@@ -2,6 +2,10 @@
   "name": "bus",
   "private": true,
   "type": "module",
+  "author": {
+    "name": "Lynn",
+    "email": "clhuang224@gmail.com"
+  },
   "scripts": {
     "build": "react-router build",
     "dev": "react-router dev",
