@@ -2,10 +2,11 @@ import { AppLayout } from '~/components/AppLayout'
 import type { Route } from './+types/Home'
 import { Card, Input } from '@mantine/core'
 
+// eslint-disable-next-line no-empty-pattern
 export function meta({}: Route.MetaArgs) {
   return [
     { title: 'Finding the Bus' },
-    { name: 'description', content: `Go find the bus you've been waiting for your whole life. (Just kidding.)` }
+    { name: 'description', content: 'Go find the bus you\'ve been waiting for your whole life. (Just kidding.)' }
   ]
 }
 

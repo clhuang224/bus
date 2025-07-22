@@ -15,7 +15,7 @@ export const AppLayout = ({ navbar, main }: PropType) => {
       navbar={{
         width: 300,
         breakpoint: 'sm',
-        collapsed: { mobile: !opened },
+        collapsed: { mobile: !opened }
       }}
       padding="md"
     >
