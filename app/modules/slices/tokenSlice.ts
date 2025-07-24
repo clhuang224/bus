@@ -40,7 +40,8 @@ export const tokenSlice = createSlice({
   }
 })
 
-// Action creators are generated for each case reducer function
-export const { getToken } = tokenSlice.actions
-
-export default tokenSlice.reducer
+export const {
+  reducer: tokenReducer,
+  actions: tokenActions,
+  selectors: tokenSelectors
+} = tokenSlice

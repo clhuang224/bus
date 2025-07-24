@@ -1,17 +1,5 @@
-import { configureStore } from '@reduxjs/toolkit'
 import { Provider } from 'react-redux'
-import busReducer from '../slices/busSlice'
-import tokenReducer from '../slices/tokenSlice'
-
-export const store = configureStore({
-    reducer: {
-      tokenReducer,
-      busReducer
-    }
-})
-
-export type RootState = ReturnType<typeof store.getState>
-export type AppDispatch = typeof store.dispatch
+import { store } from '../modules/store'
 
 interface PropType {
   children: React.ReactElement
