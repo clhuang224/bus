@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useDispatch } from 'react-redux'
 import { geolocationActions } from '../slices/geolocationSlice'
+import { GeoPermissionType } from '../enums/GeoPermissionType'
 
 export const useWatchGeolocation = () => {
   const { setCoords, setPermission, setWatching } = geolocationActions
@@ -8,12 +9,11 @@ export const useWatchGeolocation = () => {
   const started = useRef(false)
 
   useEffect(() => {
-    console.log(JSON.stringify(started))
     if (started.current) return
     started.current = true
 
     if (typeof window === 'undefined' || !('geolocation' in navigator)) {
-      dispatch(setPermission('unsupported'))
+      dispatch(setPermission(GeoPermissionType.UNSUPPORTED))
       return
     }
 
@@ -28,7 +28,7 @@ export const useWatchGeolocation = () => {
       },
       (err) => {
         console.warn(err)
-        dispatch(setPermission('denied'))
+        dispatch(setPermission(GeoPermissionType.DENIED))
         dispatch(setWatching(false))
       },
       {

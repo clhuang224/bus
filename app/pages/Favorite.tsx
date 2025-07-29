@@ -1,13 +1,20 @@
 import { List } from '@mantine/core'
+import { useMemo } from 'react'
+import { useSelector } from 'react-redux'
+import { favoriteSelectors } from '~/modules/slices/favoriteSlice'
 
 export default function Favorite() {
+  const favoriteRouteStops = useSelector(favoriteSelectors.getFavoriteRouteStops)
+
+  const list = useMemo(() => favoriteRouteStops.map((stop) => ({
+    name: stop.StopName.zh_TW
+  })), [favoriteRouteStops])
+
   return (
     <List>
-      <List.Item>Favorite Item 1</List.Item>
-      <List.Item>Favorite Item 2</List.Item>
-      <List.Item>Favorite Item 3</List.Item>
-      <List.Item>Favorite Item 4</List.Item>
-      <List.Item>Favorite Item 5</List.Item>
+      {list.map((el) => (
+        <List.Item key={el.name}>{el.name}</List.Item>
+      ))}
     </List>
   )
 }
