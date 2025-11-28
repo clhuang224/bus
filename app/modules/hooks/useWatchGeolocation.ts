@@ -1,25 +1,28 @@
 import { useEffect, useRef } from 'react'
 import { useDispatch } from 'react-redux'
-import { geolocationActions } from '../slices/geolocationSlice'
 import { GeoPermissionType } from '../enums/GeoPermissionType'
+import geolocationSlice from '../slices/geolocationSlice'
 
 export const useWatchGeolocation = () => {
-  const { setCoords, setPermission, setWatching } = geolocationActions
+  const { setCoords, setPermission, setWatching } = geolocationSlice.actions
   const dispatch = useDispatch()
-  const started = useRef(false)
+  const watchIdRef = useRef<number | null>(null)
 
   useEffect(() => {
-    if (started.current) return
-    started.current = true
 
     if (typeof window === 'undefined' || !('geolocation' in navigator)) {
+      console.error('Geolocation not supported')
       dispatch(setPermission(GeoPermissionType.UNSUPPORTED))
       return
     }
 
-    navigator.permissions?.query({ name: 'geolocation' }).then((result) => {
-      dispatch(setPermission(result.state))
-    })
+    if (navigator.permissions) {
+      navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+        dispatch(setPermission(result.state as GeoPermissionType))
+      }).catch((err) => {
+        console.warn('Permission query failed:', err)
+      })
+    }
 
     const id = navigator.geolocation.watchPosition(
       (pos) => {
@@ -27,7 +30,7 @@ export const useWatchGeolocation = () => {
         dispatch(setWatching(true))
       },
       (err) => {
-        console.warn(err)
+        console.error(err)
         dispatch(setPermission(GeoPermissionType.DENIED))
         dispatch(setWatching(false))
       },
@@ -38,9 +41,14 @@ export const useWatchGeolocation = () => {
       }
     )
 
+    watchIdRef.current = id
+
     return () => {
-      if (id) navigator.geolocation.clearWatch(id)
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current)
+        watchIdRef.current = null
+      }
       dispatch(setWatching(false))
     }
-  }, [dispatch])
+  }, [dispatch, setCoords, setPermission, setWatching])
 }
