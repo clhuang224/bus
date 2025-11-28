@@ -89,5 +89,6 @@ export const busApi = createApi({
 })
 
 export const {
-  useGetRoutesByCityQuery
+  useGetRoutesByCityQuery,
+  useGetNearStopsByCityQuery
 } = busApi
