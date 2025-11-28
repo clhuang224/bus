@@ -1,37 +1,36 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { NearStop } from '../interfaces/NearStop'
 
-export const favoriteSlice = createSlice({
+const favoriteSlice = createSlice({
   name: 'favorite',
   initialState: {
-    routeStops: JSON.parse(localStorage.getItem('favorites') ?? '[]') as NearStop[]
+    stops: [] as NearStop[]
   },
   reducers: {
-    setFavoriteRouteStops: (state, action: PayloadAction<NearStop[]>) => {
-      state.routeStops = action.payload
-      localStorage.setItem('favorite', JSON.stringify(state.routeStops))
+    loadLocalStorage: (state) => {
+      state.stops = JSON.parse(localStorage.getItem('favoriteStops') ?? '[]') as NearStop[]
     },
-    addFavoriteRouteStop: (state, action: PayloadAction<NearStop>) => {
+    setFavoriteStops: (state, action: PayloadAction<NearStop[]>) => {
+      state.stops = action.payload
+      localStorage.setItem('favorite', JSON.stringify(state.stops))
+    },
+    addFavoriteStop: (state, action: PayloadAction<NearStop>) => {
       const newStop = action.payload
-      if (!state.routeStops.map((stop) => stop.StopUID).includes(newStop.StopUID)) {
-        state.routeStops.push(newStop)
-        localStorage.setItem('favorite', JSON.stringify(state.routeStops))
+      if (!state.stops.map((stop) => stop.StopUID).includes(newStop.StopUID)) {
+        state.stops.push(newStop)
+        localStorage.setItem('favorite', JSON.stringify(state.stops))
       }
     },
-    removeFavoriteRouteStop: (state, action: PayloadAction<NearStop>) => {
+    removeFavoriteStop: (state, action: PayloadAction<NearStop>) => {
       const stopToRemove = action.payload
-      state.routeStops = state.routeStops.filter((stop) => stop.StopUID === stopToRemove.StopUID)
-      localStorage.setItem('favorite', JSON.stringify(state.routeStops))
+      state.stops = state.stops.filter((stop) => stop.StopUID === stopToRemove.StopUID)
+      localStorage.setItem('favorite', JSON.stringify(state.stops))
     }
   },
   selectors: {
-    getFavoriteRouteStops: (state) => state.routeStops,
-    isRouteStopFavorite: (state, uid: string) => state.routeStops.map((stop) => stop.StopUID).includes(uid)
+    getFavoriteStops: (state) => state.stops,
+    isStopFavorite: (state, uid: string) => state.stops.map((stop) => stop.StopUID).includes(uid)
   }
 })
 
-export const {
-  reducer: favoriteReducer,
-  actions: favoriteActions,
-  selectors: favoriteSelectors
-} = favoriteSlice
+export default favoriteSlice

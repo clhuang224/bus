@@ -1,13 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { busApi } from './apis/bus'
-import { geolocationReducer } from './slices/geolocationSlice'
-import { favoriteReducer } from './slices/favoriteSlice'
+import favoriteSlice from './slices/favoriteSlice'
+import geolocationSlice from './slices/geolocationSlice'
+import cityGeoSlice from './slices/cityGeoSlice'
 
 export const store = configureStore({
     reducer: {
         [busApi.reducerPath]: busApi.reducer,
-        geolocationReducer,
-        favoriteReducer
+        geolocation: geolocationSlice.reducer,
+        favorite: favoriteSlice.reducer,
+        cityGeo: cityGeoSlice.reducer
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware().concat(busApi.middleware)
