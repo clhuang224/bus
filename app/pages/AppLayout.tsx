@@ -1,4 +1,5 @@
-import { AppShell, Flex, Space } from '@mantine/core'
+import { AppShell, Flex, Space, useMantineTheme } from '@mantine/core'
+import { useMediaQuery } from '@mantine/hooks'
 import { RiHeart3Fill, RiHeart3Line, RiMapPin3Fill, RiMapPin3Line, RiSearchFill, RiSearchLine } from '@remixicon/react'
 import { useMemo, useState } from 'react'
 import { Outlet } from 'react-router'
@@ -14,6 +15,9 @@ export function meta() {
 }
 
 export default function AppLayout () {
+
+  const theme = useMantineTheme()
+  const isSm = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`)
 
   const [searchInput, setSearchInput] = useState('')
 
@@ -42,10 +46,10 @@ export default function AppLayout () {
 
   return (
     <AppShell
-      header={{ height: 76 }}
-      footer={{ height: 84 }}
+      header={{ height: isSm ? 0 : 76 }}
+      footer={{ height: isSm ? 84 : 0 }}
     >
-      <AppShell.Header p="md" visibleFrom="sm">
+      <AppShell.Header h={76} p="md" visibleFrom="sm">
         <Flex align="center" gap="md">
           {options.filter((option) => option.path !== '/search').map((option) => (
             <AppNavLink
