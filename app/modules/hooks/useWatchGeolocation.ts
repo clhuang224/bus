@@ -9,25 +9,25 @@ export const useWatchGeolocation = () => {
   const watchIdRef = useRef<number | null>(null)
 
   useEffect(() => {
-
     if (typeof window === 'undefined' || !('geolocation' in navigator)) {
-      console.error('Geolocation not supported')
+      console.warn('Geolocation is not supported in this environment.')
       dispatch(setPermission(GeoPermissionType.UNSUPPORTED))
       return
     }
-
-    if (navigator.permissions) {
-      navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+    (async () => {
+      if (!navigator.permissions) return
+      try {
+        const result = await navigator.permissions.query({ name: 'geolocation' })
         dispatch(setPermission(result.state as GeoPermissionType))
-      }).catch((err) => {
+      } catch (err) {
         console.warn('Permission query failed:', err)
-      })
-    }
+      }
+    })()
 
+    dispatch(setWatching(true))
     const id = navigator.geolocation.watchPosition(
       (pos) => {
         dispatch(setCoords([pos.coords.latitude, pos.coords.longitude]))
-        dispatch(setWatching(true))
       },
       (err) => {
         console.error(err)
@@ -50,5 +50,5 @@ export const useWatchGeolocation = () => {
       }
       dispatch(setWatching(false))
     }
-  }, [dispatch, setCoords, setPermission, setWatching])
+  }, [dispatch])
 }
