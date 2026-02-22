@@ -5,6 +5,7 @@ import { useState, type ReactElement } from 'react'
 export interface SearchInputPropType {
   value: string
   onChange: (value: string) => void
+  w?: number | string
 }
 
 export const SearchInput = (props: SearchInputPropType): ReactElement => {
@@ -23,7 +24,7 @@ export const SearchInput = (props: SearchInputPropType): ReactElement => {
           />
       )}
       style={{ '--input-right-section-pointer-events': 'auto' }}
-      w={400}
+      w={props.w ?? 400}
       value={value}
       onChange={(e) => {
         setValue(e.currentTarget.value)

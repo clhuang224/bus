@@ -1,10 +1,11 @@
-import { AppShell, Flex, Space, useMantineTheme } from '@mantine/core'
+import { AppShell, Box, Flex, useMantineTheme } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { RiHeart3Fill, RiHeart3Line, RiMapPin3Fill, RiMapPin3Line, RiSearchFill, RiSearchLine } from '@remixicon/react'
 import { useMemo, useState } from 'react'
 import { Outlet } from 'react-router'
 import { AppNavLink } from '~/components/AppNavLink'
-import { SearchInput } from '~/components/SearchInput'
+import { AreaSelect } from '~/components/AreaSelect'
+import { AreaType } from '~/modules/enums/AreaType'
 import { useWatchGeolocation } from '~/modules/hooks/useWatchGeolocation'
 
 export function meta() {
@@ -19,7 +20,7 @@ export default function AppLayout () {
   const theme = useMantineTheme()
   const isSm = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`)
 
-  const [searchInput, setSearchInput] = useState('')
+  const [area, setArea] = useState<AreaType>(AreaType.TAIPEI)
 
   const options = useMemo(() => ([
     {
@@ -49,22 +50,20 @@ export default function AppLayout () {
       header={{ height: isSm ? 0 : 76 }}
       footer={{ height: isSm ? 84 : 0 }}
     >
-      <AppShell.Header h={76} p="md" visibleFrom="sm">
+      <AppShell.Header h={76} p="md">
         <Flex align="center" gap="md">
-          {options.filter((option) => option.path !== '/search').map((option) => (
-            <AppNavLink
+          <AreaSelect value={area} onChange={setArea} />
+          {options.map((option) => (
+            <Box
               key={option.path}
-              label={option.name}
-              href={option.path}
-            />
+              visibleFrom="sm"
+            >
+              <AppNavLink
+                label={option.name}
+                href={option.path}
+              />
+            </Box>
           ))}
-          <Space w="md" />
-          <SearchInput
-            value={searchInput}
-            onChange={(value) => {
-              setSearchInput(value)
-            }}
-          />
         </Flex>
       </AppShell.Header>
       <AppShell.Main>
