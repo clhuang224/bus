@@ -32,4 +32,6 @@ export interface TdxNearStop<D = string, L = TdxLocalizedText> {
   UpdateTime: D
 }
 
-export type NearStop = TdxNearStop<Date, LocalizedText>
+export type NearStop<D = Date> = TdxNearStop<D, LocalizedText> & {
+  position?: [number, number]
+}

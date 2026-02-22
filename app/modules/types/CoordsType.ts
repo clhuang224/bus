@@ -1,1 +1,1 @@
-export type CoordsType = [number, number] | null
+export type CoordsType = [number, number]
