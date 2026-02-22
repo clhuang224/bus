@@ -4,7 +4,7 @@ import { GeoPermissionType } from '../enums/GeoPermissionType'
 import type { CoordsType } from '../types/CoordsType'
 
 const initialState: GeolocationState = {
-  coords: null,
+  coords: [25.0255, 121.3046],
   permission: GeoPermissionType.PROMPT,
   watching: false
 }
