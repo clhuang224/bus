@@ -7,10 +7,12 @@ Built with React, Mantine, Redux Toolkit, MapLibre, and Vite.
 
 - **Framework:** React (SPA)
 - **Build Tool:** Vite
-- **Router:** React Router
+- **Routing:** React Router
 - **UI Library:** Mantine
 - **State Management:** Redux Toolkit
-- **Map:** MapLibre
+- **Data fetching:** RTK Query
+- **Map Engine:** MapLibre GL JS
+- **Basemap:** CARTO (raster tiles)
 
 ## Application Flow
 
