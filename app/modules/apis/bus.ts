@@ -2,10 +2,12 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { BusRoute, TdxBusRoute } from '../interfaces/BusRoute'
 import type { CityNameType } from '../enums/CityNameType'
 import type { NearStop, TdxNearStop } from '../interfaces/NearStop'
+import type { Stop, TdxStop } from '../interfaces/Stop'
 
 export const busApi = createApi({
   reducerPath: 'busApi',
   baseQuery: fetchBaseQuery({ baseUrl: 'https://tdx.transportdata.tw/api/basic/v2/Bus'}),
+  keepUnusedDataFor: 60 * 5,
   endpoints: (build) => ({
     getRoutesByCity: build.query<BusRoute[], CityNameType>({
       query: (city) => `/Route/City/${city}?%24format=JSON`,
@@ -60,30 +62,54 @@ export const busApi = createApi({
         }))
       }))
     }),
-    getNearStopsByCity: build.query<NearStop[], CityNameType>({
-      query: (cityName) => `/RealTimeNearStop/City/${cityName}?&%24format=JSON`,
-      transformResponse: (res: TdxNearStop[]) => res.map((stop) => ({
-        ...stop,
-        RouteName: {
-          zh_TW: stop.RouteName.Zh_tw,
-          en: stop.RouteName.En
-        },
-        SubRouteName: {
-          zh_TW: stop.SubRouteName.Zh_tw,
-          en: stop.SubRouteName.En
-        },
+    getStopsByCity: build.query<Stop[], CityNameType>({
+      query: (cityName) => `/Stop/City/${cityName}?%24format=JSON`,
+      transformResponse: (res: TdxStop[]) => res.map((stop) => ({
+        StopUID: stop.StopUID,
+        StopID: stop.StopID,
         StopName: {
           zh_TW: stop.StopName.Zh_tw,
           en: stop.StopName.En
         },
-        GPSTime: new Date(stop.GPSTime),
-        TripStartTime: new Date(stop.TripStartTime),
-        TransTime: new Date(stop.TransTime),
-        SrcRecTime: new Date(stop.SrcRecTime),
-        SrcTransTime: new Date(stop.SrcTransTime),
-        SrcUpdateTime: new Date(stop.SrcUpdateTime),
-        UpdateTime: new Date(stop.UpdateTime)
+        position: [stop.StopPosition.PositionLon, stop.StopPosition.PositionLat]
       }))
+    }),
+    getNearStopsByCity: build.query<NearStop<string>[], CityNameType>({
+      async queryFn(cityName, _queryApi, _extraOptions, baseQuery): Promise<{ data: NearStop<string>[] }> {
+        const nearStopsRes = await baseQuery({ url: `/NearStop/City/${cityName}?%24format=JSON` })
+        const nearStopsData: TdxNearStop[] = Array.isArray(nearStopsRes.data) ? nearStopsRes.data as TdxNearStop[] : []
+        const stopsRequest = _queryApi.dispatch(
+          busApi.endpoints.getStopsByCity.initiate(cityName)
+        )
+        const stopsResult = await stopsRequest
+        stopsRequest.unsubscribe()
+
+        const stopMap = new Map<string, [number, number]>()
+        const stopsData = stopsResult.data ?? []
+
+        for (const stop of stopsData) {
+          if (stop.StopUID && stop.position) {
+            stopMap.set(stop.StopUID, stop.position)
+          }
+        }
+        const result: NearStop<string>[] = nearStopsData.map((stop) => ({
+          ...stop,
+          RouteName: {
+            zh_TW: stop.RouteName?.Zh_tw ?? '',
+            en: stop.RouteName?.En ?? ''
+          },
+          SubRouteName: {
+            zh_TW: stop.SubRouteName?.Zh_tw ?? '',
+            en: stop.SubRouteName?.En ?? ''
+          },
+          StopName: {
+            zh_TW: stop.StopName?.Zh_tw ?? '',
+            en: stop.StopName?.En ?? ''
+          },
+          position: stopMap.get(stop.StopUID) ?? undefined
+        }))
+        return { data: result }
+      }
     })
   })
 })
