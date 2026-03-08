@@ -52,7 +52,7 @@ jobs:
       - run: pnpm run build
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: build
+          path: build/client
 
   deploy:
     if: github.ref == 'refs/heads/main'
