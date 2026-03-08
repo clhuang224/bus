@@ -25,19 +25,19 @@ export default function AppLayout () {
   const options = useMemo(() => ([
     {
       name: '我的最愛',
-      path: '/',
+      path: './',
       icon: (<RiHeart3Line />),
       iconActive: (<RiHeart3Fill />)
     },
     {
       name: '附近站牌',
-      path: '/nearby',
+      path: './nearby',
       icon: (<RiMapPin3Line />),
       iconActive: (<RiMapPin3Fill />)
     },
     {
       name: '搜尋公車',
-      path: '/search',
+      path: './search',
       icon: (<RiSearchLine />),
       iconActive: (<RiSearchFill />)
     }
