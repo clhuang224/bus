@@ -85,7 +85,7 @@ export const busApi = createApi({
     }),
     getNearStopsByCity: build.query<NearStop<string>[], CityNameType>({
       async queryFn(cityName, _queryApi, _extraOptions, baseQuery): Promise<{ data: NearStop<string>[] }> {
-        const nearStopsRes = await baseQuery({ url: `/NearStop/City/${cityName}?%24format=JSON` })
+        const nearStopsRes = await baseQuery({ url: `/RealTimeNearStop/City/${cityName}?%24format=JSON` })
         const nearStopsData: TdxNearStop[] = Array.isArray(nearStopsRes.data) ? nearStopsRes.data as TdxNearStop[] : []
         const stopsRequest = _queryApi.dispatch(
           busApi.endpoints.getStopsByCity.initiate(cityName)
