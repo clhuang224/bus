@@ -50,6 +50,7 @@ jobs:
       - uses: actions/configure-pages@v5
       - run: pnpm install
       - run: pnpm run build
+      - run: cp build/client/index.html build/client/404.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build/client
