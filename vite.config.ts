@@ -3,6 +3,6 @@ import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
 export default defineConfig(({ mode }) => ({
-  base: mode === 'development' ? '' : '/bus',
+  base: mode === 'production' ? '/bus/' : '/',
   plugins: [reactRouter(), tsconfigPaths()]
 }))
