@@ -3,22 +3,18 @@ import { useId } from '@mantine/hooks'
 import mapLibre, { Map, Marker, LngLat as MapLngLat } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useLayoutEffect, useRef, useState } from 'react'
-import type { LngLat, LatLng } from '~/modules/types/CoordsType'
+import type { LatLng } from '~/modules/types/CoordsType'
 
 interface PropType {
   center: LatLng | null
   zoom?: number
-  markers: Array<{
-    position: LngLat
-    label: string
-  }>
   showUserLocation?: boolean
+  onLoad?: (map: Map) => void
 }
 
-export const AppMap = ({ center, zoom = 16, markers = [], showUserLocation = false }: PropType) => {
+const BaseMap = ({ center, zoom = 16, showUserLocation = false, onLoad }: PropType) => {
   const id = useId()
   const [map, setMap] = useState<Map | null>(null)
-  const markersRef = useRef<Marker[]>([])
   const userMarkerRef = useRef<Marker | null>(null)
 
   useLayoutEffect(() => {
@@ -62,6 +58,8 @@ export const AppMap = ({ center, zoom = 16, markers = [], showUserLocation = fal
     })
     setMap(mapInstance)
 
+    onLoad?.(mapInstance)
+
     return () => {
       mapInstance.remove()
     }
@@ -97,49 +95,7 @@ export const AppMap = ({ center, zoom = 16, markers = [], showUserLocation = fal
     }
   }, [map, showUserLocation, center])
 
-  useLayoutEffect(() => {
-    if (!map) return
-
-    markersRef.current.forEach((marker) => marker.remove())
-    markersRef.current = []
-
-    if (markers) {
-      const newMarkers = markers.map((markerData) => {
-        const el = document.createElement('div')
-        el.style.width = '36px'
-        el.style.height = '36px'
-        el.style.borderRadius = '50%'
-        el.style.backgroundColor = 'var(--mantine-primary-color-filled)'
-        el.style.border = '2px solid #fff'
-        el.style.cursor = 'pointer'
-        el.style.display = 'flex'
-        el.style.alignItems = 'center'
-        el.style.justifyContent = 'center'
-        el.style.fontSize = '16px'
-        el.style.color = 'white'
-        el.style.fontWeight = 'bold'
-        el.textContent = '🚏'
-
-        const marker = new mapLibre.Marker({ element: el })
-          .setLngLat(new MapLngLat(markerData.position[0], markerData.position[1]))
-
-        if (markerData.label) {
-          const popup = new mapLibre.Popup({ offset: 25 }).setText(markerData.label)
-          marker.setPopup(popup)
-        }
-
-        marker.addTo(map)
-        return marker
-      })
-
-      markersRef.current = newMarkers
-    }
-
-    return () => {
-      markersRef.current.forEach((marker) => marker.remove())
-      markersRef.current = []
-    }
-  }, [map, markers])
-
   return <Box id={id} style={{ width: '100%', height: 'calc(100vh - 64px)' }} />
 }
+
+export default BaseMap

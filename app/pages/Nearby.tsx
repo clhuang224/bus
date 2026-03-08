@@ -1,54 +1,43 @@
-import { Alert, Card, Flex, List, ListItem, ScrollArea } from '@mantine/core'
+import { NavLink, Accordion, AccordionControl, AccordionItem, AccordionPanel, Alert, Card, Flex, ScrollArea } from '@mantine/core'
 import { useSelector } from 'react-redux'
-import { AppMap } from '~/components/AppMap'
 import type { RootState } from '~/modules/store'
 import { GeoPermissionType } from '~/modules/enums/GeoPermissionType'
 import { busApi } from '~/modules/apis/bus'
 import { useCityByCoords } from '~/modules/hooks/useCityByCoords'
-import { useMemo } from 'react'
-import type { NearStop } from '~/modules/interfaces/NearStop'
+import { useMemo, useState } from 'react'
 import type { LngLat } from '~/modules/types/CoordsType'
+import { NearbyStopMap } from '~/components/NearbyStopMap'
 
 const Nearby = () => {
+  const [selectedStop, setSelectedStop] = useState<string | null>(null)
+
   const { coords, permission } = useSelector((state: RootState) => state.geolocation)
   const currentCity = useCityByCoords(coords)
-  const { data: allStops, isLoading, error } = busApi.useGetNearStopsByCityQuery(
+  const { data: allStops, isLoading, error, isSuccess } = busApi.useGetStopsByCityQuery(
     currentCity,
     {
-      skip: permission !== GeoPermissionType.GRANTED,
-      selectFromResult: ({ data, ...rest }) => ({
-        ...rest,
-        data: (data ?? []).map((stop) => ({
-          ...stop,
-            GPSTime: stop.GPSTime ? new Date(stop.GPSTime) : null,
-            TripStartTime: stop.TripStartTime ? new Date(stop.TripStartTime) : null,
-            TransTime: stop.TransTime ? new Date(stop.TransTime) : null,
-            SrcRecTime: stop.SrcRecTime ? new Date(stop.SrcRecTime) : null,
-            SrcTransTime: stop.SrcTransTime ? new Date(stop.SrcTransTime) : null,
-            SrcUpdateTime: stop.SrcUpdateTime ? new Date(stop.SrcUpdateTime) : null,
-            UpdateTime: stop.UpdateTime ? new Date(stop.UpdateTime) : null
-          }) as NearStop)
-        })
-      }
+      skip: permission !== GeoPermissionType.GRANTED
+    }
   )
 
   const nearbyStops = useMemo(() => {
-    if (!coords) return []
+    if (!coords || !isSuccess) return []
     return allStops.filter(stop => {
       if (!stop.position) return false
       const distance = Math.sqrt(
         Math.pow(stop.position[1] - coords[0], 2) +
         Math.pow(stop.position[0] - coords[1], 2)
       )
-      return distance <= 0.01
+      return distance <= 0.005
     })
   }, [allStops, coords])
 
   const markers = useMemo(() => nearbyStops
     .filter(stop => stop.position)
     .map(stop => ({
+      stopUID: stop.StopUID,
       position: stop.position as LngLat,
-      label: `${stop.StopName.zh_TW} (${stop.RouteName.zh_TW})`
+      label: `${stop.StopName.zh_TW})`
     })
   ), [nearbyStops])
 
@@ -100,20 +89,30 @@ const Nearby = () => {
           </Alert>
         )}
         <ScrollArea style={{ height: '100%', marginTop: '1rem' }}>
-          <List>
+          <Accordion variant="separated" value={selectedStop} onChange={setSelectedStop}>
             {nearbyStops.map((stop) => (
-              <ListItem key={stop.StopUID}>
-                {stop.StopName.zh_TW} ({stop.RouteName.zh_TW})
-              </ListItem>
+              <AccordionItem value={stop.StopUID} key={stop.StopUID}>
+                <AccordionControl>
+                  {stop.StopName.zh_TW}
+                </AccordionControl>
+                <AccordionPanel>
+                  {stop.City}
+                  {stop.StopAddress}
+                  <NavLink
+                    href={`/stop/${stop.StopUID}`}
+                    style={{ marginTop: '0.5rem' }}
+                    label="查看路線"
+                  />
+                </AccordionPanel>
+              </AccordionItem>
             ))}
-            </List>
+            </Accordion>
           </ScrollArea>
       </Card>
-      <AppMap
+      <NearbyStopMap
         center={coords}
-        zoom={15}
-        showUserLocation={true}
         markers={markers}
+        selectedStop={selectedStop}
       />
     </Flex>
   )

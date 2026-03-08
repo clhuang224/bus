@@ -1,3 +1,4 @@
+import type { LngLat } from '../types/CoordsType'
 import type { LocalizedText, TdxLocalizedText } from '../types/LocalizedText'
 
 export interface TdxStop {
@@ -8,11 +9,15 @@ export interface TdxStop {
     PositionLon: number,
     PositionLat: number
   }
+  StopAddress: string
+  City: string
 }
 
 export type Stop = {
   StopUID: string,
   StopID: string,
+  position: LngLat
   StopName: LocalizedText,
-  position: [number, number]
+  StopAddress: string
+  City: string
 }
