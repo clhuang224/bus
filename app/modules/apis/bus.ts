@@ -6,7 +6,16 @@ import type { Stop, TdxStop } from '../interfaces/Stop'
 
 export const busApi = createApi({
   reducerPath: 'busApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'https://tdx.transportdata.tw/api/basic/v2/Bus'}),
+  baseQuery: fetchBaseQuery({
+    baseUrl: 'https://tdx.transportdata.tw/api/basic/v2/Bus',
+    prepareHeaders: (headers) => {
+      const token = import.meta.env.VITE_TDX_TOKEN
+      if (token) {
+        headers.set('authorization', `Bearer ${token}`)
+      }
+      return headers
+    }
+  }),
   keepUnusedDataFor: 60 * 5,
   endpoints: (build) => ({
     getRoutesByCity: build.query<BusRoute[], CityNameType>({
