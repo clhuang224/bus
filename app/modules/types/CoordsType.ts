@@ -1,1 +1,2 @@
-export type CoordsType = [number, number]
+export type LatLng = [number, number]
+export type LngLat = [number, number]

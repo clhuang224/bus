@@ -1,10 +1,10 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { GeolocationState } from '~/modules/interfaces/GeolocationState'
 import { GeoPermissionType } from '../enums/GeoPermissionType'
-import type { CoordsType } from '../types/CoordsType'
+import type { LatLng } from '../types/CoordsType'
 
 const initialState: GeolocationState = {
-  coords: [25.0255, 121.3046],
+  coords: null,
   permission: GeoPermissionType.PROMPT,
   watching: false
 }
@@ -13,7 +13,7 @@ const geolocationSlice = createSlice({
   name: 'geolocation',
   initialState,
   reducers: {
-    setCoords: (state, action: PayloadAction<CoordsType>) => {
+    setCoords: (state, action: PayloadAction<LatLng>) => {
       state.coords = action.payload
     },
     setPermission: (state, action: PayloadAction<GeoPermissionType>) => {

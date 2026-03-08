@@ -1,4 +1,4 @@
-import { Alert, Card, Flex } from '@mantine/core'
+import { Alert, Card, Flex, List, ListItem, ScrollArea } from '@mantine/core'
 import { useSelector } from 'react-redux'
 import { AppMap } from '~/components/AppMap'
 import type { RootState } from '~/modules/store'
@@ -7,7 +7,7 @@ import { busApi } from '~/modules/apis/bus'
 import { useCityByCoords } from '~/modules/hooks/useCityByCoords'
 import { useMemo } from 'react'
 import type { NearStop } from '~/modules/interfaces/NearStop'
-import type { CoordsType } from '~/modules/types/CoordsType'
+import type { LngLat } from '~/modules/types/CoordsType'
 
 const Nearby = () => {
   const { coords, permission } = useSelector((state: RootState) => state.geolocation)
@@ -32,13 +32,25 @@ const Nearby = () => {
       }
   )
 
-  const markers = useMemo(() => allStops
+  const nearbyStops = useMemo(() => {
+    if (!coords) return []
+    return allStops.filter(stop => {
+      if (!stop.position) return false
+      const distance = Math.sqrt(
+        Math.pow(stop.position[1] - coords[0], 2) +
+        Math.pow(stop.position[0] - coords[1], 2)
+      )
+      return distance <= 0.01
+    })
+  }, [allStops, coords])
+
+  const markers = useMemo(() => nearbyStops
     .filter(stop => stop.position)
     .map(stop => ({
-      position: stop.position as CoordsType,
+      position: stop.position as LngLat,
       label: `${stop.StopName.zh_TW} (${stop.RouteName.zh_TW})`
     })
-  ), [allStops])
+  ), [nearbyStops])
 
   const message = useMemo(() => {
     if (permission === GeoPermissionType.UNSUPPORTED) {
@@ -69,7 +81,7 @@ const Nearby = () => {
         description: '正在取得附近的站牌資料，請稍候...'
       }
     }
-    if (allStops.length === 0) {
+    if (nearbyStops.length === 0) {
       return {
         color: 'yellow',
         title: '附近沒有站牌',
@@ -77,7 +89,7 @@ const Nearby = () => {
       }
     }
     return null
-  }, [permission])
+  }, [permission, nearbyStops, isLoading, error])
 
   return (
     <Flex>
@@ -87,11 +99,19 @@ const Nearby = () => {
             {message.description}
           </Alert>
         )}
-        {/* TODO: stop info list */}
+        <ScrollArea style={{ height: '100%', marginTop: '1rem' }}>
+          <List>
+            {nearbyStops.map((stop) => (
+              <ListItem key={stop.StopUID}>
+                {stop.StopName.zh_TW} ({stop.RouteName.zh_TW})
+              </ListItem>
+            ))}
+            </List>
+          </ScrollArea>
       </Card>
       <AppMap
         center={coords}
-        zoom={14}
+        zoom={15}
         showUserLocation={true}
         markers={markers}
       />

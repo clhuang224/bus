@@ -1,15 +1,15 @@
 import { Box } from '@mantine/core'
 import { useId } from '@mantine/hooks'
-import mapLibre, { Map, Marker, LngLat } from 'maplibre-gl'
+import mapLibre, { Map, Marker, LngLat as MapLngLat } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useLayoutEffect, useRef, useState } from 'react'
-import type { CoordsType } from '~/modules/types/CoordsType'
+import type { LngLat, LatLng } from '~/modules/types/CoordsType'
 
 interface PropType {
-  center: CoordsType
+  center: LatLng | null
   zoom?: number
   markers: Array<{
-    position: CoordsType
+    position: LngLat
     label: string
   }>
   showUserLocation?: boolean
@@ -57,7 +57,7 @@ export const AppMap = ({ center, zoom = 16, markers = [], showUserLocation = fal
           }
         ]
       },
-      center: new LngLat(center[1], center[0]),
+      center: center ? [center[1], center[0]] : [121.53969560512759, 25.059928238479156],
       zoom: zoom
     })
     setMap(mapInstance)
@@ -68,7 +68,13 @@ export const AppMap = ({ center, zoom = 16, markers = [], showUserLocation = fal
   }, [id])
 
   useLayoutEffect(() => {
-    if (!map) return
+    if (map && !map.getCenter() && center) {
+      map.setCenter(new MapLngLat(center[1], center[0]))
+    }
+  }, [center, map])
+
+  useLayoutEffect(() => {
+    if (!map && !center) return
 
     if (userMarkerRef.current) {
       userMarkerRef.current.remove()
@@ -83,12 +89,11 @@ export const AppMap = ({ center, zoom = 16, markers = [], showUserLocation = fal
       el.style.backgroundColor = '#4A90E2'
       el.style.border = '3px solid white'
       el.style.boxShadow = '0 0 10px rgba(0,0,0,0.3)'
+    }
 
-      const marker = new mapLibre.Marker({ element: el })
-        .setLngLat(new LngLat(center[1], center[0]))
-        .addTo(map)
-
-      userMarkerRef.current = marker
+    return () => {
+      userMarkerRef.current?.remove()
+      userMarkerRef.current = null
     }
   }, [map, showUserLocation, center])
 
@@ -101,22 +106,22 @@ export const AppMap = ({ center, zoom = 16, markers = [], showUserLocation = fal
     if (markers) {
       const newMarkers = markers.map((markerData) => {
         const el = document.createElement('div')
-        el.style.width = '30px'
-        el.style.height = '30px'
+        el.style.width = '36px'
+        el.style.height = '36px'
         el.style.borderRadius = '50%'
-        el.style.backgroundColor = '#FF6B6B'
-        el.style.border = '2px solid white'
+        el.style.backgroundColor = 'var(--mantine-primary-color-filled)'
+        el.style.border = '2px solid #fff'
         el.style.cursor = 'pointer'
         el.style.display = 'flex'
         el.style.alignItems = 'center'
         el.style.justifyContent = 'center'
-        el.style.fontSize = '12px'
+        el.style.fontSize = '16px'
         el.style.color = 'white'
         el.style.fontWeight = 'bold'
-        el.textContent = '🚌'
+        el.textContent = '🚏'
 
         const marker = new mapLibre.Marker({ element: el })
-          .setLngLat(new LngLat(markerData.position[1], markerData.position[0]))
+          .setLngLat(new MapLngLat(markerData.position[0], markerData.position[1]))
 
         if (markerData.label) {
           const popup = new mapLibre.Popup({ offset: 25 }).setText(markerData.label)

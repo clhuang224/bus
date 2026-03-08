@@ -33,7 +33,7 @@ If permission is granted:
 
 - The app determines the current city from the GPS coordinates.
 - It fetches stop data for that city.
-- Stops within **500 meters** are displayed both as a list and as map markers.
+- Stops within **1 kilometers** are displayed both as a list and as map markers.
 - Clicking a stop opens the **Stop Page**, showing:
   - All routes serving the stop
   - Real-time bus positions

@@ -1,8 +1,8 @@
 import type { GeoPermissionType } from '../enums/GeoPermissionType'
-import type { CoordsType } from '../types/CoordsType'
+import type { LatLng } from '../types/CoordsType'
 
 export interface GeolocationState {
-    coords: CoordsType
+    coords: LatLng | null
     permission: GeoPermissionType
     watching: boolean
 }
