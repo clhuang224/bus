@@ -80,6 +80,8 @@ export const busApi = createApi({
           zh_TW: stop.StopName.Zh_tw,
           en: stop.StopName.En
         },
+        StopAddress: stop.StopAddress,
+        City: stop.City,
         position: [stop.StopPosition.PositionLon, stop.StopPosition.PositionLat]
       }))
     }),
