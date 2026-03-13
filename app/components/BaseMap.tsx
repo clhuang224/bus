@@ -2,7 +2,7 @@ import { Box } from '@mantine/core'
 import { useId } from '@mantine/hooks'
 import mapLibre, { Map, Marker, LngLat as MapLngLat } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { LatLng } from '~/modules/types/CoordsType'
 
 interface PropType {
@@ -65,13 +65,13 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, onLoad }: PropTy
     }
   }, [id])
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (map && !map.getCenter() && center) {
       map.setCenter(new MapLngLat(center[1], center[0]))
     }
   }, [center, map])
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!map && !center) return
 
     if (userMarkerRef.current) {
