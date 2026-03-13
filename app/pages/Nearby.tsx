@@ -24,8 +24,10 @@ const Nearby = () => {
 
   const nearbyStops = useMemo(() => {
     if (!coords || !isSuccess) return []
+    // TODO: stop clustering
     return allStops.filter(stop => {
       if (!stop.position) return false
+      // XXX: turf
       const distance = Math.sqrt(
         Math.pow(stop.position[1] - coords[0], 2) +
         Math.pow(stop.position[0] - coords[1], 2)
