@@ -1,6 +1,6 @@
-import mapLibre, { Marker, LngLat as MapLngLat } from 'maplibre-gl'
+import mapLibre, { Marker, Popup } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { useLayoutEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import type { LngLat, LatLng } from '~/modules/types/CoordsType'
 import BaseMap from './BaseMap'
 
@@ -12,83 +12,103 @@ interface PropType {
     label: string
   }>
   selectedStop: string | null
-  onMarkerClick?: (stopUID: string) => void
+  onSelectStop: (id: string | null) => void
 }
 
-export const NearbyStopMap = ({ center, markers = [], onMarkerClick, selectedStop }: PropType) => {
+export const NearbyStopMap = ({ center, markers = [], selectedStop, onSelectStop }: PropType) => {
   const mapRef = useRef<mapLibre.Map | null>(null)
-  const markersRef = useRef<Marker[]>([])
+  const markerMap = useRef<Map<string, Marker>>(new Map<string, Marker>())
+  const popupRef = useRef<Popup | null>(null)
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!mapRef.current) return
 
-    markersRef.current.forEach((marker) => marker.remove())
-    markersRef.current = []
+    markerMap.current.forEach((marker) => marker.remove())
+    markerMap.current.clear()
 
-    const handleMarkerClick = (stopUID: string) => {
-      if (!mapRef.current) return
-      mapRef.current.flyTo({ center: new MapLngLat(...markers.find(marker => marker.stopUID === stopUID)!.position), zoom: 18 })
-      .setCenter(new MapLngLat(...markers.find(marker => marker.stopUID === stopUID)!.position))
-      onMarkerClick?.(stopUID)
-    }
+    markers.forEach(data => {
+      const el = document.createElement('div')
+      el.style.width = '36px'
+      el.style.height = '36px'
+      el.style.borderRadius = '50%'
+      el.style.backgroundColor = 'var(--mantine-primary-color-filled)'
+      el.style.border = '2px solid #fff'
+      el.style.cursor = 'pointer'
+      el.style.display = 'flex'
+      el.style.alignItems = 'center'
+      el.style.justifyContent = 'center'
+      el.style.fontSize = '16px'
+      el.style.color = 'white'
+      el.style.fontWeight = 'bold'
+      el.textContent = '🚏'
+      el.dataset.label = data.label
 
-    if (markers) {
-      const newMarkers = markers.map((markerData) => {
-        const el = document.createElement('div')
-        el.style.width = '36px'
-        el.style.height = '36px'
-        el.style.borderRadius = '50%'
-        el.style.backgroundColor = 'var(--mantine-primary-color-filled)'
-        el.style.border = '2px solid #fff'
-        el.style.cursor = 'pointer'
-        el.style.display = 'flex'
-        el.style.alignItems = 'center'
-        el.style.justifyContent = 'center'
-        el.style.fontSize = '16px'
-        el.style.color = 'white'
-        el.style.fontWeight = 'bold'
-        el.textContent = '🚏'
-        el.id = markerData.stopUID
+      const handleSelectStop = (event: MouseEvent) => {
+        event.preventDefault()
+        event.stopPropagation()
+        onSelectStop(data.stopUID)
+      }
 
-        const marker = new mapLibre.Marker({ element: el })
-          .setLngLat(new MapLngLat(markerData.position[0], markerData.position[1]))
-          
-        marker.on('click', handleMarkerClick)
+      el.addEventListener('click', handleSelectStop)
 
-        if (markerData.label) {
-          const popup = new mapLibre.Popup({ offset: 25 }).setText(markerData.label)
-          marker.setPopup(popup)
-        }
+      const marker = new Marker({ element: el })
+        .setLngLat(data.position)
+        .addTo(mapRef.current!)
 
-        marker.addTo(mapRef.current!)
-        return marker
-      })
-
-      markersRef.current = newMarkers
-    }
+      markerMap.current.set(data.stopUID, marker)
+    })
 
     return () => {
-      markersRef.current.forEach((marker) => {
-        marker.off('click', handleMarkerClick)
+      markerMap.current.forEach((marker) => {
         marker.remove()
-      }
-    )
-      markersRef.current = []
+      })
+      markerMap.current.clear()
     }
   }, [mapRef, markers])
 
-  useLayoutEffect(() => {
-    if (!mapRef.current) return
+  useEffect(() => {
+    if (!mapRef.current || !markerMap.current.size) return
 
-    if (selectedStop) {
-      mapRef.current.flyTo({ center: new MapLngLat(...markers.find(marker => marker.stopUID === selectedStop)!.position) })
-      markersRef.current.forEach(m => {
-        if (m.getPopup().isOpen()) m.togglePopup()
-      })
-      const marker = markersRef.current.find(marker => marker.getElement().id === selectedStop)
-      if (marker && !marker.getPopup().isOpen()) marker.togglePopup()
+    if (popupRef.current) {
+      popupRef.current.remove()
+      popupRef.current = null
     }
-  }, [selectedStop, markers])
+
+    if (!selectedStop) return
+
+    const marker = markerMap.current.get(selectedStop)
+    if (!marker) return
+
+    const popup = new Popup({
+      offset: 25,
+      closeOnClick: false
+    })
+      .setText(marker.getElement().dataset.label || '')
+      .setLngLat(marker.getLngLat())
+      .addTo(mapRef.current!)
+
+    popupRef.current = popup
+
+    return () => {
+      if (!popupRef.current) return
+      popupRef.current.remove()
+      popupRef.current = null
+    }
+  }, [selectedStop])
+
+  useEffect(() => {
+    if (!mapRef.current) return
+    if (!selectedStop) return
+
+    const marker = markerMap.current.get(selectedStop)
+    if (!marker) return
+
+    mapRef.current.flyTo({
+      center: marker.getLngLat(),
+      zoom: 16,
+      duration: 800
+    })
+  }, [selectedStop])
 
   return (
     <BaseMap

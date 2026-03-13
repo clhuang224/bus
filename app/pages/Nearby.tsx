@@ -4,12 +4,14 @@ import type { RootState } from '~/modules/store'
 import { GeoPermissionType } from '~/modules/enums/GeoPermissionType'
 import { busApi } from '~/modules/apis/bus'
 import { useCityByCoords } from '~/modules/hooks/useCityByCoords'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { LngLat } from '~/modules/types/CoordsType'
 import { NearbyStopMap } from '~/components/NearbyStopMap'
 
 const Nearby = () => {
   const [selectedStop, setSelectedStop] = useState<string | null>(null)
+  const scrollViewportRef = useRef<HTMLDivElement | null>(null)
+  const itemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
 
   const { coords, permission } = useSelector((state: RootState) => state.geolocation)
   const currentCity = useCityByCoords(coords)
@@ -37,7 +39,7 @@ const Nearby = () => {
     .map(stop => ({
       stopUID: stop.StopUID,
       position: stop.position as LngLat,
-      label: `${stop.StopName.zh_TW})`
+      label: stop.StopName.zh_TW
     })
   ), [nearbyStops])
 
@@ -80,6 +82,19 @@ const Nearby = () => {
     return null
   }, [permission, nearbyStops, isLoading, error])
 
+  useEffect(() => {
+    if (!selectedStop || !scrollViewportRef.current) return
+
+    const item = itemRefs.current.get(selectedStop)
+    if (!item) return
+
+    item.scrollIntoView({
+      block: 'nearest',
+      behavior: 'smooth'
+    })
+
+  }, [selectedStop, nearbyStops])
+
   return (
     <Flex h="100%">
       <Card shadow="sm" p="lg" w="375px" mih="400px">
@@ -88,10 +103,20 @@ const Nearby = () => {
             {message.description}
           </Alert>
         )}
-        <ScrollArea style={{ height: '100%', marginTop: '1rem' }}>
+        <ScrollArea viewportRef={scrollViewportRef} style={{ height: '100%', marginTop: '1rem' }}>
           <Accordion variant="separated" value={selectedStop} onChange={setSelectedStop}>
             {nearbyStops.map((stop) => (
-              <AccordionItem value={stop.StopUID} key={stop.StopUID}>
+              <AccordionItem
+                value={stop.StopUID}
+                key={stop.StopUID}
+                ref={(node) => {
+                  if (node) {
+                    itemRefs.current.set(stop.StopUID, node)
+                  } else {
+                    itemRefs.current.delete(stop.StopUID)
+                  }
+                }}
+              >
                 <AccordionControl>
                   {stop.StopName.zh_TW}
                 </AccordionControl>
@@ -113,6 +138,7 @@ const Nearby = () => {
         center={coords}
         markers={markers}
         selectedStop={selectedStop}
+        onSelectStop={setSelectedStop}
       />
     </Flex>
   )
