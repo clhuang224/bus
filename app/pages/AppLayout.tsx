@@ -47,7 +47,7 @@ export default function AppLayout () {
 
   return (
     <AppShell
-      header={{ height: isSm ? 0 : 76 }}
+      header={{ height: 76 }}
       footer={{ height: isSm ? 84 : 0 }}
     >
       <AppShell.Header h={76} p="md">
@@ -66,7 +66,7 @@ export default function AppLayout () {
           ))}
         </Flex>
       </AppShell.Header>
-      <AppShell.Main>
+      <AppShell.Main h={isSm ? 'calc(100vh - 160px)' : 'calc(100vh - 76px)'}>
         <Outlet />
       </AppShell.Main>
       <AppShell.Footer p="sm" hiddenFrom="sm">

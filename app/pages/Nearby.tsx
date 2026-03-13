@@ -81,7 +81,7 @@ const Nearby = () => {
   }, [permission, nearbyStops, isLoading, error])
 
   return (
-    <Flex>
+    <Flex h="100%">
       <Card shadow="sm" p="lg" w="375px" mih="400px">
         { message && (
           <Alert color={message.color} title={message.title}>
