@@ -2,7 +2,7 @@ import { AppShell, Box, Flex, useMantineTheme } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { RiHeart3Fill, RiHeart3Line, RiMapPin3Fill, RiMapPin3Line, RiSearchFill, RiSearchLine } from '@remixicon/react'
 import { useMemo, useState } from 'react'
-import { Outlet } from 'react-router'
+import { Outlet, useLocation } from 'react-router'
 import { AppNavLink } from '~/components/AppNavLink'
 import { AreaSelect } from '~/components/AreaSelect'
 import { AreaType } from '~/modules/enums/AreaType'
@@ -16,6 +16,8 @@ export function meta() {
 }
 
 export default function AppLayout () {
+
+  const location = useLocation()
 
   const theme = useMantineTheme()
   const isSm = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`)
@@ -52,7 +54,7 @@ export default function AppLayout () {
     >
       <AppShell.Header h={76} p="md">
         <Flex align="center" gap="md">
-          <AreaSelect value={area} onChange={setArea} />
+          <AreaSelect value={area} onChange={setArea} readOnly={location.pathname === '/nearby'} />
           {options.map((option) => (
             <Box
               key={option.path}

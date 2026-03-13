@@ -7,6 +7,7 @@ import { getEnumValues } from '~/modules/utils/getEnumValues'
 export interface AreaSelectPropType {
   value: AreaType
   onChange: (value: AreaType) => void
+  readOnly?: boolean
 }
 
 export const AreaSelect = (props: AreaSelectPropType): ReactElement => {
@@ -27,6 +28,7 @@ export const AreaSelect = (props: AreaSelectPropType): ReactElement => {
         setValue(value as AreaType)
         props.onChange(value as AreaType)
       }}
+      readOnly={props.readOnly}
     />
   )
 }
