@@ -3,7 +3,9 @@ import { useId } from '@mantine/hooks'
 import mapLibre, { Map, Marker, LngLat as MapLngLat } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useSelector } from 'react-redux'
 import type { LatLng } from '~/modules/types/CoordsType'
+import type { RootState } from '~/modules/store'
 
 interface PropType {
   center: LatLng | null
@@ -16,6 +18,8 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, onLoad }: PropTy
   const id = useId()
   const [map, setMap] = useState<Map | null>(null)
   const userMarkerRef = useRef<Marker | null>(null)
+
+  const { coords } = useSelector((state: RootState) => state.geolocation)
 
   useLayoutEffect(() => {
     const mapInstance = new mapLibre.Map({
@@ -72,28 +76,30 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, onLoad }: PropTy
   }, [center, map])
 
   useEffect(() => {
-    if (!map && !center) return
+    if (!map || !coords || !showUserLocation) return
 
     if (userMarkerRef.current) {
       userMarkerRef.current.remove()
       userMarkerRef.current = null
     }
 
-    if (showUserLocation) {
-      const el = document.createElement('div')
-      el.style.width = '20px'
-      el.style.height = '20px'
-      el.style.borderRadius = '50%'
-      el.style.backgroundColor = '#4A90E2'
-      el.style.border = '3px solid white'
-      el.style.boxShadow = '0 0 10px rgba(0,0,0,0.3)'
-    }
+    const el = document.createElement('div')
+    el.style.width = '20px'
+    el.style.height = '20px'
+    el.style.borderRadius = '50%'
+    el.style.backgroundColor = '#4A90E2'
+    el.style.border = '3px solid white'
+    el.style.boxShadow = '0 0 10px rgba(0,0,0,0.3)'
+
+    userMarkerRef.current = new Marker({ element: el })
+      .setLngLat(new MapLngLat(coords![1], coords![0]))
+      .addTo(map!)
 
     return () => {
       userMarkerRef.current?.remove()
       userMarkerRef.current = null
     }
-  }, [map, showUserLocation, center])
+  }, [map, showUserLocation, coords])
 
   return <Box id={id} style={{ width: '100%', height: 'calc(100vh - 64px)' }} />
 }
