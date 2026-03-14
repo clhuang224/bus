@@ -40,6 +40,23 @@ const mockGeojson: FeatureCollection = {
           [120.2, 23.3]
         ]]
       }
+    },
+    {
+      type: 'Feature',
+      properties: {
+        name: CityNameType.CHIAYI,
+        nameTw: '嘉義市'
+      },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[
+          [120.4, 23.45],
+          [120.6, 23.45],
+          [120.6, 23.55],
+          [120.4, 23.55],
+          [120.4, 23.45]
+        ]]
+      }
     }
   ]
 }
@@ -47,6 +64,12 @@ const mockGeojson: FeatureCollection = {
 describe('getAreaByCoords', () => {
   it('maps a detected TDX city to the expected area', () => {
     expect(getAreaByCoords([25.05, 121.55], mockGeojson)).toBe(AreaType.TAIPEI)
+    expect(getAreaByCoords([23.5, 120.5], mockGeojson)).toBe(AreaType.CHIAYI)
+  })
+
+  it('maps different TDX cities in the same group to the same area', () => {
+    expect(getAreaByCoords([25.05, 121.55], mockGeojson)).toBe(AreaType.TAIPEI)
+    expect(getAreaByCoords([25.05, 121.35], mockGeojson)).toBe(AreaType.TAIPEI)
     expect(getAreaByCoords([23.5, 120.5], mockGeojson)).toBe(AreaType.CHIAYI)
   })
 

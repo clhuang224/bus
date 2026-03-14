@@ -43,6 +43,23 @@ const mockGeojson: FeatureCollection = {
     {
       type: 'Feature',
       properties: {
+        name: CityNameType.YILAN_COUNTY,
+        nameTw: '宜蘭縣'
+      },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[
+          [121.6, 24.5],
+          [121.9, 24.5],
+          [121.9, 24.8],
+          [121.6, 24.8],
+          [121.6, 24.5]
+        ]]
+      }
+    },
+    {
+      type: 'Feature',
+      properties: {
         name: 'UnknownCity',
         nameTw: '未知縣市'
       },
@@ -66,8 +83,29 @@ describe('getCityByCoords', () => {
     expect(getCityByCoords([25.04, 121.56], null)).toBe(DEFAULT_CITY)
   })
 
-  it('prefers the priority city when polygons overlap', () => {
-    expect(getCityByCoords([25.05, 121.55], mockGeojson)).toBe(CityNameType.TAIPEI)
+  it('returns the first matching known city when polygons overlap', () => {
+    expect(getCityByCoords([25.05, 121.55], mockGeojson)).toBe(CityNameType.NEW_TAIPEI)
+  })
+
+  it('treats a point on the polygon boundary as inside the city', () => {
+    expect(getCityByCoords([24.5, 121.75], mockGeojson)).toBe(CityNameType.YILAN_COUNTY)
+  })
+
+  it('ignores unknown city names in geojson', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    expect(getCityByCoords([25.05, 121.95], mockGeojson)).toBe(DEFAULT_CITY)
+    expect(warnSpy).toHaveBeenCalledOnce()
+
+    warnSpy.mockRestore()
+  })
+
+  it('still resolves a known city when unknown city names exist in geojson', () => {
+    expect(getCityByCoords([25.05, 121.55], mockGeojson)).toBe(CityNameType.NEW_TAIPEI)
+  })
+
+  it('resolves a known city even when it is not one of the previously prioritized cities', () => {
+    expect(getCityByCoords([24.65, 121.75], mockGeojson)).toBe(CityNameType.YILAN_COUNTY)
   })
 
   it('ignores unknown city names and falls back when no known polygon matches', () => {
