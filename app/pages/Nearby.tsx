@@ -1,4 +1,6 @@
 import { NavLink, Accordion, AccordionControl, AccordionItem, AccordionPanel, Alert, Card, Flex, ScrollArea } from '@mantine/core'
+import distance from '@turf/distance'
+import { point } from '@turf/helpers'
 import { useSelector } from 'react-redux'
 import type { RootState } from '~/modules/store'
 import { GeoPermissionType } from '~/modules/enums/GeoPermissionType'
@@ -7,6 +9,8 @@ import { useCityByCoords } from '~/modules/hooks/useCityByCoords'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { LngLat } from '~/modules/types/CoordsType'
 import { NearbyStopMap } from '~/components/NearbyStopMap'
+
+const NEARBY_DISTANCE_KM = 0.5
 
 const Nearby = () => {
   const [selectedStop, setSelectedStop] = useState<string | null>(null)
@@ -25,14 +29,14 @@ const Nearby = () => {
   const nearbyStops = useMemo(() => {
     if (!coords || !isSuccess) return []
     // TODO: stop clustering
+
+    const currentPoint = point([coords[1], coords[0]])
+
     return allStops.filter(stop => {
       if (!stop.position) return false
-      // XXX: turf
-      const distance = Math.sqrt(
-        Math.pow(stop.position[1] - coords[0], 2) +
-        Math.pow(stop.position[0] - coords[1], 2)
-      )
-      return distance <= 0.005
+
+      const stopPoint = point(stop.position)
+      return distance(currentPoint, stopPoint, { units: 'kilometers' }) <= NEARBY_DISTANCE_KM
     })
   }, [allStops, coords])
 
