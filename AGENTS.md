@@ -2,6 +2,8 @@
 
 - Use English for developer-facing console output such as `console.warn`, `console.error`, and logs.
 - Use Traditional Chinese for user-facing UI copy such as alerts, empty states, and inline warnings.
+- Prefer colocated tests for small modules and utilities, using `*.test.ts` next to the implementation file.
+- Only move tests into a dedicated test folder such as `__tests__/` when the directory becomes crowded or shared fixtures/helpers make it worthwhile.
 - Follow Conventional Commits for commit messages.
 - Format commit subjects as `<type>[optional scope]: <description>`.
 - Use `feat` for new user-facing functionality.
