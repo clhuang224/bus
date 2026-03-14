@@ -18,9 +18,9 @@ export const busApi = createApi({
   }),
   keepUnusedDataFor: 60 * 5,
   endpoints: (build) => ({
-    getRoutesByCity: build.query<BusRoute[], CityNameType>({
+    getRoutesByCity: build.query<BusRoute<string>[], CityNameType>({
       query: (city) => `/Route/City/${city}?%24format=JSON`,
-      transformResponse: (res: TdxBusRoute[]) => res.map((busRoute) => ({
+      transformResponse: (res: TdxBusRoute<string>[]) => res.map((busRoute) => ({
         ...busRoute,
         Operators: busRoute.Operators.map((operator) => ({
           ...operator,
@@ -49,7 +49,6 @@ export const busApi = createApi({
           zh_TW: busRoute.FareBufferZoneDescriptionZh,
           en: busRoute.FareBufferZoneDescriptionEn
         },
-        UpdateTime: new Date(busRoute.UpdateTime),
         SubRoutes: busRoute.SubRoutes.map((busSubRoute) => ({
           ...busSubRoute,
           DepartureStopName: {
@@ -63,11 +62,7 @@ export const busApi = createApi({
           SubRouteName: {
             zh_TW: busSubRoute.SubRouteName.Zh_tw,
             en: busSubRoute.SubRouteName.En
-          },
-          FirstBusTime: new Date(busSubRoute.FirstBusTime),
-          LastBusTime: new Date(busSubRoute.LastBusTime),
-          HolidayFirstBusTime: new Date(busSubRoute.HolidayFirstBusTime),
-          HolidayLastBusTime: new Date(busSubRoute.HolidayLastBusTime)
+          }
         }))
       }))
     }),

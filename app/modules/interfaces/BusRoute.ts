@@ -48,7 +48,7 @@ export interface TdxBusRoute<D = string, L = TdxLocalizedText, S = TdxBusSubRout
   VersionID: 0
 }
 
-export interface BusSubRoute extends Omit<TdxBusSubRoute<Date, LocalizedText>,
+export interface BusSubRoute<D = Date> extends Omit<TdxBusSubRoute<D, LocalizedText>,
 'DepartureStopNameZh' |
 'DepartureStopNameEn' |
 'DestinationStopNameZh' |
@@ -57,7 +57,7 @@ export interface BusSubRoute extends Omit<TdxBusSubRoute<Date, LocalizedText>,
   DestinationStopName: LocalizedText
 }
 
-export interface BusRoute extends Omit<TdxBusRoute<Date, LocalizedText, BusSubRoute>,
+export interface BusRoute<D = Date> extends Omit<TdxBusRoute<D, LocalizedText, BusSubRoute<D>>,
 'DepartureStopNameZh' |
 'DepartureStopNameEn' |
 'DestinationStopNameZh' |
