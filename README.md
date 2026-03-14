@@ -12,7 +12,8 @@ Built with React, Mantine, Redux Toolkit, MapLibre, and Vite.
 - **State Management:** Redux Toolkit
 - **Data fetching:** RTK Query
 - **Map Engine:** MapLibre GL JS
-- **Basemap:** CARTO (raster tiles)
+- **Basemap Provider:** CARTO (raster tiles)
+- **Geospatial Analysis:** Turf.js
 
 ## Application Flow
 
@@ -33,7 +34,7 @@ If permission is granted:
 
 - The app determines the current city from the GPS coordinates.
 - It fetches stop data for that city.
-- Stops within **1 kilometers** are displayed both as a list and as map markers.
+- Stops within **0.5 kilometers** are displayed both as a list and as map markers.
 - Clicking a stop opens the **Stop Page**, showing:
   - All routes serving the stop
   - Real-time bus positions
