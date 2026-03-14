@@ -24,7 +24,7 @@ export const areaMapCity: Record<AreaType, CityNameType[]> = {
 }
 
 export const areaMapAreaName: Record<AreaType, string> = {
-    [AreaType.TAIPEI]: '台北',
+    [AreaType.TAIPEI]: '雙北',
     [AreaType.TAOYUAN]: '桃園',
     [AreaType.TAICHUNG]: '台中',
     [AreaType.TAINAN]: '台南',
@@ -44,3 +44,10 @@ export const areaMapAreaName: Record<AreaType, string> = {
     [AreaType.PENGHU]: '澎湖',
     [AreaType.LIENCHIANG]: '連江'
 }
+
+export const cityMapArea = Object.entries(areaMapCity).reduce((result, [area, cities]) => {
+    cities.forEach((city) => {
+        result[city] = area as AreaType
+    })
+    return result
+}, {} as Record<CityNameType, AreaType>)

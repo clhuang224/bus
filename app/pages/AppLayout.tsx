@@ -1,12 +1,15 @@
 import { AppShell, Box, Flex, useMantineTheme } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { RiHeart3Fill, RiHeart3Line, RiMapPin3Fill, RiMapPin3Line, RiSearchFill, RiSearchLine } from '@remixicon/react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useSelector } from 'react-redux'
 import { Outlet, useLocation } from 'react-router'
 import { AppNavLink } from '~/components/AppNavLink'
 import { AreaSelect } from '~/components/AreaSelect'
 import { AreaType } from '~/modules/enums/AreaType'
+import { useAreaByCoords } from '~/modules/hooks/useAreaByCoords'
 import { useWatchGeolocation } from '~/modules/hooks/useWatchGeolocation'
+import type { RootState } from '~/modules/store'
 
 export function meta() {
   return [
@@ -23,6 +26,8 @@ export default function AppLayout () {
   const isSm = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`)
 
   const [area, setArea] = useState<AreaType>(AreaType.TAIPEI)
+  const { coords } = useSelector((state: RootState) => state.geolocation)
+  const currentArea = useAreaByCoords(coords)
 
   const options = useMemo(() => ([
     {
@@ -46,6 +51,11 @@ export default function AppLayout () {
   ]), [])
 
   useWatchGeolocation()
+
+  useEffect(() => {
+    if (!coords) return
+    setArea(currentArea)
+  }, [coords, currentArea])
 
   return (
     <AppShell
