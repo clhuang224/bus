@@ -7,9 +7,9 @@ import { Outlet, useLocation } from 'react-router'
 import { AppNavLink } from '~/components/AppNavLink'
 import { AreaSelect } from '~/components/AreaSelect'
 import { AreaType } from '~/modules/enums/AreaType'
-import { useAreaByCoords } from '~/modules/hooks/useAreaByCoords'
 import { useWatchGeolocation } from '~/modules/hooks/useWatchGeolocation'
 import type { RootState } from '~/modules/store'
+import { getAreaByCoords } from '~/modules/utils/getAreaByCoords'
 
 export function meta() {
   return [
@@ -27,7 +27,8 @@ export default function AppLayout () {
 
   const [area, setArea] = useState<AreaType>(AreaType.TAIPEI)
   const { coords } = useSelector((state: RootState) => state.geolocation)
-  const currentArea = useAreaByCoords(coords)
+  const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
+  const currentArea = getAreaByCoords(coords, geojson)
 
   const options = useMemo(() => ([
     {

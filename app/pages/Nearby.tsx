@@ -5,9 +5,9 @@ import { useSelector } from 'react-redux'
 import type { RootState } from '~/modules/store'
 import { GeoPermissionType } from '~/modules/enums/GeoPermissionType'
 import { busApi } from '~/modules/apis/bus'
-import { useCityByCoords } from '~/modules/hooks/useCityByCoords'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { LngLat } from '~/modules/types/CoordsType'
+import { getCityByCoords } from '~/modules/utils/getCityByCoords'
 import { NearbyStopMap } from '~/components/NearbyStopMap'
 
 const NEARBY_DISTANCE_KM = 0.5
@@ -18,7 +18,8 @@ const Nearby = () => {
   const itemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
 
   const { coords, permission } = useSelector((state: RootState) => state.geolocation)
-  const currentCity = useCityByCoords(coords)
+  const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
+  const currentCity = getCityByCoords(coords, geojson)
   const { data: allStops, isLoading, error, isSuccess } = busApi.useGetStopsByCityQuery(
     currentCity,
     {
