@@ -3,15 +3,16 @@
 import '@testing-library/jest-dom/vitest'
 import { MantineProvider } from '@mantine/core'
 import { configureStore } from '@reduxjs/toolkit'
-import { render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Nearby from './Nearby'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { GeoPermissionType } from '~/modules/enums/GeoPermissionType'
 
-const { mockUseGetStopsByCityQuery } = vi.hoisted(() => ({
-  mockUseGetStopsByCityQuery: vi.fn()
+const { mockUseGetStopsByCityQuery, mockNearbyStopMap } = vi.hoisted(() => ({
+  mockUseGetStopsByCityQuery: vi.fn(),
+  mockNearbyStopMap: vi.fn()
 }))
 
 Object.defineProperty(window, 'matchMedia', {
@@ -35,6 +36,7 @@ class ResizeObserverMock {
 }
 
 vi.stubGlobal('ResizeObserver', ResizeObserverMock)
+HTMLElement.prototype.scrollIntoView = vi.fn()
 
 vi.mock('~/modules/apis/bus', () => ({
   busApi: {
@@ -47,8 +49,32 @@ vi.mock('~/modules/utils/getCityByCoords', () => ({
 }))
 
 vi.mock('~/components/NearbyStopMap', () => ({
-  NearbyStopMap: () => <div data-testid="nearby-stop-map" />
+  NearbyStopMap: (props: {
+    selectedStop: string | null
+    onSelectStop: (id: string | null) => void
+    markers: Array<{ stopUID: string, label: string }>
+  }) => {
+    mockNearbyStopMap(props)
+    return <div data-testid="nearby-stop-map" />
+  }
 }))
+
+const nearbyStopsData = [
+  {
+    StopUID: 'stop-1',
+    StopName: { zh_TW: '市政府', en: 'City Hall' },
+    City: 'Taipei',
+    StopAddress: 'Address 1',
+    position: [121.5654, 25.033]
+  },
+  {
+    StopUID: 'stop-2',
+    StopName: { zh_TW: '台北車站', en: 'Taipei Main Station' },
+    City: 'Taipei',
+    StopAddress: 'Address 2',
+    position: [121.567, 25.034]
+  }
+]
 
 function renderNearby({
   coords = null,
@@ -99,6 +125,11 @@ function renderNearby({
 describe('Nearby', () => {
   beforeEach(() => {
     mockUseGetStopsByCityQuery.mockReset()
+    mockNearbyStopMap.mockReset()
+  })
+
+  afterEach(() => {
+    cleanup()
   })
 
   it('shows a denied-location message when geolocation permission is denied', () => {
@@ -128,5 +159,88 @@ describe('Nearby', () => {
 
     expect(screen.getByText('載入中')).toBeInTheDocument()
     expect(screen.getByText('正在取得附近的站牌資料，請稍候...')).toBeInTheDocument()
+  })
+
+  it('shows an error message when nearby stop data fails to load', () => {
+    renderNearby({
+      coords: [25.033, 121.5654],
+      permission: GeoPermissionType.GRANTED,
+      queryState: {
+        error: new Error('network error')
+      }
+    })
+
+    expect(screen.getByText('載入站牌資料失敗')).toBeInTheDocument()
+    expect(screen.getByText('請稍後再試，或確認您的網路連線')).toBeInTheDocument()
+  })
+
+  it('shows an empty-state message when no nearby stops are found', () => {
+    renderNearby({
+      coords: [25.033, 121.5654],
+      permission: GeoPermissionType.GRANTED,
+      queryState: {
+        data: [],
+        isSuccess: true
+      }
+    })
+
+    expect(screen.getByText('附近沒有站牌')).toBeInTheDocument()
+    expect(screen.getByText('目前在您附近沒有找到任何站牌')).toBeInTheDocument()
+  })
+
+  it('syncs selected stop from the map back to the list state', () => {
+    renderNearby({
+      coords: [25.033, 121.5654],
+      permission: GeoPermissionType.GRANTED,
+      queryState: {
+        data: nearbyStopsData,
+        isSuccess: true
+      }
+    })
+
+    const firstRenderProps = mockNearbyStopMap.mock.calls.at(-1)?.[0]
+    expect(firstRenderProps?.selectedStop).toBeNull()
+
+    act(() => {
+      firstRenderProps?.onSelectStop('stop-1')
+    })
+
+    const updatedProps = mockNearbyStopMap.mock.calls.at(-1)?.[0]
+    expect(updatedProps?.selectedStop).toBe('stop-1')
+  })
+
+  it('syncs selected stop from the list back to the map props', () => {
+    renderNearby({
+      coords: [25.033, 121.5654],
+      permission: GeoPermissionType.GRANTED,
+      queryState: {
+        data: nearbyStopsData,
+        isSuccess: true
+      }
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: '市政府' }))
+
+    const updatedProps = mockNearbyStopMap.mock.calls.at(-1)?.[0]
+    expect(updatedProps?.selectedStop).toBe('stop-1')
+  })
+
+  it('expands the matching list item when the map selects a stop', () => {
+    renderNearby({
+      coords: [25.033, 121.5654],
+      permission: GeoPermissionType.GRANTED,
+      queryState: {
+        data: nearbyStopsData,
+        isSuccess: true
+      }
+    })
+
+    const firstRenderProps = mockNearbyStopMap.mock.calls.at(-1)?.[0]
+
+    act(() => {
+      firstRenderProps?.onSelectStop('stop-1')
+    })
+
+    expect(screen.getByRole('button', { name: '市政府' })).toHaveAttribute('aria-expanded', 'true')
   })
 })
