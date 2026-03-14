@@ -18,6 +18,7 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, onLoad }: PropTy
   const id = useId()
   const [map, setMap] = useState<Map | null>(null)
   const userMarkerRef = useRef<Marker | null>(null)
+  const initialCenterRef = useRef(Boolean(center))
 
   const { coords } = useSelector((state: RootState) => state.geolocation)
 
@@ -70,10 +71,15 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, onLoad }: PropTy
   }, [id])
 
   useEffect(() => {
-    if (map && !map.getCenter() && center) {
-      map.setCenter(new MapLngLat(center[1], center[0]))
-    }
-  }, [center, map])
+    if (!map || !center || initialCenterRef.current) return
+
+    map.flyTo({
+      center: new MapLngLat(center[1], center[0]),
+      zoom,
+      duration: 800
+    })
+    initialCenterRef.current = true
+  }, [center, map, zoom])
 
   useEffect(() => {
     if (!map || !coords || !showUserLocation) return
