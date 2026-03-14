@@ -1,19 +1,22 @@
 # Finding the Bus
 
-A minimal single-page application for searching and tracking buses in real time.  
-Built with React, Mantine, Redux Toolkit, MapLibre, and Vite.
+A bus-focused single-page application for route lookup, nearby stops, and real-time transit information in Taiwan.
 
 ## Tech Stack
 
 - **Framework:** React (SPA)
+- **Language:** TypeScript
 - **Build Tool:** Vite
-- **Routing:** React Router
+- **Routing:** React Router v7
 - **UI Library:** Mantine
 - **State Management:** Redux Toolkit
 - **Data fetching:** RTK Query
 - **Map Engine:** MapLibre GL JS
 - **Basemap Provider:** CARTO (raster tiles)
 - **Geospatial Analysis:** Turf.js
+- **Testing:** Vitest + React Testing Library
+- **Linting:** ESLint
+- **Package Manager:** pnpm
 
 ## Application Flow
 
@@ -22,6 +25,7 @@ Built with React, Mantine, Redux Toolkit, MapLibre, and Vite.
 On first launch, the app requests geolocation permission.
 
 - If granted, the current GPS coordinates are stored.
+- The app determines the user's city and area from those coordinates.
 - If denied, the "Nearby Stops" feature becomes unavailable.
 
 ### Nearby Stops
@@ -56,6 +60,31 @@ The Favorites page displays saved routes at specific stops.
 - Clicking a favorite opens the **Route Page** with the selected stop highlighted.
 - Real-time bus positions for that route are displayed.
 
+## Current Status
+
+Work in progress.
+
+## Development
+
+Install:
+
+```bash
+pnpm install
+```
+
+Run locally:
+
+```bash
+pnpm dev
+```
+
+Checks:
+
+```bash
+pnpm run lint
+pnpm run typecheck
+pnpm test
+```
 
 ## Troubleshooting
 
