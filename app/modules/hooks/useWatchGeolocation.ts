@@ -14,11 +14,20 @@ export const useWatchGeolocation = () => {
       dispatch(setPermission(GeoPermissionType.UNSUPPORTED))
       return
     }
+
+    let permissionStatus: PermissionStatus | null = null;
+
     (async () => {
-      if (!navigator.permissions) return
+      const permissions = navigator.permissions
+      const queryPermission = permissions?.query?.bind(permissions)
+      if (!queryPermission) return
       try {
-        const result = await navigator.permissions.query({ name: 'geolocation' })
+        const result = await queryPermission({ name: 'geolocation' })
+        permissionStatus = result
         dispatch(setPermission(result.state as GeoPermissionType))
+        result.onchange = () => {
+          dispatch(setPermission(result.state as GeoPermissionType))
+        }
       } catch (err) {
         console.warn('Permission query failed:', err)
       }
@@ -27,23 +36,33 @@ export const useWatchGeolocation = () => {
     dispatch(setWatching(true))
     const id = navigator.geolocation.watchPosition(
       (pos) => {
+        dispatch(setPermission(GeoPermissionType.GRANTED))
         dispatch(setCoords([pos.coords.latitude, pos.coords.longitude]))
       },
       (err) => {
         console.error(err)
-        dispatch(setPermission(GeoPermissionType.DENIED))
-        dispatch(setWatching(false))
+        if (err.code === err.PERMISSION_DENIED) {
+          dispatch(setPermission(GeoPermissionType.DENIED))
+          dispatch(setCoords(null))
+          dispatch(setWatching(false))
+          return
+        }
+
+        console.warn('Geolocation temporarily unavailable.')
       },
       {
-        enableHighAccuracy: true,
-        maximumAge: 10000,
-        timeout: 5000
+        enableHighAccuracy: false,
+        maximumAge: 30000,
+        timeout: 10000
       }
     )
 
     watchIdRef.current = id
 
     return () => {
+      if (permissionStatus) {
+        permissionStatus.onchange = null
+      }
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current)
         watchIdRef.current = null

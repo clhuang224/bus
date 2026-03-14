@@ -18,7 +18,7 @@ const Nearby = () => {
   const { data: allStops, isLoading, error, isSuccess } = busApi.useGetStopsByCityQuery(
     currentCity,
     {
-      skip: permission !== GeoPermissionType.GRANTED
+      skip: !coords
     }
   )
 
@@ -60,6 +60,13 @@ const Nearby = () => {
         description: '請在瀏覽器設定中允許此網站存取您的位置資訊'
       }
     }
+    if (!coords) {
+      return {
+        color: 'blue',
+        title: '定位中',
+        description: '正在取得您的目前位置，請稍候...'
+      }
+    }
     if (error) {
       return {
         color: 'red',
@@ -82,7 +89,7 @@ const Nearby = () => {
       }
     }
     return null
-  }, [permission, nearbyStops, isLoading, error])
+  }, [permission, coords, nearbyStops, isLoading, error])
 
   useEffect(() => {
     if (!selectedStop || !scrollViewportRef.current) return

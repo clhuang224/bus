@@ -13,7 +13,7 @@ const geolocationSlice = createSlice({
   name: 'geolocation',
   initialState,
   reducers: {
-    setCoords: (state, action: PayloadAction<LatLng>) => {
+    setCoords: (state, action: PayloadAction<LatLng | null>) => {
       state.coords = action.payload
     },
     setPermission: (state, action: PayloadAction<GeoPermissionType>) => {
