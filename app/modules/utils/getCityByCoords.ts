@@ -13,15 +13,6 @@ type CityFeature = Feature<Polygon, CityProperties>
 
 export const DEFAULT_CITY = CityNameType.TAIPEI
 
-const priorityCities: CityNameType[] = [
-  CityNameType.TAIPEI,
-  CityNameType.KEELUNG,
-  CityNameType.HSINCHU,
-  CityNameType.TAICHUNG,
-  CityNameType.CHIAYI,
-  CityNameType.TAINAN
-]
-
 const cityNameSet = new Set(Object.values(CityNameType))
 
 function getCityFromFeature(feature: CityFeature): CityNameType | null {
@@ -47,14 +38,6 @@ export function getCityByCoords(coords: LatLng | null, geojson: FeatureCollectio
   const [lat, lng] = coords
   const testPoint = point([lng, lat])
   const cityFeatures = geojson.features as CityFeature[]
-
-  const priorityFeatures = cityFeatures.filter((feature) => {
-    const city = getCityFromFeature(feature)
-    return city ? priorityCities.includes(city) : false
-  })
-
-  const priorityCity = findCityByPoint(testPoint, priorityFeatures)
-  if (priorityCity) return priorityCity
 
   const city = findCityByPoint(testPoint, cityFeatures)
   if (city) return city
