@@ -4,6 +4,11 @@
 - Use Traditional Chinese for user-facing UI copy such as alerts, empty states, and inline warnings.
 - Prefer colocated tests for small modules and utilities, using `*.test.ts` next to the implementation file.
 - Only move tests into a dedicated test folder such as `__tests__/` when the directory becomes crowded or shared fixtures/helpers make it worthwhile.
+- Prefer testing app logic, user-visible behavior, and component contracts over third-party implementation details.
+- For utility functions, prefer focused unit tests.
+- For React components, prefer testing state branches, user interactions, and parent-child contracts.
+- Avoid brittle assertions against third-party DOM structure, generated class names, animation details, or map-library internals unless there is a strong product reason.
+- For integrations with heavy UI libraries or maps, prefer lightweight mocks that preserve the component contract instead of testing the third-party library itself.
 - Follow Conventional Commits for commit messages.
 - Format commit subjects as `<type>[optional scope]: <description>`.
 - Use `feat` for new user-facing functionality.
