@@ -7,7 +7,7 @@ import { Outlet, useLocation } from 'react-router'
 import { AppNavLink } from '~/components/AppNavLink'
 import { AreaSelect } from '~/components/AreaSelect'
 import { AreaType } from '~/modules/enums/AreaType'
-import { useWatchGeolocation } from '~/modules/hooks/useWatchGeolocation'
+import { useWatchGeo } from '~/modules/hooks/useWatchGeo'
 import type { RootState } from '~/modules/store'
 import { getAreaByCoords } from '~/modules/utils/getAreaByCoords'
 
@@ -51,7 +51,7 @@ export default function AppLayout () {
     }
   ]), [])
 
-  useWatchGeolocation()
+  useWatchGeo()
 
   useEffect(() => {
     if (!coords) return

@@ -1,14 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { busApi } from './apis/bus'
 import favoriteSlice from './slices/favoriteSlice'
-import geolocationSlice from './slices/geolocationSlice'
+import geoSlice from './slices/geoSlice'
 import cityGeoSlice, { setGeoJSON } from './slices/cityGeoSlice'
 import globalModalSlice from './slices/globalModalSlice'
 
 export const store = configureStore({
     reducer: {
         [busApi.reducerPath]: busApi.reducer,
-        geolocation: geolocationSlice.reducer,
+        geolocation: geoSlice.reducer,
         favorite: favoriteSlice.reducer,
         cityGeo: cityGeoSlice.reducer,
         globalModal: globalModalSlice.reducer

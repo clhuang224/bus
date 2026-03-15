@@ -7,8 +7,13 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Nearby from './Nearby'
+import {
+  geoErrorMessages,
+  geoPermissionMessages
+} from '~/modules/constants/geoMessages'
 import { CityNameType } from '~/modules/enums/CityNameType'
-import { GeoPermissionType } from '~/modules/enums/GeoPermissionType'
+import { GeoErrorType } from '~/modules/enums/geo/GeoErrorType'
+import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
 
 const { mockUseGetStopsByCityQuery, mockNearbyStopMap } = vi.hoisted(() => ({
   mockUseGetStopsByCityQuery: vi.fn(),
@@ -48,7 +53,7 @@ vi.mock('~/modules/utils/getCityByCoords', () => ({
   getCityByCoords: () => CityNameType.TAIPEI
 }))
 
-vi.mock('~/components/NearbyStopMap', () => ({
+vi.mock('~/components/nearby/NearbyStopMap', () => ({
   NearbyStopMap: (props: {
     selectedStop: string | null
     onSelectStop: (id: string | null) => void
@@ -78,10 +83,12 @@ const nearbyStopsData = [
 
 function renderNearby({
   coords = null,
+  geolocationError = null,
   permission = GeoPermissionType.PROMPT,
   queryState
 }: {
   coords?: [number, number] | null
+  geolocationError?: GeoErrorType | null
   permission?: GeoPermissionType
   queryState?: {
     data?: unknown[]
@@ -94,6 +101,7 @@ function renderNearby({
     reducer: {
       geolocation: () => ({
         coords,
+        error: geolocationError,
         permission,
         watching: false
       }),
@@ -137,8 +145,12 @@ describe('Nearby', () => {
       permission: GeoPermissionType.DENIED
     })
 
-    expect(screen.getByText('無法取得位置')).toBeInTheDocument()
-    expect(screen.getByText('請在瀏覽器設定中允許此網站存取您的位置資訊')).toBeInTheDocument()
+    expect(
+      screen.getByText(geoPermissionMessages[GeoPermissionType.DENIED]!.title)
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(geoPermissionMessages[GeoPermissionType.DENIED]!.description)
+    ).toBeInTheDocument()
   })
 
   it('shows a locating message while waiting for coordinates', () => {
@@ -146,6 +158,21 @@ describe('Nearby', () => {
 
     expect(screen.getByText('定位中')).toBeInTheDocument()
     expect(screen.getByText('正在取得您的目前位置，請稍候...')).toBeInTheDocument()
+  })
+
+  it('shows a geolocation error message when the position is unavailable', () => {
+    renderNearby({
+      geolocationError: GeoErrorType.POSITION_UNAVAILABLE
+    })
+
+    expect(
+      screen.getByText(geoErrorMessages[GeoErrorType.POSITION_UNAVAILABLE].title)
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        geoErrorMessages[GeoErrorType.POSITION_UNAVAILABLE].description
+      )
+    ).toBeInTheDocument()
   })
 
   it('shows a loading message after coordinates are available and nearby stops are loading', () => {

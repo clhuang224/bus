@@ -3,21 +3,48 @@ import distance from '@turf/distance'
 import { point } from '@turf/helpers'
 import { useSelector } from 'react-redux'
 import type { RootState } from '~/modules/store'
-import { GeoPermissionType } from '~/modules/enums/GeoPermissionType'
+import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
 import { busApi } from '~/modules/apis/bus'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  geoErrorMessages,
+  geoPermissionMessages
+} from '~/modules/constants/geoMessages'
 import type { LngLat } from '~/modules/types/CoordsType'
 import { getCityByCoords } from '~/modules/utils/getCityByCoords'
 import { NearbyStopMap } from '~/components/nearby/NearbyStopMap'
 
 const NEARBY_DISTANCE_KM = 0.5
+const locatingMessage = {
+  color: 'blue',
+  title: '定位中',
+  description: '正在取得您的目前位置，請稍候...'
+} as const
+
+const loadingStopsMessage = {
+  color: 'blue',
+  title: '載入中',
+  description: '正在取得附近的站牌資料，請稍候...'
+} as const
+
+const loadStopsErrorMessage = {
+  color: 'red',
+  title: '載入站牌資料失敗',
+  description: '請稍後再試，或確認您的網路連線'
+} as const
+
+const emptyStopsMessage = {
+  color: 'yellow',
+  title: '附近沒有站牌',
+  description: '目前在您附近沒有找到任何站牌'
+} as const
 
 const Nearby = () => {
   const [selectedStop, setSelectedStop] = useState<string | null>(null)
   const scrollViewportRef = useRef<HTMLDivElement | null>(null)
   const itemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
 
-  const { coords, permission } = useSelector((state: RootState) => state.geolocation)
+  const { coords, error: geolocationError, permission } = useSelector((state: RootState) => state.geolocation)
   const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
   const currentCity = getCityByCoords(coords, geojson)
   const { data: allStops, isLoading, error, isSuccess } = busApi.useGetStopsByCityQuery(
@@ -51,50 +78,17 @@ const Nearby = () => {
   ), [nearbyStops])
 
   const message = useMemo(() => {
-    if (permission === GeoPermissionType.UNSUPPORTED) {
-      return {
-        color: 'red',
-        title: '不支援定位',
-        description: '您的瀏覽器不支援地理定位功能'
-      }
+    if ([GeoPermissionType.UNSUPPORTED, GeoPermissionType.DENIED].includes(permission)) {
+      return geoPermissionMessages[permission]
     }
-    if (permission === GeoPermissionType.DENIED) {
-      return {
-        color: 'red',
-        title: '無法取得位置',
-        description: '請在瀏覽器設定中允許此網站存取您的位置資訊'
-      }
-    }
-    if (!coords) {
-      return {
-        color: 'blue',
-        title: '定位中',
-        description: '正在取得您的目前位置，請稍候...'
-      }
-    }
-    if (error) {
-      return {
-        color: 'red',
-        title: '載入站牌資料失敗',
-        description: '請稍後再試，或確認您的網路連線'
-      }
-    }
-    if (isLoading) {
-      return {
-        color: 'blue',
-        title: '載入中',
-        description: '正在取得附近的站牌資料，請稍候...'
-      }
-    }
-    if (nearbyStops.length === 0) {
-      return {
-        color: 'yellow',
-        title: '附近沒有站牌',
-        description: '目前在您附近沒有找到任何站牌'
-      }
-    }
+    if (geolocationError) return geoErrorMessages[geolocationError]
+    if (!coords) return locatingMessage
+    if (error) return loadStopsErrorMessage
+    if (isLoading) return loadingStopsMessage
+    if (nearbyStops.length === 0) return emptyStopsMessage
+
     return null
-  }, [permission, coords, nearbyStops, isLoading, error])
+  }, [permission, geolocationError, coords, nearbyStops, isLoading, error])
 
   useEffect(() => {
     if (!selectedStop || !scrollViewportRef.current) return

@@ -1,17 +1,18 @@
 import { useEffect, useRef } from 'react'
 import { useDispatch } from 'react-redux'
-import { GeoPermissionType } from '../enums/GeoPermissionType'
-import geolocationSlice from '../slices/geolocationSlice'
+import { GeoActionType } from '../enums/geo/GeoActionType'
+import { GeoPermissionType } from '../enums/geo/GeoPermissionType'
+import geoSlice from '../slices/geoSlice'
 
-export const useWatchGeolocation = () => {
-  const { setCoords, setPermission, setWatching } = geolocationSlice.actions
+export const useWatchGeo = () => {
+  const { transitionState } = geoSlice.actions
   const dispatch = useDispatch()
   const watchIdRef = useRef<number | null>(null)
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('geolocation' in navigator)) {
       console.warn('Geolocation is not supported in this environment.')
-      dispatch(setPermission(GeoPermissionType.UNSUPPORTED))
+      dispatch(transitionState({ type: GeoActionType.UNSUPPORTED }))
       return
     }
 
@@ -24,27 +25,43 @@ export const useWatchGeolocation = () => {
       try {
         const result = await queryPermission({ name: 'geolocation' })
         permissionStatus = result
-        dispatch(setPermission(result.state as GeoPermissionType))
+        dispatch(transitionState({
+          type: GeoActionType.PERMISSION_CHANGED,
+          permission: result.state as GeoPermissionType
+        }))
         result.onchange = () => {
-          dispatch(setPermission(result.state as GeoPermissionType))
+          dispatch(transitionState({
+            type: GeoActionType.PERMISSION_CHANGED,
+            permission: result.state as GeoPermissionType
+          }))
         }
       } catch (err) {
         console.warn('Permission query failed:', err)
       }
     })()
 
-    dispatch(setWatching(true))
+    dispatch(transitionState({ type: GeoActionType.WATCH_STARTED }))
     const id = navigator.geolocation.watchPosition(
       (pos) => {
-        dispatch(setPermission(GeoPermissionType.GRANTED))
-        dispatch(setCoords([pos.coords.latitude, pos.coords.longitude]))
+        dispatch(transitionState({
+          type: GeoActionType.POSITION_UPDATED,
+          coords: [pos.coords.latitude, pos.coords.longitude]
+        }))
       },
       (err) => {
         console.error(err)
         if (err.code === err.PERMISSION_DENIED) {
-          dispatch(setPermission(GeoPermissionType.DENIED))
-          dispatch(setCoords(null))
-          dispatch(setWatching(false))
+          dispatch(transitionState({ type: GeoActionType.POSITION_DENIED }))
+          return
+        }
+
+        if (err.code === err.POSITION_UNAVAILABLE) {
+          dispatch(transitionState({ type: GeoActionType.POSITION_UNAVAILABLE }))
+          return
+        }
+
+        if (err.code === err.TIMEOUT) {
+          dispatch(transitionState({ type: GeoActionType.POSITION_TIMEOUT }))
           return
         }
 
@@ -67,7 +84,7 @@ export const useWatchGeolocation = () => {
         navigator.geolocation.clearWatch(watchIdRef.current)
         watchIdRef.current = null
       }
-      dispatch(setWatching(false))
+      dispatch(transitionState({ type: GeoActionType.WATCH_STOPPED }))
     }
   }, [dispatch])
 }
