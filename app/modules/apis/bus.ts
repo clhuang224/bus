@@ -3,19 +3,48 @@ import type { BusRoute, TdxBusRoute } from '../interfaces/BusRoute'
 import type { CityNameType } from '../enums/CityNameType'
 import type { NearStop, TdxNearStop } from '../interfaces/NearStop'
 import type { Stop, TdxStop } from '../interfaces/Stop'
+import { openGlobalModal } from '../slices/globalModalSlice'
+
+const tdxBaseQuery = fetchBaseQuery({
+  baseUrl: 'https://tdx.transportdata.tw/api/basic/v2/Bus',
+  prepareHeaders: (headers) => {
+    const token = import.meta.env.VITE_TDX_TOKEN
+    if (token) {
+      headers.set('authorization', `Bearer ${token}`)
+    }
+    return headers
+  }
+})
 
 export const busApi = createApi({
   reducerPath: 'busApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: 'https://tdx.transportdata.tw/api/basic/v2/Bus',
-    prepareHeaders: (headers) => {
-      const token = import.meta.env.VITE_TDX_TOKEN
-      if (token) {
-        headers.set('authorization', `Bearer ${token}`)
+  baseQuery: async (args, api, extraOptions) => {
+    try {
+      const result = await tdxBaseQuery(args, api, extraOptions)
+
+      if (result.error?.status === 429) {
+        api.dispatch(openGlobalModal({
+          title: '目前查詢人數較多',
+          message: '系統暫時無法取得公車資料，請稍候一段時間再試。',
+          variant: 'alert',
+          confirmText: '重整頁面',
+          confirmAction: 'refresh'
+        }))
       }
-      return headers
+
+      return result
+    } catch (error) {
+      console.error('busApi baseQuery error:', error)
+      api.dispatch(openGlobalModal({
+        title: '系統暫時無法使用',
+        message: '目前無法取得公車資料，請稍後再試。',
+        variant: 'alert',
+        confirmText: '重整頁面',
+        confirmAction: 'refresh'
+      }))
+      throw error
     }
-  }),
+  },
   keepUnusedDataFor: 60 * 5,
   endpoints: (build) => ({
     getRoutesByCity: build.query<BusRoute<string>[], CityNameType>({

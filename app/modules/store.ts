@@ -3,13 +3,15 @@ import { busApi } from './apis/bus'
 import favoriteSlice from './slices/favoriteSlice'
 import geolocationSlice from './slices/geolocationSlice'
 import cityGeoSlice, { setGeoJSON } from './slices/cityGeoSlice'
+import globalModalSlice from './slices/globalModalSlice'
 
 export const store = configureStore({
     reducer: {
         [busApi.reducerPath]: busApi.reducer,
         geolocation: geolocationSlice.reducer,
         favorite: favoriteSlice.reducer,
-        cityGeo: cityGeoSlice.reducer
+        cityGeo: cityGeoSlice.reducer,
+        globalModal: globalModalSlice.reducer
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

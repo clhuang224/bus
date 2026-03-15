@@ -11,6 +11,7 @@ import type { Route } from './+types/root'
 
 import { ThemeProvider } from './components/ThemeProvider'
 import { StoreProvider } from './components/StoreProvider'
+import { GlobalModal } from './components/GlobalModal'
 
 import '@mantine/core/styles.css'
 
@@ -49,7 +50,10 @@ export default function App() {
   return (
     <ThemeProvider>
       <StoreProvider>
-        <Outlet />
+        <>
+          <Outlet />
+          <GlobalModal />
+        </>
       </StoreProvider>
     </ThemeProvider>
   )
