@@ -66,19 +66,58 @@ Work in progress.
 
 ## Development
 
-Install:
+### API Token (optional)
+
+The app can run without a token, but requests may be rate-limited.
+
+To enable authenticated requests, create a `.env.local` file with a TDX API token.
+
+Register an application on the [Transport Data eXchange](https://tdx.transportdata.tw/) to obtain a `client_id` and `client_secret`.
+
+Then use the following command to request an access token:
+
+```bash
+curl --request POST \
+  --url 'https://tdx.transportdata.tw/auth/realms/TDXConnect/protocol/openid-connect/token' \
+  --header 'content-type: application/x-www-form-urlencoded' \
+  --data grant_type=client_credentials \
+  --data client_id=your_client_id_here \
+  --data client_secret=your_client_secret_here
+```
+
+The response will contain an access_token:
+
+```json
+{
+  "access_token": "your_access_token_here",
+  "expires_in": 86400,
+  "token_type": "Bearer"
+}
+```
+
+Add the token to .env.local:
+
+```env
+VITE_TDX_TOKEN=your_access_token_here
+```
+
+This token typically expires after 24 hours and must be regenerated periodically.
+
+Do not commit .env.local to version control.
+
+### Install Dependencies
 
 ```bash
 pnpm install
 ```
 
-Run locally:
+### Run
 
 ```bash
 pnpm dev
 ```
 
-Checks:
+### Test
 
 ```bash
 pnpm run lint
