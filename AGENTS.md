@@ -2,6 +2,7 @@
 
 - Use English for developer-facing console output such as `console.warn`, `console.error`, and logs.
 - Use Traditional Chinese for user-facing UI copy such as alerts, empty states, and inline warnings.
+- When enum values need user-facing names or derived metadata, define a colocated map such as `directionMapName` and derive from the enum plus that map, rather than scattering hard-coded strings across the codebase.
 - Prefer colocated tests for small modules and utilities, using `*.test.ts` next to the implementation file.
 - Only move tests into a dedicated test folder such as `__tests__/` when the directory becomes crowded or shared fixtures/helpers make it worthwhile.
 - Prefer testing app logic, user-visible behavior, and component contracts over third-party implementation details.
