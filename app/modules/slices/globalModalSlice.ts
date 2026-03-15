@@ -14,7 +14,7 @@ interface GlobalModalState {
   confirmAction: GlobalModalConfirmAction
 }
 
-type OpenGlobalModalPayload = Pick<GlobalModalState, 'title' | 'message' | 'variant'> &
+export type OpenGlobalModalPayload = Pick<GlobalModalState, 'title' | 'message' | 'variant'> &
   Partial<Pick<GlobalModalState, 'confirmText' | 'cancelText' | 'confirmAction'>>
 
 const initialState: GlobalModalState = {

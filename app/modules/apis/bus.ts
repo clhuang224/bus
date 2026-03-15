@@ -3,6 +3,7 @@ import type { BusRoute, TdxBusRoute } from '../interfaces/BusRoute'
 import type { CityNameType } from '../enums/CityNameType'
 import type { NearStop, TdxNearStop } from '../interfaces/NearStop'
 import type { Stop, TdxStop } from '../interfaces/Stop'
+import { getBusErrorModal, tdxSystemErrorModal } from './errors/busError'
 import { openGlobalModal } from '../slices/globalModalSlice'
 
 const tdxBaseQuery = fetchBaseQuery({
@@ -21,27 +22,16 @@ export const busApi = createApi({
   baseQuery: async (args, api, extraOptions) => {
     try {
       const result = await tdxBaseQuery(args, api, extraOptions)
+      const errorModal = result.error ? getBusErrorModal(result.error.status) : null
 
-      if (result.error?.status === 429) {
-        api.dispatch(openGlobalModal({
-          title: '目前查詢人數較多',
-          message: '系統暫時無法取得公車資料，請稍候一段時間再試。',
-          variant: 'alert',
-          confirmText: '重整頁面',
-          confirmAction: 'refresh'
-        }))
+      if (errorModal) {
+        api.dispatch(openGlobalModal(errorModal))
       }
 
       return result
     } catch (error) {
       console.error('busApi baseQuery error:', error)
-      api.dispatch(openGlobalModal({
-        title: '系統暫時無法使用',
-        message: '目前無法取得公車資料，請稍後再試。',
-        variant: 'alert',
-        confirmText: '重整頁面',
-        confirmAction: 'refresh'
-      }))
+      api.dispatch(openGlobalModal(tdxSystemErrorModal))
       throw error
     }
   },
