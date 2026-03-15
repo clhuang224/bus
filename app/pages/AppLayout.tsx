@@ -33,19 +33,19 @@ export default function AppLayout () {
   const options = useMemo(() => ([
     {
       name: '我的最愛',
-      path: './',
+      path: '/',
       icon: (<RiHeart3Line />),
       iconActive: (<RiHeart3Fill />)
     },
     {
       name: '附近站牌',
-      path: './nearby',
+      path: '/nearby',
       icon: (<RiMapPin3Line />),
       iconActive: (<RiMapPin3Fill />)
     },
     {
       name: '搜尋公車',
-      path: './search',
+      path: '/search',
       icon: (<RiSearchLine />),
       iconActive: (<RiSearchFill />)
     }
@@ -73,7 +73,7 @@ export default function AppLayout () {
             >
               <AppNavLink
                 label={option.name}
-                href={option.path}
+                to={option.path}
               />
             </Box>
           ))}
@@ -88,7 +88,7 @@ export default function AppLayout () {
             <Flex key={option.path} align="center" justify="center" direction="column">
               <AppNavLink
                 label={option.name}
-                href={option.path}
+                to={option.path}
                 icon={option.icon}
                 iconActive={option.iconActive}
               />
