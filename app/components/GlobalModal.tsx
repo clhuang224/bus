@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux'
-import BaseModal from './BaseModal'
+import BaseModal from './common/BaseModal'
 import { busApi } from '~/modules/apis/bus'
 import {
   closeGlobalModal,

@@ -1,5 +1,5 @@
 import { Provider } from 'react-redux'
-import { store } from '../modules/store'
+import { store } from '../../modules/store'
 
 interface PropType {
   children: React.ReactElement

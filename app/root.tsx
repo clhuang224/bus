@@ -9,8 +9,8 @@ import {
 
 import type { Route } from './+types/root'
 
-import { ThemeProvider } from './components/ThemeProvider'
-import { StoreProvider } from './components/StoreProvider'
+import { ThemeProvider } from './components/providers/ThemeProvider'
+import { StoreProvider } from './components/providers/StoreProvider'
 import { GlobalModal } from './components/GlobalModal'
 
 import '@mantine/core/styles.css'

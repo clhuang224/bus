@@ -8,7 +8,7 @@ import { busApi } from '~/modules/apis/bus'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { LngLat } from '~/modules/types/CoordsType'
 import { getCityByCoords } from '~/modules/utils/getCityByCoords'
-import { NearbyStopMap } from '~/components/NearbyStopMap'
+import { NearbyStopMap } from '~/components/nearby/NearbyStopMap'
 
 const NEARBY_DISTANCE_KM = 0.5
 

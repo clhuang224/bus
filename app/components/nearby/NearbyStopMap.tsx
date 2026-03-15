@@ -2,7 +2,7 @@ import mapLibre, { Marker, Popup } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useEffect, useRef } from 'react'
 import type { LngLat, LatLng } from '~/modules/types/CoordsType'
-import BaseMap from './BaseMap'
+import BaseMap from '../common/BaseMap'
 
 interface PropType {
   center: LatLng | null
