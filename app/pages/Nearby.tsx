@@ -11,10 +11,11 @@ import {
 } from '~/modules/consts/geoMessages'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
 import { busApi } from '~/modules/apis/bus'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
 import { getCityByCoords } from '~/modules/utils/getCityByCoords'
+import { useNearbySearchParams } from '~/modules/hooks/useNearbySearchParams'
 import { NearbyStopDetail } from '~/components/nearby/NearbyStopDetail'
 import { NearbyStopMap } from '~/components/nearby/NearbyStopMap'
 import { NearbyStopRoutes } from '~/components/nearby/NearbyStopRoutes'
@@ -47,10 +48,15 @@ const emptyStopsMessage = {
 const disabledNearbyPermissions = [GeoPermissionType.UNSUPPORTED, GeoPermissionType.DENIED]
 
 const Nearby = () => {
-  const [selectedStop, setSelectedStop] = useState<string | null>(null)
-  const [selectedStationRouteStop, setSelectedStationRouteStop] = useState<string | null>(null)
   const scrollViewportRef = useRef<HTMLDivElement | null>(null)
   const itemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
+  const {
+    selectedStop,
+    selectedRouteStop,
+    selectStop,
+    viewStopRoutes,
+    backToNearbyStops
+  } = useNearbySearchParams()
 
   const { coords, error: geolocationError, permission } = useSelector((state: RootState) => state.geolocation)
   const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
@@ -172,14 +178,14 @@ const Nearby = () => {
   }, [permission, geolocationError, coords, nearbyStopGroups, isLoading, error])
 
   const selectedStopGroup = useMemo(() => {
-    if (!selectedStationRouteStop) return null
-    return nearbyStopGroups.find((stopGroup) => stopGroup.StationID === selectedStationRouteStop) ?? null
-  }, [nearbyStopGroups, selectedStationRouteStop])
+    if (!selectedRouteStop) return null
+    return nearbyStopGroups.find((stopGroup) => stopGroup.StationID === selectedRouteStop) ?? null
+  }, [nearbyStopGroups, selectedRouteStop])
 
   const selectedStationRoutes = useMemo(() => {
-    if (!selectedStationRouteStop) return []
-    return stationRoutesMap.get(selectedStationRouteStop) ?? []
-  }, [selectedStationRouteStop, stationRoutesMap])
+    if (!selectedRouteStop) return []
+    return stationRoutesMap.get(selectedRouteStop) ?? []
+  }, [selectedRouteStop, stationRoutesMap])
 
   const stationRouteBadgesMap = useMemo(() => {
     const stationRouteBadges = new Map<string, Array<Pick<StationRoute, 'routeUID' | 'name'>>>()
@@ -234,7 +240,11 @@ const Nearby = () => {
           {selectedStopGroup
             ? (
               <Stack gap="md">
-                <Button variant="subtle" w="fit-content" onClick={() => setSelectedStationRouteStop(null)}>
+                <Button
+                  variant="subtle"
+                  w="fit-content"
+                  onClick={backToNearbyStops}
+                >
                   返回附近站牌
                 </Button>
                 <Stack gap="xs">
@@ -256,7 +266,11 @@ const Nearby = () => {
               </Stack>
               )
             : (
-              <Accordion variant="separated" value={selectedStop} onChange={setSelectedStop}>
+              <Accordion
+                variant="separated"
+                value={selectedStop}
+                onChange={selectStop}
+              >
                 {nearbyStopGroups.map((stopGroup) => (
                   <AccordionItem
                     value={stopGroup.StationID}
@@ -276,7 +290,7 @@ const Nearby = () => {
                       <NearbyStopDetail
                         stopGroup={stopGroup}
                         routes={stationRouteBadgesMap.get(stopGroup.StationID) ?? []}
-                        onViewRoutes={setSelectedStationRouteStop}
+                        onViewRoutes={viewStopRoutes}
                       />
                     </AccordionPanel>
                   </AccordionItem>
@@ -299,7 +313,7 @@ const Nearby = () => {
           center={coords}
           markers={markers}
           selectedStop={selectedStop}
-          onSelectStop={setSelectedStop}
+          onSelectStop={selectStop}
         />
       </Flex>
     </Flex>

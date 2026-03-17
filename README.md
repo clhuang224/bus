@@ -78,7 +78,7 @@ app/
 │   ├── apis/                 # RTK Query APIs
 │   ├── consts/               # Constant maps
 │   ├── enums/                # Domain enums
-│   ├── hooks/                # Reusable hooks
+│   ├── hooks/                # Reusable app hooks
 │   ├── interfaces/           # Domain interfaces
 │   ├── slices/               # Redux slices
 │   ├── types/                # Shared types

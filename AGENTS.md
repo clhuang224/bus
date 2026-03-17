@@ -179,6 +179,10 @@ Current route structure:
 
 When adding a new page, define the route in `app/routes.ts` and place the page component under `app/pages/`.
 
+This project should follow React Router v7 framework mode conventions wherever practical.
+
+Prefer React Router's built-in primitives for route state and navigation behavior, such as route modules, route params, search params, links, navigation helpers, and framework-mode file conventions, before introducing custom wrappers or ad hoc URL state helpers.
+
 ### Store
 
 The Redux store is defined in `app/modules/store.ts`.
@@ -190,6 +194,10 @@ Use the store for:
 - data that needs central coordination
 
 Do not push local rendering state into Redux unless there is a strong reason.
+
+This project should also follow Redux Toolkit and RTK Query conventions wherever practical.
+
+Prefer standard Redux Toolkit patterns such as slices, typed selectors, typed dispatch, RTK Query endpoints, and API-layer transforms before introducing custom state containers or alternative async data flow patterns.
 
 ### API Data Flow
 

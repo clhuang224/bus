@@ -1,6 +1,6 @@
 import mapLibre, { Marker, Popup } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { LngLat, LatLng } from '~/modules/types/CoordsType'
 import BaseMap from '../common/BaseMap'
 
@@ -16,12 +16,12 @@ interface PropType {
 }
 
 export const NearbyStopMap = ({ center, markers = [], selectedStop, onSelectStop }: PropType) => {
-  const mapRef = useRef<mapLibre.Map | null>(null)
+  const [map, setMap] = useState<mapLibre.Map | null>(null)
   const markerMap = useRef<Map<string, Marker>>(new Map<string, Marker>())
   const popupRef = useRef<Popup | null>(null)
 
   useEffect(() => {
-    if (!mapRef.current) return
+    if (!map) return
 
     markerMap.current.forEach((marker) => marker.remove())
     markerMap.current.clear()
@@ -53,7 +53,7 @@ export const NearbyStopMap = ({ center, markers = [], selectedStop, onSelectStop
 
       const marker = new Marker({ element: el })
         .setLngLat(data.position)
-        .addTo(mapRef.current!)
+        .addTo(map)
 
       markerMap.current.set(data.id, marker)
     })
@@ -64,10 +64,10 @@ export const NearbyStopMap = ({ center, markers = [], selectedStop, onSelectStop
       })
       markerMap.current.clear()
     }
-  }, [mapRef, markers])
+  }, [map, markers, onSelectStop])
 
   useEffect(() => {
-    if (!mapRef.current || !markerMap.current.size) return
+    if (!map || !markerMap.current.size) return
 
     if (popupRef.current) {
       popupRef.current.remove()
@@ -85,7 +85,7 @@ export const NearbyStopMap = ({ center, markers = [], selectedStop, onSelectStop
     })
       .setText(marker.getElement().dataset.label || '')
       .setLngLat(marker.getLngLat())
-      .addTo(mapRef.current!)
+      .addTo(map)
 
     popupRef.current = popup
 
@@ -94,21 +94,21 @@ export const NearbyStopMap = ({ center, markers = [], selectedStop, onSelectStop
       popupRef.current.remove()
       popupRef.current = null
     }
-  }, [selectedStop])
+  }, [map, markers, selectedStop])
 
   useEffect(() => {
-    if (!mapRef.current) return
+    if (!map) return
     if (!selectedStop) return
 
     const marker = markerMap.current.get(selectedStop)
     if (!marker) return
 
-    mapRef.current.flyTo({
+    map.flyTo({
       center: marker.getLngLat(),
       zoom: 16,
       duration: 800
     })
-  }, [selectedStop])
+  }, [map, markers, selectedStop])
 
   return (
     <BaseMap
@@ -116,7 +116,7 @@ export const NearbyStopMap = ({ center, markers = [], selectedStop, onSelectStop
       zoom={16}
       showUserLocation
       onLoad={(map) => {
-        mapRef.current = map
+        setMap(map)
       }}
     />
   )

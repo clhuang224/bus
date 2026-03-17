@@ -5,6 +5,7 @@ import { MantineProvider } from '@mantine/core'
 import { configureStore } from '@reduxjs/toolkit'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { Provider } from 'react-redux'
+import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Nearby from './Nearby'
 import {
@@ -285,9 +286,11 @@ function renderNearby({
 
   return render(
     <MantineProvider>
-      <Provider store={store}>
-        <Nearby />
-      </Provider>
+      <MemoryRouter>
+        <Provider store={store}>
+          <Nearby />
+        </Provider>
+      </MemoryRouter>
     </MantineProvider>
   )
 }
