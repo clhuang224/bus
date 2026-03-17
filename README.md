@@ -64,6 +64,71 @@ The Favorites page displays saved routes at specific stops.
 
 Work in progress.
 
+## Project Structure
+
+The app is organized around route-level pages, reusable feature components, and shared domain modules.
+
+```text
+app/
+├── components/
+│   ├── common/               # Shared UI components
+│   ├── nearby/               # Nearby feature components
+│   └── providers/            # App providers
+├── modules/
+│   ├── apis/                 # RTK Query APIs
+│   ├── consts/               # Constant maps
+│   ├── enums/                # Domain enums
+│   ├── hooks/                # Reusable hooks
+│   ├── interfaces/           # Domain interfaces
+│   ├── slices/               # Redux slices
+│   ├── types/                # Shared types
+│   ├── utils/                # Shared helpers
+│   └── store.ts              # Redux store
+├── pages/                    # Route pages
+├── root.tsx                  # App root
+└── routes.ts                 # Route config
+```
+
+### Key Pages
+
+- `app/pages/Favorite.tsx`: saved favorite stops
+- `app/pages/Search.tsx`: route search flow
+- `app/pages/Nearby.tsx`: nearby stop discovery using geolocation
+- `app/pages/BusRoute.tsx`: route detail and stop list view
+
+### Key Data Flow
+
+1. Route screens fetch data through `app/modules/apis/bus.ts`.
+2. Raw TDX fields are transformed into app-facing models in the API layer.
+3. Pages coordinate screen state and pass shaped data into feature components.
+4. Shared app state such as favorites, geolocation, city geo data, and global modals is stored in Redux slices.
+
+## APIs In Use
+
+The project currently uses the TDX Bus API base URL:
+
+`https://tdx.transportdata.tw/api/basic/v2/Bus`
+
+TDX, short for Transport Data eXchange, is Taiwan's transportation data platform. It provides standardized transport datasets and APIs, including bus routes, stops, and related transit data used by this project.
+
+This project currently authenticates to TDX with a bearer access token obtained from an application-level `client_id` and `client_secret`. In practice, that means you first register an application on TDX, exchange those credentials for an access token, and then send that token in the `Authorization: Bearer ...` header for API requests.
+
+Current endpoints used by the app:
+
+| Method | Endpoint | Used For | Response Summary |
+| --- | --- | --- | --- |
+| `GET` | `/Route/City/:city` | Route search and route detail pages | Route-level data including subroutes, operators, departure stop names, and destination stop names |
+| `GET` | `/StopOfRoute/City/:city` | Building stop-to-route relationships for nearby stops | Stops under each route plus destination stop data for each direction |
+| `GET` | `/Stop/City/:city` | Nearby page stop discovery | Stop positions and metadata used to group nearby stops into stations |
+
+In the actual implementation, these requests may include OData query parameters such as `$format=JSON`.
+
+### API Model Notes
+
+- API access is centralized in `app/modules/apis/bus.ts`.
+- Raw TDX localized fields such as `Zh_tw` and `En` are transformed into app-localized objects like `{ zh_TW, en }`.
+- Nearby stop route data is further shaped into view models such as `NearbyStopGroup` and `StationRoute`.
+
 ## Development
 
 ### API Token (optional)
