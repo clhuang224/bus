@@ -85,17 +85,46 @@ export const busApi = createApi({
         }))
       }))
     }),
+    getStopOfRoutesByCity: build.query<StopOfRoute[], CityNameType>({
+      query: (cityName) => `/StopOfRoute/City/${cityName}?%24format=JSON`,
+      transformResponse: (res: TdxStopOfRoute[]) => res.map((stopOfRoute) => ({
+        ...stopOfRoute,
+        RouteName: {
+          zh_TW: stopOfRoute.RouteName.Zh_tw,
+          en: stopOfRoute.RouteName.En
+        },
+        SubRouteName: {
+          zh_TW: stopOfRoute.SubRouteName.Zh_tw,
+          en: stopOfRoute.SubRouteName.En
+        },
+        Stops: stopOfRoute.Stops.map((stop) => ({
+          ...stop,
+          StopName: {
+            zh_TW: stop.StopName.Zh_tw,
+            en: stop.StopName.En
+          }
+        }))
+      }))
+    }),
     getStopsByCity: build.query<Stop[], CityNameType>({
       query: (cityName) => `/Stop/City/${cityName}?%24format=JSON`,
       transformResponse: (res: TdxStop[]) => res.map((stop) => ({
         StopUID: stop.StopUID,
         StopID: stop.StopID,
+        AuthorityID: stop.AuthorityID,
+        StationID: stop.StationID,
+        StationGroupID: stop.StationGroupID,
         StopName: {
           zh_TW: stop.StopName.Zh_tw,
           en: stop.StopName.En
         },
+        GeoHash: stop.StopPosition.GeoHash,
         StopAddress: stop.StopAddress,
-        City: stop.City,
+        Bearing: stop.Bearing,
+        StopDescription: stop.StopDescription,
+        City: stop.City || null,
+        UpdateTime: stop.UpdateTime,
+        VersionID: stop.VersionID,
         position: [stop.StopPosition.PositionLon, stop.StopPosition.PositionLat]
       }))
     })
@@ -104,5 +133,5 @@ export const busApi = createApi({
 
 export const {
   useGetRoutesByCityQuery,
-  useGetNearStopsByCityQuery
+  useGetStopOfRoutesByCityQuery
 } = busApi
