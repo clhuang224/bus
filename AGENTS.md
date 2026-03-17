@@ -2,6 +2,12 @@
 
 - Use English for developer-facing console output such as `console.warn`, `console.error`, and logs.
 - Use Traditional Chinese for user-facing UI copy such as alerts, empty states, and inline warnings.
+- Prefer defining reusable object-shaped domain models and API contracts in `app/modules/interfaces/`.
+- Prefer defining reusable type aliases, tuples, unions, and other type utilities in `app/modules/types/`.
+- Strongly related API raw models and transformed app models may live in the same file when they are maintained as a pair, such as `TdxStop` and `Stop`.
+- Split raw and transformed models into separate files only when the file becomes large, the models diverge significantly, or the transformed model is reused independently from the original API source.
+- In public interfaces, prefer explicit field types or small shared interfaces over indexed access types such as `Stop['StopName']`; reserve indexed access for true type plumbing rather than everyday model declarations.
+- Keep types inside a component file only when they are truly private to that component alone.
 - When enum values need user-facing names or derived metadata, define a colocated map such as `directionMapName` and derive from the enum plus that map, rather than scattering hard-coded strings across the codebase.
 - Prefer colocated tests for small modules and utilities, using `*.test.ts` next to the implementation file.
 - Only move tests into a dedicated test folder such as `__tests__/` when the directory becomes crowded or shared fixtures/helpers make it worthwhile.
