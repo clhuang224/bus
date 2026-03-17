@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { BusRoute, TdxBusRoute } from '../interfaces/BusRoute'
 import type { CityNameType } from '../enums/CityNameType'
-import type { NearStop, TdxNearStop } from '../interfaces/NearStop'
+import type { StopOfRoute, TdxStopOfRoute } from '../interfaces/StopOfRoute'
 import type { Stop, TdxStop } from '../interfaces/Stop'
 import { getBusErrorModal, tdxSystemErrorModal } from './errors/busError'
 import { openGlobalModal } from '../slices/globalModalSlice'
@@ -98,43 +98,6 @@ export const busApi = createApi({
         City: stop.City,
         position: [stop.StopPosition.PositionLon, stop.StopPosition.PositionLat]
       }))
-    }),
-    getNearStopsByCity: build.query<NearStop<string>[], CityNameType>({
-      async queryFn(cityName, _queryApi, _extraOptions, baseQuery): Promise<{ data: NearStop<string>[] }> {
-        const nearStopsRes = await baseQuery({ url: `/RealTimeNearStop/City/${cityName}?%24format=JSON` })
-        const nearStopsData: TdxNearStop[] = Array.isArray(nearStopsRes.data) ? nearStopsRes.data as TdxNearStop[] : []
-        const stopsRequest = _queryApi.dispatch(
-          busApi.endpoints.getStopsByCity.initiate(cityName)
-        )
-        const stopsResult = await stopsRequest
-        stopsRequest.unsubscribe()
-
-        const stopMap = new Map<string, [number, number]>()
-        const stopsData = stopsResult.data ?? []
-
-        for (const stop of stopsData) {
-          if (stop.StopUID && stop.position) {
-            stopMap.set(stop.StopUID, stop.position)
-          }
-        }
-        const result: NearStop<string>[] = nearStopsData.map((stop) => ({
-          ...stop,
-          RouteName: {
-            zh_TW: stop.RouteName?.Zh_tw ?? '',
-            en: stop.RouteName?.En ?? ''
-          },
-          SubRouteName: {
-            zh_TW: stop.SubRouteName?.Zh_tw ?? '',
-            en: stop.SubRouteName?.En ?? ''
-          },
-          StopName: {
-            zh_TW: stop.StopName?.Zh_tw ?? '',
-            en: stop.StopName?.En ?? ''
-          },
-          position: stopMap.get(stop.StopUID) ?? undefined
-        }))
-        return { data: result }
-      }
     })
   })
 })
