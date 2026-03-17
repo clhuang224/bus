@@ -1,4 +1,5 @@
 import { useSearchParams } from 'react-router'
+import { updateSearchParam } from '../utils/updateSearchParam'
 
 interface NearbySearchParamUpdates {
   selectedStopId?: string | null
@@ -16,22 +17,8 @@ export const useNearbySearchParams = () => {
   }: NearbySearchParamUpdates) => {
     setSearchParams((currentSearchParams) => {
       const nextSearchParams = new URLSearchParams(currentSearchParams)
-
-      if (selectedStopId !== undefined) {
-        if (selectedStopId) {
-          nextSearchParams.set('stop', selectedStopId)
-        } else {
-          nextSearchParams.delete('stop')
-        }
-      }
-
-      if (selectedRouteStopId !== undefined) {
-        if (selectedRouteStopId) {
-          nextSearchParams.set('routeStop', selectedRouteStopId)
-        } else {
-          nextSearchParams.delete('routeStop')
-        }
-      }
+      updateSearchParam(nextSearchParams, 'stop', selectedStopId)
+      updateSearchParam(nextSearchParams, 'routeStop', selectedRouteStopId)
 
       return nextSearchParams
     })

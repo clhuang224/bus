@@ -93,9 +93,9 @@ const routesData = [
   }
 ]
 
-const renderSearch = () => render(
+const renderSearch = (initialEntries = ['/search']) => render(
   <MantineProvider>
-    <MemoryRouter>
+    <MemoryRouter initialEntries={initialEntries}>
       <Search />
     </MemoryRouter>
   </MantineProvider>
@@ -134,6 +134,16 @@ describe('Search', () => {
     })
 
     await waitFor(() => {
+      expect(screen.getAllByText('紅25').length).toBeGreaterThan(0)
+      expect(screen.queryByText('藍1')).not.toBeInTheDocument()
+    })
+  })
+
+  it('reads the keyword from the search params', async () => {
+    renderSearch(['/search?keyword=紅25'])
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('textbox')[0]).toHaveValue('紅25')
       expect(screen.getAllByText('紅25').length).toBeGreaterThan(0)
       expect(screen.queryByText('藍1')).not.toBeInTheDocument()
     })
