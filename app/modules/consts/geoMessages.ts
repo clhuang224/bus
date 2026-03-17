@@ -1,13 +1,8 @@
 import { GeoErrorType } from '../enums/geo/GeoErrorType'
 import { GeoPermissionType } from '../enums/geo/GeoPermissionType'
+import type { AlertMessageConfig } from '../interfaces/AlertMessageConfig'
 
-export interface MessagePayload {
-  color: string
-  title: string
-  description: string
-}
-
-export const geoPermissionMessages: { [key in GeoPermissionType]: MessagePayload | null } = {
+export const geoPermissionMessages: { [key in GeoPermissionType]: AlertMessageConfig | null } = {
   [GeoPermissionType.UNSUPPORTED]: {
     color: 'red',
     title: '無法使用附近站牌',
@@ -22,7 +17,7 @@ export const geoPermissionMessages: { [key in GeoPermissionType]: MessagePayload
   [GeoPermissionType.GRANTED]: null
 }
 
-export const geoErrorMessages: { [key in GeoErrorType]: MessagePayload } = {
+export const geoErrorMessages: { [key in GeoErrorType]: AlertMessageConfig } = {
   [GeoErrorType.PERMISSION_DENIED]: {
     color: 'red',
     title: '無法取得位置',

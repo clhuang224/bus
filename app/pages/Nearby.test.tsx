@@ -12,6 +12,7 @@ import {
   geoErrorMessages,
   geoPermissionMessages
 } from '~/modules/consts/geoMessages'
+import { nearbyMessages } from '~/modules/consts/pageMessages'
 import { BearingType } from '~/modules/enums/BearingType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { GeoErrorType } from '~/modules/enums/geo/GeoErrorType'
@@ -323,8 +324,8 @@ describe('Nearby', () => {
   it('shows a locating message while waiting for coordinates', () => {
     renderNearby()
 
-    expect(screen.getByText('定位中')).toBeInTheDocument()
-    expect(screen.getByText('正在取得您的目前位置，請稍候...')).toBeInTheDocument()
+    expect(screen.getByText(nearbyMessages.locating.title)).toBeInTheDocument()
+    expect(screen.getByText(nearbyMessages.locating.description)).toBeInTheDocument()
   })
 
   it('shows a geolocation error message when the position is unavailable', () => {
@@ -351,8 +352,8 @@ describe('Nearby', () => {
       }
     })
 
-    expect(screen.getByText('載入中')).toBeInTheDocument()
-    expect(screen.getByText('正在取得附近的站牌資料，請稍候...')).toBeInTheDocument()
+    expect(screen.getByText(nearbyMessages.loadingStops.title)).toBeInTheDocument()
+    expect(screen.getByText(nearbyMessages.loadingStops.description)).toBeInTheDocument()
   })
 
   it('shows an error message when nearby stop data fails to load', () => {
@@ -364,8 +365,8 @@ describe('Nearby', () => {
       }
     })
 
-    expect(screen.getByText('載入站牌資料失敗')).toBeInTheDocument()
-    expect(screen.getByText('請稍後再試，或確認您的網路連線')).toBeInTheDocument()
+    expect(screen.getByText(nearbyMessages.loadStopsError.title)).toBeInTheDocument()
+    expect(screen.getByText(nearbyMessages.loadStopsError.description)).toBeInTheDocument()
   })
 
   it('shows an empty-state message when no nearby stops are found', () => {
@@ -378,8 +379,8 @@ describe('Nearby', () => {
       }
     })
 
-    expect(screen.getByText('附近沒有站牌')).toBeInTheDocument()
-    expect(screen.getByText('目前在您附近沒有找到任何站牌')).toBeInTheDocument()
+    expect(screen.getByText(nearbyMessages.emptyStops.title)).toBeInTheDocument()
+    expect(screen.getByText(nearbyMessages.emptyStops.description)).toBeInTheDocument()
   })
 
   it('syncs selected stop from the map back to the list state', () => {

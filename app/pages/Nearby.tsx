@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux'
 import type { RootState } from '~/modules/store'
 import { cityMapArea } from '~/modules/consts/area'
 import { cityMapName } from '~/modules/consts/city'
+import { nearbyMessages } from '~/modules/consts/pageMessages'
 import {
   geoErrorMessages,
   geoPermissionMessages
@@ -21,30 +22,6 @@ import { NearbyStopMap } from '~/components/nearby/NearbyStopMap'
 import { NearbyStopRoutes } from '~/components/nearby/NearbyStopRoutes'
 
 const NEARBY_DISTANCE_KM = 0.5
-const locatingMessage = {
-  color: 'blue',
-  title: '定位中',
-  description: '正在取得您的目前位置，請稍候...'
-} as const
-
-const loadingStopsMessage = {
-  color: 'blue',
-  title: '載入中',
-  description: '正在取得附近的站牌資料，請稍候...'
-} as const
-
-const loadStopsErrorMessage = {
-  color: 'red',
-  title: '載入站牌資料失敗',
-  description: '請稍後再試，或確認您的網路連線'
-} as const
-
-const emptyStopsMessage = {
-  color: 'yellow',
-  title: '附近沒有站牌',
-  description: '目前在您附近沒有找到任何站牌'
-} as const
-
 const disabledNearbyPermissions = [GeoPermissionType.UNSUPPORTED, GeoPermissionType.DENIED]
 
 const Nearby = () => {
@@ -169,10 +146,10 @@ const Nearby = () => {
       return geoPermissionMessages[permission]
     }
     if (geolocationError) return geoErrorMessages[geolocationError]
-    if (!coords) return locatingMessage
-    if (error) return loadStopsErrorMessage
-    if (isLoading) return loadingStopsMessage
-    if (nearbyStopGroups.length === 0) return emptyStopsMessage
+    if (!coords) return nearbyMessages.locating
+    if (error) return nearbyMessages.loadStopsError
+    if (isLoading) return nearbyMessages.loadingStops
+    if (nearbyStopGroups.length === 0) return nearbyMessages.emptyStops
 
     return null
   }, [permission, geolocationError, coords, nearbyStopGroups, isLoading, error])
