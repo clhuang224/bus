@@ -224,7 +224,7 @@ const Nearby = () => {
           w="fit-content"
           onClick={backToNearbyStops}
         >
-          返回附近站牌
+          返回站牌列表
         </Button>
         <Stack gap="xs">
           <Title order={4}>{selectedStopGroup.StopName.zh_TW}</Title>
@@ -287,6 +287,7 @@ const Nearby = () => {
       <NearbyStopDetail
         stopGroup={selectedMapStopGroup}
         routes={stationRouteBadgesMap.get(selectedMapStopGroup.StationID) ?? []}
+        displayMode={isSm ? 'full' : 'title'}
         onViewRoutes={(stationID) => {
           viewStopRoutes(stationID)
           if (isSm) {
@@ -326,7 +327,7 @@ const Nearby = () => {
             style={{ zIndex: 2 }}
             onClick={openSidebar}
           >
-            附近站牌
+            展開列表
           </Button>
         )}
       <Drawer

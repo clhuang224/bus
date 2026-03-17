@@ -7,9 +7,19 @@ interface PropType {
   stopGroup: NearbyStopGroup
   routes: Array<Pick<StationRoute, 'routeUID' | 'name'>>
   onViewRoutes: (stationID: string) => void
+  displayMode?: 'content' | 'full' | 'title'
 }
 
-export const NearbyStopDetail = ({ stopGroup, routes, onViewRoutes }: PropType) => {
+export const NearbyStopDetail = ({
+  stopGroup,
+  routes,
+  onViewRoutes,
+  displayMode = 'content'
+}: PropType) => {
+  if (displayMode === 'title') {
+    return <Text>{stopGroup.StopName.zh_TW}</Text>
+  }
+
   const detailSections = [
     {
       label: '縣市',
@@ -47,6 +57,7 @@ export const NearbyStopDetail = ({ stopGroup, routes, onViewRoutes }: PropType) 
 
   return (
     <Stack gap="xs">
+      {displayMode === 'full' && <Text>{stopGroup.StopName.zh_TW}</Text>}
       {detailSections.map((section) => (
         <Stack key={section.label} gap={4}>
           <Text size="sm" c="dimmed">{section.label}</Text>
