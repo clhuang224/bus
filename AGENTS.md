@@ -325,6 +325,13 @@ Commit body rules:
 
 Mark breaking changes with `!` in the header or a `BREAKING CHANGE:` footer when needed.
 
+This repository uses Husky hooks as a local quality gate:
+
+- `pre-commit` runs `pnpm run lint` and `pnpm run typecheck`
+- `pre-push` runs `pnpm run test`
+
+When preparing changes, expect these hooks to run unless the user explicitly asks to bypass them.
+
 ## 8. Working Style Expectations
 
 When making changes in this repository:

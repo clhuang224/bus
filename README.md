@@ -190,6 +190,19 @@ pnpm run typecheck
 pnpm test
 ```
 
+### Git Hooks
+
+This project uses Husky to run checks before commit and push.
+
+- `pre-commit`: runs `pnpm run lint` and `pnpm run typecheck`
+- `pre-push`: runs `pnpm run test`
+
+If hooks stop running locally, re-initialize Husky with:
+
+```bash
+pnpm run prepare
+```
+
 ## Troubleshooting
 
 ### Hydration Mismatch Error (Development Only)
