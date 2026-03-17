@@ -327,7 +327,10 @@ Use an optional scope when it adds useful context, such as:
 
 Keep the subject concise and imperative.
 
-Always include a commit body.
+Commit body rules depend on how the commit is created:
+
+- if the user creates a commit manually, a body is optional
+- if an AI agent creates the commit, always include a body
 
 Commit body rules:
 
@@ -340,6 +343,7 @@ Mark breaking changes with `!` in the header or a `BREAKING CHANGE:` footer when
 This repository uses Husky hooks as a local quality gate:
 
 - `pre-commit` runs `pnpm run lint` and `pnpm run typecheck`
+- `commit-msg` validates the Conventional Commit header format
 - `pre-push` runs `pnpm run test`
 
 When preparing changes, expect these hooks to run unless the user explicitly asks to bypass them.
