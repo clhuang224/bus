@@ -235,6 +235,8 @@ When reviewing a UI block, ask:
 - Is this a screen-level concern that belongs in the page?
 - Or is this already a named piece of the feature that deserves its own component?
 
+When working with Mantine components, prefer Mantine props, variants, spacing, radius, color, and layout primitives over custom `style` or `styles` overrides whenever the built-in API can express the same intent.
+
 ### Rendering Patterns
 
 Use simple inline template rendering for very small, one-off sections.

@@ -6,6 +6,7 @@ export interface StationRoute {
   routeUID: string
   city: CityNameType
   name: string
+  departure: string
   destination: string
   direction: DirectionType
 }

@@ -111,13 +111,20 @@ const Nearby = () => {
 
   const stationRoutesMap = useMemo(() => {
     const stationRoutes = new Map<string, StationRoute[]>()
+    const routeDepartureMap = new Map<string, string>()
     const routeDestinationMap = new Map<string, string>()
+    const routeFallbackDepartureMap = new Map<string, string>()
     const routeFallbackDestinationMap = new Map<string, string>()
 
     routes.forEach((route) => {
+      routeFallbackDepartureMap.set(route.RouteUID, route.DepartureStopName.zh_TW || route.RouteName.zh_TW)
       routeFallbackDestinationMap.set(route.RouteUID, route.DestinationStopName.zh_TW || route.RouteName.zh_TW)
 
       route.SubRoutes.forEach((subRoute) => {
+        routeDepartureMap.set(
+          `${subRoute.SubRouteUID}-${subRoute.Direction}`,
+          subRoute.DepartureStopName.zh_TW
+        )
         routeDestinationMap.set(
           `${subRoute.SubRouteUID}-${subRoute.Direction}`,
           subRoute.DestinationStopName.zh_TW
@@ -132,6 +139,7 @@ const Nearby = () => {
         routeUID: stopOfRoute.RouteUID,
         city: stopOfRoute.City,
         name: stopOfRoute.SubRouteName.zh_TW || stopOfRoute.RouteName.zh_TW,
+        departure: routeDepartureMap.get(routeKey) ?? routeFallbackDepartureMap.get(stopOfRoute.RouteUID) ?? '',
         destination: routeDestinationMap.get(routeKey) ?? routeFallbackDestinationMap.get(stopOfRoute.RouteUID) ?? '',
         direction: stopOfRoute.Direction
       }

@@ -1,4 +1,4 @@
-import { NavLink, Stack, Text } from '@mantine/core'
+import { Badge, Card, Flex, NavLink, Stack, Tabs, Text } from '@mantine/core'
 import { Link } from 'react-router'
 import { cityMapName } from '~/modules/consts/city'
 import { directionMapName } from '~/modules/consts/direction'
@@ -37,22 +37,66 @@ export const NearbyStopRoutes = ({ routes }: PropType) => {
   return (
     <Stack gap="sm">
       <Text size="sm" c="dimmed">此站路線</Text>
-      {routeSections.map((section) => (
-        <Stack key={section.direction} gap={4}>
-          <Text size="sm" fw={500}>{section.label}</Text>
-          <Stack gap={6} pl="sm">
-            {section.routes.map((route) => (
-              <NavLink
-                key={route.id}
-                component={Link}
-                to={`/bus-route/${route.city}/${route.routeUID}`}
-                label={route.name}
-                description={`${cityMapName[route.city]} · 往 ${route.destination}`}
-              />
-            ))}
-          </Stack>
-        </Stack>
-      ))}
+      <Tabs defaultValue={String(routeSections[0].direction)}>
+        <Tabs.List>
+          {routeSections.map((section) => (
+            <Tabs.Tab key={section.direction} value={String(section.direction)}>
+              {section.label}
+            </Tabs.Tab>
+          ))}
+        </Tabs.List>
+
+        {routeSections.map((section) => (
+          <Tabs.Panel key={section.direction} value={String(section.direction)} pt="sm">
+            <Stack gap="xs">
+              {section.routes.map((route) => (
+                <Stack key={route.id} gap="xs">
+                  <Card
+                    withBorder
+                    radius="md"
+                    p="xs"
+                    shadow="xs"
+                  >
+                    <NavLink
+                      component={Link}
+                      to={`/bus-route/${route.city}/${route.routeUID}`}
+                      variant="light"
+                      color="blue"
+                      px="xs"
+                      py={6}
+                      bdrs="sm"
+                      label={(
+                        <Stack gap={8}>
+                          <Flex justify="space-between" align="center">
+                            <Badge
+                              variant="light"
+                              color="blue"
+                              radius="sm"
+                              size="lg"
+                            >
+                              {route.name}
+                            </Badge>
+                            <Badge
+                              variant="light"
+                              color="gray"
+                              radius="sm"
+                              size="lg"
+                            >
+                              {cityMapName[route.city]}
+                            </Badge>
+                          </Flex>
+                          <Text size="xs" c="dimmed">起訖站</Text>
+                          <Text size="sm">{`${route.departure} → ${route.destination}`}</Text>
+                        </Stack>
+                      )}
+                    />
+                  </Card>
+                </Stack>
+              ))}
+            </Stack>
+          </Tabs.Panel>
+        ))}
+      </Tabs>
     </Stack>
   )
 }
