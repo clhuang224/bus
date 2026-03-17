@@ -210,13 +210,9 @@ const Nearby = () => {
             {message.description}
           </Alert>
         )}
-        <ScrollArea
-          viewportRef={scrollViewportRef}
-          style={{ flex: 1, minHeight: 0 }}
-        >
-          {selectedStopGroup
-            ? (
-              <Stack gap="md">
+        {selectedStopGroup
+          ? (
+              <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
                 <Button
                   variant="subtle"
                   w="fit-content"
@@ -241,8 +237,12 @@ const Nearby = () => {
                 </Stack>
                 <NearbyStopRoutes routes={selectedStationRoutes} />
               </Stack>
-              )
-            : (
+            )
+          : (
+            <ScrollArea
+              viewportRef={scrollViewportRef}
+              style={{ flex: 1, minHeight: 0 }}
+            >
               <Accordion
                 variant="separated"
                 value={selectedStopId}
@@ -273,8 +273,8 @@ const Nearby = () => {
                   </AccordionItem>
                 ))}
               </Accordion>
-              )}
-        </ScrollArea>
+            </ScrollArea>
+            )}
         </Flex>
       </Card>
       <Flex pos="relative" style={{ flex: 1 }}>

@@ -1,4 +1,5 @@
-import { Stack, Tabs, Text } from '@mantine/core'
+import { ScrollArea, Stack, Tabs, Text } from '@mantine/core'
+import { useState } from 'react'
 import { directionMapName } from '~/modules/consts/direction'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
@@ -23,6 +24,9 @@ export const NearbyStopRoutes = ({ routes }: PropType) => {
         .sort((left, right) => routeNameCollator.compare(left.name, right.name))
     }))
     .filter((section) => section.routes.length > 0)
+  const [selectedDirection, setSelectedDirection] = useState<string | null>(
+    routeSections[0] ? String(routeSections[0].direction) : null
+  )
 
   if (routeSections.length === 0) {
     return (
@@ -34,9 +38,12 @@ export const NearbyStopRoutes = ({ routes }: PropType) => {
   }
 
   return (
-    <Stack gap="sm">
+    <Stack gap="sm" style={{ flex: 1, minHeight: 0 }}>
       <Text size="sm" c="dimmed">此站路線</Text>
-      <Tabs defaultValue={String(routeSections[0].direction)}>
+      <Tabs
+        value={selectedDirection}
+        onChange={setSelectedDirection}
+      >
         <Tabs.List>
           {routeSections.map((section) => (
             <Tabs.Tab key={section.direction} value={String(section.direction)}>
@@ -44,25 +51,25 @@ export const NearbyStopRoutes = ({ routes }: PropType) => {
             </Tabs.Tab>
           ))}
         </Tabs.List>
-
-        {routeSections.map((section) => (
-          <Tabs.Panel key={section.direction} value={String(section.direction)} pt="sm">
-            <Stack gap="xs">
-              {section.routes.map((route) => (
-                <Stack key={route.id} gap="xs">
-                  <RouteInfoCard
-                    to={`/bus-route/${route.city}/${route.routeUID}`}
-                    name={route.name}
-                    city={route.city}
-                    departure={route.departure}
-                    destination={route.destination}
-                  />
-                </Stack>
-              ))}
-            </Stack>
-          </Tabs.Panel>
-        ))}
       </Tabs>
+
+      <ScrollArea style={{ flex: 1, minHeight: 0 }}>
+        <Stack gap="xs" pt="sm">
+          {routeSections
+            .find((section) => String(section.direction) === selectedDirection)
+            ?.routes.map((route) => (
+              <Stack key={route.id} gap="xs">
+                <RouteInfoCard
+                  to={`/bus-route/${route.city}/${route.routeUID}`}
+                  name={route.name}
+                  city={route.city}
+                  departure={route.departure}
+                  destination={route.destination}
+                />
+              </Stack>
+            ))}
+        </Stack>
+      </ScrollArea>
     </Stack>
   )
 }
