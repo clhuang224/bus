@@ -1,6 +1,8 @@
-import { Accordion, AccordionControl, AccordionItem, AccordionPanel, Alert, Button, Card, Flex, Overlay, ScrollArea, Stack, Text, Title } from '@mantine/core'
+import { Accordion, AccordionControl, AccordionItem, AccordionPanel, Alert, Button, Card, Drawer, Flex, Overlay, ScrollArea, Stack, Text, Title, useMantineTheme } from '@mantine/core'
 import distance from '@turf/distance'
 import { point } from '@turf/helpers'
+import { useDisclosure, useMediaQuery } from '@mantine/hooks'
+import { RiArrowLeftDoubleFill, RiMenuLine } from '@remixicon/react'
 import { useSelector } from 'react-redux'
 import type { RootState } from '~/modules/store'
 import { cityMapArea } from '~/modules/consts/area'
@@ -27,6 +29,9 @@ const disabledNearbyPermissions = [GeoPermissionType.UNSUPPORTED, GeoPermissionT
 const Nearby = () => {
   const scrollViewportRef = useRef<HTMLDivElement | null>(null)
   const itemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
+  const theme = useMantineTheme()
+  const isSm = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`)
+  const [isSidebarOpened, { open: openSidebar, close: closeSidebar }] = useDisclosure(false)
   const {
     selectedStopId,
     selectedRouteStopId,
@@ -159,6 +164,11 @@ const Nearby = () => {
     return nearbyStopGroups.find((stopGroup) => stopGroup.StationID === selectedRouteStopId) ?? null
   }, [nearbyStopGroups, selectedRouteStopId])
 
+  const selectedMapStopGroup = useMemo(() => {
+    if (!selectedStopId) return null
+    return nearbyStopGroups.find((stopGroup) => stopGroup.StationID === selectedStopId) ?? null
+  }, [nearbyStopGroups, selectedStopId])
+
   const selectedStationRoutes = useMemo(() => {
     if (!selectedRouteStopId) return []
     return stationRoutesMap.get(selectedRouteStopId) ?? []
@@ -201,83 +211,137 @@ const Nearby = () => {
 
   }, [selectedStopId, nearbyStopGroups])
 
+  useEffect(() => {
+    if (!isSm || !selectedRouteStopId) return
+    openSidebar()
+  }, [isSm, selectedRouteStopId, openSidebar])
+
+  const sidebarContent = selectedStopGroup
+    ? (
+      <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
+        <Button
+          variant="subtle"
+          w="fit-content"
+          onClick={backToNearbyStops}
+        >
+          返回附近站牌
+        </Button>
+        <Stack gap="xs">
+          <Title order={4}>{selectedStopGroup.StopName.zh_TW}</Title>
+          <Stack gap={2}>
+            <Text size="sm" c="dimmed">縣市</Text>
+            <Text size="sm">
+              {selectedStopGroup.City ? cityMapName[selectedStopGroup.City] : '未提供'}
+            </Text>
+          </Stack>
+          <Stack gap={2}>
+            <Text size="sm" c="dimmed">地址</Text>
+            <Text size="sm">
+              {Array.from(new Set(selectedStopGroup.stops.map((stop) => stop.StopAddress).filter(Boolean))).join('、') || '未提供'}
+            </Text>
+          </Stack>
+        </Stack>
+        <NearbyStopRoutes routes={selectedStationRoutes} />
+      </Stack>
+    )
+    : (
+      <ScrollArea
+        viewportRef={scrollViewportRef}
+        style={{ flex: 1, minHeight: 0 }}
+      >
+        <Accordion
+          variant="separated"
+          value={selectedStopId}
+          onChange={selectStop}
+        >
+          {nearbyStopGroups.map((stopGroup) => (
+            <AccordionItem
+              value={stopGroup.StationID}
+              key={stopGroup.StationID}
+              ref={(node) => {
+                if (node) {
+                  itemRefs.current.set(stopGroup.StationID, node)
+                } else {
+                  itemRefs.current.delete(stopGroup.StationID)
+                }
+              }}
+            >
+              <AccordionControl>
+                {stopGroup.StopName.zh_TW}
+              </AccordionControl>
+              <AccordionPanel>
+                <NearbyStopDetail
+                  stopGroup={stopGroup}
+                  routes={stationRouteBadgesMap.get(stopGroup.StationID) ?? []}
+                  onViewRoutes={viewStopRoutes}
+                />
+              </AccordionPanel>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </ScrollArea>
+    )
+
+  const selectedStopPopupContent = selectedMapStopGroup
+    ? (
+      <NearbyStopDetail
+        stopGroup={selectedMapStopGroup}
+        routes={stationRouteBadgesMap.get(selectedMapStopGroup.StationID) ?? []}
+        onViewRoutes={(stationID) => {
+          viewStopRoutes(stationID)
+          if (isSm) {
+            openSidebar()
+          }
+        }}
+      />
+    )
+    : null
+
+  const sidebarPanel = (
+    <Flex direction="column" h="100%" gap="md">
+      { message && (
+        <Alert color={message.color} title={message.title}>
+          {message.description}
+        </Alert>
+      )}
+      {sidebarContent}
+    </Flex>
+  )
+
   return (
     <Flex h="100%">
-      <Card shadow="sm" p="lg" w="375px" h="100%">
-        <Flex direction="column" h="100%" gap="md">
-        { message && (
-          <Alert color={message.color} title={message.title}>
-            {message.description}
-          </Alert>
-        )}
-        {selectedStopGroup
-          ? (
-              <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
-                <Button
-                  variant="subtle"
-                  w="fit-content"
-                  onClick={backToNearbyStops}
-                >
-                  返回附近站牌
-                </Button>
-                <Stack gap="xs">
-                  <Title order={4}>{selectedStopGroup.StopName.zh_TW}</Title>
-                  <Stack gap={2}>
-                    <Text size="sm" c="dimmed">縣市</Text>
-                    <Text size="sm">
-                      {selectedStopGroup.City ? cityMapName[selectedStopGroup.City] : '未提供'}
-                    </Text>
-                  </Stack>
-                  <Stack gap={2}>
-                    <Text size="sm" c="dimmed">地址</Text>
-                    <Text size="sm">
-                      {Array.from(new Set(selectedStopGroup.stops.map((stop) => stop.StopAddress).filter(Boolean))).join('、') || '未提供'}
-                    </Text>
-                  </Stack>
-                </Stack>
-                <NearbyStopRoutes routes={selectedStationRoutes} />
-              </Stack>
-            )
-          : (
-            <ScrollArea
-              viewportRef={scrollViewportRef}
-              style={{ flex: 1, minHeight: 0 }}
-            >
-              <Accordion
-                variant="separated"
-                value={selectedStopId}
-                onChange={selectStop}
-              >
-                {nearbyStopGroups.map((stopGroup) => (
-                  <AccordionItem
-                    value={stopGroup.StationID}
-                    key={stopGroup.StationID}
-                    ref={(node) => {
-                      if (node) {
-                        itemRefs.current.set(stopGroup.StationID, node)
-                      } else {
-                        itemRefs.current.delete(stopGroup.StationID)
-                      }
-                    }}
-                  >
-                    <AccordionControl>
-                      {stopGroup.StopName.zh_TW}
-                    </AccordionControl>
-                    <AccordionPanel>
-                      <NearbyStopDetail
-                        stopGroup={stopGroup}
-                        routes={stationRouteBadgesMap.get(stopGroup.StationID) ?? []}
-                        onViewRoutes={viewStopRoutes}
-                      />
-                    </AccordionPanel>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </ScrollArea>
-            )}
-        </Flex>
-      </Card>
+      {!isSm && (
+        <Card shadow="sm" p="lg" w="375px" h="100%">
+          {sidebarPanel}
+        </Card>
+      )}
       <Flex pos="relative" style={{ flex: 1 }}>
+        {isSm && (
+          <Button
+            pos="absolute"
+            top="md"
+            left="md"
+            variant="filled"
+            leftSection={<RiMenuLine size={18} />}
+            style={{ zIndex: 2 }}
+            onClick={openSidebar}
+          >
+            附近站牌
+          </Button>
+        )}
+      <Drawer
+        opened={isSm && isSidebarOpened}
+        onClose={closeSidebar}
+        title="附近站牌"
+        position="left"
+        size="100%"
+        hiddenFrom="sm"
+        closeButtonProps={{
+          icon: <RiArrowLeftDoubleFill />
+        }}
+      >
+        {sidebarPanel}
+      </Drawer>
         {isNearbyDisabled && (
           <Overlay
             color="#fff"
@@ -290,6 +354,7 @@ const Nearby = () => {
           center={coords}
           markers={markers}
           selectedStop={selectedStopId}
+          selectedStopPopupContent={selectedStopPopupContent}
           onSelectStop={selectStop}
         />
       </Flex>

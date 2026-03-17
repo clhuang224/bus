@@ -1,6 +1,7 @@
 import mapLibre, { Marker, Popup } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import type { LngLat, LatLng } from '~/modules/types/CoordsType'
 import BaseMap from '../common/BaseMap'
 
@@ -12,11 +13,19 @@ interface PropType {
     label: string
   }>
   selectedStop: string | null
+  selectedStopPopupContent?: ReactNode
   onSelectStop: (id: string | null) => void
 }
 
-export const NearbyStopMap = ({ center, markers = [], selectedStop, onSelectStop }: PropType) => {
+export const NearbyStopMap = ({
+  center,
+  markers = [],
+  selectedStop,
+  selectedStopPopupContent,
+  onSelectStop
+}: PropType) => {
   const [map, setMap] = useState<mapLibre.Map | null>(null)
+  const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(null)
   const markerMap = useRef<Map<string, Marker>>(new Map<string, Marker>())
   const popupRef = useRef<Popup | null>(null)
 
@@ -73,6 +82,7 @@ export const NearbyStopMap = ({ center, markers = [], selectedStop, onSelectStop
       popupRef.current.remove()
       popupRef.current = null
     }
+    setPopupContainer(null)
 
     if (!selectedStop) return
 
@@ -82,10 +92,17 @@ export const NearbyStopMap = ({ center, markers = [], selectedStop, onSelectStop
     const popup = new Popup({
       offset: 25,
       closeOnClick: false
-    })
-      .setText(marker.getElement().dataset.label || '')
-      .setLngLat(marker.getLngLat())
-      .addTo(map)
+    }).setLngLat(marker.getLngLat())
+
+    if (selectedStopPopupContent) {
+      const container = document.createElement('div')
+      popup.setDOMContent(container)
+      setPopupContainer(container)
+    } else {
+      popup.setText(marker.getElement().dataset.label || '')
+    }
+
+    popup.addTo(map)
 
     popupRef.current = popup
 
@@ -93,8 +110,9 @@ export const NearbyStopMap = ({ center, markers = [], selectedStop, onSelectStop
       if (!popupRef.current) return
       popupRef.current.remove()
       popupRef.current = null
+      setPopupContainer(null)
     }
-  }, [map, markers, selectedStop])
+  }, [map, markers, selectedStop, selectedStopPopupContent])
 
   useEffect(() => {
     if (!map) return
@@ -111,13 +129,18 @@ export const NearbyStopMap = ({ center, markers = [], selectedStop, onSelectStop
   }, [map, markers, selectedStop])
 
   return (
-    <BaseMap
-      center={center}
-      zoom={16}
-      showUserLocation
-      onLoad={(map) => {
-        setMap(map)
-      }}
-    />
+    <>
+      <BaseMap
+        center={center}
+        zoom={16}
+        showUserLocation
+        onLoad={(map) => {
+          setMap(map)
+        }}
+      />
+      {popupContainer && selectedStopPopupContent
+        ? createPortal(selectedStopPopupContent, popupContainer)
+        : null}
+    </>
   )
 }

@@ -245,6 +245,8 @@ When reviewing a UI block, ask:
 
 When working with Mantine components, prefer Mantine props, variants, spacing, radius, color, and layout primitives over custom `style` or `styles` overrides whenever the built-in API can express the same intent.
 
+For responsive logic, prefer breakpoint-based names such as `isSm` or `isMd` over device labels such as `isMobile` or `isTablet`, and derive media queries from Mantine theme breakpoints when practical.
+
 ### Rendering Patterns
 
 Use simple inline template rendering for very small, one-off sections.
