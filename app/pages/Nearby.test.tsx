@@ -17,12 +17,12 @@ import { GeoErrorType } from '~/modules/enums/geo/GeoErrorType'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
 
 const {
-  mockUseGetStopsByCityQuery,
-  mockUseGetStopOfRoutesByCityQuery,
+  mockUseGetStopsByAreaQuery,
+  mockUseGetStopOfRoutesByAreaQuery,
   mockNearbyStopMap
 } = vi.hoisted(() => ({
-  mockUseGetStopsByCityQuery: vi.fn(),
-  mockUseGetStopOfRoutesByCityQuery: vi.fn(),
+  mockUseGetStopsByAreaQuery: vi.fn(),
+  mockUseGetStopOfRoutesByAreaQuery: vi.fn(),
   mockNearbyStopMap: vi.fn()
 }))
 
@@ -51,8 +51,8 @@ HTMLElement.prototype.scrollIntoView = vi.fn()
 
 vi.mock('~/modules/apis/bus', () => ({
   busApi: {
-    useGetStopsByCityQuery: mockUseGetStopsByCityQuery,
-    useGetStopOfRoutesByCityQuery: mockUseGetStopOfRoutesByCityQuery
+    useGetStopsByAreaQuery: mockUseGetStopsByAreaQuery,
+    useGetStopOfRoutesByAreaQuery: mockUseGetStopOfRoutesByAreaQuery
   }
 }))
 
@@ -129,7 +129,9 @@ const stopOfRoutesData = [
     RouteName: { zh_TW: '藍1', en: 'Blue 1' },
     SubRouteUID: 'subroute-1',
     SubRouteID: '1',
+    City: CityNameType.TAIPEI,
     SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    DestinationStopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
     Direction: 0,
     Stops: [
       {
@@ -147,7 +149,9 @@ const stopOfRoutesData = [
     RouteName: { zh_TW: '藍1', en: 'Blue 1' },
     SubRouteUID: 'subroute-2',
     SubRouteID: '2',
+    City: CityNameType.NEW_TAIPEI,
     SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    DestinationStopName: { zh_TW: '板橋公車站', en: 'Banqiao Bus Station' },
     Direction: 1,
     Stops: [
       {
@@ -193,14 +197,14 @@ function renderNearby({
     }
   })
 
-  mockUseGetStopsByCityQuery.mockReturnValue({
+  mockUseGetStopsByAreaQuery.mockReturnValue({
     data: [],
     isLoading: false,
     error: null,
     isSuccess: false,
     ...queryState
   })
-  mockUseGetStopOfRoutesByCityQuery.mockReturnValue({
+  mockUseGetStopOfRoutesByAreaQuery.mockReturnValue({
     data: stopOfRoutesData
   })
 
@@ -215,8 +219,8 @@ function renderNearby({
 
 describe('Nearby', () => {
   beforeEach(() => {
-    mockUseGetStopsByCityQuery.mockReset()
-    mockUseGetStopOfRoutesByCityQuery.mockReset()
+    mockUseGetStopsByAreaQuery.mockReset()
+    mockUseGetStopOfRoutesByAreaQuery.mockReset()
     mockNearbyStopMap.mockReset()
   })
 

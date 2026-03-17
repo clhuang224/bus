@@ -1,10 +1,12 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { BusRoute, TdxBusRoute } from '../interfaces/BusRoute'
+import type { AreaType } from '../enums/AreaType'
 import type { CityNameType } from '../enums/CityNameType'
 import type { StopOfRoute, TdxStopOfRoute } from '../interfaces/StopOfRoute'
 import type { Stop, TdxStop } from '../interfaces/Stop'
 import { getBusErrorModal, tdxSystemErrorModal } from './errors/busError'
 import { openGlobalModal } from '../slices/globalModalSlice'
+import { areaMapCity } from '../consts/area'
 
 const tdxBaseQuery = fetchBaseQuery({
   baseUrl: 'https://tdx.transportdata.tw/api/basic/v2/Bus',
@@ -87,8 +89,9 @@ export const busApi = createApi({
     }),
     getStopOfRoutesByCity: build.query<StopOfRoute[], CityNameType>({
       query: (cityName) => `/StopOfRoute/City/${cityName}?%24format=JSON`,
-      transformResponse: (res: TdxStopOfRoute[]) => res.map((stopOfRoute) => ({
+      transformResponse: (res: TdxStopOfRoute[], _meta, cityName) => res.map((stopOfRoute) => ({
         ...stopOfRoute,
+        City: cityName,
         RouteName: {
           zh_TW: stopOfRoute.RouteName.Zh_tw,
           en: stopOfRoute.RouteName.En
@@ -110,32 +113,97 @@ export const busApi = createApi({
         }))
       }))
     }),
+    getStopOfRoutesByArea: build.query<StopOfRoute[], AreaType>({
+      queryFn: async (area, _api, _extraOptions, baseQuery) => {
+        const cityResults = await Promise.all(
+          areaMapCity[area].map(async (city) => ({
+            city,
+            result: await baseQuery(`/StopOfRoute/City/${city}?%24format=JSON`)
+          }))
+        )
+
+        const errorResult = cityResults.find(({ result }) => result.error != null)
+        if (errorResult?.result.error != null) {
+          return { error: errorResult.result.error }
+        }
+
+        return {
+          data: cityResults.flatMap(({ city, result }) =>
+            (result.data as TdxStopOfRoute[]).map((stopOfRoute) => ({
+              ...stopOfRoute,
+              City: city,
+              RouteName: {
+                zh_TW: stopOfRoute.RouteName.Zh_tw,
+                en: stopOfRoute.RouteName.En
+              },
+              SubRouteName: {
+                zh_TW: stopOfRoute.SubRouteName.Zh_tw,
+                en: stopOfRoute.SubRouteName.En
+              },
+              DestinationStopName: {
+                zh_TW: stopOfRoute.DestinationStopNameZh,
+                en: stopOfRoute.DestinationStopNameEn
+              },
+              Stops: stopOfRoute.Stops.map((stop) => ({
+                ...stop,
+                StopName: {
+                  zh_TW: stop.StopName.Zh_tw,
+                  en: stop.StopName.En
+                }
+              }))
+            }))
+          )
+        }
+      }
+    }),
     getStopsByCity: build.query<Stop[], CityNameType>({
       query: (cityName) => `/Stop/City/${cityName}?%24format=JSON`,
       transformResponse: (res: TdxStop[]) => res.map((stop) => ({
-        StopUID: stop.StopUID,
-        StopID: stop.StopID,
-        AuthorityID: stop.AuthorityID,
-        StationID: stop.StationID,
-        StationGroupID: stop.StationGroupID,
+        ...stop,
         StopName: {
           zh_TW: stop.StopName.Zh_tw,
           en: stop.StopName.En
         },
         GeoHash: stop.StopPosition.GeoHash,
-        StopAddress: stop.StopAddress,
-        Bearing: stop.Bearing,
-        StopDescription: stop.StopDescription,
         City: stop.City || null,
-        UpdateTime: stop.UpdateTime,
-        VersionID: stop.VersionID,
-        position: [stop.StopPosition.PositionLon, stop.StopPosition.PositionLat]
+        position: [stop.StopPosition.PositionLon, stop.StopPosition.PositionLat] as Stop['position']
       }))
+    }),
+    getStopsByArea: build.query<Stop[], AreaType>({
+      queryFn: async (area, _api, _extraOptions, baseQuery) => {
+        const cityResults = await Promise.all(
+          areaMapCity[area].map(async (city) => ({
+            city,
+            result: await baseQuery(`/Stop/City/${city}?%24format=JSON`)
+          }))
+        )
+
+        const errorResult = cityResults.find(({ result }) => result.error != null)
+        if (errorResult?.result.error != null) {
+          return { error: errorResult.result.error }
+        }
+
+        return {
+          data: cityResults.flatMap(({ result }) =>
+            (result.data as TdxStop[]).map((stop) => ({
+              ...stop,
+              StopName: {
+                zh_TW: stop.StopName.Zh_tw,
+                en: stop.StopName.En
+              },
+              GeoHash: stop.StopPosition.GeoHash,
+              City: stop.City || null,
+              position: [stop.StopPosition.PositionLon, stop.StopPosition.PositionLat] as Stop['position']
+            }))
+          )
+        }
+      }
     })
   })
 })
 
 export const {
   useGetRoutesByCityQuery,
-  useGetStopOfRoutesByCityQuery
+  useGetStopOfRoutesByAreaQuery,
+  useGetStopsByAreaQuery
 } = busApi

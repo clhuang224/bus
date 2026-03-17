@@ -1,3 +1,4 @@
+import type { CityNameType } from '../enums/CityNameType'
 import type { DirectionType } from '../enums/DirectionType'
 import type { LocalizedText, TdxLocalizedText } from '../types/LocalizedText'
 
@@ -27,5 +28,6 @@ export type StopOfRouteStop = TdxStopOfRouteStop<LocalizedText>
 export interface StopOfRoute extends Omit<TdxStopOfRoute<LocalizedText, StopOfRouteStop>,
 'DestinationStopNameZh' |
 'DestinationStopNameEn'> {
+  City: CityNameType
   DestinationStopName: LocalizedText
 }

@@ -201,6 +201,12 @@ The preferred data flow is:
 
 This keeps pages focused on behavior and presentation instead of raw response cleanup.
 
+When the same kind of API request must be sent to multiple sibling targets, such as multiple cities in the same area, prefer `await Promise.all(...)` over sequential requests unless request ordering or rate limiting is a real requirement.
+
+If both city-level and area-level RTK Query endpoints exist, only export the hooks that are actually used by the app. Do not keep unused lower-level hook exports around by default.
+
+Across the project, prefer `async` / `await` over chained `.then()` / `.catch()` promise style unless there is a clear reason not to.
+
 ## 4. UI And Copy Rules
 
 ### Language

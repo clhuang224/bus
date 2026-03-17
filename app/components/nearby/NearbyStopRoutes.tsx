@@ -1,13 +1,12 @@
 import { NavLink, Stack, Text } from '@mantine/core'
 import { Link } from 'react-router'
+import { cityMapName } from '~/modules/consts/city'
 import { directionMapName } from '~/modules/consts/direction'
 import { DirectionType } from '~/modules/enums/DirectionType'
-import type { CityNameType } from '~/modules/enums/CityNameType'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
 import { getEnumValues } from '~/modules/utils/getEnumValues'
 
 interface PropType {
-  city: CityNameType
   routes: StationRoute[]
 }
 
@@ -15,7 +14,7 @@ const routeNameCollator = new Intl.Collator('zh-Hant-u-co-stroke', {
   numeric: true
 })
 
-export const NearbyStopRoutes = ({ city, routes }: PropType) => {
+export const NearbyStopRoutes = ({ routes }: PropType) => {
   const routeSections = getEnumValues(DirectionType)
     .map((direction) => ({
       direction,
@@ -46,9 +45,9 @@ export const NearbyStopRoutes = ({ city, routes }: PropType) => {
               <NavLink
                 key={route.id}
                 component={Link}
-                to={`/bus-route/${city}/${route.routeUID}`}
+                to={`/bus-route/${route.city}/${route.routeUID}`}
                 label={route.name}
-                description={`往 ${route.destination}`}
+                description={`${cityMapName[route.city]} · 往 ${route.destination}`}
               />
             ))}
           </Stack>

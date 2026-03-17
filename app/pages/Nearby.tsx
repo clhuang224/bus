@@ -3,6 +3,7 @@ import distance from '@turf/distance'
 import { point } from '@turf/helpers'
 import { useSelector } from 'react-redux'
 import type { RootState } from '~/modules/store'
+import { cityMapArea } from '~/modules/consts/area'
 import { cityMapName } from '~/modules/consts/city'
 import {
   geoErrorMessages,
@@ -52,14 +53,15 @@ const Nearby = () => {
   const { coords, error: geolocationError, permission } = useSelector((state: RootState) => state.geolocation)
   const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
   const currentCity = getCityByCoords(coords, geojson)
-  const { data: allStops, isLoading, error, isSuccess } = busApi.useGetStopsByCityQuery(
-    currentCity,
+  const currentArea = currentCity ? cityMapArea[currentCity] : null
+  const { data: allStops, isLoading, error, isSuccess } = busApi.useGetStopsByAreaQuery(
+    currentArea!,
     {
-      skip: !coords
+      skip: !coords || !currentArea
     }
   )
-  const { data: stopOfRoutes = [] } = busApi.useGetStopOfRoutesByCityQuery(currentCity, {
-    skip: !coords
+  const { data: stopOfRoutes = [] } = busApi.useGetStopOfRoutesByAreaQuery(currentArea!, {
+    skip: !coords || !currentArea
   })
 
   const nearbyStopGroups = useMemo(() => {
@@ -109,6 +111,7 @@ const Nearby = () => {
       const route = {
         id: routeKey,
         routeUID: stopOfRoute.RouteUID,
+        city: stopOfRoute.City,
         name: stopOfRoute.SubRouteName.zh_TW || stopOfRoute.RouteName.zh_TW,
         destination: stopOfRoute.DestinationStopName.zh_TW,
         direction: stopOfRoute.Direction
@@ -218,7 +221,7 @@ const Nearby = () => {
                     </Text>
                   </Stack>
                 </Stack>
-                <NearbyStopRoutes city={currentCity} routes={selectedStationRoutes} />
+                <NearbyStopRoutes routes={selectedStationRoutes} />
               </Stack>
               )
             : (
