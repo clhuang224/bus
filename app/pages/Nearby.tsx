@@ -1,4 +1,4 @@
-import { Accordion, AccordionControl, AccordionItem, AccordionPanel, Alert, Button, Card, Flex, ScrollArea, Stack, Text, Title } from '@mantine/core'
+import { Accordion, AccordionControl, AccordionItem, AccordionPanel, Alert, Button, Card, Flex, Overlay, ScrollArea, Stack, Text, Title } from '@mantine/core'
 import distance from '@turf/distance'
 import { point } from '@turf/helpers'
 import { useSelector } from 'react-redux'
@@ -44,6 +44,8 @@ const emptyStopsMessage = {
   description: '目前在您附近沒有找到任何站牌'
 } as const
 
+const disabledNearbyPermissions = [GeoPermissionType.UNSUPPORTED, GeoPermissionType.DENIED]
+
 const Nearby = () => {
   const [selectedStop, setSelectedStop] = useState<string | null>(null)
   const [selectedStationRouteStop, setSelectedStationRouteStop] = useState<string | null>(null)
@@ -54,6 +56,7 @@ const Nearby = () => {
   const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
   const currentCity = getCityByCoords(coords, geojson)
   const currentArea = currentCity ? cityMapArea[currentCity] : null
+  const isNearbyDisabled = disabledNearbyPermissions.includes(permission) || geolocationError !== null
   const { data: allStops, isLoading, error, isSuccess } = busApi.useGetStopsByAreaQuery(
     currentArea!,
     {
@@ -193,13 +196,17 @@ const Nearby = () => {
 
   return (
     <Flex h="100%">
-      <Card shadow="sm" p="lg" w="375px" mih="400px">
+      <Card shadow="sm" p="lg" w="375px" h="100%">
+        <Flex direction="column" h="100%" gap="md">
         { message && (
           <Alert color={message.color} title={message.title}>
             {message.description}
           </Alert>
         )}
-        <ScrollArea viewportRef={scrollViewportRef} style={{ height: '100%', marginTop: '1rem' }}>
+        <ScrollArea
+          viewportRef={scrollViewportRef}
+          style={{ flex: 1, minHeight: 0 }}
+        >
           {selectedStopGroup
             ? (
               <Stack gap="md">
@@ -252,14 +259,25 @@ const Nearby = () => {
                 ))}
               </Accordion>
               )}
-          </ScrollArea>
+        </ScrollArea>
+        </Flex>
       </Card>
-      <NearbyStopMap
-        center={coords}
-        markers={markers}
-        selectedStop={selectedStop}
-        onSelectStop={setSelectedStop}
-      />
+      <Flex pos="relative" style={{ flex: 1 }}>
+        {isNearbyDisabled && (
+          <Overlay
+            color="#fff"
+            backgroundOpacity={0.55}
+            zIndex={1}
+            style={{ cursor: 'not-allowed' }}
+          />
+        )}
+        <NearbyStopMap
+          center={coords}
+          markers={markers}
+          selectedStop={selectedStop}
+          onSelectStop={setSelectedStop}
+        />
+      </Flex>
     </Flex>
   )
 }

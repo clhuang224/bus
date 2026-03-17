@@ -32,12 +32,12 @@ On first launch, the app requests geolocation permission.
 
 The Nearby Stops page is based on the user's current GPS location.
 
-If geolocation permission is denied, a message is displayed indicating that the feature cannot be used.
+If geolocation permission is denied, the Nearby Stops feature cannot be used.
 
 If permission is granted:
 
 - The app determines the current city from the GPS coordinates.
-- It fetches stop data for that city.
+- It maps that city to a service area and fetches stop data for that area.
 - Stops within **0.5 kilometers** are displayed both as a list and as map markers.
 - Clicking a stop opens the **Stop Page**, showing:
   - All routes serving the stop
@@ -215,3 +215,14 @@ Recommended solution:
 
 - Disable the extension for `localhost`, or
 - Use a clean browser profile for development.
+
+## Geolocation Fallback (Development Only)
+
+For local Nearby page development, you can also define a development-only geolocation fallback:
+
+```env
+VITE_DEV_GEO_FALLBACK_LAT=25.0330
+VITE_DEV_GEO_FALLBACK_LNG=121.5654
+```
+
+When running in development mode, the app will use these coordinates only if browser geolocation returns `Position unavailable` or `Timeout`.
