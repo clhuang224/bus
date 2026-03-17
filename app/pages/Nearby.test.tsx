@@ -10,13 +10,19 @@ import Nearby from './Nearby'
 import {
   geoErrorMessages,
   geoPermissionMessages
-} from '~/modules/constants/geoMessages'
+} from '~/modules/consts/geoMessages'
+import { BearingType } from '~/modules/enums/BearingType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { GeoErrorType } from '~/modules/enums/geo/GeoErrorType'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
 
-const { mockUseGetStopsByCityQuery, mockNearbyStopMap } = vi.hoisted(() => ({
+const {
+  mockUseGetStopsByCityQuery,
+  mockUseGetStopOfRoutesByCityQuery,
+  mockNearbyStopMap
+} = vi.hoisted(() => ({
   mockUseGetStopsByCityQuery: vi.fn(),
+  mockUseGetStopOfRoutesByCityQuery: vi.fn(),
   mockNearbyStopMap: vi.fn()
 }))
 
@@ -45,7 +51,8 @@ HTMLElement.prototype.scrollIntoView = vi.fn()
 
 vi.mock('~/modules/apis/bus', () => ({
   busApi: {
-    useGetStopsByCityQuery: mockUseGetStopsByCityQuery
+    useGetStopsByCityQuery: mockUseGetStopsByCityQuery,
+    useGetStopOfRoutesByCityQuery: mockUseGetStopOfRoutesByCityQuery
   }
 }))
 
@@ -57,7 +64,7 @@ vi.mock('~/components/nearby/NearbyStopMap', () => ({
   NearbyStopMap: (props: {
     selectedStop: string | null
     onSelectStop: (id: string | null) => void
-    markers: Array<{ stopUID: string, label: string }>
+    markers: Array<{ id: string, label: string }>
   }) => {
     mockNearbyStopMap(props)
     return <div data-testid="nearby-stop-map" />
@@ -67,17 +74,90 @@ vi.mock('~/components/nearby/NearbyStopMap', () => ({
 const nearbyStopsData = [
   {
     StopUID: 'stop-1',
+    AuthorityID: '005',
+    StationID: 'station-1',
+    StationGroupID: 'group-1',
+    StopID: 'stop-id-1',
     StopName: { zh_TW: '市政府', en: 'City Hall' },
-    City: 'Taipei',
+    GeoHash: 'wsqqefdz0',
+    City: CityNameType.TAIPEI,
     StopAddress: 'Address 1',
+    Bearing: BearingType.NORTH,
+    StopDescription: null,
+    UpdateTime: '2026-03-15T21:52:45+08:00',
+    VersionID: 1,
     position: [121.5654, 25.033]
   },
   {
     StopUID: 'stop-2',
-    StopName: { zh_TW: '台北車站', en: 'Taipei Main Station' },
-    City: 'Taipei',
+    AuthorityID: '005',
+    StationID: 'station-1',
+    StationGroupID: 'group-1',
+    StopID: 'stop-id-2',
+    StopName: { zh_TW: '市政府', en: 'City Hall' },
+    GeoHash: 'wsqqefcw6',
+    City: CityNameType.TAIPEI,
     StopAddress: 'Address 2',
+    Bearing: BearingType.SOUTH,
+    StopDescription: null,
+    UpdateTime: '2026-03-15T21:52:45+08:00',
+    VersionID: 1,
     position: [121.567, 25.034]
+  },
+  {
+    StopUID: 'stop-3',
+    AuthorityID: '005',
+    StationID: 'station-2',
+    StationGroupID: 'group-2',
+    StopID: 'stop-id-3',
+    StopName: { zh_TW: '台北車站', en: 'Taipei Main Station' },
+    GeoHash: 'wsqqeepb5',
+    City: CityNameType.TAIPEI,
+    StopAddress: 'Address 3',
+    Bearing: BearingType.EAST,
+    StopDescription: null,
+    UpdateTime: '2026-03-15T21:52:45+08:00',
+    VersionID: 1,
+    position: [121.568, 25.035]
+  }
+]
+
+const stopOfRoutesData = [
+  {
+    RouteUID: 'route-1',
+    RouteID: '1',
+    RouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    SubRouteUID: 'subroute-1',
+    SubRouteID: '1',
+    SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    Direction: 0,
+    Stops: [
+      {
+        StopUID: 'stop-1',
+        StopID: 'stop-id-1',
+        StationID: 'station-1',
+        StopSequence: 1,
+        StopName: { zh_TW: '市政府', en: 'City Hall' }
+      }
+    ]
+  },
+  {
+    RouteUID: 'route-2',
+    RouteID: '2',
+    RouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    SubRouteUID: 'subroute-2',
+    SubRouteID: '2',
+    SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    Direction: 1,
+    Stops: [
+      {
+        StopUID: 'stop-2',
+        StopID: 'stop-id-2',
+        StationID: 'station-1',
+        StopSequence: 2,
+        StopName: { zh_TW: '市政府', en: 'City Hall' }
+      }
+    ]
   }
 ]
 
@@ -120,6 +200,9 @@ function renderNearby({
     isSuccess: false,
     ...queryState
   })
+  mockUseGetStopOfRoutesByCityQuery.mockReturnValue({
+    data: stopOfRoutesData
+  })
 
   return render(
     <MantineProvider>
@@ -133,6 +216,7 @@ function renderNearby({
 describe('Nearby', () => {
   beforeEach(() => {
     mockUseGetStopsByCityQuery.mockReset()
+    mockUseGetStopOfRoutesByCityQuery.mockReset()
     mockNearbyStopMap.mockReset()
   })
 
@@ -229,11 +313,11 @@ describe('Nearby', () => {
     expect(firstRenderProps?.selectedStop).toBeNull()
 
     act(() => {
-      firstRenderProps?.onSelectStop('stop-1')
+      firstRenderProps?.onSelectStop('station-1')
     })
 
     const updatedProps = mockNearbyStopMap.mock.calls.at(-1)?.[0]
-    expect(updatedProps?.selectedStop).toBe('stop-1')
+    expect(updatedProps?.selectedStop).toBe('station-1')
   })
 
   it('syncs selected stop from the list back to the map props', () => {
@@ -249,7 +333,7 @@ describe('Nearby', () => {
     fireEvent.click(screen.getByRole('button', { name: '市政府' }))
 
     const updatedProps = mockNearbyStopMap.mock.calls.at(-1)?.[0]
-    expect(updatedProps?.selectedStop).toBe('stop-1')
+    expect(updatedProps?.selectedStop).toBe('station-1')
   })
 
   it('expands the matching list item when the map selects a stop', () => {
@@ -265,7 +349,7 @@ describe('Nearby', () => {
     const firstRenderProps = mockNearbyStopMap.mock.calls.at(-1)?.[0]
 
     act(() => {
-      firstRenderProps?.onSelectStop('stop-1')
+      firstRenderProps?.onSelectStop('station-1')
     })
 
     expect(screen.getByRole('button', { name: '市政府' })).toHaveAttribute('aria-expanded', 'true')

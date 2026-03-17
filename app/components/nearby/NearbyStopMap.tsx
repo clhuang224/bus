@@ -7,7 +7,7 @@ import BaseMap from '../common/BaseMap'
 interface PropType {
   center: LatLng | null
   markers: Array<{
-    stopUID: string
+    id: string
     position: LngLat
     label: string
   }>
@@ -46,7 +46,7 @@ export const NearbyStopMap = ({ center, markers = [], selectedStop, onSelectStop
       const handleSelectStop = (event: MouseEvent) => {
         event.preventDefault()
         event.stopPropagation()
-        onSelectStop(data.stopUID)
+        onSelectStop(data.id)
       }
 
       el.addEventListener('click', handleSelectStop)
@@ -55,7 +55,7 @@ export const NearbyStopMap = ({ center, markers = [], selectedStop, onSelectStop
         .setLngLat(data.position)
         .addTo(mapRef.current!)
 
-      markerMap.current.set(data.stopUID, marker)
+      markerMap.current.set(data.id, marker)
     })
 
     return () => {
