@@ -17,10 +17,12 @@ import { GeoErrorType } from '~/modules/enums/geo/GeoErrorType'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
 
 const {
+  mockUseGetRoutesByAreaQuery,
   mockUseGetStopsByAreaQuery,
   mockUseGetStopOfRoutesByAreaQuery,
   mockNearbyStopMap
 } = vi.hoisted(() => ({
+  mockUseGetRoutesByAreaQuery: vi.fn(),
   mockUseGetStopsByAreaQuery: vi.fn(),
   mockUseGetStopOfRoutesByAreaQuery: vi.fn(),
   mockNearbyStopMap: vi.fn()
@@ -51,6 +53,7 @@ HTMLElement.prototype.scrollIntoView = vi.fn()
 
 vi.mock('~/modules/apis/bus', () => ({
   busApi: {
+    useGetRoutesByAreaQuery: mockUseGetRoutesByAreaQuery,
     useGetStopsByAreaQuery: mockUseGetStopsByAreaQuery,
     useGetStopOfRoutesByAreaQuery: mockUseGetStopOfRoutesByAreaQuery
   }
@@ -131,7 +134,6 @@ const stopOfRoutesData = [
     SubRouteID: '1',
     City: CityNameType.TAIPEI,
     SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
-    DestinationStopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
     Direction: 0,
     Stops: [
       {
@@ -151,7 +153,6 @@ const stopOfRoutesData = [
     SubRouteID: '2',
     City: CityNameType.NEW_TAIPEI,
     SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
-    DestinationStopName: { zh_TW: '板橋公車站', en: 'Banqiao Bus Station' },
     Direction: 1,
     Stops: [
       {
@@ -160,6 +161,77 @@ const stopOfRoutesData = [
         StationID: 'station-1',
         StopSequence: 2,
         StopName: { zh_TW: '市政府', en: 'City Hall' }
+      }
+    ]
+  }
+]
+
+const routesData = [
+  {
+    RouteUID: 'route-1',
+    RouteID: '1',
+    HasSubRoutes: true,
+    Operators: [],
+    AuthorityID: '005',
+    ProviderID: 'provider-1',
+    RouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
+    DestinationStopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
+    TicketPriceDescription: { zh_TW: '', en: '' },
+    FareBufferZoneDescription: { zh_TW: '', en: '' },
+    RouteMapImageUrl: '',
+    City: CityNameType.TAIPEI,
+    CityCode: 'TPE',
+    UpdateTime: '2026-03-15T21:52:45+08:00',
+    VersionID: 1,
+    BusRouteType: 0,
+    SubRoutes: [
+      {
+        SubRouteUID: 'subroute-1',
+        SubRouteID: '1',
+        OperatorIDs: [],
+        SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+        Direction: 0,
+        FirstBusTime: '',
+        LastBusTime: '',
+        HolidayFirstBusTime: '',
+        HolidayLastBusTime: '',
+        DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
+        DestinationStopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' }
+      }
+    ]
+  },
+  {
+    RouteUID: 'route-2',
+    RouteID: '2',
+    HasSubRoutes: true,
+    Operators: [],
+    AuthorityID: '005',
+    ProviderID: 'provider-2',
+    RouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
+    DestinationStopName: { zh_TW: '板橋公車站', en: 'Banqiao Bus Station' },
+    TicketPriceDescription: { zh_TW: '', en: '' },
+    FareBufferZoneDescription: { zh_TW: '', en: '' },
+    RouteMapImageUrl: '',
+    City: CityNameType.NEW_TAIPEI,
+    CityCode: 'NWT',
+    UpdateTime: '2026-03-15T21:52:45+08:00',
+    VersionID: 1,
+    BusRouteType: 0,
+    SubRoutes: [
+      {
+        SubRouteUID: 'subroute-2',
+        SubRouteID: '2',
+        OperatorIDs: [],
+        SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+        Direction: 1,
+        FirstBusTime: '',
+        LastBusTime: '',
+        HolidayFirstBusTime: '',
+        HolidayLastBusTime: '',
+        DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
+        DestinationStopName: { zh_TW: '板橋公車站', en: 'Banqiao Bus Station' }
       }
     ]
   }
@@ -204,6 +276,9 @@ function renderNearby({
     isSuccess: false,
     ...queryState
   })
+  mockUseGetRoutesByAreaQuery.mockReturnValue({
+    data: routesData
+  })
   mockUseGetStopOfRoutesByAreaQuery.mockReturnValue({
     data: stopOfRoutesData
   })
@@ -219,6 +294,7 @@ function renderNearby({
 
 describe('Nearby', () => {
   beforeEach(() => {
+    mockUseGetRoutesByAreaQuery.mockReset()
     mockUseGetStopsByAreaQuery.mockReset()
     mockUseGetStopOfRoutesByAreaQuery.mockReset()
     mockNearbyStopMap.mockReset()

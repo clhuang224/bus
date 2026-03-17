@@ -70,7 +70,7 @@ export const busApi = createApi({
           zh_TW: busRoute.FareBufferZoneDescriptionZh,
           en: busRoute.FareBufferZoneDescriptionEn
         },
-        SubRoutes: busRoute.SubRoutes.map((busSubRoute) => ({
+        SubRoutes: (busRoute.SubRoutes ?? []).map((busSubRoute) => ({
           ...busSubRoute,
           DepartureStopName: {
             zh_TW: busSubRoute.DepartureStopNameZh,
@@ -99,10 +99,6 @@ export const busApi = createApi({
         SubRouteName: {
           zh_TW: stopOfRoute.SubRouteName.Zh_tw,
           en: stopOfRoute.SubRouteName.En
-        },
-        DestinationStopName: {
-          zh_TW: stopOfRoute.DestinationStopNameZh,
-          en: stopOfRoute.DestinationStopNameEn
         },
         Stops: stopOfRoute.Stops.map((stop) => ({
           ...stop,
@@ -140,15 +136,76 @@ export const busApi = createApi({
                 zh_TW: stopOfRoute.SubRouteName.Zh_tw,
                 en: stopOfRoute.SubRouteName.En
               },
-              DestinationStopName: {
-                zh_TW: stopOfRoute.DestinationStopNameZh,
-                en: stopOfRoute.DestinationStopNameEn
-              },
               Stops: stopOfRoute.Stops.map((stop) => ({
                 ...stop,
                 StopName: {
                   zh_TW: stop.StopName.Zh_tw,
                   en: stop.StopName.En
+                }
+              }))
+            }))
+          )
+        }
+      }
+    }),
+    getRoutesByArea: build.query<BusRoute<string>[], AreaType>({
+      queryFn: async (area, _api, _extraOptions, baseQuery) => {
+        const cityResults = await Promise.all(
+          areaMapCity[area].map(async (city) => ({
+            city,
+            result: await baseQuery(`/Route/City/${city}?%24format=JSON`)
+          }))
+        )
+
+        const errorResult = cityResults.find(({ result }) => result.error != null)
+        if (errorResult?.result.error != null) {
+          return { error: errorResult.result.error }
+        }
+
+        return {
+          data: cityResults.flatMap(({ result }) =>
+            (result.data as TdxBusRoute<string>[]).map((busRoute) => ({
+              ...busRoute,
+              Operators: busRoute.Operators.map((operator) => ({
+                ...operator,
+                OperatorName: {
+                  zh_TW: operator.OperatorName.Zh_tw,
+                  en: operator.OperatorName.En
+                }
+              })),
+              RouteName: {
+                zh_TW: busRoute.RouteName.Zh_tw,
+                en: busRoute.RouteName.En
+              },
+              DepartureStopName: {
+                zh_TW: busRoute.DepartureStopNameZh,
+                en: busRoute.DepartureStopNameEn
+              },
+              DestinationStopName: {
+                zh_TW: busRoute.DestinationStopNameZh,
+                en: busRoute.DestinationStopNameEn
+              },
+              TicketPriceDescription: {
+                zh_TW: busRoute.TicketPriceDescriptionZh,
+                en: busRoute.TicketPriceDescriptionEn
+              },
+              FareBufferZoneDescription: {
+                zh_TW: busRoute.FareBufferZoneDescriptionZh,
+                en: busRoute.FareBufferZoneDescriptionEn
+              },
+              SubRoutes: (busRoute.SubRoutes ?? []).map((busSubRoute) => ({
+                ...busSubRoute,
+                DepartureStopName: {
+                  zh_TW: busSubRoute.DepartureStopNameZh,
+                  en: busSubRoute.DepartureStopNameEn
+                },
+                DestinationStopName: {
+                  zh_TW: busSubRoute.DestinationStopNameZh,
+                  en: busSubRoute.DestinationStopNameEn
+                },
+                SubRouteName: {
+                  zh_TW: busSubRoute.SubRouteName.Zh_tw,
+                  en: busSubRoute.SubRouteName.En
                 }
               }))
             }))
@@ -204,6 +261,7 @@ export const busApi = createApi({
 
 export const {
   useGetRoutesByCityQuery,
+  useGetRoutesByAreaQuery,
   useGetStopOfRoutesByAreaQuery,
   useGetStopsByAreaQuery
 } = busApi

@@ -17,17 +17,12 @@ export interface TdxStopOfRoute<L = TdxLocalizedText, S = TdxStopOfRouteStop<L>>
   SubRouteUID: string
   SubRouteID: string
   SubRouteName: L
-  DestinationStopNameZh: string
-  DestinationStopNameEn: string
   Direction: DirectionType
   Stops: S[]
 }
 
 export type StopOfRouteStop = TdxStopOfRouteStop<LocalizedText>
 
-export interface StopOfRoute extends Omit<TdxStopOfRoute<LocalizedText, StopOfRouteStop>,
-'DestinationStopNameZh' |
-'DestinationStopNameEn'> {
+export interface StopOfRoute extends TdxStopOfRoute<LocalizedText, StopOfRouteStop> {
   City: CityNameType
-  DestinationStopName: LocalizedText
 }

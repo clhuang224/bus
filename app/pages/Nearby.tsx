@@ -66,6 +66,9 @@ const Nearby = () => {
   const { data: stopOfRoutes = [] } = busApi.useGetStopOfRoutesByAreaQuery(currentArea!, {
     skip: !coords || !currentArea
   })
+  const { data: routes = [] } = busApi.useGetRoutesByAreaQuery(currentArea!, {
+    skip: !coords || !currentArea
+  })
 
   const nearbyStopGroups = useMemo(() => {
     if (!coords || !isSuccess) return []
@@ -108,6 +111,19 @@ const Nearby = () => {
 
   const stationRoutesMap = useMemo(() => {
     const stationRoutes = new Map<string, StationRoute[]>()
+    const routeDestinationMap = new Map<string, string>()
+    const routeFallbackDestinationMap = new Map<string, string>()
+
+    routes.forEach((route) => {
+      routeFallbackDestinationMap.set(route.RouteUID, route.DestinationStopName.zh_TW || route.RouteName.zh_TW)
+
+      route.SubRoutes.forEach((subRoute) => {
+        routeDestinationMap.set(
+          `${subRoute.SubRouteUID}-${subRoute.Direction}`,
+          subRoute.DestinationStopName.zh_TW
+        )
+      })
+    })
 
     stopOfRoutes.forEach((stopOfRoute) => {
       const routeKey = `${stopOfRoute.SubRouteUID}-${stopOfRoute.Direction}`
@@ -116,7 +132,7 @@ const Nearby = () => {
         routeUID: stopOfRoute.RouteUID,
         city: stopOfRoute.City,
         name: stopOfRoute.SubRouteName.zh_TW || stopOfRoute.RouteName.zh_TW,
-        destination: stopOfRoute.DestinationStopName.zh_TW,
+        destination: routeDestinationMap.get(routeKey) ?? routeFallbackDestinationMap.get(stopOfRoute.RouteUID) ?? '',
         direction: stopOfRoute.Direction
       }
 
@@ -132,7 +148,7 @@ const Nearby = () => {
     })
 
     return stationRoutes
-  }, [stopOfRoutes])
+  }, [routes, stopOfRoutes])
 
   const message = useMemo(() => {
     if ([GeoPermissionType.UNSUPPORTED, GeoPermissionType.DENIED].includes(permission)) {
