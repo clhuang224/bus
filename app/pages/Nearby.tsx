@@ -1,25 +1,22 @@
-import { Accordion, AccordionControl, AccordionItem, AccordionPanel, Alert, Button, Card, Flex, List, NavLink, ScrollArea, Stack, Tabs, Text, Title } from '@mantine/core'
+import { Accordion, AccordionControl, AccordionItem, AccordionPanel, Alert, Button, Card, Flex, ScrollArea, Stack, Text, Title } from '@mantine/core'
 import distance from '@turf/distance'
 import { point } from '@turf/helpers'
 import { useSelector } from 'react-redux'
 import type { RootState } from '~/modules/store'
 import { cityMapName } from '~/modules/consts/city'
-import { directionMapName } from '~/modules/consts/direction'
 import {
   geoErrorMessages,
   geoPermissionMessages
 } from '~/modules/consts/geoMessages'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
-import { DirectionType } from '~/modules/enums/DirectionType'
 import { busApi } from '~/modules/apis/bus'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
-import { getEnumValues } from '~/modules/utils/getEnumValues'
 import { getCityByCoords } from '~/modules/utils/getCityByCoords'
 import { NearbyStopDetail } from '~/components/nearby/NearbyStopDetail'
 import { NearbyStopMap } from '~/components/nearby/NearbyStopMap'
+import { NearbyStopRoutes } from '~/components/nearby/NearbyStopRoutes'
 
 const NEARBY_DISTANCE_KM = 0.5
 const locatingMessage = {
@@ -46,13 +43,7 @@ const emptyStopsMessage = {
   description: '目前在您附近沒有找到任何站牌'
 } as const
 
-const routeNameCollator = new Intl.Collator('zh-Hant-u-co-stroke', {
-  numeric: true
-})
-
 const Nearby = () => {
-  const directionTabs = getEnumValues(DirectionType).map((type) => ({ type, value: String(type), label: directionMapName[type] }))
-
   const [selectedStop, setSelectedStop] = useState<string | null>(null)
   const [selectedStationRouteStop, setSelectedStationRouteStop] = useState<string | null>(null)
   const scrollViewportRef = useRef<HTMLDivElement | null>(null)
@@ -160,17 +151,12 @@ const Nearby = () => {
     return stationRoutesMap.get(selectedStationRouteStop) ?? []
   }, [selectedStationRouteStop, stationRoutesMap])
 
-  const routesByDirection = useMemo(() => {
-    return directionTabs.reduce<Record<string, StationRoute[]>>((result, tab) => {
-      result[tab.value] = selectedStationRoutes
-        .filter((route) => route.direction === tab.type)
-          .sort((left, right) => routeNameCollator.compare(left.name, right.name))
-      return result
-    }, {})
-  }, [directionTabs, selectedStationRoutes])
-
   const stationRouteBadgesMap = useMemo(() => {
     const stationRouteBadges = new Map<string, Array<Pick<StationRoute, 'routeUID' | 'name'>>>()
+
+    const routeNameCollator = new Intl.Collator('zh-Hant-u-co-stroke', {
+      numeric: true
+    })
 
     stationRoutesMap.forEach((routes, stationID) => {
       const uniqueRoutes = routes.reduce<Array<Pick<StationRoute, 'routeUID' | 'name'>>>((result, route) => {
@@ -232,39 +218,7 @@ const Nearby = () => {
                     </Text>
                   </Stack>
                 </Stack>
-                <Tabs defaultValue={String(DirectionType.GO)}>
-                  <Tabs.List>
-                    {directionTabs
-                      .filter((tab) => routesByDirection[tab.value].length > 0)
-                      .map((tab) => (
-                        <Tabs.Tab key={tab.value} value={tab.value}>
-                          {tab.label}
-                        </Tabs.Tab>
-                      ))}
-                  </Tabs.List>
-                  {directionTabs
-                    .filter((tab) => routesByDirection[tab.value].length > 0)
-                    .map((tab) => (
-                      <Tabs.Panel key={tab.value} value={tab.value} pt="md">
-                        <List spacing="xs" listStyleType="none">
-                          {routesByDirection[tab.value].map((route) => (
-                            <List.Item key={route.id}>
-                              <NavLink
-                                component={Link}
-                                to={`/bus-route/${currentCity}/${route.routeUID}`}
-                                label={(
-                                  <Flex justify="space-between">
-                                    {route.name}
-                                    {`往 ${route.destination}`}
-                                  </Flex>
-                                )}
-                              />
-                            </List.Item>
-                          ))}
-                        </List>
-                      </Tabs.Panel>
-                    ))}
-                </Tabs>
+                <NearbyStopRoutes city={currentCity} routes={selectedStationRoutes} />
               </Stack>
               )
             : (

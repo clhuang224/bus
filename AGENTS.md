@@ -23,5 +23,7 @@
 - Other common types are allowed when appropriate, such as `docs`, `refactor`, `test`, `chore`, `build`, `ci`, `style`, and `perf`.
 - Use an optional scope when it adds useful context, such as `fix(nearby): ...` or `refactor(geolocation): ...`.
 - Keep the subject concise and imperative.
-- Add a blank line before the body when extra context is needed.
+- Always include a commit body.
+- Add a blank line between the subject and body.
+- In the body, explicitly summarize the concrete changes included in the commit.
 - Mark breaking changes with `!` in the header or a `BREAKING CHANGE:` footer.
