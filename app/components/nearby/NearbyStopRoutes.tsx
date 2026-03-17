@@ -1,10 +1,9 @@
-import { Badge, Card, Flex, NavLink, Stack, Tabs, Text } from '@mantine/core'
-import { Link } from 'react-router'
-import { cityMapName } from '~/modules/consts/city'
+import { Stack, Tabs, Text } from '@mantine/core'
 import { directionMapName } from '~/modules/consts/direction'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
 import { getEnumValues } from '~/modules/utils/getEnumValues'
+import { RouteInfoCard } from '../routes/RouteInfoCard'
 
 interface PropType {
   routes: StationRoute[]
@@ -51,46 +50,13 @@ export const NearbyStopRoutes = ({ routes }: PropType) => {
             <Stack gap="xs">
               {section.routes.map((route) => (
                 <Stack key={route.id} gap="xs">
-                  <Card
-                    withBorder
-                    radius="md"
-                    p="xs"
-                    shadow="xs"
-                  >
-                    <NavLink
-                      component={Link}
-                      to={`/bus-route/${route.city}/${route.routeUID}`}
-                      variant="light"
-                      color="blue"
-                      px="xs"
-                      py={6}
-                      bdrs="sm"
-                      label={(
-                        <Stack gap={8}>
-                          <Flex justify="space-between" align="center">
-                            <Badge
-                              variant="light"
-                              color="blue"
-                              radius="sm"
-                              size="lg"
-                            >
-                              {route.name}
-                            </Badge>
-                            <Badge
-                              variant="light"
-                              color="gray"
-                              radius="sm"
-                              size="lg"
-                            >
-                              {cityMapName[route.city]}
-                            </Badge>
-                          </Flex>
-                          <Text size="xs" c="dimmed">起訖站</Text>
-                          <Text size="sm">{`${route.departure} → ${route.destination}`}</Text>
-                        </Stack>
-                      )}
-                    />
-                  </Card>
+                  <RouteInfoCard
+                    to={`/bus-route/${route.city}/${route.routeUID}`}
+                    name={route.name}
+                    city={route.city}
+                    departure={route.departure}
+                    destination={route.destination}
+                  />
                 </Stack>
               ))}
             </Stack>
