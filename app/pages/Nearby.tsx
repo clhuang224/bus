@@ -51,8 +51,8 @@ const Nearby = () => {
   const scrollViewportRef = useRef<HTMLDivElement | null>(null)
   const itemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
   const {
-    selectedStop,
-    selectedRouteStop,
+    selectedStopId,
+    selectedRouteStopId,
     selectStop,
     viewStopRoutes,
     backToNearbyStops
@@ -178,14 +178,14 @@ const Nearby = () => {
   }, [permission, geolocationError, coords, nearbyStopGroups, isLoading, error])
 
   const selectedStopGroup = useMemo(() => {
-    if (!selectedRouteStop) return null
-    return nearbyStopGroups.find((stopGroup) => stopGroup.StationID === selectedRouteStop) ?? null
-  }, [nearbyStopGroups, selectedRouteStop])
+    if (!selectedRouteStopId) return null
+    return nearbyStopGroups.find((stopGroup) => stopGroup.StationID === selectedRouteStopId) ?? null
+  }, [nearbyStopGroups, selectedRouteStopId])
 
   const selectedStationRoutes = useMemo(() => {
-    if (!selectedRouteStop) return []
-    return stationRoutesMap.get(selectedRouteStop) ?? []
-  }, [selectedRouteStop, stationRoutesMap])
+    if (!selectedRouteStopId) return []
+    return stationRoutesMap.get(selectedRouteStopId) ?? []
+  }, [selectedRouteStopId, stationRoutesMap])
 
   const stationRouteBadgesMap = useMemo(() => {
     const stationRouteBadges = new Map<string, Array<Pick<StationRoute, 'routeUID' | 'name'>>>()
@@ -212,9 +212,9 @@ const Nearby = () => {
   }, [stationRoutesMap])
 
   useEffect(() => {
-    if (!selectedStop || !scrollViewportRef.current) return
+    if (!selectedStopId || !scrollViewportRef.current) return
 
-    const item = itemRefs.current.get(selectedStop)
+    const item = itemRefs.current.get(selectedStopId)
     if (!item) return
 
     item.scrollIntoView({
@@ -222,7 +222,7 @@ const Nearby = () => {
       behavior: 'smooth'
     })
 
-  }, [selectedStop, nearbyStopGroups])
+  }, [selectedStopId, nearbyStopGroups])
 
   return (
     <Flex h="100%">
@@ -268,7 +268,7 @@ const Nearby = () => {
             : (
               <Accordion
                 variant="separated"
-                value={selectedStop}
+                value={selectedStopId}
                 onChange={selectStop}
               >
                 {nearbyStopGroups.map((stopGroup) => (
@@ -312,7 +312,7 @@ const Nearby = () => {
         <NearbyStopMap
           center={coords}
           markers={markers}
-          selectedStop={selectedStop}
+          selectedStop={selectedStopId}
           onSelectStop={selectStop}
         />
       </Flex>
