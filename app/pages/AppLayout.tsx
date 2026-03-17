@@ -11,6 +11,10 @@ import { useWatchGeo } from '~/modules/hooks/useWatchGeo'
 import type { RootState } from '~/modules/store'
 import { getAreaByCoords } from '~/modules/utils/getAreaByCoords'
 
+export interface AreaContext {
+  area: AreaType
+}
+
 export function meta() {
   return [
     { title: 'Finding the Bus' },
@@ -80,7 +84,7 @@ export default function AppLayout () {
         </Flex>
       </AppShell.Header>
       <AppShell.Main h={isSm ? 'calc(100vh - 160px)' : 'calc(100vh - 76px)'}>
-        <Outlet />
+        <Outlet context={{ area }} />
       </AppShell.Main>
       <AppShell.Footer p="sm" hiddenFrom="sm">
         <Flex justify="space-around" align="center" gap="md">
