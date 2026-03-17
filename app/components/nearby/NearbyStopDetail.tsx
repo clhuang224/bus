@@ -9,43 +9,58 @@ interface PropType {
   onViewRoutes: (stationID: string) => void
 }
 
-const renderInfoRow = (label: string, value: string) => (
-  <Stack gap={2}>
-    <Text size="sm" c="dimmed">{label}</Text>
-    <Text size="sm">{value}</Text>
-  </Stack>
-)
+export const NearbyStopDetail = ({ stopGroup, routes, onViewRoutes }: PropType) => {
+  const detailSections = [
+    {
+      label: '縣市',
+      content: (
+        <Text size="sm">{stopGroup.City ? cityMapName[stopGroup.City] : '未提供'}</Text>
+      )
+    },
+    {
+      label: '地址',
+      content: (
+        <Text size="sm">
+          {Array.from(new Set(stopGroup.stops.map((stop) => stop.StopAddress).filter(Boolean))).join('、') || '未提供'}
+        </Text>
+      )
+    },
+    {
+      label: '路線',
+      content: (
+        <Flex gap="xs" wrap="wrap">
+          {routes.map((route) => (
+            <Badge
+              key={route.routeUID}
+              variant="light"
+              color="blue"
+              radius="sm"
+              size="lg"
+            >
+              {route.name}
+            </Badge>
+          ))}
+        </Flex>
+      )
+    }
+  ]
 
-export const NearbyStopDetail = ({ stopGroup, routes, onViewRoutes }: PropType) => (
-  <Stack gap="xs">
-    {renderInfoRow('縣市', stopGroup.City ? cityMapName[stopGroup.City] : '未提供')}
-    {renderInfoRow(
-      '地址',
-      Array.from(new Set(stopGroup.stops.map((stop) => stop.StopAddress).filter(Boolean))).join('、') || '未提供'
-    )}
-    <Stack gap={4}>
-      <Text size="sm" c="dimmed">路線</Text>
-      <Flex gap="xs" wrap="wrap">
-        {routes.map((route) => (
-          <Badge
-            key={route.routeUID}
-            variant="light"
-            color="blue"
-            radius="sm"
-            size="lg"
-          >
-            {route.name}
-          </Badge>
-        ))}
-      </Flex>
+  return (
+    <Stack gap="xs">
+      {detailSections.map((section) => (
+        <Stack key={section.label} gap={4}>
+          <Text size="sm" c="dimmed">{section.label}</Text>
+          {section.content}
+        </Stack>
+      ))}
+      <Button
+        variant="subtle"
+        p={0}
+        justify="flex-start"
+        onClick={() => onViewRoutes(stopGroup.StationID)}
+      >
+        查看此站路線
+      </Button>
     </Stack>
-    <Button
-      variant="subtle"
-      p={0}
-      justify="flex-start"
-      onClick={() => onViewRoutes(stopGroup.StationID)}
-    >
-      查看此站路線
-    </Button>
-  </Stack>
-)
+  )
+}
