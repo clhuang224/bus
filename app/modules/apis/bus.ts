@@ -97,6 +97,10 @@ export const busApi = createApi({
           zh_TW: stopOfRoute.SubRouteName.Zh_tw,
           en: stopOfRoute.SubRouteName.En
         },
+        DestinationStopName: {
+          zh_TW: stopOfRoute.DestinationStopNameZh,
+          en: stopOfRoute.DestinationStopNameEn
+        },
         Stops: stopOfRoute.Stops.map((stop) => ({
           ...stop,
           StopName: {

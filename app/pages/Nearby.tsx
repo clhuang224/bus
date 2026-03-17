@@ -119,6 +119,7 @@ const Nearby = () => {
         id: routeKey,
         routeUID: stopOfRoute.RouteUID,
         name: stopOfRoute.SubRouteName.zh_TW || stopOfRoute.RouteName.zh_TW,
+        destination: stopOfRoute.DestinationStopName.zh_TW,
         direction: stopOfRoute.Direction
       }
 
@@ -188,13 +189,6 @@ const Nearby = () => {
     return stationRouteBadges
   }, [stationRoutesMap])
 
-  const renderInfoRow = (label: string, value: string) => (
-    <Stack gap={2}>
-      <Text size="sm" c="dimmed">{label}</Text>
-      <Text size="sm">{value}</Text>
-    </Stack>
-  )
-
   useEffect(() => {
     if (!selectedStop || !scrollViewportRef.current) return
 
@@ -225,8 +219,18 @@ const Nearby = () => {
                 </Button>
                 <Stack gap="xs">
                   <Title order={4}>{selectedStopGroup.StopName.zh_TW}</Title>
-                  {renderInfoRow('縣市', selectedStopGroup.City ? cityMapName[selectedStopGroup.City] : '未提供')}
-                  {renderInfoRow('地址', Array.from(new Set(selectedStopGroup.stops.map((stop) => stop.StopAddress).filter(Boolean))).join('、') || '未提供')}
+                  <Stack gap={2}>
+                    <Text size="sm" c="dimmed">縣市</Text>
+                    <Text size="sm">
+                      {selectedStopGroup.City ? cityMapName[selectedStopGroup.City] : '未提供'}
+                    </Text>
+                  </Stack>
+                  <Stack gap={2}>
+                    <Text size="sm" c="dimmed">地址</Text>
+                    <Text size="sm">
+                      {Array.from(new Set(selectedStopGroup.stops.map((stop) => stop.StopAddress).filter(Boolean))).join('、') || '未提供'}
+                    </Text>
+                  </Stack>
                 </Stack>
                 <Tabs defaultValue={String(DirectionType.GO)}>
                   <Tabs.List>
@@ -242,13 +246,18 @@ const Nearby = () => {
                     .filter((tab) => routesByDirection[tab.value].length > 0)
                     .map((tab) => (
                       <Tabs.Panel key={tab.value} value={tab.value} pt="md">
-                        <List spacing="xs">
+                        <List spacing="xs" listStyleType="none">
                           {routesByDirection[tab.value].map((route) => (
                             <List.Item key={route.id}>
                               <NavLink
                                 component={Link}
                                 to={`/bus-route/${currentCity}/${route.routeUID}`}
-                                label={route.name}
+                                label={(
+                                  <Flex justify="space-between">
+                                    {route.name}
+                                    {`往 ${route.destination}`}
+                                  </Flex>
+                                )}
                               />
                             </List.Item>
                           ))}
