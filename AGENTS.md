@@ -183,6 +183,10 @@ This project should follow React Router v7 framework mode conventions wherever p
 
 Prefer React Router's built-in primitives for route state and navigation behavior, such as route modules, route params, search params, links, navigation helpers, and framework-mode file conventions, before introducing custom wrappers or ad hoc URL state helpers.
 
+This project is deployed with GitHub Pages and React Router v7, so all `href`, asset URLs, icon links, and similar path-based settings must account for the difference between the local base URL and the production GitHub Pages base URL.
+
+When adding or changing URL-like values, use relative paths by default so they work in both local development and the deployed GitHub Pages base path. Do not assume the app is always served from `/`, and do not hard-code root-absolute paths unless there is a clear, documented reason.
+
 ### Store
 
 The Redux store is defined in `app/modules/store.ts`.
