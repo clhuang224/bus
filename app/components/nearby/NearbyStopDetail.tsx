@@ -1,5 +1,6 @@
-import { ActionIcon, Badge, Flex, Stack, Text } from '@mantine/core'
+import { ActionIcon, Flex, Stack, Text } from '@mantine/core'
 import { RiArrowRightSLine } from '@remixicon/react'
+import { AppBadge } from '~/components/common/AppBadge'
 import { cityMapName } from '~/modules/consts/city'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
@@ -41,15 +42,9 @@ export const NearbyStopDetail = ({
       content: (
         <Flex gap="xs" wrap="wrap">
           {routes.map((route) => (
-            <Badge
-              key={route.routeUID}
-              variant="light"
-              color="blue"
-              radius="sm"
-              size="lg"
-            >
+            <AppBadge key={route.routeUID} type="route">
               {route.name}
-            </Badge>
+            </AppBadge>
           ))}
         </Flex>
       )

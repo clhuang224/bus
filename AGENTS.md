@@ -253,6 +253,11 @@ When reviewing a UI block, ask:
 
 When working with Mantine components, prefer Mantine props, variants, spacing, radius, color, and layout primitives over custom `style` or `styles` overrides whenever the built-in API can express the same intent.
 
+For badge-based route UI, keep badge semantics consistent across the app:
+
+- route name plus direction: `Badge` with `color="blue"` and `variant="light"`
+- city: `Badge` with `color="gray"` and `variant="light"`
+
 For responsive logic, prefer breakpoint-based names such as `isSm` or `isMd` over device labels such as `isMobile` or `isTablet`, and derive media queries from Mantine theme breakpoints when practical.
 
 ### Rendering Patterns

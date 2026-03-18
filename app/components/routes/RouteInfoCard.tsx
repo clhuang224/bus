@@ -1,8 +1,8 @@
-import { Badge, Card, Flex, NavLink, Stack, Text } from '@mantine/core'
+import { Card, Flex, NavLink, Stack, Text } from '@mantine/core'
 import { Link } from 'react-router'
+import { AppBadge } from '~/components/common/AppBadge'
 import { cityMapName } from '~/modules/consts/city'
 import type { CityNameType } from '~/modules/enums/CityNameType'
-import { RiBuildingFill, RiRouteFill } from '@remixicon/react'
 
 interface PropType {
   to: string
@@ -36,24 +36,12 @@ export const RouteInfoCard = ({
       label={(
         <Stack gap={8}>
           <Flex justify="space-between" align="center">
-            <Badge
-              variant="light"
-              color="blue"
-              radius="sm"
-              size="lg"
-              leftSection={<RiRouteFill size="1em" />}
-            >
+            <AppBadge type="route">
               {name}
-            </Badge>
-            <Badge
-              variant="light"
-              color="gray"
-              radius="sm"
-              size="lg"
-              leftSection={<RiBuildingFill size="1em" />}
-            >
+            </AppBadge>
+            <AppBadge type="city">
               {cityMapName[city]}
-            </Badge>
+            </AppBadge>
           </Flex>
           <Text size="xs" c="dimmed">
             {`起訖站： ${departure} → ${destination}`}

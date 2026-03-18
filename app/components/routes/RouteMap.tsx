@@ -17,6 +17,7 @@ interface PropType {
 
 const ROUTE_LINE_SOURCE_ID = 'route-line-source'
 const ROUTE_LINE_LAYER_ID = 'route-line-layer'
+const ROUTE_COLOR = '#1c7ed6'
 
 function removeRouteLine(map: MapLibreMap) {
   if (map.getLayer(ROUTE_LINE_LAYER_ID)) {
@@ -94,7 +95,7 @@ export const RouteMap = ({ stops }: PropType) => {
           'line-join': 'round'
         },
         paint: {
-          'line-color': '#228be6',
+          'line-color': ROUTE_COLOR,
           'line-width': 4,
           'line-opacity': 0.85
         }
@@ -106,7 +107,7 @@ export const RouteMap = ({ stops }: PropType) => {
       el.style.width = '28px'
       el.style.height = '28px'
       el.style.borderRadius = '999px'
-      el.style.backgroundColor = '#228be6'
+      el.style.backgroundColor = ROUTE_COLOR
       el.style.border = '2px solid #ffffff'
       el.style.color = '#ffffff'
       el.style.fontSize = '12px'
