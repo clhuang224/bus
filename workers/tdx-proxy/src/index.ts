@@ -5,6 +5,7 @@ const TOKEN_REFRESH_BUFFER_MS = 60 * 1000
 interface Env {
   TDX_CLIENT_ID?: string
   TDX_CLIENT_SECRET?: string
+  TDX_ALLOWED_ORIGIN?: string
 }
 
 interface TdxTokenResponse {
@@ -12,19 +13,40 @@ interface TdxTokenResponse {
   expires_in: number
 }
 
+class ProxyConfigError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'ProxyConfigError'
+  }
+}
+
 let cachedToken: string | null = null
 let cachedTokenExpiresAt = 0
 
-function withCorsHeaders(headers: Headers) {
-  headers.set('access-control-allow-origin', '*')
+function withCorsHeaders(headers: Headers, allowedOrigin: string) {
+  headers.set('access-control-allow-origin', allowedOrigin)
   headers.set('access-control-allow-methods', 'GET,OPTIONS')
   headers.set('access-control-allow-headers', 'content-type')
   headers.set('access-control-expose-headers', 'content-type')
+  headers.set('vary', 'origin')
+}
+
+function getCorsOrigin(request: Request, env: Env) {
+  if (!env.TDX_ALLOWED_ORIGIN) {
+    return '*'
+  }
+
+  const requestOrigin = request.headers.get('origin')
+  if (!requestOrigin) {
+    return null
+  }
+
+  return requestOrigin === env.TDX_ALLOWED_ORIGIN ? requestOrigin : null
 }
 
 async function getAccessToken(env: Env) {
   if (!env.TDX_CLIENT_ID || !env.TDX_CLIENT_SECRET) {
-    throw new Error('TDX proxy is not configured. Follow the environment setup steps in README.md.')
+    throw new ProxyConfigError('TDX proxy is not configured. Follow the environment setup steps in README.md.')
   }
 
   if (cachedToken && Date.now() + TOKEN_REFRESH_BUFFER_MS < cachedTokenExpiresAt) {
@@ -67,15 +89,28 @@ function getUpstreamUrl(requestUrl: URL) {
 
 export default {
   async fetch(request: Request, env: Env) {
+    const corsOrigin = getCorsOrigin(request, env)
+
+    if (corsOrigin == null) {
+      return new Response(JSON.stringify({
+        error: 'Origin is not allowed.'
+      }), {
+        status: 403,
+        headers: {
+          'content-type': 'application/json'
+        }
+      })
+    }
+
     if (request.method === 'OPTIONS') {
       const headers = new Headers()
-      withCorsHeaders(headers)
+      withCorsHeaders(headers, corsOrigin)
       return new Response(null, { status: 204, headers })
     }
 
     if (request.method !== 'GET') {
       const headers = new Headers()
-      withCorsHeaders(headers)
+      withCorsHeaders(headers, corsOrigin)
       return new Response('Method Not Allowed', { status: 405, headers })
     }
 
@@ -90,7 +125,7 @@ export default {
       })
 
       const headers = new Headers(upstreamResponse.headers)
-      withCorsHeaders(headers)
+      withCorsHeaders(headers, corsOrigin)
 
       return new Response(upstreamResponse.body, {
         status: upstreamResponse.status,
@@ -100,18 +135,15 @@ export default {
     } catch (error) {
       console.error('tdx-proxy worker error:', error)
 
-      const errorMessage = error instanceof Error ? error.message : 'TDX proxy request failed.'
-      const isMissingConfigError = errorMessage.startsWith('TDX proxy is not configured.')
-
       const headers = new Headers({
         'content-type': 'application/json'
       })
-      withCorsHeaders(headers)
+      withCorsHeaders(headers, corsOrigin)
 
-      if (isMissingConfigError) {
+      if (error instanceof ProxyConfigError) {
         return new Response(JSON.stringify({
           error: 'TDX proxy is not configured.',
-          message: errorMessage
+          message: error.message
         }), {
           status: 503,
           headers

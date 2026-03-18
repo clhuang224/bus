@@ -143,7 +143,7 @@ Suggested local setup:
 
 1. Install dependencies with `pnpm install`.
 2. Copy `workers/tdx-proxy/.dev.vars.example` to `workers/tdx-proxy/.dev.vars`.
-3. Fill in `TDX_CLIENT_ID` and `TDX_CLIENT_SECRET`.
+3. Fill in `TDX_CLIENT_ID`, `TDX_CLIENT_SECRET`, and `TDX_ALLOWED_ORIGIN`.
 4. The frontend already points to the local Worker in `.env.development`:
 
 ```env
@@ -166,7 +166,7 @@ In production, the Worker should be deployed separately and the frontend should 
 
 The current deployment design is:
 
-1. Store `TDX_CLIENT_ID` and `TDX_CLIENT_SECRET` in Cloudflare Worker secrets.
+1. Store `TDX_CLIENT_ID`, `TDX_CLIENT_SECRET`, and `TDX_ALLOWED_ORIGIN` in Cloudflare Worker environment bindings.
 2. Deploy the Worker with `pnpm run deploy:proxy`.
 3. Store `VITE_PROXY_API_BASE_URL` as a GitHub Actions repository variable.
 4. Let the GitHub Pages build inject that value during `pnpm run build`.
