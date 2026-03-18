@@ -1,0 +1,115 @@
+import { Accordion, AccordionControl, AccordionItem, AccordionPanel, ActionIcon, Alert, Flex, ScrollArea, Stack, Text, Title } from '@mantine/core'
+import { RiArrowLeftSLine } from '@remixicon/react'
+import type { RefObject } from 'react'
+import { cityMapName } from '~/modules/consts/city'
+import type { AlertMessageConfig } from '~/modules/interfaces/AlertMessageConfig'
+import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
+import type { StationRoute } from '~/modules/interfaces/StationRoute'
+import { NearbyStopDetail } from './NearbyStopDetail'
+import { NearbyStopRoutes } from './NearbyStopRoutes'
+
+type StopItemRefs = RefObject<Map<string, HTMLDivElement | null>>
+
+interface NearbySidebarListState {
+  nearbyStopGroups: NearbyStopGroup[]
+  onSelectStop: (value: string | null) => void
+  onViewRoutes: (stationID: string) => void
+  scrollViewportRef: RefObject<HTMLDivElement | null>
+  selectedStopId: string | null
+  stationRouteBadgesMap: Map<string, Array<Pick<StationRoute, 'routeUID' | 'name'>>>
+  stopItemRefs: StopItemRefs
+}
+
+interface NearbySidebarDetailState {
+  onBack: () => void
+  stopGroup: NearbyStopGroup | null
+  stationRoutes: StationRoute[]
+}
+
+interface PropType {
+  detailState: NearbySidebarDetailState
+  listState: NearbySidebarListState
+  message: AlertMessageConfig | null
+}
+
+const NearbySidebarContentDetail = ({ detailState }: { detailState: NearbySidebarDetailState }) => (
+  <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
+    <Flex gap="xs" align="center">
+      <ActionIcon onClick={detailState.onBack}>
+        <RiArrowLeftSLine size={18} />
+      </ActionIcon>
+      <Title order={4}>{detailState.stopGroup!.StopName.zh_TW}</Title>
+    </Flex>
+    <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
+      <Stack gap={2}>
+        <Text size="sm" c="dimmed">縣市</Text>
+        <Text size="sm">
+          {detailState.stopGroup!.City ? cityMapName[detailState.stopGroup!.City] : '未提供'}
+        </Text>
+      </Stack>
+      <Stack gap={2}>
+        <Text size="sm" c="dimmed">地址</Text>
+        <Text size="sm">
+          {Array.from(new Set(detailState.stopGroup!.stops.map((stop) => stop.StopAddress).filter(Boolean))).join('、') || '未提供'}
+        </Text>
+      </Stack>
+      <NearbyStopRoutes routes={detailState.stationRoutes} />
+    </Stack>
+  </Stack>
+)
+
+const NearbySidebarContentList = ({ listState }: { listState: NearbySidebarListState }) => (
+  <ScrollArea
+    viewportRef={listState.scrollViewportRef}
+    style={{ flex: 1, minHeight: 0 }}
+  >
+    <Accordion
+      variant="separated"
+      value={listState.selectedStopId}
+      onChange={listState.onSelectStop}
+    >
+      {listState.nearbyStopGroups.map((stopGroup) => (
+        <AccordionItem
+          value={stopGroup.StationID}
+          key={stopGroup.StationID}
+          ref={(node) => {
+            if (node) {
+              listState.stopItemRefs.current.set(stopGroup.StationID, node)
+            } else {
+              listState.stopItemRefs.current.delete(stopGroup.StationID)
+            }
+          }}
+        >
+          <AccordionControl>
+            {stopGroup.StopName.zh_TW}
+          </AccordionControl>
+          <AccordionPanel>
+            <NearbyStopDetail
+              stopGroup={stopGroup}
+              routes={listState.stationRouteBadgesMap.get(stopGroup.StationID) ?? []}
+              onViewRoutes={listState.onViewRoutes}
+            />
+          </AccordionPanel>
+        </AccordionItem>
+      ))}
+    </Accordion>
+  </ScrollArea>
+)
+
+export const NearbySidebarContent = ({
+  detailState,
+  listState,
+  message
+}: PropType) => (
+  <Flex direction="column" h="100%" gap="md">
+    {message && (
+      <Alert color={message.color} title={message.title}>
+        {message.description}
+      </Alert>
+    )}
+    { detailState.stopGroup
+      ? <NearbySidebarContentDetail detailState={detailState} />
+      : <NearbySidebarContentList listState={listState} />
+    }
+  </Flex>
+)

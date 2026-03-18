@@ -1,13 +1,12 @@
-import { Accordion, AccordionControl, AccordionItem, AccordionPanel, ActionIcon, Alert, Flex, Overlay, ScrollArea, Stack, Text, Title, useMantineTheme } from '@mantine/core'
+import { Overlay, useMantineTheme } from '@mantine/core'
 import distance from '@turf/distance'
 import { point } from '@turf/helpers'
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
-import { RiArrowLeftSLine } from '@remixicon/react'
 import { useSelector } from 'react-redux'
 import { MapSidebarLayout } from '~/components/common/MapSidebarLayout'
+import { NearbySidebarContent } from '~/components/nearby/NearbySidebarContent'
 import type { RootState } from '~/modules/store'
 import { cityMapArea } from '~/modules/consts/area'
-import { cityMapName } from '~/modules/consts/city'
 import { nearbyMessages } from '~/modules/consts/pageMessages'
 import {
   geoErrorMessages,
@@ -22,14 +21,13 @@ import { getCityByCoords } from '~/modules/utils/getCityByCoords'
 import { useNearbySearchParams } from '~/modules/hooks/useNearbySearchParams'
 import { NearbyStopDetail } from '~/components/nearby/NearbyStopDetail'
 import { NearbyStopMap } from '~/components/nearby/NearbyStopMap'
-import { NearbyStopRoutes } from '~/components/nearby/NearbyStopRoutes'
 import { NEARBY_DISTANCE_KM } from '~/modules/consts/nearby'
 
 const disabledNearbyPermissions = [GeoPermissionType.UNSUPPORTED, GeoPermissionType.DENIED]
 
 const Nearby = () => {
   const scrollViewportRef = useRef<HTMLDivElement | null>(null)
-  const itemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
+  const stopItemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
   const theme = useMantineTheme()
   const isSm = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`)
   const [isSidebarOpened, { open: openSidebar, close: closeSidebar }] = useDisclosure(false)
@@ -202,7 +200,7 @@ const Nearby = () => {
   useEffect(() => {
     if (!selectedStopId || !scrollViewportRef.current) return
 
-    const item = itemRefs.current.get(selectedStopId)
+    const item = stopItemRefs.current.get(selectedStopId)
     if (!item) return
 
     item.scrollIntoView({
@@ -216,72 +214,6 @@ const Nearby = () => {
     if (!isSm || !selectedRouteStopId) return
     openSidebar()
   }, [isSm, selectedRouteStopId, openSidebar])
-
-  const sidebarContent = selectedStopGroup
-    ? (
-      <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
-        <Flex gap="xs" align="center">
-          <ActionIcon
-            onClick={backToNearbyStops}
-          >
-            <RiArrowLeftSLine size={18} />
-          </ActionIcon>
-          <Title order={4}>{selectedStopGroup.StopName.zh_TW}</Title>
-        </Flex>
-        <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
-          <Stack gap={2}>
-            <Text size="sm" c="dimmed">縣市</Text>
-            <Text size="sm">
-              {selectedStopGroup.City ? cityMapName[selectedStopGroup.City] : '未提供'}
-            </Text>
-          </Stack>
-          <Stack gap={2}>
-            <Text size="sm" c="dimmed">地址</Text>
-            <Text size="sm">
-              {Array.from(new Set(selectedStopGroup.stops.map((stop) => stop.StopAddress).filter(Boolean))).join('、') || '未提供'}
-            </Text>
-          </Stack>
-          <NearbyStopRoutes routes={selectedStationRoutes} />
-        </Stack>
-      </Stack>
-    )
-    : (
-      <ScrollArea
-        viewportRef={scrollViewportRef}
-        style={{ flex: 1, minHeight: 0 }}
-      >
-        <Accordion
-          variant="separated"
-          value={selectedStopId}
-          onChange={selectStop}
-        >
-          {nearbyStopGroups.map((stopGroup) => (
-            <AccordionItem
-              value={stopGroup.StationID}
-              key={stopGroup.StationID}
-              ref={(node) => {
-                if (node) {
-                  itemRefs.current.set(stopGroup.StationID, node)
-                } else {
-                  itemRefs.current.delete(stopGroup.StationID)
-                }
-              }}
-            >
-              <AccordionControl>
-                {stopGroup.StopName.zh_TW}
-              </AccordionControl>
-              <AccordionPanel>
-                <NearbyStopDetail
-                  stopGroup={stopGroup}
-                  routes={stationRouteBadgesMap.get(stopGroup.StationID) ?? []}
-                  onViewRoutes={viewStopRoutes}
-                />
-              </AccordionPanel>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </ScrollArea>
-    )
 
   const selectedStopPopupContent = selectedMapStopGroup
     ? (
@@ -307,14 +239,23 @@ const Nearby = () => {
       onOpenSidebar={openSidebar}
       openButtonLabel="開啟附近站牌列表"
       panel={(
-        <Flex direction="column" h="100%" gap="md">
-          { message && (
-            <Alert color={message.color} title={message.title}>
-              {message.description}
-            </Alert>
-          )}
-          {sidebarContent}
-        </Flex>
+        <NearbySidebarContent
+          detailState={{
+            onBack: backToNearbyStops,
+            stopGroup: selectedStopGroup,
+            stationRoutes: selectedStationRoutes
+          }}
+          listState={{
+            nearbyStopGroups,
+            onSelectStop: selectStop,
+            onViewRoutes: viewStopRoutes,
+            scrollViewportRef,
+            selectedStopId,
+            stationRouteBadgesMap,
+            stopItemRefs
+          }}
+          message={message}
+        />
       )}
     >
         {isNearbyDisabled && (

@@ -259,6 +259,8 @@ For responsive logic, prefer breakpoint-based names such as `isSm` or `isMd` ove
 
 Use simple inline template rendering for very small, one-off sections.
 
+Avoid building a conditional `ReactNode` in a local variable and then dropping that variable into the returned JSX when the block has real structure or domain meaning. If a conditional branch is substantial enough to deserve a name, prefer extracting it into a small named component and choose between components in the template instead.
+
 Use data-driven `map` rendering when:
 
 - the UI is clearly a repeated structure
