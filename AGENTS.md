@@ -4,6 +4,8 @@ This document explains how this project is organized, how data flows through the
 
 Use this as the default guide for new work. When a change touches multiple areas, prefer keeping the structure and naming consistent with the patterns described here instead of introducing a new local style.
 
+Keep `README.md` focused on product overview, setup, and usage. Small implementation conventions and team-facing coding notes should live in `AGENTS.md` or code-local comments instead of being added to the README.
+
 ## 1. Project Overview
 
 This is a React + React Router bus application with Redux Toolkit for app state and RTK Query for bus API requests.

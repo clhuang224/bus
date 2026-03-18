@@ -103,11 +103,6 @@ app/
 3. Pages coordinate screen state and pass shaped data into feature components.
 4. Shared app state such as favorites, geolocation, city geo data, and global modals is stored in Redux slices.
 
-### Responsive Notes
-
-- Prefer breakpoint-based names such as `isSm` and `isMd` over device-based names such as `isMobile`.
-- Prefer deriving media queries from Mantine theme breakpoints so responsive behavior stays aligned across pages.
-
 ## APIs In Use
 
 The project currently uses the TDX Bus API base URL:
