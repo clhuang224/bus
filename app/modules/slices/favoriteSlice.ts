@@ -1,35 +1,57 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import type { Stop } from '../interfaces/Stop'
+import type { FavoriteRouteStop } from '../interfaces/FavoriteRouteStop'
+
+const FAVORITE_ROUTE_STOPS_STORAGE_KEY = 'favoriteRouteStops'
+
+function loadStoredFavoriteRouteStops() {
+  const storedValue = localStorage.getItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY)
+  if (!storedValue) return [] as FavoriteRouteStop[]
+
+  const parsedValue = JSON.parse(storedValue) as unknown
+  if (!Array.isArray(parsedValue)) return [] as FavoriteRouteStop[]
+
+  return parsedValue.filter((item): item is FavoriteRouteStop =>
+    typeof item === 'object' &&
+    item !== null &&
+    'favoriteId' in item &&
+    typeof item.favoriteId === 'string'
+  )
+}
+
+function persistFavoriteRouteStops(routeStops: FavoriteRouteStop[]) {
+  localStorage.setItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY, JSON.stringify(routeStops))
+}
 
 const favoriteSlice = createSlice({
   name: 'favorite',
   initialState: {
-    stops: [] as Stop[]
+    routeStops: [] as FavoriteRouteStop[]
   },
   reducers: {
     loadLocalStorage: (state) => {
-      state.stops = JSON.parse(localStorage.getItem('favoriteStops') ?? '[]') as Stop[]
+      state.routeStops = loadStoredFavoriteRouteStops()
     },
-    setFavoriteStops: (state, action: PayloadAction<Stop[]>) => {
-      state.stops = action.payload
-      localStorage.setItem('favorite', JSON.stringify(state.stops))
+    setFavoriteRouteStops: (state, action: PayloadAction<FavoriteRouteStop[]>) => {
+      state.routeStops = action.payload
+      persistFavoriteRouteStops(state.routeStops)
     },
-    addFavoriteStop: (state, action: PayloadAction<Stop>) => {
-      const newStop = action.payload
-      if (!state.stops.map((stop) => stop.StopUID).includes(newStop.StopUID)) {
-        state.stops.push(newStop)
-        localStorage.setItem('favorite', JSON.stringify(state.stops))
+    addFavoriteRouteStop: (state, action: PayloadAction<FavoriteRouteStop>) => {
+      const newRouteStop = action.payload
+      if (!state.routeStops.some((routeStop) => routeStop.favoriteId === newRouteStop.favoriteId)) {
+        state.routeStops.push(newRouteStop)
+        persistFavoriteRouteStops(state.routeStops)
       }
     },
-    removeFavoriteStop: (state, action: PayloadAction<Stop>) => {
-      const stopToRemove = action.payload
-      state.stops = state.stops.filter((stop) => stop.StopUID === stopToRemove.StopUID)
-      localStorage.setItem('favorite', JSON.stringify(state.stops))
+    removeFavoriteRouteStop: (state, action: PayloadAction<FavoriteRouteStop>) => {
+      const routeStopToRemove = action.payload
+      state.routeStops = state.routeStops.filter((routeStop) => routeStop.favoriteId !== routeStopToRemove.favoriteId)
+      persistFavoriteRouteStops(state.routeStops)
     }
   },
   selectors: {
-    getFavoriteStops: (state) => state.stops,
-    isStopFavorite: (state, uid: string) => state.stops.map((stop) => stop.StopUID).includes(uid)
+    getFavoriteRouteStops: (state) => state.routeStops,
+    isRouteStopFavorite: (state, favoriteId: string) =>
+      state.routeStops.some((routeStop) => routeStop.favoriteId === favoriteId)
   }
 })
 
