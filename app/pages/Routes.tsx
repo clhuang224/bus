@@ -52,8 +52,8 @@ export default function Routes() {
   }, [error, isLoading, filteredRoutes.length])
 
   return (
-    <Flex justify="center" p="lg" h="100%">
-      <Card shadow="sm" p="lg" w="100%" maw={720} h="100%">
+    <Flex justify="center" h="100%">
+      <Card p="lg" w="100%" maw={720} h="100%" withBorder={false}>
         <Stack gap="md" h="100%">
           <Stack gap={4}>
             <Title order={3}>搜尋公車</Title>
