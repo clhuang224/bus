@@ -1,9 +1,10 @@
-import { Accordion, AccordionControl, AccordionItem, AccordionPanel, ActionIcon, Alert, Card, Drawer, Flex, Overlay, ScrollArea, Stack, Text, Title, useMantineTheme } from '@mantine/core'
+import { Accordion, AccordionControl, AccordionItem, AccordionPanel, ActionIcon, Alert, Flex, Overlay, ScrollArea, Stack, Text, Title, useMantineTheme } from '@mantine/core'
 import distance from '@turf/distance'
 import { point } from '@turf/helpers'
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
-import { RiArrowLeftSLine, RiMenuFill } from '@remixicon/react'
+import { RiArrowLeftSLine } from '@remixicon/react'
 import { useSelector } from 'react-redux'
+import { MapSidebarLayout } from '~/components/common/MapSidebarLayout'
 import type { RootState } from '~/modules/store'
 import { cityMapArea } from '~/modules/consts/area'
 import { cityMapName } from '~/modules/consts/city'
@@ -22,7 +23,6 @@ import { useNearbySearchParams } from '~/modules/hooks/useNearbySearchParams'
 import { NearbyStopDetail } from '~/components/nearby/NearbyStopDetail'
 import { NearbyStopMap } from '~/components/nearby/NearbyStopMap'
 import { NearbyStopRoutes } from '~/components/nearby/NearbyStopRoutes'
-import { APP_HEADER_HEIGHT } from '~/modules/consts/layout'
 import { NEARBY_DISTANCE_KM } from '~/modules/consts/nearby'
 
 const disabledNearbyPermissions = [GeoPermissionType.UNSUPPORTED, GeoPermissionType.DENIED]
@@ -311,48 +311,14 @@ const Nearby = () => {
   )
 
   return (
-    <Flex h="100%" pos="relative">
-      {!isSm && (
-        <Card shadow="sm" p="lg" w="375px" h="100%">
-          {sidebarPanel}
-        </Card>
-      )}
-      <Flex pos="relative" style={{ flex: 1 }}>
-        {isSm && (
-          <ActionIcon
-            pos="absolute"
-            right="8px"
-            bottom="8px"
-            style={{ zIndex: 2 }}
-            onClick={openSidebar}
-          >
-            <RiMenuFill size={18} />
-          </ActionIcon>
-        )}
-      <Drawer
-        opened={isSm && isSidebarOpened}
-        onClose={closeSidebar}
-        position="bottom"
-        size="100%"
-        hiddenFrom="sm"
-        styles={{
-          content: {
-            top: APP_HEADER_HEIGHT,
-            position: 'relative',
-            display: 'flex',
-            flexDirection: 'column'
-          },
-          body: {
-            flex: 1,
-            minHeight: 0,
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column'
-          }
-        }}
-      >
-        {sidebarPanel}
-      </Drawer>
+    <MapSidebarLayout
+      isSm={isSm}
+      isSidebarOpened={isSidebarOpened}
+      onCloseSidebar={closeSidebar}
+      onOpenSidebar={openSidebar}
+      openButtonLabel="開啟附近站牌列表"
+      sidebar={sidebarPanel}
+    >
         {isNearbyDisabled && (
           <Overlay
             color="#fff"
@@ -369,8 +335,7 @@ const Nearby = () => {
           isSm={isSm}
           onSelectStop={selectStop}
         />
-      </Flex>
-    </Flex>
+    </MapSidebarLayout>
   )
 }
 
