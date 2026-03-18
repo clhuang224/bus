@@ -261,6 +261,8 @@ export const busApi = createApi({
 
 export const {
   useGetRoutesByCityQuery,
+  useGetStopOfRoutesByCityQuery,
+  useGetStopsByCityQuery,
   useGetRoutesByAreaQuery,
   useGetStopOfRoutesByAreaQuery,
   useGetStopsByAreaQuery
