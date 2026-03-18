@@ -60,7 +60,7 @@ export const NearbyStopRoutes = ({ routes }: PropType) => {
             ?.routes.map((route) => (
               <Stack key={route.id} gap="xs">
                 <RouteInfoCard
-                  to={`/bus-route/${route.city}/${route.routeUID}`}
+                  to={`/routes/${route.city}/${route.routeUID}`}
                   name={route.name}
                   city={route.city}
                   departure={route.departure}

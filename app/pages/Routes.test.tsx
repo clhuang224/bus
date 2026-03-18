@@ -7,7 +7,7 @@ import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AreaType } from '~/modules/enums/AreaType'
 import { CityNameType } from '~/modules/enums/CityNameType'
-import Search from './Search'
+import Routes from './Routes'
 
 const { mockUseGetRoutesByAreaQuery, mockUseOutletContext } = vi.hoisted(() => ({
   mockUseGetRoutesByAreaQuery: vi.fn(),
@@ -93,15 +93,15 @@ const routesData = [
   }
 ]
 
-const renderSearch = (initialEntries = ['/search']) => render(
+const renderRoutes = (initialEntries = ['/routes']) => render(
   <MantineProvider>
     <MemoryRouter initialEntries={initialEntries}>
-      <Search />
+      <Routes />
     </MemoryRouter>
   </MantineProvider>
 )
 
-describe('Search', () => {
+describe('Routes', () => {
   beforeEach(() => {
     mockUseGetRoutesByAreaQuery.mockReset()
     mockUseOutletContext.mockReset()
@@ -121,13 +121,13 @@ describe('Search', () => {
   })
 
   it('shows the current area from layout context', () => {
-    renderSearch()
+    renderRoutes()
 
     expect(screen.getByText('目前搜尋範圍：雙北')).toBeInTheDocument()
   })
 
   it('filters routes by the entered keyword', async () => {
-    renderSearch()
+    renderRoutes()
 
     fireEvent.change(screen.getAllByRole('textbox')[0], {
       target: { value: '紅25' }
@@ -140,7 +140,7 @@ describe('Search', () => {
   })
 
   it('reads the keyword from the search params', async () => {
-    renderSearch(['/search?keyword=紅25'])
+    renderRoutes(['/routes?keyword=紅25'])
 
     await waitFor(() => {
       expect(screen.getAllByRole('textbox')[0]).toHaveValue('紅25')

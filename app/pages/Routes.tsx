@@ -10,7 +10,7 @@ import { busApi } from '~/modules/apis/bus'
 import type { BusRoute } from '~/modules/interfaces/BusRoute'
 import type { AreaContext } from './AppLayout'
 
-export default function Search() {
+export default function Routes() {
   const { keyword, setKeyword } = useSearchRouteParams()
   const { area } = useOutletContext<AreaContext>()
   const { data: routes = [], isLoading, error } = busApi.useGetRoutesByAreaQuery(area)
@@ -76,7 +76,7 @@ export default function Search() {
               {filteredRoutes.map((route) => (
                 <RouteInfoCard
                   key={route.RouteUID}
-                  to={`/bus-route/${route.City}/${route.RouteUID}`}
+                  to={`/routes/${route.City}/${route.RouteUID}`}
                   name={route.RouteName.zh_TW}
                   city={route.City}
                   departure={route.DepartureStopName.zh_TW}

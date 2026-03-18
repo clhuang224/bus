@@ -49,7 +49,7 @@ export default function AppLayout () {
     },
     {
       name: '搜尋公車',
-      path: '/search',
+      path: '/routes',
       icon: (<RiSearchLine />),
       iconActive: (<RiSearchFill />)
     }

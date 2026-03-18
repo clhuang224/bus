@@ -7,7 +7,7 @@ import { DirectionType } from '~/modules/enums/DirectionType'
 import type { CityNameType } from '~/modules/enums/CityNameType'
 import { getEnumValues } from '~/modules/utils/getEnumValues'
 
-export default function BusRoute() {
+export default function Route() {
   const directionTabs = getEnumValues(DirectionType).map((type) => ({ type, value: String(type), label: directionMapName[type] }))
 
   const { city, id } = useParams()

@@ -13,9 +13,9 @@ This is a React + React Router bus application with Redux Toolkit for app state 
 The current product structure is page-driven:
 
 - `Favorite`: saved stops and quick access
-- `Search`: search-based route discovery
+- `Routes`: search-based route discovery
 - `Nearby`: nearby stop discovery based on geolocation
-- `BusRoute`: route detail view
+- `Route`: route detail view
 
 At a high level, most features follow this flow:
 
@@ -41,9 +41,9 @@ Current examples:
 
 - `AppLayout.tsx`: shared page shell
 - `Favorite.tsx`: default index page
-- `Search.tsx`: search flow
+- `Routes.tsx`: route search flow
 - `Nearby.tsx`: geolocation and nearby stop flow
-- `BusRoute.tsx`: route detail page
+- `Route.tsx`: route detail page
 
 ### `app/components/`
 
@@ -177,8 +177,8 @@ Current route structure:
 
 - `/` -> `AppLayout`
 - index -> `Favorite`
-- `/bus-route/:city/:id` -> `BusRoute`
-- `/search` -> `Search`
+- `/routes` -> `Routes`
+- `/routes/:city/:id` -> `Route`
 - `/nearby` -> `Nearby`
 
 When adding a new page, define the route in `app/routes.ts` and place the page component under `app/pages/`.

@@ -32,8 +32,6 @@ On first launch, the app requests geolocation permission.
 
 The Nearby Stops page is based on the user's current GPS location.
 
-If geolocation permission is denied, the Nearby Stops feature cannot be used.
-
 If permission is granted:
 
 - The app determines the current city from the GPS coordinates.
@@ -92,9 +90,9 @@ app/
 ### Key Pages
 
 - `app/pages/Favorite.tsx`: saved favorite stops
-- `app/pages/Search.tsx`: route search flow
+- `app/pages/Routes.tsx`: route search flow
 - `app/pages/Nearby.tsx`: nearby stop discovery using geolocation
-- `app/pages/BusRoute.tsx`: route detail and stop list view
+- `app/pages/Route.tsx`: route detail and stop list view
 
 ### Key Data Flow
 
@@ -135,8 +133,6 @@ In the actual implementation, these requests may include OData query parameters 
 
 The app can run without a token, but requests may be rate-limited.
 
-To enable authenticated requests, create a `.env.local` file with a TDX API token.
-
 Register an application on the [Transport Data eXchange](https://tdx.transportdata.tw/) to obtain a `client_id` and `client_secret`.
 
 Then use the following command to request an access token:
@@ -160,7 +156,7 @@ The response will contain an access_token:
 }
 ```
 
-Add the token to .env.local:
+To enable authenticated requests, add the token to `.env.local`:
 
 ```env
 VITE_TDX_TOKEN=your_access_token_here

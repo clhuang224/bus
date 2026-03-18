@@ -11,7 +11,7 @@ export interface AppNavLinkPropType {
 
 export const AppNavLink = (props: AppNavLinkPropType) => {
   const resolvedPath = useResolvedPath(props.to)
-  const isActive = useMatch({ path: resolvedPath.pathname, end: true }) !== null
+  const isActive = useMatch({ path: resolvedPath.pathname, end: resolvedPath.pathname === '/' }) !== null
 
   return (
     <NavLink
