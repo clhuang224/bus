@@ -1,8 +1,8 @@
-import { Accordion, AccordionControl, AccordionItem, AccordionPanel, Alert, Button, Card, Drawer, Flex, Overlay, ScrollArea, Stack, Text, Title, useMantineTheme } from '@mantine/core'
+import { Accordion, AccordionControl, AccordionItem, AccordionPanel, ActionIcon, Alert, Card, Drawer, Flex, Overlay, ScrollArea, Stack, Text, Title, useMantineTheme } from '@mantine/core'
 import distance from '@turf/distance'
 import { point } from '@turf/helpers'
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
-import { RiArrowLeftDoubleFill, RiMenuLine } from '@remixicon/react'
+import { RiArrowLeftSLine, RiMenuFill } from '@remixicon/react'
 import { useSelector } from 'react-redux'
 import type { RootState } from '~/modules/store'
 import { cityMapArea } from '~/modules/consts/area'
@@ -24,6 +24,7 @@ import { NearbyStopMap } from '~/components/nearby/NearbyStopMap'
 import { NearbyStopRoutes } from '~/components/nearby/NearbyStopRoutes'
 
 const NEARBY_DISTANCE_KM = 0.5
+const APP_HEADER_HEIGHT = 76
 const disabledNearbyPermissions = [GeoPermissionType.UNSUPPORTED, GeoPermissionType.DENIED]
 
 const Nearby = () => {
@@ -219,15 +220,15 @@ const Nearby = () => {
   const sidebarContent = selectedStopGroup
     ? (
       <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
-        <Button
-          variant="subtle"
-          w="fit-content"
-          onClick={backToNearbyStops}
-        >
-          返回站牌列表
-        </Button>
-        <Stack gap="xs">
+        <Flex gap="xs" align="center">
+          <ActionIcon
+            onClick={backToNearbyStops}
+          >
+            <RiArrowLeftSLine size={18} />
+          </ActionIcon>
           <Title order={4}>{selectedStopGroup.StopName.zh_TW}</Title>
+        </Flex>
+        <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
           <Stack gap={2}>
             <Text size="sm" c="dimmed">縣市</Text>
             <Text size="sm">
@@ -240,8 +241,8 @@ const Nearby = () => {
               {Array.from(new Set(selectedStopGroup.stops.map((stop) => stop.StopAddress).filter(Boolean))).join('、') || '未提供'}
             </Text>
           </Stack>
+          <NearbyStopRoutes routes={selectedStationRoutes} />
         </Stack>
-        <NearbyStopRoutes routes={selectedStationRoutes} />
       </Stack>
     )
     : (
@@ -310,7 +311,7 @@ const Nearby = () => {
   )
 
   return (
-    <Flex h="100%">
+    <Flex h="100%" pos="relative">
       {!isSm && (
         <Card shadow="sm" p="lg" w="375px" h="100%">
           {sidebarPanel}
@@ -318,27 +319,38 @@ const Nearby = () => {
       )}
       <Flex pos="relative" style={{ flex: 1 }}>
         {isSm && (
-          <Button
+          <ActionIcon
             pos="absolute"
-            top="md"
-            left="md"
-            variant="filled"
-            leftSection={<RiMenuLine size={18} />}
+            top="8px"
+            left="8px"
             style={{ zIndex: 2 }}
             onClick={openSidebar}
           >
-            展開列表
-          </Button>
+            <RiMenuFill size={18} />
+          </ActionIcon>
         )}
       <Drawer
         opened={isSm && isSidebarOpened}
         onClose={closeSidebar}
-        title="附近站牌"
         position="left"
         size="100%"
         hiddenFrom="sm"
-        closeButtonProps={{
-          icon: <RiArrowLeftDoubleFill />
+        withCloseButton={false}
+        styles={{
+          content: {
+            top: APP_HEADER_HEIGHT,
+            height: `calc(100dvh - ${APP_HEADER_HEIGHT}px)`,
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column'
+          },
+          body: {
+            flex: 1,
+            minHeight: 0,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column'
+          }
         }}
       >
         {sidebarPanel}

@@ -1,4 +1,5 @@
-import { Badge, Button, Flex, Stack, Text } from '@mantine/core'
+import { ActionIcon, Badge, Flex, Stack, Text } from '@mantine/core'
+import { RiArrowRightSLine } from '@remixicon/react'
 import { cityMapName } from '~/modules/consts/city'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
@@ -57,21 +58,21 @@ export const NearbyStopDetail = ({
 
   return (
     <Stack gap="xs">
-      {displayMode === 'full' && <Text>{stopGroup.StopName.zh_TW}</Text>}
+      {displayMode === 'full' && (
+          <Text>{stopGroup.StopName.zh_TW}</Text>
+      )}
       {detailSections.map((section) => (
         <Stack key={section.label} gap={4}>
           <Text size="sm" c="dimmed">{section.label}</Text>
           {section.content}
         </Stack>
       ))}
-      <Button
-        variant="subtle"
-        p={0}
-        justify="flex-start"
+      <ActionIcon
+        ml="auto"
         onClick={() => onViewRoutes(stopGroup.StationID)}
       >
-        查看此站路線
-      </Button>
+        <RiArrowRightSLine size={18}/>
+      </ActionIcon>
     </Stack>
   )
 }
