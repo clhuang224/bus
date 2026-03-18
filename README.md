@@ -67,6 +67,12 @@ The Favorites page displays saved route-stop combinations.
 
 Work in progress.
 
+Planned or not yet implemented:
+
+- Real-time bus positions on the Route page
+- More accurate route lines based on official route shape data
+- Highlighting a saved favorite stop after opening its Route page
+
 ## Project Structure
 
 The app is organized around route-level pages, reusable feature components, and shared domain modules.
@@ -104,19 +110,23 @@ app/
 ### Key Data Flow
 
 1. Route screens fetch data through `app/modules/apis/bus.ts`.
-2. Raw TDX fields are transformed into app-facing models in the API layer.
+2. The API layer shapes external data into app-facing models.
 3. Pages coordinate screen state and pass shaped data into feature components.
 4. Shared app state such as favorites, geolocation, city geo data, and global modals is stored in Redux slices.
 
-## APIs In Use
+## Open Data
 
-The project currently uses the TDX Bus API base URL:
+The project currently relies on two external open data sources:
+
+### TDX Bus API
+
+Base URL:
 
 `https://tdx.transportdata.tw/api/basic/v2/Bus`
 
 TDX, short for Transport Data eXchange, is Taiwan's transportation data platform. It provides standardized transport datasets and APIs, including bus routes, stops, and related transit data used by this project.
 
-This project currently reaches TDX through a Cloudflare Worker proxy. The Worker holds the application-level `client_id` and `client_secret`, exchanges them for a bearer access token, and forwards authenticated TDX requests on behalf of the frontend.
+This project reaches TDX through a Cloudflare Worker proxy. The Worker holds the application-level `client_id` and `client_secret`, exchanges them for a bearer access token, and forwards authenticated TDX requests on behalf of the frontend.
 
 Current endpoints used by the app:
 
@@ -128,33 +138,41 @@ Current endpoints used by the app:
 
 In the actual implementation, these requests may include OData query parameters such as `$format=JSON`.
 
-### API Model Notes
+### Taiwan County Boundaries
 
-- API access is centralized in `app/modules/apis/bus.ts`.
-- Raw TDX localized fields such as `Zh_tw` and `En` are transformed into app-localized objects like `{ zh_TW, en }`.
-- Nearby stop route data is further shaped into view models such as `NearbyStopGroup` and `StationRoute`.
-- Area-level requests are implemented by fan-out to multiple city endpoints and merged in the API layer.
+Boundary data is loaded from the counties dataset in [dkaoster/taiwan-atlas](https://github.com/dkaoster/taiwan-atlas):
+
+`https://cdn.jsdelivr.net/npm/taiwan-atlas/counties-10t.json`
+
+The app converts that TopoJSON counties dataset into GeoJSON and uses it to determine which Taiwan city or county contains the user's current coordinates. That city lookup then drives:
+
+- Nearby page area selection
+- automatic area sync in the layout
+- region-aware bus API requests based on the resolved county
 
 ## Development
 
-### Local Development Proxy
+This repository includes a Worker scaffold at `workers/tdx-proxy/`. To run the app locally:
 
-Local development uses the bundled Cloudflare Worker proxy instead of a frontend bearer token.
+### Install dependencies
 
-This repository includes a Worker scaffold at `workers/tdx-proxy/`.
+```bash
+pnpm install
+```
 
-Suggested local setup:
+### Set Environment Variables
 
-1. Install dependencies with `pnpm install`.
-2. Copy `workers/tdx-proxy/.dev.vars.example` to `workers/tdx-proxy/.dev.vars`.
-3. Fill in `TDX_CLIENT_ID`, `TDX_CLIENT_SECRET`, and `TDX_ALLOWED_ORIGIN`.
-4. The frontend already points to the local Worker in `.env.development`:
+1. Copy `workers/tdx-proxy/.dev.vars.example` to `workers/tdx-proxy/.dev.vars`.
+2. Fill in `TDX_CLIENT_ID`, `TDX_CLIENT_SECRET`, and `TDX_ALLOWED_ORIGIN`.
+3. The frontend is already pointed at the local Worker in `.env.development`:
 
 ```env
 VITE_PROXY_API_BASE_URL=http://127.0.0.1:3000/api/tdx
 ```
 
-5. Run local development with:
+### Run
+
+Run local development with:
 
 ```bash
 pnpm run dev
@@ -162,7 +180,15 @@ pnpm run dev
 
 This starts both the frontend dev server and the local Cloudflare Worker proxy.
 
-### Cloudflare Worker Proxy (recommended for public deployment)
+### Test
+
+```bash
+pnpm run lint
+pnpm run typecheck
+pnpm test
+```
+
+### Cloudflare Worker Proxy
 
 For public deployment, keep the frontend static and move TDX authentication behind a thin Cloudflare Worker proxy so the frontend no longer exposes a bearer token.
 
@@ -176,60 +202,3 @@ The current deployment design is:
 4. Let the GitHub Pages build inject that value during `pnpm run build`.
 
 The frontend no longer supports a direct bearer-token fallback path. Both local development and public deployment are expected to route TDX traffic through the proxy.
-
-### Install Dependencies
-
-```bash
-pnpm install
-```
-
-### Run
-
-```bash
-pnpm dev
-```
-
-### Test
-
-```bash
-pnpm run lint
-pnpm run typecheck
-pnpm test
-```
-
-### Git Hooks
-
-This project uses Husky to run checks before commit and push.
-
-- `pre-commit`: runs `pnpm run lint` and `pnpm run typecheck`
-- `pre-push`: runs `pnpm run test`
-
-If hooks stop running locally, re-initialize Husky with:
-
-```bash
-pnpm run prepare
-```
-
-## Troubleshooting
-
-### Hydration Mismatch Error (Development Only)
-
-If a hydration mismatch error appears during development, it is most likely caused by a browser extension modifying the DOM before React completes hydration.
-
-For example, dictionary lookup extensions (e.g. Moedict) may inject additional elements into the page.
-
-Recommended solution:
-
-- Disable the extension for `localhost`, or
-- Use a clean browser profile for development.
-
-## Geolocation Fallback (Development Only)
-
-For local Nearby page development, you can also define a development-only geolocation fallback:
-
-```env
-VITE_DEV_GEO_FALLBACK_LAT=25.0330
-VITE_DEV_GEO_FALLBACK_LNG=121.5654
-```
-
-When running in development mode, the app will use these coordinates only if browser geolocation returns `Position unavailable` or `Timeout`.

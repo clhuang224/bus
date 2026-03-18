@@ -3,20 +3,6 @@ import { useDispatch } from 'react-redux'
 import { GeoActionType } from '../enums/geo/GeoActionType'
 import { GeoPermissionType } from '../enums/geo/GeoPermissionType'
 import geoSlice from '../slices/geoSlice'
-import type { LatLng } from '../types/CoordsType'
-
-const getDevFallbackCoords = (): LatLng | null => {
-  if (!import.meta.env.DEV) return null
-
-  const latitude = Number(import.meta.env.VITE_DEV_GEO_FALLBACK_LAT)
-  const longitude = Number(import.meta.env.VITE_DEV_GEO_FALLBACK_LNG)
-
-  if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
-    return null
-  }
-
-  return [latitude, longitude]
-}
 
 export const useWatchGeo = () => {
   const { transitionState } = geoSlice.actions
@@ -55,7 +41,6 @@ export const useWatchGeo = () => {
     })()
 
     dispatch(transitionState({ type: GeoActionType.WATCH_STARTED }))
-    const fallbackCoords = getDevFallbackCoords()
     const id = navigator.geolocation.watchPosition(
       (pos) => {
         dispatch(transitionState({
@@ -71,27 +56,11 @@ export const useWatchGeo = () => {
         }
 
         if (err.code === err.POSITION_UNAVAILABLE) {
-          if (fallbackCoords) {
-            console.warn('Using development geolocation fallback after position unavailable error.')
-            dispatch(transitionState({
-              type: GeoActionType.POSITION_UPDATED,
-              coords: fallbackCoords
-            }))
-            return
-          }
           dispatch(transitionState({ type: GeoActionType.POSITION_UNAVAILABLE }))
           return
         }
 
         if (err.code === err.TIMEOUT) {
-          if (fallbackCoords) {
-            console.warn('Using development geolocation fallback after timeout error.')
-            dispatch(transitionState({
-              type: GeoActionType.POSITION_UPDATED,
-              coords: fallbackCoords
-            }))
-            return
-          }
           dispatch(transitionState({ type: GeoActionType.POSITION_TIMEOUT }))
           return
         }

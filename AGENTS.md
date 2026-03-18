@@ -6,6 +6,15 @@ Use this as the default guide for new work. When a change touches multiple areas
 
 Keep `README.md` focused on product overview, setup, and usage. Small implementation conventions and team-facing coding notes should live in `AGENTS.md` or code-local comments instead of being added to the README.
 
+When updating `README.md`, prioritize:
+
+- open data sources
+- user-facing features
+- high-level architecture
+- local development and deployment setup
+
+Avoid implementation-level field mappings, low-level data reshaping details, or internal helper behavior in the README unless those details are necessary for someone to run or understand the project at a high level.
+
 ## 1. Project Overview
 
 This is a React + React Router bus application with Redux Toolkit for app state and RTK Query for bus API requests.
