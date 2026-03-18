@@ -51,6 +51,8 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: [lint, typecheck, test]
     runs-on: ubuntu-latest
+    env:
+      VITE_PROXY_API_BASE_URL: ${{ vars.VITE_PROXY_API_BASE_URL }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v2
