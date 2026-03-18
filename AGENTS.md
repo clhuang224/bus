@@ -379,6 +379,7 @@ Commit body rules:
 - add a blank line between the subject and body
 - explicitly summarize the concrete changes included in the commit
 - do not leave the body vague or generic
+- do not write literal `\n` sequences in the commit message; use real line breaks in the body
 
 Mark breaking changes with `!` in the header or a `BREAKING CHANGE:` footer when needed.
 
