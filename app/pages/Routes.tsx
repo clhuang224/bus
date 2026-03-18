@@ -10,6 +10,32 @@ import { busApi } from '~/modules/apis/bus'
 import type { BusRoute } from '~/modules/interfaces/BusRoute'
 import type { AreaContext } from './AppLayout'
 
+const routeNameCollator = new Intl.Collator('zh-Hant-u-co-stroke', {
+  numeric: true
+})
+
+function deduplicateRoutes(routes: BusRoute<string>[]) {
+  return Array.from(
+    routes.reduce<Map<string, BusRoute<string>>>((result, route) => {
+      if (!result.has(route.RouteUID)) {
+        result.set(route.RouteUID, route)
+      }
+
+      return result
+    }, new Map()).values()
+  )
+}
+
+function matchesRouteKeyword(route: BusRoute<string>, keyword: string) {
+  if (!keyword) return true
+
+  return [
+    route.RouteName.zh_TW,
+    route.DepartureStopName.zh_TW,
+    route.DestinationStopName.zh_TW
+  ].some((value) => value.toLowerCase().includes(keyword))
+}
+
 export default function Routes() {
   const { keyword, setKeyword } = useSearchRouteParams()
   const { area } = useOutletContext<AreaContext>()
@@ -18,28 +44,8 @@ export default function Routes() {
   const filteredRoutes = useMemo(() => {
     const normalizedKeyword = keyword.trim().toLowerCase()
 
-    const uniqueRoutes = routes.reduce<Map<string, BusRoute<string>>>((result, route) => {
-      if (!result.has(route.RouteUID)) {
-        result.set(route.RouteUID, route)
-      }
-
-      return result
-    }, new Map())
-
-    const routeNameCollator = new Intl.Collator('zh-Hant-u-co-stroke', {
-      numeric: true
-    })
-
-    return Array.from(uniqueRoutes.values())
-      .filter((route) => {
-        if (!normalizedKeyword) return true
-
-        return [
-          route.RouteName.zh_TW,
-          route.DepartureStopName.zh_TW,
-          route.DestinationStopName.zh_TW
-        ].some((value) => value.toLowerCase().includes(normalizedKeyword))
-      })
+    return deduplicateRoutes(routes)
+      .filter((route) => matchesRouteKeyword(route, normalizedKeyword))
       .sort((left, right) => routeNameCollator.compare(left.RouteName.zh_TW, right.RouteName.zh_TW))
   }, [keyword, routes])
 

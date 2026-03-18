@@ -72,6 +72,26 @@ const routesData = [
     VersionID: 1
   },
   {
+    RouteUID: 'route-1',
+    RouteID: '1-duplicate',
+    HasSubRoutes: true,
+    Operators: [],
+    AuthorityID: '005',
+    ProviderID: 'provider-1-duplicate',
+    SubRoutes: [],
+    BusRouteType: 0,
+    RouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
+    DestinationStopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
+    TicketPriceDescription: { zh_TW: '', en: '' },
+    FareBufferZoneDescription: { zh_TW: '', en: '' },
+    RouteMapImageUrl: '',
+    City: CityNameType.NEW_TAIPEI,
+    CityCode: 'NWT',
+    UpdateTime: '2026-03-17T10:05:00+08:00',
+    VersionID: 2
+  },
+  {
     RouteUID: 'route-2',
     RouteID: '2',
     HasSubRoutes: true,
@@ -124,6 +144,12 @@ describe('Routes', () => {
     renderRoutes()
 
     expect(screen.getByText('目前搜尋範圍：雙北')).toBeInTheDocument()
+  })
+
+  it('deduplicates routes that share the same RouteUID', () => {
+    renderRoutes()
+
+    expect(screen.getAllByText('藍1')).toHaveLength(1)
   })
 
   it('filters routes by the entered keyword', async () => {
