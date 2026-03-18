@@ -24,7 +24,7 @@ export const busApi = createApi({
   baseQuery: async (args, api, extraOptions) => {
     try {
       const result = await tdxBaseQuery(args, api, extraOptions)
-      const errorModal = result.error ? getBusErrorModal(result.error.status) : null
+      const errorModal = result.error ? getBusErrorModal(result.error) : null
 
       if (errorModal) {
         api.dispatch(openGlobalModal(errorModal))

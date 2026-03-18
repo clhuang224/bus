@@ -1,14 +1,20 @@
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { OpenGlobalModalPayload } from '../../slices/globalModalSlice'
 
-export enum TdxErrorStatus {
+export enum TdxHttpErrorStatus {
   UNAUTHORIZED = 401,
-  RATE_LIMIT = 429,
-  FETCH_ERROR = 'FETCH_ERROR'
+  RATE_LIMIT = 429
+}
+
+export enum BaseQueryErrorStatus {
+  FETCH_ERROR = 'FETCH_ERROR',
+  PARSING_ERROR = 'PARSING_ERROR',
+  TIMEOUT_ERROR = 'TIMEOUT_ERROR',
+  CUSTOM_ERROR = 'CUSTOM_ERROR'
 }
 
 // Development only
-const tdxUnauthorizedModal: OpenGlobalModalPayload = {
+export const tdxUnauthorizedModal: OpenGlobalModalPayload = {
   title: 'TDX TOKEN 已過期',
   message: '你的 TDX TOKEN 已過期，請更新 .env.local 並重新執行專案。',
   variant: 'alert',
@@ -32,15 +38,35 @@ export const tdxSystemErrorModal: OpenGlobalModalPayload = {
   confirmAction: 'refresh'
 }
 
-export const getBusErrorModal = (status: FetchBaseQueryError['status']) => {
-  switch (status) {
-    case TdxErrorStatus.RATE_LIMIT:
-      return tdxRateLimitModal
-    case TdxErrorStatus.FETCH_ERROR:
-      return tdxSystemErrorModal
-    case TdxErrorStatus.UNAUTHORIZED:
+function isTdxSystemStatus(status: number) {
+  return status >= 500
+}
+
+export const getBusErrorModal = (error: FetchBaseQueryError) => {
+  switch (error.status) {
+    case TdxHttpErrorStatus.UNAUTHORIZED:
       return tdxUnauthorizedModal
+    case TdxHttpErrorStatus.RATE_LIMIT:
+      return tdxRateLimitModal
+    case BaseQueryErrorStatus.PARSING_ERROR:
+      switch (error.originalStatus) {
+        case TdxHttpErrorStatus.UNAUTHORIZED:
+          return tdxUnauthorizedModal
+        case TdxHttpErrorStatus.RATE_LIMIT:
+          return tdxRateLimitModal
+        default:
+          // A non-JSON or malformed TDX response is effectively a server-side outage.
+          return tdxSystemErrorModal
+      }
+    case BaseQueryErrorStatus.FETCH_ERROR:
+    case BaseQueryErrorStatus.TIMEOUT_ERROR:
+    case BaseQueryErrorStatus.CUSTOM_ERROR:
+      return null
     default:
+      if (typeof error.status === 'number' && isTdxSystemStatus(error.status)) {
+        return tdxSystemErrorModal
+      }
+
       return null
   }
 }

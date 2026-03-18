@@ -301,6 +301,8 @@ Testing priorities:
 
 For utility functions, prefer focused unit tests.
 
+When a test needs expected values that already exist as exported constants, fixtures, or config objects, import and reuse them instead of retyping the same strings inline.
+
 For React components, prefer testing:
 
 - state branches
