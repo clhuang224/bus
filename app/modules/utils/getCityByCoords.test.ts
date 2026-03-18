@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { FeatureCollection } from 'geojson'
 import { CityNameType } from '../enums/CityNameType'
+import { CountyIdType } from '../enums/CountyIdType'
 import { DEFAULT_CITY, getCityByCoords } from './getCityByCoords'
 
 const mockGeojson: FeatureCollection = {
@@ -85,6 +86,34 @@ describe('getCityByCoords', () => {
 
   it('returns the first matching known city when polygons overlap', () => {
     expect(getCityByCoords([25.05, 121.55], mockGeojson)).toBe(CityNameType.NEW_TAIPEI)
+  })
+
+  it('supports taiwan-atlas county property names', () => {
+    const atlasGeojson: FeatureCollection = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          properties: {
+            COUNTYID: CountyIdType.TAICHUNG,
+            COUNTYENG: 'Taichung City',
+            COUNTYNAME: '台中市'
+          },
+          geometry: {
+            type: 'MultiPolygon',
+            coordinates: [[[
+              [120.4, 24.0],
+              [120.9, 24.0],
+              [120.9, 24.4],
+              [120.4, 24.4],
+              [120.4, 24.0]
+            ]]]
+          }
+        }
+      ]
+    }
+
+    expect(getCityByCoords([24.1369, 120.6847], atlasGeojson)).toBe(CityNameType.TAICHUNG)
   })
 
   it('treats a point on the polygon boundary as inside the city', () => {

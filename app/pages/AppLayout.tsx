@@ -2,14 +2,15 @@ import { AppShell, Box, Flex, useMantineTheme } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { RiHeart3Fill, RiHeart3Line, RiMapPin3Fill, RiMapPin3Line, RiSearchFill, RiSearchLine } from '@remixicon/react'
 import { useEffect, useMemo, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { Outlet, useLocation } from 'react-router'
 import { AppNavLink } from '~/components/AppNavLink'
 import { AreaSelect } from '~/components/AreaSelect'
 import { APP_FOOTER_HEIGHT, APP_HEADER_HEIGHT } from '~/modules/consts/layout'
 import { AreaType } from '~/modules/enums/AreaType'
 import { useWatchGeo } from '~/modules/hooks/useWatchGeo'
-import type { RootState } from '~/modules/store'
+import { fetchCityGeoJSON } from '~/modules/slices/cityGeoSlice'
+import type { AppDispatch, RootState } from '~/modules/store'
 import { getAreaByCoords } from '~/modules/utils/getAreaByCoords'
 
 export interface AreaContext {
@@ -26,6 +27,7 @@ export function meta() {
 export default function AppLayout () {
 
   const location = useLocation()
+  const dispatch = useDispatch<AppDispatch>()
 
   const theme = useMantineTheme()
   const isSm = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`)
@@ -57,6 +59,11 @@ export default function AppLayout () {
   ]), [])
 
   useWatchGeo()
+
+  useEffect(() => {
+    if (geojson) return
+    dispatch(fetchCityGeoJSON())
+  }, [dispatch, geojson])
 
   useEffect(() => {
     if (!coords) return

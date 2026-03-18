@@ -1,4 +1,5 @@
 import { CityNameType } from '../enums/CityNameType'
+import { CountyIdType } from '../enums/CountyIdType'
 
 export const cityMapName: Record<CityNameType, string> = {
   [CityNameType.TAIPEI]: '台北市',
@@ -23,4 +24,33 @@ export const cityMapName: Record<CityNameType, string> = {
   [CityNameType.KINMEN_COUNTY]: '金門縣',
   [CityNameType.PENGHU_COUNTY]: '澎湖縣',
   [CityNameType.LIENCHIANG_COUNTY]: '連江縣'
+}
+
+export const cityMapNameToCity = Object.fromEntries(
+  Object.entries(cityMapName).map(([city, cityNameTw]) => [cityNameTw, city as CityNameType])
+) as Record<string, CityNameType>
+
+export const countyIdMapCity: Record<CountyIdType, CityNameType> = {
+  [CountyIdType.TAIPEI]: CityNameType.TAIPEI,
+  [CountyIdType.TAICHUNG]: CityNameType.TAICHUNG,
+  [CountyIdType.KEELUNG]: CityNameType.KEELUNG,
+  [CountyIdType.TAINAN]: CityNameType.TAINAN,
+  [CountyIdType.KAOHSIUNG]: CityNameType.KAOHSIUNG,
+  [CountyIdType.NEW_TAIPEI]: CityNameType.NEW_TAIPEI,
+  [CountyIdType.YILAN_COUNTY]: CityNameType.YILAN_COUNTY,
+  [CountyIdType.TAOYUAN]: CityNameType.TAOYUAN,
+  [CountyIdType.CHIAYI]: CityNameType.CHIAYI,
+  [CountyIdType.HSINCHU_COUNTY]: CityNameType.HSINCHU_COUNTY,
+  [CountyIdType.MIAOLI_COUNTY]: CityNameType.MIAOLI_COUNTY,
+  [CountyIdType.NANTOU_COUNTY]: CityNameType.NANTOU_COUNTY,
+  [CountyIdType.CHANGHUA_COUNTY]: CityNameType.CHANGHUA_COUNTY,
+  [CountyIdType.HSINCHU]: CityNameType.HSINCHU,
+  [CountyIdType.YUNLIN_COUNTY]: CityNameType.YUNLIN_COUNTY,
+  [CountyIdType.CHIAYI_COUNTY]: CityNameType.CHIAYI_COUNTY,
+  [CountyIdType.PINGTUNG_COUNTY]: CityNameType.PINGTUNG_COUNTY,
+  [CountyIdType.HUALIEN_COUNTY]: CityNameType.HUALIEN_COUNTY,
+  [CountyIdType.TAITUNG_COUNTY]: CityNameType.TAITUNG_COUNTY,
+  [CountyIdType.KINMEN_COUNTY]: CityNameType.KINMEN_COUNTY,
+  [CountyIdType.PENGHU_COUNTY]: CityNameType.PENGHU_COUNTY,
+  [CountyIdType.LIENCHIANG_COUNTY]: CityNameType.LIENCHIANG_COUNTY
 }
