@@ -14,6 +14,7 @@ interface PropType {
   }>
   selectedStop: string | null
   selectedStopPopupContent?: ReactNode
+  isSm?: boolean
   onSelectStop: (id: string | null) => void
 }
 
@@ -22,6 +23,7 @@ export const NearbyStopMap = ({
   markers = [],
   selectedStop,
   selectedStopPopupContent,
+  isSm = false,
   onSelectStop
 }: PropType) => {
   const [map, setMap] = useState<mapLibre.Map | null>(null)
@@ -139,7 +141,19 @@ export const NearbyStopMap = ({
         }}
       />
       {popupContainer && selectedStopPopupContent
-        ? createPortal(selectedStopPopupContent, popupContainer)
+        ? createPortal(
+          <div
+            style={isSm
+              ? {
+                  maxHeight: '50dvh',
+                  overflowY: 'auto'
+                }
+              : undefined}
+          >
+            {selectedStopPopupContent}
+          </div>,
+          popupContainer
+        )
         : null}
     </>
   )

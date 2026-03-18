@@ -368,6 +368,7 @@ const Nearby = () => {
           markers={markers}
           selectedStop={selectedStopId}
           selectedStopPopupContent={selectedStopPopupContent}
+          isSm={isSm}
           onSelectStop={selectStop}
         />
       </Flex>

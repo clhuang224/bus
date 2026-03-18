@@ -70,6 +70,7 @@ vi.mock('~/components/nearby/NearbyStopMap', () => ({
     selectedStop: string | null
     onSelectStop: (id: string | null) => void
     markers: Array<{ id: string, label: string }>
+    isSm?: boolean
   }) => {
     mockNearbyStopMap(props)
     return <div data-testid="nearby-stop-map" />
