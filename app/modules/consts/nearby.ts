@@ -1,0 +1,1 @@
+export const NEARBY_DISTANCE_KM = 0.5

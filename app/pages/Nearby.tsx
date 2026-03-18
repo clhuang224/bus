@@ -22,9 +22,9 @@ import { useNearbySearchParams } from '~/modules/hooks/useNearbySearchParams'
 import { NearbyStopDetail } from '~/components/nearby/NearbyStopDetail'
 import { NearbyStopMap } from '~/components/nearby/NearbyStopMap'
 import { NearbyStopRoutes } from '~/components/nearby/NearbyStopRoutes'
+import { APP_HEADER_HEIGHT } from '~/modules/consts/layout'
+import { NEARBY_DISTANCE_KM } from '~/modules/consts/nearby'
 
-const NEARBY_DISTANCE_KM = 0.5
-const APP_HEADER_HEIGHT = 76
 const disabledNearbyPermissions = [GeoPermissionType.UNSUPPORTED, GeoPermissionType.DENIED]
 
 const Nearby = () => {
@@ -321,8 +321,8 @@ const Nearby = () => {
         {isSm && (
           <ActionIcon
             pos="absolute"
-            top="8px"
-            left="8px"
+            right="8px"
+            bottom="8px"
             style={{ zIndex: 2 }}
             onClick={openSidebar}
           >
@@ -332,14 +332,12 @@ const Nearby = () => {
       <Drawer
         opened={isSm && isSidebarOpened}
         onClose={closeSidebar}
-        position="left"
+        position="bottom"
         size="100%"
         hiddenFrom="sm"
-        withCloseButton={false}
         styles={{
           content: {
             top: APP_HEADER_HEIGHT,
-            height: `calc(100dvh - ${APP_HEADER_HEIGHT}px)`,
             position: 'relative',
             display: 'flex',
             flexDirection: 'column'

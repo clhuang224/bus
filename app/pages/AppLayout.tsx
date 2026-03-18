@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux'
 import { Outlet, useLocation } from 'react-router'
 import { AppNavLink } from '~/components/AppNavLink'
 import { AreaSelect } from '~/components/AreaSelect'
+import { APP_FOOTER_HEIGHT, APP_HEADER_HEIGHT } from '~/modules/consts/layout'
 import { AreaType } from '~/modules/enums/AreaType'
 import { useWatchGeo } from '~/modules/hooks/useWatchGeo'
 import type { RootState } from '~/modules/store'
@@ -64,8 +65,8 @@ export default function AppLayout () {
 
   return (
     <AppShell
-      header={{ height: 76 }}
-      footer={{ height: isSm ? 84 : 0 }}
+      header={{ height: APP_HEADER_HEIGHT }}
+      footer={{ height: isSm ? APP_FOOTER_HEIGHT : 0 }}
     >
       <AppShell.Header h={76} p="md">
         <Flex align="center" gap="md">
