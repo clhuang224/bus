@@ -335,6 +335,8 @@ Avoid brittle assertions against:
 - animation details
 - map library internals
 
+When UI copy is primarily presentational, prefer matching the important user-facing meaning instead of locking tests to exact punctuation or badge text composition. Use exact text assertions for messages, labels, or copy that are part of the real product contract, and use looser matchers for formatting-oriented display strings.
+
 For integrations with heavy UI libraries or maps, prefer lightweight mocks that preserve the component contract instead of testing the third-party library itself.
 
 ## 7. Commit Rules

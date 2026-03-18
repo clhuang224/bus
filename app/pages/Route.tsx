@@ -1,17 +1,20 @@
-import { ActionIcon, Alert, Flex, ScrollArea, Stack, Tabs, Text, Title, useMantineTheme } from '@mantine/core'
+import { ActionIcon, Alert, Flex, ScrollArea, Stack, Tabs, Text, useMantineTheme } from '@mantine/core'
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
 import { useEffect, useMemo, useState } from 'react'
 import { MapSidebarLayout } from '~/components/common/MapSidebarLayout'
 import { useNavigate, useParams } from 'react-router'
 import { RouteMap } from '~/components/routes/RouteMap'
-import { RouteStopsTimeline } from '~/components/routes/RouteStopsTimeline'
+import { RouteStopList } from '~/components/routes/RouteStopList'
+import { useFavoriteRouteStops } from '~/modules/hooks/useFavoriteRouteStops'
 import { busApi } from '~/modules/apis/bus'
 import { directionMapName } from '~/modules/consts/direction'
 import { routeMessages } from '~/modules/consts/pageMessages'
 import type { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
+import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import type { StopOfRouteStop } from '~/modules/interfaces/StopOfRoute'
 import { RiArrowLeftSLine } from '@remixicon/react'
+import { AppBadge } from '~/components/common/AppBadge'
 
 interface RouteTab {
   id: string
@@ -26,6 +29,7 @@ export default function Route() {
   const theme = useMantineTheme()
   const isSm = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`)
   const [isSidebarOpened, { open: openSidebar, close: closeSidebar }] = useDisclosure(false)
+  const { isFavoriteRouteStop, toggleFavoriteRouteStop } = useFavoriteRouteStops()
   const cityName = city as CityNameType
   const { data: routes = [], isLoading: isRoutesLoading, error: routesError } = busApi.useGetRoutesByCityQuery(
     cityName,
@@ -82,6 +86,18 @@ export default function Route() {
     ) ?? null
   }, [activeTab, id, routeTabs, stopOfRoutes])
 
+  const activeSubRoute = useMemo(() => {
+    if (!busRoute || !activeTab) return null
+
+    const activeRouteTab = routeTabs.find((tab) => tab.id === activeTab)
+    if (!activeRouteTab) return null
+
+    return busRoute.SubRoutes.find((subRoute) =>
+      subRoute.SubRouteUID === activeRouteTab.subRouteUID &&
+      subRoute.Direction === activeRouteTab.direction
+    ) ?? null
+  }, [activeTab, busRoute, routeTabs])
+
   const stopPositionMap = useMemo(() => {
     return stopsByCity.reduce<Map<string, (typeof stopsByCity)[number]['position']>>((result, stop) => {
       if (stop.position) {
@@ -93,13 +109,37 @@ export default function Route() {
   }, [stopsByCity])
 
   const timelineStops = useMemo(() => {
-    return (activeStopOfRoute?.Stops ?? []).map((stop) => ({
-      id: stop.StopUID,
-      name: stop.StopName.zh_TW,
-      sequence: stop.StopSequence,
-      isFavorite: false
-    }))
-  }, [activeStopOfRoute])
+    if (!activeStopOfRoute || !activeSubRoute || !busRoute) return []
+
+    return activeStopOfRoute.Stops.map((stop) => {
+      const stationKey = stop.StationID ?? stop.StopUID
+      const favoriteRouteStop: FavoriteRouteStop = {
+        favoriteId: `${busRoute.RouteUID}-${activeSubRoute.SubRouteUID}-${activeSubRoute.Direction}-${stationKey}`,
+        city: busRoute.City,
+        routeUID: busRoute.RouteUID,
+        routeName: busRoute.RouteName.zh_TW,
+        subRouteUID: activeSubRoute.SubRouteUID,
+        subRouteName: activeSubRoute.SubRouteName.zh_TW,
+        direction: activeSubRoute.Direction,
+        stopUID: stop.StopUID,
+        stopID: stop.StopID,
+        stationID: stop.StationID ?? null,
+        stationKey,
+        stopName: stop.StopName.zh_TW,
+        stopSequence: stop.StopSequence,
+        departure: activeSubRoute.DepartureStopName?.zh_TW || busRoute.DepartureStopName.zh_TW,
+        destination: activeSubRoute.DestinationStopName?.zh_TW || busRoute.DestinationStopName.zh_TW
+      }
+
+      return {
+        id: stop.StopUID,
+        favoriteRouteStop,
+        name: stop.StopName.zh_TW,
+        sequence: stop.StopSequence,
+        isFavorite: isFavoriteRouteStop(favoriteRouteStop.favoriteId)
+      }
+    })
+  }, [activeStopOfRoute, activeSubRoute, busRoute, isFavoriteRouteStop])
 
   const routeMapStops = useMemo(() => {
     return (activeStopOfRoute?.Stops ?? []).map((stop: StopOfRouteStop) => ({
@@ -146,18 +186,16 @@ export default function Route() {
           {busRoute && routeTabs.length > 0 && (
             <>
               <Stack gap={4}>
-                <Flex gap="xs">
+                <Flex gap="xs" align="center">
                   <ActionIcon onClick={handleBack}>
                     <RiArrowLeftSLine size={18} />
                   </ActionIcon>
-                  <Title order={3}>{busRoute.RouteName.zh_TW || '公車路線'}</Title>
-
+                  <AppBadge type="route" size="xl">{busRoute.RouteName.zh_TW}</AppBadge>
                 </Flex>
-                <Text size="sm" c="dimmed">
+                <Text size="sm" c="dimmed" mt="sm">
                   {busRoute.DepartureStopName.zh_TW} - {busRoute.DestinationStopName.zh_TW}
                 </Text>
               </Stack>
-
               <Tabs
                 value={activeTab}
                 onChange={setActiveTab}
@@ -189,7 +227,10 @@ export default function Route() {
                     style={{ flex: 1, minHeight: 0 }}
                   >
                     <ScrollArea h="100%">
-                      <RouteStopsTimeline stops={timelineStops} />
+                      <RouteStopList
+                        stops={timelineStops}
+                        onToggleFavorite={toggleFavoriteRouteStop}
+                      />
                     </ScrollArea>
                   </Tabs.Panel>
                 ))}

@@ -1,12 +1,15 @@
 // @vitest-environment jsdom
 
 import '@testing-library/jest-dom/vitest'
+import { configureStore } from '@reduxjs/toolkit'
 import { MantineProvider } from '@mantine/core'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { Provider } from 'react-redux'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import { CityNameType } from '~/modules/enums/CityNameType'
+import favoriteSlice from '~/modules/slices/favoriteSlice'
 import RoutePage from './Route'
 
 const {
@@ -179,19 +182,28 @@ const stopsByCityData = [
 ]
 
 function renderRoutePage() {
+  const store = configureStore({
+    reducer: {
+      favorite: favoriteSlice.reducer
+    }
+  })
+
   return render(
-    <MantineProvider>
-      <MemoryRouter initialEntries={['/routes/Taipei/route-1']}>
-        <Routes>
-          <Route path="/routes/:city/:id" element={<RoutePage />} />
-        </Routes>
-      </MemoryRouter>
-    </MantineProvider>
+    <Provider store={store}>
+      <MantineProvider>
+        <MemoryRouter initialEntries={['/routes/Taipei/route-1']}>
+          <Routes>
+            <Route path="/routes/:city/:id" element={<RoutePage />} />
+          </Routes>
+        </MemoryRouter>
+      </MantineProvider>
+    </Provider>
   )
 }
 
 describe('Route', () => {
   beforeEach(() => {
+    localStorage.clear()
     mockUseGetRoutesByCityQuery.mockReset()
     mockUseGetStopOfRoutesByCityQuery.mockReset()
     mockUseGetStopsByCityQuery.mockReset()
@@ -228,14 +240,14 @@ describe('Route', () => {
     cleanup()
   })
 
-  it('shows subroute tabs and the stop timeline for the active subroute', () => {
+  it('shows subroute tabs and the stop list for the active subroute', () => {
     renderRoutePage()
 
     expect(screen.getByText('藍1')).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: /往捷運昆陽站.*去程/ })).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: /往市政府.*返程/ })).toBeInTheDocument()
-    expect(screen.getByText('1 市政府')).toBeInTheDocument()
-    expect(screen.getByText('2 國父紀念館')).toBeInTheDocument()
+    expect(screen.getByText('1. 市政府')).toBeInTheDocument()
+    expect(screen.getByText('2. 國父紀念館')).toBeInTheDocument()
   })
 
   it('passes mapped stop positions to the route map', () => {
@@ -266,6 +278,23 @@ describe('Route', () => {
     renderRoutePage()
 
     expect(screen.getByText('查無路線')).toBeInTheDocument()
+  })
+
+  it('toggles the favorite route stop from the timeline', () => {
+    renderRoutePage()
+
+    const favoriteButton = screen.getAllByRole('button', { name: '收藏站牌路線' })[0]
+    fireEvent.click(favoriteButton)
+
+    expect(screen.getByRole('button', { name: '取消收藏站牌路線' })).toBeInTheDocument()
+    expect(JSON.parse(localStorage.getItem('favoriteRouteStops') ?? '[]')).toEqual([
+      expect.objectContaining({
+        city: CityNameType.TAIPEI,
+        routeUID: 'route-1',
+        subRouteUID: 'subroute-1',
+        stopUID: 'stop-1'
+      })
+    ])
   })
 
   it('opens the bottom drawer on small screens', async () => {
