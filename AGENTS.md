@@ -223,6 +223,18 @@ If both city-level and area-level RTK Query endpoints exist, only export the hoo
 
 Across the project, prefer `async` / `await` over chained `.then()` / `.catch()` promise style unless there is a clear reason not to.
 
+For local development, using a manually refreshed `VITE_TDX_TOKEN` in `.env.local` is acceptable.
+
+For public deployment, treat both the TDX `client_secret` and the resulting bearer token as sensitive credentials. A GitHub Pages frontend must not be the long-term place where those credentials are exposed.
+
+The preferred future direction is:
+
+1. Keep the frontend as a static app.
+2. Move TDX authentication and request proxying behind a thin server-side layer.
+3. Prefer Cloudflare Workers as the first option for that proxy, unless another platform is already in active use.
+
+Once a Worker-based proxy is in place, prefer removing the manual token refresh workflow from the normal app setup and routing frontend requests through the proxy instead.
+
 ## 4. UI And Copy Rules
 
 ### Language
