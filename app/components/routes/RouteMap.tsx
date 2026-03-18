@@ -18,9 +18,20 @@ interface PropType {
 const ROUTE_LINE_SOURCE_ID = 'route-line-source'
 const ROUTE_LINE_LAYER_ID = 'route-line-layer'
 
+function removeRouteLine(map: MapLibreMap) {
+  if (map.getLayer(ROUTE_LINE_LAYER_ID)) {
+    map.removeLayer(ROUTE_LINE_LAYER_ID)
+  }
+
+  if (map.getSource(ROUTE_LINE_SOURCE_ID)) {
+    map.removeSource(ROUTE_LINE_SOURCE_ID)
+  }
+}
+
 export const RouteMap = ({ stops }: PropType) => {
   const [map, setMap] = useState<MapLibreMap | null>(null)
   const [isMapReady, setIsMapReady] = useState(false)
+  const isUnmountingRef = useRef(false)
   const markerRef = useRef<Marker[]>([])
 
   const positionedStops = useMemo(
@@ -31,6 +42,14 @@ export const RouteMap = ({ stops }: PropType) => {
   const center = positionedStops[0]
     ? [positionedStops[0].position[1], positionedStops[0].position[0]] as LatLng
     : null
+
+  useEffect(() => {
+    isUnmountingRef.current = false
+
+    return () => {
+      isUnmountingRef.current = true
+    }
+  }, [])
 
   useEffect(() => {
     if (!map) {
@@ -60,13 +79,7 @@ export const RouteMap = ({ stops }: PropType) => {
     markerRef.current.forEach((marker) => marker.remove())
     markerRef.current = []
 
-    if (map.getLayer(ROUTE_LINE_LAYER_ID)) {
-      map.removeLayer(ROUTE_LINE_LAYER_ID)
-    }
-
-    if (map.getSource(ROUTE_LINE_SOURCE_ID)) {
-      map.removeSource(ROUTE_LINE_SOURCE_ID)
-    }
+    removeRouteLine(map)
 
     if (positionedStops.length > 1) {
       map.addSource(ROUTE_LINE_SOURCE_ID, {
@@ -137,13 +150,8 @@ export const RouteMap = ({ stops }: PropType) => {
       markerRef.current.forEach((marker) => marker.remove())
       markerRef.current = []
 
-      if (!map) return
-      if (map.getLayer(ROUTE_LINE_LAYER_ID)) {
-        map.removeLayer(ROUTE_LINE_LAYER_ID)
-      }
-      if (map.getSource(ROUTE_LINE_SOURCE_ID)) {
-        map.removeSource(ROUTE_LINE_SOURCE_ID)
-      }
+      if (!map || isUnmountingRef.current) return
+      removeRouteLine(map)
     }
   }, [isMapReady, map, positionedStops])
 
@@ -152,6 +160,11 @@ export const RouteMap = ({ stops }: PropType) => {
       <BaseMap
         center={center}
         zoom={13}
+        onBeforeDestroy={(map) => {
+          markerRef.current.forEach((marker) => marker.remove())
+          markerRef.current = []
+          removeRouteLine(map)
+        }}
         onLoad={setMap}
       />
     </>

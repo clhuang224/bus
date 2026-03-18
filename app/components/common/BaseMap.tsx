@@ -11,16 +11,27 @@ interface PropType {
   center: LatLng | null
   zoom?: number
   showUserLocation?: boolean
+  onBeforeDestroy?: (map: Map) => void
   onLoad?: (map: Map) => void
 }
 
-const BaseMap = ({ center, zoom = 16, showUserLocation = false, onLoad }: PropType) => {
+const BaseMap = ({ center, zoom = 16, showUserLocation = false, onBeforeDestroy, onLoad }: PropType) => {
   const id = useId()
   const [map, setMap] = useState<Map | null>(null)
   const userMarkerRef = useRef<Marker | null>(null)
   const initialCenterRef = useRef(Boolean(center))
+  const onLoadRef = useRef(onLoad)
+  const onBeforeDestroyRef = useRef(onBeforeDestroy)
 
   const { coords } = useSelector((state: RootState) => state.geolocation)
+
+  useEffect(() => {
+    onLoadRef.current = onLoad
+  }, [onLoad])
+
+  useEffect(() => {
+    onBeforeDestroyRef.current = onBeforeDestroy
+  }, [onBeforeDestroy])
 
   useLayoutEffect(() => {
     const mapInstance = new mapLibre.Map({
@@ -63,9 +74,10 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, onLoad }: PropTy
     })
     setMap(mapInstance)
 
-    onLoad?.(mapInstance)
+    onLoadRef.current?.(mapInstance)
 
     return () => {
+      onBeforeDestroyRef.current?.(mapInstance)
       mapInstance.remove()
     }
   }, [id])
