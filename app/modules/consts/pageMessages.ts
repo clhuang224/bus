@@ -49,3 +49,25 @@ export const searchMessages: {
     description: '請試試其他關鍵字，或切換到不同區域。'
   }
 }
+
+export const routeMessages: {
+  loadingRoute: AlertMessageConfig
+  loadRouteError: AlertMessageConfig
+  emptyRoute: AlertMessageConfig
+} = {
+  loadingRoute: {
+    color: 'blue',
+    title: '載入中',
+    description: '正在取得此路線資料，請稍候...'
+  },
+  loadRouteError: {
+    color: 'red',
+    title: '載入路線失敗',
+    description: '請稍後再試，或確認您的網路連線。'
+  },
+  emptyRoute: {
+    color: 'yellow',
+    title: '查無路線',
+    description: '目前找不到這條公車路線資料。'
+  }
+}
