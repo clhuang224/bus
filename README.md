@@ -37,9 +37,9 @@ If permission is granted:
 - The app determines the current city from the GPS coordinates.
 - It maps that city to a service area and fetches stop data for that area.
 - Stops within **0.5 kilometers** are displayed both as a list and as map markers.
-- Clicking a stop opens the **Stop Page**, showing:
+- Clicking a stop opens the stop detail panel, showing:
+  - The stop's city and address
   - All routes serving the stop
-  - Real-time bus positions
 
 ### Route Search
 
@@ -48,15 +48,16 @@ Users can search routes within the currently selected region.
 - Route numbers can be entered using a custom bus keypad or the native keyboard.
 - Matching routes are displayed as a list.
 - Clicking a route opens the **Route Page**, which shows:
-  - All stops along the route
-  - Real-time bus positions
+  - Subroute tabs for each available direction or variant
+  - All stops along the active subroute
+  - The route path and stop markers on the map
 
 ### Route Favorites
 
-The Favorites page displays saved routes at specific stops.
+The Favorites page displays saved route-stop combinations.
 
-- Clicking a favorite opens the **Route Page** with the selected stop highlighted.
-- Real-time bus positions for that route are displayed.
+- Each favorite stores a route, subroute, direction, and a specific stop.
+- Clicking a favorite opens the matching **Route Page**.
 
 ## Current Status
 
@@ -70,7 +71,9 @@ The app is organized around route-level pages, reusable feature components, and 
 app/
 ├── components/
 │   ├── common/               # Shared UI components
+│   ├── favorite/             # Favorite feature components
 │   ├── nearby/               # Nearby feature components
+│   ├── routes/               # Route feature components
 │   └── providers/            # App providers
 ├── modules/
 │   ├── apis/                 # RTK Query APIs
@@ -89,7 +92,7 @@ app/
 
 ### Key Pages
 
-- `app/pages/Favorite.tsx`: saved favorite stops
+- `app/pages/Favorite.tsx`: saved favorite route-stop combinations
 - `app/pages/Routes.tsx`: route search flow
 - `app/pages/Nearby.tsx`: nearby stop discovery using geolocation
 - `app/pages/Route.tsx`: route detail and stop list view
@@ -115,9 +118,9 @@ Current endpoints used by the app:
 
 | Method | Endpoint | Used For | Response Summary |
 | --- | --- | --- | --- |
-| `GET` | `/Route/City/:city` | Route search and route detail pages | Route-level data including subroutes, operators, departure stop names, and destination stop names |
-| `GET` | `/StopOfRoute/City/:city` | Building stop-to-route relationships for nearby stops | Stops under each route plus destination stop data for each direction |
-| `GET` | `/Stop/City/:city` | Nearby page stop discovery | Stop positions and metadata used to group nearby stops into stations |
+| `GET` | `/Route/City/:city` | Route search, route detail, and area-level route fan-out requests | Route-level data including subroutes, operators, departure stop names, and destination stop names |
+| `GET` | `/StopOfRoute/City/:city` | Route detail and building stop-to-route relationships for nearby stops | Stops under each route plus subroute and direction-specific stop sequences |
+| `GET` | `/Stop/City/:city` | Nearby page stop discovery and route map stop positions | Stop positions and metadata used to group nearby stops into stations |
 
 In the actual implementation, these requests may include OData query parameters such as `$format=JSON`.
 
@@ -126,6 +129,7 @@ In the actual implementation, these requests may include OData query parameters 
 - API access is centralized in `app/modules/apis/bus.ts`.
 - Raw TDX localized fields such as `Zh_tw` and `En` are transformed into app-localized objects like `{ zh_TW, en }`.
 - Nearby stop route data is further shaped into view models such as `NearbyStopGroup` and `StationRoute`.
+- Area-level requests are implemented by fan-out to multiple city endpoints and merged in the API layer.
 
 ## Development
 
