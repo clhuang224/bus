@@ -152,6 +152,8 @@ Good fits:
 - enum helpers
 - sorting or formatting helpers used in multiple places
 
+When iterating over enum members in app code or tests, prefer shared helpers such as `getEnumValues(...)` instead of repeating raw `Object.values(...)` enum traversal inline.
+
 Do not move tiny single-file implementation details into `utils/` too early. If logic is only used in one page or one component and is still easy to read there, keep it local.
 
 ### `app/modules/hooks/`
@@ -283,6 +285,8 @@ Keep types inside a component file only when they are truly private to that comp
 ## 6. Testing Guidance
 
 Prefer colocated tests for small modules and utilities using `*.test.ts` next to the implementation file.
+
+Use `*.test.ts` and `*.test.tsx` consistently across the repository. Do not mix `*.spec.*` and `*.test.*` naming styles.
 
 Only move tests into a dedicated folder such as `__tests__/` when:
 
