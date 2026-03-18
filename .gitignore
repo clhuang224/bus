@@ -6,3 +6,5 @@
 /build/
 
 .env.local
+workers/tdx-proxy/.dev.vars
+workers/tdx-proxy/.wrangler/

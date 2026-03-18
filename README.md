@@ -133,9 +133,55 @@ In the actual implementation, these requests may include OData query parameters 
 
 ## Development
 
-### API Token (optional)
+### Local Development Proxy
 
-The app can run without a token, but requests may be rate-limited.
+Local development now prefers the bundled Cloudflare Worker proxy instead of a frontend bearer token.
+
+This repository includes a Worker scaffold at `workers/tdx-proxy/`.
+
+Suggested local setup:
+
+1. Install dependencies with `pnpm install`.
+2. Copy `workers/tdx-proxy/.dev.vars.example` to `workers/tdx-proxy/.dev.vars`.
+3. Fill in `TDX_CLIENT_ID` and `TDX_CLIENT_SECRET`.
+4. The frontend already points to the local Worker in `.env.development`:
+
+```env
+VITE_PROXY_API_BASE_URL=http://127.0.0.1:3000/api/tdx
+```
+
+5. Run local development with:
+
+```bash
+pnpm run dev
+```
+
+This starts both the frontend dev server and the local Cloudflare Worker proxy.
+
+### Cloudflare Worker Proxy (recommended for public deployment)
+
+For public deployment, keep the frontend static and move TDX authentication behind a thin Cloudflare Worker proxy so the frontend no longer exposes a bearer token.
+
+Suggested deployment setup:
+
+1. Create Worker secrets for `TDX_CLIENT_ID` and `TDX_CLIENT_SECRET`.
+2. Deploy the Worker with:
+
+```bash
+pnpm run deploy:proxy
+```
+
+3. Point the frontend at the deployed Worker by setting:
+
+```env
+VITE_PROXY_API_BASE_URL=https://your-worker-domain.example.com/api/tdx
+```
+
+When `VITE_PROXY_API_BASE_URL` is set, the frontend stops attaching `VITE_TDX_TOKEN` and assumes the proxy handles authentication instead.
+
+### Direct TDX Token Fallback (optional)
+
+If the Worker proxy is unavailable, the app can still fall back to direct TDX requests with a manually refreshed bearer token.
 
 Register an application on the [Transport Data eXchange](https://tdx.transportdata.tw/) to obtain a `client_id` and `client_secret`.
 
@@ -160,7 +206,7 @@ The response will contain an access_token:
 }
 ```
 
-To enable authenticated requests, add the token to `.env.local`:
+To enable the fallback path, remove `VITE_PROXY_API_BASE_URL` and add the token to `.env.local`:
 
 ```env
 VITE_TDX_TOKEN=your_access_token_here
@@ -168,7 +214,7 @@ VITE_TDX_TOKEN=your_access_token_here
 
 This token typically expires after 24 hours and must be regenerated periodically.
 
-Do not commit .env.local to version control.
+Do not commit `.env.local` or `workers/tdx-proxy/.dev.vars` to version control.
 
 ### Install Dependencies
 

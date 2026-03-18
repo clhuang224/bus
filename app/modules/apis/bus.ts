@@ -8,12 +8,14 @@ import { getBusErrorModal, tdxSystemErrorModal } from './errors/busError'
 import { openGlobalModal } from '../slices/globalModalSlice'
 import { areaMapCity } from '../consts/area'
 
+const TDX_BASE_URL = 'https://tdx.transportdata.tw/api/basic/v2/Bus'
+const apiBaseUrl = import.meta.env.VITE_PROXY_API_BASE_URL || TDX_BASE_URL
+
 const tdxBaseQuery = fetchBaseQuery({
-  baseUrl: 'https://tdx.transportdata.tw/api/basic/v2/Bus',
+  baseUrl: apiBaseUrl,
   prepareHeaders: (headers) => {
-    const token = import.meta.env.VITE_TDX_TOKEN
-    if (token) {
-      headers.set('authorization', `Bearer ${token}`)
+    if (!import.meta.env.VITE_PROXY_API_BASE_URL && import.meta.env.VITE_TDX_TOKEN) {
+      headers.set('authorization', `Bearer ${import.meta.env.VITE_TDX_TOKEN}`)
     }
     return headers
   }

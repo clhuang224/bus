@@ -5,7 +5,10 @@
   "scripts": {
     "prepare": "husky",
     "build": "react-router build",
-    "dev": "react-router dev",
+    "dev": "pnpm run dev:proxy & pnpm run dev:app",
+    "dev:app": "react-router dev",
+    "dev:proxy": "wrangler dev --config workers/tdx-proxy/wrangler.jsonc --port 3000",
+    "deploy:proxy": "wrangler deploy --config workers/tdx-proxy/wrangler.jsonc",
     "start": "react-router-serve ./build/server/index.js",
     "test": "vitest run --config vitest.config.ts",
     "typecheck": "react-router typegen && tsc",
@@ -50,6 +53,7 @@
     "typescript-eslint": "^8.38.0",
     "vite": "^6.3.3",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.0",
+    "wrangler": "^4.75.0"
   }
 }
