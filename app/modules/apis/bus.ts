@@ -4,40 +4,29 @@ import type { AreaType } from '../enums/AreaType'
 import type { CityNameType } from '../enums/CityNameType'
 import type { StopOfRoute, TdxStopOfRoute } from '../interfaces/StopOfRoute'
 import type { Stop, TdxStop } from '../interfaces/Stop'
-import { getBusErrorModal, tdxSystemErrorModal } from './errors/busError'
+import { getBusErrorModal } from './errors/busError'
 import { openGlobalModal } from '../slices/globalModalSlice'
 import { areaMapCity } from '../consts/area'
 
-const TDX_BASE_URL = 'https://tdx.transportdata.tw/api/basic/v2/Bus'
-const apiBaseUrl = import.meta.env.VITE_PROXY_API_BASE_URL || TDX_BASE_URL
+if (!import.meta.env.VITE_PROXY_API_BASE_URL) {
+  throw new Error('VITE_PROXY_API_BASE_URL is required. Follow the proxy setup in README.md.')
+}
 
-const tdxBaseQuery = fetchBaseQuery({
-  baseUrl: apiBaseUrl,
-  prepareHeaders: (headers) => {
-    if (!import.meta.env.VITE_PROXY_API_BASE_URL && import.meta.env.VITE_TDX_TOKEN) {
-      headers.set('authorization', `Bearer ${import.meta.env.VITE_TDX_TOKEN}`)
-    }
-    return headers
-  }
+const baseQuery = fetchBaseQuery({
+  baseUrl: import.meta.env.VITE_PROXY_API_BASE_URL
 })
 
 export const busApi = createApi({
   reducerPath: 'busApi',
   baseQuery: async (args, api, extraOptions) => {
-    try {
-      const result = await tdxBaseQuery(args, api, extraOptions)
-      const errorModal = result.error ? getBusErrorModal(result.error) : null
+    const result = await baseQuery(args, api, extraOptions)
+    const errorModal = result.error ? getBusErrorModal(result.error) : null
 
-      if (errorModal) {
-        api.dispatch(openGlobalModal(errorModal))
-      }
-
-      return result
-    } catch (error) {
-      console.error('busApi baseQuery error:', error)
-      api.dispatch(openGlobalModal(tdxSystemErrorModal))
-      throw error
+    if (errorModal) {
+      api.dispatch(openGlobalModal(errorModal))
     }
+
+    return result
   },
   keepUnusedDataFor: 60 * 5,
   endpoints: (build) => ({

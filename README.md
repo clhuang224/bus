@@ -112,7 +112,7 @@ The project currently uses the TDX Bus API base URL:
 
 TDX, short for Transport Data eXchange, is Taiwan's transportation data platform. It provides standardized transport datasets and APIs, including bus routes, stops, and related transit data used by this project.
 
-This project currently authenticates to TDX with a bearer access token obtained from an application-level `client_id` and `client_secret`. In practice, that means you first register an application on TDX, exchange those credentials for an access token, and then send that token in the `Authorization: Bearer ...` header for API requests.
+This project currently reaches TDX through a Cloudflare Worker proxy. The Worker holds the application-level `client_id` and `client_secret`, exchanges them for a bearer access token, and forwards authenticated TDX requests on behalf of the frontend.
 
 Current endpoints used by the app:
 
@@ -135,7 +135,7 @@ In the actual implementation, these requests may include OData query parameters 
 
 ### Local Development Proxy
 
-Local development now prefers the bundled Cloudflare Worker proxy instead of a frontend bearer token.
+Local development uses the bundled Cloudflare Worker proxy instead of a frontend bearer token.
 
 This repository includes a Worker scaffold at `workers/tdx-proxy/`.
 
@@ -162,59 +162,16 @@ This starts both the frontend dev server and the local Cloudflare Worker proxy.
 
 For public deployment, keep the frontend static and move TDX authentication behind a thin Cloudflare Worker proxy so the frontend no longer exposes a bearer token.
 
-Suggested deployment setup:
+In production, the Worker should be deployed separately and the frontend should point at the deployed proxy URL through GitHub Actions build-time configuration.
 
-1. Create Worker secrets for `TDX_CLIENT_ID` and `TDX_CLIENT_SECRET`.
-2. Deploy the Worker with:
+The current deployment design is:
 
-```bash
-pnpm run deploy:proxy
-```
+1. Store `TDX_CLIENT_ID` and `TDX_CLIENT_SECRET` in Cloudflare Worker secrets.
+2. Deploy the Worker with `pnpm run deploy:proxy`.
+3. Store `VITE_PROXY_API_BASE_URL` as a GitHub Actions repository variable.
+4. Let the GitHub Pages build inject that value during `pnpm run build`.
 
-3. Point the frontend at the deployed Worker by setting:
-
-```env
-VITE_PROXY_API_BASE_URL=https://your-worker-domain.example.com/api/tdx
-```
-
-When `VITE_PROXY_API_BASE_URL` is set, the frontend stops attaching `VITE_TDX_TOKEN` and assumes the proxy handles authentication instead.
-
-### Direct TDX Token Fallback (optional)
-
-If the Worker proxy is unavailable, the app can still fall back to direct TDX requests with a manually refreshed bearer token.
-
-Register an application on the [Transport Data eXchange](https://tdx.transportdata.tw/) to obtain a `client_id` and `client_secret`.
-
-Then use the following command to request an access token:
-
-```bash
-curl --request POST \
-  --url 'https://tdx.transportdata.tw/auth/realms/TDXConnect/protocol/openid-connect/token' \
-  --header 'content-type: application/x-www-form-urlencoded' \
-  --data grant_type=client_credentials \
-  --data client_id=your_client_id_here \
-  --data client_secret=your_client_secret_here
-```
-
-The response will contain an access_token:
-
-```json
-{
-  "access_token": "your_access_token_here",
-  "expires_in": 86400,
-  "token_type": "Bearer"
-}
-```
-
-To enable the fallback path, remove `VITE_PROXY_API_BASE_URL` and add the token to `.env.local`:
-
-```env
-VITE_TDX_TOKEN=your_access_token_here
-```
-
-This token typically expires after 24 hours and must be regenerated periodically.
-
-Do not commit `.env.local` or `workers/tdx-proxy/.dev.vars` to version control.
+The frontend no longer supports a direct bearer-token fallback path. Both local development and public deployment are expected to route TDX traffic through the proxy.
 
 ### Install Dependencies
 

@@ -223,7 +223,7 @@ If both city-level and area-level RTK Query endpoints exist, only export the hoo
 
 Across the project, prefer `async` / `await` over chained `.then()` / `.catch()` promise style unless there is a clear reason not to.
 
-For local development, prefer the bundled Cloudflare Worker proxy with `VITE_PROXY_API_BASE_URL` instead of a frontend bearer token. The default development flow should work through `pnpm run dev`, which starts both the app and the local Worker proxy.
+For local development, use the bundled Cloudflare Worker proxy with `VITE_PROXY_API_BASE_URL`. The default development flow should work through `pnpm run dev`, which starts both the app and the local Worker proxy.
 
 Treat both the TDX `client_secret` and the resulting bearer token as sensitive credentials. A GitHub Pages frontend must not be the long-term place where those credentials are exposed.
 
@@ -233,7 +233,7 @@ The preferred deployment direction is:
 2. Move TDX authentication and request proxying behind a thin server-side layer.
 3. Prefer Cloudflare Workers as the first option for that proxy, unless another platform is already in active use.
 
-Use direct `VITE_TDX_TOKEN` access only as a fallback when the Worker proxy is unavailable, not as the default path.
+Do not reintroduce a frontend `VITE_TDX_TOKEN` flow as a normal path. Both local development and public deployment should route TDX requests through the proxy unless there is a temporary, explicitly documented exception.
 
 ## 4. UI And Copy Rules
 

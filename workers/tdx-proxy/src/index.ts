@@ -3,8 +3,8 @@ const TDX_TOKEN_ENDPOINT = 'https://tdx.transportdata.tw/auth/realms/TDXConnect/
 const TOKEN_REFRESH_BUFFER_MS = 60 * 1000
 
 interface Env {
-  TDX_CLIENT_ID: string
-  TDX_CLIENT_SECRET: string
+  TDX_CLIENT_ID?: string
+  TDX_CLIENT_SECRET?: string
 }
 
 interface TdxTokenResponse {
@@ -23,6 +23,10 @@ function withCorsHeaders(headers: Headers) {
 }
 
 async function getAccessToken(env: Env) {
+  if (!env.TDX_CLIENT_ID || !env.TDX_CLIENT_SECRET) {
+    throw new Error('TDX proxy is not configured. Follow the environment setup steps in README.md.')
+  }
+
   if (cachedToken && Date.now() + TOKEN_REFRESH_BUFFER_MS < cachedTokenExpiresAt) {
     return cachedToken
   }
@@ -96,12 +100,27 @@ export default {
     } catch (error) {
       console.error('tdx-proxy worker error:', error)
 
+      const errorMessage = error instanceof Error ? error.message : 'TDX proxy request failed.'
+      const isMissingConfigError = errorMessage.startsWith('TDX proxy is not configured.')
+
       const headers = new Headers({
         'content-type': 'application/json'
       })
       withCorsHeaders(headers)
 
-      return new Response(JSON.stringify({ error: 'TDX proxy request failed.' }), {
+      if (isMissingConfigError) {
+        return new Response(JSON.stringify({
+          error: 'TDX proxy is not configured.',
+          message: errorMessage
+        }), {
+          status: 503,
+          headers
+        })
+      }
+
+      return new Response(JSON.stringify({
+        error: 'TDX proxy request failed.'
+      }), {
         status: 500,
         headers
       })
