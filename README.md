@@ -2,6 +2,10 @@
 
 A bus-focused single-page application for route lookup, nearby stops, and real-time transit information in Taiwan.
 
+## Screenshot
+
+![demo](./demo.png)
+
 ## Tech Stack
 
 - **Framework:** React (SPA)
