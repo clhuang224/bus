@@ -10,7 +10,7 @@ interface PropType {
   onCloseSidebar: () => void
   onOpenSidebar: () => void
   openButtonLabel: string
-  sidebar: ReactNode
+  panel: ReactNode
 }
 
 export const MapSidebarLayout = ({
@@ -20,7 +20,7 @@ export const MapSidebarLayout = ({
   onCloseSidebar,
   onOpenSidebar,
   openButtonLabel,
-  sidebar
+  panel
 }: PropType) => (
   <Flex h="100%" pos="relative">
     {!isSm && (
@@ -37,7 +37,7 @@ export const MapSidebarLayout = ({
           borderRight: '1px solid var(--mantine-color-gray-3)'
         }}
       >
-        {sidebar}
+        {panel}
       </Box>
     )}
 
@@ -77,7 +77,7 @@ export const MapSidebarLayout = ({
           }
         }}
       >
-        {sidebar}
+        {panel}
       </Drawer>
 
       {children}

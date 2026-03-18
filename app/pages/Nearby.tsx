@@ -299,17 +299,6 @@ const Nearby = () => {
     )
     : null
 
-  const sidebarPanel = (
-    <Flex direction="column" h="100%" gap="md">
-      { message && (
-        <Alert color={message.color} title={message.title}>
-          {message.description}
-        </Alert>
-      )}
-      {sidebarContent}
-    </Flex>
-  )
-
   return (
     <MapSidebarLayout
       isSm={isSm}
@@ -317,7 +306,16 @@ const Nearby = () => {
       onCloseSidebar={closeSidebar}
       onOpenSidebar={openSidebar}
       openButtonLabel="開啟附近站牌列表"
-      sidebar={sidebarPanel}
+      panel={(
+        <Flex direction="column" h="100%" gap="md">
+          { message && (
+            <Alert color={message.color} title={message.title}>
+              {message.description}
+            </Alert>
+          )}
+          {sidebarContent}
+        </Flex>
+      )}
     >
         {isNearbyDisabled && (
           <Overlay
