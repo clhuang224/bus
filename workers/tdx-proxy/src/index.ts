@@ -41,8 +41,23 @@ function withCorsHeaders(headers: Headers, allowedOrigin: string) {
   headers.set('vary', 'origin')
 }
 
+function getAllowedOrigins(env: Env) {
+  const configuredOrigins = env.TDX_ALLOWED_ORIGINS
+
+  if (!configuredOrigins) {
+    return []
+  }
+
+  return configuredOrigins
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter((origin) => !!origin)
+}
+
 function getCorsOrigin(request: Request, env: Env) {
-  if (!env.TDX_ALLOWED_ORIGINS) {
+  const allowedOrigins = getAllowedOrigins(env)
+
+  if (allowedOrigins.length === 0) {
     return null
   }
 
@@ -51,7 +66,6 @@ function getCorsOrigin(request: Request, env: Env) {
     return null
   }
 
-  const allowedOrigins = env.TDX_ALLOWED_ORIGINS.split(',').map(o => o.trim())
   return allowedOrigins.includes(requestOrigin) ? requestOrigin : null
 }
 

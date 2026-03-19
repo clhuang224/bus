@@ -136,7 +136,7 @@ pnpm install
 ### Set environment variables
 
 1. Copy `workers/tdx-proxy/.dev.vars.example` to `workers/tdx-proxy/.dev.vars`.
-2. Fill in `TDX_CLIENT_ID`, `TDX_CLIENT_SECRET`, and `TDX_ALLOWED_ORIGIN`.
+2. Fill in `TDX_CLIENT_ID`, `TDX_CLIENT_SECRET`, and `TDX_ALLOWED_ORIGINS`.
 3. The frontend is already pointed at the local Worker in `.env.development`:
 
 ```env
@@ -165,7 +165,7 @@ pnpm test
 
 The frontend is deployed as a static app, while TDX authentication is handled by a separate Cloudflare Worker proxy.
 
-1. Store `TDX_CLIENT_ID`, `TDX_CLIENT_SECRET`, and `TDX_ALLOWED_ORIGIN` in Cloudflare Worker environment bindings.
+1. Store `TDX_CLIENT_ID`, `TDX_CLIENT_SECRET`, and `TDX_ALLOWED_ORIGINS` in Cloudflare Worker environment bindings.
 2. Deploy the Worker with `pnpm run deploy:proxy`.
 3. Store `VITE_PROXY_API_BASE_URL` as a GitHub Actions repository variable.
 4. Let the GitHub Pages build inject that value during `pnpm run build`.
