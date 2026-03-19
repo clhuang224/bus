@@ -6,6 +6,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import type { LatLng } from '~/modules/types/CoordsType'
 import type { RootState } from '~/modules/store'
+import { createMapMarkerElement } from '~/modules/utils/createMapMarkerElement'
 
 interface PropType {
   center: LatLng | null
@@ -94,13 +95,10 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, onLoad }: PropTy
       userMarkerRef.current = null
     }
 
-    const el = document.createElement('div')
-    el.style.width = '20px'
-    el.style.height = '20px'
-    el.style.borderRadius = '50%'
-    el.style.backgroundColor = '#4A90E2'
-    el.style.border = '3px solid white'
-    el.style.boxShadow = '0 0 10px rgba(0,0,0,0.3)'
+    const el = createMapMarkerElement({
+      boxShadow: '0 0 10px rgba(0,0,0,0.3)',
+      type: 'user'
+    })
 
     userMarkerRef.current = new Marker({ element: el })
       .setLngLat(new MapLngLat(coords![1], coords![0]))

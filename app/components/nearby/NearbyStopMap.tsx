@@ -3,6 +3,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import type { LngLat, LatLng } from '~/modules/types/CoordsType'
+import { createMapMarkerElement } from '~/modules/utils/createMapMarkerElement'
 import BaseMap from '../common/BaseMap'
 
 interface PropType {
@@ -38,21 +39,14 @@ export const NearbyStopMap = ({
     markerMap.current.clear()
 
     markers.forEach(data => {
-      const el = document.createElement('div')
-      el.style.width = '36px'
-      el.style.height = '36px'
-      el.style.borderRadius = '50%'
-      el.style.backgroundColor = 'var(--mantine-primary-color-filled)'
-      el.style.border = '2px solid #fff'
-      el.style.cursor = 'pointer'
-      el.style.display = 'flex'
-      el.style.alignItems = 'center'
-      el.style.justifyContent = 'center'
-      el.style.fontSize = '16px'
-      el.style.color = 'white'
-      el.style.fontWeight = 'bold'
-      el.textContent = '🚏'
-      el.dataset.label = data.label
+      const el = createMapMarkerElement({
+        backgroundColor: 'var(--mantine-primary-color-filled)',
+        datasetLabel: data.label,
+        fontSize: '16px',
+        fontWeight: 'bold',
+        textContent: '🚏',
+        type: 'stop'
+      })
 
       const handleSelectStop = (event: MouseEvent) => {
         event.preventDefault()

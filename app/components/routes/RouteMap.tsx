@@ -2,6 +2,7 @@ import type { Map as MapLibreMap, Marker, Popup } from 'maplibre-gl'
 import mapLibre from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { LngLat, LatLng } from '~/modules/types/CoordsType'
+import { createMapMarkerElement } from '~/modules/utils/createMapMarkerElement'
 import BaseMap from '../common/BaseMap'
 
 export interface RouteMapStop {
@@ -109,22 +110,13 @@ export const RouteMap = ({ highlightedStopId = null, onSelectStop, selectedStop,
 
     positionedStops.forEach((stop) => {
       const isHighlighted = stop.id === highlightedStopId
-      const el = document.createElement('div')
-      el.style.width = '28px'
-      el.style.height = '28px'
-      el.style.borderRadius = '999px'
-      el.style.backgroundColor = isHighlighted ? HIGHLIGHTED_STOP_COLOR : ROUTE_COLOR
-      el.style.border = '2px solid #ffffff'
-      el.style.color = '#ffffff'
-      el.style.fontSize = '12px'
-      el.style.fontWeight = '700'
-      el.style.display = 'flex'
-      el.style.alignItems = 'center'
-      el.style.justifyContent = 'center'
-      el.style.cursor = 'pointer'
-      el.title = stop.name
-      el.dataset.label = stop.name
-      el.textContent = String(stop.sequence)
+      const el = createMapMarkerElement({
+        backgroundColor: isHighlighted ? HIGHLIGHTED_STOP_COLOR : ROUTE_COLOR,
+        datasetLabel: stop.name,
+        textContent: String(stop.sequence),
+        title: stop.name,
+        type: 'stop'
+      })
 
       const handleSelectStop = (event: MouseEvent) => {
         event.preventDefault()
