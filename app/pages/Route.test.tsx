@@ -12,11 +12,13 @@ import Route from './Route'
 
 const {
   mockToggleFavoriteRouteStop,
+  mockUseGetRouteShapesByRouteQuery,
   mockUseGetRoutesByCityQuery,
   mockUseGetStopOfRoutesByCityQuery,
   mockUseGetStopsByCityQuery
 } = vi.hoisted(() => ({
   mockToggleFavoriteRouteStop: vi.fn(),
+  mockUseGetRouteShapesByRouteQuery: vi.fn(),
   mockUseGetRoutesByCityQuery: vi.fn(),
   mockUseGetStopOfRoutesByCityQuery: vi.fn(),
   mockUseGetStopsByCityQuery: vi.fn()
@@ -69,6 +71,7 @@ vi.mock('~/components/common/MapSidebarLayout', () => ({
 
 vi.mock('~/modules/apis/bus', () => ({
   busApi: {
+    useGetRouteShapesByRouteQuery: mockUseGetRouteShapesByRouteQuery,
     useGetRoutesByCityQuery: mockUseGetRoutesByCityQuery,
     useGetStopOfRoutesByCityQuery: mockUseGetStopOfRoutesByCityQuery,
     useGetStopsByCityQuery: mockUseGetStopsByCityQuery
@@ -224,6 +227,7 @@ const targetFavoriteRouteStop: FavoriteRouteStop = {
 describe('Route', () => {
   beforeEach(() => {
     mockToggleFavoriteRouteStop.mockReset()
+    mockUseGetRouteShapesByRouteQuery.mockReset()
     mockUseGetRoutesByCityQuery.mockReset()
     mockUseGetStopOfRoutesByCityQuery.mockReset()
     mockUseGetStopsByCityQuery.mockReset()
@@ -242,6 +246,12 @@ describe('Route', () => {
 
     mockUseGetStopsByCityQuery.mockReturnValue({
       data: stopsByCityData,
+      isLoading: false,
+      error: null
+    })
+
+    mockUseGetRouteShapesByRouteQuery.mockReturnValue({
+      data: [],
       isLoading: false,
       error: null
     })

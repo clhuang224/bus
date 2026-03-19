@@ -4,11 +4,13 @@ import type { AreaType } from '../enums/AreaType'
 import type { CityNameType } from '../enums/CityNameType'
 import type { EstimatedArrival, TdxEstimatedArrival } from '../interfaces/EstimatedArrival'
 import type { RealtimeNearStop, TdxRealtimeNearStop } from '../interfaces/RealtimeNearStop'
+import type { RouteShape, TdxRouteShape } from '../interfaces/RouteShape'
 import type { StopOfRoute, TdxStopOfRoute } from '../interfaces/StopOfRoute'
 import type { Stop, TdxStop } from '../interfaces/Stop'
 import { getBusErrorModal } from './errors/busError'
 import { openGlobalModal } from '../slices/globalModalSlice'
 import { areaMapCity } from '../consts/area'
+import { parseRouteShapePath } from '../utils/parseRouteShapePath'
 
 if (!import.meta.env.VITE_PROXY_API_BASE_URL) {
   throw new Error('VITE_PROXY_API_BASE_URL is required. Follow the proxy setup in README.md.')
@@ -287,6 +289,27 @@ export const busApi = createApi({
         },
         position: [realtimeNearStop.BusPosition.PositionLon, realtimeNearStop.BusPosition.PositionLat] as RealtimeNearStop['position']
       }))
+    }),
+    getRouteShapesByRoute: build.query<RouteShape[], { city: CityNameType, routeUID: string }>({
+      query: ({ city, routeUID }) => `/Shape/City/${city}?%24filter=RouteUID%20eq%20'${routeUID}'&%24format=JSON`,
+      transformResponse: (res: TdxRouteShape[], _meta, { city }) => res.map((routeShape) => ({
+        ...routeShape,
+        City: city,
+        RouteName: {
+          zh_TW: routeShape.RouteName.Zh_tw,
+          en: routeShape.RouteName.En
+        },
+        SubRouteName: routeShape.SubRouteName
+          ? {
+            zh_TW: routeShape.SubRouteName.Zh_tw,
+            en: routeShape.SubRouteName.En
+          }
+          : null,
+        path: parseRouteShapePath({
+          encodedPolyline: routeShape.EncodedPolyline,
+          geometry: routeShape.Geometry
+        })
+      }))
     })
   })
 })
@@ -294,6 +317,7 @@ export const busApi = createApi({
 export const {
   useGetEstimatedArrivalByRouteQuery,
   useGetRealtimeNearStopsByRouteQuery,
+  useGetRouteShapesByRouteQuery,
   useGetRoutesByCityQuery,
   useGetStopOfRoutesByCityQuery,
   useGetStopsByCityQuery,

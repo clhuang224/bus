@@ -72,7 +72,6 @@ Work in progress.
 Planned or not yet implemented:
 
 - Real-time bus positions on the Route page
-- More accurate route lines based on official route shape data
 
 ## Project Structure
 

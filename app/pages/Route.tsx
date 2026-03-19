@@ -126,6 +126,10 @@ export default function Route() {
       subRoute.Direction === activeRouteTab.direction
     ) ?? null
   }, [activeTab, busRoute, routeTabs])
+  const { data: routeShapes = [] } = busApi.useGetRouteShapesByRouteQuery(
+    { city: cityName, routeUID: id! },
+    { skip: shouldSkipRealtimeQueries }
+  )
 
   const stopPositionMap = useMemo(() => {
     return stopsByCity.reduce<Map<string, (typeof stopsByCity)[number]['position']>>((result, stop) => {
@@ -178,6 +182,15 @@ export default function Route() {
       position: stopPositionMap.get(stop.StopUID) ?? stopPositionMap.get(stop.StopID) ?? null
     }))
   }, [activeStopOfRoute, stopPositionMap])
+
+  const activeRoutePath = useMemo(() => {
+    if (!activeSubRoute) return []
+
+    return routeShapes.find((routeShape) =>
+      routeShape.SubRouteUID === activeSubRoute.SubRouteUID &&
+      routeShape.Direction === activeSubRoute.Direction
+    )?.path ?? []
+  }, [activeSubRoute, routeShapes])
 
   const highlightedStopId = useMemo(() => {
     if (!targetFavoriteRouteStop || !activeSubRoute || !activeStopOfRoute || !busRoute) return null
@@ -328,6 +341,7 @@ export default function Route() {
         highlightedStopId={highlightedStopId}
         selectedStop={selectedStopId}
         onSelectStop={handleSelectStopFromMap}
+        routePath={activeRoutePath}
         stops={routeMapStops}
       />
     </MapSidebarLayout>

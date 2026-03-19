@@ -15,6 +15,7 @@ export interface RouteMapStop {
 interface PropType {
   highlightedStopId?: string | null
   onSelectStop: (stopId: string | null) => void
+  routePath?: LngLat[]
   selectedStop: string | null
   stops: RouteMapStop[]
 }
@@ -34,7 +35,7 @@ function removeRouteLine(map: MapLibreMap) {
   }
 }
 
-export const RouteMap = ({ highlightedStopId = null, onSelectStop, selectedStop, stops }: PropType) => {
+  routePath = [],
   const [map, setMap] = useState<MapLibreMap | null>(null)
   const [isMapReady, setIsMapReady] = useState(false)
   const markerMap = useRef<Map<string, Marker>>(new Map())
@@ -79,7 +80,13 @@ export const RouteMap = ({ highlightedStopId = null, onSelectStop, selectedStop,
 
     removeRouteLine(map)
 
-    if (positionedStops.length > 1) {
+    const lineCoordinates = routePath.length > 1
+      ? routePath
+      : positionedStops.length > 1
+        ? positionedStops.map((stop) => stop.position)
+        : []
+
+    if (lineCoordinates.length > 1) {
       map.addSource(ROUTE_LINE_SOURCE_ID, {
         type: 'geojson',
         data: {
@@ -87,7 +94,7 @@ export const RouteMap = ({ highlightedStopId = null, onSelectStop, selectedStop,
           properties: {},
           geometry: {
             type: 'LineString',
-            coordinates: positionedStops.map((stop) => stop.position)
+            coordinates: lineCoordinates
           }
         }
       })
@@ -145,7 +152,7 @@ export const RouteMap = ({ highlightedStopId = null, onSelectStop, selectedStop,
         duration: 800
       })
     }
-  }, [highlightedStopId, isMapReady, map, onSelectStop, positionedStops, selectedStop])
+  }, [highlightedStopId, isMapReady, map, onSelectStop, positionedStops, routePath, selectedStop, vehicles])
 
   useEffect(() => {
     if (!map || !markerMap.current.size) return
