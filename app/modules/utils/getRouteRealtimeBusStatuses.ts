@@ -9,7 +9,7 @@ function formatEstimatedArrival(estimateTime: number | null, stopStatus: StopSta
     if (estimateTime <= 60) return '即將進站'
     return `${Math.ceil(estimateTime / 60)} 分`
   }
-
+  if ([StopStatusType.NORMAL, StopStatusType.UNKNOWN].includes(stopStatus)) return '暫無預估'
   return stopStatusMapLabel[stopStatus]
 }
 
