@@ -47,13 +47,13 @@ export const getBusErrorModal = (error: FetchBaseQueryError) => {
     case TdxHttpErrorStatus.UNAUTHORIZED:
       return tdxUnauthorizedModal
     case TdxHttpErrorStatus.RATE_LIMIT:
-      return tdxRateLimitModal
+      return null
     case BaseQueryErrorStatus.PARSING_ERROR:
       switch (error.originalStatus) {
         case TdxHttpErrorStatus.UNAUTHORIZED:
           return tdxUnauthorizedModal
         case TdxHttpErrorStatus.RATE_LIMIT:
-          return tdxRateLimitModal
+          return null
         default:
           // A non-JSON or malformed TDX response is effectively a server-side outage.
           return tdxSystemErrorModal

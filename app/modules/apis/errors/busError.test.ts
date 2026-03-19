@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
   getBusErrorModal,
-  tdxRateLimitModal,
   tdxSystemErrorModal,
   tdxUnauthorizedModal
 } from './busError'
@@ -27,16 +26,16 @@ describe('getBusErrorModal', () => {
     ).toBe(tdxUnauthorizedModal)
   })
 
-  it('returns the rate limit modal for 429 errors', () => {
+  it('does not open a modal for 429 errors', () => {
     expect(
       getBusErrorModal({
         status: 429,
         data: {}
       })
-    ).toBe(tdxRateLimitModal)
+    ).toBeNull()
   })
 
-  it('returns the rate limit modal when a 429 is wrapped as a parsing error', () => {
+  it('does not open a modal when a 429 is wrapped as a parsing error', () => {
     expect(
       getBusErrorModal({
         status: 'PARSING_ERROR',
@@ -44,7 +43,7 @@ describe('getBusErrorModal', () => {
         data: 'Too Many Requests',
         error: 'SyntaxError: Unexpected token T in JSON at position 0'
       })
-    ).toBe(tdxRateLimitModal)
+    ).toBeNull()
   })
 
   it('returns the system modal for 5xx errors', () => {
