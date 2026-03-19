@@ -17,6 +17,7 @@ import { busApi } from '~/modules/apis/bus'
 import { useEffect, useMemo, useRef } from 'react'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
+import { useScrollSelectedItem } from '~/modules/hooks/useScrollSelectedItem'
 import { getCityByCoords } from '~/modules/utils/getCityByCoords'
 import { useNearbySearchParams } from '~/modules/hooks/useNearbySearchParams'
 import { NearbyStopDetail } from '~/components/nearby/NearbyStopDetail'
@@ -197,18 +198,11 @@ const Nearby = () => {
     return stationRouteBadges
   }, [stationRoutesMap])
 
-  useEffect(() => {
-    if (!selectedStopId || !scrollViewportRef.current) return
-
-    const item = stopItemRefs.current.get(selectedStopId)
-    if (!item) return
-
-    item.scrollIntoView({
-      block: 'nearest',
-      behavior: 'smooth'
-    })
-
-  }, [selectedStopId, nearbyStopGroups])
+  useScrollSelectedItem({
+    itemElementRefs: stopItemRefs,
+    listItems: nearbyStopGroups,
+    selectedItemId: selectedStopId
+  })
 
   useEffect(() => {
     if (!isSm || !selectedRouteStopId) return

@@ -1,6 +1,7 @@
 import { ActionIcon, Box, Group, Text, Timeline } from '@mantine/core'
 import { RiHeart2Fill, RiHeart2Line } from '@remixicon/react'
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
+import { useScrollSelectedItem } from '~/modules/hooks/useScrollSelectedItem'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 
 export interface RouteStopListItem {
@@ -30,29 +31,20 @@ export const RouteStopList = ({
 }: PropType) => {
   const stopItemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
 
-  useEffect(() => {
-    if (!highlightedStopId) return
+  useScrollSelectedItem({
+    itemElementRefs: stopItemRefs,
+    listItems: stops,
+    selectedItemId: highlightedStopId
+    ,
+    verticalAlignment: 'center'
+  })
 
-    const highlightedStop = stopItemRefs.current.get(highlightedStopId)
-    if (!highlightedStop) return
-
-    highlightedStop.scrollIntoView({
-      behavior: 'smooth',
-      block: 'center'
-    })
-  }, [highlightedStopId, stops])
-
-  useEffect(() => {
-    if (!selectedStopId) return
-
-    const selectedStop = stopItemRefs.current.get(selectedStopId)
-    if (!selectedStop) return
-
-    selectedStop.scrollIntoView({
-      behavior: 'smooth',
-      block: listScrollBehavior
-    })
-  }, [listScrollBehavior, selectedStopId, stops])
+  useScrollSelectedItem({
+    itemElementRefs: stopItemRefs,
+    listItems: stops,
+    selectedItemId: selectedStopId,
+    verticalAlignment: listScrollBehavior
+  })
 
   return (
     <Timeline active={-1} bulletSize={18} lineWidth={2}>
