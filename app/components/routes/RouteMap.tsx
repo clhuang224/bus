@@ -12,12 +12,21 @@ export interface RouteMapStop {
   sequence: number
 }
 
+export interface RouteMapVehicle {
+  id: string
+  estimateLabel: string
+  plateNumb: string | null
+  position: LngLat
+  stopName: string
+}
+
 interface PropType {
   highlightedStopId?: string | null
   onSelectStop: (stopId: string | null) => void
   routePath?: LngLat[]
   selectedStop: string | null
   stops: RouteMapStop[]
+  vehicles?: RouteMapVehicle[]
 }
 
 const ROUTE_LINE_SOURCE_ID = 'route-line-source'
@@ -35,11 +44,19 @@ function removeRouteLine(map: MapLibreMap) {
   }
 }
 
+export const RouteMap = ({
+  highlightedStopId = null,
+  onSelectStop,
   routePath = [],
+  selectedStop,
+  stops,
+  vehicles = []
+}: PropType) => {
   const [map, setMap] = useState<MapLibreMap | null>(null)
   const [isMapReady, setIsMapReady] = useState(false)
   const markerMap = useRef<Map<string, Marker>>(new Map())
   const popupRef = useRef<Popup | null>(null)
+  const vehicleMarkerMap = useRef<Map<string, Marker>>(new Map())
 
   const positionedStops = useMemo(
     () => stops.filter((stop): stop is RouteMapStop & { position: LngLat } => stop.position != null),
@@ -77,6 +94,8 @@ function removeRouteLine(map: MapLibreMap) {
 
     markerMap.current.forEach((marker) => marker.remove())
     markerMap.current.clear()
+    vehicleMarkerMap.current.forEach((marker) => marker.remove())
+    vehicleMarkerMap.current.clear()
 
     removeRouteLine(map)
 
@@ -138,6 +157,48 @@ function removeRouteLine(map: MapLibreMap) {
         .addTo(map)
 
       markerMap.current.set(stop.id, marker)
+    })
+
+    vehicles.forEach((vehicle) => {
+      const el = createMapMarkerElement({
+        datasetLabel: `${vehicle.plateNumb ?? '未提供車牌'}\n最近站牌：${vehicle.stopName}\n預估到站：${vehicle.estimateLabel}`,
+        textContent: '🚌',
+        type: 'vehicle'
+      })
+
+      const handleOpenVehiclePopup = (event: MouseEvent) => {
+        event.preventDefault()
+        event.stopPropagation()
+
+        if (popupRef.current) {
+          popupRef.current.remove()
+          popupRef.current = null
+        }
+
+        const popup = new mapLibre.Popup({
+          offset: 20,
+          closeOnClick: false
+        })
+          .setLngLat(vehicle.position)
+          .setText(el.dataset.label || '')
+          .addTo(map)
+
+        popupRef.current = popup
+
+        map.flyTo({
+          center: vehicle.position,
+          zoom: 16,
+          duration: 800
+        })
+      }
+
+      el.addEventListener('click', handleOpenVehiclePopup)
+
+      const marker = new mapLibre.Marker({ element: el })
+        .setLngLat(vehicle.position)
+        .addTo(map)
+
+      vehicleMarkerMap.current.set(vehicle.id, marker)
     })
 
     if (positionedStops.length > 0 && !selectedStop) {

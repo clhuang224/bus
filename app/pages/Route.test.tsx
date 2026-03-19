@@ -2,22 +2,27 @@
 
 import '@testing-library/jest-dom/vitest'
 import { MantineProvider } from '@mantine/core'
-import { render, screen, waitFor } from '@testing-library/react'
+import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route as RouterRoute, Routes as RouterRoutes } from 'react-router'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
+import { StopStatusType } from '~/modules/enums/StopStatusType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import Route from './Route'
 
 const {
   mockToggleFavoriteRouteStop,
+  mockUseGetEstimatedArrivalByRouteQuery,
+  mockUseGetRealtimeNearStopsByRouteQuery,
   mockUseGetRouteShapesByRouteQuery,
   mockUseGetRoutesByCityQuery,
   mockUseGetStopOfRoutesByCityQuery,
   mockUseGetStopsByCityQuery
 } = vi.hoisted(() => ({
   mockToggleFavoriteRouteStop: vi.fn(),
+  mockUseGetEstimatedArrivalByRouteQuery: vi.fn(),
+  mockUseGetRealtimeNearStopsByRouteQuery: vi.fn(),
   mockUseGetRouteShapesByRouteQuery: vi.fn(),
   mockUseGetRoutesByCityQuery: vi.fn(),
   mockUseGetStopOfRoutesByCityQuery: vi.fn(),
@@ -71,6 +76,8 @@ vi.mock('~/components/common/MapSidebarLayout', () => ({
 
 vi.mock('~/modules/apis/bus', () => ({
   busApi: {
+    useGetEstimatedArrivalByRouteQuery: mockUseGetEstimatedArrivalByRouteQuery,
+    useGetRealtimeNearStopsByRouteQuery: mockUseGetRealtimeNearStopsByRouteQuery,
     useGetRouteShapesByRouteQuery: mockUseGetRouteShapesByRouteQuery,
     useGetRoutesByCityQuery: mockUseGetRoutesByCityQuery,
     useGetStopOfRoutesByCityQuery: mockUseGetStopOfRoutesByCityQuery,
@@ -206,6 +213,54 @@ const stopsByCityData = [
   }
 ]
 
+const estimatedArrivalsData = [
+  {
+    PlateNumb: 'ABC-123',
+    StopUID: 'stop-c',
+    StopID: 'stop-c',
+    StopName: { zh_TW: '市政府', en: 'City Hall' },
+    RouteUID: 'route-1',
+    RouteID: 'route-1',
+    RouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    SubRouteUID: 'subroute-1',
+    SubRouteID: 'subroute-1',
+    SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    Direction: DirectionType.RETURN,
+    StopSequence: 2,
+    EstimateTime: 181,
+    StopStatus: StopStatusType.NORMAL,
+    MessageType: 0,
+    UpdateTime: '2026-03-19T10:00:00+08:00',
+    City: CityNameType.TAIPEI
+  }
+]
+
+const realtimeNearStopsData = [
+  {
+    PlateNumb: 'ABC-123',
+    OperatorID: 'operator-1',
+    RouteUID: 'route-1',
+    RouteID: 'route-1',
+    RouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    SubRouteUID: 'subroute-1',
+    SubRouteID: 'subroute-1',
+    SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    Direction: DirectionType.RETURN,
+    StopUID: 'stop-c',
+    StopID: 'stop-c',
+    StopName: { zh_TW: '市政府', en: 'City Hall' },
+    StopSequence: 2,
+    DutyStatus: 0,
+    BusStatus: 0,
+    A2EventType: 0,
+    GPSTime: '2026-03-19T10:00:00+08:00',
+    SrcUpdateTime: '2026-03-19T10:00:00+08:00',
+    UpdateTime: '2026-03-19T10:00:00+08:00',
+    position: [121.56, 25.04] as [number, number],
+    City: CityNameType.TAIPEI
+  }
+]
+
 const targetFavoriteRouteStop: FavoriteRouteStop = {
   favoriteId: 'route-1-subroute-1-1-station-c',
   city: CityNameType.TAIPEI,
@@ -225,8 +280,25 @@ const targetFavoriteRouteStop: FavoriteRouteStop = {
 }
 
 describe('Route', () => {
+  afterEach(() => {
+    cleanup()
+  })
+
   beforeEach(() => {
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn()
+    }))
+
     mockToggleFavoriteRouteStop.mockReset()
+    mockUseGetEstimatedArrivalByRouteQuery.mockReset()
+    mockUseGetRealtimeNearStopsByRouteQuery.mockReset()
     mockUseGetRouteShapesByRouteQuery.mockReset()
     mockUseGetRoutesByCityQuery.mockReset()
     mockUseGetStopOfRoutesByCityQuery.mockReset()
@@ -246,6 +318,20 @@ describe('Route', () => {
 
     mockUseGetStopsByCityQuery.mockReturnValue({
       data: stopsByCityData,
+      isLoading: false,
+      error: null
+    })
+
+    mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
+      data: estimatedArrivalsData,
+      isError: false,
+      isLoading: false,
+      error: null
+    })
+
+    mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
+      data: realtimeNearStopsData,
+      isError: false,
       isLoading: false,
       error: null
     })
@@ -276,6 +362,120 @@ describe('Route', () => {
     await waitFor(() => {
       expect(screen.getByText('2. 市政府').closest('[data-highlighted="true"]')).toBeInTheDocument()
       expect(screen.queryByText('1. 市政府')).not.toBeInTheDocument()
+      expect(screen.getByText('ABC-123')).toBeInTheDocument()
+      expect(screen.getByText('4 分')).toBeInTheDocument()
+    })
+  })
+
+  it('shows an inline warning when realtime queries are rate limited', async () => {
+    mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
+      data: [],
+      isError: true,
+      isLoading: false,
+      error: {
+        status: 429,
+        data: {}
+      }
+    })
+
+    mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
+      data: [],
+      isError: true,
+      isLoading: false,
+      error: {
+        status: 429,
+        data: {}
+      }
+    })
+
+    render(
+      <MantineProvider>
+        <MemoryRouter initialEntries={['/routes/Taipei/route-1']}>
+          <RouterRoutes>
+            <RouterRoute path="/routes/:city/:id" element={<Route />} />
+          </RouterRoutes>
+        </MemoryRouter>
+      </MantineProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('即時公車資料暫時無法完整更新。')).toBeInTheDocument()
+    })
+  })
+
+  it('does not show the realtime error warning when ETA data succeeds but realtime vehicle data is unavailable', async () => {
+    mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
+      data: estimatedArrivalsData,
+      isError: false,
+      isLoading: false,
+      error: null
+    })
+
+    mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
+      data: [],
+      isError: true,
+      isLoading: false,
+      error: {
+        status: 500,
+        data: {}
+      }
+    })
+
+    render(
+      <MantineProvider>
+        <MemoryRouter initialEntries={['/routes/Taipei/route-1']}>
+          <RouterRoutes>
+            <RouterRoute path="/routes/:city/:id" element={<Route />} />
+          </RouterRoutes>
+        </MemoryRouter>
+      </MantineProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByText('即時公車資料暫時無法完整更新。')).not.toBeInTheDocument()
+    })
+  })
+
+  it('shows a non-operating notice when there are no active buses but the route is outside service hours', async () => {
+    mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
+      data: [{
+        ...estimatedArrivalsData[0],
+        SubRouteUID: 'subroute-0',
+        SubRouteID: 'subroute-0',
+        Direction: DirectionType.GO,
+        StopUID: 'stop-a',
+        StopID: 'stop-a',
+        StopName: { zh_TW: '市政府', en: 'City Hall' },
+        StopSequence: 1,
+        PlateNumb: undefined,
+        EstimateTime: null,
+        StopStatus: StopStatusType.LAST_BUS_PASSED
+      }],
+      isError: false,
+      isLoading: false,
+      error: null
+    })
+
+    mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
+      data: [],
+      isError: false,
+      isLoading: false,
+      error: null
+    })
+
+    render(
+      <MantineProvider>
+        <MemoryRouter initialEntries={['/routes/Taipei/route-1']}>
+          <RouterRoutes>
+            <RouterRoute path="/routes/:city/:id" element={<Route />} />
+          </RouterRoutes>
+        </MemoryRouter>
+      </MantineProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('目前沒有營運班次')).toBeInTheDocument()
+      expect(screen.queryByText('即時公車資料暫時無法完整更新。')).not.toBeInTheDocument()
     })
   })
 
@@ -302,7 +502,13 @@ describe('Route', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByTestId('route-sidebar-state')).toHaveTextContent('opened')
+      expect(
+        screen.getAllByTestId('route-sidebar-state').some((element) => element.textContent === 'opened')
+      ).toBe(true)
     })
   })
 })
+
+function themeBreakpointsSmMaxWidth() {
+  return '48em'
+}

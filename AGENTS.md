@@ -232,6 +232,14 @@ If both city-level and area-level RTK Query endpoints exist, only export the hoo
 
 Across the project, prefer `async` / `await` over chained `.then()` / `.catch()` promise style unless there is a clear reason not to.
 
+When handling API or query errors, prefer interpreting the error by its actual type, status, or accompanying data state instead of collapsing it to a bare boolean too early. For example, distinguish between:
+
+- a real transport or proxy failure
+- a successful response with empty data
+- a partial-data scenario where one source succeeded and another failed
+
+Avoid `Boolean(error)` style checks when the UI behavior depends on the difference between those states.
+
 For local development, use the bundled Cloudflare Worker proxy with `VITE_PROXY_API_BASE_URL`. The default development flow should work through `pnpm run dev`, which starts both the app and the local Worker proxy.
 
 Treat both the TDX `client_secret` and the resulting bearer token as sensitive credentials. A GitHub Pages frontend must not be the long-term place where those credentials are exposed.
@@ -243,6 +251,15 @@ The preferred deployment direction is:
 3. Prefer Cloudflare Workers as the first option for that proxy, unless another platform is already in active use.
 
 Do not reintroduce a frontend `VITE_TDX_TOKEN` flow as a normal path. Both local development and public deployment should route TDX requests through the proxy unless there is a temporary, explicitly documented exception.
+
+For TDX rate-limit planning, use the current `Route` page behavior as a rough baseline:
+
+- the page issues 2 real-time requests per polling cycle: `EstimatedTimeOfArrival` and `RealTimeNearStop`
+- the current polling interval is 30 seconds
+- when the page is visible, that is roughly 4 requests per minute for one open `Route` page
+- extra traffic can still happen on reconnect, route changes, hard refresh, or multiple open tabs
+
+This means the free tier limit of `5 requests/minute/key` is too tight for sustained route-detail real-time usage, even before accounting for development refreshes or multiple users. In practice, a paid tier with per-second limits is the expected path once route real-time features are used regularly.
 
 ## 4. UI And Copy Rules
 

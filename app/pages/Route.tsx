@@ -1,4 +1,4 @@
-import { ActionIcon, Alert, Flex, ScrollArea, Stack, Tabs, Text, useMantineTheme } from '@mantine/core'
+import { ActionIcon, Alert, Flex, Stack, Tabs, Text, useMantineTheme } from '@mantine/core'
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
 import { useEffect, useMemo, useState } from 'react'
 import { MapSidebarLayout } from '~/components/common/MapSidebarLayout'
@@ -11,10 +11,14 @@ import { directionMapName } from '~/modules/consts/direction'
 import { routeMessages } from '~/modules/consts/pageMessages'
 import type { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
+import { StopStatusType } from '~/modules/enums/StopStatusType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import type { StopOfRouteStop } from '~/modules/interfaces/StopOfRoute'
+import { getRouteRealtimeBusStatuses } from '~/modules/utils/getRouteRealtimeBusStatuses'
 import { RiArrowLeftSLine } from '@remixicon/react'
 import { AppBadge } from '~/components/common/AppBadge'
+
+const REALTIME_POLLING_INTERVAL = 30000
 
 interface RouteTab {
   id: string
@@ -126,6 +130,36 @@ export default function Route() {
       subRoute.Direction === activeRouteTab.direction
     ) ?? null
   }, [activeTab, busRoute, routeTabs])
+
+  const shouldSkipRealtimeQueries = !city || !id || !busRoute || !activeSubRoute
+  const {
+    data: estimatedArrivals = [],
+    isError: isEstimatedArrivalsError,
+    isLoading: isEstimatedArrivalsLoading
+  } =
+    busApi.useGetEstimatedArrivalByRouteQuery(
+      { city: cityName, routeUID: id! },
+      {
+        skip: shouldSkipRealtimeQueries,
+        pollingInterval: REALTIME_POLLING_INTERVAL,
+        skipPollingIfUnfocused: true,
+        refetchOnReconnect: true
+      }
+    )
+  const {
+    data: realtimeNearStops = [],
+    isError: isRealtimeNearStopsError,
+    isLoading: isRealtimeNearStopsLoading
+  } =
+    busApi.useGetRealtimeNearStopsByRouteQuery(
+      { city: cityName, routeUID: id! },
+      {
+        skip: shouldSkipRealtimeQueries,
+        pollingInterval: REALTIME_POLLING_INTERVAL,
+        skipPollingIfUnfocused: true,
+        refetchOnReconnect: true
+      }
+    )
   const { data: routeShapes = [] } = busApi.useGetRouteShapesByRouteQuery(
     { city: cityName, routeUID: id! },
     { skip: shouldSkipRealtimeQueries }
@@ -140,6 +174,72 @@ export default function Route() {
       return result
     }, new Map())
   }, [stopsByCity])
+
+  const realtimeBusStatuses = useMemo(() => getRouteRealtimeBusStatuses(
+    realtimeNearStops.filter((realtimeNearStop) =>
+      realtimeNearStop.SubRouteUID === activeSubRoute?.SubRouteUID &&
+      realtimeNearStop.Direction === activeSubRoute?.Direction
+    ),
+    estimatedArrivals.filter((estimatedArrival) =>
+      estimatedArrival.SubRouteUID === activeSubRoute?.SubRouteUID &&
+      estimatedArrival.Direction === activeSubRoute?.Direction
+    )
+  ), [activeSubRoute, estimatedArrivals, realtimeNearStops])
+
+  const activeEstimatedArrivals = useMemo(() => estimatedArrivals.filter((estimatedArrival) =>
+    estimatedArrival.SubRouteUID === activeSubRoute?.SubRouteUID &&
+    estimatedArrival.Direction === activeSubRoute?.Direction
+  ), [activeSubRoute, estimatedArrivals])
+
+  const realtimeBusesByStopSequence = useMemo(() => {
+    return realtimeBusStatuses.reduce<Map<number, typeof realtimeBusStatuses>>((result, realtimeBus) => {
+      const stopBuses = result.get(realtimeBus.stopSequence) ?? []
+      stopBuses.push(realtimeBus)
+      result.set(realtimeBus.stopSequence, stopBuses)
+      return result
+    }, new Map())
+  }, [realtimeBusStatuses])
+
+  const hasRealtimeError = useMemo(() => {
+    if (isEstimatedArrivalsError && estimatedArrivals.length === 0) {
+      return true
+    }
+
+    if (isRealtimeNearStopsError && realtimeNearStops.length === 0 && estimatedArrivals.length === 0) {
+      return true
+    }
+
+    return false
+  }, [
+    estimatedArrivals.length,
+    isEstimatedArrivalsError,
+    isRealtimeNearStopsError,
+    realtimeNearStops.length
+  ])
+
+  const realtimeInfoMessage = useMemo(() => {
+    if (hasRealtimeError || isEstimatedArrivalsLoading || isRealtimeNearStopsLoading) {
+      return null
+    }
+
+    if (realtimeBusStatuses.length > 0 || activeEstimatedArrivals.length === 0) {
+      return null
+    }
+
+    const isOutOfService = activeEstimatedArrivals.every((estimatedArrival) => [
+      StopStatusType.NOT_YET_DEPARTED,
+      StopStatusType.LAST_BUS_PASSED,
+      StopStatusType.NOT_IN_SERVICE_TODAY
+    ].includes(estimatedArrival.StopStatus))
+
+    return isOutOfService ? '目前沒有營運班次' : null
+  }, [
+    activeEstimatedArrivals,
+    hasRealtimeError,
+    isEstimatedArrivalsLoading,
+    isRealtimeNearStopsLoading,
+    realtimeBusStatuses.length
+  ])
 
   const timelineStops = useMemo(() => {
     if (!activeStopOfRoute || !activeSubRoute || !busRoute) return []
@@ -168,11 +268,12 @@ export default function Route() {
         id: stop.StopUID,
         favoriteRouteStop,
         name: stop.StopName.zh_TW,
+        realtimeBuses: realtimeBusesByStopSequence.get(stop.StopSequence) ?? [],
         sequence: stop.StopSequence,
         isFavorite: isFavoriteRouteStop(favoriteRouteStop.favoriteId)
       }
     })
-  }, [activeStopOfRoute, activeSubRoute, busRoute, isFavoriteRouteStop])
+  }, [activeStopOfRoute, activeSubRoute, busRoute, isFavoriteRouteStop, realtimeBusesByStopSequence])
 
   const routeMapStops = useMemo(() => {
     return (activeStopOfRoute?.Stops ?? []).map((stop: StopOfRouteStop) => ({
@@ -212,11 +313,6 @@ export default function Route() {
 
     return matchedStop?.StopUID ?? null
   }, [activeStopOfRoute, activeSubRoute, busRoute, targetFavoriteRouteStop])
-
-  useEffect(() => {
-    if (!isSm || !highlightedStopId) return
-    openSidebar()
-  }, [highlightedStopId, isSm, openSidebar])
 
   useEffect(() => {
     if (!selectedStopId) return
@@ -313,24 +409,25 @@ export default function Route() {
                   </Alert>
                 )}
                 {routeTabs.map((tab) => (
-                  <Tabs.Panel
-                    key={tab.id}
-                    value={tab.id}
-                    pt="md"
-                    style={{ flex: 1, minHeight: 0 }}
-                  >
-                    <ScrollArea h="100%">
-                      <RouteStopList
-                        highlightedStopId={highlightedStopId}
-                        listScrollBehavior={listScrollBehavior}
-                        onSelectStop={handleSelectStopFromList}
-                        stops={timelineStops}
-                        onToggleFavorite={toggleFavoriteRouteStop}
-                        selectedStopId={selectedStopId}
-                      />
-                    </ScrollArea>
-                  </Tabs.Panel>
-                ))}
+                <Tabs.Panel
+                  key={tab.id}
+                  value={tab.id}
+                  pt="md"
+                  style={{ flex: 1, minHeight: 0 }}
+                >
+                  <RouteStopList
+                    highlightedStopId={highlightedStopId}
+                    hasRealtimeError={hasRealtimeError}
+                    isRealtimeLoading={isEstimatedArrivalsLoading || isRealtimeNearStopsLoading}
+                    listScrollBehavior={listScrollBehavior}
+                    onSelectStop={handleSelectStopFromList}
+                    realtimeInfoMessage={realtimeInfoMessage}
+                    stops={timelineStops}
+                    onToggleFavorite={toggleFavoriteRouteStop}
+                    selectedStopId={selectedStopId}
+                  />
+                </Tabs.Panel>
+              ))}
               </Tabs>
             </>
           )}
@@ -343,6 +440,13 @@ export default function Route() {
         onSelectStop={handleSelectStopFromMap}
         routePath={activeRoutePath}
         stops={routeMapStops}
+        vehicles={realtimeBusStatuses.map((bus) => ({
+          id: bus.id,
+          estimateLabel: bus.estimateLabel,
+          plateNumb: bus.plateNumb,
+          position: bus.position,
+          stopName: bus.stopName
+        }))}
       />
     </MapSidebarLayout>
   )

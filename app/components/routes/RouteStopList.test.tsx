@@ -6,6 +6,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
+import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeBusStatus'
 import { RouteStopList } from './RouteStopList'
 
 Object.defineProperty(window, 'matchMedia', {
@@ -21,6 +22,14 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn()
   }))
 })
+
+class ResizeObserverMock {
+  observe = vi.fn()
+  unobserve = vi.fn()
+  disconnect = vi.fn()
+}
+
+vi.stubGlobal('ResizeObserver', ResizeObserverMock)
 
 const favoriteRouteStop = {
   favoriteId: 'favorite-1',
@@ -40,6 +49,18 @@ const favoriteRouteStop = {
   destination: '捷運昆陽站'
 }
 
+const realtimeBus: RouteRealtimeBusStatus = {
+  direction: DirectionType.GO,
+  estimateLabel: '4 分',
+  estimateMinutes: 4,
+  id: 'bus-1',
+  plateNumb: 'ABC-123',
+  position: [121.56, 25.04],
+  stopName: '市政府',
+  stopSequence: 1,
+  subRouteUID: 'subroute-1'
+}
+
 describe('RouteStopList', () => {
   afterEach(() => {
     cleanup()
@@ -56,6 +77,7 @@ describe('RouteStopList', () => {
             id: 'stop-1',
             favoriteRouteStop,
             name: '市政府',
+            realtimeBuses: [],
             sequence: 1,
             isFavorite: false
           }]}
@@ -82,6 +104,7 @@ describe('RouteStopList', () => {
             id: 'stop-1',
             favoriteRouteStop,
             name: '市政府',
+            realtimeBuses: [],
             sequence: 1,
             isFavorite: false
           }]}
@@ -95,5 +118,27 @@ describe('RouteStopList', () => {
 
     expect(handleToggleFavorite).toHaveBeenCalledWith(favoriteRouteStop)
     expect(handleSelectStop).not.toHaveBeenCalled()
+  })
+
+  it('renders realtime buses inline with the stop timeline item', () => {
+    render(
+      <MantineProvider>
+        <RouteStopList
+          stops={[{
+            id: 'stop-1',
+            favoriteRouteStop,
+            name: '市政府',
+            realtimeBuses: [realtimeBus],
+            sequence: 1,
+            isFavorite: false
+          }]}
+          onSelectStop={vi.fn()}
+          onToggleFavorite={vi.fn()}
+        />
+      </MantineProvider>
+    )
+
+    expect(screen.getByText('ABC-123')).toBeInTheDocument()
+    expect(screen.getByText('4 分')).toBeInTheDocument()
   })
 })
