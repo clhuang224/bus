@@ -5,13 +5,12 @@ import type { ReactElement } from 'react'
 export interface SearchInputPropType {
   value: string
   onChange: (value: string) => void
-  w?: number | string
 }
 
 export const SearchInput = (props: SearchInputPropType): ReactElement => {
   return (
     <Input
-      placeholder={'搜尋公車'}
+      placeholder={'輸入關鍵字以搜尋路線、起點或終點'}
       leftSection={<RiSearchLine />}
       rightSection={props.value && (
           <CloseButton
@@ -21,11 +20,11 @@ export const SearchInput = (props: SearchInputPropType): ReactElement => {
           />
       )}
       style={{ '--input-right-section-pointer-events': 'auto' }}
-      w={props.w ?? 400}
       value={props.value}
       onChange={(e) => {
         props.onChange(e.currentTarget.value)
       }}
+      flex={1}
     />
   )
 }

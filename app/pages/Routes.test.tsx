@@ -1,17 +1,19 @@
 // @vitest-environment jsdom
 
 import '@testing-library/jest-dom/vitest'
+import { configureStore } from '@reduxjs/toolkit'
 import { MantineProvider } from '@mantine/core'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AreaType } from '~/modules/enums/AreaType'
 import { CityNameType } from '~/modules/enums/CityNameType'
+import routeSearchSlice from '~/modules/slices/routeSearchSlice'
 import Routes from './Routes'
 
-const { mockUseGetRoutesByAreaQuery, mockUseOutletContext } = vi.hoisted(() => ({
-  mockUseGetRoutesByAreaQuery: vi.fn(),
-  mockUseOutletContext: vi.fn()
+const { mockUseGetRoutesByAreaQuery } = vi.hoisted(() => ({
+  mockUseGetRoutesByAreaQuery: vi.fn()
 }))
 
 Object.defineProperty(window, 'matchMedia', {
@@ -42,13 +44,27 @@ vi.mock('~/modules/apis/bus', () => ({
   }
 }))
 
-vi.mock('react-router', async () => {
-  const actual = await vi.importActual<typeof import('react-router')>('react-router')
-  return {
-    ...actual,
-    useOutletContext: mockUseOutletContext
-  }
-})
+vi.mock('~/components/AreaSelect', () => ({
+  AreaSelect: ({
+    value,
+    onChange
+  }: {
+    value: string
+    onChange: (value: AreaType) => void
+  }) => (
+    <select
+      aria-label="area-select"
+      value={value}
+      onChange={(event) => onChange(event.target.value as AreaType)}
+    >
+      {Object.values(AreaType).map((area) => (
+        <option key={area} value={area}>
+          {area}
+        </option>
+      ))}
+    </select>
+  )
+}))
 
 const routesData = [
   {
@@ -113,22 +129,52 @@ const routesData = [
   }
 ]
 
-const renderRoutes = (initialEntries = ['/routes']) => render(
-  <MantineProvider>
-    <MemoryRouter initialEntries={initialEntries}>
-      <Routes />
-    </MemoryRouter>
-  </MantineProvider>
-)
+function createStore(preloadedRouteSearchState?: {
+  keyword?: string
+  selectedArea?: AreaType | null
+}) {
+  return configureStore({
+    reducer: {
+      geolocation: () => ({
+        coords: [25.033, 121.5654] as [number, number]
+      }),
+      cityGeo: () => ({
+        geojson: null
+      }),
+      routeSearch: routeSearchSlice.reducer
+    },
+    preloadedState: {
+      routeSearch: {
+        keyword: preloadedRouteSearchState?.keyword ?? '',
+        selectedArea: preloadedRouteSearchState?.selectedArea ?? null
+      }
+    }
+  })
+}
+
+const renderRoutes = (preloadedRouteSearchState?: {
+  keyword?: string
+  selectedArea?: AreaType | null
+}) => {
+  const store = createStore(preloadedRouteSearchState)
+
+  return {
+    store,
+    ...render(
+      <Provider store={store}>
+        <MantineProvider>
+          <MemoryRouter initialEntries={['/routes']}>
+            <Routes />
+          </MemoryRouter>
+        </MantineProvider>
+      </Provider>
+    )
+  }
+}
 
 describe('Routes', () => {
   beforeEach(() => {
     mockUseGetRoutesByAreaQuery.mockReset()
-    mockUseOutletContext.mockReset()
-
-    mockUseOutletContext.mockReturnValue({
-      area: AreaType.TAIPEI
-    })
     mockUseGetRoutesByAreaQuery.mockReturnValue({
       data: routesData,
       isLoading: false,
@@ -140,10 +186,32 @@ describe('Routes', () => {
     cleanup()
   })
 
-  it('shows the current area from layout context', () => {
+  it('shows the manually selected area from store state', () => {
+    const { store } = renderRoutes({
+      selectedArea: AreaType.TAICHUNG
+    })
+
+    expect(store.getState().routeSearch.selectedArea).toBe(AreaType.TAICHUNG)
+    expect(screen.getByLabelText('area-select')).toHaveValue(AreaType.TAICHUNG)
+  })
+
+  it('falls back to the located area when the user has not picked one', () => {
     renderRoutes()
 
-    expect(screen.getByText('目前搜尋範圍：雙北')).toBeInTheDocument()
+    expect(screen.getByLabelText('area-select')).toHaveValue(AreaType.TAIPEI)
+  })
+
+  it('updates the selected area from the picker', async () => {
+    const { store } = renderRoutes()
+
+    fireEvent.change(screen.getByLabelText('area-select'), {
+      target: { value: AreaType.TAICHUNG }
+    })
+
+    await waitFor(() => {
+      expect(store.getState().routeSearch.selectedArea).toBe(AreaType.TAICHUNG)
+      expect(screen.getByLabelText('area-select')).toHaveValue(AreaType.TAICHUNG)
+    })
   })
 
   it('deduplicates routes that share the same RouteUID', () => {
@@ -153,20 +221,23 @@ describe('Routes', () => {
   })
 
   it('filters routes by the entered keyword', async () => {
-    renderRoutes()
+    const { store } = renderRoutes()
 
     fireEvent.change(screen.getAllByRole('textbox')[0], {
       target: { value: '紅25' }
     })
 
     await waitFor(() => {
+      expect(store.getState().routeSearch.keyword).toBe('紅25')
       expect(screen.getAllByText('紅25').length).toBeGreaterThan(0)
       expect(screen.queryByText('藍1')).not.toBeInTheDocument()
     })
   })
 
-  it('reads the keyword from the search params', async () => {
-    renderRoutes(['/routes?keyword=紅25'])
+  it('shows the saved keyword from store state', async () => {
+    renderRoutes({
+      keyword: '紅25'
+    })
 
     await waitFor(() => {
       expect(screen.getAllByRole('textbox')[0]).toHaveValue('紅25')

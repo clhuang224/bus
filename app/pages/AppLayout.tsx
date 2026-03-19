@@ -1,21 +1,14 @@
 import { AppShell, Box, Flex, useMantineTheme } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { RiHeart3Fill, RiHeart3Line, RiMapPin3Fill, RiMapPin3Line, RiSearchFill, RiSearchLine } from '@remixicon/react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Outlet, useLocation } from 'react-router'
+import { Outlet } from 'react-router'
 import { AppNavLink } from '~/components/AppNavLink'
-import { AreaSelect } from '~/components/AreaSelect'
 import { APP_FOOTER_HEIGHT, APP_HEADER_HEIGHT } from '~/modules/consts/layout'
-import { AreaType } from '~/modules/enums/AreaType'
 import { useWatchGeo } from '~/modules/hooks/useWatchGeo'
 import { fetchCityGeoJSON } from '~/modules/slices/cityGeoSlice'
 import type { AppDispatch, RootState } from '~/modules/store'
-import { getAreaByCoords } from '~/modules/utils/getAreaByCoords'
-
-export interface AreaContext {
-  area: AreaType
-}
 
 export function meta() {
   return [
@@ -25,17 +18,12 @@ export function meta() {
 }
 
 export default function AppLayout () {
-
-  const location = useLocation()
   const dispatch = useDispatch<AppDispatch>()
 
   const theme = useMantineTheme()
   const isSm = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`)
 
-  const [area, setArea] = useState<AreaType>(AreaType.TAIPEI)
-  const { coords } = useSelector((state: RootState) => state.geolocation)
   const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
-  const currentArea = getAreaByCoords(coords, geojson)
 
   const options = useMemo(() => ([
     {
@@ -65,19 +53,13 @@ export default function AppLayout () {
     dispatch(fetchCityGeoJSON())
   }, [dispatch, geojson])
 
-  useEffect(() => {
-    if (!coords) return
-    setArea(currentArea)
-  }, [coords, currentArea])
-
   return (
     <AppShell
-      header={{ height: APP_HEADER_HEIGHT }}
+      header={{ height: isSm ? 0 : APP_HEADER_HEIGHT }}
       footer={{ height: isSm ? APP_FOOTER_HEIGHT : 0 }}
     >
-      <AppShell.Header h={76} p="md">
+      <AppShell.Header h={76} p="md" visibleFrom="sm">
         <Flex align="center" gap="md">
-          <AreaSelect value={area} onChange={setArea} readOnly={location.pathname === '/nearby'} />
           {options.map((option) => (
             <Box
               key={option.path}
@@ -91,8 +73,8 @@ export default function AppLayout () {
           ))}
         </Flex>
       </AppShell.Header>
-      <AppShell.Main h={isSm ? 'calc(100vh - 160px)' : 'calc(100vh - 76px)'}>
-        <Outlet context={{ area }} />
+      <AppShell.Main h={isSm ? `calc(100vh - ${APP_FOOTER_HEIGHT}px)` : `calc(100vh - ${APP_HEADER_HEIGHT}px)`}>
+        <Outlet />
       </AppShell.Main>
       <AppShell.Footer p="sm" hiddenFrom="sm">
         <Flex justify="space-around" align="center" gap="md">

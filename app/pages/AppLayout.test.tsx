@@ -11,14 +11,12 @@ const {
   mockDispatch,
   mockUseSelector,
   mockFetchCityGeoJSON,
-  mockUseWatchGeo,
-  mockUseLocation
+  mockUseWatchGeo
 } = vi.hoisted(() => ({
   mockDispatch: vi.fn(),
   mockUseSelector: vi.fn(),
   mockFetchCityGeoJSON: vi.fn(),
-  mockUseWatchGeo: vi.fn(),
-  mockUseLocation: vi.fn()
+  mockUseWatchGeo: vi.fn()
 }))
 
 Object.defineProperty(window, 'matchMedia', {
@@ -48,14 +46,9 @@ vi.mock('react-router', async () => {
   const actual = await vi.importActual<typeof import('react-router')>('react-router')
   return {
     ...actual,
-    Outlet: () => <div>outlet</div>,
-    useLocation: mockUseLocation
+    Outlet: () => <div>outlet</div>
   }
 })
-
-vi.mock('~/components/AreaSelect', () => ({
-  AreaSelect: () => <div>area-select</div>
-}))
 
 vi.mock('~/components/AppNavLink', () => ({
   AppNavLink: ({ label }: { label: string }) => <div>{label}</div>
@@ -85,9 +78,6 @@ describe('AppLayout', () => {
     mockUseSelector.mockReset()
     mockFetchCityGeoJSON.mockReset()
     mockUseWatchGeo.mockReset()
-    mockUseLocation.mockReset()
-
-    mockUseLocation.mockReturnValue({ pathname: '/' })
     mockFetchCityGeoJSON.mockReturnValue({ type: 'cityGeo/fetchCityGeoJSON' })
   })
 

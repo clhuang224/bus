@@ -1,14 +1,16 @@
-import { Alert, Card, Flex, ScrollArea, Stack, Text, Title } from '@mantine/core'
+import { Alert, Card, Flex, Group, ScrollArea, Stack, Title } from '@mantine/core'
 import { useMemo } from 'react'
-import { useOutletContext } from 'react-router'
+import { useDispatch, useSelector } from 'react-redux'
+import { AreaSelect } from '~/components/AreaSelect'
 import { SearchInput } from '~/components/SearchInput'
 import { RouteInfoCard } from '~/components/routes/RouteInfoCard'
-import { areaMapAreaName } from '~/modules/consts/area'
+import { AreaType } from '~/modules/enums/AreaType'
 import { searchMessages } from '~/modules/consts/pageMessages'
-import { useSearchRouteParams } from '~/modules/hooks/useSearchRouteParams'
 import { busApi } from '~/modules/apis/bus'
 import type { BusRoute } from '~/modules/interfaces/BusRoute'
-import type { AreaContext } from './AppLayout'
+import { setKeyword, setSelectedArea } from '~/modules/slices/routeSearchSlice'
+import type { AppDispatch, RootState } from '~/modules/store'
+import { getAreaByCoords } from '~/modules/utils/getAreaByCoords'
 
 const routeNameCollator = new Intl.Collator('zh-Hant-u-co-stroke', {
   numeric: true
@@ -37,8 +39,12 @@ function matchesRouteKeyword(route: BusRoute<string>, keyword: string) {
 }
 
 export default function Routes() {
-  const { keyword, setKeyword } = useSearchRouteParams()
-  const { area } = useOutletContext<AreaContext>()
+  const dispatch = useDispatch<AppDispatch>()
+  const { coords } = useSelector((state: RootState) => state.geolocation)
+  const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
+  const { keyword, selectedArea } = useSelector((state: RootState) => state.routeSearch)
+  const currentArea = getAreaByCoords(coords, geojson)
+  const area = selectedArea ?? currentArea ?? AreaType.TAIPEI
   const { data: routes = [], isLoading, error } = busApi.useGetRoutesByAreaQuery(area)
 
   const filteredRoutes = useMemo(() => {
@@ -63,15 +69,14 @@ export default function Routes() {
         <Stack gap="md" h="100%">
           <Stack gap={4}>
             <Title order={3}>搜尋公車</Title>
-            <Text size="sm" c="dimmed">
-              目前搜尋範圍：{areaMapAreaName[area]}
-            </Text>
           </Stack>
-          <SearchInput
-            value={keyword}
-            onChange={setKeyword}
-            w="100%"
-          />
+          <Group>
+            <AreaSelect value={area} onChange={(nextArea) => dispatch(setSelectedArea(nextArea))} />
+            <SearchInput
+              value={keyword}
+              onChange={(nextKeyword) => dispatch(setKeyword(nextKeyword))}
+            />
+          </Group>
           {message && (
             <Alert color={message.color} title={message.title}>
               {message.description}
