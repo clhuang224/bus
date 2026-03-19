@@ -77,6 +77,24 @@ vi.mock('~/components/nearby/NearbyStopMap', () => ({
   }
 }))
 
+vi.mock('~/components/common/MapSidebarLayout', () => ({
+  MapSidebarLayout: ({
+    isSidebarOpened,
+    panel,
+    children
+  }: {
+    isSidebarOpened: boolean
+    panel: React.ReactNode
+    children: React.ReactNode
+  }) => (
+    <div>
+      <div data-testid="nearby-sidebar-state">{isSidebarOpened ? 'opened' : 'closed'}</div>
+      <div>{panel}</div>
+      <div>{children}</div>
+    </div>
+  )
+}))
+
 const nearbyStopsData = [
   {
     StopUID: 'stop-1',
@@ -299,6 +317,17 @@ function renderNearby({
 
 describe('Nearby', () => {
   beforeEach(() => {
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn()
+    }))
+
     mockUseGetRoutesByAreaQuery.mockReset()
     mockUseGetStopsByAreaQuery.mockReset()
     mockUseGetStopOfRoutesByAreaQuery.mockReset()
@@ -320,6 +349,32 @@ describe('Nearby', () => {
     expect(
       screen.getByText(geoPermissionMessages[GeoPermissionType.DENIED]!.description)
     ).toBeInTheDocument()
+  })
+
+  it('opens the drawer by default on small screens', () => {
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query.includes(themeBreakpointsSmMaxWidth()),
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn()
+    }))
+
+    renderNearby({
+      coords: [25.033, 121.5654],
+      permission: GeoPermissionType.GRANTED,
+      queryState: {
+        data: nearbyStopsData,
+        isLoading: false,
+        error: null,
+        isSuccess: true
+      }
+    })
+
+    expect(screen.getByTestId('nearby-sidebar-state')).toHaveTextContent('opened')
   })
 
   it('shows a locating message while waiting for coordinates', () => {
@@ -440,3 +495,7 @@ describe('Nearby', () => {
     expect(screen.getByRole('button', { name: '市政府' })).toHaveAttribute('aria-expanded', 'true')
   })
 })
+
+function themeBreakpointsSmMaxWidth() {
+  return '48em'
+}

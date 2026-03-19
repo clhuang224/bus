@@ -50,8 +50,17 @@ Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
 })
 
 vi.mock('~/components/common/MapSidebarLayout', () => ({
-  MapSidebarLayout: ({ panel, children }: { panel: React.ReactNode, children: React.ReactNode }) => (
+  MapSidebarLayout: ({
+    isSidebarOpened,
+    panel,
+    children
+  }: {
+    isSidebarOpened: boolean
+    panel: React.ReactNode
+    children: React.ReactNode
+  }) => (
     <div>
+      <div data-testid="route-sidebar-state">{isSidebarOpened ? 'opened' : 'closed'}</div>
       <div>{panel}</div>
       <div>{children}</div>
     </div>
@@ -257,6 +266,33 @@ describe('Route', () => {
     await waitFor(() => {
       expect(screen.getByText('2. 市政府').closest('[data-highlighted="true"]')).toBeInTheDocument()
       expect(screen.queryByText('1. 市政府')).not.toBeInTheDocument()
+    })
+  })
+
+  it('opens the drawer by default on small screens', async () => {
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query.includes(themeBreakpointsSmMaxWidth()),
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn()
+    }))
+
+    render(
+      <MantineProvider>
+        <MemoryRouter initialEntries={['/routes/Taipei/route-1']}>
+          <RouterRoutes>
+            <RouterRoute path="/routes/:city/:id" element={<Route />} />
+          </RouterRoutes>
+        </MemoryRouter>
+      </MantineProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('route-sidebar-state')).toHaveTextContent('opened')
     })
   })
 })

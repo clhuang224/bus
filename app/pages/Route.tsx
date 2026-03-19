@@ -79,6 +79,13 @@ export default function Route() {
   const [selectedStopId, setSelectedStopId] = useState<string | null>(null)
 
   useEffect(() => {
+    if (isSm) {
+      openSidebar()
+      return
+    }
+  }, [isSm, openSidebar])
+
+  useEffect(() => {
     if (!routeTabs.length) {
       setActiveTab(null)
       return

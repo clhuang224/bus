@@ -205,6 +205,13 @@ const Nearby = () => {
   })
 
   useEffect(() => {
+    if (isSm) {
+      openSidebar()
+      return
+    }
+  }, [isSm])
+
+  useEffect(() => {
     if (!isSm || !selectedRouteStopId) return
     openSidebar()
   }, [isSm, selectedRouteStopId, openSidebar])
