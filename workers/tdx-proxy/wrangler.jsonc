@@ -1,5 +1,11 @@
 {
   "name": "finding-the-bus-tdx-proxy",
   "main": "src/index.ts",
-  "compatibility_date": "2026-03-18"
+  "compatibility_date": "2026-03-18",
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true
+    }
+  }
 }
