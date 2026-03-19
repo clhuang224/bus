@@ -73,7 +73,6 @@ Planned or not yet implemented:
 
 - Real-time bus positions on the Route page
 - More accurate route lines based on official route shape data
-- Highlighting a saved favorite stop after opening its Route page
 
 ## Project Structure
 
