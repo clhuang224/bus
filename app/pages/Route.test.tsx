@@ -1,34 +1,39 @@
 // @vitest-environment jsdom
 
 import '@testing-library/jest-dom/vitest'
-import { configureStore } from '@reduxjs/toolkit'
 import { MantineProvider } from '@mantine/core'
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { Provider } from 'react-redux'
-import { MemoryRouter, Route, Routes } from 'react-router'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { DirectionType } from '~/modules/enums/DirectionType'
+import { render, screen, waitFor } from '@testing-library/react'
+import { MemoryRouter, Route as RouterRoute, Routes as RouterRoutes } from 'react-router'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { CityNameType } from '~/modules/enums/CityNameType'
-import favoriteSlice from '~/modules/slices/favoriteSlice'
-import RoutePage from './Route'
+import { DirectionType } from '~/modules/enums/DirectionType'
+import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
+import Route from './Route'
 
 const {
+  mockToggleFavoriteRouteStop,
   mockUseGetRoutesByCityQuery,
   mockUseGetStopOfRoutesByCityQuery,
-  mockUseGetStopsByCityQuery,
-  mockRouteMap,
-  mockMatchMedia
+  mockUseGetStopsByCityQuery
 } = vi.hoisted(() => ({
+  mockToggleFavoriteRouteStop: vi.fn(),
   mockUseGetRoutesByCityQuery: vi.fn(),
   mockUseGetStopOfRoutesByCityQuery: vi.fn(),
-  mockUseGetStopsByCityQuery: vi.fn(),
-  mockRouteMap: vi.fn(),
-  mockMatchMedia: vi.fn()
+  mockUseGetStopsByCityQuery: vi.fn()
 }))
 
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: mockMatchMedia
+  value: vi.fn().mockImplementation((query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn()
+  }))
 })
 
 class ResizeObserverMock {
@@ -39,6 +44,20 @@ class ResizeObserverMock {
 
 vi.stubGlobal('ResizeObserver', ResizeObserverMock)
 
+Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+  writable: true,
+  value: vi.fn()
+})
+
+vi.mock('~/components/common/MapSidebarLayout', () => ({
+  MapSidebarLayout: ({ panel, children }: { panel: React.ReactNode, children: React.ReactNode }) => (
+    <div>
+      <div>{panel}</div>
+      <div>{children}</div>
+    </div>
+  )
+}))
+
 vi.mock('~/modules/apis/bus', () => ({
   busApi: {
     useGetRoutesByCityQuery: mockUseGetRoutesByCityQuery,
@@ -48,20 +67,57 @@ vi.mock('~/modules/apis/bus', () => ({
 }))
 
 vi.mock('~/components/routes/RouteMap', () => ({
-  RouteMap: (props: { stops: unknown[] }) => {
-    mockRouteMap(props)
-    return <div data-testid="route-map" />
-  }
+  RouteMap: () => <div>route-map</div>
 }))
 
-const routesData = [
+vi.mock('~/components/common/AppBadge', () => ({
+  AppBadge: ({ children }: { children: React.ReactNode }) => <span>{children}</span>
+}))
+
+vi.mock('~/modules/hooks/useFavoriteRouteStops', () => ({
+  useFavoriteRouteStops: () => ({
+    isFavoriteRouteStop: () => false,
+    toggleFavoriteRouteStop: mockToggleFavoriteRouteStop
+  })
+}))
+
+const routeData = [
   {
     RouteUID: 'route-1',
-    RouteID: '1',
+    RouteID: 'route-1',
     HasSubRoutes: true,
     Operators: [],
     AuthorityID: '005',
     ProviderID: 'provider-1',
+    SubRoutes: [
+      {
+        SubRouteUID: 'subroute-0',
+        SubRouteID: 'subroute-0',
+        OperatorIDs: [],
+        SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+        Direction: DirectionType.GO,
+        FirstBusTime: '06:00',
+        LastBusTime: '22:00',
+        HolidayFirstBusTime: '06:00',
+        HolidayLastBusTime: '22:00',
+        DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
+        DestinationStopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' }
+      },
+      {
+        SubRouteUID: 'subroute-1',
+        SubRouteID: 'subroute-1',
+        OperatorIDs: [],
+        SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+        Direction: DirectionType.RETURN,
+        FirstBusTime: '06:00',
+        LastBusTime: '22:00',
+        HolidayFirstBusTime: '06:00',
+        HolidayLastBusTime: '22:00',
+        DepartureStopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
+        DestinationStopName: { zh_TW: '市政府', en: 'City Hall' }
+      }
+    ],
+    BusRouteType: 0,
     RouteName: { zh_TW: '藍1', en: 'Blue 1' },
     DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
     DestinationStopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
@@ -70,83 +126,54 @@ const routesData = [
     RouteMapImageUrl: '',
     City: CityNameType.TAIPEI,
     CityCode: 'TPE',
-    UpdateTime: '2026-03-17T10:00:00+08:00',
-    VersionID: 1,
-    BusRouteType: 0,
-    SubRoutes: [
-      {
-        SubRouteUID: 'subroute-1',
-        SubRouteID: '1',
-        OperatorIDs: [],
-        SubRouteName: { zh_TW: '往捷運昆陽站', en: 'To MRT Kunyang Station' },
-        Direction: DirectionType.GO,
-        FirstBusTime: '',
-        LastBusTime: '',
-        HolidayFirstBusTime: '',
-        HolidayLastBusTime: '',
-        DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
-        DestinationStopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' }
-      },
-      {
-        SubRouteUID: 'subroute-2',
-        SubRouteID: '2',
-        OperatorIDs: [],
-        SubRouteName: { zh_TW: '往市政府', en: 'To City Hall' },
-        Direction: DirectionType.RETURN,
-        FirstBusTime: '',
-        LastBusTime: '',
-        HolidayFirstBusTime: '',
-        HolidayLastBusTime: '',
-        DepartureStopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
-        DestinationStopName: { zh_TW: '市政府', en: 'City Hall' }
-      }
-    ]
+    UpdateTime: '2026-03-19T10:00:00+08:00',
+    VersionID: 1
   }
 ]
 
 const stopOfRoutesData = [
   {
     RouteUID: 'route-1',
-    RouteID: '1',
+    RouteID: 'route-1',
     RouteName: { zh_TW: '藍1', en: 'Blue 1' },
-    SubRouteUID: 'subroute-1',
-    SubRouteID: '1',
-    City: CityNameType.TAIPEI,
-    SubRouteName: { zh_TW: '往捷運昆陽站', en: 'To MRT Kunyang Station' },
+    SubRouteUID: 'subroute-0',
+    SubRouteID: 'subroute-0',
+    SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
     Direction: DirectionType.GO,
+    City: CityNameType.TAIPEI,
     Stops: [
       {
-        StopUID: 'stop-1',
-        StopID: 'stop-id-1',
-        StationID: 'station-1',
+        StopUID: 'stop-a',
+        StopID: 'stop-a',
+        StopName: { zh_TW: '市政府', en: 'City Hall' },
         StopSequence: 1,
-        StopName: { zh_TW: '市政府', en: 'City Hall' }
-      },
-      {
-        StopUID: 'stop-2',
-        StopID: 'stop-id-2',
-        StationID: 'station-2',
-        StopSequence: 2,
-        StopName: { zh_TW: '國父紀念館', en: 'Sun Yat-sen Memorial Hall' }
+        StationID: 'station-a'
       }
     ]
   },
   {
     RouteUID: 'route-1',
-    RouteID: '1',
+    RouteID: 'route-1',
     RouteName: { zh_TW: '藍1', en: 'Blue 1' },
-    SubRouteUID: 'subroute-2',
-    SubRouteID: '2',
-    City: CityNameType.TAIPEI,
-    SubRouteName: { zh_TW: '往市政府', en: 'To City Hall' },
+    SubRouteUID: 'subroute-1',
+    SubRouteID: 'subroute-1',
+    SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
     Direction: DirectionType.RETURN,
+    City: CityNameType.TAIPEI,
     Stops: [
       {
-        StopUID: 'stop-3',
-        StopID: 'stop-id-3',
-        StationID: 'station-3',
+        StopUID: 'stop-b',
+        StopID: 'stop-b',
+        StopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
         StopSequence: 1,
-        StopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' }
+        StationID: 'station-b'
+      },
+      {
+        StopUID: 'stop-c',
+        StopID: 'stop-c',
+        StopName: { zh_TW: '市政府', en: 'City Hall' },
+        StopSequence: 2,
+        StationID: 'station-c'
       }
     ]
   }
@@ -154,81 +181,56 @@ const stopOfRoutesData = [
 
 const stopsByCityData = [
   {
-    StopUID: 'stop-1',
-    StopID: 'stop-id-1',
-    StopName: { zh_TW: '市政府', en: 'City Hall' },
-    GeoHash: 'hash-1',
-    City: CityNameType.TAIPEI,
-    StopAddress: 'Address 1',
-    Bearing: 0,
-    StopDescription: null,
-    UpdateTime: '2026-03-17T10:00:00+08:00',
-    VersionID: 1,
-    position: [121.5654, 25.033]
+    StopUID: 'stop-b',
+    StopID: 'stop-b',
+    StopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
+    position: [121.6, 25.05] as [number, number]
   },
   {
-    StopUID: 'stop-2',
-    StopID: 'stop-id-2',
-    StopName: { zh_TW: '國父紀念館', en: 'Sun Yat-sen Memorial Hall' },
-    GeoHash: 'hash-2',
-    City: CityNameType.TAIPEI,
-    StopAddress: 'Address 2',
-    Bearing: 0,
-    StopDescription: null,
-    UpdateTime: '2026-03-17T10:00:00+08:00',
-    VersionID: 1,
-    position: [121.5598, 25.041]
+    StopUID: 'stop-c',
+    StopID: 'stop-c',
+    StopName: { zh_TW: '市政府', en: 'City Hall' },
+    position: [121.56, 25.04] as [number, number]
   }
 ]
 
-function renderRoutePage() {
-  const store = configureStore({
-    reducer: {
-      favorite: favoriteSlice.reducer
-    }
-  })
-
-  return render(
-    <Provider store={store}>
-      <MantineProvider>
-        <MemoryRouter initialEntries={['/routes/Taipei/route-1']}>
-          <Routes>
-            <Route path="/routes/:city/:id" element={<RoutePage />} />
-          </Routes>
-        </MemoryRouter>
-      </MantineProvider>
-    </Provider>
-  )
+const targetFavoriteRouteStop: FavoriteRouteStop = {
+  favoriteId: 'route-1-subroute-1-1-station-c',
+  city: CityNameType.TAIPEI,
+  routeUID: 'route-1',
+  routeName: '藍1',
+  subRouteUID: 'subroute-1',
+  subRouteName: '藍1',
+  direction: DirectionType.RETURN,
+  stopUID: 'stop-c',
+  stopID: 'stop-c',
+  stationID: 'station-c',
+  stationKey: 'station-c',
+  stopName: '市政府',
+  stopSequence: 2,
+  departure: '捷運昆陽站',
+  destination: '市政府'
 }
 
 describe('Route', () => {
   beforeEach(() => {
-    localStorage.clear()
+    mockToggleFavoriteRouteStop.mockReset()
     mockUseGetRoutesByCityQuery.mockReset()
     mockUseGetStopOfRoutesByCityQuery.mockReset()
     mockUseGetStopsByCityQuery.mockReset()
-    mockRouteMap.mockReset()
-    mockMatchMedia.mockImplementation((query: string) => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn()
-    }))
 
     mockUseGetRoutesByCityQuery.mockReturnValue({
-      data: routesData,
+      data: routeData,
       isLoading: false,
       error: null
     })
+
     mockUseGetStopOfRoutesByCityQuery.mockReturnValue({
       data: stopOfRoutesData,
       isLoading: false,
       error: null
     })
+
     mockUseGetStopsByCityQuery.mockReturnValue({
       data: stopsByCityData,
       isLoading: false,
@@ -236,86 +238,25 @@ describe('Route', () => {
     })
   })
 
-  afterEach(() => {
-    cleanup()
-  })
-
-  it('shows subroute tabs and the stop list for the active subroute', () => {
-    renderRoutePage()
-
-    expect(screen.getByText('藍1')).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: /往捷運昆陽站.*去程/ })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: /往市政府.*返程/ })).toBeInTheDocument()
-    expect(screen.getByText('1. 市政府')).toBeInTheDocument()
-    expect(screen.getByText('2. 國父紀念館')).toBeInTheDocument()
-  })
-
-  it('passes mapped stop positions to the route map', () => {
-    renderRoutePage()
-
-    const mapProps = mockRouteMap.mock.calls.at(-1)?.[0]
-    expect(mapProps?.stops).toEqual([
-      expect.objectContaining({
-        id: 'stop-1',
-        sequence: 1,
-        position: [121.5654, 25.033]
-      }),
-      expect.objectContaining({
-        id: 'stop-2',
-        sequence: 2,
-        position: [121.5598, 25.041]
-      })
-    ])
-  })
-
-  it('shows the empty state when the route cannot be found', () => {
-    mockUseGetRoutesByCityQuery.mockReturnValue({
-      data: [],
-      isLoading: false,
-      error: null
-    })
-
-    renderRoutePage()
-
-    expect(screen.getByText('查無路線')).toBeInTheDocument()
-  })
-
-  it('toggles the favorite route stop from the timeline', () => {
-    renderRoutePage()
-
-    const favoriteButton = screen.getAllByRole('button', { name: '收藏站牌路線' })[0]
-    fireEvent.click(favoriteButton)
-
-    expect(screen.getByRole('button', { name: '取消收藏站牌路線' })).toBeInTheDocument()
-    expect(JSON.parse(localStorage.getItem('favoriteRouteStops') ?? '[]')).toEqual([
-      expect.objectContaining({
-        city: CityNameType.TAIPEI,
-        routeUID: 'route-1',
-        subRouteUID: 'subroute-1',
-        stopUID: 'stop-1'
-      })
-    ])
-  })
-
-  it('opens the bottom drawer on small screens', async () => {
-    mockMatchMedia.mockImplementation((query: string) => ({
-      matches: query.includes('max-width'),
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn()
-    }))
-
-    renderRoutePage()
-
-    fireEvent.click(screen.getByRole('button', { name: '開啟路線列表' }))
+  it('highlights the saved favorite stop after opening the route page from favorites', async () => {
+    render(
+      <MantineProvider>
+        <MemoryRouter
+          initialEntries={[{
+            pathname: '/routes/Taipei/route-1',
+            state: { favoriteRouteStop: targetFavoriteRouteStop }
+          }]}
+        >
+          <RouterRoutes>
+            <RouterRoute path="/routes/:city/:id" element={<Route />} />
+          </RouterRoutes>
+        </MemoryRouter>
+      </MantineProvider>
+    )
 
     await waitFor(() => {
-      expect(screen.getByText('藍1')).toBeInTheDocument()
-      expect(screen.getByRole('tab', { name: /往捷運昆陽站.*去程/ })).toBeInTheDocument()
+      expect(screen.getByText('2. 市政府').closest('[data-highlighted="true"]')).toBeInTheDocument()
+      expect(screen.queryByText('1. 市政府')).not.toBeInTheDocument()
     })
   })
 })

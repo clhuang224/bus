@@ -23,6 +23,7 @@ export const FavoriteRouteStopCard = ({ favoriteRouteStop, onRemove }: PropType)
         <Box
           component={Link}
           to={`/routes/${favoriteRouteStop.city}/${favoriteRouteStop.routeUID}`}
+          state={{ favoriteRouteStop }}
           style={{
             color: 'inherit',
             flex: 1,

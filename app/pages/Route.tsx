@@ -2,7 +2,7 @@ import { ActionIcon, Alert, Flex, ScrollArea, Stack, Tabs, Text, useMantineTheme
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
 import { useEffect, useMemo, useState } from 'react'
 import { MapSidebarLayout } from '~/components/common/MapSidebarLayout'
-import { useNavigate, useParams } from 'react-router'
+import { useLocation, useNavigate, useParams } from 'react-router'
 import { RouteMap } from '~/components/routes/RouteMap'
 import { RouteStopList } from '~/components/routes/RouteStopList'
 import { useFavoriteRouteStops } from '~/modules/hooks/useFavoriteRouteStops'
@@ -23,12 +23,18 @@ interface RouteTab {
   direction: DirectionType
 }
 
+interface RouteLocationState {
+  favoriteRouteStop?: FavoriteRouteStop
+}
+
 export default function Route() {
   const { city, id } = useParams()
+  const location = useLocation()
   const navigate = useNavigate()
   const theme = useMantineTheme()
   const isSm = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`)
   const [isSidebarOpened, { open: openSidebar, close: closeSidebar }] = useDisclosure(false)
+  const [listScrollBehavior, setListScrollBehavior] = useState<ScrollLogicalPosition>('nearest')
   const { isFavoriteRouteStop, toggleFavoriteRouteStop } = useFavoriteRouteStops()
   const cityName = city as CityNameType
   const { data: routes = [], isLoading: isRoutesLoading, error: routesError } = busApi.useGetRoutesByCityQuery(
@@ -39,6 +45,14 @@ export default function Route() {
     busApi.useGetStopOfRoutesByCityQuery(cityName, { skip: !city || !id })
   const { data: stopsByCity = [], isLoading: isStopsLoading, error: stopsError } =
     busApi.useGetStopsByCityQuery(cityName, { skip: !city || !id })
+
+  const targetFavoriteRouteStop = useMemo(() => {
+    const favoriteRouteStop = (location.state as RouteLocationState | null)?.favoriteRouteStop
+    if (!favoriteRouteStop) return null
+    if (favoriteRouteStop.city !== cityName || favoriteRouteStop.routeUID !== id) return null
+
+    return favoriteRouteStop
+  }, [cityName, id, location.state])
 
   const busRoute = useMemo(
     () => routes.find((route) => route.RouteUID === id),
@@ -62,6 +76,7 @@ export default function Route() {
   }, [busRoute])
 
   const [activeTab, setActiveTab] = useState<string | null>(null)
+  const [selectedStopId, setSelectedStopId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!routeTabs.length) {
@@ -69,10 +84,17 @@ export default function Route() {
       return
     }
 
+    const targetTabId = targetFavoriteRouteStop
+      ? routeTabs.find((tab) =>
+        tab.subRouteUID === targetFavoriteRouteStop.subRouteUID &&
+        tab.direction === targetFavoriteRouteStop.direction
+      )?.id
+      : null
+
     setActiveTab((currentTab) => currentTab && routeTabs.some((tab) => tab.id === currentTab)
       ? currentTab
-      : routeTabs[0].id)
-  }, [routeTabs])
+      : targetTabId ?? routeTabs[0].id)
+  }, [routeTabs, targetFavoriteRouteStop])
 
   const activeStopOfRoute = useMemo(() => {
     if (!activeTab) return null
@@ -150,6 +172,57 @@ export default function Route() {
     }))
   }, [activeStopOfRoute, stopPositionMap])
 
+  const highlightedStopId = useMemo(() => {
+    if (!targetFavoriteRouteStop || !activeSubRoute || !activeStopOfRoute || !busRoute) return null
+    if (
+      targetFavoriteRouteStop.routeUID !== busRoute.RouteUID ||
+      targetFavoriteRouteStop.subRouteUID !== activeSubRoute.SubRouteUID ||
+      targetFavoriteRouteStop.direction !== activeSubRoute.Direction
+    ) {
+      return null
+    }
+
+    const matchedStop = activeStopOfRoute.Stops.find((stop) => {
+      const stationKey = stop.StationID ?? stop.StopUID
+
+      return stationKey === targetFavoriteRouteStop.stationKey ||
+        stop.StopUID === targetFavoriteRouteStop.stopUID ||
+        stop.StopID === targetFavoriteRouteStop.stopID
+    })
+
+    return matchedStop?.StopUID ?? null
+  }, [activeStopOfRoute, activeSubRoute, busRoute, targetFavoriteRouteStop])
+
+  useEffect(() => {
+    if (!isSm || !highlightedStopId) return
+    openSidebar()
+  }, [highlightedStopId, isSm, openSidebar])
+
+  useEffect(() => {
+    if (!selectedStopId) return
+    if (timelineStops.some((stop) => stop.id === selectedStopId)) return
+
+    setSelectedStopId(null)
+  }, [selectedStopId, timelineStops])
+
+  const handleSelectStopFromList = (stopId: string) => {
+    setListScrollBehavior('nearest')
+    setSelectedStopId(stopId)
+
+    if (isSm) {
+      closeSidebar()
+    }
+  }
+
+  const handleSelectStopFromMap = (stopId: string | null) => {
+    setListScrollBehavior('start')
+    setSelectedStopId(stopId)
+
+    if (isSm && stopId) {
+      openSidebar()
+    }
+  }
+
   const isLoading = isRoutesLoading || isStopOfRoutesLoading || isStopsLoading
   const error = routesError || stopOfRoutesError || stopsError
   const message = useMemo(() => {
@@ -178,11 +251,6 @@ export default function Route() {
       openButtonLabel="開啟路線列表"
       panel={(
         <Stack h="100%" gap="md">
-          {message && (
-            <Alert color={message.color} title={message.title}>
-              {message.description}
-            </Alert>
-          )}
           {busRoute && routeTabs.length > 0 && (
             <>
               <Stack gap={4}>
@@ -219,6 +287,11 @@ export default function Route() {
                     </Tabs.Tab>
                   ))}
                 </Tabs.List>
+                {message && (
+                  <Alert color={message.color} title={message.title} mt="sm">
+                    {message.description}
+                  </Alert>
+                )}
                 {routeTabs.map((tab) => (
                   <Tabs.Panel
                     key={tab.id}
@@ -228,8 +301,12 @@ export default function Route() {
                   >
                     <ScrollArea h="100%">
                       <RouteStopList
+                        highlightedStopId={highlightedStopId}
+                        listScrollBehavior={listScrollBehavior}
+                        onSelectStop={handleSelectStopFromList}
                         stops={timelineStops}
                         onToggleFavorite={toggleFavoriteRouteStop}
+                        selectedStopId={selectedStopId}
                       />
                     </ScrollArea>
                   </Tabs.Panel>
@@ -240,7 +317,12 @@ export default function Route() {
         </Stack>
       )}
     >
-      <RouteMap stops={routeMapStops} />
+      <RouteMap
+        highlightedStopId={highlightedStopId}
+        selectedStop={selectedStopId}
+        onSelectStop={handleSelectStopFromMap}
+        stops={routeMapStops}
+      />
     </MapSidebarLayout>
   )
 }

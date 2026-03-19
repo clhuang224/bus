@@ -112,7 +112,7 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, onLoad }: PropTy
     }
   }, [map, showUserLocation, coords])
 
-  return <Box id={id} style={{ width: '100%', height: 'calc(100vh - 64px)' }} />
+  return <Box id={id} style={{ width: '100%', height: '100%' }} />
 }
 
 export default BaseMap

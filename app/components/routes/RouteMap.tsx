@@ -1,4 +1,4 @@
-import type { Map as MapLibreMap, Marker } from 'maplibre-gl'
+import type { Map as MapLibreMap, Marker, Popup } from 'maplibre-gl'
 import mapLibre from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { LngLat, LatLng } from '~/modules/types/CoordsType'
@@ -12,12 +12,16 @@ export interface RouteMapStop {
 }
 
 interface PropType {
+  highlightedStopId?: string | null
+  onSelectStop: (stopId: string | null) => void
+  selectedStop: string | null
   stops: RouteMapStop[]
 }
 
 const ROUTE_LINE_SOURCE_ID = 'route-line-source'
 const ROUTE_LINE_LAYER_ID = 'route-line-layer'
-const ROUTE_COLOR = '#1c7ed6'
+const ROUTE_COLOR = '#868e96'
+const HIGHLIGHTED_STOP_COLOR = '#1c7ed6'
 
 function removeRouteLine(map: MapLibreMap) {
   if (map.getLayer(ROUTE_LINE_LAYER_ID)) {
@@ -29,10 +33,11 @@ function removeRouteLine(map: MapLibreMap) {
   }
 }
 
-export const RouteMap = ({ stops }: PropType) => {
+export const RouteMap = ({ highlightedStopId = null, onSelectStop, selectedStop, stops }: PropType) => {
   const [map, setMap] = useState<MapLibreMap | null>(null)
   const [isMapReady, setIsMapReady] = useState(false)
-  const markerRef = useRef<Marker[]>([])
+  const markerMap = useRef<Map<string, Marker>>(new Map())
+  const popupRef = useRef<Popup | null>(null)
 
   const positionedStops = useMemo(
     () => stops.filter((stop): stop is RouteMapStop & { position: LngLat } => stop.position != null),
@@ -68,8 +73,8 @@ export const RouteMap = ({ stops }: PropType) => {
   useEffect(() => {
     if (!map || !isMapReady) return
 
-    markerRef.current.forEach((marker) => marker.remove())
-    markerRef.current = []
+    markerMap.current.forEach((marker) => marker.remove())
+    markerMap.current.clear()
 
     removeRouteLine(map)
 
@@ -103,11 +108,12 @@ export const RouteMap = ({ stops }: PropType) => {
     }
 
     positionedStops.forEach((stop) => {
+      const isHighlighted = stop.id === highlightedStopId
       const el = document.createElement('div')
       el.style.width = '28px'
       el.style.height = '28px'
       el.style.borderRadius = '999px'
-      el.style.backgroundColor = ROUTE_COLOR
+      el.style.backgroundColor = isHighlighted ? HIGHLIGHTED_STOP_COLOR : ROUTE_COLOR
       el.style.border = '2px solid #ffffff'
       el.style.color = '#ffffff'
       el.style.fontSize = '12px'
@@ -115,17 +121,27 @@ export const RouteMap = ({ stops }: PropType) => {
       el.style.display = 'flex'
       el.style.alignItems = 'center'
       el.style.justifyContent = 'center'
+      el.style.cursor = 'pointer'
       el.title = stop.name
+      el.dataset.label = stop.name
       el.textContent = String(stop.sequence)
 
-      markerRef.current.push(
-        new mapLibre.Marker({ element: el })
-          .setLngLat(stop.position)
-          .addTo(map)
-      )
+      const handleSelectStop = (event: MouseEvent) => {
+        event.preventDefault()
+        event.stopPropagation()
+        onSelectStop(stop.id)
+      }
+
+      el.addEventListener('click', handleSelectStop)
+
+      const marker = new mapLibre.Marker({ element: el })
+        .setLngLat(stop.position)
+        .addTo(map)
+
+      markerMap.current.set(stop.id, marker)
     })
 
-    if (positionedStops.length > 0) {
+    if (positionedStops.length > 0 && !selectedStop) {
       const bounds = positionedStops.reduce(
         (result, stop) => result.extend(stop.position),
         new mapLibre.LngLatBounds(positionedStops[0].position, positionedStops[0].position)
@@ -137,7 +153,50 @@ export const RouteMap = ({ stops }: PropType) => {
         duration: 800
       })
     }
-  }, [isMapReady, map, positionedStops])
+  }, [highlightedStopId, isMapReady, map, onSelectStop, positionedStops, selectedStop])
+
+  useEffect(() => {
+    if (!map || !markerMap.current.size) return
+
+    if (popupRef.current) {
+      popupRef.current.remove()
+      popupRef.current = null
+    }
+
+    if (!selectedStop) return
+
+    const marker = markerMap.current.get(selectedStop)
+    if (!marker) return
+
+    const popup = new mapLibre.Popup({
+      offset: 25,
+      closeOnClick: false
+    })
+      .setLngLat(marker.getLngLat())
+      .setText(marker.getElement().dataset.label || '')
+      .addTo(map)
+
+    popupRef.current = popup
+
+    return () => {
+      if (!popupRef.current) return
+      popupRef.current.remove()
+      popupRef.current = null
+    }
+  }, [map, selectedStop])
+
+  useEffect(() => {
+    if (!map || !selectedStop) return
+
+    const marker = markerMap.current.get(selectedStop)
+    if (!marker) return
+
+    map.flyTo({
+      center: marker.getLngLat(),
+      zoom: 16,
+      duration: 800
+    })
+  }, [map, selectedStop])
 
   return (
     <>

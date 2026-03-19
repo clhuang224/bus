@@ -58,7 +58,7 @@ export default function AppLayout () {
       header={{ height: isSm ? 0 : APP_HEADER_HEIGHT }}
       footer={{ height: isSm ? APP_FOOTER_HEIGHT : 0 }}
     >
-      <AppShell.Header h={76} p="md" visibleFrom="sm">
+      <AppShell.Header p="md" visibleFrom="sm">
         <Flex align="center" gap="md">
           {options.map((option) => (
             <Box

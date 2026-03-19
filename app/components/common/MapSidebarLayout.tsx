@@ -46,7 +46,7 @@ export const MapSidebarLayout = ({
         <ActionIcon
           pos="absolute"
           right="8px"
-          bottom="8px"
+          bottom="48px"
           style={{ zIndex: 2 }}
           onClick={onOpenSidebar}
           aria-label={openButtonLabel}
