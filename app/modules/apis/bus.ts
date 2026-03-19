@@ -2,6 +2,8 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { BusRoute, TdxBusRoute } from '../interfaces/BusRoute'
 import type { AreaType } from '../enums/AreaType'
 import type { CityNameType } from '../enums/CityNameType'
+import type { EstimatedArrival, TdxEstimatedArrival } from '../interfaces/EstimatedArrival'
+import type { RealtimeNearStop, TdxRealtimeNearStop } from '../interfaces/RealtimeNearStop'
 import type { StopOfRoute, TdxStopOfRoute } from '../interfaces/StopOfRoute'
 import type { Stop, TdxStop } from '../interfaces/Stop'
 import { getBusErrorModal } from './errors/busError'
@@ -30,6 +32,25 @@ export const busApi = createApi({
   },
   keepUnusedDataFor: 60 * 5,
   endpoints: (build) => ({
+    getEstimatedArrivalByRoute: build.query<EstimatedArrival[], { city: CityNameType, routeUID: string }>({
+      query: ({ city, routeUID }) => `/EstimatedTimeOfArrival/City/${city}?%24filter=RouteUID%20eq%20'${routeUID}'&%24format=JSON`,
+      transformResponse: (res: TdxEstimatedArrival[], _meta, { city }) => res.map((estimatedArrival) => ({
+        ...estimatedArrival,
+        City: city,
+        RouteName: {
+          zh_TW: estimatedArrival.RouteName.Zh_tw,
+          en: estimatedArrival.RouteName.En
+        },
+        StopName: {
+          zh_TW: estimatedArrival.StopName.Zh_tw,
+          en: estimatedArrival.StopName.En
+        },
+        SubRouteName: {
+          zh_TW: estimatedArrival.SubRouteName.Zh_tw,
+          en: estimatedArrival.SubRouteName.En
+        }
+      }))
+    }),
     getRoutesByCity: build.query<BusRoute<string>[], CityNameType>({
       query: (city) => `/Route/City/${city}?%24format=JSON`,
       transformResponse: (res: TdxBusRoute<string>[]) => res.map((busRoute) => ({
@@ -246,11 +267,33 @@ export const busApi = createApi({
           )
         }
       }
+    }),
+    getRealtimeNearStopsByRoute: build.query<RealtimeNearStop[], { city: CityNameType, routeUID: string }>({
+      query: ({ city, routeUID }) => `/RealTimeNearStop/City/${city}?%24filter=RouteUID%20eq%20'${routeUID}'&%24format=JSON`,
+      transformResponse: (res: TdxRealtimeNearStop[], _meta, { city }) => res.map((realtimeNearStop) => ({
+        ...realtimeNearStop,
+        City: city,
+        RouteName: {
+          zh_TW: realtimeNearStop.RouteName.Zh_tw,
+          en: realtimeNearStop.RouteName.En
+        },
+        StopName: {
+          zh_TW: realtimeNearStop.StopName.Zh_tw,
+          en: realtimeNearStop.StopName.En
+        },
+        SubRouteName: {
+          zh_TW: realtimeNearStop.SubRouteName.Zh_tw,
+          en: realtimeNearStop.SubRouteName.En
+        },
+        position: [realtimeNearStop.BusPosition.PositionLon, realtimeNearStop.BusPosition.PositionLat] as RealtimeNearStop['position']
+      }))
     })
   })
 })
 
 export const {
+  useGetEstimatedArrivalByRouteQuery,
+  useGetRealtimeNearStopsByRouteQuery,
   useGetRoutesByCityQuery,
   useGetStopOfRoutesByCityQuery,
   useGetStopsByCityQuery,
