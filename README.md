@@ -47,9 +47,11 @@ If permission is granted:
 
 ### Route Search
 
-Users can search routes within the currently selected region.
+Users can search routes within the selected service area.
 
-- Route numbers can be entered using a custom bus keypad or the native keyboard.
+- The Routes page defaults to the area resolved from the user's current location.
+- If the user changes the area manually, the app keeps that selection while they continue browsing.
+- Search keywords are also preserved when returning to the Routes page during the same session.
 - Matching routes are displayed as a list.
 - Clicking a route opens the **Route Page**, which shows:
   - Subroute tabs for each available direction or variant
@@ -147,7 +149,7 @@ Boundary data is loaded from the counties dataset in [dkaoster/taiwan-atlas](htt
 The app converts that TopoJSON counties dataset into GeoJSON and uses it to determine which Taiwan city or county contains the user's current coordinates. That city lookup then drives:
 
 - Nearby page area selection
-- automatic area sync in the layout
+- default route search area selection
 - region-aware bus API requests based on the resolved county
 
 ## Development
