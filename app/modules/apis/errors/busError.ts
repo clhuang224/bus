@@ -13,10 +13,9 @@ export enum BaseQueryErrorStatus {
   CUSTOM_ERROR = 'CUSTOM_ERROR'
 }
 
-// Development only
 export const tdxUnauthorizedModal: OpenGlobalModalPayload = {
-  title: 'TDX TOKEN 已過期',
-  message: '你的 TDX TOKEN 已過期，請更新 .env.local 並重新執行專案。',
+  title: '公車資料服務驗證失敗',
+  message: '目前無法驗證公車資料服務，請稍後再試。',
   variant: 'alert',
   confirmText: '重整頁面',
   confirmAction: 'refresh'

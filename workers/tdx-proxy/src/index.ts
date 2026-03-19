@@ -13,6 +13,11 @@ interface TdxTokenResponse {
   expires_in: number
 }
 
+interface UpstreamFetchResult {
+  response: Response
+  retriedAfterUnauthorized: boolean
+}
+
 class ProxyConfigError extends Error {
   constructor(message: string) {
     super(message)
@@ -22,6 +27,11 @@ class ProxyConfigError extends Error {
 
 let cachedToken: string | null = null
 let cachedTokenExpiresAt = 0
+
+function clearCachedToken() {
+  cachedToken = null
+  cachedTokenExpiresAt = 0
+}
 
 function withCorsHeaders(headers: Headers, allowedOrigin: string) {
   headers.set('access-control-allow-origin', allowedOrigin)
@@ -87,6 +97,62 @@ function getUpstreamUrl(requestUrl: URL) {
   return `${TDX_BUS_BASE_URL}${upstreamPath}${requestUrl.search}`
 }
 
+function logProxyRequest({
+  durationMs,
+  path,
+  retriedAfterUnauthorized,
+  search,
+  status
+}: {
+  durationMs: number
+  path: string
+  retriedAfterUnauthorized: boolean
+  search: string
+  status: number
+}) {
+  console.log(JSON.stringify({
+    type: 'tdx-proxy-request',
+    timestamp: new Date().toISOString(),
+    path,
+    search,
+    status,
+    durationMs,
+    requestCount: 1,
+    retriedAfterUnauthorized
+  }))
+}
+
+async function fetchUpstreamWithTokenRetry(requestUrl: URL, env: Env): Promise<UpstreamFetchResult> {
+  let accessToken = await getAccessToken(env)
+  let upstreamResponse = await fetch(getUpstreamUrl(requestUrl), {
+    headers: {
+      authorization: `Bearer ${accessToken}`,
+      accept: 'application/json'
+    }
+  })
+
+  if (upstreamResponse.status !== 401) {
+    return {
+      response: upstreamResponse,
+      retriedAfterUnauthorized: false
+    }
+  }
+
+  clearCachedToken()
+  accessToken = await getAccessToken(env)
+  upstreamResponse = await fetch(getUpstreamUrl(requestUrl), {
+    headers: {
+      authorization: `Bearer ${accessToken}`,
+      accept: 'application/json'
+    }
+  })
+
+  return {
+    response: upstreamResponse,
+    retriedAfterUnauthorized: true
+  }
+}
+
 export default {
   async fetch(request: Request, env: Env) {
     const corsOrigin = getCorsOrigin(request, env)
@@ -116,16 +182,20 @@ export default {
 
     try {
       const requestUrl = new URL(request.url)
-      const accessToken = await getAccessToken(env)
-      const upstreamResponse = await fetch(getUpstreamUrl(requestUrl), {
-        headers: {
-          authorization: `Bearer ${accessToken}`,
-          accept: 'application/json'
-        }
-      })
+      const startedAt = Date.now()
+      const { response: upstreamResponse, retriedAfterUnauthorized } = await fetchUpstreamWithTokenRetry(requestUrl, env)
+      const durationMs = Date.now() - startedAt
 
       const headers = new Headers(upstreamResponse.headers)
       withCorsHeaders(headers, corsOrigin)
+
+      logProxyRequest({
+        durationMs,
+        path: requestUrl.pathname.replace(/^\/api\/tdx/, ''),
+        retriedAfterUnauthorized,
+        search: requestUrl.search,
+        status: upstreamResponse.status
+      })
 
       return new Response(upstreamResponse.body, {
         status: upstreamResponse.status,
@@ -133,7 +203,14 @@ export default {
         headers
       })
     } catch (error) {
-      console.error('tdx-proxy worker error:', error)
+      const requestUrl = new URL(request.url)
+      console.error('tdx-proxy worker error:', JSON.stringify({
+        type: 'tdx-proxy-error',
+        timestamp: new Date().toISOString(),
+        path: requestUrl.pathname.replace(/^\/api\/tdx/, ''),
+        search: requestUrl.search,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      }))
 
       const headers = new Headers({
         'content-type': 'application/json'
