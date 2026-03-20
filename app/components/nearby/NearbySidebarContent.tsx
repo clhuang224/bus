@@ -11,6 +11,7 @@ import { NearbyStopRoutes } from './NearbyStopRoutes'
 type StopItemRefs = RefObject<Map<string, HTMLDivElement | null>>
 
 interface NearbySidebarListState {
+  isStationRoutesLoading: boolean
   nearbyStopGroups: NearbyStopGroup[]
   onSelectStop: (value: string | null) => void
   onViewRoutes: (stationID: string) => void
@@ -21,6 +22,7 @@ interface NearbySidebarListState {
 }
 
 interface NearbySidebarDetailState {
+  isStationRoutesLoading: boolean
   onBack: () => void
   stopGroup: NearbyStopGroup | null
   stationRoutes: StationRoute[]
@@ -53,7 +55,10 @@ const NearbySidebarContentDetail = ({ detailState }: { detailState: NearbySideba
           {Array.from(new Set(detailState.stopGroup!.stops.map((stop) => stop.StopAddress).filter(Boolean))).join('、') || '未提供'}
         </Text>
       </Stack>
-      <NearbyStopRoutes routes={detailState.stationRoutes} />
+      <NearbyStopRoutes
+        routes={detailState.stationRoutes}
+        isLoading={detailState.isStationRoutesLoading}
+      />
     </Stack>
   </Stack>
 )
@@ -87,6 +92,7 @@ const NearbySidebarContentList = ({ listState }: { listState: NearbySidebarListS
             <NearbyStopDetail
               stopGroup={stopGroup}
               routes={listState.stationRouteBadgesMap.get(stopGroup.StationID) ?? []}
+              isRoutesLoading={listState.isStationRoutesLoading && listState.selectedStopId === stopGroup.StationID}
               onViewRoutes={listState.onViewRoutes}
             />
           </AccordionPanel>

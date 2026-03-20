@@ -1,4 +1,4 @@
-import { ScrollArea, Stack, Tabs, Text } from '@mantine/core'
+import { ScrollArea, Skeleton, Stack, Tabs, Text } from '@mantine/core'
 import { useState } from 'react'
 import { directionMapName } from '~/modules/consts/direction'
 import { DirectionType } from '~/modules/enums/DirectionType'
@@ -8,13 +8,14 @@ import { RouteInfoCard } from '../routes/RouteInfoCard'
 
 interface PropType {
   routes: StationRoute[]
+  isLoading?: boolean
 }
 
 const routeNameCollator = new Intl.Collator('zh-Hant-u-co-stroke', {
   numeric: true
 })
 
-export const NearbyStopRoutes = ({ routes }: PropType) => {
+export const NearbyStopRoutes = ({ routes, isLoading = false }: PropType) => {
   const routeSections = getEnumValues(DirectionType)
     .map((direction) => ({
       direction,
@@ -27,6 +28,27 @@ export const NearbyStopRoutes = ({ routes }: PropType) => {
   const [selectedDirection, setSelectedDirection] = useState<string | null>(
     routeSections[0] ? String(routeSections[0].direction) : null
   )
+
+  if (isLoading) {
+    return (
+      <Stack gap="sm" style={{ flex: 1, minHeight: 0 }}>
+        <Text size="sm" c="dimmed">此站路線</Text>
+        <Tabs value={null}>
+          <Tabs.List>
+            <Tabs.Tab value="loading-go">去程</Tabs.Tab>
+            <Tabs.Tab value="loading-return">返程</Tabs.Tab>
+          </Tabs.List>
+        </Tabs>
+        <ScrollArea style={{ flex: 1, minHeight: 0 }} data-testid="nearby-stop-routes-skeleton">
+          <Stack gap="xs" pt="sm">
+            <Skeleton h={84} radius="md" />
+            <Skeleton h={84} radius="md" />
+            <Skeleton h={84} radius="md" />
+          </Stack>
+        </ScrollArea>
+      </Stack>
+    )
+  }
 
   if (routeSections.length === 0) {
     return (

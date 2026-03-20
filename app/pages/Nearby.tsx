@@ -44,6 +44,7 @@ const Nearby = () => {
   const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
   const currentCity = getCityByCoords(coords, geojson)
   const currentArea = currentCity ? cityMapArea[currentCity] : null
+  const activeStationId = selectedRouteStopId ?? selectedStopId
   const isNearbyDisabled = disabledNearbyPermissions.includes(permission) || geolocationError !== null
   const { data: allStops, isLoading, error, isSuccess } = busApi.useGetStopsByAreaQuery(
     currentArea!,
@@ -51,12 +52,13 @@ const Nearby = () => {
       skip: !coords || !currentArea
     }
   )
-  const { data: stopOfRoutes = [] } = busApi.useGetStopOfRoutesByAreaQuery(currentArea!, {
-    skip: !coords || !currentArea
+  const { data: stopOfRoutes = [], isLoading: isStopOfRoutesLoading } = busApi.useGetStopOfRoutesByAreaQuery(currentArea!, {
+    skip: !coords || !currentArea || !activeStationId
   })
-  const { data: routes = [] } = busApi.useGetRoutesByAreaQuery(currentArea!, {
-    skip: !coords || !currentArea
+  const { data: routes = [], isLoading: isRoutesLoading } = busApi.useGetRoutesByAreaQuery(currentArea!, {
+    skip: !coords || !currentArea || !activeStationId
   })
+  const isStationRoutesLoading = isRoutesLoading || isStopOfRoutesLoading
 
   const nearbyStopGroups = useMemo(() => {
     if (!coords || !isSuccess) return []
@@ -242,11 +244,13 @@ const Nearby = () => {
       panel={(
         <NearbySidebarContent
           detailState={{
+            isStationRoutesLoading,
             onBack: backToNearbyStops,
             stopGroup: selectedStopGroup,
             stationRoutes: selectedStationRoutes
           }}
           listState={{
+            isStationRoutesLoading,
             nearbyStopGroups,
             onSelectStop: selectStop,
             onViewRoutes: viewStopRoutes,

@@ -259,11 +259,15 @@ const routesData = [
 ]
 
 function renderNearby({
+  initialEntry = '/nearby',
   coords = null,
   geolocationError = null,
   permission = GeoPermissionType.PROMPT,
-  queryState
+  queryState,
+  routesQueryState,
+  stopOfRoutesQueryState
 }: {
+  initialEntry?: string
   coords?: [number, number] | null
   geolocationError?: GeoErrorType | null
   permission?: GeoPermissionType
@@ -272,6 +276,14 @@ function renderNearby({
     isLoading?: boolean
     error?: unknown
     isSuccess?: boolean
+  }
+  routesQueryState?: {
+    data?: unknown[]
+    isLoading?: boolean
+  }
+  stopOfRoutesQueryState?: {
+    data?: unknown[]
+    isLoading?: boolean
   }
 } = {}) {
   const store = configureStore({
@@ -298,15 +310,19 @@ function renderNearby({
     ...queryState
   })
   mockUseGetRoutesByAreaQuery.mockReturnValue({
-    data: routesData
+    data: routesData,
+    isLoading: false,
+    ...routesQueryState
   })
   mockUseGetStopOfRoutesByAreaQuery.mockReturnValue({
-    data: stopOfRoutesData
+    data: stopOfRoutesData,
+    isLoading: false,
+    ...stopOfRoutesQueryState
   })
 
   return render(
     <MantineProvider>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[initialEntry]}>
         <Provider store={store}>
           <Nearby />
         </Provider>
@@ -437,6 +453,55 @@ describe('Nearby', () => {
 
     expect(screen.getByText(nearbyMessages.emptyStops.title)).toBeInTheDocument()
     expect(screen.getByText(nearbyMessages.emptyStops.description)).toBeInTheDocument()
+  })
+
+  it('does not load area route data until a stop is selected', () => {
+    renderNearby({
+      coords: [25.033, 121.5654],
+      permission: GeoPermissionType.GRANTED,
+      queryState: {
+        data: nearbyStopsData,
+        isSuccess: true
+      }
+    })
+
+    expect(mockUseGetRoutesByAreaQuery).toHaveBeenLastCalledWith(expect.anything(), {
+      skip: true
+    })
+    expect(mockUseGetStopOfRoutesByAreaQuery).toHaveBeenLastCalledWith(expect.anything(), {
+      skip: true
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: '市政府' }))
+
+    expect(mockUseGetRoutesByAreaQuery).toHaveBeenLastCalledWith(expect.anything(), {
+      skip: false
+    })
+    expect(mockUseGetStopOfRoutesByAreaQuery).toHaveBeenLastCalledWith(expect.anything(), {
+      skip: false
+    })
+  })
+
+  it('shows route skeletons while nearby station routes are loading', () => {
+    renderNearby({
+      initialEntry: '/nearby?stop=station-1&routeStop=station-1',
+      coords: [25.033, 121.5654],
+      permission: GeoPermissionType.GRANTED,
+      queryState: {
+        data: nearbyStopsData,
+        isSuccess: true
+      },
+      routesQueryState: {
+        data: [],
+        isLoading: true
+      },
+      stopOfRoutesQueryState: {
+        data: [],
+        isLoading: true
+      }
+    })
+
+    expect(screen.getByTestId('nearby-stop-routes-skeleton')).toBeInTheDocument()
   })
 
   it('syncs selected stop from the map back to the list state', () => {
