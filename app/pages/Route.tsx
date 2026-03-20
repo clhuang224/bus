@@ -1,9 +1,8 @@
-import { ActionIcon, Flex, Skeleton, Stack, Tabs, Text, useMantineTheme } from '@mantine/core'
+import { ActionIcon, Flex, Stack, Tabs, Text, useMantineTheme } from '@mantine/core'
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
 import { useEffect, useMemo, useState } from 'react'
 import { BaseAlert } from '~/components/common/BaseAlert'
 import { MapSidebarLayout } from '~/components/common/MapSidebarLayout'
-import { SkeletonList } from '~/components/common/SkeletonList'
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { RouteMap } from '~/components/routes/RouteMap'
 import { RouteStopList } from '~/components/routes/RouteStopList'
@@ -12,27 +11,6 @@ import { useRouteBaseData } from '~/modules/hooks/useRouteBaseData'
 import { useRouteRealtimeData } from '~/modules/hooks/useRouteRealtimeData'
 import { RiArrowLeftSLine } from '@remixicon/react'
 import { AppBadge } from '~/components/common/AppBadge'
-
-const RoutePanelSkeleton = () => (
-  <Stack gap="md" h="100%" data-testid="route-panel-skeleton">
-    <Stack gap={4}>
-      <Flex gap="xs" align="center">
-        <Skeleton h={36} w={36} radius="md" />
-        <Skeleton h={32} w={88} radius="xl" />
-      </Flex>
-      <Skeleton h={14} mt="sm" radius="sm" />
-    </Stack>
-    <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
-      <Flex gap="xs">
-        <Skeleton h={36} w={96} radius="md" />
-        <Skeleton h={36} w={96} radius="md" />
-      </Flex>
-      <SkeletonList count={6} gap="sm">
-        <Skeleton h={52} radius="md" />
-      </SkeletonList>
-    </Stack>
-  </Stack>
-)
 
 export default function Route() {
   const { city, id } = useParams()
@@ -51,6 +29,7 @@ export default function Route() {
     busRoute,
     highlightedStopId,
     isLoading,
+    isStopListLoading,
     message,
     defaultActiveTabId,
     routeMapStops,
@@ -142,71 +121,78 @@ export default function Route() {
       onCloseSidebar={closeSidebar}
       onOpenSidebar={openSidebar}
       openButtonLabel="開啟路線列表"
-      panel={isLoading
-        ? <RoutePanelSkeleton />
-        : (
-          <Stack h="100%" gap="md">
-            {busRoute && routeTabs.length > 0 && (
-              <>
-                <Stack gap={4}>
-                  <Flex gap="xs" align="center">
-                    <ActionIcon onClick={handleBack}>
-                      <RiArrowLeftSLine size={18} />
-                    </ActionIcon>
-                    <AppBadge type="route" size="xl">{busRoute.RouteName.zh_TW}</AppBadge>
-                  </Flex>
-                  <Text size="sm" c="dimmed" mt="sm">
-                    {busRoute.DepartureStopName.zh_TW} - {busRoute.DestinationStopName.zh_TW}
-                  </Text>
-                </Stack>
-                <Tabs
-                  value={activeTab}
-                  onChange={setActiveTab}
-                  keepMounted={false}
-                  style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}
-                >
-                  <Tabs.List
-                    style={{
-                      flexWrap: 'nowrap',
-                      overflowX: 'auto',
-                      overflowY: 'hidden'
-                    }}
-                  >
-                    {routeTabs.map((tab) => (
-                      <Tabs.Tab
-                        key={tab.id}
-                        value={tab.id}
-                        style={{ flex: '0 0 auto' }}
-                      >
-                        {tab.label}
-                      </Tabs.Tab>
-                    ))}
-                  </Tabs.List>
-                  {message && <BaseAlert {...message} mt="sm" />}
-                  {routeTabs.map((tab) => (
-                  <Tabs.Panel
-                    key={tab.id}
-                    value={tab.id}
-                    pt="md"
-                    style={{ flex: 1, minHeight: 0 }}
-                  >
-                    <RouteStopList
-                      highlightedStopId={highlightedStopId}
-                      hasRealtimeError={hasRealtimeError}
-                      isRealtimeLoading={isRealtimeLoading}
-                      listScrollBehavior={listScrollBehavior}
-                      onSelectStop={handleSelectStopFromList}
-                      realtimeInfoState={realtimeInfoState}
-                      stops={timelineStops}
-                      onToggleFavorite={toggleFavoriteRouteStop}
-                      selectedStopId={selectedStopId}
-                    />
-                  </Tabs.Panel>
-                ))}
-                </Tabs>
-              </>
+      panel={(
+        <Stack h="100%" gap="md">
+          <Stack gap={4}>
+            <Flex gap="xs" align="center">
+              <ActionIcon aria-label="返回路線列表" onClick={handleBack}>
+                <RiArrowLeftSLine size={18} />
+              </ActionIcon>
+              {busRoute && (
+                <AppBadge type="route" size="xl">{busRoute.RouteName.zh_TW}</AppBadge>
+              )}
+            </Flex>
+            {busRoute && (
+              <Text size="sm" c="dimmed" mt="sm">
+                {busRoute.DepartureStopName.zh_TW} - {busRoute.DestinationStopName.zh_TW}
+              </Text>
             )}
           </Stack>
+          {routeTabs.length > 0
+            ? (
+            <Tabs
+              value={activeTab}
+              onChange={setActiveTab}
+              keepMounted={false}
+              style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}
+            >
+              <Tabs.List
+                style={{
+                  flexWrap: 'nowrap',
+                  overflowX: 'auto',
+                  overflowY: 'hidden'
+                }}
+              >
+                {routeTabs.map((tab) => (
+                  <Tabs.Tab
+                    key={tab.id}
+                    value={tab.id}
+                    style={{ flex: '0 0 auto' }}
+                  >
+                    {tab.label}
+                  </Tabs.Tab>
+                ))}
+              </Tabs.List>
+              {!isLoading && message && <BaseAlert {...message} mt="sm" />}
+              {routeTabs.map((tab) => (
+                <Tabs.Panel
+                  key={tab.id}
+                  value={tab.id}
+                  pt="md"
+                  style={{ flex: 1, minHeight: 0 }}
+                >
+                  <RouteStopList
+                    highlightedStopId={highlightedStopId}
+                    hasRealtimeError={hasRealtimeError}
+                    isLoading={isStopListLoading}
+                    isRealtimeLoading={isRealtimeLoading}
+                    listScrollBehavior={listScrollBehavior}
+                    onSelectStop={handleSelectStopFromList}
+                    realtimeInfoState={realtimeInfoState}
+                    stops={timelineStops}
+                    onToggleFavorite={toggleFavoriteRouteStop}
+                    selectedStopId={selectedStopId}
+                  />
+                </Tabs.Panel>
+              ))}
+            </Tabs>
+              )
+            : (
+                !isLoading && message
+                  ? <BaseAlert {...message} />
+                  : null
+              )}
+        </Stack>
       )}
     >
       <RouteMap

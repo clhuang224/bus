@@ -367,7 +367,7 @@ describe('Route', () => {
     })
   })
 
-  it('shows a route panel skeleton while base route data is loading', () => {
+  it('keeps the back button visible while base route data is loading', () => {
     mockUseGetRoutesByCityQuery.mockReturnValue({
       data: [],
       isLoading: true,
@@ -394,7 +394,8 @@ describe('Route', () => {
       </MantineProvider>
     )
 
-    expect(screen.getByTestId('route-panel-skeleton')).toBeInTheDocument()
+    expect(screen.getByLabelText('返回路線列表')).toBeInTheDocument()
+    expect(screen.queryByText('藍1')).not.toBeInTheDocument()
     expect(screen.queryByText('載入中')).not.toBeInTheDocument()
   })
 

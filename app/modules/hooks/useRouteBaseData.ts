@@ -196,6 +196,7 @@ export function useRouteBaseData({
   }, [activeStopOfRoute, activeSubRoute, busRoute, targetFavoriteRouteStop])
 
   const isLoading = isRoutesLoading || isStopOfRoutesLoading || isStopsLoading
+  const isStopListLoading = Boolean(busRoute) && routeTabs.length > 0 && (isStopOfRoutesLoading || isStopsLoading)
   const error = routesError || stopOfRoutesError || stopsError
 
   const message = useMemo(() => {
@@ -211,6 +212,7 @@ export function useRouteBaseData({
     busRoute,
     highlightedStopId,
     isLoading,
+    isStopListLoading,
     message,
     defaultActiveTabId,
     routeMapStops,
