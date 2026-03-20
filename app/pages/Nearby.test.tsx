@@ -13,6 +13,7 @@ import {
   geoPermissionMessages
 } from '~/modules/consts/geoMessages'
 import { nearbyMessages } from '~/modules/consts/pageMessages'
+import { AreaType } from '~/modules/enums/AreaType'
 import { BearingType } from '~/modules/enums/BearingType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { GeoErrorType } from '~/modules/enums/geo/GeoErrorType'
@@ -20,12 +21,12 @@ import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
 
 const {
   mockUseGetRoutesByAreaQuery,
-  mockUseGetStopsByAreaQuery,
+  mockUseGetStopsByNearbyAreaQuery,
   mockUseGetStopOfRoutesByAreaQuery,
   mockNearbyStopMap
 } = vi.hoisted(() => ({
   mockUseGetRoutesByAreaQuery: vi.fn(),
-  mockUseGetStopsByAreaQuery: vi.fn(),
+  mockUseGetStopsByNearbyAreaQuery: vi.fn(),
   mockUseGetStopOfRoutesByAreaQuery: vi.fn(),
   mockNearbyStopMap: vi.fn()
 }))
@@ -56,7 +57,7 @@ HTMLElement.prototype.scrollIntoView = vi.fn()
 vi.mock('~/modules/apis/bus', () => ({
   busApi: {
     useGetRoutesByAreaQuery: mockUseGetRoutesByAreaQuery,
-    useGetStopsByAreaQuery: mockUseGetStopsByAreaQuery,
+    useGetStopsByNearbyAreaQuery: mockUseGetStopsByNearbyAreaQuery,
     useGetStopOfRoutesByAreaQuery: mockUseGetStopOfRoutesByAreaQuery
   }
 }))
@@ -302,7 +303,7 @@ function renderNearby({
     }
   })
 
-  mockUseGetStopsByAreaQuery.mockReturnValue({
+  mockUseGetStopsByNearbyAreaQuery.mockReturnValue({
     data: [],
     isLoading: false,
     error: null,
@@ -345,7 +346,7 @@ describe('Nearby', () => {
     }))
 
     mockUseGetRoutesByAreaQuery.mockReset()
-    mockUseGetStopsByAreaQuery.mockReset()
+    mockUseGetStopsByNearbyAreaQuery.mockReset()
     mockUseGetStopOfRoutesByAreaQuery.mockReset()
     mockNearbyStopMap.mockReset()
   })
@@ -453,6 +454,24 @@ describe('Nearby', () => {
 
     expect(screen.getByText(nearbyMessages.emptyStops.title)).toBeInTheDocument()
     expect(screen.getByText(nearbyMessages.emptyStops.description)).toBeInTheDocument()
+  })
+
+  it('loads nearby stops with bounded area query params once coords are available', () => {
+    renderNearby({
+      coords: [25.033, 121.5654],
+      permission: GeoPermissionType.GRANTED,
+      queryState: {
+        data: nearbyStopsData,
+        isSuccess: true
+      }
+    })
+
+    expect(mockUseGetStopsByNearbyAreaQuery).toHaveBeenLastCalledWith({
+      area: AreaType.TAIPEI,
+      coords: [25.033, 121.5654]
+    }, {
+      skip: false
+    })
   })
 
   it('does not load area route data until a stop is selected', () => {

@@ -91,6 +91,13 @@ export function transformStop(stop: TdxStop): Stop | null {
   }
 }
 
+export function transformStops(stops: TdxStop[]): Stop[] {
+  return stops.flatMap((stop) => {
+    const transformedStop = transformStop(stop)
+    return transformedStop ? [transformedStop] : []
+  })
+}
+
 export function transformRealtimeNearStop(
   realtimeNearStop: TdxRealtimeNearStop,
   city: CityNameType

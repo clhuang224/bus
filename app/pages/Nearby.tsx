@@ -46,8 +46,8 @@ const Nearby = () => {
   const currentArea = currentCity ? cityMapArea[currentCity] : null
   const activeStationId = selectedRouteStopId ?? selectedStopId
   const isNearbyDisabled = disabledNearbyPermissions.includes(permission) || geolocationError !== null
-  const { data: allStops, isLoading, error, isSuccess } = busApi.useGetStopsByAreaQuery(
-    currentArea!,
+  const { data: allStops, isLoading, error, isSuccess } = busApi.useGetStopsByNearbyAreaQuery(
+    { area: currentArea!, coords: coords! },
     {
       skip: !coords || !currentArea
     }

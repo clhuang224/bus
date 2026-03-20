@@ -10,12 +10,14 @@ import type { Stop, TdxStop } from '../interfaces/Stop'
 import { getBusErrorModal } from './errors/busError'
 import { openGlobalModal } from '../slices/globalModalSlice'
 import { areaMapCity } from '../consts/area'
+import type { LatLng } from '../types/CoordsType'
+import { buildNearbyStopQuery } from '../utils/buildNearbyStopQuery'
 import {
   transformBusRoute,
   transformEstimatedArrival,
   transformRealtimeNearStop,
   transformRouteShape,
-  transformStop,
+  transformStops,
   transformStopOfRoute
 } from '../utils/transformTdxBusData'
 
@@ -99,10 +101,7 @@ export const busApi = createApi({
     }),
     getStopsByCity: build.query<Stop[], CityNameType>({
       query: (cityName) => `/Stop/City/${cityName}?%24format=JSON`,
-      transformResponse: (res: TdxStop[]) => res.flatMap((stop) => {
-        const transformedStop = transformStop(stop)
-        return transformedStop ? [transformedStop] : []
-      })
+      transformResponse: (res: TdxStop[]) => transformStops(res)
     }),
     getStopsByArea: build.query<Stop[], AreaType>({
       queryFn: async (area, _api, _extraOptions, baseQuery) => {
@@ -119,12 +118,25 @@ export const busApi = createApi({
         }
 
         return {
-          data: cityResults.flatMap(({ result }) =>
-            (result.data as TdxStop[]).flatMap((stop) => {
-              const transformedStop = transformStop(stop)
-              return transformedStop ? [transformedStop] : []
-            })
-          )
+          data: cityResults.flatMap(({ result }) => transformStops(result.data as TdxStop[]))
+        }
+      }
+    }),
+    getStopsByNearbyArea: build.query<Stop[], { area: AreaType, coords: LatLng }>({
+      queryFn: async ({ area, coords }, _api, _extraOptions, baseQuery) => {
+        const cityResults = await Promise.all(
+          areaMapCity[area].map(async (city) => ({
+            result: await baseQuery(buildNearbyStopQuery(city, coords))
+          }))
+        )
+
+        const errorResult = cityResults.find(({ result }) => result.error != null)
+        if (errorResult?.result.error != null) {
+          return { error: errorResult.result.error }
+        }
+
+        return {
+          data: cityResults.flatMap(({ result }) => transformStops(result.data as TdxStop[]))
         }
       }
     }),
@@ -152,5 +164,6 @@ export const {
   useGetStopsByCityQuery,
   useGetRoutesByAreaQuery,
   useGetStopOfRoutesByAreaQuery,
-  useGetStopsByAreaQuery
+  useGetStopsByAreaQuery,
+  useGetStopsByNearbyAreaQuery
 } = busApi
