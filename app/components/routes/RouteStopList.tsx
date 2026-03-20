@@ -103,7 +103,7 @@ export const RouteStopList = ({
                           alignItems: 'center',
                           justifyContent: 'center',
                           color: '#ffffff',
-                          fontSize: hasRealtimeBus ? '11px' : '12px',
+                          fontSize: '12px',
                           fontWeight: 700
                         }}
                       >
