@@ -11,7 +11,7 @@ import { getBusErrorModal } from './errors/busError'
 import { openGlobalModal } from '../slices/globalModalSlice'
 import { areaMapCity } from '../consts/area'
 import type { LatLng } from '../types/CoordsType'
-import { buildNearbyStopQuery } from '../utils/buildNearbyStopQuery'
+import { buildNearbyStopOfRouteQuery, buildNearbyStopQuery } from '../utils/buildNearbyStopQuery'
 import {
   transformBusRoute,
   transformEstimatedArrival,
@@ -52,17 +52,19 @@ export const busApi = createApi({
       query: (city) => `/Route/City/${city}?%24format=JSON`,
       transformResponse: (res: TdxBusRoute<string>[]) => res.map(transformBusRoute)
     }),
-    getStopOfRoutesByCity: build.query<StopOfRoute[], CityNameType>({
-      query: (cityName) => `/StopOfRoute/City/${cityName}?%24format=JSON`,
-      transformResponse: (res: TdxStopOfRoute[], _meta, cityName) =>
-        res.map((stopOfRoute) => transformStopOfRoute(stopOfRoute, cityName))
+    getStopOfRoutesByCity: build.query<StopOfRoute[], { city: CityNameType, routeUID?: string }>({
+      query: ({ city, routeUID }) => routeUID
+        ? `/StopOfRoute/City/${city}?%24filter=RouteUID%20eq%20'${routeUID}'&%24format=JSON`
+        : `/StopOfRoute/City/${city}?%24format=JSON`,
+      transformResponse: (res: TdxStopOfRoute[], _meta, { city }) =>
+        res.map((stopOfRoute) => transformStopOfRoute(stopOfRoute, city))
     }),
-    getStopOfRoutesByArea: build.query<StopOfRoute[], AreaType>({
-      queryFn: async (area, _api, _extraOptions, baseQuery) => {
+    getStopOfRoutesByArea: build.query<StopOfRoute[], { area: AreaType, stopUIDs?: string[] }>({
+      queryFn: async ({ area, stopUIDs = [] }, _api, _extraOptions, baseQuery) => {
         const cityResults = await Promise.all(
           areaMapCity[area].map(async (city) => ({
             city,
-            result: await baseQuery(`/StopOfRoute/City/${city}?%24format=JSON`)
+            result: await baseQuery(buildNearbyStopOfRouteQuery(city, stopUIDs))
           }))
         )
 

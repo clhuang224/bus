@@ -474,7 +474,7 @@ describe('Nearby', () => {
     })
   })
 
-  it('does not load area route data until a stop is selected', () => {
+  it('loads stop-of-route data when a stop is selected, but delays route detail data until viewing routes', () => {
     renderNearby({
       coords: [25.033, 121.5654],
       permission: GeoPermissionType.GRANTED,
@@ -487,16 +487,36 @@ describe('Nearby', () => {
     expect(mockUseGetRoutesByAreaQuery).toHaveBeenLastCalledWith(expect.anything(), {
       skip: true
     })
-    expect(mockUseGetStopOfRoutesByAreaQuery).toHaveBeenLastCalledWith(expect.anything(), {
+    expect(mockUseGetStopOfRoutesByAreaQuery).toHaveBeenLastCalledWith({
+      area: AreaType.TAIPEI,
+      stopUIDs: ['stop-1', 'stop-2', 'stop-3']
+    }, {
       skip: true
     })
 
     fireEvent.click(screen.getByRole('button', { name: '市政府' }))
 
     expect(mockUseGetRoutesByAreaQuery).toHaveBeenLastCalledWith(expect.anything(), {
+      skip: true
+    })
+    expect(mockUseGetStopOfRoutesByAreaQuery).toHaveBeenLastCalledWith({
+      area: AreaType.TAIPEI,
+      stopUIDs: ['stop-1', 'stop-2', 'stop-3']
+    }, {
       skip: false
     })
-    expect(mockUseGetStopOfRoutesByAreaQuery).toHaveBeenLastCalledWith(expect.anything(), {
+
+    renderNearby({
+      initialEntry: '/nearby?stop=station-1&routeStop=station-1',
+      coords: [25.033, 121.5654],
+      permission: GeoPermissionType.GRANTED,
+      queryState: {
+        data: nearbyStopsData,
+        isSuccess: true
+      }
+    })
+
+    expect(mockUseGetRoutesByAreaQuery).toHaveBeenLastCalledWith(expect.anything(), {
       skip: false
     })
   })

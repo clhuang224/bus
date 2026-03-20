@@ -49,7 +49,10 @@ export default function Route() {
     { skip: !city || !id }
   )
   const { data: stopOfRoutes = [], isLoading: isStopOfRoutesLoading, error: stopOfRoutesError } =
-    busApi.useGetStopOfRoutesByCityQuery(cityName, { skip: !city || !id })
+    busApi.useGetStopOfRoutesByCityQuery(
+      { city: cityName, routeUID: id },
+      { skip: !city || !id }
+    )
   const { data: stopsByCity = [], isLoading: isStopsLoading, error: stopsError } =
     busApi.useGetStopsByCityQuery(cityName, { skip: !city || !id })
 

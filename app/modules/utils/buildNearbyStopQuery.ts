@@ -58,3 +58,18 @@ export function buildNearbyStopQuery(city: CityNameType, coords: LatLng): string
 
   return `/Stop/City/${city}?${searchParams.toString()}`
 }
+
+export function buildNearbyStopOfRouteQuery(city: CityNameType, stopUIDs: string[]): string {
+  const searchParams = new URLSearchParams({
+    $format: 'JSON'
+  })
+
+  if (stopUIDs.length > 0) {
+    searchParams.set(
+      '$filter',
+      `Stops/any(d:(${stopUIDs.map((stopUID) => `d/StopUID eq '${stopUID}'`).join(' or ')}))`
+    )
+  }
+
+  return `/StopOfRoute/City/${city}?${searchParams.toString()}`
+}
