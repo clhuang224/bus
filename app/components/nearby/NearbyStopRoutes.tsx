@@ -16,6 +16,10 @@ const routeNameCollator = new Intl.Collator('zh-Hant-u-co-stroke', {
   numeric: true
 })
 
+function getDefaultRouteDirection(directions: DirectionType[]) {
+  return directions[0] != null ? String(directions[0]) : null
+}
+
 export const NearbyStopRoutes = ({ routes, isLoading = false }: PropType) => {
   const routeSections = getEnumValues(DirectionType)
     .map((direction) => ({
@@ -27,13 +31,15 @@ export const NearbyStopRoutes = ({ routes, isLoading = false }: PropType) => {
     }))
     .filter((section) => section.routes.length > 0)
   const [selectedDirection, setSelectedDirection] = useState<string | null>(
-    routeSections[0] ? String(routeSections[0].direction) : null
+    getDefaultRouteDirection(routeSections.map((section) => section.direction))
   )
 
   useEffect(() => {
-    const firstDirection = routeSections[0] ? String(routeSections[0].direction) : null
+    const defaultDirection = getDefaultRouteDirection(
+      routeSections.map((section) => section.direction)
+    )
 
-    if (!firstDirection) {
+    if (!defaultDirection) {
       setSelectedDirection(null)
       return
     }
@@ -43,7 +49,7 @@ export const NearbyStopRoutes = ({ routes, isLoading = false }: PropType) => {
     )
 
     if (!hasSelectedDirection) {
-      setSelectedDirection(firstDirection)
+      setSelectedDirection(defaultDirection)
     }
   }, [routeSections, selectedDirection])
 
