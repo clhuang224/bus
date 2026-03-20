@@ -101,10 +101,6 @@ export default function Route() {
   const handleSelectStopFromMap = (stopId: string | null) => {
     setListScrollBehavior('start')
     setSelectedStopId(stopId)
-
-    if (isSm && stopId) {
-      openSidebar()
-    }
   }
 
   const handleBack = () => {
