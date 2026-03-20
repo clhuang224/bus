@@ -1,6 +1,8 @@
-import { Alert, Flex, ScrollArea, Stack, Text, Title } from '@mantine/core'
+import { Flex, ScrollArea, Stack, Text, Title } from '@mantine/core'
 import { useMemo } from 'react'
+import { BaseAlert } from '~/components/common/BaseAlert'
 import { FavoriteRouteStopCard } from '~/components/favorite/FavoriteRouteStopCard'
+import { favoriteMessages } from '~/modules/consts/pageMessages'
 import { useFavoriteRouteStops } from '~/modules/hooks/useFavoriteRouteStops'
 
 const favoriteRouteStopCollator = new Intl.Collator('zh-Hant-u-co-stroke', {
@@ -30,9 +32,7 @@ export default function Favorite() {
         </Stack>
         {sortedFavoriteRouteStops.length === 0
           ? (
-            <Alert color="yellow" title="尚未收藏站牌路線">
-              你可以在路線頁的站序列表按愛心，把某條子路線的特定站牌加入我的最愛。
-            </Alert>
+            <BaseAlert {...favoriteMessages.emptyFavoriteRouteStops} />
           )
           : (
             <ScrollArea style={{ flex: 1, minHeight: 0 }}>

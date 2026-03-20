@@ -1,6 +1,8 @@
-import { Accordion, AccordionControl, AccordionItem, AccordionPanel, ActionIcon, Alert, Flex, ScrollArea, Stack, Text, Title } from '@mantine/core'
+import { Accordion, AccordionControl, AccordionItem, AccordionPanel, ActionIcon, Flex, ScrollArea, Skeleton, Stack, Text, Title } from '@mantine/core'
 import { RiArrowLeftSLine } from '@remixicon/react'
 import type { RefObject } from 'react'
+import { BaseAlert } from '~/components/common/BaseAlert'
+import { SkeletonList } from '~/components/common/SkeletonList'
 import { cityMapName } from '~/modules/consts/city'
 import type { AlertMessageConfig } from '~/modules/interfaces/AlertMessageConfig'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
@@ -11,6 +13,7 @@ import { NearbyStopRoutes } from './NearbyStopRoutes'
 type StopItemRefs = RefObject<Map<string, HTMLDivElement | null>>
 
 interface NearbySidebarListState {
+  isStopsLoading: boolean
   isStationRoutesLoading: boolean
   nearbyStopGroups: NearbyStopGroup[]
   onSelectStop: (value: string | null) => void
@@ -68,6 +71,16 @@ const NearbySidebarContentList = ({ listState }: { listState: NearbySidebarListS
     viewportRef={listState.scrollViewportRef}
     style={{ flex: 1, minHeight: 0 }}
   >
+    {listState.isStopsLoading && (
+      <SkeletonList
+        count={5}
+        gap="sm"
+        testId="nearby-stops-skeleton"
+      >
+        <Skeleton h={56} radius="md" />
+      </SkeletonList>
+    )}
+    {!listState.isStopsLoading && (
     <Accordion
       variant="separated"
       value={listState.selectedStopId}
@@ -99,6 +112,7 @@ const NearbySidebarContentList = ({ listState }: { listState: NearbySidebarListS
         </AccordionItem>
       ))}
     </Accordion>
+    )}
   </ScrollArea>
 )
 
@@ -108,11 +122,7 @@ export const NearbySidebarContent = ({
   message
 }: PropType) => (
   <Flex direction="column" h="100%" gap="md">
-    {message && (
-      <Alert color={message.color} title={message.title}>
-        {message.description}
-      </Alert>
-    )}
+    {message && <BaseAlert {...message} />}
     { detailState.stopGroup
       ? <NearbySidebarContentDetail detailState={detailState} />
       : <NearbySidebarContentList listState={listState} />

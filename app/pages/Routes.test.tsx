@@ -214,6 +214,19 @@ describe('Routes', () => {
     })
   })
 
+  it('shows route skeleton cards while routes are loading', () => {
+    mockUseGetRoutesByAreaQuery.mockReturnValue({
+      data: [],
+      isLoading: true,
+      error: null
+    })
+
+    renderRoutes()
+
+    expect(screen.getAllByTestId('routes-skeleton-card')).toHaveLength(6)
+    expect(screen.queryByText('載入中')).not.toBeInTheDocument()
+  })
+
   it('deduplicates routes that share the same RouteUID', () => {
     renderRoutes()
 

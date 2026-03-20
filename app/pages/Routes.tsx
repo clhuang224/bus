@@ -1,8 +1,9 @@
-import { Alert, Card, Flex, Group, ScrollArea, Stack, Title } from '@mantine/core'
+import { Card, Flex, Group, ScrollArea, Skeleton, Stack, Title } from '@mantine/core'
 import { useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { AreaSelect } from '~/components/AreaSelect'
 import { SearchInput } from '~/components/SearchInput'
+import { BaseAlert } from '~/components/common/BaseAlert'
 import { RouteInfoCard } from '~/components/routes/RouteInfoCard'
 import { AreaType } from '~/modules/enums/AreaType'
 import { searchMessages } from '~/modules/consts/pageMessages'
@@ -55,13 +56,24 @@ export default function Routes() {
       .sort((left, right) => routeNameCollator.compare(left.RouteName.zh_TW, right.RouteName.zh_TW))
   }, [keyword, routes])
 
+  const routeCardSkeletons = Array.from({ length: 6 }, (_, index) => (
+    <Card key={index} withBorder radius="md" p="xs" shadow="xs" data-testid="routes-skeleton-card">
+      <Stack gap={8}>
+        <Flex justify="space-between" align="center">
+          <Skeleton h={26} w={64} radius="xl" />
+          <Skeleton h={26} w={72} radius="xl" />
+        </Flex>
+        <Skeleton h={14} radius="sm" />
+      </Stack>
+    </Card>
+  ))
+
   const message = useMemo(() => {
     if (error) return searchMessages.loadRoutesError
-    if (isLoading) return searchMessages.loadingRoutes
     if (filteredRoutes.length === 0) return searchMessages.emptyRoutes
 
     return null
-  }, [error, isLoading, filteredRoutes.length])
+  }, [error, filteredRoutes.length])
 
   return (
     <Flex justify="center" h="100%">
@@ -77,23 +89,21 @@ export default function Routes() {
               onChange={(nextKeyword) => dispatch(setKeyword(nextKeyword))}
             />
           </Group>
-          {message && (
-            <Alert color={message.color} title={message.title}>
-              {message.description}
-            </Alert>
-          )}
+          {message && <BaseAlert {...message} />}
           <ScrollArea style={{ flex: 1, minHeight: 0 }}>
             <Stack gap="sm">
-              {filteredRoutes.map((route) => (
-                <RouteInfoCard
-                  key={route.RouteUID}
-                  to={`/routes/${route.City}/${route.RouteUID}`}
-                  name={route.RouteName.zh_TW}
-                  city={route.City}
-                  departure={route.DepartureStopName.zh_TW}
-                  destination={route.DestinationStopName.zh_TW}
-                />
-              ))}
+              {isLoading
+                ? routeCardSkeletons
+                : filteredRoutes.map((route) => (
+                  <RouteInfoCard
+                    key={route.RouteUID}
+                    to={`/routes/${route.City}/${route.RouteUID}`}
+                    name={route.RouteName.zh_TW}
+                    city={route.City}
+                    departure={route.DepartureStopName.zh_TW}
+                    destination={route.DestinationStopName.zh_TW}
+                  />
+                ))}
             </Stack>
           </ScrollArea>
         </Stack>

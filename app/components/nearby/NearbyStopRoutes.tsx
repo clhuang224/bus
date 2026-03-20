@@ -1,5 +1,6 @@
 import { ScrollArea, Skeleton, Stack, Tabs, Text } from '@mantine/core'
 import { useState } from 'react'
+import { SkeletonList } from '~/components/common/SkeletonList'
 import { directionMapName } from '~/modules/consts/direction'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
@@ -40,11 +41,9 @@ export const NearbyStopRoutes = ({ routes, isLoading = false }: PropType) => {
           </Tabs.List>
         </Tabs>
         <ScrollArea style={{ flex: 1, minHeight: 0 }} data-testid="nearby-stop-routes-skeleton">
-          <Stack gap="xs" pt="sm">
+          <SkeletonList count={3} gap="xs" pt="sm">
             <Skeleton h={84} radius="md" />
-            <Skeleton h={84} radius="md" />
-            <Skeleton h={84} radius="md" />
-          </Stack>
+          </SkeletonList>
         </ScrollArea>
       </Stack>
     )

@@ -153,13 +153,11 @@ const Nearby = () => {
       return geoPermissionMessages[permission]
     }
     if (geolocationError) return geoErrorMessages[geolocationError]
-    if (!coords) return nearbyMessages.locating
     if (error) return nearbyMessages.loadStopsError
-    if (isLoading) return nearbyMessages.loadingStops
     if (nearbyStopGroups.length === 0) return nearbyMessages.emptyStops
 
     return null
-  }, [permission, geolocationError, coords, nearbyStopGroups, isLoading, error])
+  }, [permission, geolocationError, nearbyStopGroups, error])
 
   const selectedStopGroup = useMemo(() => {
     if (!selectedRouteStopId) return null
@@ -250,6 +248,7 @@ const Nearby = () => {
             stationRoutes: selectedStationRoutes
           }}
           listState={{
+            isStopsLoading: !coords || isLoading,
             isStationRoutesLoading,
             nearbyStopGroups,
             onSelectStop: selectStop,

@@ -367,6 +367,37 @@ describe('Route', () => {
     })
   })
 
+  it('shows a route panel skeleton while base route data is loading', () => {
+    mockUseGetRoutesByCityQuery.mockReturnValue({
+      data: [],
+      isLoading: true,
+      error: null
+    })
+    mockUseGetStopOfRoutesByCityQuery.mockReturnValue({
+      data: [],
+      isLoading: true,
+      error: null
+    })
+    mockUseGetStopsByCityQuery.mockReturnValue({
+      data: [],
+      isLoading: true,
+      error: null
+    })
+
+    render(
+      <MantineProvider>
+        <MemoryRouter initialEntries={['/routes/Taipei/route-1']}>
+          <RouterRoutes>
+            <RouterRoute path="/routes/:city/:id" element={<Route />} />
+          </RouterRoutes>
+        </MemoryRouter>
+      </MantineProvider>
+    )
+
+    expect(screen.getByTestId('route-panel-skeleton')).toBeInTheDocument()
+    expect(screen.queryByText('載入中')).not.toBeInTheDocument()
+  })
+
   it('shows an inline warning when realtime queries are rate limited', async () => {
     mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
       data: [],

@@ -1,5 +1,7 @@
+import type { AlertType } from '../types/AlertType'
+
 export interface AlertMessageConfig {
-  color: string
+  type: AlertType
   title: string
   description: string
 }

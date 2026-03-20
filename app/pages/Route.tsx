@@ -1,7 +1,9 @@
-import { ActionIcon, Alert, Flex, Stack, Tabs, Text, useMantineTheme } from '@mantine/core'
+import { ActionIcon, Flex, Skeleton, Stack, Tabs, Text, useMantineTheme } from '@mantine/core'
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
 import { useEffect, useMemo, useState } from 'react'
+import { BaseAlert } from '~/components/common/BaseAlert'
 import { MapSidebarLayout } from '~/components/common/MapSidebarLayout'
+import { SkeletonList } from '~/components/common/SkeletonList'
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { RouteMap } from '~/components/routes/RouteMap'
 import { RouteStopList } from '~/components/routes/RouteStopList'
@@ -351,14 +353,33 @@ export default function Route() {
   }
 
   const isLoading = isRoutesLoading || isStopOfRoutesLoading || isStopsLoading
+  const routePanelSkeleton = (
+    <Stack gap="md" h="100%" data-testid="route-panel-skeleton">
+      <Stack gap={4}>
+        <Flex gap="xs" align="center">
+          <Skeleton h={36} w={36} radius="md" />
+          <Skeleton h={32} w={88} radius="xl" />
+        </Flex>
+        <Skeleton h={14} mt="sm" radius="sm" />
+      </Stack>
+      <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
+        <Flex gap="xs">
+          <Skeleton h={36} w={96} radius="md" />
+          <Skeleton h={36} w={96} radius="md" />
+        </Flex>
+        <SkeletonList count={6} gap="sm">
+          <Skeleton h={52} radius="md" />
+        </SkeletonList>
+      </Stack>
+    </Stack>
+  )
   const error = routesError || stopOfRoutesError || stopsError
   const message = useMemo(() => {
     if (error) return routeMessages.loadRouteError
-    if (isLoading) return routeMessages.loadingRoute
     if (!busRoute || routeTabs.length === 0) return routeMessages.emptyRoute
 
     return null
-  }, [busRoute, error, isLoading, routeTabs.length])
+  }, [busRoute, error, routeTabs.length])
 
   const handleBack = () => {
     if ((window.history.state?.idx ?? 0) > 0) {
@@ -376,7 +397,7 @@ export default function Route() {
       onCloseSidebar={closeSidebar}
       onOpenSidebar={openSidebar}
       openButtonLabel="開啟路線列表"
-      panel={(
+      panel={isLoading ? routePanelSkeleton : (
         <Stack h="100%" gap="md">
           {busRoute && routeTabs.length > 0 && (
             <>
@@ -414,11 +435,7 @@ export default function Route() {
                     </Tabs.Tab>
                   ))}
                 </Tabs.List>
-                {message && (
-                  <Alert color={message.color} title={message.title} mt="sm">
-                    {message.description}
-                  </Alert>
-                )}
+                {message && <BaseAlert {...message} mt="sm" />}
                 {routeTabs.map((tab) => (
                 <Tabs.Panel
                   key={tab.id}

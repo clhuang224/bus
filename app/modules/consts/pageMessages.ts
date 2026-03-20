@@ -1,72 +1,58 @@
 import type { AlertMessageConfig } from '../interfaces/AlertMessageConfig'
 
 export const nearbyMessages: {
-  locating: AlertMessageConfig
-  loadingStops: AlertMessageConfig
   loadStopsError: AlertMessageConfig
   emptyStops: AlertMessageConfig
 } = {
-  locating: {
-    color: 'blue',
-    title: '定位中',
-    description: '正在取得您的目前位置，請稍候...'
-  },
-  loadingStops: {
-    color: 'blue',
-    title: '載入中',
-    description: '正在取得附近的站牌資料，請稍候...'
-  },
   loadStopsError: {
-    color: 'red',
+    type: 'error',
     title: '載入失敗',
     description: '請稍後再試，或確認您的網路連線。'
   },
   emptyStops: {
-    color: 'yellow',
+    type: 'warn',
     title: '附近沒有站牌',
     description: '目前在您附近沒有找到任何站牌。'
   }
 }
 
+export const favoriteMessages: {
+  emptyFavoriteRouteStops: AlertMessageConfig
+} = {
+  emptyFavoriteRouteStops: {
+    type: 'warn',
+    title: '尚未收藏站牌路線',
+    description: '你可以在路線頁的站序列表按愛心，把某條子路線的特定站牌加入我的最愛。'
+  }
+}
+
 export const searchMessages: {
-  loadingRoutes: AlertMessageConfig
   loadRoutesError: AlertMessageConfig
   emptyRoutes: AlertMessageConfig
 } = {
-  loadingRoutes: {
-    color: 'blue',
-    title: '載入中',
-    description: '正在取得此區域的公車路線資料，請稍候...'
-  },
   loadRoutesError: {
-    color: 'red',
+    type: 'error',
     title: '載入失敗',
     description: '請稍後再試，或確認您的網路連線。'
   },
   emptyRoutes: {
-    color: 'yellow',
+    type: 'warn',
     title: '找不到符合的路線',
     description: '請試試其他關鍵字，或切換到不同區域。'
   }
 }
 
 export const routeMessages: {
-  loadingRoute: AlertMessageConfig
   loadRouteError: AlertMessageConfig
   emptyRoute: AlertMessageConfig
 } = {
-  loadingRoute: {
-    color: 'blue',
-    title: '載入中',
-    description: '正在取得此路線資料，請稍候...'
-  },
   loadRouteError: {
-    color: 'red',
+    type: 'error',
     title: '載入路線失敗',
     description: '請稍後再試，或確認您的網路連線。'
   },
   emptyRoute: {
-    color: 'yellow',
+    type: 'warn',
     title: '查無路線',
     description: '目前找不到這條公車路線資料。'
   }

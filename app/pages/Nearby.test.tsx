@@ -394,11 +394,10 @@ describe('Nearby', () => {
     expect(screen.getByTestId('nearby-sidebar-state')).toHaveTextContent('opened')
   })
 
-  it('shows a locating message while waiting for coordinates', () => {
+  it('shows stop skeletons while waiting for coordinates', () => {
     renderNearby()
 
-    expect(screen.getByText(nearbyMessages.locating.title)).toBeInTheDocument()
-    expect(screen.getByText(nearbyMessages.locating.description)).toBeInTheDocument()
+    expect(screen.getByTestId('nearby-stops-skeleton')).toBeInTheDocument()
   })
 
   it('shows a geolocation error message when the position is unavailable', () => {
@@ -416,7 +415,7 @@ describe('Nearby', () => {
     ).toBeInTheDocument()
   })
 
-  it('shows a loading message after coordinates are available and nearby stops are loading', () => {
+  it('shows stop skeletons after coordinates are available and nearby stops are loading', () => {
     renderNearby({
       coords: [25.033, 121.5654],
       permission: GeoPermissionType.GRANTED,
@@ -425,8 +424,9 @@ describe('Nearby', () => {
       }
     })
 
-    expect(screen.getByText(nearbyMessages.loadingStops.title)).toBeInTheDocument()
-    expect(screen.getByText(nearbyMessages.loadingStops.description)).toBeInTheDocument()
+    expect(screen.getByTestId('nearby-stops-skeleton')).toBeInTheDocument()
+    expect(screen.queryByText('定位中')).not.toBeInTheDocument()
+    expect(screen.queryByText('載入中')).not.toBeInTheDocument()
   })
 
   it('shows an error message when nearby stop data fails to load', () => {
