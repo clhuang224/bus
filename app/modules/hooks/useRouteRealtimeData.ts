@@ -4,7 +4,7 @@ import type { BusRoute, BusSubRoute } from '~/modules/interfaces/BusRoute'
 import type { CityNameType } from '~/modules/enums/CityNameType'
 import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
-import { getRouteRealtimeBusStatuses } from '~/modules/utils/getRouteRealtimeBusStatuses'
+import { formatEstimatedArrivalLabel, getRouteRealtimeBusStatuses } from '~/modules/utils/getRouteRealtimeBusStatuses'
 
 const REALTIME_POLLING_INTERVAL = 30000
 
@@ -85,6 +85,33 @@ export function useRouteRealtimeData({
     }, new Map())
   }, [realtimeBusStatuses])
 
+  const estimatedArrivalLabelsByStopSequence = useMemo(() => {
+    const sortedEstimatedArrivals = [...activeEstimatedArrivals].sort((left, right) => {
+      if (left.EstimateTime == null && right.EstimateTime == null) {
+        return left.StopSequence - right.StopSequence
+      }
+      if (left.EstimateTime == null) return 1
+      if (right.EstimateTime == null) return -1
+      return left.EstimateTime - right.EstimateTime
+    })
+
+    return sortedEstimatedArrivals.reduce<Map<number, string>>((result, estimatedArrival) => {
+      if (result.has(estimatedArrival.StopSequence)) {
+        return result
+      }
+
+      result.set(
+        estimatedArrival.StopSequence,
+        formatEstimatedArrivalLabel(
+          estimatedArrival.EstimateTime,
+          estimatedArrival.StopStatus
+        )
+      )
+
+      return result
+    }, new Map())
+  }, [activeEstimatedArrivals])
+
   const hasRealtimeError = useMemo(() => {
     if (isEstimatedArrivalsError && estimatedArrivals.length === 0) {
       return true
@@ -142,6 +169,7 @@ export function useRouteRealtimeData({
 
   return {
     activeRoutePath,
+    estimatedArrivalLabelsByStopSequence,
     hasRealtimeError,
     isRealtimeLoading: isEstimatedArrivalsLoading || isRealtimeNearStopsLoading,
     realtimeBusesByStopSequence,

@@ -43,6 +43,7 @@ export default function Route() {
   })
   const {
     activeRoutePath,
+    estimatedArrivalLabelsByStopSequence,
     hasRealtimeError,
     isRealtimeLoading,
     realtimeBusesByStopSequence,
@@ -56,8 +57,9 @@ export default function Route() {
   })
   const timelineStops = useMemo(() => baseTimelineStops.map((stop) => ({
     ...stop,
+    estimatedArrivalLabel: estimatedArrivalLabelsByStopSequence.get(stop.sequence) ?? null,
     realtimeBuses: realtimeBusesByStopSequence.get(stop.sequence) ?? []
-  })), [baseTimelineStops, realtimeBusesByStopSequence])
+  })), [baseTimelineStops, estimatedArrivalLabelsByStopSequence, realtimeBusesByStopSequence])
 
   useEffect(() => {
     if (isSm) {

@@ -360,8 +360,7 @@ describe('Route', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText('2. 市政府').closest('[data-highlighted="true"]')).toBeInTheDocument()
-      expect(screen.queryByText('1. 市政府')).not.toBeInTheDocument()
+      expect(screen.getByText('市政府').closest('[data-highlighted="true"]')).toBeInTheDocument()
       expect(screen.getByText('ABC-123')).toBeInTheDocument()
       expect(screen.getByText('4 分')).toBeInTheDocument()
     })

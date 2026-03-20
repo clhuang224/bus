@@ -9,6 +9,7 @@ import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeB
 import { SkeletonList } from '../common/SkeletonList'
 
 export interface RouteStopListItem {
+  estimatedArrivalLabel: string | null
   favoriteRouteStop: FavoriteRouteStop
   id: string
   name: string
@@ -58,13 +59,15 @@ export const RouteStopList = ({
     verticalAlignment: listScrollBehavior
   })
 
-  const realtimeMessage = isRealtimeLoading
-    ? routeRealtimeMessages.loading
-    : hasRealtimeError
-      ? routeRealtimeMessages.error
-      : realtimeInfoState !== RouteRealtimeInfoState.NORMAL
-        ? routeRealtimeMessages[realtimeInfoState]
-        : null
+  const realtimeMessage = isLoading
+    ? null
+    : isRealtimeLoading
+      ? routeRealtimeMessages.loading
+      : hasRealtimeError
+        ? routeRealtimeMessages.error
+        : realtimeInfoState !== RouteRealtimeInfoState.NORMAL
+          ? routeRealtimeMessages[realtimeInfoState]
+          : null
 
   return (
     <Stack h="100%" gap="xs" style={{ minHeight: 0 }}>
@@ -86,6 +89,7 @@ export const RouteStopList = ({
                 const isHighlighted = stop.id === highlightedStopId
                 const isSelected = stop.id === selectedStopId
                 const hasRealtimeBus = stop.realtimeBuses.length > 0
+                const shouldShowEstimatedArrival = !hasRealtimeBus && stop.estimatedArrivalLabel
 
                 return (
                   <Timeline.Item
@@ -131,8 +135,13 @@ export const RouteStopList = ({
                         <Group justify="space-between" align="center" wrap="nowrap">
                           <Stack gap={4}>
                             <Text fw={isHighlighted || isSelected ? 700 : undefined} c={isHighlighted ? 'blue.8' : undefined}>
-                              {stop.sequence}. {stop.name}
+                              {stop.name}
                             </Text>
+                            {shouldShowEstimatedArrival && (
+                              <Text size="xs" c="dimmed">
+                                {stop.estimatedArrivalLabel}
+                              </Text>
+                            )}
                             {stop.realtimeBuses.map((bus) => (
                               <Group key={bus.id} gap="xs" wrap="wrap">
                                 <Badge color="orange" variant="light" size="sm">

@@ -74,6 +74,7 @@ describe('RouteStopList', () => {
       <MantineProvider>
         <RouteStopList
           stops={[{
+            estimatedArrivalLabel: null,
             id: 'stop-1',
             favoriteRouteStop,
             name: '市政府',
@@ -87,7 +88,7 @@ describe('RouteStopList', () => {
       </MantineProvider>
     )
 
-    fireEvent.click(screen.getByText('1. 市政府'))
+    fireEvent.click(screen.getByText('市政府'))
 
     expect(handleSelectStop).toHaveBeenCalledWith('stop-1')
     expect(handleToggleFavorite).not.toHaveBeenCalled()
@@ -101,6 +102,7 @@ describe('RouteStopList', () => {
       <MantineProvider>
         <RouteStopList
           stops={[{
+            estimatedArrivalLabel: null,
             id: 'stop-1',
             favoriteRouteStop,
             name: '市政府',
@@ -125,6 +127,7 @@ describe('RouteStopList', () => {
       <MantineProvider>
         <RouteStopList
           stops={[{
+            estimatedArrivalLabel: null,
             id: 'stop-1',
             favoriteRouteStop,
             name: '市政府',
@@ -140,5 +143,27 @@ describe('RouteStopList', () => {
 
     expect(screen.getByText('ABC-123')).toBeInTheDocument()
     expect(screen.getByText('4 分')).toBeInTheDocument()
+  })
+
+  it('renders the nearest estimated arrival when there is no realtime bus marker', () => {
+    render(
+      <MantineProvider>
+        <RouteStopList
+          stops={[{
+            estimatedArrivalLabel: '6 分',
+            id: 'stop-1',
+            favoriteRouteStop,
+            name: '市政府',
+            realtimeBuses: [],
+            sequence: 1,
+            isFavorite: false
+          }]}
+          onSelectStop={vi.fn()}
+          onToggleFavorite={vi.fn()}
+        />
+      </MantineProvider>
+    )
+
+    expect(screen.getByText('6 分')).toBeInTheDocument()
   })
 })

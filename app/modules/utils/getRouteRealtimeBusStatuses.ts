@@ -4,7 +4,7 @@ import type { EstimatedArrival } from '../interfaces/EstimatedArrival'
 import type { RealtimeNearStop } from '../interfaces/RealtimeNearStop'
 import type { RouteRealtimeBusStatus } from '../interfaces/RouteRealtimeBusStatus'
 
-function formatEstimatedArrival(estimateTime: number | null, stopStatus: StopStatusType) {
+export function formatEstimatedArrivalLabel(estimateTime: number | null, stopStatus: StopStatusType) {
   if (estimateTime != null) {
     if (estimateTime <= 60) return '即將進站'
     return `${Math.ceil(estimateTime / 60)} 分`
@@ -33,7 +33,7 @@ export function getRouteRealtimeBusStatuses(
 
       return {
         direction: realtimeBus.Direction,
-        estimateLabel: formatEstimatedArrival(
+        estimateLabel: formatEstimatedArrivalLabel(
           matchedArrival?.EstimateTime ?? null,
           matchedArrival?.StopStatus ?? StopStatusType.UNKNOWN
         ),
