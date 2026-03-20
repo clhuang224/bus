@@ -232,6 +232,16 @@ If both city-level and area-level RTK Query endpoints exist, only export the hoo
 
 Across the project, prefer `async` / `await` over chained `.then()` / `.catch()` promise style unless there is a clear reason not to.
 
+When shaping API requests, prefer narrowing the response as close to the server as practical instead of over-fetching and filtering everything in the client.
+
+Prefer query patterns such as:
+
+- `$select` to request only the fields the current screen actually needs
+- `$filter` by stable identifiers such as `RouteUID`, `StopUID`, `StationID`, or similar keys when the page only needs a subset
+- coordinate or bounding-box filters for nearby/location-driven screens when the API supports them
+
+For performance-sensitive pages, avoid loading full city-wide or area-wide datasets if the user is only looking at one route, one station, or one nearby geographic slice.
+
 When handling API or query errors, prefer interpreting the error by its actual type, status, or accompanying data state instead of collapsing it to a bare boolean too early. For example, distinguish between:
 
 - a real transport or proxy failure
@@ -419,3 +429,9 @@ When making changes in this repository:
 - choose readability over clever abstraction
 
 If a new pattern is introduced, it should make the surrounding code easier for the next person to navigate, not just shorter.
+
+Use file length as a readability signal. When a file approaches or exceeds roughly `300` lines, pause and evaluate whether a clearly named component, hook, or utility should be extracted.
+
+This is a soft guideline, not a hard cap. A file may stay above that size when its responsibility is still cohesive and the flow remains easy to follow.
+
+When a page starts accumulating query calls, derived data shaping, loading-state coordination, and message selection in the same file, prefer extracting a feature-specific data hook so the page can stay focused on screen composition and interaction flow.
