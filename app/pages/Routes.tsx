@@ -12,14 +12,15 @@ import type { BusRoute } from '~/modules/interfaces/BusRoute'
 import { setKeyword, setSelectedArea } from '~/modules/slices/routeSearchSlice'
 import type { AppDispatch, RootState } from '~/modules/store'
 import { getAreaByCoords } from '~/modules/utils/getAreaByCoords'
+import { normalizeBusRoutesWithDates } from '~/modules/utils/normalizeBusRoutesWithDates'
 
 const routeNameCollator = new Intl.Collator('zh-Hant-u-co-stroke', {
   numeric: true
 })
 
-function deduplicateRoutes(routes: BusRoute<string>[]) {
+function deduplicateRoutes(routes: BusRoute<Date | null>[]) {
   return Array.from(
-    routes.reduce<Map<string, BusRoute<string>>>((result, route) => {
+    routes.reduce<Map<string, BusRoute<Date | null>>>((result, route) => {
       if (!result.has(route.RouteUID)) {
         result.set(route.RouteUID, route)
       }
@@ -29,7 +30,7 @@ function deduplicateRoutes(routes: BusRoute<string>[]) {
   )
 }
 
-function matchesRouteKeyword(route: BusRoute<string>, keyword: string) {
+function matchesRouteKeyword(route: BusRoute<Date | null>, keyword: string) {
   if (!keyword) return true
 
   return [
@@ -46,7 +47,8 @@ export default function Routes() {
   const { keyword, selectedArea } = useSelector((state: RootState) => state.routeSearch)
   const currentArea = getAreaByCoords(coords, geojson)
   const area = selectedArea ?? currentArea ?? AreaType.TAIPEI
-  const { data: routes = [], isLoading, error } = busApi.useGetRoutesByAreaQuery(area)
+  const { data: routeData = [], isLoading, error } = busApi.useGetRoutesByAreaQuery(area)
+  const routes = useMemo(() => normalizeBusRoutesWithDates(routeData), [routeData])
 
   const filteredRoutes = useMemo(() => {
     const normalizedKeyword = keyword.trim().toLowerCase()

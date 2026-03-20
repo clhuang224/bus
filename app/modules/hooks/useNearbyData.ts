@@ -18,6 +18,7 @@ import type { StopOfRoute } from '~/modules/interfaces/StopOfRoute'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
 import type { RootState } from '~/modules/store'
 import { getCityByCoords } from '~/modules/utils/getCityByCoords'
+import { normalizeBusRoutesWithDates } from '~/modules/utils/normalizeBusRoutesWithDates'
 
 const disabledNearbyPermissions = [GeoPermissionType.UNSUPPORTED, GeoPermissionType.DENIED]
 const routeNameCollator = new Intl.Collator('zh-Hant-u-co-stroke', {
@@ -93,7 +94,7 @@ function buildStationRouteBadgesMap(
 }
 
 function buildStationRoutes(
-  routes: BusRoute<string>[],
+  routes: BusRoute<Date | null>[],
   stopOfRoutes: StopOfRoute[],
   selectedRouteStopId: string | null
 ): StationRoute[] {
@@ -189,9 +190,10 @@ export function useNearbyData({
     }
   )
 
-  const { data: routes = [], isLoading: isRoutesLoading } = busApi.useGetRoutesByAreaQuery(currentArea!, {
+  const { data: routeData = [], isLoading: isRoutesLoading } = busApi.useGetRoutesByAreaQuery(currentArea!, {
     skip: !coords || !currentArea || !selectedRouteStopId
   })
+  const routes = useMemo(() => normalizeBusRoutesWithDates(routeData), [routeData])
 
   const markers = useMemo(() => nearbyStopGroups.map((stopGroup) => ({
     id: stopGroup.StationID,

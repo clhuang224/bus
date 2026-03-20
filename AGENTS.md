@@ -242,6 +242,16 @@ Prefer query patterns such as:
 
 For performance-sensitive pages, avoid loading full city-wide or area-wide datasets if the user is only looking at one route, one station, or one nearby geographic slice.
 
+When TDX route-like models contain time fields that should be exposed as `Date` objects in the app, perform that conversion in page-level or feature-level hooks after the RTK Query cache layer, not inside `transformResponse`.
+
+This project should keep RTK Query cache data serializable. Avoid placing `Date` instances directly into RTK Query cached responses, since that can trigger Redux serializability warnings and make cache behavior harder to reason about.
+
+In practice, this means:
+
+- keep API-layer route time fields as strings in RTK Query data
+- convert them to `Date | null` in page or feature hooks right before component consumption
+- prefer a shared helper at the page / hook layer when multiple screens need the same conversion
+
 When handling API or query errors, prefer interpreting the error by its actual type, status, or accompanying data state instead of collapsing it to a bare boolean too early. For example, distinguish between:
 
 - a real transport or proxy failure

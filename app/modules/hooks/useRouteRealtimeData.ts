@@ -9,8 +9,8 @@ import { getRouteRealtimeBusStatuses } from '~/modules/utils/getRouteRealtimeBus
 const REALTIME_POLLING_INTERVAL = 30000
 
 interface UseRouteRealtimeDataOptions {
-  activeSubRoute: BusSubRoute<string> | null
-  busRoute: BusRoute<string> | undefined
+  activeSubRoute: BusSubRoute<Date | null> | null
+  busRoute: BusRoute<Date | null> | undefined
   city: string | undefined
   id: string | undefined
 }

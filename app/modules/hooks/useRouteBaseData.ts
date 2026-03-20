@@ -7,6 +7,7 @@ import { DirectionType } from '~/modules/enums/DirectionType'
 import type { BusSubRoute } from '~/modules/interfaces/BusRoute'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import type { StopOfRouteStop } from '~/modules/interfaces/StopOfRoute'
+import { normalizeBusRoutesWithDates } from '~/modules/utils/normalizeBusRoutesWithDates'
 
 export interface RouteTab {
   id: string
@@ -44,7 +45,7 @@ export function useRouteBaseData({
 }: UseRouteBaseDataOptions) {
   const cityName = city as CityNameType
 
-  const { data: routes = [], isLoading: isRoutesLoading, error: routesError } = busApi.useGetRoutesByCityQuery(
+  const { data: routeData = [], isLoading: isRoutesLoading, error: routesError } = busApi.useGetRoutesByCityQuery(
     cityName,
     { skip: !city || !id }
   )
@@ -63,6 +64,8 @@ export function useRouteBaseData({
 
     return favoriteRouteStop
   }, [cityName, id, locationState])
+
+  const routes = useMemo(() => normalizeBusRoutesWithDates(routeData), [routeData])
 
   const busRoute = useMemo(
     () => routes.find((route) => route.RouteUID === id),
@@ -107,7 +110,7 @@ export function useRouteBaseData({
     ) ?? null
   }, [activeTab, id, routeTabs, stopOfRoutes])
 
-  const activeSubRoute = useMemo<BusSubRoute<string> | null>(() => {
+  const activeSubRoute = useMemo<BusSubRoute<Date | null> | null>(() => {
     if (!busRoute || !activeTab) return null
 
     const activeRouteTab = routeTabs.find((tab) => tab.id === activeTab)
