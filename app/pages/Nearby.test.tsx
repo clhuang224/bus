@@ -543,6 +543,21 @@ describe('Nearby', () => {
     expect(screen.getByTestId('nearby-stop-routes-skeleton')).toBeInTheDocument()
   })
 
+  it('sets the first available nearby route tab as active once route data is ready', () => {
+    renderNearby({
+      initialEntry: '/nearby?stop=station-1&routeStop=station-1',
+      coords: [25.033, 121.5654],
+      permission: GeoPermissionType.GRANTED,
+      queryState: {
+        data: nearbyStopsData,
+        isSuccess: true
+      }
+    })
+
+    expect(screen.getByRole('tab', { name: '去程' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: '返程' })).toHaveAttribute('aria-selected', 'false')
+  })
+
   it('syncs selected stop from the map back to the list state', () => {
     renderNearby({
       coords: [25.033, 121.5654],

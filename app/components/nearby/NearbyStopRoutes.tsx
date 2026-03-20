@@ -1,5 +1,5 @@
 import { ScrollArea, Skeleton, Stack, Tabs, Text } from '@mantine/core'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SkeletonList } from '~/components/common/SkeletonList'
 import { directionMapName } from '~/modules/consts/direction'
 import { DirectionType } from '~/modules/enums/DirectionType'
@@ -29,6 +29,23 @@ export const NearbyStopRoutes = ({ routes, isLoading = false }: PropType) => {
   const [selectedDirection, setSelectedDirection] = useState<string | null>(
     routeSections[0] ? String(routeSections[0].direction) : null
   )
+
+  useEffect(() => {
+    const firstDirection = routeSections[0] ? String(routeSections[0].direction) : null
+
+    if (!firstDirection) {
+      setSelectedDirection(null)
+      return
+    }
+
+    const hasSelectedDirection = routeSections.some(
+      (section) => String(section.direction) === selectedDirection
+    )
+
+    if (!hasSelectedDirection) {
+      setSelectedDirection(firstDirection)
+    }
+  }, [routeSections, selectedDirection])
 
   if (isLoading) {
     return (
