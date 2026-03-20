@@ -10,7 +10,14 @@ import type { Stop, TdxStop } from '../interfaces/Stop'
 import { getBusErrorModal } from './errors/busError'
 import { openGlobalModal } from '../slices/globalModalSlice'
 import { areaMapCity } from '../consts/area'
-import { parseRouteShapePath } from '../utils/parseRouteShapePath'
+import {
+  transformBusRoute,
+  transformEstimatedArrival,
+  transformRealtimeNearStop,
+  transformRouteShape,
+  transformStop,
+  transformStopOfRoute
+} from '../utils/transformTdxBusData'
 
 if (!import.meta.env.VITE_PROXY_API_BASE_URL) {
   throw new Error('VITE_PROXY_API_BASE_URL is required. Follow the proxy setup in README.md.')
@@ -36,92 +43,17 @@ export const busApi = createApi({
   endpoints: (build) => ({
     getEstimatedArrivalByRoute: build.query<EstimatedArrival[], { city: CityNameType, routeUID: string }>({
       query: ({ city, routeUID }) => `/EstimatedTimeOfArrival/City/${city}?%24filter=RouteUID%20eq%20'${routeUID}'&%24format=JSON`,
-      transformResponse: (res: TdxEstimatedArrival[], _meta, { city }) => res.map((estimatedArrival) => ({
-        ...estimatedArrival,
-        City: city,
-        RouteName: {
-          zh_TW: estimatedArrival.RouteName.Zh_tw,
-          en: estimatedArrival.RouteName.En
-        },
-        StopName: {
-          zh_TW: estimatedArrival.StopName.Zh_tw,
-          en: estimatedArrival.StopName.En
-        },
-        SubRouteName: {
-          zh_TW: estimatedArrival.SubRouteName.Zh_tw,
-          en: estimatedArrival.SubRouteName.En
-        }
-      }))
+      transformResponse: (res: TdxEstimatedArrival[], _meta, { city }) =>
+        res.map((estimatedArrival) => transformEstimatedArrival(estimatedArrival, city))
     }),
     getRoutesByCity: build.query<BusRoute<string>[], CityNameType>({
       query: (city) => `/Route/City/${city}?%24format=JSON`,
-      transformResponse: (res: TdxBusRoute<string>[]) => res.map((busRoute) => ({
-        ...busRoute,
-        Operators: busRoute.Operators.map((operator) => ({
-          ...operator,
-          OperatorName: {
-            zh_TW: operator.OperatorName.Zh_tw,
-            en: operator.OperatorName.En
-          }
-        })),
-        RouteName: {
-          zh_TW: busRoute.RouteName.Zh_tw,
-          en: busRoute.RouteName.En
-        },
-        DepartureStopName: {
-          zh_TW: busRoute.DepartureStopNameZh,
-          en: busRoute.DepartureStopNameEn
-        },
-        DestinationStopName: {
-          zh_TW: busRoute.DestinationStopNameZh,
-          en: busRoute.DestinationStopNameEn
-        },
-        TicketPriceDescription: {
-          zh_TW: busRoute.TicketPriceDescriptionZh,
-          en: busRoute.TicketPriceDescriptionEn
-        },
-        FareBufferZoneDescription: {
-          zh_TW: busRoute.FareBufferZoneDescriptionZh,
-          en: busRoute.FareBufferZoneDescriptionEn
-        },
-        SubRoutes: (busRoute.SubRoutes ?? []).map((busSubRoute) => ({
-          ...busSubRoute,
-          DepartureStopName: {
-            zh_TW: busSubRoute.DepartureStopNameZh,
-            en: busSubRoute.DepartureStopNameEn
-          },
-          DestinationStopName: {
-            zh_TW: busSubRoute.DestinationStopNameZh,
-            en: busSubRoute.DestinationStopNameEn
-          },
-          SubRouteName: {
-            zh_TW: busSubRoute.SubRouteName.Zh_tw,
-            en: busSubRoute.SubRouteName.En
-          }
-        }))
-      }))
+      transformResponse: (res: TdxBusRoute<string>[]) => res.map(transformBusRoute)
     }),
     getStopOfRoutesByCity: build.query<StopOfRoute[], CityNameType>({
       query: (cityName) => `/StopOfRoute/City/${cityName}?%24format=JSON`,
-      transformResponse: (res: TdxStopOfRoute[], _meta, cityName) => res.map((stopOfRoute) => ({
-        ...stopOfRoute,
-        City: cityName,
-        RouteName: {
-          zh_TW: stopOfRoute.RouteName.Zh_tw,
-          en: stopOfRoute.RouteName.En
-        },
-        SubRouteName: {
-          zh_TW: stopOfRoute.SubRouteName.Zh_tw,
-          en: stopOfRoute.SubRouteName.En
-        },
-        Stops: stopOfRoute.Stops.map((stop) => ({
-          ...stop,
-          StopName: {
-            zh_TW: stop.StopName.Zh_tw,
-            en: stop.StopName.En
-          }
-        }))
-      }))
+      transformResponse: (res: TdxStopOfRoute[], _meta, cityName) =>
+        res.map((stopOfRoute) => transformStopOfRoute(stopOfRoute, cityName))
     }),
     getStopOfRoutesByArea: build.query<StopOfRoute[], AreaType>({
       queryFn: async (area, _api, _extraOptions, baseQuery) => {
@@ -139,25 +71,7 @@ export const busApi = createApi({
 
         return {
           data: cityResults.flatMap(({ city, result }) =>
-            (result.data as TdxStopOfRoute[]).map((stopOfRoute) => ({
-              ...stopOfRoute,
-              City: city,
-              RouteName: {
-                zh_TW: stopOfRoute.RouteName.Zh_tw,
-                en: stopOfRoute.RouteName.En
-              },
-              SubRouteName: {
-                zh_TW: stopOfRoute.SubRouteName.Zh_tw,
-                en: stopOfRoute.SubRouteName.En
-              },
-              Stops: stopOfRoute.Stops.map((stop) => ({
-                ...stop,
-                StopName: {
-                  zh_TW: stop.StopName.Zh_tw,
-                  en: stop.StopName.En
-                }
-              }))
-            }))
+            (result.data as TdxStopOfRoute[]).map((stopOfRoute) => transformStopOfRoute(stopOfRoute, city))
           )
         }
       }
@@ -178,67 +92,17 @@ export const busApi = createApi({
 
         return {
           data: cityResults.flatMap(({ result }) =>
-            (result.data as TdxBusRoute<string>[]).map((busRoute) => ({
-              ...busRoute,
-              Operators: busRoute.Operators.map((operator) => ({
-                ...operator,
-                OperatorName: {
-                  zh_TW: operator.OperatorName.Zh_tw,
-                  en: operator.OperatorName.En
-                }
-              })),
-              RouteName: {
-                zh_TW: busRoute.RouteName.Zh_tw,
-                en: busRoute.RouteName.En
-              },
-              DepartureStopName: {
-                zh_TW: busRoute.DepartureStopNameZh,
-                en: busRoute.DepartureStopNameEn
-              },
-              DestinationStopName: {
-                zh_TW: busRoute.DestinationStopNameZh,
-                en: busRoute.DestinationStopNameEn
-              },
-              TicketPriceDescription: {
-                zh_TW: busRoute.TicketPriceDescriptionZh,
-                en: busRoute.TicketPriceDescriptionEn
-              },
-              FareBufferZoneDescription: {
-                zh_TW: busRoute.FareBufferZoneDescriptionZh,
-                en: busRoute.FareBufferZoneDescriptionEn
-              },
-              SubRoutes: (busRoute.SubRoutes ?? []).map((busSubRoute) => ({
-                ...busSubRoute,
-                DepartureStopName: {
-                  zh_TW: busSubRoute.DepartureStopNameZh,
-                  en: busSubRoute.DepartureStopNameEn
-                },
-                DestinationStopName: {
-                  zh_TW: busSubRoute.DestinationStopNameZh,
-                  en: busSubRoute.DestinationStopNameEn
-                },
-                SubRouteName: {
-                  zh_TW: busSubRoute.SubRouteName.Zh_tw,
-                  en: busSubRoute.SubRouteName.En
-                }
-              }))
-            }))
+            (result.data as TdxBusRoute<string>[]).map(transformBusRoute)
           )
         }
       }
     }),
     getStopsByCity: build.query<Stop[], CityNameType>({
       query: (cityName) => `/Stop/City/${cityName}?%24format=JSON`,
-      transformResponse: (res: TdxStop[]) => res.map((stop) => ({
-        ...stop,
-        StopName: {
-          zh_TW: stop.StopName.Zh_tw,
-          en: stop.StopName.En
-        },
-        GeoHash: stop.StopPosition.GeoHash,
-        City: stop.City || null,
-        position: [stop.StopPosition.PositionLon, stop.StopPosition.PositionLat] as Stop['position']
-      }))
+      transformResponse: (res: TdxStop[]) => res.flatMap((stop) => {
+        const transformedStop = transformStop(stop)
+        return transformedStop ? [transformedStop] : []
+      })
     }),
     getStopsByArea: build.query<Stop[], AreaType>({
       queryFn: async (area, _api, _extraOptions, baseQuery) => {
@@ -256,60 +120,25 @@ export const busApi = createApi({
 
         return {
           data: cityResults.flatMap(({ result }) =>
-            (result.data as TdxStop[]).map((stop) => ({
-              ...stop,
-              StopName: {
-                zh_TW: stop.StopName.Zh_tw,
-                en: stop.StopName.En
-              },
-              GeoHash: stop.StopPosition.GeoHash,
-              City: stop.City || null,
-              position: [stop.StopPosition.PositionLon, stop.StopPosition.PositionLat] as Stop['position']
-            }))
+            (result.data as TdxStop[]).flatMap((stop) => {
+              const transformedStop = transformStop(stop)
+              return transformedStop ? [transformedStop] : []
+            })
           )
         }
       }
     }),
     getRealtimeNearStopsByRoute: build.query<RealtimeNearStop[], { city: CityNameType, routeUID: string }>({
       query: ({ city, routeUID }) => `/RealTimeNearStop/City/${city}?%24filter=RouteUID%20eq%20'${routeUID}'&%24format=JSON`,
-      transformResponse: (res: TdxRealtimeNearStop[], _meta, { city }) => res.map((realtimeNearStop) => ({
-        ...realtimeNearStop,
-        City: city,
-        RouteName: {
-          zh_TW: realtimeNearStop.RouteName.Zh_tw,
-          en: realtimeNearStop.RouteName.En
-        },
-        StopName: {
-          zh_TW: realtimeNearStop.StopName.Zh_tw,
-          en: realtimeNearStop.StopName.En
-        },
-        SubRouteName: {
-          zh_TW: realtimeNearStop.SubRouteName.Zh_tw,
-          en: realtimeNearStop.SubRouteName.En
-        },
-        position: [realtimeNearStop.BusPosition.PositionLon, realtimeNearStop.BusPosition.PositionLat] as RealtimeNearStop['position']
-      }))
+      transformResponse: (res: TdxRealtimeNearStop[], _meta, { city }) => res.flatMap((realtimeNearStop) => {
+        const transformedRealtimeNearStop = transformRealtimeNearStop(realtimeNearStop, city)
+        return transformedRealtimeNearStop ? [transformedRealtimeNearStop] : []
+      })
     }),
     getRouteShapesByRoute: build.query<RouteShape[], { city: CityNameType, routeUID: string }>({
       query: ({ city, routeUID }) => `/Shape/City/${city}?%24filter=RouteUID%20eq%20'${routeUID}'&%24format=JSON`,
-      transformResponse: (res: TdxRouteShape[], _meta, { city }) => res.map((routeShape) => ({
-        ...routeShape,
-        City: city,
-        RouteName: {
-          zh_TW: routeShape.RouteName.Zh_tw,
-          en: routeShape.RouteName.En
-        },
-        SubRouteName: routeShape.SubRouteName
-          ? {
-            zh_TW: routeShape.SubRouteName.Zh_tw,
-            en: routeShape.SubRouteName.En
-          }
-          : null,
-        path: parseRouteShapePath({
-          encodedPolyline: routeShape.EncodedPolyline,
-          geometry: routeShape.Geometry
-        })
-      }))
+      transformResponse: (res: TdxRouteShape[], _meta, { city }) =>
+        res.map((routeShape) => transformRouteShape(routeShape, city))
     })
   })
 })
