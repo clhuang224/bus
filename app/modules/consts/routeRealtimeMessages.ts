@@ -13,5 +13,10 @@ export const routeRealtimeMessages = {
     color: 'blue',
     title: '營運狀態',
     description: '目前沒有營運班次'
+  },
+  noRealtimeData: {
+    color: 'yellow',
+    title: '即時公車',
+    description: '目前沒有可顯示的即時公車資訊，可能是已收班或上游暫時未提供完整資料。'
   }
 } as const

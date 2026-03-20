@@ -11,6 +11,7 @@ import { directionMapName } from '~/modules/consts/direction'
 import { routeMessages } from '~/modules/consts/pageMessages'
 import type { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
+import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import type { StopOfRouteStop } from '~/modules/interfaces/StopOfRoute'
@@ -217,13 +218,22 @@ export default function Route() {
     realtimeNearStops.length
   ])
 
-  const realtimeInfoMessage = useMemo(() => {
+  const activeRealtimeNearStops = useMemo(() => realtimeNearStops.filter((realtimeNearStop) =>
+    realtimeNearStop.SubRouteUID === activeSubRoute?.SubRouteUID &&
+    realtimeNearStop.Direction === activeSubRoute?.Direction
+  ), [activeSubRoute, realtimeNearStops])
+
+  const realtimeInfoState = useMemo<RouteRealtimeInfoState>(() => {
     if (hasRealtimeError || isEstimatedArrivalsLoading || isRealtimeNearStopsLoading) {
-      return null
+      return RouteRealtimeInfoState.NORMAL
     }
 
-    if (realtimeBusStatuses.length > 0 || activeEstimatedArrivals.length === 0) {
-      return null
+    if (realtimeBusStatuses.length > 0) {
+      return RouteRealtimeInfoState.NORMAL
+    }
+
+    if (activeEstimatedArrivals.length === 0 && activeRealtimeNearStops.length === 0) {
+      return RouteRealtimeInfoState.NO_REALTIME_DATA
     }
 
     const isOutOfService = activeEstimatedArrivals.every((estimatedArrival) => [
@@ -232,9 +242,10 @@ export default function Route() {
       StopStatusType.NOT_IN_SERVICE_TODAY
     ].includes(estimatedArrival.StopStatus))
 
-    return isOutOfService ? '目前沒有營運班次' : null
+    return isOutOfService ? RouteRealtimeInfoState.NO_SERVICE : RouteRealtimeInfoState.NO_REALTIME_DATA
   }, [
     activeEstimatedArrivals,
+    activeRealtimeNearStops.length,
     hasRealtimeError,
     isEstimatedArrivalsLoading,
     isRealtimeNearStopsLoading,
@@ -421,7 +432,7 @@ export default function Route() {
                     isRealtimeLoading={isEstimatedArrivalsLoading || isRealtimeNearStopsLoading}
                     listScrollBehavior={listScrollBehavior}
                     onSelectStop={handleSelectStopFromList}
-                    realtimeInfoMessage={realtimeInfoMessage}
+                    realtimeInfoState={realtimeInfoState}
                     stops={timelineStops}
                     onToggleFavorite={toggleFavoriteRouteStop}
                     selectedStopId={selectedStopId}

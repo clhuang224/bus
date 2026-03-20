@@ -2,6 +2,7 @@ import { ActionIcon, Alert, Badge, Box, Group, ScrollArea, Stack, Text, Timeline
 import { RiHeart2Fill, RiHeart2Line } from '@remixicon/react'
 import { useRef } from 'react'
 import { routeRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
+import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
 import { useScrollSelectedItem } from '~/modules/hooks/useScrollSelectedItem'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeBusStatus'
@@ -18,7 +19,7 @@ export interface RouteStopListItem {
 interface PropType {
   highlightedStopId?: string | null
   hasRealtimeError?: boolean
-  realtimeInfoMessage?: string | null
+  realtimeInfoState?: RouteRealtimeInfoState
   isRealtimeLoading?: boolean
   listScrollBehavior?: ScrollLogicalPosition
   onSelectStop: (stopId: string) => void
@@ -30,7 +31,7 @@ interface PropType {
 export const RouteStopList = ({
   highlightedStopId = null,
   hasRealtimeError = false,
-  realtimeInfoMessage = null,
+  realtimeInfoState = RouteRealtimeInfoState.NORMAL,
   isRealtimeLoading = false,
   listScrollBehavior = 'nearest',
   onSelectStop,
@@ -58,18 +59,18 @@ export const RouteStopList = ({
     ? routeRealtimeMessages.loading
     : hasRealtimeError
       ? routeRealtimeMessages.error
-      : realtimeInfoMessage
-        ? routeRealtimeMessages.noService
+      : realtimeInfoState !== RouteRealtimeInfoState.NORMAL
+        ? routeRealtimeMessages[realtimeInfoState]
         : null
 
   return (
-    <Stack h="100%" gap="xs">
+    <Stack h="100%" gap="xs" style={{ minHeight: 0 }}>
       {realtimeMessage && (
-        <Alert color={realtimeMessage.color} title={realtimeMessage.title}>
+        <Alert color={realtimeMessage.color} title={realtimeMessage.title} style={{ flex: '0 0 auto' }}>
           {realtimeMessage.description}
         </Alert>
       )}
-      <ScrollArea h="100%">
+      <ScrollArea style={{ flex: 1, minHeight: 0 }}>
         <Timeline active={-1} bulletSize={28} lineWidth={2}>
           {stops.map((stop) => {
             const isHighlighted = stop.id === highlightedStopId

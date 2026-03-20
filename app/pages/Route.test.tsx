@@ -403,7 +403,7 @@ describe('Route', () => {
     })
   })
 
-  it('does not show the realtime error warning when ETA data succeeds but realtime vehicle data is unavailable', async () => {
+  it('shows an ambiguous realtime notice when ETA data succeeds but realtime vehicle data is unavailable', async () => {
     mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
       data: estimatedArrivalsData,
       isError: false,
@@ -433,6 +433,7 @@ describe('Route', () => {
 
     await waitFor(() => {
       expect(screen.queryByText('即時公車資料暫時無法完整更新。')).not.toBeInTheDocument()
+      expect(screen.getByText('目前沒有可顯示的即時公車資訊，可能是已收班或上游暫時未提供完整資料。')).toBeInTheDocument()
     })
   })
 
@@ -476,6 +477,7 @@ describe('Route', () => {
     await waitFor(() => {
       expect(screen.getByText('目前沒有營運班次')).toBeInTheDocument()
       expect(screen.queryByText('即時公車資料暫時無法完整更新。')).not.toBeInTheDocument()
+      expect(screen.queryByText('目前沒有可顯示的即時公車資訊，可能是已收班或上游暫時未提供完整資料。')).not.toBeInTheDocument()
     })
   })
 
