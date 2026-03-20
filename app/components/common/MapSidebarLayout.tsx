@@ -25,15 +25,12 @@ export const MapSidebarLayout = ({
   <Flex h="100%" pos="relative">
     {!isSm && (
       <Box
-        pos="absolute"
-        top={0}
-        left={0}
         w={MAP_SIDEBAR_WIDTH}
         h="100%"
         p="lg"
         bg="white"
         style={{
-          zIndex: 1,
+          flex: `0 0 ${MAP_SIDEBAR_WIDTH}px`,
           borderRight: '1px solid var(--mantine-color-gray-3)'
         }}
       >
@@ -41,7 +38,7 @@ export const MapSidebarLayout = ({
       </Box>
     )}
 
-    <Flex pos="relative" style={{ flex: 1 }}>
+    <Flex pos="relative" style={{ flex: 1, minWidth: 0 }}>
       {isSm && (
         <ActionIcon
           pos="absolute"
