@@ -311,6 +311,8 @@ When reviewing a UI block, ask:
 
 When working with Mantine components, prefer Mantine props, variants, spacing, radius, color, and layout primitives over custom `style` or `styles` overrides whenever the built-in API can express the same intent.
 
+Avoid ad hoc odd pixel values such as `11px` or `13px` unless there is a clear reason grounded in an existing design pattern or third-party constraint. Prefer consistent Mantine sizing, spacing tokens, or even-numbered pixel values when custom sizing is still needed.
+
 For badge-based route UI, keep badge semantics consistent across the app:
 
 - route name plus direction: `Badge` with `color="blue"` and `variant="light"`
@@ -331,6 +333,8 @@ Use data-driven `map` rendering when:
 - the mapping improves readability instead of hiding it
 
 Do not force array-driven rendering when the data only contains one or two fields and the JSX becomes harder to understand.
+
+When a section is still rendering loading skeletons for its primary content, suppress empty-state, no-data, or warning messaging for that same section until the loading state has resolved. Do not show skeletons and "nothing to show" style messaging at the same time for the same content block.
 
 ## 5. Model And File Placement Rules
 

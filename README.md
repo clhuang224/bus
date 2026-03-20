@@ -23,7 +23,8 @@ The Route page combines stop lists, map interaction, and real-time transit data.
 
 - Official route shape data is used for more accurate route lines on the map when available.
 - The stop list and map stay in sync: selecting a stop in one view updates the other.
-- Real-time buses are displayed on both the route map and the stop timeline.
+- Each stop shows the nearest estimated arrival when upstream ETA data is available.
+- Real-time buses are displayed on both the route map and the stop timeline when live vehicle data is available.
 - The app shows real-time status messaging such as temporary data issues or non-operating service periods.
 
 ### Nearby Stops
@@ -32,7 +33,8 @@ The Nearby Stops page uses the user's current GPS location.
 
 - If location permission is granted, the app resolves the current city and service area automatically.
 - Stops within **0.5 kilometers** are shown as both a list and map markers.
-- Selecting a stop reveals stop details, including its city, address, and all serving routes.
+- Selecting a stop reveals stop details, including its city, address, and serving route badges.
+- Opening a stop's route detail view shows the full route list grouped by direction.
 
 If location permission is denied, the Nearby Stops feature becomes unavailable.
 
