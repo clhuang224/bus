@@ -3,11 +3,11 @@ import type { LocalizedText, TdxLocalizedText } from '../types/LocalizedText'
 
 export function toLocalizedText(
   text?: TdxLocalizedText | null,
-  fallback?: TdxLocalizedText | null
+  defaultText?: TdxLocalizedText | null
 ): LocalizedText {
   return {
-    zh_TW: text?.Zh_tw ?? fallback?.Zh_tw ?? '',
-    en: text?.En ?? fallback?.En ?? ''
+    zh_TW: text?.Zh_tw ?? defaultText?.Zh_tw ?? '',
+    en: text?.En ?? defaultText?.En ?? ''
   }
 }
 
