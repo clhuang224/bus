@@ -3,10 +3,11 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { fireEvent, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { favoriteMessages } from '~/modules/consts/pageMessages'
+import { getFavoriteMessages } from '~/modules/consts/pageMessages'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
+import i18n from '~/modules/i18n'
 import favoriteSlice from '~/modules/slices/favoriteSlice'
 import { renderWithProvidersAndRouter } from '~/test/render'
 import Favorite from './Favorite'
@@ -112,7 +113,7 @@ describe('Favorite', () => {
   it('shows the empty state when there are no favorite route stops', () => {
     renderFavoritePage([])
 
-    expect(screen.getByText(favoriteMessages.emptyFavoriteRouteStops.title)).toBeInTheDocument()
+    expect(screen.getByText(getFavoriteMessages(i18n.t).emptyFavoriteRouteStops.title)).toBeInTheDocument()
   })
 
   it('renders favorite route stops and links back to the route page', () => {
@@ -142,6 +143,6 @@ describe('Favorite', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '移除收藏站牌路線' }))
 
-    expect(screen.getByText(favoriteMessages.emptyFavoriteRouteStops.title)).toBeInTheDocument()
+    expect(screen.getByText(getFavoriteMessages(i18n.t).emptyFavoriteRouteStops.title)).toBeInTheDocument()
   })
 })

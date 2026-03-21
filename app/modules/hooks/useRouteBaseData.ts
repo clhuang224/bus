@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { busApi } from '~/modules/apis/bus'
 import { directionMapName } from '~/modules/consts/direction'
-import { routeMessages } from '~/modules/consts/pageMessages'
+import { getRouteMessages } from '~/modules/consts/pageMessages'
 import type { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import type { BusSubRoute } from '~/modules/interfaces/BusRoute'
@@ -44,7 +45,9 @@ export function useRouteBaseData({
   isFavoriteRouteStop,
   locationState
 }: UseRouteBaseDataOptions) {
+  const { t } = useTranslation()
   const cityName = city as CityNameType
+  const routeMessages = getRouteMessages(t)
 
   const { data: routeData = [], isLoading: isRoutesLoading, error: routesError } = busApi.useGetRoutesByCityQuery(
     cityName,

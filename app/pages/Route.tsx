@@ -1,6 +1,7 @@
 import { ActionIcon, Flex, Stack, Tabs, Text, useMantineTheme } from '@mantine/core'
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BaseAlert } from '~/components/common/BaseAlert'
 import { MapSidebarLayout } from '~/components/common/MapSidebarLayout'
 import { useLocation, useNavigate, useParams } from 'react-router'
@@ -13,6 +14,7 @@ import { RiArrowLeftSLine } from '@remixicon/react'
 import { AppBadge } from '~/components/common/AppBadge'
 
 export default function Route() {
+  const { t } = useTranslation()
   const { city, id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
@@ -121,12 +123,12 @@ export default function Route() {
       isSidebarOpened={isSidebarOpened}
       onCloseSidebar={closeSidebar}
       onOpenSidebar={openSidebar}
-      openButtonLabel="開啟路線列表"
+      openButtonLabel={t('components.mapSidebarLayout.openRouteList')}
       panel={(
         <Stack h="100%" gap="md">
           <Stack gap={4}>
             <Flex gap="xs" align="center">
-              <ActionIcon aria-label="返回路線列表" onClick={handleBack}>
+              <ActionIcon aria-label={t('routePage.backToRoutes')} onClick={handleBack}>
                 <RiArrowLeftSLine size={18} />
               </ActionIcon>
               {busRoute && (

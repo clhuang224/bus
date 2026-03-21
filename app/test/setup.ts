@@ -1,9 +1,15 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach, vi } from 'vitest'
+import { DEFAULT_APP_LOCALE } from '~/modules/consts/i18n'
+import i18n from '~/modules/i18n'
 
-afterEach(() => {
+afterEach(async () => {
   cleanup()
+  if (typeof document !== 'undefined') {
+    document.documentElement.lang = DEFAULT_APP_LOCALE
+  }
+  await i18n.changeLanguage(DEFAULT_APP_LOCALE)
 })
 
 if (typeof window !== 'undefined') {

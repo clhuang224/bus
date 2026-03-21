@@ -5,6 +5,7 @@ import favoriteSlice from './slices/favoriteSlice'
 import geoSlice from './slices/geoSlice'
 import cityGeoSlice, { setGeoJSON } from './slices/cityGeoSlice'
 import globalModalSlice from './slices/globalModalSlice'
+import localeSlice from './slices/localeSlice'
 import routeSearchSlice from './slices/routeSearchSlice'
 
 export const store = configureStore({
@@ -14,6 +15,7 @@ export const store = configureStore({
     favorite: favoriteSlice.reducer,
     cityGeo: cityGeoSlice.reducer,
     globalModal: globalModalSlice.reducer,
+    locale: localeSlice.reducer,
     routeSearch: routeSearchSlice.reducer
   },
   middleware: (getDefaultMiddleware) =>

@@ -1,6 +1,7 @@
 import { CloseButton, Input } from '@mantine/core'
 import { RiSearchLine } from '@remixicon/react'
 import type { ReactElement } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export interface SearchInputPropType {
   value: string
@@ -8,10 +9,12 @@ export interface SearchInputPropType {
 }
 
 export const SearchInput = (props: SearchInputPropType): ReactElement => {
+  const { t } = useTranslation()
+
   return (
     <Input
-      aria-label="搜尋公車路線"
-      placeholder={'輸入關鍵字以搜尋路線、起點或終點'}
+      aria-label={t('components.searchInput.ariaLabel')}
+      placeholder={t('components.searchInput.placeholder')}
       leftSection={<RiSearchLine />}
       rightSection={props.value && (
           <CloseButton

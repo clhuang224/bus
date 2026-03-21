@@ -2,6 +2,7 @@ import { AppShell, Box, Flex, useMantineTheme } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { RiHeart3Fill, RiHeart3Line, RiMapPin3Fill, RiMapPin3Line, RiSearchFill, RiSearchLine } from '@remixicon/react'
 import { useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { Outlet } from 'react-router'
 import { AppNavLink } from '~/components/AppNavLink'
@@ -19,6 +20,7 @@ export function meta() {
 
 export default function AppLayout () {
   const dispatch = useDispatch<AppDispatch>()
+  const { t } = useTranslation()
 
   const theme = useMantineTheme()
   const isSm = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`)
@@ -27,24 +29,24 @@ export default function AppLayout () {
 
   const options = useMemo(() => ([
     {
-      name: '我的最愛',
+      name: t('layout.nav.favorite'),
       path: '/',
       icon: (<RiHeart3Line />),
       iconActive: (<RiHeart3Fill />)
     },
     {
-      name: '附近站牌',
+      name: t('layout.nav.nearby'),
       path: '/nearby',
       icon: (<RiMapPin3Line />),
       iconActive: (<RiMapPin3Fill />)
     },
     {
-      name: '搜尋公車',
+      name: t('layout.nav.routes'),
       path: '/routes',
       icon: (<RiSearchLine />),
       iconActive: (<RiSearchFill />)
     }
-  ]), [])
+  ]), [t])
 
   useWatchGeo()
 

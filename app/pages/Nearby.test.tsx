@@ -4,11 +4,12 @@ import { configureStore } from '@reduxjs/toolkit'
 import { act, fireEvent, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import Nearby from './Nearby'
+import i18n from '~/modules/i18n'
 import {
-  geoErrorMessages,
-  geoPermissionMessages
+  getGeoErrorMessages,
+  getGeoPermissionMessages
 } from '~/modules/consts/geoMessages'
-import { nearbyMessages } from '~/modules/consts/pageMessages'
+import { getNearbyMessages } from '~/modules/consts/pageMessages'
 import { AreaType } from '~/modules/enums/AreaType'
 import { BearingType } from '~/modules/enums/BearingType'
 import { CityNameType } from '~/modules/enums/CityNameType'
@@ -330,10 +331,10 @@ describe('Nearby', () => {
     })
 
     expect(
-      screen.getByText(geoPermissionMessages[GeoPermissionType.DENIED]!.title)
+      screen.getByText(getGeoPermissionMessages(i18n.t)[GeoPermissionType.DENIED]!.title)
     ).toBeInTheDocument()
     expect(
-      screen.getByText(geoPermissionMessages[GeoPermissionType.DENIED]!.description)
+      screen.getByText(getGeoPermissionMessages(i18n.t)[GeoPermissionType.DENIED]!.description)
     ).toBeInTheDocument()
   })
 
@@ -375,11 +376,11 @@ describe('Nearby', () => {
     })
 
     expect(
-      screen.getByText(geoErrorMessages[GeoErrorType.POSITION_UNAVAILABLE].title)
+      screen.getByText(getGeoErrorMessages(i18n.t)[GeoErrorType.POSITION_UNAVAILABLE].title)
     ).toBeInTheDocument()
     expect(
       screen.getByText(
-        geoErrorMessages[GeoErrorType.POSITION_UNAVAILABLE].description
+        getGeoErrorMessages(i18n.t)[GeoErrorType.POSITION_UNAVAILABLE].description
       )
     ).toBeInTheDocument()
   })
@@ -407,8 +408,8 @@ describe('Nearby', () => {
       }
     })
 
-    expect(screen.getByText(nearbyMessages.loadStopsError.title)).toBeInTheDocument()
-    expect(screen.getByText(nearbyMessages.loadStopsError.description)).toBeInTheDocument()
+    expect(screen.getByText(getNearbyMessages(i18n.t).loadStopsError.title)).toBeInTheDocument()
+    expect(screen.getByText(getNearbyMessages(i18n.t).loadStopsError.description)).toBeInTheDocument()
   })
 
   it('shows an empty-state message when no nearby stops are found', () => {
@@ -421,8 +422,8 @@ describe('Nearby', () => {
       }
     })
 
-    expect(screen.getByText(nearbyMessages.emptyStops.title)).toBeInTheDocument()
-    expect(screen.getByText(nearbyMessages.emptyStops.description)).toBeInTheDocument()
+    expect(screen.getByText(getNearbyMessages(i18n.t).emptyStops.title)).toBeInTheDocument()
+    expect(screen.getByText(getNearbyMessages(i18n.t).emptyStops.description)).toBeInTheDocument()
   })
 
   it('loads nearby stops with bounded area query params once coords are available', () => {

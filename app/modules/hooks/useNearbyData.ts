@@ -1,15 +1,16 @@
 import distance from '@turf/distance'
 import { point } from '@turf/helpers'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { busApi } from '~/modules/apis/bus'
 import { cityMapArea } from '~/modules/consts/area'
 import {
-  geoErrorMessages,
-  geoPermissionMessages
+  getGeoErrorMessages,
+  getGeoPermissionMessages
 } from '~/modules/consts/geoMessages'
 import { NEARBY_DISTANCE_KM } from '~/modules/consts/nearby'
-import { nearbyMessages } from '~/modules/consts/pageMessages'
+import { getNearbyMessages } from '~/modules/consts/pageMessages'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
 import type { BusRoute } from '~/modules/interfaces/BusRoute'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
@@ -152,8 +153,12 @@ export function useNearbyData({
   selectedStopId,
   selectedRouteStopId
 }: UseNearbyDataOptions) {
+  const { t } = useTranslation()
   const { coords, error: geolocationError, permission } = useSelector((state: RootState) => state.geolocation)
   const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
+  const geoPermissionMessages = getGeoPermissionMessages(t)
+  const geoErrorMessages = getGeoErrorMessages(t)
+  const nearbyMessages = getNearbyMessages(t)
   const currentCity = getCityByCoords(coords, geojson)
   const currentArea = currentCity ? cityMapArea[currentCity] : null
   const isNearbyDisabled = disabledNearbyPermissions.includes(permission) || geolocationError !== null
