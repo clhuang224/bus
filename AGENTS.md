@@ -408,12 +408,20 @@ When updating or adding tests in this repository, prefer these conventions:
 - for timer-based hooks, use fake timers with `act(...)` and focus assertions on delay, reset, and cleanup behavior
 - keep UI tests centered on user-visible behavior, state branches, and component contracts rather than third-party DOM internals
 
+Current shared testing mechanisms:
+
+- use `app/test/setup.ts` for shared jsdom test setup such as `jest-dom`, automatic `cleanup()`, and browser API shims required by Mantine or scroll-sync behavior
+- use `app/test/render.tsx` for shared provider wrappers such as `renderWithMantine`, `renderWithStore`, `renderWithProvidersAndRouter`, and `renderRoute`
+- prefer these shared render helpers when the test is only repeating provider boilerplate; do not recreate the same Mantine, Redux, or router wrapper inline across multiple test files
+- keep shared render helpers infrastructure-focused; they should provide providers and route context, not hide scenario-specific state, mock data, or user actions
+- local test-file helpers are encouraged when they are thin and repetitive, such as a small route-page render helper or grouped mock reset/default-return setup
+- do not introduce large scenario helpers that hide the important test preconditions; mock state and branch-specific query responses should remain visible in the test file
+
 Current testing cleanup backlog:
 
 - replace remaining hard-coded shared UI copy in tests with imports from existing message constants where practical
 - reduce positional DOM selectors in tests, especially indexed textbox queries, in favor of labels, roles, or clearer helpers
-- consider standardizing repeated test setup helpers for common render wrappers when page tests grow further
-- reevaluate whether explicit `cleanup()` calls are still needed in each `jsdom` test file, and remove the boilerplate if the shared test environment already guarantees cleanup
+- continue consolidating obviously repeated provider boilerplate or mock reset code when the helper remains small, honest, and easy to inspect
 
 ## 7. Commit Rules
 

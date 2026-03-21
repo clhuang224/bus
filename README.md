@@ -65,27 +65,32 @@ The app is organized around route-level pages, feature components, and shared do
 ```text
 app/
 ├── components/
-│   ├── common/        # Shared UI components
-│   ├── favorite/      # Favorite feature components
-│   ├── nearby/        # Nearby feature components
-│   ├── routes/        # Route feature components
-│   └── providers/     # App providers
+│   ├── AppNavLink.tsx   # Shared app navigation link
+│   ├── AreaSelect.tsx   # Area picker
+│   ├── GlobalModal.tsx  # App-wide modal renderer
+│   ├── SearchInput.tsx  # Shared search input
+│   ├── common/          # Shared UI components
+│   ├── favorite/        # Favorite feature components
+│   ├── nearby/          # Nearby feature components
+│   ├── providers/       # App providers
+│   └── routes/          # Route feature components
 ├── modules/
-│   ├── apis/          # RTK Query APIs
-│   ├── consts/        # Constant maps and UI copy
-│   ├── enums/         # Domain enums
-│   ├── hooks/         # Reusable app hooks
-│   ├── interfaces/    # Domain and API object models
-│   ├── slices/        # Redux slices
-│   ├── types/         # Shared type helpers
-│   ├── utils/         # Shared helpers
-│   └── store.ts       # Redux store
-├── pages/             # Route page modules
-├── root.tsx           # App root
-└── routes.ts          # Route definitions
+│   ├── apis/            # RTK Query APIs
+│   ├── consts/          # Constant maps and UI copy
+│   ├── enums/           # Domain enums
+│   ├── hooks/           # Reusable app hooks
+│   ├── interfaces/      # Domain and API object models
+│   ├── slices/          # Redux slices
+│   ├── types/           # Shared type helpers
+│   ├── utils/           # Shared helpers
+│   └── store.ts         # Redux store
+├── pages/               # Route page modules
+├── test/                # Shared test setup and render helpers
+├── root.tsx             # App root
+└── routes.ts            # Route definitions
 
 workers/
-└── tdx-proxy/         # Cloudflare Worker proxy
+└── tdx-proxy/           # Cloudflare Worker proxy
 ```
 
 ## Open Data
