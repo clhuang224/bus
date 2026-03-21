@@ -301,6 +301,15 @@ function mockDefaultRouteQueries() {
   })
 }
 
+function renderRoutePage(
+  initialEntries: Array<string | { pathname: string, state?: unknown }> = ['/routes/Taipei/route-1']
+) {
+  return renderRoute(<Route />, {
+    path: '/routes/:city/:id',
+    initialEntries
+  })
+}
+
 describe('Route', () => {
   beforeEach(() => {
     window.matchMedia = vi.fn().mockImplementation((query: string) => ({
@@ -319,13 +328,10 @@ describe('Route', () => {
   })
 
   it('highlights the saved favorite stop after opening the route page from favorites', async () => {
-    renderRoute(<Route />, {
-      path: '/routes/:city/:id',
-      initialEntries: [{
-        pathname: '/routes/Taipei/route-1',
-        state: { favoriteRouteStop: targetFavoriteRouteStop }
-      }]
-    })
+    renderRoutePage([{
+      pathname: '/routes/Taipei/route-1',
+      state: { favoriteRouteStop: targetFavoriteRouteStop }
+    }])
 
     await waitFor(() => {
       expect(screen.getByText('市政府').closest('[data-highlighted="true"]')).toBeInTheDocument()
@@ -351,10 +357,7 @@ describe('Route', () => {
       error: null
     })
 
-    renderRoute(<Route />, {
-      path: '/routes/:city/:id',
-      initialEntries: ['/routes/Taipei/route-1']
-    })
+    renderRoutePage()
 
     expect(screen.getByLabelText('返回路線列表')).toBeInTheDocument()
     expect(screen.queryByText('藍1')).not.toBeInTheDocument()
@@ -382,10 +385,7 @@ describe('Route', () => {
       }
     })
 
-    renderRoute(<Route />, {
-      path: '/routes/:city/:id',
-      initialEntries: ['/routes/Taipei/route-1']
-    })
+    renderRoutePage()
 
     await waitFor(() => {
       expect(screen.getByText(routeRealtimeMessages.rateLimited.description)).toBeInTheDocument()
@@ -410,10 +410,7 @@ describe('Route', () => {
       }
     })
 
-    renderRoute(<Route />, {
-      path: '/routes/:city/:id',
-      initialEntries: ['/routes/Taipei/route-1']
-    })
+    renderRoutePage()
 
     await waitFor(() => {
       expect(screen.queryByText(routeRealtimeMessages.error.description)).not.toBeInTheDocument()
@@ -448,10 +445,7 @@ describe('Route', () => {
       error: null
     })
 
-    renderRoute(<Route />, {
-      path: '/routes/:city/:id',
-      initialEntries: ['/routes/Taipei/route-1']
-    })
+    renderRoutePage()
 
     await waitFor(() => {
       expect(screen.getByText(routeRealtimeMessages.noService.description)).toBeInTheDocument()
@@ -472,10 +466,7 @@ describe('Route', () => {
       dispatchEvent: vi.fn()
     }))
 
-    renderRoute(<Route />, {
-      path: '/routes/:city/:id',
-      initialEntries: ['/routes/Taipei/route-1']
-    })
+    renderRoutePage()
 
     await waitFor(() => {
       expect(
