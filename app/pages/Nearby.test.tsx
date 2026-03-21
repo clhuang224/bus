@@ -1,12 +1,8 @@
 // @vitest-environment jsdom
 
-import '@testing-library/jest-dom/vitest'
-import { MantineProvider } from '@mantine/core'
 import { configureStore } from '@reduxjs/toolkit'
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { Provider } from 'react-redux'
-import { MemoryRouter } from 'react-router'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { act, fireEvent, screen } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import Nearby from './Nearby'
 import {
   geoErrorMessages,
@@ -18,6 +14,7 @@ import { BearingType } from '~/modules/enums/BearingType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { GeoErrorType } from '~/modules/enums/geo/GeoErrorType'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
+import { renderWithProvidersAndRouter } from '~/test/render'
 
 const {
   mockUseGetRoutesByAreaQuery,
@@ -30,29 +27,6 @@ const {
   mockUseGetStopOfRoutesByAreaQuery: vi.fn(),
   mockNearbyStopMap: vi.fn()
 }))
-
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation((query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn()
-  }))
-})
-
-class ResizeObserverMock {
-  observe = vi.fn()
-  unobserve = vi.fn()
-  disconnect = vi.fn()
-}
-
-vi.stubGlobal('ResizeObserver', ResizeObserverMock)
-HTMLElement.prototype.scrollIntoView = vi.fn()
 
 vi.mock('~/modules/apis/bus', () => ({
   busApi: {
@@ -259,6 +233,13 @@ const routesData = [
   }
 ]
 
+function resetNearbyMocks() {
+  mockUseGetRoutesByAreaQuery.mockReset()
+  mockUseGetStopsByNearbyAreaQuery.mockReset()
+  mockUseGetStopOfRoutesByAreaQuery.mockReset()
+  mockNearbyStopMap.mockReset()
+}
+
 function renderNearby({
   initialEntry = '/nearby',
   coords = null,
@@ -321,15 +302,10 @@ function renderNearby({
     ...stopOfRoutesQueryState
   })
 
-  return render(
-    <MantineProvider>
-      <MemoryRouter initialEntries={[initialEntry]}>
-        <Provider store={store}>
-          <Nearby />
-        </Provider>
-      </MemoryRouter>
-    </MantineProvider>
-  )
+  return renderWithProvidersAndRouter(<Nearby />, {
+    store,
+    initialEntries: [initialEntry]
+  })
 }
 
 describe('Nearby', () => {
@@ -345,14 +321,7 @@ describe('Nearby', () => {
       dispatchEvent: vi.fn()
     }))
 
-    mockUseGetRoutesByAreaQuery.mockReset()
-    mockUseGetStopsByNearbyAreaQuery.mockReset()
-    mockUseGetStopOfRoutesByAreaQuery.mockReset()
-    mockNearbyStopMap.mockReset()
-  })
-
-  afterEach(() => {
-    cleanup()
+    resetNearbyMocks()
   })
 
   it('shows a denied-location message when geolocation permission is denied', () => {

@@ -1,10 +1,7 @@
 // @vitest-environment jsdom
 
-import '@testing-library/jest-dom/vitest'
-import { MantineProvider } from '@mantine/core'
-import { cleanup, render } from '@testing-library/react'
-import { MemoryRouter } from 'react-router'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { renderRoute } from '~/test/render'
 import AppLayout from './AppLayout'
 
 const {
@@ -18,20 +15,6 @@ const {
   mockFetchCityGeoJSON: vi.fn(),
   mockUseWatchGeo: vi.fn()
 }))
-
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation((query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn()
-  }))
-})
 
 vi.mock('react-redux', async () => {
   const actual = await vi.importActual<typeof import('react-redux')>('react-redux')
@@ -63,13 +46,9 @@ vi.mock('~/modules/slices/cityGeoSlice', () => ({
 }))
 
 function renderAppLayout() {
-  return render(
-    <MantineProvider>
-      <MemoryRouter>
-        <AppLayout />
-      </MemoryRouter>
-    </MantineProvider>
-  )
+  return renderRoute(<AppLayout />, {
+    path: '*'
+  })
 }
 
 describe('AppLayout', () => {
@@ -79,10 +58,6 @@ describe('AppLayout', () => {
     mockFetchCityGeoJSON.mockReset()
     mockUseWatchGeo.mockReset()
     mockFetchCityGeoJSON.mockReturnValue({ type: 'cityGeo/fetchCityGeoJSON' })
-  })
-
-  afterEach(() => {
-    cleanup()
   })
 
   it('dispatches city geo fetch when geojson is missing', () => {

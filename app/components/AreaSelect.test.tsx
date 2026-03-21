@@ -1,8 +1,7 @@
 // @vitest-environment jsdom
 
-import '@testing-library/jest-dom/vitest'
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { fireEvent, render, screen, within } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 import { AreaSelect } from './AreaSelect'
 import { AreaType } from '~/modules/enums/AreaType'
 import { areaMapAreaName } from '~/modules/consts/area'
@@ -32,10 +31,6 @@ vi.mock('@mantine/core', () => ({
 }))
 
 describe('AreaSelect', () => {
-  afterEach(() => {
-    cleanup()
-  })
-
   it('calls onChange with the selected area', () => {
     const handleChange = vi.fn()
 

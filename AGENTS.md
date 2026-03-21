@@ -398,6 +398,23 @@ When UI copy is primarily presentational, prefer matching the important user-fac
 
 For integrations with heavy UI libraries or maps, prefer lightweight mocks that preserve the component contract instead of testing the third-party library itself.
 
+### Test Maintenance Notes
+
+When updating or adding tests in this repository, prefer these conventions:
+
+- import shared message constants or exported copy objects when the UI text already exists in app code, instead of hard-coding the same user-facing strings again in tests
+- prefer stable selectors such as `getByRole`, `getByLabelText`, or named `getByText` queries over positional selectors like `getAllByRole(...)[0]`
+- use `data-testid` only when accessible queries or stable text queries would be unclear or fragile
+- for timer-based hooks, use fake timers with `act(...)` and focus assertions on delay, reset, and cleanup behavior
+- keep UI tests centered on user-visible behavior, state branches, and component contracts rather than third-party DOM internals
+
+Current testing cleanup backlog:
+
+- replace remaining hard-coded shared UI copy in tests with imports from existing message constants where practical
+- reduce positional DOM selectors in tests, especially indexed textbox queries, in favor of labels, roles, or clearer helpers
+- consider standardizing repeated test setup helpers for common render wrappers when page tests grow further
+- reevaluate whether explicit `cleanup()` calls are still needed in each `jsdom` test file, and remove the boilerplate if the shared test environment already guarantees cleanup
+
 ## 7. Commit Rules
 
 Follow Conventional Commits for commit messages.
@@ -450,6 +467,7 @@ When making changes in this repository:
 - keep data transformation close to the API layer
 - keep page files focused on screen flow
 - choose readability over clever abstraction
+- if a useful cleanup or follow-up is small enough to complete safely in the current task, prefer doing it directly instead of recording it as future todo work
 
 If a new pattern is introduced, it should make the surrounding code easier for the next person to navigate, not just shorter.
 

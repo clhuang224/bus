@@ -1,42 +1,17 @@
 // @vitest-environment jsdom
 
-import '@testing-library/jest-dom/vitest'
 import { configureStore } from '@reduxjs/toolkit'
-import { MantineProvider } from '@mantine/core'
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { Provider } from 'react-redux'
-import { MemoryRouter } from 'react-router'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AreaType } from '~/modules/enums/AreaType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import routeSearchSlice from '~/modules/slices/routeSearchSlice'
+import { renderWithProvidersAndRouter } from '~/test/render'
 import Routes from './Routes'
 
 const { mockUseGetRoutesByAreaQuery } = vi.hoisted(() => ({
   mockUseGetRoutesByAreaQuery: vi.fn()
 }))
-
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation((query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn()
-  }))
-})
-
-class ResizeObserverMock {
-  observe = vi.fn()
-  unobserve = vi.fn()
-  disconnect = vi.fn()
-}
-
-vi.stubGlobal('ResizeObserver', ResizeObserverMock)
 
 vi.mock('~/modules/apis/bus', () => ({
   busApi: {
@@ -160,15 +135,10 @@ const renderRoutes = (preloadedRouteSearchState?: {
 
   return {
     store,
-    ...render(
-      <Provider store={store}>
-        <MantineProvider>
-          <MemoryRouter initialEntries={['/routes']}>
-            <Routes />
-          </MemoryRouter>
-        </MantineProvider>
-      </Provider>
-    )
+    ...renderWithProvidersAndRouter(<Routes />, {
+      store,
+      initialEntries: ['/routes']
+    })
   }
 }
 
@@ -180,10 +150,6 @@ describe('Routes', () => {
       isLoading: false,
       error: null
     })
-  })
-
-  afterEach(() => {
-    cleanup()
   })
 
   it('shows the manually selected area from store state', () => {
@@ -236,7 +202,7 @@ describe('Routes', () => {
   it('filters routes by the entered keyword', async () => {
     const { store } = renderRoutes()
 
-    fireEvent.change(screen.getAllByRole('textbox')[0], {
+    fireEvent.change(screen.getByLabelText('搜尋公車路線'), {
       target: { value: '紅25' }
     })
 
@@ -253,7 +219,7 @@ describe('Routes', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getAllByRole('textbox')[0]).toHaveValue('紅25')
+      expect(screen.getByLabelText('搜尋公車路線')).toHaveValue('紅25')
       expect(screen.getAllByText('紅25').length).toBeGreaterThan(0)
       expect(screen.queryByText('藍1')).not.toBeInTheDocument()
     })

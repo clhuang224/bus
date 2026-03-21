@@ -1,15 +1,13 @@
 // @vitest-environment jsdom
 
-import '@testing-library/jest-dom/vitest'
-import { MantineProvider } from '@mantine/core'
-import { cleanup, render, screen, waitFor } from '@testing-library/react'
-import { MemoryRouter, Route as RouterRoute, Routes as RouterRoutes } from 'react-router'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { screen, waitFor } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { routeRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
+import { renderRoute } from '~/test/render'
 import Route from './Route'
 
 const {
@@ -29,33 +27,6 @@ const {
   mockUseGetStopOfRoutesByCityQuery: vi.fn(),
   mockUseGetStopsByCityQuery: vi.fn()
 }))
-
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation((query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn()
-  }))
-})
-
-class ResizeObserverMock {
-  observe = vi.fn()
-  unobserve = vi.fn()
-  disconnect = vi.fn()
-}
-
-vi.stubGlobal('ResizeObserver', ResizeObserverMock)
-
-Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
-  writable: true,
-  value: vi.fn()
-})
 
 vi.mock('~/components/common/MapSidebarLayout', () => ({
   MapSidebarLayout: ({
@@ -280,11 +251,57 @@ const targetFavoriteRouteStop: FavoriteRouteStop = {
   destination: '市政府'
 }
 
-describe('Route', () => {
-  afterEach(() => {
-    cleanup()
+function resetRouteMocks() {
+  mockToggleFavoriteRouteStop.mockReset()
+  mockUseGetEstimatedArrivalByRouteQuery.mockReset()
+  mockUseGetRealtimeNearStopsByRouteQuery.mockReset()
+  mockUseGetRouteShapesByRouteQuery.mockReset()
+  mockUseGetRoutesByCityQuery.mockReset()
+  mockUseGetStopOfRoutesByCityQuery.mockReset()
+  mockUseGetStopsByCityQuery.mockReset()
+}
+
+function mockDefaultRouteQueries() {
+  mockUseGetRoutesByCityQuery.mockReturnValue({
+    data: routeData,
+    isLoading: false,
+    error: null
   })
 
+  mockUseGetStopOfRoutesByCityQuery.mockReturnValue({
+    data: stopOfRoutesData,
+    isLoading: false,
+    error: null
+  })
+
+  mockUseGetStopsByCityQuery.mockReturnValue({
+    data: stopsByCityData,
+    isLoading: false,
+    error: null
+  })
+
+  mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
+    data: estimatedArrivalsData,
+    isError: false,
+    isLoading: false,
+    error: null
+  })
+
+  mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
+    data: realtimeNearStopsData,
+    isError: false,
+    isLoading: false,
+    error: null
+  })
+
+  mockUseGetRouteShapesByRouteQuery.mockReturnValue({
+    data: [],
+    isLoading: false,
+    error: null
+  })
+}
+
+describe('Route', () => {
   beforeEach(() => {
     window.matchMedia = vi.fn().mockImplementation((query: string) => ({
       matches: false,
@@ -297,68 +314,18 @@ describe('Route', () => {
       dispatchEvent: vi.fn()
     }))
 
-    mockToggleFavoriteRouteStop.mockReset()
-    mockUseGetEstimatedArrivalByRouteQuery.mockReset()
-    mockUseGetRealtimeNearStopsByRouteQuery.mockReset()
-    mockUseGetRouteShapesByRouteQuery.mockReset()
-    mockUseGetRoutesByCityQuery.mockReset()
-    mockUseGetStopOfRoutesByCityQuery.mockReset()
-    mockUseGetStopsByCityQuery.mockReset()
-
-    mockUseGetRoutesByCityQuery.mockReturnValue({
-      data: routeData,
-      isLoading: false,
-      error: null
-    })
-
-    mockUseGetStopOfRoutesByCityQuery.mockReturnValue({
-      data: stopOfRoutesData,
-      isLoading: false,
-      error: null
-    })
-
-    mockUseGetStopsByCityQuery.mockReturnValue({
-      data: stopsByCityData,
-      isLoading: false,
-      error: null
-    })
-
-    mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
-      data: estimatedArrivalsData,
-      isError: false,
-      isLoading: false,
-      error: null
-    })
-
-    mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
-      data: realtimeNearStopsData,
-      isError: false,
-      isLoading: false,
-      error: null
-    })
-
-    mockUseGetRouteShapesByRouteQuery.mockReturnValue({
-      data: [],
-      isLoading: false,
-      error: null
-    })
+    resetRouteMocks()
+    mockDefaultRouteQueries()
   })
 
   it('highlights the saved favorite stop after opening the route page from favorites', async () => {
-    render(
-      <MantineProvider>
-        <MemoryRouter
-          initialEntries={[{
-            pathname: '/routes/Taipei/route-1',
-            state: { favoriteRouteStop: targetFavoriteRouteStop }
-          }]}
-        >
-          <RouterRoutes>
-            <RouterRoute path="/routes/:city/:id" element={<Route />} />
-          </RouterRoutes>
-        </MemoryRouter>
-      </MantineProvider>
-    )
+    renderRoute(<Route />, {
+      path: '/routes/:city/:id',
+      initialEntries: [{
+        pathname: '/routes/Taipei/route-1',
+        state: { favoriteRouteStop: targetFavoriteRouteStop }
+      }]
+    })
 
     await waitFor(() => {
       expect(screen.getByText('市政府').closest('[data-highlighted="true"]')).toBeInTheDocument()
@@ -384,15 +351,10 @@ describe('Route', () => {
       error: null
     })
 
-    render(
-      <MantineProvider>
-        <MemoryRouter initialEntries={['/routes/Taipei/route-1']}>
-          <RouterRoutes>
-            <RouterRoute path="/routes/:city/:id" element={<Route />} />
-          </RouterRoutes>
-        </MemoryRouter>
-      </MantineProvider>
-    )
+    renderRoute(<Route />, {
+      path: '/routes/:city/:id',
+      initialEntries: ['/routes/Taipei/route-1']
+    })
 
     expect(screen.getByLabelText('返回路線列表')).toBeInTheDocument()
     expect(screen.queryByText('藍1')).not.toBeInTheDocument()
@@ -420,15 +382,10 @@ describe('Route', () => {
       }
     })
 
-    render(
-      <MantineProvider>
-        <MemoryRouter initialEntries={['/routes/Taipei/route-1']}>
-          <RouterRoutes>
-            <RouterRoute path="/routes/:city/:id" element={<Route />} />
-          </RouterRoutes>
-        </MemoryRouter>
-      </MantineProvider>
-    )
+    renderRoute(<Route />, {
+      path: '/routes/:city/:id',
+      initialEntries: ['/routes/Taipei/route-1']
+    })
 
     await waitFor(() => {
       expect(screen.getByText(routeRealtimeMessages.rateLimited.description)).toBeInTheDocument()
@@ -453,19 +410,14 @@ describe('Route', () => {
       }
     })
 
-    render(
-      <MantineProvider>
-        <MemoryRouter initialEntries={['/routes/Taipei/route-1']}>
-          <RouterRoutes>
-            <RouterRoute path="/routes/:city/:id" element={<Route />} />
-          </RouterRoutes>
-        </MemoryRouter>
-      </MantineProvider>
-    )
+    renderRoute(<Route />, {
+      path: '/routes/:city/:id',
+      initialEntries: ['/routes/Taipei/route-1']
+    })
 
     await waitFor(() => {
-      expect(screen.queryByText('即時公車資料暫時無法完整更新。')).not.toBeInTheDocument()
-      expect(screen.getByText('目前沒有可顯示的即時公車資訊，可能是已收班或上游暫時未提供完整資料。')).toBeInTheDocument()
+      expect(screen.queryByText(routeRealtimeMessages.error.description)).not.toBeInTheDocument()
+      expect(screen.getByText(routeRealtimeMessages.noRealtimeData.description)).toBeInTheDocument()
     })
   })
 
@@ -496,20 +448,15 @@ describe('Route', () => {
       error: null
     })
 
-    render(
-      <MantineProvider>
-        <MemoryRouter initialEntries={['/routes/Taipei/route-1']}>
-          <RouterRoutes>
-            <RouterRoute path="/routes/:city/:id" element={<Route />} />
-          </RouterRoutes>
-        </MemoryRouter>
-      </MantineProvider>
-    )
+    renderRoute(<Route />, {
+      path: '/routes/:city/:id',
+      initialEntries: ['/routes/Taipei/route-1']
+    })
 
     await waitFor(() => {
-      expect(screen.getByText('目前沒有營運班次')).toBeInTheDocument()
-      expect(screen.queryByText('即時公車資料暫時無法完整更新。')).not.toBeInTheDocument()
-      expect(screen.queryByText('目前沒有可顯示的即時公車資訊，可能是已收班或上游暫時未提供完整資料。')).not.toBeInTheDocument()
+      expect(screen.getByText(routeRealtimeMessages.noService.description)).toBeInTheDocument()
+      expect(screen.queryByText(routeRealtimeMessages.error.description)).not.toBeInTheDocument()
+      expect(screen.queryByText(routeRealtimeMessages.noRealtimeData.description)).not.toBeInTheDocument()
     })
   })
 
@@ -525,15 +472,10 @@ describe('Route', () => {
       dispatchEvent: vi.fn()
     }))
 
-    render(
-      <MantineProvider>
-        <MemoryRouter initialEntries={['/routes/Taipei/route-1']}>
-          <RouterRoutes>
-            <RouterRoute path="/routes/:city/:id" element={<Route />} />
-          </RouterRoutes>
-        </MemoryRouter>
-      </MantineProvider>
-    )
+    renderRoute(<Route />, {
+      path: '/routes/:city/:id',
+      initialEntries: ['/routes/Taipei/route-1']
+    })
 
     await waitFor(() => {
       expect(

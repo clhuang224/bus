@@ -10,6 +10,7 @@ export interface SearchInputPropType {
 export const SearchInput = (props: SearchInputPropType): ReactElement => {
   return (
     <Input
+      aria-label="搜尋公車路線"
       placeholder={'輸入關鍵字以搜尋路線、起點或終點'}
       leftSection={<RiSearchLine />}
       rightSection={props.value && (

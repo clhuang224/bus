@@ -1,35 +1,12 @@
 // @vitest-environment jsdom
 
-import '@testing-library/jest-dom/vitest'
-import { MantineProvider } from '@mantine/core'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { fireEvent, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeBusStatus'
+import { renderWithMantine } from '~/test/render'
 import { RouteStopList } from './RouteStopList'
-
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation((query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn()
-  }))
-})
-
-class ResizeObserverMock {
-  observe = vi.fn()
-  unobserve = vi.fn()
-  disconnect = vi.fn()
-}
-
-vi.stubGlobal('ResizeObserver', ResizeObserverMock)
 
 const favoriteRouteStop = {
   favoriteId: 'favorite-1',
@@ -62,30 +39,24 @@ const realtimeBus: RouteRealtimeBusStatus = {
 }
 
 describe('RouteStopList', () => {
-  afterEach(() => {
-    cleanup()
-  })
-
   it('selects a stop when the stop row is clicked', () => {
     const handleSelectStop = vi.fn()
     const handleToggleFavorite = vi.fn()
 
-    render(
-      <MantineProvider>
-        <RouteStopList
-          stops={[{
-            estimatedArrivalLabel: null,
-            id: 'stop-1',
-            favoriteRouteStop,
-            name: '市政府',
-            realtimeBuses: [],
-            sequence: 1,
-            isFavorite: false
-          }]}
-          onSelectStop={handleSelectStop}
-          onToggleFavorite={handleToggleFavorite}
-        />
-      </MantineProvider>
+    renderWithMantine(
+      <RouteStopList
+        stops={[{
+          estimatedArrivalLabel: null,
+          id: 'stop-1',
+          favoriteRouteStop,
+          name: '市政府',
+          realtimeBuses: [],
+          sequence: 1,
+          isFavorite: false
+        }]}
+        onSelectStop={handleSelectStop}
+        onToggleFavorite={handleToggleFavorite}
+      />
     )
 
     fireEvent.click(screen.getByText('市政府'))
@@ -98,22 +69,20 @@ describe('RouteStopList', () => {
     const handleSelectStop = vi.fn()
     const handleToggleFavorite = vi.fn()
 
-    render(
-      <MantineProvider>
-        <RouteStopList
-          stops={[{
-            estimatedArrivalLabel: null,
-            id: 'stop-1',
-            favoriteRouteStop,
-            name: '市政府',
-            realtimeBuses: [],
-            sequence: 1,
-            isFavorite: false
-          }]}
-          onSelectStop={handleSelectStop}
-          onToggleFavorite={handleToggleFavorite}
-        />
-      </MantineProvider>
+    renderWithMantine(
+      <RouteStopList
+        stops={[{
+          estimatedArrivalLabel: null,
+          id: 'stop-1',
+          favoriteRouteStop,
+          name: '市政府',
+          realtimeBuses: [],
+          sequence: 1,
+          isFavorite: false
+        }]}
+        onSelectStop={handleSelectStop}
+        onToggleFavorite={handleToggleFavorite}
+      />
     )
 
     fireEvent.click(screen.getByLabelText('收藏站牌路線'))
@@ -123,22 +92,20 @@ describe('RouteStopList', () => {
   })
 
   it('renders realtime buses inline with the stop timeline item', () => {
-    render(
-      <MantineProvider>
-        <RouteStopList
-          stops={[{
-            estimatedArrivalLabel: null,
-            id: 'stop-1',
-            favoriteRouteStop,
-            name: '市政府',
-            realtimeBuses: [realtimeBus],
-            sequence: 1,
-            isFavorite: false
-          }]}
-          onSelectStop={vi.fn()}
-          onToggleFavorite={vi.fn()}
-        />
-      </MantineProvider>
+    renderWithMantine(
+      <RouteStopList
+        stops={[{
+          estimatedArrivalLabel: null,
+          id: 'stop-1',
+          favoriteRouteStop,
+          name: '市政府',
+          realtimeBuses: [realtimeBus],
+          sequence: 1,
+          isFavorite: false
+        }]}
+        onSelectStop={vi.fn()}
+        onToggleFavorite={vi.fn()}
+      />
     )
 
     expect(screen.getByText('ABC-123')).toBeInTheDocument()
@@ -146,22 +113,20 @@ describe('RouteStopList', () => {
   })
 
   it('renders the nearest estimated arrival when there is no realtime bus marker', () => {
-    render(
-      <MantineProvider>
-        <RouteStopList
-          stops={[{
-            estimatedArrivalLabel: '6 分',
-            id: 'stop-1',
-            favoriteRouteStop,
-            name: '市政府',
-            realtimeBuses: [],
-            sequence: 1,
-            isFavorite: false
-          }]}
-          onSelectStop={vi.fn()}
-          onToggleFavorite={vi.fn()}
-        />
-      </MantineProvider>
+    renderWithMantine(
+      <RouteStopList
+        stops={[{
+          estimatedArrivalLabel: '6 分',
+          id: 'stop-1',
+          favoriteRouteStop,
+          name: '市政府',
+          realtimeBuses: [],
+          sequence: 1,
+          isFavorite: false
+        }]}
+        onSelectStop={vi.fn()}
+        onToggleFavorite={vi.fn()}
+      />
     )
 
     expect(screen.getByText('6 分')).toBeInTheDocument()

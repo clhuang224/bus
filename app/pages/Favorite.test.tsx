@@ -1,42 +1,15 @@
 // @vitest-environment jsdom
 
-import '@testing-library/jest-dom/vitest'
 import { configureStore } from '@reduxjs/toolkit'
-import { MantineProvider } from '@mantine/core'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { Provider } from 'react-redux'
-import { MemoryRouter } from 'react-router'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { fireEvent, screen } from '@testing-library/react'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { favoriteMessages } from '~/modules/consts/pageMessages'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import favoriteSlice from '~/modules/slices/favoriteSlice'
+import { renderWithProvidersAndRouter } from '~/test/render'
 import Favorite from './Favorite'
-
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: (query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: () => {},
-    removeListener: () => {},
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    dispatchEvent: () => false
-  })
-})
-
-class ResizeObserverMock {
-  observe = () => {}
-  unobserve = () => {}
-  disconnect = () => {}
-}
-
-Object.defineProperty(window, 'ResizeObserver', {
-  writable: true,
-  value: ResizeObserverMock
-})
 
 const favoriteRouteStops: FavoriteRouteStop[] = [
   {
@@ -126,15 +99,9 @@ function renderFavoritePage(routeStops: FavoriteRouteStop[] = favoriteRouteStops
     }
   })
 
-  return render(
-    <Provider store={store}>
-      <MantineProvider>
-        <MemoryRouter>
-          <Favorite />
-        </MemoryRouter>
-      </MantineProvider>
-    </Provider>
-  )
+  return renderWithProvidersAndRouter(<Favorite />, {
+    store
+  })
 }
 
 describe('Favorite', () => {
@@ -142,14 +109,10 @@ describe('Favorite', () => {
     localStorage.clear()
   })
 
-  afterEach(() => {
-    cleanup()
-  })
-
   it('shows the empty state when there are no favorite route stops', () => {
     renderFavoritePage([])
 
-    expect(screen.getByText('尚未收藏站牌路線')).toBeInTheDocument()
+    expect(screen.getByText(favoriteMessages.emptyFavoriteRouteStops.title)).toBeInTheDocument()
   })
 
   it('renders favorite route stops and links back to the route page', () => {
@@ -179,6 +142,6 @@ describe('Favorite', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '移除收藏站牌路線' }))
 
-    expect(screen.getByText('尚未收藏站牌路線')).toBeInTheDocument()
+    expect(screen.getByText(favoriteMessages.emptyFavoriteRouteStops.title)).toBeInTheDocument()
   })
 })

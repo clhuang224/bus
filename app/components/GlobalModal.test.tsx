@@ -1,10 +1,7 @@
 // @vitest-environment jsdom
 
-import '@testing-library/jest-dom/vitest'
-import { MantineProvider } from '@mantine/core'
 import { configureStore } from '@reduxjs/toolkit'
-import { fireEvent, render, screen } from '@testing-library/react'
-import { Provider } from 'react-redux'
+import { fireEvent, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { busApi } from '~/modules/apis/bus'
 import { tdxRateLimitModal } from '~/modules/apis/errors/busError'
@@ -12,21 +9,8 @@ import globalModalSlice, {
   closeGlobalModal,
   openGlobalModal
 } from '~/modules/slices/globalModalSlice'
+import { renderWithStore } from '~/test/render'
 import { GlobalModal } from './GlobalModal'
-
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation((query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn()
-  }))
-})
 
 function createTestStore() {
   return configureStore({
@@ -46,13 +30,7 @@ describe('GlobalModal', () => {
 
     store.dispatch(openGlobalModal(tdxRateLimitModal))
 
-    render(
-      <MantineProvider>
-        <Provider store={store}>
-          <GlobalModal />
-        </Provider>
-      </MantineProvider>
-    )
+    renderWithStore(<GlobalModal />, { store })
 
     expect(screen.getByText(tdxRateLimitModal.title)).toBeInTheDocument()
 
