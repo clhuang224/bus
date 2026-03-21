@@ -22,6 +22,7 @@ interface PropType {
   highlightedStopId?: string | null
   hasRealtimeError?: boolean
   isLoading?: boolean
+  isRealtimeRateLimited?: boolean
   realtimeInfoState?: RouteRealtimeInfoState
   isRealtimeLoading?: boolean
   listScrollBehavior?: ScrollLogicalPosition
@@ -35,6 +36,7 @@ export const RouteStopList = ({
   highlightedStopId = null,
   hasRealtimeError = false,
   isLoading = false,
+  isRealtimeRateLimited = false,
   realtimeInfoState = RouteRealtimeInfoState.NORMAL,
   isRealtimeLoading = false,
   listScrollBehavior = 'nearest',
@@ -59,15 +61,16 @@ export const RouteStopList = ({
     verticalAlignment: listScrollBehavior
   })
 
-  const realtimeMessage = isLoading
-    ? null
-    : isRealtimeLoading
-      ? routeRealtimeMessages.loading
-      : hasRealtimeError
-        ? routeRealtimeMessages.error
-        : realtimeInfoState !== RouteRealtimeInfoState.NORMAL
-          ? routeRealtimeMessages[realtimeInfoState]
-          : null
+  const realtimeMessage = (() => {
+    if (isLoading) return null
+    if (isRealtimeLoading) return routeRealtimeMessages.loading
+    if (isRealtimeRateLimited) return routeRealtimeMessages.rateLimited
+    if (hasRealtimeError) return routeRealtimeMessages.error
+    if (realtimeInfoState !== RouteRealtimeInfoState.NORMAL) {
+      return routeRealtimeMessages[realtimeInfoState]
+    }
+    return null
+  })()
 
   return (
     <Stack h="100%" gap="xs" style={{ minHeight: 0 }}>

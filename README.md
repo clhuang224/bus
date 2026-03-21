@@ -115,7 +115,9 @@ Current endpoints used by the app:
 
 The Route page polls `EstimatedTimeOfArrival` and `RealTimeNearStop` every 30 seconds while visible, so one active Route page generates about **4 requests per minute** under steady-state conditions.
 
-Actual request load can be higher during hard refreshes, reconnects, route changes, multiple open tabs, or upstream instability. Real-time features should therefore be treated as a best-effort integration with the upstream provider rather than a strict availability guarantee.
+The TDX bronze plan currently enforces a shared limit of **5 requests per second per key**. Because this app uses one proxy-backed key for all visitors, short bursts can still hit 429 responses during hard refreshes, reconnects, route changes, multiple open tabs, or periods with many concurrent users.
+
+In practice, this means route realtime data should be treated as a best-effort feature rather than a strict availability guarantee. When the shared limit is hit, the app may temporarily show a message that realtime data is unavailable or that too many people are querying at the same time, then retry automatically after a short delay.
 
 The Cloudflare Worker proxy also emits structured request logs for operational visibility.
 

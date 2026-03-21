@@ -5,6 +5,7 @@ import { MantineProvider } from '@mantine/core'
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route as RouterRoute, Routes as RouterRoutes } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { routeRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
@@ -430,7 +431,7 @@ describe('Route', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText('即時公車資料暫時無法完整更新。')).toBeInTheDocument()
+      expect(screen.getByText(routeRealtimeMessages.rateLimited.description)).toBeInTheDocument()
     })
   })
 

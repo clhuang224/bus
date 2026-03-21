@@ -9,6 +9,11 @@ export const routeRealtimeMessages = {
     title: '即時公車',
     description: '即時公車資料暫時無法完整更新。'
   },
+  rateLimited: {
+    color: 'orange',
+    title: '即時公車',
+    description: '目前同時查詢人數較多，即時公車資料會稍後自動重試。'
+  },
   noService: {
     color: 'blue',
     title: '營運狀態',

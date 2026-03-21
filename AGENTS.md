@@ -260,6 +260,15 @@ When handling API or query errors, prefer interpreting the error by its actual t
 
 Avoid `Boolean(error)` style checks when the UI behavior depends on the difference between those states.
 
+Because the deployed TDX proxy key is shared by all visitors, design request timing with the TDX per-key second-level limit in mind. Avoid route-detail request bursts that stack multiple realtime calls into the same second as large base-data requests when a small delay or staged startup would preserve the user experience.
+
+For route realtime specifically:
+
+- prefer delaying initial realtime requests slightly after the base route data has loaded instead of firing every route-detail request at once on first paint
+- when a realtime request receives `429`, prefer a short automatic backoff before retrying instead of immediately hammering the upstream again
+- use user-facing copy that clearly distinguishes "too many people are querying right now" from generic upstream outages or empty realtime data
+- reflect shared rate-limit caveats in `README.md` so deployers understand that concurrent usage can temporarily make realtime queries unavailable
+
 For local development, use the bundled Cloudflare Worker proxy with `VITE_PROXY_API_BASE_URL`. The default development flow should work through `pnpm run dev`, which starts both the app and the local Worker proxy.
 
 Treat both the TDX `client_secret` and the resulting bearer token as sensitive credentials. A GitHub Pages frontend must not be the long-term place where those credentials are exposed.
@@ -279,7 +288,7 @@ For TDX rate-limit planning, use the current `Route` page behavior as a rough ba
 - when the page is visible, that is roughly 4 requests per minute for one open `Route` page
 - extra traffic can still happen on reconnect, route changes, hard refresh, or multiple open tabs
 
-This means the free tier limit of `5 requests/minute/key` is too tight for sustained route-detail real-time usage, even before accounting for development refreshes or multiple users. In practice, a paid tier with per-second limits is the expected path once route real-time features are used regularly.
+This means the bronze-tier limit of `5 requests/second/key` can still be too tight for sustained route-detail real-time usage once hard refreshes, reconnects, and multiple concurrent users are factored in. In practice, request pacing and backoff are still necessary even on the paid per-second tier.
 
 ## 4. UI And Copy Rules
 

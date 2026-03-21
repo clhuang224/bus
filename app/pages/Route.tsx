@@ -46,6 +46,7 @@ export default function Route() {
     estimatedArrivalLabelsByStopSequence,
     hasRealtimeError,
     isRealtimeLoading,
+    isRealtimeRateLimited,
     realtimeBusesByStopSequence,
     realtimeBusStatuses,
     realtimeInfoState
@@ -174,6 +175,7 @@ export default function Route() {
                     hasRealtimeError={hasRealtimeError}
                     isLoading={isStopListLoading}
                     isRealtimeLoading={isRealtimeLoading}
+                    isRealtimeRateLimited={isRealtimeRateLimited}
                     listScrollBehavior={listScrollBehavior}
                     onSelectStop={handleSelectStopFromList}
                     realtimeInfoState={realtimeInfoState}
