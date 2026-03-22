@@ -335,7 +335,6 @@ describe('Route', () => {
 
     await waitFor(() => {
       expect(screen.getByText('市政府').closest('[data-highlighted="true"]')).toBeInTheDocument()
-      expect(screen.getByText('ABC-123')).toBeInTheDocument()
       expect(screen.getByText('4 分後到站')).toBeInTheDocument()
     })
   })
@@ -418,7 +417,7 @@ describe('Route', () => {
     })
   })
 
-  it('shows realtime vehicle info in the list even when bus positions are unavailable', async () => {
+  it('keeps stop ETA rendering available even when bus positions are unavailable', async () => {
     mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
       data: estimatedArrivalsData,
       isError: false,
@@ -441,7 +440,6 @@ describe('Route', () => {
     fireEvent.click(screen.getByRole('tab', { name: '返程' }))
 
     await waitFor(() => {
-      expect(screen.getByText('ABC-123')).toBeInTheDocument()
       expect(screen.getByText('4 分後到站')).toBeInTheDocument()
       expect(screen.queryByText(routeRealtimeMessages.noRealtimeData.description)).not.toBeInTheDocument()
     })
@@ -451,10 +449,10 @@ describe('Route', () => {
     mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
       data: [{
         ...estimatedArrivalsData[0],
-        RouteUID: 'subroute-1',
-        SubRouteUID: undefined,
-        SubRouteID: undefined,
-        SubRouteName: undefined
+        RouteUID: 'route-1',
+        SubRouteUID: 'route-1',
+        SubRouteID: 'route-1',
+        SubRouteName: { zh_TW: '藍1', en: 'Blue 1' }
       }],
       isError: false,
       isLoading: false,
@@ -473,7 +471,6 @@ describe('Route', () => {
     fireEvent.click(screen.getByRole('tab', { name: '返程' }))
 
     await waitFor(() => {
-      expect(screen.getByText('ABC-123')).toBeInTheDocument()
       expect(screen.getByText('4 分後到站')).toBeInTheDocument()
       expect(screen.queryByText('暫無預估')).not.toBeInTheDocument()
     })

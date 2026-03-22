@@ -1,5 +1,5 @@
 import { ActionIcon, Alert, Badge, Box, Group, ScrollArea, Skeleton, Stack, Text, Timeline } from '@mantine/core'
-import { RiBus2Fill, RiHeart2Fill, RiHeart2Line } from '@remixicon/react'
+import { RiHeart2Fill, RiHeart2Line } from '@remixicon/react'
 import { useRef } from 'react'
 import { routeRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
 import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
@@ -91,8 +91,6 @@ export const RouteStopList = ({
               {stops.map((stop) => {
                 const isHighlighted = stop.id === highlightedStopId
                 const isSelected = stop.id === selectedStopId
-                const hasRealtimeBus = stop.realtimeBuses.length > 0
-                const shouldShowEstimatedArrival = !hasRealtimeBus && stop.estimatedArrivalLabel
 
                 return (
                   <Timeline.Item
@@ -104,9 +102,7 @@ export const RouteStopList = ({
                         style={{
                           flex: '0 0 28px',
                           borderRadius: '50%',
-                          backgroundColor: hasRealtimeBus
-                            ? 'var(--mantine-color-orange-5)'
-                            : 'var(--mantine-color-gray-4)',
+                          backgroundColor: 'var(--mantine-color-gray-4)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -116,7 +112,7 @@ export const RouteStopList = ({
                           lineHeight: 1
                         }}
                       >
-                        {hasRealtimeBus ? <RiBus2Fill size={14} /> : stop.sequence}
+                        {stop.sequence}
                       </Box>
                     )}
                     title={(
@@ -137,28 +133,29 @@ export const RouteStopList = ({
                         style={{ borderRadius: 'var(--mantine-radius-sm)', cursor: 'pointer' }}
                         onClick={() => onSelectStop(stop.id)}
                       >
-                        <Group justify="space-between" align="center" wrap="nowrap">
-                          <Stack gap={4}>
-                            <Text fw={isHighlighted || isSelected ? 700 : undefined} c={isHighlighted ? 'blue.8' : undefined}>
+                        <Group justify="space-between" align="flex-start" wrap="nowrap">
+                          <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
+                            <Text
+                              fw={isHighlighted || isSelected ? 700 : undefined}
+                              c={isHighlighted ? 'blue.8' : undefined}
+                              style={{ minWidth: 0 }}
+                            >
                               {stop.name}
                             </Text>
-                            {shouldShowEstimatedArrival && (
+                            {stop.estimatedArrivalLabel && (
                               <Text size="xs" c="dimmed">
                                 {stop.estimatedArrivalLabel}
                               </Text>
                             )}
-                            {stop.realtimeBuses.map((bus) => (
-                              <Group key={bus.id} gap="xs" wrap="wrap">
-                                <Badge color="orange" variant="light" size="sm">
+                          </Stack>
+                          <Group pr="sm" gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
+                            <Group gap="xs" wrap="wrap" justify="flex-end">
+                              {stop.realtimeBuses.map((bus) => (
+                                <Badge key={bus.id} color="orange" variant="light" size="sm">
                                   {bus.plateNumb ?? '未提供車牌'}
                                 </Badge>
-                                <Text size="xs" c="orange.8">
-                                  {bus.estimateLabel}
-                                </Text>
-                              </Group>
-                            ))}
-                          </Stack>
-                          <Group pr="sm">
+                              ))}
+                            </Group>
                             <ActionIcon
                               variant="light"
                               color={stop.isFavorite ? 'pink' : 'gray'}

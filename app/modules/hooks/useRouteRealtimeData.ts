@@ -95,15 +95,34 @@ export function useRouteRealtimeData({
     setRealtimeStartDelayMs(REALTIME_RATE_LIMIT_BACKOFF_MS)
   }, [isRealtimeRateLimited])
 
-  const activeEstimatedArrivals = useMemo(() => estimatedArrivals.filter((estimatedArrival) => {
-    if (!activeSubRoute) return false
-    if (estimatedArrival.Direction !== activeSubRoute.Direction) return false
+  const directionMatchedEstimatedArrivals = useMemo(() => {
+    if (!activeSubRoute || !busRoute) return []
 
-    return (
-      estimatedArrival.SubRouteUID === activeSubRoute.SubRouteUID ||
-      estimatedArrival.RouteUID === activeSubRoute.SubRouteUID
+    return estimatedArrivals.filter((estimatedArrival) =>
+      estimatedArrival.Direction === activeSubRoute.Direction
     )
-  }), [activeSubRoute, estimatedArrivals])
+  }, [activeSubRoute, busRoute, estimatedArrivals])
+
+  const activeEstimatedArrivals = useMemo(() => {
+    if (!activeSubRoute || !busRoute) return []
+
+    const subRouteMatchedEstimatedArrivals = directionMatchedEstimatedArrivals.filter((estimatedArrival) =>
+      estimatedArrival.SubRouteUID === activeSubRoute.SubRouteUID
+    )
+
+    if (subRouteMatchedEstimatedArrivals.length > 0) {
+      return subRouteMatchedEstimatedArrivals
+    }
+
+    const routeLevelEstimatedArrivals = directionMatchedEstimatedArrivals.filter((estimatedArrival) =>
+      estimatedArrival.RouteUID === busRoute.RouteUID ||
+      estimatedArrival.SubRouteUID === busRoute.RouteUID
+    )
+
+    return routeLevelEstimatedArrivals.length > 0
+      ? routeLevelEstimatedArrivals
+      : directionMatchedEstimatedArrivals
+  }, [activeSubRoute, busRoute, directionMatchedEstimatedArrivals])
 
   const activeRealtimeNearStops = useMemo(() => realtimeNearStops.filter((realtimeNearStop) =>
     realtimeNearStop.SubRouteUID === activeSubRoute?.SubRouteUID &&
@@ -124,7 +143,7 @@ export function useRouteRealtimeData({
     }, new Map())
   }, [realtimeBusStatuses])
 
-  const estimatedArrivalLabelsByStopSequence = useMemo(() => {
+  const estimatedArrivalLabelsByStopKey = useMemo(() => {
     const sortedEstimatedArrivals = [...activeEstimatedArrivals].sort((left, right) => {
       const leftStopSequence = left.StopSequence ?? Number.POSITIVE_INFINITY
       const rightStopSequence = right.StopSequence ?? Number.POSITIVE_INFINITY
@@ -137,22 +156,19 @@ export function useRouteRealtimeData({
       return left.EstimateTime - right.EstimateTime
     })
 
-    return sortedEstimatedArrivals.reduce<Map<number, string>>((result, estimatedArrival) => {
-      if (estimatedArrival.StopSequence == null) {
-        return result
-      }
-
-      if (result.has(estimatedArrival.StopSequence)) {
-        return result
-      }
-
-      result.set(
-        estimatedArrival.StopSequence,
-        formatEstimatedArrivalLabel(
-          estimatedArrival.EstimateTime,
-          estimatedArrival.StopStatus
-        )
+    return sortedEstimatedArrivals.reduce<Map<string, string>>((result, estimatedArrival) => {
+      const estimatedArrivalLabel = formatEstimatedArrivalLabel(
+        estimatedArrival.EstimateTime,
+        estimatedArrival.StopStatus
       )
+
+      if (estimatedArrival.StopUID && !result.has(estimatedArrival.StopUID)) {
+        result.set(estimatedArrival.StopUID, estimatedArrivalLabel)
+      }
+
+      if (estimatedArrival.StopID && !result.has(estimatedArrival.StopID)) {
+        result.set(estimatedArrival.StopID, estimatedArrivalLabel)
+      }
 
       return result
     }, new Map())
@@ -215,7 +231,7 @@ export function useRouteRealtimeData({
 
   return {
     activeRoutePath,
-    estimatedArrivalLabelsByStopSequence,
+    estimatedArrivalLabelsByStopKey,
     hasRealtimeError,
     isRealtimeLoading: isEstimatedArrivalsLoading || isRealtimeNearStopsLoading,
     isRealtimeRateLimited,

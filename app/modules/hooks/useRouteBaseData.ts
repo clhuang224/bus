@@ -22,6 +22,7 @@ export interface RouteBaseTimelineStop {
   isFavorite: boolean
   name: string
   sequence: number
+  stopID: string
 }
 
 interface UseRouteBaseDataOptions {
@@ -160,6 +161,7 @@ export function useRouteBaseData({
         favoriteRouteStop,
         name: stop.StopName.zh_TW,
         sequence: stop.StopSequence,
+        stopID: stop.StopID,
         isFavorite: isFavoriteRouteStop(favoriteRouteStop.favoriteId)
       }
     })

@@ -91,11 +91,31 @@ describe('RouteStopList', () => {
     expect(handleSelectStop).not.toHaveBeenCalled()
   })
 
-  it('renders realtime buses inline with the stop timeline item', () => {
+  it('renders estimated arrival text for a stop', () => {
     renderWithMantine(
       <RouteStopList
         stops={[{
-          estimatedArrivalLabel: null,
+          estimatedArrivalLabel: '4 分後到站',
+          id: 'stop-1',
+          favoriteRouteStop,
+          name: '市政府',
+          realtimeBuses: [],
+          sequence: 1,
+          isFavorite: false
+        }]}
+        onSelectStop={vi.fn()}
+        onToggleFavorite={vi.fn()}
+      />
+    )
+
+    expect(screen.getByText('4 分後到站')).toBeInTheDocument()
+  })
+
+  it('renders realtime bus plate badges without replacing stop ETA text', () => {
+    renderWithMantine(
+      <RouteStopList
+        stops={[{
+          estimatedArrivalLabel: '6 分後到站',
           id: 'stop-1',
           favoriteRouteStop,
           name: '市政府',
@@ -109,26 +129,6 @@ describe('RouteStopList', () => {
     )
 
     expect(screen.getByText('ABC-123')).toBeInTheDocument()
-    expect(screen.getByText('4 分後到站')).toBeInTheDocument()
-  })
-
-  it('renders the nearest estimated arrival when there is no realtime bus marker', () => {
-    renderWithMantine(
-      <RouteStopList
-        stops={[{
-          estimatedArrivalLabel: '6 分後到站',
-          id: 'stop-1',
-          favoriteRouteStop,
-          name: '市政府',
-          realtimeBuses: [],
-          sequence: 1,
-          isFavorite: false
-        }]}
-        onSelectStop={vi.fn()}
-        onToggleFavorite={vi.fn()}
-      />
-    )
-
     expect(screen.getByText('6 分後到站')).toBeInTheDocument()
   })
 })

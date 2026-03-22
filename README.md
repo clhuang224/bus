@@ -23,8 +23,9 @@ The Route page combines stop lists, map interaction, and real-time transit data.
 
 - Official route shape data is used for more accurate route lines on the map when available.
 - The stop list and map stay in sync: selecting a stop in one view updates the other.
-- Each stop shows the nearest estimated arrival when upstream ETA data is available.
-- Real-time buses are displayed on both the route map and the stop timeline when live vehicle data is available.
+- Each stop shows stop-level ETA based directly on `EstimatedTimeOfArrival` when upstream ETA data is available.
+- Real-time vehicle plates are shown as separate location cues in the stop list and do not define the stop ETA.
+- Real-time buses are displayed on the route map when live vehicle data is available.
 - The app shows real-time status messaging such as temporary data issues or non-operating service periods.
 
 ### Nearby Stops
@@ -112,8 +113,8 @@ Current endpoints used by the app:
 | `GET` | `/Route/City/:city` | Route search, route detail, and area-level route fan-out requests | Route-level data including subroutes, operators, departure stop names, and destination stop names |
 | `GET` | `/StopOfRoute/City/:city` | Route detail and building stop-to-route relationships for nearby stops | Stops under each route plus subroute and direction-specific stop sequences |
 | `GET` | `/Stop/City/:city` | Nearby page stop discovery and route map stop positions | Stop positions and metadata used to group nearby stops into stations |
-| `GET` | `/EstimatedTimeOfArrival/City/:city` | Route detail realtime ETA | Stop-level estimated arrival times and operating status |
-| `GET` | `/RealTimeNearStop/City/:city` | Route detail realtime vehicles | Live vehicle positions and nearest stop information |
+| `GET` | `/EstimatedTimeOfArrival/City/:city` | Route detail stop-level ETA | Stop-level estimated arrival times and operating status used for the stop list ETA view |
+| `GET` | `/RealTimeNearStop/City/:city` | Route detail realtime vehicle location cues | Live vehicle positions and nearest stop information used for map vehicles and stop-list plate badges |
 | `GET` | `/Shape/City/:city` | Route detail map path rendering | Official route geometry for map line rendering |
 
 ### Real-time Capacity Notes
