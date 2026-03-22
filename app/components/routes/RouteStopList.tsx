@@ -1,6 +1,7 @@
 import { ActionIcon, Alert, Badge, Box, Group, ScrollArea, Skeleton, Stack, Text, Timeline } from '@mantine/core'
 import { RiHeart2Fill, RiHeart2Line } from '@remixicon/react'
 import { useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { routeRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
 import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
 import { useScrollSelectedItem } from '~/modules/hooks/useScrollSelectedItem'
@@ -45,6 +46,7 @@ export const RouteStopList = ({
   selectedStopId = null,
   stops
 }: PropType) => {
+  const { t } = useTranslation()
   const stopItemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
 
   useScrollSelectedItem({
@@ -152,7 +154,7 @@ export const RouteStopList = ({
                             <Group gap="xs" wrap="wrap" justify="flex-end">
                               {stop.realtimeBuses.map((bus) => (
                                 <Badge key={bus.id} color="orange" variant="light" size="sm">
-                                  {bus.plateNumb ?? '未提供車牌'}
+                                  {bus.plateNumb ?? t('components.routeStopList.missingPlate')}
                                 </Badge>
                               ))}
                             </Group>
@@ -160,7 +162,9 @@ export const RouteStopList = ({
                               variant="light"
                               color={stop.isFavorite ? 'pink' : 'gray'}
                               radius="50%"
-                              aria-label={stop.isFavorite ? '取消收藏站牌路線' : '收藏站牌路線'}
+                              aria-label={stop.isFavorite
+                                ? t('components.routeStopList.removeFavoriteAriaLabel')
+                                : t('components.routeStopList.addFavoriteAriaLabel')}
                               onClick={(event) => {
                                 event.stopPropagation()
                                 onToggleFavorite(stop.favoriteRouteStop)

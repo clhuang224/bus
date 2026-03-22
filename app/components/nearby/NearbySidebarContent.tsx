@@ -1,6 +1,7 @@
 import { Accordion, AccordionControl, AccordionItem, AccordionPanel, ActionIcon, Flex, ScrollArea, Skeleton, Stack, Text, Title } from '@mantine/core'
 import { RiArrowLeftSLine } from '@remixicon/react'
 import type { RefObject } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BaseAlert } from '~/components/common/BaseAlert'
 import { SkeletonList } from '~/components/common/SkeletonList'
 import { cityMapName } from '~/modules/consts/city'
@@ -37,34 +38,44 @@ interface PropType {
   message: AlertMessageConfig | null
 }
 
-const NearbySidebarContentDetail = ({ detailState }: { detailState: NearbySidebarDetailState }) => (
-  <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
-    <Flex gap="xs" align="center">
-      <ActionIcon onClick={detailState.onBack}>
-        <RiArrowLeftSLine size={18} />
-      </ActionIcon>
-      <Title order={4}>{detailState.stopGroup!.StopName.zh_TW}</Title>
-    </Flex>
+const NearbySidebarContentDetail = ({ detailState }: { detailState: NearbySidebarDetailState }) => {
+  const { t } = useTranslation()
+
+  return (
     <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
-      <Stack gap={2}>
-        <Text size="sm" c="dimmed">縣市</Text>
-        <Text size="sm">
-          {detailState.stopGroup!.City ? cityMapName[detailState.stopGroup!.City] : '未提供'}
-        </Text>
+      <Flex gap="xs" align="center">
+        <ActionIcon
+          aria-label={t('components.nearbySidebarContent.backAriaLabel')}
+          onClick={detailState.onBack}
+        >
+          <RiArrowLeftSLine size={18} />
+        </ActionIcon>
+        <Title order={4}>{detailState.stopGroup!.StopName.zh_TW}</Title>
+      </Flex>
+      <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
+        <Stack gap={2}>
+          <Text size="sm" c="dimmed">{t('components.nearbyStopDetail.cityLabel')}</Text>
+          <Text size="sm">
+            {detailState.stopGroup!.City
+              ? cityMapName[detailState.stopGroup!.City]
+              : t('components.nearbyStopDetail.notProvided')}
+          </Text>
+        </Stack>
+        <Stack gap={2}>
+          <Text size="sm" c="dimmed">{t('components.nearbyStopDetail.addressLabel')}</Text>
+          <Text size="sm">
+            {Array.from(new Set(detailState.stopGroup!.stops.map((stop) => stop.StopAddress).filter(Boolean))).join('、') ||
+              t('components.nearbyStopDetail.notProvided')}
+          </Text>
+        </Stack>
+        <NearbyStopRoutes
+          routes={detailState.stationRoutes}
+          isLoading={detailState.isStationRoutesLoading}
+        />
       </Stack>
-      <Stack gap={2}>
-        <Text size="sm" c="dimmed">地址</Text>
-        <Text size="sm">
-          {Array.from(new Set(detailState.stopGroup!.stops.map((stop) => stop.StopAddress).filter(Boolean))).join('、') || '未提供'}
-        </Text>
-      </Stack>
-      <NearbyStopRoutes
-        routes={detailState.stationRoutes}
-        isLoading={detailState.isStationRoutesLoading}
-      />
     </Stack>
-  </Stack>
-)
+  )
+}
 
 const NearbySidebarContentList = ({ listState }: { listState: NearbySidebarListState }) => (
   <ScrollArea

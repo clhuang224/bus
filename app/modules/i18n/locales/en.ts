@@ -29,9 +29,24 @@ export const en = {
         removeAriaLabel: 'Remove favorite route stop',
         terminalLabel: 'Terminals'
       },
+      routeStopList: {
+        addFavoriteAriaLabel: 'Save route stop',
+        removeFavoriteAriaLabel: 'Remove saved route stop',
+        missingPlate: 'Plate unavailable'
+      },
       mapSidebarLayout: {
         openNearbyStops: 'Open nearby stops list',
         openRouteList: 'Open route list'
+      },
+      nearbyStopDetail: {
+        cityLabel: 'City',
+        addressLabel: 'Address',
+        routesLabel: 'Routes',
+        notProvided: 'Not provided',
+        viewRoutesAriaLabel: 'View routes for {{stopName}}'
+      },
+      nearbySidebarContent: {
+        backAriaLabel: 'Back to nearby stops list'
       }
     },
     routePage: {

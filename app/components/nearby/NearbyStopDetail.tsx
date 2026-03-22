@@ -1,5 +1,6 @@
 import { ActionIcon, Flex, Skeleton, Stack, Text } from '@mantine/core'
 import { RiArrowRightSLine } from '@remixicon/react'
+import { useTranslation } from 'react-i18next'
 import { AppBadge } from '~/components/common/AppBadge'
 import { cityMapName } from '~/modules/consts/city'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
@@ -20,27 +21,32 @@ export const NearbyStopDetail = ({
   onViewRoutes,
   displayMode = 'content'
 }: PropType) => {
+  const { t } = useTranslation()
+
   if (displayMode === 'title') {
     return <Text>{stopGroup.StopName.zh_TW}</Text>
   }
 
   const detailSections = [
     {
-      label: '縣市',
-      content: (
-        <Text size="sm">{stopGroup.City ? cityMapName[stopGroup.City] : '未提供'}</Text>
-      )
-    },
-    {
-      label: '地址',
+      label: t('components.nearbyStopDetail.cityLabel'),
       content: (
         <Text size="sm">
-          {Array.from(new Set(stopGroup.stops.map((stop) => stop.StopAddress).filter(Boolean))).join('、') || '未提供'}
+          {stopGroup.City ? cityMapName[stopGroup.City] : t('components.nearbyStopDetail.notProvided')}
         </Text>
       )
     },
     {
-      label: '路線',
+      label: t('components.nearbyStopDetail.addressLabel'),
+      content: (
+        <Text size="sm">
+          {Array.from(new Set(stopGroup.stops.map((stop) => stop.StopAddress).filter(Boolean))).join('、') ||
+            t('components.nearbyStopDetail.notProvided')}
+        </Text>
+      )
+    },
+    {
+      label: t('components.nearbyStopDetail.routesLabel'),
       content: isRoutesLoading
         ? (
           <Flex gap="xs" wrap="wrap" data-testid="nearby-stop-routes-skeleton">
@@ -74,7 +80,7 @@ export const NearbyStopDetail = ({
       ))}
       <ActionIcon
         ml="auto"
-        aria-label={`查看 ${stopGroup.StopName.zh_TW} 路線`}
+        aria-label={t('components.nearbyStopDetail.viewRoutesAriaLabel', { stopName: stopGroup.StopName.zh_TW })}
         onClick={() => onViewRoutes(stopGroup.StationID)}
       >
         <RiArrowRightSLine size={18}/>

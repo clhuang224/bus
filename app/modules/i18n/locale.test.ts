@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { DEFAULT_APP_LOCALE } from '../consts/i18n'
 import { AppLocaleType } from '../enums/AppLocaleType'
-import { getLocaleFromStorage } from './locale'
+import { getLocaleFromStorage, setLocaleInStorage } from './locale'
 
 describe('getLocaleFromStorage', () => {
   it('returns the stored locale when it is supported', () => {
@@ -20,5 +20,13 @@ describe('getLocaleFromStorage', () => {
     expect(getLocaleFromStorage({
       getItem: () => null
     })).toBe(DEFAULT_APP_LOCALE)
+  })
+
+  it('persists the selected locale to storage', () => {
+    const setItem = vi.fn()
+
+    setLocaleInStorage({ setItem }, AppLocaleType.EN)
+
+    expect(setItem).toHaveBeenCalledWith('appLocale', AppLocaleType.EN)
   })
 })

@@ -4,6 +4,7 @@ import { fireEvent, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
+import i18n from '~/modules/i18n'
 import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeBusStatus'
 import { renderWithMantine } from '~/test/render'
 import { RouteStopList } from './RouteStopList'
@@ -85,7 +86,7 @@ describe('RouteStopList', () => {
       />
     )
 
-    fireEvent.click(screen.getByLabelText('收藏站牌路線'))
+    fireEvent.click(screen.getByLabelText(i18n.t('components.routeStopList.addFavoriteAriaLabel')))
 
     expect(handleToggleFavorite).toHaveBeenCalledWith(favoriteRouteStop)
     expect(handleSelectStop).not.toHaveBeenCalled()

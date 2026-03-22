@@ -25,3 +25,10 @@ export function getInitialAppLocale(): AppLocaleType {
 export function getLocaleFromStorage(storage: Pick<Storage, 'getItem'>): AppLocaleType {
   return readStoredLocale(storage)
 }
+
+export function setLocaleInStorage(
+  storage: Pick<Storage, 'setItem'>,
+  locale: AppLocaleType
+) {
+  storage.setItem(APP_LOCALE_STORAGE_KEY, locale)
+}

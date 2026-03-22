@@ -2,6 +2,7 @@
 
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import i18n from '~/modules/i18n'
 import { routeRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
@@ -358,7 +359,7 @@ describe('Route', () => {
 
     renderRoutePage()
 
-    expect(screen.getByLabelText('返回路線列表')).toBeInTheDocument()
+    expect(screen.getByLabelText(i18n.t('routePage.backToRoutes'))).toBeInTheDocument()
     expect(screen.queryByText('藍1')).not.toBeInTheDocument()
     expect(screen.queryByText('載入中')).not.toBeInTheDocument()
   })

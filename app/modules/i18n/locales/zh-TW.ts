@@ -29,9 +29,24 @@ export const zhTW = {
         removeAriaLabel: '移除收藏站牌路線',
         terminalLabel: '起訖站'
       },
+      routeStopList: {
+        addFavoriteAriaLabel: '收藏站牌路線',
+        removeFavoriteAriaLabel: '取消收藏站牌路線',
+        missingPlate: '未提供車牌'
+      },
       mapSidebarLayout: {
         openNearbyStops: '開啟附近站牌列表',
         openRouteList: '開啟路線列表'
+      },
+      nearbyStopDetail: {
+        cityLabel: '縣市',
+        addressLabel: '地址',
+        routesLabel: '路線',
+        notProvided: '未提供',
+        viewRoutesAriaLabel: '查看 {{stopName}} 路線'
+      },
+      nearbySidebarContent: {
+        backAriaLabel: '返回附近站牌列表'
       }
     },
     routePage: {
