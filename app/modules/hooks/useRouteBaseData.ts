@@ -47,7 +47,6 @@ export function useRouteBaseData({
 }: UseRouteBaseDataOptions) {
   const { t } = useTranslation()
   const cityName = city as CityNameType
-  const routeMessages = getRouteMessages(t)
 
   const { data: routeData = [], isLoading: isRoutesLoading, error: routesError } = busApi.useGetRoutesByCityQuery(
     cityName,
@@ -205,11 +204,11 @@ export function useRouteBaseData({
   const error = routesError || stopOfRoutesError || stopsError
 
   const message = useMemo(() => {
-    if (error) return routeMessages.loadRouteError
-    if (!busRoute || routeTabs.length === 0) return routeMessages.emptyRoute
+    if (error) return getRouteMessages(t).loadRouteError
+    if (!busRoute || routeTabs.length === 0) return getRouteMessages(t).emptyRoute
 
     return null
-  }, [busRoute, error, routeTabs.length])
+  }, [busRoute, error, routeTabs.length, t])
 
   return {
     activeSubRoute,

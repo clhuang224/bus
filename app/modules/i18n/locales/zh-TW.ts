@@ -27,7 +27,8 @@ export const zhTW = {
       },
       favoriteRouteStopCard: {
         removeAriaLabel: '移除收藏站牌路線',
-        terminalLabel: '起訖站'
+        terminalLabel: '起訖站',
+        terminal: '{{departure}} → {{destination}}'
       },
       routeStopList: {
         addFavoriteAriaLabel: '收藏站牌路線',

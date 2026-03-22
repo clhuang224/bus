@@ -16,6 +16,7 @@ import { GlobalModal } from './components/GlobalModal'
 import i18n from './modules/i18n'
 
 import '@mantine/core/styles.css'
+import { DEFAULT_APP_LOCALE } from './modules/consts/i18n'
 
 export const links: Route.LinksFunction = () => [
   { rel: 'icon', href: './favicon.svg', type: 'image/svg+xml' },
@@ -34,7 +35,7 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="zh-TW">
+    <html lang={DEFAULT_APP_LOCALE}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />

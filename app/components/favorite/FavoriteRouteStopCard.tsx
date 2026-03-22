@@ -52,9 +52,10 @@ export const FavoriteRouteStopCard = ({ favoriteRouteStop, onRemove }: PropType)
                 {favoriteRouteStop.stopSequence}. {favoriteRouteStop.stopName}
               </Text>
               <Text size="xs" c="dimmed">
-                {t('components.favoriteRouteStopCard.terminalLabel')}:
-                {' '}
-                {favoriteRouteStop.departure} → {favoriteRouteStop.destination}
+                {t('components.favoriteRouteStopCard.terminal', {
+                  departure: favoriteRouteStop.departure,
+                  destination: favoriteRouteStop.destination
+                })}
               </Text>
             </Stack>
           </Box>

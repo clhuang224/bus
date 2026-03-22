@@ -141,7 +141,9 @@ describe('Favorite', () => {
   it('removes a favorite route stop from the page', () => {
     renderFavoritePage()
 
-    fireEvent.click(screen.getByRole('button', { name: '移除收藏站牌路線' }))
+    fireEvent.click(
+      screen.getByRole('button', { name: i18n.t('components.favoriteRouteStopCard.removeAriaLabel') })
+    )
 
     expect(screen.getByText(getFavoriteMessages(i18n.t).emptyFavoriteRouteStops.title)).toBeInTheDocument()
   })

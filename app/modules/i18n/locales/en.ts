@@ -27,7 +27,8 @@ export const en = {
       },
       favoriteRouteStopCard: {
         removeAriaLabel: 'Remove favorite route stop',
-        terminalLabel: 'Terminals'
+        terminalLabel: 'Terminals',
+        terminal: '{{departure}} → {{destination}}'
       },
       routeStopList: {
         addFavoriteAriaLabel: 'Save route stop',

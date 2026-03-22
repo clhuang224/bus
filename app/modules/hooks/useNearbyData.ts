@@ -156,9 +156,6 @@ export function useNearbyData({
   const { t } = useTranslation()
   const { coords, error: geolocationError, permission } = useSelector((state: RootState) => state.geolocation)
   const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
-  const geoPermissionMessages = getGeoPermissionMessages(t)
-  const geoErrorMessages = getGeoErrorMessages(t)
-  const nearbyMessages = getNearbyMessages(t)
   const currentCity = getCityByCoords(coords, geojson)
   const currentArea = currentCity ? cityMapArea[currentCity] : null
   const isNearbyDisabled = disabledNearbyPermissions.includes(permission) || geolocationError !== null
@@ -208,14 +205,14 @@ export function useNearbyData({
 
   const message = useMemo(() => {
     if ([GeoPermissionType.UNSUPPORTED, GeoPermissionType.DENIED].includes(permission)) {
-      return geoPermissionMessages[permission]
+      return getGeoPermissionMessages(t)[permission]
     }
-    if (geolocationError) return geoErrorMessages[geolocationError]
-    if (stopsError) return nearbyMessages.loadStopsError
-    if (nearbyStopGroups.length === 0) return nearbyMessages.emptyStops
+    if (geolocationError) return getGeoErrorMessages(t)[geolocationError]
+    if (stopsError) return getNearbyMessages(t).loadStopsError
+    if (nearbyStopGroups.length === 0) return getNearbyMessages(t).emptyStops
 
     return null
-  }, [permission, geolocationError, stopsError, nearbyStopGroups])
+  }, [permission, geolocationError, stopsError, nearbyStopGroups, t])
 
   const selectedStopGroup = useMemo(() => {
     if (!selectedRouteStopId) return null

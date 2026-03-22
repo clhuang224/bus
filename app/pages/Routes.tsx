@@ -47,7 +47,6 @@ export default function Routes() {
   const { coords } = useSelector((state: RootState) => state.geolocation)
   const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
   const { keyword, selectedArea } = useSelector((state: RootState) => state.routeSearch)
-  const searchMessages = getSearchMessages(t)
   const currentArea = getAreaByCoords(coords, geojson)
   const area = selectedArea ?? currentArea ?? AreaType.TAIPEI
   const { data: routeData = [], isLoading, error } = busApi.useGetRoutesByAreaQuery(area)
@@ -74,11 +73,11 @@ export default function Routes() {
   ))
 
   const message = useMemo(() => {
-    if (error) return searchMessages.loadRoutesError
-    if (filteredRoutes.length === 0) return searchMessages.emptyRoutes
+    if (error) return getSearchMessages(t).loadRoutesError
+    if (filteredRoutes.length === 0) return getSearchMessages(t).emptyRoutes
 
     return null
-  }, [error, filteredRoutes.length])
+  }, [error, filteredRoutes.length, t])
 
   return (
     <Flex justify="center" h="100%">
