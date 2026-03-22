@@ -25,6 +25,7 @@ The current product structure is page-driven:
 - `Routes`: search-based route discovery
 - `Nearby`: nearby stop discovery based on geolocation
 - `Route`: route detail view
+- `Settings`: app preferences such as language selection
 
 At a high level, most features follow this flow:
 
@@ -53,6 +54,7 @@ Current examples:
 - `Routes.tsx`: route search flow
 - `Nearby.tsx`: geolocation and nearby stop flow
 - `Route.tsx`: route detail page
+- `Settings.tsx`: app settings flow
 
 ### `app/components/`
 
@@ -189,6 +191,7 @@ Current route structure:
 - `/routes` -> `Routes`
 - `/routes/:city/:id` -> `Route`
 - `/nearby` -> `Nearby`
+- `/settings` -> `Settings`
 
 When adding a new page, define the route in `app/routes.ts` and place the page component under `app/pages/`.
 
@@ -211,6 +214,8 @@ Use the store for:
 - data that needs central coordination
 
 Do not push local rendering state into Redux unless there is a strong reason.
+
+Locale selection is a valid Redux use case in this project because it is app-wide state that affects navigation, page copy, and document-level metadata.
 
 This project should also follow Redux Toolkit and RTK Query conventions wherever practical.
 
@@ -309,12 +314,25 @@ Use English for developer-facing console output such as:
 - `console.error`
 - logs
 
-Use Traditional Chinese for user-facing UI copy such as:
+Use Traditional Chinese as the default source language for user-facing UI copy such as:
 
 - alerts
 - empty states
 - inline warnings
 - buttons, labels, and helper text shown to users
+
+For translatable UI copy, do not hard-code those strings directly in pages or shared components. Prefer `react-i18next` translation keys and keep the source strings in `app/modules/i18n/locales/`.
+
+Current app locale rules:
+
+- supported locales are currently limited to `zh-TW` and `en`
+- default locale is `zh-TW`
+- locale state lives in Redux
+- locale persistence lives in `localStorage`
+- `AppI18nProvider` is responsible for syncing the active locale to both `i18n` and `document.documentElement.lang`
+- when adding new translatable static copy, prefer extending the existing locale resource shape instead of creating one-off local translation objects
+
+For TDX-backed localized text such as route names, stop names, departure labels, or destination labels, do not assume `.zh_TW` is always the rendered field going forward. Follow the current i18n rollout plan and keep locale-aware access explicit and readable as those screens migrate.
 
 ### UI Structure
 

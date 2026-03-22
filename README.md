@@ -46,6 +46,13 @@ The Favorites page stores route-stop combinations for quick access.
 - Each favorite keeps the route, subroute, direction, and a specific stop.
 - Opening a favorite jumps back into the matching Route page and highlights the saved stop.
 
+### Language Settings
+
+The app currently supports both `zh-TW` and `en`.
+
+- Users can switch the interface language from the Settings page.
+- The selected language is saved in local storage and restored on the next visit.
+
 ## Tech Stack
 
 - **Framework:** React SPA with React Router v7
@@ -65,33 +72,25 @@ The app is organized around route-level pages, feature components, and shared do
 
 ```text
 app/
-├── components/
-│   ├── AppNavLink.tsx   # Shared app navigation link
-│   ├── AreaSelect.tsx   # Area picker
-│   ├── GlobalModal.tsx  # App-wide modal renderer
-│   ├── SearchInput.tsx  # Shared search input
-│   ├── common/          # Shared UI components
-│   ├── favorite/        # Favorite feature components
-│   ├── nearby/          # Nearby feature components
-│   ├── providers/       # App providers
-│   └── routes/          # Route feature components
+├── components/        # Shared and feature UI
 ├── modules/
-│   ├── apis/            # RTK Query APIs
-│   ├── consts/          # Constant maps and UI copy
-│   ├── enums/           # Domain enums
-│   ├── hooks/           # Reusable app hooks
-│   ├── interfaces/      # Domain and API object models
-│   ├── slices/          # Redux slices
-│   ├── types/           # Shared type helpers
-│   ├── utils/           # Shared helpers
-│   └── store.ts         # Redux store
-├── pages/               # Route page modules
-├── test/                # Shared test setup and render helpers
-├── root.tsx             # App root
-└── routes.ts            # Route definitions
+│   ├── apis/          # RTK Query APIs
+│   ├── consts/        # Shared constants and UI copy
+│   ├── enums/         # Domain enums
+│   ├── hooks/         # Reusable hooks
+│   ├── i18n/          # Locale setup and translation resources
+│   ├── interfaces/    # Domain and API models
+│   ├── slices/        # Redux slices
+│   ├── types/         # Shared type helpers
+│   ├── utils/         # Shared helpers
+│   └── store.ts       # Redux store
+├── pages/             # Route pages, including Favorite, Routes, Nearby, Route, and Settings
+├── test/              # Shared test setup and render helpers
+├── root.tsx           # App root
+└── routes.ts          # Route definitions
 
 workers/
-└── tdx-proxy/           # Cloudflare Worker proxy
+└── tdx-proxy/         # Cloudflare Worker proxy
 ```
 
 ## Open Data
@@ -100,32 +99,29 @@ The project relies on two external open data sources.
 
 ### TDX Bus API
 
-Base URL:
-
 `https://tdx.transportdata.tw/api/basic/v2/Bus`
 
-TDX, short for Transport Data eXchange, provides the route, stop, realtime, and shape data used by this app. Requests go through a Cloudflare Worker proxy that handles TDX authentication for the frontend.
+TDX, short for Transport Data eXchange, provides the route, stop, realtime, and shape data used by this app. Frontend requests go through a Cloudflare Worker proxy that handles TDX authentication.
 
-Current endpoints used by the app:
+The app uses TDX data for:
 
-| Method | Endpoint | Used For | Response Summary |
-| --- | --- | --- | --- |
-| `GET` | `/Route/City/:city` | Route search, route detail, and area-level route fan-out requests | Route-level data including subroutes, operators, departure stop names, and destination stop names |
-| `GET` | `/StopOfRoute/City/:city` | Route detail and building stop-to-route relationships for nearby stops | Stops under each route plus subroute and direction-specific stop sequences |
-| `GET` | `/Stop/City/:city` | Nearby page stop discovery and route map stop positions | Stop positions and metadata used to group nearby stops into stations |
-| `GET` | `/EstimatedTimeOfArrival/City/:city` | Route detail stop-level ETA | Stop-level estimated arrival times and operating status used for the stop list ETA view |
-| `GET` | `/RealTimeNearStop/City/:city` | Route detail realtime vehicle location cues | Live vehicle positions and nearest stop information used for map vehicles and stop-list plate badges |
-| `GET` | `/Shape/City/:city` | Route detail map path rendering | Official route geometry for map line rendering |
+- route search and route detail lookups
+- stop and station discovery for nearby views
+- stop-level ETA and realtime vehicle location
+- official route shape rendering on maps
 
-### Real-time Capacity Notes
+Current endpoint usage:
 
-The Route page polls `EstimatedTimeOfArrival` and `RealTimeNearStop` every 30 seconds while visible, so one active Route page generates about **4 requests per minute** under steady-state conditions.
+| Endpoint | Used For |
+| --- | --- |
+| `/Route/City/:city` | route search and route detail |
+| `/StopOfRoute/City/:city` | route stop lists and nearby route relationships |
+| `/Stop/City/:city` | nearby stop discovery and map stop positions |
+| `/EstimatedTimeOfArrival/City/:city` | stop-level ETA |
+| `/RealTimeNearStop/City/:city` | realtime vehicle positions and stop-list vehicle cues |
+| `/Shape/City/:city` | route map path rendering |
 
-The TDX bronze plan currently enforces a shared limit of **5 requests per second per key**. Because this app uses one proxy-backed key for all visitors, short bursts can still hit 429 responses during hard refreshes, reconnects, route changes, multiple open tabs, or periods with many concurrent users.
-
-In practice, this means route realtime data should be treated as a best-effort feature rather than a strict availability guarantee. When the shared limit is hit, the app may temporarily show a message that realtime data is unavailable or that too many people are querying at the same time, then retry automatically after a short delay.
-
-The Cloudflare Worker proxy also emits structured request logs for operational visibility.
+Realtime data is best-effort and may be temporarily unavailable when the shared proxy-backed key hits upstream rate limits.
 
 ### Taiwan County Boundaries
 
