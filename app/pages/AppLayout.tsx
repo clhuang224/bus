@@ -97,7 +97,8 @@ export default function AppLayout () {
           </Flex>
           <Flex ml="auto">
             <AppNavLink
-              label={settingNav.name}
+              icon={settingNav.icon}
+              iconActive={settingNav.iconActive}
               to={settingNav.path}
             />
           </Flex>

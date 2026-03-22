@@ -4,7 +4,7 @@ import { Link, useMatch, useResolvedPath } from 'react-router'
 
 export interface AppNavLinkPropType {
   to: string
-	label: string
+	label?: string
 	icon?: ReactElement
 	iconActive?: ReactElement
 }
@@ -19,7 +19,7 @@ export const AppNavLink = (props: AppNavLinkPropType) => {
       to={props.to}
       label={(
         <Flex align="center" justify="center" direction="column">
-          {props.label}
+          {Boolean(props.label) && props.label}
           {props.icon && isActive ? props.iconActive : props.icon}
         </Flex>
       )}
