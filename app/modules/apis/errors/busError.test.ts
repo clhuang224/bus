@@ -4,7 +4,7 @@ import {
   getBusErrorModal,
   getTdxSystemErrorModal,
   getTdxUnauthorizedModal,
-  isTdxRateLimitError,
+  isTdxRateLimitError
 } from './busError'
 
 describe('getTdxHttpErrorStatus', () => {
