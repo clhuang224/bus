@@ -95,7 +95,11 @@ export const en = {
     components: {
       searchInput: {
         ariaLabel: 'Search bus routes',
-        placeholder: 'Search by route, departure stop, or destination'
+        placeholder: 'Search by route, departure stop, or destination',
+        clearAriaLabel: 'Clear search keyword'
+      },
+      areaSelect: {
+        ariaLabel: 'Choose area'
       },
       favoriteRouteStopCard: {
         removeAriaLabel: 'Remove favorite route stop',
@@ -111,10 +115,15 @@ export const en = {
         missingPlate: 'Plate unavailable'
       },
       routeMap: {
+        stopMarkerAriaLabel: '{{stopName}}, stop {{sequence}}',
+        vehicleMarkerAriaLabel: '{{plateNumb}}, recent stop {{stopName}}, estimated arrival {{estimateLabel}}',
         vehiclePopup: {
           recentStop: 'Recent stop',
           estimate: 'Estimated arrival'
         }
+      },
+      baseMap: {
+        userLocationMarkerAriaLabel: 'Current location'
       },
       mapSidebarLayout: {
         openNearbyStops: 'Open nearby stops list',
@@ -130,6 +139,9 @@ export const en = {
       nearbyStopRoutes: {
         title: 'Routes at this stop',
         empty: 'No route information is currently available for this stop'
+      },
+      nearbyStopMap: {
+        stopMarkerAriaLabel: 'Nearby stop {{stopName}}'
       },
       nearbySidebarContent: {
         backAriaLabel: 'Back to nearby stops list'

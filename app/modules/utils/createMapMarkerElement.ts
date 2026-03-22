@@ -1,6 +1,7 @@
 type MapMarkerType = 'stop' | 'vehicle' | 'user'
 
 interface CreateMapMarkerElementOptions {
+  ariaLabel?: string
   backgroundColor?: string
   boxShadow?: string
   datasetLabel?: string
@@ -42,6 +43,7 @@ const markerStyleMap: Record<MapMarkerType, Partial<CSSStyleDeclaration>> = {
 }
 
 export const createMapMarkerElement = ({
+  ariaLabel,
   backgroundColor,
   boxShadow,
   datasetLabel,
@@ -67,6 +69,10 @@ export const createMapMarkerElement = ({
 
   if (datasetLabel) {
     element.dataset.label = datasetLabel
+  }
+
+  if (ariaLabel) {
+    element.setAttribute('aria-label', ariaLabel)
   }
 
   if (textContent) {

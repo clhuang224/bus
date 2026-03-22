@@ -139,6 +139,10 @@ export const RouteMap = ({
     positionedStops.forEach((stop) => {
       const isHighlighted = stop.id === highlightedStopId
       const el = createMapMarkerElement({
+        ariaLabel: t('components.routeMap.stopMarkerAriaLabel', {
+          stopName: stop.name,
+          sequence: stop.sequence
+        }),
         backgroundColor: isHighlighted ? HIGHLIGHTED_STOP_COLOR : ROUTE_COLOR,
         datasetLabel: stop.name,
         textContent: String(stop.sequence),
@@ -162,7 +166,13 @@ export const RouteMap = ({
     })
 
     vehicles.forEach((vehicle) => {
+      const vehicleLabel = t('components.routeMap.vehicleMarkerAriaLabel', {
+        plateNumb: vehicle.plateNumb ?? t('components.routeStopList.missingPlate'),
+        stopName: vehicle.stopName,
+        estimateLabel: vehicle.estimateLabel
+      })
       const el = createMapMarkerElement({
+        ariaLabel: vehicleLabel,
         datasetLabel: [
           vehicle.plateNumb ?? t('components.routeStopList.missingPlate'),
           `${t('components.routeMap.vehiclePopup.recentStop')}: ${vehicle.stopName}`,

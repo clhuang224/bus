@@ -8,16 +8,18 @@ import i18n from '~/modules/i18n'
 
 vi.mock('@mantine/core', () => ({
   Select: ({
+    'aria-label': ariaLabel,
     value,
     data,
     onChange
   }: {
+    'aria-label'?: string
     value: string
     data: Array<{ label: string, value: string }>
     onChange: (value: string | null) => void
   }) => (
     <select
-      aria-label="area-select"
+      aria-label={ariaLabel}
       value={value}
       onChange={(event) => onChange(event.target.value)}
     >
@@ -41,7 +43,7 @@ describe('AreaSelect', () => {
       />
     )
 
-    fireEvent.change(screen.getByLabelText('area-select'), {
+    fireEvent.change(screen.getByLabelText(i18n.t('components.areaSelect.ariaLabel')), {
       target: { value: AreaType.TAICHUNG }
     })
 
@@ -57,7 +59,7 @@ describe('AreaSelect', () => {
       />
     )
 
-    const areaSelect = () => within(container).getByLabelText('area-select')
+    const areaSelect = () => within(container).getByLabelText(i18n.t('components.areaSelect.ariaLabel'))
 
     expect(areaSelect()).toHaveValue(AreaType.TAIPEI)
     expect((within(areaSelect()).getByRole('option', { name: i18n.t('common.area.Taipei') }) as HTMLOptionElement).selected).toBe(true)

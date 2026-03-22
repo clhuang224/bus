@@ -18,13 +18,19 @@ interface GlobalModalState {
 export type OpenGlobalModalPayload = Pick<GlobalModalState, 'title' | 'message' | 'variant'> &
   Partial<Pick<GlobalModalState, 'confirmText' | 'cancelText' | 'confirmAction'>>
 
+function getDefaultModalTexts() {
+  return {
+    confirmText: i18n.t('common.modal.confirm'),
+    cancelText: i18n.t('common.modal.cancel')
+  }
+}
+
 const initialState: GlobalModalState = {
   opened: false,
   title: '',
   message: '',
   variant: 'alert',
-  confirmText: i18n.t('common.modal.confirm'),
-  cancelText: i18n.t('common.modal.cancel'),
+  ...getDefaultModalTexts(),
   confirmAction: 'close'
 }
 
@@ -36,21 +42,23 @@ const globalModalSlice = createSlice({
       state,
       action: PayloadAction<OpenGlobalModalPayload>
     ) => {
+      const defaultTexts = getDefaultModalTexts()
       state.opened = true
       state.title = action.payload.title
       state.message = action.payload.message
       state.variant = action.payload.variant
-      state.confirmText = action.payload.confirmText ?? initialState.confirmText
-      state.cancelText = action.payload.cancelText ?? initialState.cancelText
+      state.confirmText = action.payload.confirmText ?? defaultTexts.confirmText
+      state.cancelText = action.payload.cancelText ?? defaultTexts.cancelText
       state.confirmAction = action.payload.confirmAction ?? initialState.confirmAction
     },
     closeGlobalModal: (state) => {
+      const defaultTexts = getDefaultModalTexts()
       state.opened = false
       state.title = initialState.title
       state.message = initialState.message
       state.variant = initialState.variant
-      state.confirmText = initialState.confirmText
-      state.cancelText = initialState.cancelText
+      state.confirmText = defaultTexts.confirmText
+      state.cancelText = defaultTexts.cancelText
       state.confirmAction = initialState.confirmAction
     }
   }

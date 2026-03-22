@@ -2,6 +2,7 @@ import mapLibre, { Marker, Popup } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import type { LngLat, LatLng } from '~/modules/types/CoordsType'
 import { createMapMarkerElement } from '~/modules/utils/createMapMarkerElement'
 import BaseMap from '../common/BaseMap'
@@ -27,6 +28,7 @@ export const NearbyStopMap = ({
   isSm = false,
   onSelectStop
 }: PropType) => {
+  const { t } = useTranslation()
   const [map, setMap] = useState<mapLibre.Map | null>(null)
   const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(null)
   const markerMap = useRef<Map<string, Marker>>(new Map<string, Marker>())
@@ -40,6 +42,7 @@ export const NearbyStopMap = ({
 
     markers.forEach(data => {
       const el = createMapMarkerElement({
+        ariaLabel: t('components.nearbyStopMap.stopMarkerAriaLabel', { stopName: data.label }),
         backgroundColor: 'var(--mantine-primary-color-filled)',
         datasetLabel: data.label,
         fontSize: '16px',
@@ -69,7 +72,7 @@ export const NearbyStopMap = ({
       })
       markerMap.current.clear()
     }
-  }, [map, markers, onSelectStop])
+  }, [map, markers, onSelectStop, t])
 
   useEffect(() => {
     if (!map || !markerMap.current.size) return

@@ -26,6 +26,7 @@ export const AreaSelect = (props: AreaSelectPropType): ReactElement => {
 
   return (
     <Select
+      aria-label={t('components.areaSelect.ariaLabel')}
       w={80}
       value={value}
       data={options}

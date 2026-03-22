@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import {
   getTdxRateLimitModal,
   getTdxSystemErrorModal
@@ -10,6 +10,10 @@ import globalModalSlice, {
 } from './globalModalSlice'
 
 describe('globalModalSlice', () => {
+  afterEach(async () => {
+    await i18n.changeLanguage('zh-TW')
+  })
+
   it('stores modal content and confirm behavior when opened', () => {
     const tdxRateLimitModal = getTdxRateLimitModal()
     const state = globalModalSlice.reducer(
@@ -43,5 +47,18 @@ describe('globalModalSlice', () => {
       cancelText: i18n.t('common.modal.cancel'),
       confirmAction: 'close'
     })
+  })
+
+  it('uses the current locale for default modal button labels', async () => {
+    await i18n.changeLanguage('en')
+
+    const state = globalModalSlice.reducer(undefined, openGlobalModal({
+      title: 'title',
+      message: 'message',
+      variant: 'alert'
+    }))
+
+    expect(state.confirmText).toBe(i18n.t('common.modal.confirm'))
+    expect(state.cancelText).toBe(i18n.t('common.modal.cancel'))
   })
 })

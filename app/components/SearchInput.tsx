@@ -18,6 +18,7 @@ export const SearchInput = (props: SearchInputPropType): ReactElement => {
       leftSection={<RiSearchLine />}
       rightSection={props.value && (
           <CloseButton
+            aria-label={t('components.searchInput.clearAriaLabel')}
             onClick={() => {
               props.onChange('')
             }}

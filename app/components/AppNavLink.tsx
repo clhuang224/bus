@@ -4,9 +4,10 @@ import { Link, useMatch, useResolvedPath } from 'react-router'
 
 export interface AppNavLinkPropType {
   to: string
-	label?: string
-	icon?: ReactElement
-	iconActive?: ReactElement
+  label?: string
+  ariaLabel?: string
+  icon?: ReactElement
+  iconActive?: ReactElement
 }
 
 export const AppNavLink = (props: AppNavLinkPropType) => {
@@ -17,9 +18,10 @@ export const AppNavLink = (props: AppNavLinkPropType) => {
     <NavLink
       component={Link}
       to={props.to}
+      aria-label={props.ariaLabel ?? props.label}
       label={(
         <Flex align="center" justify="center" direction="column">
-          {Boolean(props.label) && props.label}
+          {props.label}
           {props.icon && isActive ? props.iconActive : props.icon}
         </Flex>
       )}

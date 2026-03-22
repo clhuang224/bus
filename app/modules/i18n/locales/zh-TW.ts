@@ -95,7 +95,11 @@ export const zhTW = {
     components: {
       searchInput: {
         ariaLabel: '搜尋公車路線',
-        placeholder: '輸入關鍵字以搜尋路線、起點或終點'
+        placeholder: '輸入關鍵字以搜尋路線、起點或終點',
+        clearAriaLabel: '清除搜尋關鍵字'
+      },
+      areaSelect: {
+        ariaLabel: '選擇區域'
       },
       favoriteRouteStopCard: {
         removeAriaLabel: '移除收藏站牌路線',
@@ -111,10 +115,15 @@ export const zhTW = {
         missingPlate: '未提供車牌'
       },
       routeMap: {
+        stopMarkerAriaLabel: '{{stopName}}，第 {{sequence}} 站',
+        vehicleMarkerAriaLabel: '{{plateNumb}}，最近站牌 {{stopName}}，預估到站 {{estimateLabel}}',
         vehiclePopup: {
           recentStop: '最近站牌',
           estimate: '預估到站'
         }
+      },
+      baseMap: {
+        userLocationMarkerAriaLabel: '目前位置'
       },
       mapSidebarLayout: {
         openNearbyStops: '開啟附近站牌列表',
@@ -130,6 +139,9 @@ export const zhTW = {
       nearbyStopRoutes: {
         title: '此站路線',
         empty: '目前沒有可顯示的路線資訊'
+      },
+      nearbyStopMap: {
+        stopMarkerAriaLabel: '附近站牌 {{stopName}}'
       },
       nearbySidebarContent: {
         backAriaLabel: '返回附近站牌列表'
