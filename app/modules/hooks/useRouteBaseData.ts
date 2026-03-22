@@ -1,13 +1,13 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { busApi } from '~/modules/apis/bus'
-import { directionMapName } from '~/modules/consts/direction'
 import { getRouteMessages } from '~/modules/consts/pageMessages'
 import type { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import type { BusSubRoute } from '~/modules/interfaces/BusRoute'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import type { StopOfRouteStop } from '~/modules/interfaces/StopOfRoute'
+import { getDirectionLabel } from '~/modules/utils/getDirectionLabel'
 import { normalizeBusRoutesWithDates } from '~/modules/utils/normalizeBusRoutesWithDates'
 
 export interface RouteTab {
@@ -84,7 +84,7 @@ export function useRouteBaseData({
       id: `${subRoute.SubRouteUID}-${subRoute.Direction}`,
       label: [
         subRoute.SubRouteName.zh_TW.trim() === routeName ? null : subRoute.SubRouteName.zh_TW.trim(),
-        directionMapName[subRoute.Direction]
+        getDirectionLabel(t, subRoute.Direction)
       ].filter(Boolean).join(' '),
       subRouteUID: subRoute.SubRouteUID,
       direction: subRoute.Direction

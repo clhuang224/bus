@@ -4,10 +4,10 @@ import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BaseAlert } from '~/components/common/BaseAlert'
 import { SkeletonList } from '~/components/common/SkeletonList'
-import { cityMapName } from '~/modules/consts/city'
 import type { AlertMessageConfig } from '~/modules/interfaces/AlertMessageConfig'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
+import { getCityLabel } from '~/modules/utils/getCityLabel'
 import { NearbyStopDetail } from './NearbyStopDetail'
 import { NearbyStopRoutes } from './NearbyStopRoutes'
 
@@ -57,7 +57,7 @@ const NearbySidebarContentDetail = ({ detailState }: { detailState: NearbySideba
           <Text size="sm" c="dimmed">{t('components.nearbyStopDetail.cityLabel')}</Text>
           <Text size="sm">
             {detailState.stopGroup!.City
-              ? cityMapName[detailState.stopGroup!.City]
+              ? getCityLabel(t, detailState.stopGroup!.City)
               : t('components.nearbyStopDetail.notProvided')}
           </Text>
         </Stack>

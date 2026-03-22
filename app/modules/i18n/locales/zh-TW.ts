@@ -4,6 +4,39 @@ export const zhTW = {
       name: 'Finding the Bus',
       description: '一起找公車。'
     },
+    common: {
+      city: {
+        Taipei: '台北市',
+        NewTaipei: '新北市',
+        Taoyuan: '桃園市',
+        Taichung: '台中市',
+        Tainan: '台南市',
+        Kaohsiung: '高雄市',
+        Keelung: '基隆市',
+        Hsinchu: '新竹市',
+        HsinchuCounty: '新竹縣',
+        MiaoliCounty: '苗栗縣',
+        ChanghuaCounty: '彰化縣',
+        NantouCounty: '南投縣',
+        YunlinCounty: '雲林縣',
+        ChiayiCounty: '嘉義縣',
+        Chiayi: '嘉義市',
+        PingtungCounty: '屏東縣',
+        YilanCounty: '宜蘭縣',
+        HualienCounty: '花蓮縣',
+        TaitungCounty: '台東縣',
+        KinmenCounty: '金門縣',
+        PenghuCounty: '澎湖縣',
+        LienchiangCounty: '連江縣'
+      },
+      direction: {
+        go: '去程',
+        return: '返程',
+        loop: '迴圈',
+        shuttle: '循環',
+        unknown: '未知'
+      }
+    },
     layout: {
       nav: {
         favorite: '我的最愛',
@@ -43,6 +76,9 @@ export const zhTW = {
         terminalLabel: '起訖站',
         terminal: '{{departure}} → {{destination}}'
       },
+      routeInfoCard: {
+        terminal: '起訖站： {{departure}} → {{destination}}'
+      },
       routeStopList: {
         addFavoriteAriaLabel: '收藏站牌路線',
         removeFavoriteAriaLabel: '取消收藏站牌路線',
@@ -58,6 +94,10 @@ export const zhTW = {
         routesLabel: '路線',
         notProvided: '未提供',
         viewRoutesAriaLabel: '查看 {{stopName}} 路線'
+      },
+      nearbyStopRoutes: {
+        title: '此站路線',
+        empty: '目前沒有可顯示的路線資訊'
       },
       nearbySidebarContent: {
         backAriaLabel: '返回附近站牌列表'

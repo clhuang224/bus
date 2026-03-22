@@ -4,6 +4,39 @@ export const en = {
       name: 'Finding the Bus',
       description: 'Find the bus you need, faster.'
     },
+    common: {
+      city: {
+        Taipei: 'Taipei City',
+        NewTaipei: 'New Taipei City',
+        Taoyuan: 'Taoyuan City',
+        Taichung: 'Taichung City',
+        Tainan: 'Tainan City',
+        Kaohsiung: 'Kaohsiung City',
+        Keelung: 'Keelung City',
+        Hsinchu: 'Hsinchu City',
+        HsinchuCounty: 'Hsinchu County',
+        MiaoliCounty: 'Miaoli County',
+        ChanghuaCounty: 'Changhua County',
+        NantouCounty: 'Nantou County',
+        YunlinCounty: 'Yunlin County',
+        ChiayiCounty: 'Chiayi County',
+        Chiayi: 'Chiayi City',
+        PingtungCounty: 'Pingtung County',
+        YilanCounty: 'Yilan County',
+        HualienCounty: 'Hualien County',
+        TaitungCounty: 'Taitung County',
+        KinmenCounty: 'Kinmen County',
+        PenghuCounty: 'Penghu County',
+        LienchiangCounty: 'Lienchiang County'
+      },
+      direction: {
+        go: 'Outbound',
+        return: 'Inbound',
+        loop: 'Loop',
+        shuttle: 'Shuttle',
+        unknown: 'Unknown'
+      }
+    },
     layout: {
       nav: {
         favorite: 'Favorites',
@@ -43,6 +76,9 @@ export const en = {
         terminalLabel: 'Terminals',
         terminal: '{{departure}} → {{destination}}'
       },
+      routeInfoCard: {
+        terminal: 'Terminals: {{departure}} → {{destination}}'
+      },
       routeStopList: {
         addFavoriteAriaLabel: 'Save route stop',
         removeFavoriteAriaLabel: 'Remove saved route stop',
@@ -58,6 +94,10 @@ export const en = {
         routesLabel: 'Routes',
         notProvided: 'Not provided',
         viewRoutesAriaLabel: 'View routes for {{stopName}}'
+      },
+      nearbyStopRoutes: {
+        title: 'Routes at this stop',
+        empty: 'No route information is currently available for this stop'
       },
       nearbySidebarContent: {
         backAriaLabel: 'Back to nearby stops list'

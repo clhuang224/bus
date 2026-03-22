@@ -1,5 +1,8 @@
 import { CityNameType } from '../enums/CityNameType'
 import { CountyIdType } from '../enums/CountyIdType'
+import { zhTW } from '../i18n/locales/zh-TW'
+
+type CityTranslationKey = `common.city.${keyof typeof zhTW.translation.common.city}`
 
 export const cityMapName: Record<CityNameType, string> = {
   [CityNameType.TAIPEI]: '台北市',
@@ -24,6 +27,31 @@ export const cityMapName: Record<CityNameType, string> = {
   [CityNameType.KINMEN_COUNTY]: '金門縣',
   [CityNameType.PENGHU_COUNTY]: '澎湖縣',
   [CityNameType.LIENCHIANG_COUNTY]: '連江縣'
+}
+
+export const cityTranslationKeyMap: Record<CityNameType, CityTranslationKey> = {
+  [CityNameType.TAIPEI]: 'common.city.Taipei',
+  [CityNameType.NEW_TAIPEI]: 'common.city.NewTaipei',
+  [CityNameType.TAOYUAN]: 'common.city.Taoyuan',
+  [CityNameType.TAICHUNG]: 'common.city.Taichung',
+  [CityNameType.TAINAN]: 'common.city.Tainan',
+  [CityNameType.KAOHSIUNG]: 'common.city.Kaohsiung',
+  [CityNameType.KEELUNG]: 'common.city.Keelung',
+  [CityNameType.HSINCHU]: 'common.city.Hsinchu',
+  [CityNameType.HSINCHU_COUNTY]: 'common.city.HsinchuCounty',
+  [CityNameType.MIAOLI_COUNTY]: 'common.city.MiaoliCounty',
+  [CityNameType.CHANGHUA_COUNTY]: 'common.city.ChanghuaCounty',
+  [CityNameType.NANTOU_COUNTY]: 'common.city.NantouCounty',
+  [CityNameType.YUNLIN_COUNTY]: 'common.city.YunlinCounty',
+  [CityNameType.CHIAYI_COUNTY]: 'common.city.ChiayiCounty',
+  [CityNameType.CHIAYI]: 'common.city.Chiayi',
+  [CityNameType.PINGTUNG_COUNTY]: 'common.city.PingtungCounty',
+  [CityNameType.YILAN_COUNTY]: 'common.city.YilanCounty',
+  [CityNameType.HUALIEN_COUNTY]: 'common.city.HualienCounty',
+  [CityNameType.TAITUNG_COUNTY]: 'common.city.TaitungCounty',
+  [CityNameType.KINMEN_COUNTY]: 'common.city.KinmenCounty',
+  [CityNameType.PENGHU_COUNTY]: 'common.city.PenghuCounty',
+  [CityNameType.LIENCHIANG_COUNTY]: 'common.city.LienchiangCounty'
 }
 
 export const cityMapNameToCity = Object.fromEntries(
