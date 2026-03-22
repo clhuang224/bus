@@ -1,12 +1,13 @@
 import { Card, Flex, Group, ScrollArea, Skeleton, Stack, Title } from '@mantine/core'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { AreaSelect } from '~/components/AreaSelect'
 import { SearchInput } from '~/components/SearchInput'
 import { BaseAlert } from '~/components/common/BaseAlert'
 import { RouteInfoCard } from '~/components/routes/RouteInfoCard'
 import { AreaType } from '~/modules/enums/AreaType'
-import { searchMessages } from '~/modules/consts/pageMessages'
+import { getSearchMessages } from '~/modules/consts/pageMessages'
 import { busApi } from '~/modules/apis/bus'
 import type { BusRoute } from '~/modules/interfaces/BusRoute'
 import { setKeyword, setSelectedArea } from '~/modules/slices/routeSearchSlice'
@@ -42,6 +43,7 @@ function matchesRouteKeyword(route: BusRoute<Date | null>, keyword: string) {
 
 export default function Routes() {
   const dispatch = useDispatch<AppDispatch>()
+  const { t } = useTranslation()
   const { coords } = useSelector((state: RootState) => state.geolocation)
   const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
   const { keyword, selectedArea } = useSelector((state: RootState) => state.routeSearch)
@@ -71,18 +73,18 @@ export default function Routes() {
   ))
 
   const message = useMemo(() => {
-    if (error) return searchMessages.loadRoutesError
-    if (filteredRoutes.length === 0) return searchMessages.emptyRoutes
+    if (error) return getSearchMessages(t).loadRoutesError
+    if (filteredRoutes.length === 0) return getSearchMessages(t).emptyRoutes
 
     return null
-  }, [error, filteredRoutes.length])
+  }, [error, filteredRoutes.length, t])
 
   return (
     <Flex justify="center" h="100%">
       <Card p="lg" w="100%" maw={720} h="100%" withBorder={false}>
         <Stack gap="md" h="100%">
           <Stack gap={4}>
-            <Title order={3}>搜尋公車</Title>
+            <Title order={3}>{t('pages.routes.title')}</Title>
           </Stack>
           <Group>
             <AreaSelect value={area} onChange={(nextArea) => dispatch(setSelectedArea(nextArea))} />

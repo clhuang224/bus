@@ -1,15 +1,16 @@
 import distance from '@turf/distance'
 import { point } from '@turf/helpers'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { busApi } from '~/modules/apis/bus'
 import { cityMapArea } from '~/modules/consts/area'
 import {
-  geoErrorMessages,
-  geoPermissionMessages
+  getGeoErrorMessages,
+  getGeoPermissionMessages
 } from '~/modules/consts/geoMessages'
 import { NEARBY_DISTANCE_KM } from '~/modules/consts/nearby'
-import { nearbyMessages } from '~/modules/consts/pageMessages'
+import { getNearbyMessages } from '~/modules/consts/pageMessages'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
 import type { BusRoute } from '~/modules/interfaces/BusRoute'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
@@ -152,6 +153,7 @@ export function useNearbyData({
   selectedStopId,
   selectedRouteStopId
 }: UseNearbyDataOptions) {
+  const { t } = useTranslation()
   const { coords, error: geolocationError, permission } = useSelector((state: RootState) => state.geolocation)
   const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
   const currentCity = getCityByCoords(coords, geojson)
@@ -203,14 +205,14 @@ export function useNearbyData({
 
   const message = useMemo(() => {
     if ([GeoPermissionType.UNSUPPORTED, GeoPermissionType.DENIED].includes(permission)) {
-      return geoPermissionMessages[permission]
+      return getGeoPermissionMessages(t)[permission]
     }
-    if (geolocationError) return geoErrorMessages[geolocationError]
-    if (stopsError) return nearbyMessages.loadStopsError
-    if (nearbyStopGroups.length === 0) return nearbyMessages.emptyStops
+    if (geolocationError) return getGeoErrorMessages(t)[geolocationError]
+    if (stopsError) return getNearbyMessages(t).loadStopsError
+    if (nearbyStopGroups.length === 0) return getNearbyMessages(t).emptyStops
 
     return null
-  }, [permission, geolocationError, stopsError, nearbyStopGroups])
+  }, [permission, geolocationError, stopsError, nearbyStopGroups, t])
 
   const selectedStopGroup = useMemo(() => {
     if (!selectedRouteStopId) return null

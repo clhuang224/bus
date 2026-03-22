@@ -3,6 +3,7 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import i18n from '~/modules/i18n'
 import { AreaType } from '~/modules/enums/AreaType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import routeSearchSlice from '~/modules/slices/routeSearchSlice'
@@ -202,7 +203,7 @@ describe('Routes', () => {
   it('filters routes by the entered keyword', async () => {
     const { store } = renderRoutes()
 
-    fireEvent.change(screen.getByLabelText('搜尋公車路線'), {
+    fireEvent.change(screen.getByLabelText(i18n.t('components.searchInput.ariaLabel')), {
       target: { value: '紅25' }
     })
 
@@ -219,7 +220,7 @@ describe('Routes', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByLabelText('搜尋公車路線')).toHaveValue('紅25')
+      expect(screen.getByLabelText(i18n.t('components.searchInput.ariaLabel'))).toHaveValue('紅25')
       expect(screen.getAllByText('紅25').length).toBeGreaterThan(0)
       expect(screen.queryByText('藍1')).not.toBeInTheDocument()
     })

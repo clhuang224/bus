@@ -25,10 +25,12 @@
     "@turf/distance": "^7.3.4",
     "@turf/helpers": "^7.3.1",
     "@types/topojson-client": "^3.1.5",
+    "i18next": "^25.10.2",
     "isbot": "^5.1.27",
     "maplibre-gl": "^5.6.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-i18next": "^16.6.0",
     "react-redux": "^9.2.0",
     "react-router": "^7.7.0",
     "topojson-client": "^3.1.0"

@@ -11,9 +11,12 @@ import type { Route } from './+types/root'
 
 import { ThemeProvider } from './components/providers/ThemeProvider'
 import { StoreProvider } from './components/providers/StoreProvider'
+import { AppI18nProvider } from './components/providers/AppI18nProvider'
 import { GlobalModal } from './components/GlobalModal'
+import i18n from './modules/i18n'
 
 import '@mantine/core/styles.css'
+import { DEFAULT_APP_LOCALE } from './modules/consts/i18n'
 
 export const links: Route.LinksFunction = () => [
   { rel: 'icon', href: './favicon.svg', type: 'image/svg+xml' },
@@ -32,7 +35,7 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang={DEFAULT_APP_LOCALE}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -52,18 +55,20 @@ export default function App() {
   return (
     <ThemeProvider>
       <StoreProvider>
-        <>
-          <Outlet />
-          <GlobalModal />
-        </>
+        <AppI18nProvider>
+          <>
+            <Outlet />
+            <GlobalModal />
+          </>
+        </AppI18nProvider>
       </StoreProvider>
     </ThemeProvider>
   )
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = 'Oops!'
-  let details = 'An unexpected error occurred.'
+  let message = i18n.t('app.name')
+  let details = i18n.t('app.description')
   let stack: string | undefined
 
   if (isRouteErrorResponse(error)) {

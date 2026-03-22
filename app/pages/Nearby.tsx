@@ -1,5 +1,6 @@
 import { Overlay, useMantineTheme } from '@mantine/core'
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
+import { useTranslation } from 'react-i18next'
 import { MapSidebarLayout } from '~/components/common/MapSidebarLayout'
 import { NearbySidebarContent } from '~/components/nearby/NearbySidebarContent'
 import { useEffect, useRef } from 'react'
@@ -10,6 +11,7 @@ import { NearbyStopDetail } from '~/components/nearby/NearbyStopDetail'
 import { NearbyStopMap } from '~/components/nearby/NearbyStopMap'
 
 const Nearby = () => {
+  const { t } = useTranslation()
   const scrollViewportRef = useRef<HTMLDivElement | null>(null)
   const stopItemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
   const theme = useMantineTheme()
@@ -81,7 +83,7 @@ const Nearby = () => {
       isSidebarOpened={isSidebarOpened}
       onCloseSidebar={closeSidebar}
       onOpenSidebar={openSidebar}
-      openButtonLabel="開啟附近站牌列表"
+      openButtonLabel={t('components.mapSidebarLayout.openNearbyStops')}
       panel={(
         <NearbySidebarContent
           detailState={{
