@@ -4,7 +4,7 @@ import { Link, useMatch, useResolvedPath } from 'react-router'
 
 export interface AppNavLinkPropType {
   to: string
-	label?: string
+	label: string
 	icon?: ReactElement
 	iconActive?: ReactElement
 }

@@ -6,7 +6,6 @@ export const en = {
     },
     layout: {
       nav: {
-        back: 'Back',
         favorite: 'Favorites',
         nearby: 'Nearby',
         routes: 'Routes',
@@ -22,6 +21,7 @@ export const en = {
       },
       settings: {
         title: 'Settings',
+        backAriaLabel: 'Back',
         languageSectionTitle: 'Language',
         localeOptions: {
           zhTW: {

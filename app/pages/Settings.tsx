@@ -1,5 +1,4 @@
-import { ActionIcon, Card, Flex, Radio, Stack, Title } from '@mantine/core'
-import { useMantineTheme } from '@mantine/core'
+import { ActionIcon, Card, Flex, Radio, Stack, Title, useMantineTheme } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { RiArrowLeftSLine } from '@remixicon/react'
 import { useTranslation } from 'react-i18next'
@@ -37,7 +36,7 @@ export default function Settings() {
           <Flex align="flex-start" gap="sm">
             {isSm && (
               <ActionIcon
-                aria-label={t('layout.nav.back')}
+                aria-label={t('pages.settings.backAriaLabel')}
                 variant="subtle"
                 color="gray"
                 onClick={() => navigate(-1)}

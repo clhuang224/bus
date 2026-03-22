@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppI18nProvider } from '~/components/providers/AppI18nProvider'
 import { APP_LOCALE_STORAGE_KEY } from '~/modules/consts/i18n'
 import { AppLocaleType } from '~/modules/enums/AppLocaleType'
+import i18n from '~/modules/i18n'
 import localeSlice from '~/modules/slices/localeSlice'
 import { renderWithProvidersAndRouter } from '~/test/render'
 import Settings from './Settings'
@@ -90,7 +91,7 @@ describe('Settings', () => {
   it('does not show the back button on desktop', () => {
     renderSettingsPage()
 
-    expect(screen.queryByRole('button', { name: '返回上一頁' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: i18n.t('pages.settings.backAriaLabel') })).not.toBeInTheDocument()
   })
 
   it('returns to the previous page from the settings header on mobile', () => {
@@ -98,7 +99,7 @@ describe('Settings', () => {
 
     renderSettingsPage()
 
-    fireEvent.click(screen.getByRole('button', { name: '返回上一頁' }))
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('pages.settings.backAriaLabel') }))
 
     expect(mockNavigate).toHaveBeenCalledWith(-1)
   })
