@@ -5,6 +5,7 @@ export default [
         index('./pages/Favorite.tsx'),
         route('routes', './pages/Routes.tsx'),
         route('routes/:city/:id', './pages/Route.tsx'),
-        route('nearby', './pages/Nearby.tsx')
+        route('nearby', './pages/Nearby.tsx'),
+        route('settings', './pages/Settings.tsx')
     ])
 ] satisfies RouteConfig

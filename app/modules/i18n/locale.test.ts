@@ -1,7 +1,9 @@
+// @vitest-environment jsdom
+
 import { describe, expect, it, vi } from 'vitest'
-import { DEFAULT_APP_LOCALE } from '../consts/i18n'
+import { APP_LOCALE_STORAGE_KEY, DEFAULT_APP_LOCALE } from '../consts/i18n'
 import { AppLocaleType } from '../enums/AppLocaleType'
-import { getLocaleFromStorage, setLocaleInStorage } from './locale'
+import { getInitialAppLocale, getLocaleFromStorage, setLocaleInStorage } from './locale'
 
 describe('getLocaleFromStorage', () => {
   it('returns the stored locale when it is supported', () => {
@@ -28,5 +30,13 @@ describe('getLocaleFromStorage', () => {
     setLocaleInStorage({ setItem }, AppLocaleType.EN)
 
     expect(setItem).toHaveBeenCalledWith('appLocale', AppLocaleType.EN)
+  })
+})
+
+describe('getInitialAppLocale', () => {
+  it('restores the saved locale from window localStorage on app load', () => {
+    localStorage.setItem(APP_LOCALE_STORAGE_KEY, AppLocaleType.EN)
+
+    expect(getInitialAppLocale()).toBe(AppLocaleType.EN)
   })
 })
