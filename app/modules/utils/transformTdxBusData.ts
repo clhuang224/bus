@@ -101,19 +101,14 @@ export function transformStops(stops: TdxStop[]): Stop[] {
 export function transformRealtimeNearStop(
   realtimeNearStop: TdxRealtimeNearStop,
   city: CityNameType
-): RealtimeNearStop | null {
-  const position = toLngLat(realtimeNearStop.BusPosition)
-  if (position == null) {
-    return null
-  }
-
+): RealtimeNearStop {
   return {
     ...realtimeNearStop,
     City: city,
     RouteName: toLocalizedText(realtimeNearStop.RouteName),
     StopName: toLocalizedText(realtimeNearStop.StopName),
     SubRouteName: toLocalizedText(realtimeNearStop.SubRouteName, realtimeNearStop.RouteName),
-    position
+    position: toLngLat(realtimeNearStop.BusPosition)
   }
 }
 

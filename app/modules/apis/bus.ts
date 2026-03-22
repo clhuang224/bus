@@ -144,10 +144,8 @@ export const busApi = createApi({
     }),
     getRealtimeNearStopsByRoute: build.query<RealtimeNearStop[], { city: CityNameType, routeUID: string }>({
       query: ({ city, routeUID }) => `/RealTimeNearStop/City/${city}?%24filter=RouteUID%20eq%20'${routeUID}'&%24format=JSON`,
-      transformResponse: (res: TdxRealtimeNearStop[], _meta, { city }) => res.flatMap((realtimeNearStop) => {
-        const transformedRealtimeNearStop = transformRealtimeNearStop(realtimeNearStop, city)
-        return transformedRealtimeNearStop ? [transformedRealtimeNearStop] : []
-      })
+      transformResponse: (res: TdxRealtimeNearStop[], _meta, { city }) =>
+        res.map((realtimeNearStop) => transformRealtimeNearStop(realtimeNearStop, city))
     }),
     getRouteShapesByRoute: build.query<RouteShape[], { city: CityNameType, routeUID: string }>({
       query: ({ city, routeUID }) => `/Shape/City/${city}?%24filter=RouteUID%20eq%20'${routeUID}'&%24format=JSON`,

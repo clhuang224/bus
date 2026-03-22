@@ -30,7 +30,7 @@ describe('transformTdxBusData', () => {
     }))
   })
 
-  it('skips realtime near stop entries without bus position', () => {
+  it('keeps realtime near stop entries even when bus position is missing', () => {
     expect(transformRealtimeNearStop({
       PlateNumb: 'ABC-123',
       OperatorID: 'operator-1',
@@ -52,7 +52,11 @@ describe('transformTdxBusData', () => {
       SrcUpdateTime: '2026-03-20T10:00:00+08:00',
       UpdateTime: '2026-03-20T10:00:00+08:00',
       BusPosition: undefined as never
-    }, CityNameType.TAIPEI)).toBeNull()
+    }, CityNameType.TAIPEI)).toEqual(expect.objectContaining({
+      City: CityNameType.TAIPEI,
+      PlateNumb: 'ABC-123',
+      position: null
+    }))
   })
 
   it('skips stop entries without stop position', () => {

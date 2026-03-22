@@ -7,7 +7,7 @@ export interface RouteRealtimeBusStatus {
   estimateMinutes: number | null
   id: string
   plateNumb: string | null
-  position: LngLat
+  position: LngLat | null
   stopName: string
   stopSequence: number
   subRouteUID: string

@@ -201,13 +201,17 @@ export default function Route() {
         onSelectStop={handleSelectStopFromMap}
         routePath={activeRoutePath}
         stops={routeMapStops}
-        vehicles={realtimeBusStatuses.map((bus) => ({
-          id: bus.id,
-          estimateLabel: bus.estimateLabel,
-          plateNumb: bus.plateNumb,
-          position: bus.position,
-          stopName: bus.stopName
-        }))}
+        vehicles={realtimeBusStatuses.flatMap((bus) => (
+          bus.position == null
+            ? []
+            : [{
+                id: bus.id,
+                estimateLabel: bus.estimateLabel,
+                plateNumb: bus.plateNumb,
+                position: bus.position,
+                stopName: bus.stopName
+              }]
+        ))}
       />
     </MapSidebarLayout>
   )

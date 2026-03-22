@@ -25,11 +25,11 @@ export interface TdxRealtimeNearStop<L = TdxLocalizedText> {
   GPSTime: string
   SrcUpdateTime: string
   UpdateTime: string
-  BusPosition: {
+  BusPosition?: {
     PositionLon: number
     PositionLat: number
     GeoHash?: string | null
-  }
+  } | null
 }
 
 export interface RealtimeNearStop extends Omit<TdxRealtimeNearStop<LocalizedText>, 'RouteName' | 'SubRouteName' | 'StopName' | 'BusPosition'> {
@@ -37,5 +37,5 @@ export interface RealtimeNearStop extends Omit<TdxRealtimeNearStop<LocalizedText
   RouteName: LocalizedText
   SubRouteName: LocalizedText
   StopName: LocalizedText
-  position: LngLat
+  position: LngLat | null
 }

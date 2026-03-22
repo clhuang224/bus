@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { routeRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
 import { CityNameType } from '~/modules/enums/CityNameType'
@@ -415,6 +415,35 @@ describe('Route', () => {
     await waitFor(() => {
       expect(screen.queryByText(routeRealtimeMessages.error.description)).not.toBeInTheDocument()
       expect(screen.getByText(routeRealtimeMessages.noRealtimeData.description)).toBeInTheDocument()
+    })
+  })
+
+  it('shows realtime vehicle info in the list even when bus positions are unavailable', async () => {
+    mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
+      data: estimatedArrivalsData,
+      isError: false,
+      isLoading: false,
+      error: null
+    })
+
+    mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
+      data: [{
+        ...realtimeNearStopsData[0],
+        position: null
+      }],
+      isError: false,
+      isLoading: false,
+      error: null
+    })
+
+    renderRoutePage()
+
+    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('ABC-123')).toBeInTheDocument()
+      expect(screen.getByText('4 分')).toBeInTheDocument()
+      expect(screen.queryByText(routeRealtimeMessages.noRealtimeData.description)).not.toBeInTheDocument()
     })
   })
 
