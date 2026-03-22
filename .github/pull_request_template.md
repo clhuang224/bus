@@ -1,5 +1,11 @@
 PR title guideline: prefer `<type>: <short summary>` or `<type>(<scope>): <short summary>`, such as `feat(i18n): add phase 1 locale foundation`.
 
+## Related
+
+Use `Closes #...`, `Fixes #...`, or `Part of #...` as needed.
+
+- Part of #
+
 ## Summary
 
 Describe the user-facing goal or engineering purpose of this PR.
