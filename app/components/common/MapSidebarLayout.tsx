@@ -1,7 +1,12 @@
 import { ActionIcon, Box, Drawer, Flex } from '@mantine/core'
 import { RiMenuFill } from '@remixicon/react'
 import type { ReactNode } from 'react'
-import { APP_HEADER_HEIGHT, MAP_SIDEBAR_WIDTH } from '~/modules/consts/layout'
+import {
+  APP_FLOATING_ACTION_OFFSET,
+  APP_HEADER_HEIGHT,
+  APP_PAGE_PADDING,
+  MAP_SIDEBAR_WIDTH
+} from '~/modules/consts/layout'
 
 interface PropType {
   children: ReactNode
@@ -27,7 +32,7 @@ export const MapSidebarLayout = ({
       <Box
         w={MAP_SIDEBAR_WIDTH}
         h="100%"
-        p="lg"
+        p={APP_PAGE_PADDING}
         bg="white"
         style={{
           flex: `0 0 ${MAP_SIDEBAR_WIDTH}px`,
@@ -42,7 +47,7 @@ export const MapSidebarLayout = ({
       {isSm && (
         <ActionIcon
           pos="absolute"
-          right="8px"
+          right={APP_FLOATING_ACTION_OFFSET}
           bottom="48px"
           style={{ zIndex: 2 }}
           onClick={onOpenSidebar}

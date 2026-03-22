@@ -8,16 +8,29 @@ export const en = {
       nav: {
         favorite: 'Favorites',
         nearby: 'Nearby',
-        routes: 'Routes'
+        routes: 'Routes',
+        settings: 'Settings'
       }
     },
     pages: {
       favorite: {
-        title: 'Favorites',
-        description: 'Save the route stops you use often so you can jump back to them quickly.'
+        title: 'Favorites'
       },
       routes: {
         title: 'Routes'
+      },
+      settings: {
+        title: 'Settings',
+        backAriaLabel: 'Back',
+        languageSectionTitle: 'Language',
+        localeOptions: {
+          zhTW: {
+            label: 'Traditional Chinese'
+          },
+          en: {
+            label: 'English'
+          }
+        }
       }
     },
     components: {

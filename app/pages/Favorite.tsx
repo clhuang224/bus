@@ -1,8 +1,9 @@
-import { Flex, ScrollArea, Stack, Text, Title } from '@mantine/core'
+import { Flex, ScrollArea, Stack, Title } from '@mantine/core'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BaseAlert } from '~/components/common/BaseAlert'
 import { FavoriteRouteStopCard } from '~/components/favorite/FavoriteRouteStopCard'
+import { APP_PAGE_PADDING } from '~/modules/consts/layout'
 import { getFavoriteMessages } from '~/modules/consts/pageMessages'
 import { useFavoriteRouteStops } from '~/modules/hooks/useFavoriteRouteStops'
 
@@ -26,13 +27,8 @@ export default function Favorite() {
 
   return (
     <Flex justify="center" h="100%">
-      <Stack p="lg" w="100%" maw={720} h="100%" gap="md">
-        <Stack gap={4}>
-          <Title order={3}>{t('pages.favorite.title')}</Title>
-          <Text size="sm" c="dimmed">
-            {t('pages.favorite.description')}
-          </Text>
-        </Stack>
+      <Stack p={APP_PAGE_PADDING} w="100%" maw={720} h="100%" gap="md">
+        <Title order={3}>{t('pages.favorite.title')}</Title>
         {sortedFavoriteRouteStops.length === 0
           ? (
             <BaseAlert {...favoriteMessages.emptyFavoriteRouteStops} />

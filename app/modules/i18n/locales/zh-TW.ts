@@ -8,16 +8,29 @@ export const zhTW = {
       nav: {
         favorite: '我的最愛',
         nearby: '附近站牌',
-        routes: '搜尋公車'
+        routes: '搜尋公車',
+        settings: '設定'
       }
     },
     pages: {
       favorite: {
-        title: '我的最愛',
-        description: '收藏常用的公車路線站牌，之後可以直接回到對應路線查看。'
+        title: '我的最愛'
       },
       routes: {
         title: '搜尋公車'
+      },
+      settings: {
+        title: '設定',
+        backAriaLabel: '返回上一頁',
+        languageSectionTitle: '語言',
+        localeOptions: {
+          zhTW: {
+            label: '繁體中文'
+          },
+          en: {
+            label: 'English'
+          }
+        }
       }
     },
     components: {

@@ -6,6 +6,7 @@ import { AreaSelect } from '~/components/AreaSelect'
 import { SearchInput } from '~/components/SearchInput'
 import { BaseAlert } from '~/components/common/BaseAlert'
 import { RouteInfoCard } from '~/components/routes/RouteInfoCard'
+import { APP_PAGE_PADDING } from '~/modules/consts/layout'
 import { AreaType } from '~/modules/enums/AreaType'
 import { getSearchMessages } from '~/modules/consts/pageMessages'
 import { busApi } from '~/modules/apis/bus'
@@ -81,7 +82,7 @@ export default function Routes() {
 
   return (
     <Flex justify="center" h="100%">
-      <Card p="lg" w="100%" maw={720} h="100%" withBorder={false}>
+      <Card p={APP_PAGE_PADDING} w="100%" maw={720} h="100%" withBorder={false}>
         <Stack gap="md" h="100%">
           <Stack gap={4}>
             <Title order={3}>{t('pages.routes.title')}</Title>
