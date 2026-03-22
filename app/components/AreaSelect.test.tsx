@@ -4,7 +4,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { AreaSelect } from './AreaSelect'
 import { AreaType } from '~/modules/enums/AreaType'
-import { areaMapAreaName } from '~/modules/consts/area'
+import i18n from '~/modules/i18n'
 
 vi.mock('@mantine/core', () => ({
   Select: ({
@@ -60,7 +60,7 @@ describe('AreaSelect', () => {
     const areaSelect = () => within(container).getByLabelText('area-select')
 
     expect(areaSelect()).toHaveValue(AreaType.TAIPEI)
-    expect((within(areaSelect()).getByRole('option', { name: areaMapAreaName[AreaType.TAIPEI] }) as HTMLOptionElement).selected).toBe(true)
+    expect((within(areaSelect()).getByRole('option', { name: i18n.t('common.area.Taipei') }) as HTMLOptionElement).selected).toBe(true)
 
     rerender(
       <AreaSelect
@@ -70,6 +70,6 @@ describe('AreaSelect', () => {
     )
 
     expect(areaSelect()).toHaveValue(AreaType.TAICHUNG)
-    expect((within(areaSelect()).getByRole('option', { name: areaMapAreaName[AreaType.TAICHUNG] }) as HTMLOptionElement).selected).toBe(true)
+    expect((within(areaSelect()).getByRole('option', { name: i18n.t('common.area.Taichung') }) as HTMLOptionElement).selected).toBe(true)
   })
 })

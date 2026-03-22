@@ -4,7 +4,13 @@ import { CityNameType } from '../enums/CityNameType'
 import { DirectionType } from '../enums/DirectionType'
 import { DutyStatusType } from '../enums/DutyStatusType'
 import { StopStatusType } from '../enums/StopStatusType'
+import i18n from '../i18n'
 import { getRouteRealtimeBusStatuses } from './getRouteRealtimeBusStatuses'
+
+const fourMinutesAwayLabel = i18n.t('routePage.realtime.minutesAway', { count: 4 })
+const twoMinutesAwayLabel = i18n.t('routePage.realtime.minutesAway', { count: 2 })
+const inServiceLabel = i18n.t('routePage.realtime.inService')
+const comingSoonLabel = i18n.t('routePage.realtime.comingSoon')
 
 describe('getRouteRealtimeBusStatuses', () => {
   it('matches a realtime bus with its estimated arrival by plate number and formats minutes', () => {
@@ -52,9 +58,9 @@ describe('getRouteRealtimeBusStatuses', () => {
       City: CityNameType.TAIPEI
     }]
 
-    expect(getRouteRealtimeBusStatuses(realtimeBuses, estimatedArrivals)).toEqual([
+    expect(getRouteRealtimeBusStatuses(i18n.t, realtimeBuses, estimatedArrivals)).toEqual([
       expect.objectContaining({
-        estimateLabel: '4 分後到站',
+        estimateLabel: fourMinutesAwayLabel,
         estimateMinutes: 4,
         plateNumb: 'ABC-123',
         stopName: '市政府'
@@ -107,9 +113,9 @@ describe('getRouteRealtimeBusStatuses', () => {
       City: CityNameType.TAIPEI
     }]
 
-    expect(getRouteRealtimeBusStatuses(realtimeBuses, estimatedArrivals)).toEqual([
+    expect(getRouteRealtimeBusStatuses(i18n.t, realtimeBuses, estimatedArrivals)).toEqual([
       expect.objectContaining({
-        estimateLabel: '行駛中',
+        estimateLabel: inServiceLabel,
         estimateMinutes: null,
         stopName: '捷運昆陽站'
       })
@@ -161,9 +167,9 @@ describe('getRouteRealtimeBusStatuses', () => {
       City: CityNameType.TAIPEI
     }]
 
-    expect(getRouteRealtimeBusStatuses(realtimeBuses, estimatedArrivals)).toEqual([
+    expect(getRouteRealtimeBusStatuses(i18n.t, realtimeBuses, estimatedArrivals)).toEqual([
       expect.objectContaining({
-        estimateLabel: '4 分後到站',
+        estimateLabel: fourMinutesAwayLabel,
         estimateMinutes: 4,
         stopName: '市政府'
       })
@@ -215,9 +221,9 @@ describe('getRouteRealtimeBusStatuses', () => {
       City: CityNameType.TAIPEI
     }]
 
-    expect(getRouteRealtimeBusStatuses(realtimeBuses, estimatedArrivals)).toEqual([
+    expect(getRouteRealtimeBusStatuses(i18n.t, realtimeBuses, estimatedArrivals)).toEqual([
       expect.objectContaining({
-        estimateLabel: '2 分後到站',
+        estimateLabel: twoMinutesAwayLabel,
         estimateMinutes: 2,
         plateNumb: 'eal-1095'
       })
@@ -290,9 +296,9 @@ describe('getRouteRealtimeBusStatuses', () => {
       }
     ]
 
-    expect(getRouteRealtimeBusStatuses(realtimeBuses, estimatedArrivals)).toEqual([
+    expect(getRouteRealtimeBusStatuses(i18n.t, realtimeBuses, estimatedArrivals)).toEqual([
       expect.objectContaining({
-        estimateLabel: '即將進站',
+        estimateLabel: comingSoonLabel,
         estimateMinutes: 1,
         plateNumb: 'KKA-0151'
       })
@@ -365,9 +371,9 @@ describe('getRouteRealtimeBusStatuses', () => {
       }
     ]
 
-    expect(getRouteRealtimeBusStatuses(realtimeBuses, estimatedArrivals)).toEqual([
+    expect(getRouteRealtimeBusStatuses(i18n.t, realtimeBuses, estimatedArrivals)).toEqual([
       expect.objectContaining({
-        estimateLabel: '2 分後到站',
+        estimateLabel: twoMinutesAwayLabel,
         estimateMinutes: 2,
         plateNumb: 'KKA-0151'
       })

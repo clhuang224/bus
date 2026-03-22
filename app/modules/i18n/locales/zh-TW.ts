@@ -5,6 +5,32 @@ export const zhTW = {
       description: '一起找公車。'
     },
     common: {
+      modal: {
+        confirm: '確定',
+        cancel: '取消',
+        refresh: '重整頁面'
+      },
+      area: {
+        Taipei: '雙北',
+        Taoyuan: '桃園',
+        Taichung: '台中',
+        Tainan: '台南',
+        Kaohsiung: '高雄',
+        Keelung: '基隆',
+        Hsinchu: '新竹',
+        Miaoli: '苗栗',
+        Changhua: '彰化',
+        Nantou: '南投',
+        Yunlin: '雲林',
+        Chiayi: '嘉義',
+        Pingtung: '屏東',
+        Yilan: '宜蘭',
+        Hualien: '花蓮',
+        Taitung: '台東',
+        Kinmen: '金門',
+        Penghu: '澎湖',
+        Lienchiang: '連江'
+      },
       city: {
         Taipei: '台北市',
         NewTaipei: '新北市',
@@ -84,6 +110,12 @@ export const zhTW = {
         removeFavoriteAriaLabel: '取消收藏站牌路線',
         missingPlate: '未提供車牌'
       },
+      routeMap: {
+        vehiclePopup: {
+          recentStop: '最近站牌',
+          estimate: '預估到站'
+        }
+      },
       mapSidebarLayout: {
         openNearbyStops: '開啟附近站牌列表',
         openRouteList: '開啟路線列表'
@@ -104,7 +136,22 @@ export const zhTW = {
       }
     },
     routePage: {
-      backToRoutes: '返回路線列表'
+      backToRoutes: '返回路線列表',
+      realtime: {
+        inService: '行駛中',
+        comingSoon: '即將進站',
+        noEstimate: '暫無預估',
+        minutesAway_one: '{{count}} 分後到站',
+        minutesAway_other: '{{count}} 分後到站',
+        stopStatus: {
+          normal: '正常',
+          notYetDeparted: '- 分後到站',
+          noStopDueToTrafficControl: '交管不停靠',
+          lastBusPassed: '末班已過',
+          notInServiceToday: '今日未營運',
+          unknown: '未知狀態'
+        }
+      }
     },
     messages: {
       nearby: {
@@ -141,6 +188,42 @@ export const zhTW = {
         emptyRoute: {
           title: '查無路線',
           description: '目前找不到這條公車路線資料。'
+        }
+      },
+      routeRealtime: {
+        loading: {
+          title: '更新中',
+          description: '正在更新線上公車資料...'
+        },
+        error: {
+          title: '即時公車',
+          description: '即時公車資料暫時無法完整更新。'
+        },
+        rateLimited: {
+          title: '即時公車',
+          description: '目前同時查詢人數較多，即時公車資料會稍後自動重試。'
+        },
+        noService: {
+          title: '營運狀態',
+          description: '目前沒有營運班次'
+        },
+        noRealtimeData: {
+          title: '即時公車',
+          description: '目前沒有可顯示的即時公車資訊，可能是已收班或上游暫時未提供完整資料。'
+        }
+      },
+      busService: {
+        unauthorized: {
+          title: '公車資料服務驗證失敗',
+          description: '目前無法驗證公車資料服務，請稍後再試。'
+        },
+        rateLimited: {
+          title: '目前查詢人數較多',
+          description: '系統暫時無法取得公車資料，請稍候一段時間再試。'
+        },
+        systemError: {
+          title: '系統暫時無法使用',
+          description: '目前無法取得公車資料，請稍後再試。'
         }
       },
       geo: {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { areaMapAreaName, areaMapCity, cityMapArea } from './area'
+import { areaMapCity, areaTranslationKeyMap, cityMapArea } from './area'
 import { AreaType } from '../enums/AreaType'
 import { CityNameType } from '../enums/CityNameType'
 import { getEnumValues } from '../utils/getEnumValues'
@@ -9,7 +9,7 @@ describe('area mappings', () => {
     const areas = getEnumValues(AreaType)
 
     areas.forEach((area) => {
-      expect(areaMapAreaName[area]).toBeTruthy()
+      expect(areaTranslationKeyMap[area]).toBeTruthy()
       expect(areaMapCity[area]).toBeDefined()
       expect(areaMapCity[area]).not.toHaveLength(0)
     })

@@ -1,4 +1,5 @@
-import { stopStatusMapLabel } from '../consts/stopStatus'
+import type { TFunction } from 'i18next'
+import { stopStatusTranslationKeyMap } from '../consts/stopStatus'
 import { StopStatusType } from '../enums/StopStatusType'
 import type { EstimatedArrival } from '../interfaces/EstimatedArrival'
 import type { RealtimeNearStop } from '../interfaces/RealtimeNearStop'
@@ -8,12 +9,16 @@ function normalizePlateNumb(plateNumb: string | null | undefined) {
   return plateNumb?.trim().toUpperCase() ?? null
 }
 
-function getRealtimeFallbackLabel(stopStatus: StopStatusType) {
+function getStopStatusLabel(t: TFunction, stopStatus: StopStatusType) {
+  return t(stopStatusTranslationKeyMap[stopStatus])
+}
+
+function getRealtimeFallbackLabel(t: TFunction, stopStatus: StopStatusType) {
   if ([StopStatusType.NOT_YET_DEPARTED, StopStatusType.UNKNOWN].includes(stopStatus)) {
-    return '行駛中'
+    return t('routePage.realtime.inService')
   }
 
-  return stopStatusMapLabel[stopStatus]
+  return getStopStatusLabel(t, stopStatus)
 }
 
 function isStrongArrivalMatch(estimatedArrival: EstimatedArrival | undefined) {
@@ -32,16 +37,18 @@ function isStrongArrivalMatch(estimatedArrival: EstimatedArrival | undefined) {
   ].includes(estimatedArrival.StopStatus)
 }
 
-export function formatEstimatedArrivalLabel(estimateTime: number | null, stopStatus: StopStatusType) {
+export function formatEstimatedArrivalLabel(t: TFunction, estimateTime: number | null, stopStatus: StopStatusType) {
   if (estimateTime != null) {
-    if (estimateTime <= 60) return '即將進站'
-    return `${Math.ceil(estimateTime / 60)} 分後到站`
+    if (estimateTime <= 60) return t('routePage.realtime.comingSoon')
+    const minutes = Math.ceil(estimateTime / 60)
+    return t('routePage.realtime.minutesAway', { count: minutes })
   }
-  if (stopStatus === StopStatusType.NORMAL) return '暫無預估'
-  return stopStatusMapLabel[stopStatus]
+  if (stopStatus === StopStatusType.NORMAL) return t('routePage.realtime.noEstimate')
+  return getStopStatusLabel(t, stopStatus)
 }
 
 export function getRouteRealtimeBusStatuses(
+  t: TFunction,
   realtimeBuses: RealtimeNearStop[],
   estimatedArrivals: EstimatedArrival[]
 ): RouteRealtimeBusStatus[] {
@@ -100,12 +107,13 @@ export function getRouteRealtimeBusStatuses(
           : nextEstimatedArrival ?? stopMatchedArrival)
       const estimateLabel = matchedArrival
         ? formatEstimatedArrivalLabel(
+            t,
             matchedArrival.EstimateTime,
             matchedArrival.EstimateTime == null
               ? matchedArrival.StopStatus
               : matchedArrival.StopStatus
           )
-        : getRealtimeFallbackLabel(StopStatusType.UNKNOWN)
+        : getRealtimeFallbackLabel(t, StopStatusType.UNKNOWN)
       const shouldUseRealtimeFallbackLabel =
         matchedArrival != null &&
         matchedArrival.EstimateTime == null &&
@@ -114,7 +122,7 @@ export function getRouteRealtimeBusStatuses(
       return {
         direction: realtimeBus.Direction,
         estimateLabel: shouldUseRealtimeFallbackLabel
-          ? getRealtimeFallbackLabel(matchedArrival.StopStatus)
+          ? getRealtimeFallbackLabel(t, matchedArrival.StopStatus)
           : estimateLabel,
         estimateMinutes: matchedArrival?.EstimateTime != null
           ? Math.ceil(matchedArrival.EstimateTime / 60)

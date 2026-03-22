@@ -1,4 +1,5 @@
 import { Button, Flex, Modal } from '@mantine/core'
+import i18n from '~/modules/i18n'
 
 type ModalVariant = 'alert' | 'confirm'
 
@@ -20,8 +21,8 @@ const BaseModal = ({
   title,
   children,
   variant = 'alert',
-  confirmText = '確定',
-  cancelText = '取消'
+  confirmText = i18n.t('common.modal.confirm'),
+  cancelText = i18n.t('common.modal.cancel')
 }: PropType) => {
   const isConfirm = variant === 'confirm'
 

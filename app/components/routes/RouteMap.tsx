@@ -1,6 +1,7 @@
 import type { Map as MapLibreMap, Marker, Popup } from 'maplibre-gl'
 import mapLibre from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { LngLat, LatLng } from '~/modules/types/CoordsType'
 import { createMapMarkerElement } from '~/modules/utils/createMapMarkerElement'
 import BaseMap from '../common/BaseMap'
@@ -52,6 +53,7 @@ export const RouteMap = ({
   stops,
   vehicles = []
 }: PropType) => {
+  const { t } = useTranslation()
   const [map, setMap] = useState<MapLibreMap | null>(null)
   const [isMapReady, setIsMapReady] = useState(false)
   const markerMap = useRef<Map<string, Marker>>(new Map())
@@ -161,7 +163,11 @@ export const RouteMap = ({
 
     vehicles.forEach((vehicle) => {
       const el = createMapMarkerElement({
-        datasetLabel: `${vehicle.plateNumb ?? '未提供車牌'}\n最近站牌：${vehicle.stopName}\n預估到站：${vehicle.estimateLabel}`,
+        datasetLabel: [
+          vehicle.plateNumb ?? t('components.routeStopList.missingPlate'),
+          `${t('components.routeMap.vehiclePopup.recentStop')}: ${vehicle.stopName}`,
+          `${t('components.routeMap.vehiclePopup.estimate')}: ${vehicle.estimateLabel}`
+        ].join('\n'),
         textContent: '🚌',
         type: 'vehicle'
       })
@@ -213,7 +219,7 @@ export const RouteMap = ({
         duration: 800
       })
     }
-  }, [highlightedStopId, isMapReady, map, onSelectStop, positionedStops, routePath, selectedStop, vehicles])
+  }, [highlightedStopId, isMapReady, map, onSelectStop, positionedStops, routePath, selectedStop, t, vehicles])
 
   useEffect(() => {
     if (!map || !markerMap.current.size) return

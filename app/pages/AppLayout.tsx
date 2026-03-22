@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { Outlet, useLocation, useNavigate } from 'react-router'
 import { AppNavLink } from '~/components/AppNavLink'
+import i18n from '~/modules/i18n'
 import {
   APP_FLOATING_ACTION_OFFSET,
   APP_FOOTER_HEIGHT,
@@ -26,8 +27,8 @@ import type { AppDispatch, RootState } from '~/modules/store'
 
 export function meta() {
   return [
-    { title: 'Finding the Bus' },
-    { name: 'description', content: 'Go find the bus you\'ve been waiting for your whole life. (Just kidding.)' }
+    { title: i18n.t('app.name') },
+    { name: 'description', content: i18n.t('app.description') }
   ]
 }
 

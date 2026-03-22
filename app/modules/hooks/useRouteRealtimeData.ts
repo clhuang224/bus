@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { busApi } from '~/modules/apis/bus'
 import { isTdxRateLimitError } from '~/modules/apis/errors/busError'
 import type { BusRoute, BusSubRoute } from '~/modules/interfaces/BusRoute'
@@ -25,6 +26,7 @@ export function useRouteRealtimeData({
   city,
   id
 }: UseRouteRealtimeDataOptions) {
+  const { t } = useTranslation()
   const cityName = city as CityNameType
   const shouldPrepareRealtimeQueries = Boolean(city && id && busRoute && activeSubRoute)
   const [realtimeStartDelayMs, setRealtimeStartDelayMs] = useState<number | null>(null)
@@ -130,9 +132,10 @@ export function useRouteRealtimeData({
   ), [activeSubRoute, realtimeNearStops])
 
   const realtimeBusStatuses = useMemo(() => getRouteRealtimeBusStatuses(
+    t,
     activeRealtimeNearStops,
     activeEstimatedArrivals
-  ), [activeEstimatedArrivals, activeRealtimeNearStops])
+  ), [activeEstimatedArrivals, activeRealtimeNearStops, t])
 
   const realtimeBusesByStopSequence = useMemo(() => {
     return realtimeBusStatuses.reduce<Map<number, typeof realtimeBusStatuses>>((result, realtimeBus) => {
@@ -158,6 +161,7 @@ export function useRouteRealtimeData({
 
     return sortedEstimatedArrivals.reduce<Map<string, string>>((result, estimatedArrival) => {
       const estimatedArrivalLabel = formatEstimatedArrivalLabel(
+        t,
         estimatedArrival.EstimateTime,
         estimatedArrival.StopStatus
       )
@@ -172,7 +176,7 @@ export function useRouteRealtimeData({
 
       return result
     }, new Map())
-  }, [activeEstimatedArrivals])
+  }, [activeEstimatedArrivals, t])
 
   const hasRealtimeError = useMemo(() => {
     if (isEstimatedArrivalsError && estimatedArrivals.length === 0) {

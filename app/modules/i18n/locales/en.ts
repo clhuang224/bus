@@ -5,6 +5,32 @@ export const en = {
       description: 'Find the bus you need, faster.'
     },
     common: {
+      modal: {
+        confirm: 'Confirm',
+        cancel: 'Cancel',
+        refresh: 'Refresh page'
+      },
+      area: {
+        Taipei: 'Taipei and New Taipei',
+        Taoyuan: 'Taoyuan',
+        Taichung: 'Taichung',
+        Tainan: 'Tainan',
+        Kaohsiung: 'Kaohsiung',
+        Keelung: 'Keelung',
+        Hsinchu: 'Hsinchu',
+        Miaoli: 'Miaoli',
+        Changhua: 'Changhua',
+        Nantou: 'Nantou',
+        Yunlin: 'Yunlin',
+        Chiayi: 'Chiayi',
+        Pingtung: 'Pingtung',
+        Yilan: 'Yilan',
+        Hualien: 'Hualien',
+        Taitung: 'Taitung',
+        Kinmen: 'Kinmen',
+        Penghu: 'Penghu',
+        Lienchiang: 'Lienchiang'
+      },
       city: {
         Taipei: 'Taipei City',
         NewTaipei: 'New Taipei City',
@@ -84,6 +110,12 @@ export const en = {
         removeFavoriteAriaLabel: 'Remove saved route stop',
         missingPlate: 'Plate unavailable'
       },
+      routeMap: {
+        vehiclePopup: {
+          recentStop: 'Recent stop',
+          estimate: 'Estimated arrival'
+        }
+      },
       mapSidebarLayout: {
         openNearbyStops: 'Open nearby stops list',
         openRouteList: 'Open route list'
@@ -104,7 +136,22 @@ export const en = {
       }
     },
     routePage: {
-      backToRoutes: 'Back to routes'
+      backToRoutes: 'Back to routes',
+      realtime: {
+        inService: 'In service',
+        comingSoon: 'Coming soon',
+        noEstimate: 'No estimate available',
+        minutesAway_one: 'Arriving in {{count}} min',
+        minutesAway_other: 'Arriving in {{count}} mins',
+        stopStatus: {
+          normal: 'Normal',
+          notYetDeparted: 'Not departed yet',
+          noStopDueToTrafficControl: 'Skipping stop due to traffic control',
+          lastBusPassed: 'Last bus has passed',
+          notInServiceToday: 'Not in service today',
+          unknown: 'Unknown status'
+        }
+      }
     },
     messages: {
       nearby: {
@@ -141,6 +188,42 @@ export const en = {
         emptyRoute: {
           title: 'Route not found',
           description: 'We could not find data for this bus route.'
+        }
+      },
+      routeRealtime: {
+        loading: {
+          title: 'Updating',
+          description: 'Refreshing realtime bus data...'
+        },
+        error: {
+          title: 'Realtime bus',
+          description: 'Realtime bus data is temporarily incomplete.'
+        },
+        rateLimited: {
+          title: 'Realtime bus',
+          description: 'Too many people are querying right now. Realtime bus data will retry shortly.'
+        },
+        noService: {
+          title: 'Service status',
+          description: 'There are no active services right now'
+        },
+        noRealtimeData: {
+          title: 'Realtime bus',
+          description: 'No realtime bus information is available right now. Service may have ended or upstream data may be temporarily incomplete.'
+        }
+      },
+      busService: {
+        unauthorized: {
+          title: 'Bus data service authentication failed',
+          description: 'The app could not authenticate with the bus data service right now. Please try again later.'
+        },
+        rateLimited: {
+          title: 'Too many queries right now',
+          description: 'The system cannot fetch bus data at the moment. Please wait a bit and try again.'
+        },
+        systemError: {
+          title: 'The system is temporarily unavailable',
+          description: 'Bus data is temporarily unavailable. Please try again later.'
         }
       },
       geo: {

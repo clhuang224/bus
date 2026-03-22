@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
-  tdxRateLimitModal,
-  tdxSystemErrorModal
+  getTdxRateLimitModal,
+  getTdxSystemErrorModal
 } from '../apis/errors/busError'
+import i18n from '../i18n'
 import globalModalSlice, {
   closeGlobalModal,
   openGlobalModal
@@ -10,6 +11,7 @@ import globalModalSlice, {
 
 describe('globalModalSlice', () => {
   it('stores modal content and confirm behavior when opened', () => {
+    const tdxRateLimitModal = getTdxRateLimitModal()
     const state = globalModalSlice.reducer(
       undefined,
       openGlobalModal(tdxRateLimitModal)
@@ -18,12 +20,13 @@ describe('globalModalSlice', () => {
     expect(state).toMatchObject({
       opened: true,
       ...tdxRateLimitModal,
-      cancelText: '取消',
+      cancelText: i18n.t('common.modal.cancel'),
       confirmAction: 'refresh'
     })
   })
 
   it('resets modal state when closed', () => {
+    const tdxSystemErrorModal = getTdxSystemErrorModal()
     const openedState = globalModalSlice.reducer(
       undefined,
       openGlobalModal(tdxSystemErrorModal)
@@ -36,8 +39,8 @@ describe('globalModalSlice', () => {
       title: '',
       message: '',
       variant: 'alert',
-      confirmText: '確定',
-      cancelText: '取消',
+      confirmText: i18n.t('common.modal.confirm'),
+      cancelText: i18n.t('common.modal.cancel'),
       confirmAction: 'close'
     })
   })

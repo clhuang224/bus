@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import i18n from '../i18n'
 import type { RootState } from '../store'
 
 type GlobalModalVariant = 'alert' | 'confirm'
@@ -22,8 +23,8 @@ const initialState: GlobalModalState = {
   title: '',
   message: '',
   variant: 'alert',
-  confirmText: '確定',
-  cancelText: '取消',
+  confirmText: i18n.t('common.modal.confirm'),
+  cancelText: i18n.t('common.modal.cancel'),
   confirmAction: 'close'
 }
 
