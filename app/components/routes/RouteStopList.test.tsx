@@ -28,7 +28,7 @@ const favoriteRouteStop = {
 
 const realtimeBus: RouteRealtimeBusStatus = {
   direction: DirectionType.GO,
-  estimateLabel: '4 分',
+  estimateLabel: '4 分後到站',
   estimateMinutes: 4,
   id: 'bus-1',
   plateNumb: 'ABC-123',
@@ -109,14 +109,14 @@ describe('RouteStopList', () => {
     )
 
     expect(screen.getByText('ABC-123')).toBeInTheDocument()
-    expect(screen.getByText('4 分')).toBeInTheDocument()
+    expect(screen.getByText('4 分後到站')).toBeInTheDocument()
   })
 
   it('renders the nearest estimated arrival when there is no realtime bus marker', () => {
     renderWithMantine(
       <RouteStopList
         stops={[{
-          estimatedArrivalLabel: '6 分',
+          estimatedArrivalLabel: '6 分後到站',
           id: 'stop-1',
           favoriteRouteStop,
           name: '市政府',
@@ -129,6 +129,6 @@ describe('RouteStopList', () => {
       />
     )
 
-    expect(screen.getByText('6 分')).toBeInTheDocument()
+    expect(screen.getByText('6 分後到站')).toBeInTheDocument()
   })
 })

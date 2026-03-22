@@ -5,22 +5,22 @@ import type { LocalizedText, TdxLocalizedText } from '../types/LocalizedText'
 
 export interface TdxEstimatedArrival<L = TdxLocalizedText> {
   PlateNumb?: string | null
-  StopUID: string
-  StopID: string
-  StopName: L
-  RouteUID: string
-  RouteID: string
-  RouteName: L
-  SubRouteUID: string
-  SubRouteID: string
-  SubRouteName: L
+  StopUID?: string | null
+  StopID?: string | null
+  StopName?: L | null
+  RouteUID: string | null
+  RouteID?: string | null
+  RouteName?: L | null
+  SubRouteUID?: string | null
+  SubRouteID?: string | null
+  SubRouteName?: L | null
   Direction: DirectionType
-  StopSequence: number
+  StopSequence?: number | null
   EstimateTime: number | null
-  StopStatus: StopStatusType
-  MessageType: number
+  StopStatus?: StopStatusType | null
+  MessageType?: number | null
   NextBusTime?: string | null
-  SrcUpdateTime?: string
+  SrcUpdateTime?: string | null
   UpdateTime: string
 }
 
@@ -29,4 +29,9 @@ export interface EstimatedArrival extends Omit<TdxEstimatedArrival<LocalizedText
   StopName: LocalizedText
   RouteName: LocalizedText
   SubRouteName: LocalizedText
+  RouteUID: string
+  RouteID: string | null
+  SubRouteUID: string
+  SubRouteID: string | null
+  StopStatus: StopStatusType
 }

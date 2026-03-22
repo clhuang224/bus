@@ -260,6 +260,13 @@ When handling API or query errors, prefer interpreting the error by its actual t
 
 Avoid `Boolean(error)` style checks when the UI behavior depends on the difference between those states.
 
+For route realtime UI, treat `RealTimeNearStop` as stronger evidence that a vehicle is already in service than an `EstimatedTimeOfArrival` row that still says `StopStatus = 1` for the current stop. When the realtime feed shows a bus on the route but the matched ETA row is still "not yet departed" or otherwise lacks a usable countdown, prefer either:
+
+- the next downstream ETA with a real countdown, or
+- a neutral in-service label such as `行駛中`
+
+Do not regress the route page back to showing `尚未發車` for a vehicle that the realtime feed already places on the road.
+
 Because the deployed TDX proxy key is shared by all visitors, design request timing with the TDX per-key second-level limit in mind. Avoid route-detail request bursts that stack multiple realtime calls into the same second as large base-data requests when a small delay or staged startup would preserve the user experience.
 
 For route realtime specifically:

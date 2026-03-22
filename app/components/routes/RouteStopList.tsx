@@ -1,5 +1,5 @@
 import { ActionIcon, Alert, Badge, Box, Group, ScrollArea, Skeleton, Stack, Text, Timeline } from '@mantine/core'
-import { RiHeart2Fill, RiHeart2Line } from '@remixicon/react'
+import { RiBus2Fill, RiHeart2Fill, RiHeart2Line } from '@remixicon/react'
 import { useRef } from 'react'
 import { routeRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
 import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
@@ -102,6 +102,7 @@ export const RouteStopList = ({
                         w={28}
                         h={28}
                         style={{
+                          flex: '0 0 28px',
                           borderRadius: '50%',
                           backgroundColor: hasRealtimeBus
                             ? 'var(--mantine-color-orange-5)'
@@ -111,10 +112,11 @@ export const RouteStopList = ({
                           justifyContent: 'center',
                           color: '#ffffff',
                           fontSize: '12px',
-                          fontWeight: 700
+                          fontWeight: 700,
+                          lineHeight: 1
                         }}
                       >
-                        {hasRealtimeBus ? Math.min(stop.realtimeBuses.length, 9) : stop.sequence}
+                        {hasRealtimeBus ? <RiBus2Fill size={14} /> : stop.sequence}
                       </Box>
                     )}
                     title={(

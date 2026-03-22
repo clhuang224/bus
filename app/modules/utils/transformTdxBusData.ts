@@ -12,11 +12,18 @@ export function transformEstimatedArrival(
   estimatedArrival: TdxEstimatedArrival,
   city: CityNameType
 ): EstimatedArrival {
+  const routeUID = estimatedArrival.RouteUID ?? ''
+
   return {
     ...estimatedArrival,
     City: city,
+    RouteUID: routeUID,
+    RouteID: estimatedArrival.RouteID ?? null,
     RouteName: toLocalizedText(estimatedArrival.RouteName),
     StopName: toLocalizedText(estimatedArrival.StopName),
+    StopStatus: estimatedArrival.StopStatus ?? 255,
+    SubRouteUID: estimatedArrival.SubRouteUID ?? routeUID,
+    SubRouteID: estimatedArrival.SubRouteID ?? estimatedArrival.RouteID ?? null,
     SubRouteName: toLocalizedText(estimatedArrival.SubRouteName, estimatedArrival.RouteName)
   }
 }

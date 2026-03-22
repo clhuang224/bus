@@ -95,26 +95,25 @@ export function useRouteRealtimeData({
     setRealtimeStartDelayMs(REALTIME_RATE_LIMIT_BACKOFF_MS)
   }, [isRealtimeRateLimited])
 
-  const realtimeBusStatuses = useMemo(() => getRouteRealtimeBusStatuses(
-    realtimeNearStops.filter((realtimeNearStop) =>
-      realtimeNearStop.SubRouteUID === activeSubRoute?.SubRouteUID &&
-      realtimeNearStop.Direction === activeSubRoute?.Direction
-    ),
-    estimatedArrivals.filter((estimatedArrival) =>
-      estimatedArrival.SubRouteUID === activeSubRoute?.SubRouteUID &&
-      estimatedArrival.Direction === activeSubRoute?.Direction
-    )
-  ), [activeSubRoute, estimatedArrivals, realtimeNearStops])
+  const activeEstimatedArrivals = useMemo(() => estimatedArrivals.filter((estimatedArrival) => {
+    if (!activeSubRoute) return false
+    if (estimatedArrival.Direction !== activeSubRoute.Direction) return false
 
-  const activeEstimatedArrivals = useMemo(() => estimatedArrivals.filter((estimatedArrival) =>
-    estimatedArrival.SubRouteUID === activeSubRoute?.SubRouteUID &&
-    estimatedArrival.Direction === activeSubRoute?.Direction
-  ), [activeSubRoute, estimatedArrivals])
+    return (
+      estimatedArrival.SubRouteUID === activeSubRoute.SubRouteUID ||
+      estimatedArrival.RouteUID === activeSubRoute.SubRouteUID
+    )
+  }), [activeSubRoute, estimatedArrivals])
 
   const activeRealtimeNearStops = useMemo(() => realtimeNearStops.filter((realtimeNearStop) =>
     realtimeNearStop.SubRouteUID === activeSubRoute?.SubRouteUID &&
     realtimeNearStop.Direction === activeSubRoute?.Direction
   ), [activeSubRoute, realtimeNearStops])
+
+  const realtimeBusStatuses = useMemo(() => getRouteRealtimeBusStatuses(
+    activeRealtimeNearStops,
+    activeEstimatedArrivals
+  ), [activeEstimatedArrivals, activeRealtimeNearStops])
 
   const realtimeBusesByStopSequence = useMemo(() => {
     return realtimeBusStatuses.reduce<Map<number, typeof realtimeBusStatuses>>((result, realtimeBus) => {
@@ -127,8 +126,11 @@ export function useRouteRealtimeData({
 
   const estimatedArrivalLabelsByStopSequence = useMemo(() => {
     const sortedEstimatedArrivals = [...activeEstimatedArrivals].sort((left, right) => {
+      const leftStopSequence = left.StopSequence ?? Number.POSITIVE_INFINITY
+      const rightStopSequence = right.StopSequence ?? Number.POSITIVE_INFINITY
+
       if (left.EstimateTime == null && right.EstimateTime == null) {
-        return left.StopSequence - right.StopSequence
+        return leftStopSequence - rightStopSequence
       }
       if (left.EstimateTime == null) return 1
       if (right.EstimateTime == null) return -1
@@ -136,6 +138,10 @@ export function useRouteRealtimeData({
     })
 
     return sortedEstimatedArrivals.reduce<Map<number, string>>((result, estimatedArrival) => {
+      if (estimatedArrival.StopSequence == null) {
+        return result
+      }
+
       if (result.has(estimatedArrival.StopSequence)) {
         return result
       }

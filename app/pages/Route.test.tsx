@@ -336,7 +336,7 @@ describe('Route', () => {
     await waitFor(() => {
       expect(screen.getByText('市政府').closest('[data-highlighted="true"]')).toBeInTheDocument()
       expect(screen.getByText('ABC-123')).toBeInTheDocument()
-      expect(screen.getByText('4 分')).toBeInTheDocument()
+      expect(screen.getByText('4 分後到站')).toBeInTheDocument()
     })
   })
 
@@ -442,8 +442,40 @@ describe('Route', () => {
 
     await waitFor(() => {
       expect(screen.getByText('ABC-123')).toBeInTheDocument()
-      expect(screen.getByText('4 分')).toBeInTheDocument()
+      expect(screen.getByText('4 分後到站')).toBeInTheDocument()
       expect(screen.queryByText(routeRealtimeMessages.noRealtimeData.description)).not.toBeInTheDocument()
+    })
+  })
+
+  it('uses route-level ETA data when subroute fields are omitted by upstream', async () => {
+    mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
+      data: [{
+        ...estimatedArrivalsData[0],
+        RouteUID: 'subroute-1',
+        SubRouteUID: undefined,
+        SubRouteID: undefined,
+        SubRouteName: undefined
+      }],
+      isError: false,
+      isLoading: false,
+      error: null
+    })
+
+    mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
+      data: realtimeNearStopsData,
+      isError: false,
+      isLoading: false,
+      error: null
+    })
+
+    renderRoutePage()
+
+    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('ABC-123')).toBeInTheDocument()
+      expect(screen.getByText('4 分後到站')).toBeInTheDocument()
+      expect(screen.queryByText('暫無預估')).not.toBeInTheDocument()
     })
   })
 

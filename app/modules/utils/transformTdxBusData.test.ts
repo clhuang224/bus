@@ -12,8 +12,8 @@ describe('transformTdxBusData', () => {
       RouteUID: 'route-1',
       RouteID: 'route-1',
       RouteName: { Zh_tw: '藍1', En: 'Blue 1' },
-      SubRouteUID: 'subroute-1',
-      SubRouteID: 'subroute-1',
+      SubRouteUID: undefined,
+      SubRouteID: undefined,
       SubRouteName: undefined as never,
       Direction: DirectionType.GO,
       StopSequence: 1,
@@ -23,6 +23,8 @@ describe('transformTdxBusData', () => {
       UpdateTime: '2026-03-20T10:00:00+08:00'
     }, CityNameType.TAIPEI)).toEqual(expect.objectContaining({
       City: CityNameType.TAIPEI,
+      SubRouteUID: 'route-1',
+      SubRouteID: 'route-1',
       SubRouteName: {
         zh_TW: '藍1',
         en: 'Blue 1'
