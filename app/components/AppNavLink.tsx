@@ -28,7 +28,7 @@ export const AppNavLink = (props: AppNavLinkPropType) => {
       label={(
         <Flex align="center" justify="center" direction="column">
           {props.label}
-          {props.icon && isActive ? props.iconActive : props.icon}
+          {isActive ? (props.iconActive ?? props.icon) : props.icon}
         </Flex>
       )}
       active={isActive}
