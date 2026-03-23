@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { CityNameType } from '../enums/CityNameType'
 import { DirectionType } from '../enums/DirectionType'
-import { transformEstimatedArrival, transformRealtimeNearStop, transformStop } from './transformTdxBusData'
+import { transformBusRoute, transformEstimatedArrival, transformRealtimeNearStop, transformStop } from './transformTdxBusData'
 
 describe('transformTdxBusData', () => {
   it('falls back to route name when estimated arrival sub route name is missing', () => {
@@ -77,5 +77,55 @@ describe('transformTdxBusData', () => {
       UpdateTime: '2026-03-20T10:00:00+08:00',
       VersionID: 1
     })).toBeNull()
+  })
+
+  it('falls back to route-level terminal names when subroute terminal names are missing', () => {
+    expect(transformBusRoute({
+      RouteUID: 'route-1',
+      RouteID: 'route-1',
+      HasSubRoutes: true,
+      Operators: [],
+      AuthorityID: '005',
+      ProviderID: 'provider-1',
+      SubRoutes: [{
+        SubRouteUID: 'subroute-1',
+        SubRouteID: 'subroute-1',
+        OperatorIDs: [],
+        SubRouteName: { Zh_tw: '2', En: '2' },
+        Direction: DirectionType.GO,
+        FirstBusTime: '',
+        LastBusTime: '',
+        HolidayFirstBusTime: '',
+        HolidayLastBusTime: '',
+        DepartureStopNameZh: undefined as unknown as string,
+        DepartureStopNameEn: undefined as unknown as string,
+        DestinationStopNameZh: undefined as unknown as string,
+        DestinationStopNameEn: undefined as unknown as string
+      }],
+      BusRouteType: 0,
+      RouteName: { Zh_tw: '2', En: '2' },
+      DepartureStopNameZh: '圓環',
+      DepartureStopNameEn: 'Yuanhuan',
+      DestinationStopNameZh: '大龍峒',
+      DestinationStopNameEn: 'Dalongdong',
+      TicketPriceDescriptionZh: '',
+      TicketPriceDescriptionEn: '',
+      FareBufferZoneDescriptionZh: '',
+      FareBufferZoneDescriptionEn: '',
+      RouteMapImageUrl: '',
+      City: CityNameType.TAIPEI,
+      CityCode: 'TPE',
+      UpdateTime: '2026-03-20T10:00:00+08:00',
+      VersionID: 0
+    }).SubRoutes[0]).toEqual(expect.objectContaining({
+      DepartureStopName: {
+        zh_TW: '圓環',
+        en: 'Yuanhuan'
+      },
+      DestinationStopName: {
+        zh_TW: '大龍峒',
+        en: 'Dalongdong'
+      }
+    }))
   })
 })
