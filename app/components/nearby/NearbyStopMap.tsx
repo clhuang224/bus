@@ -37,6 +37,7 @@ export const NearbyStopMap = ({
 
   useEffect(() => {
     if (!map) return
+    const markerCleanupFns: Array<() => void> = []
 
     markerMap.current.forEach((marker) => marker.remove())
     markerMap.current.clear()
@@ -59,7 +60,7 @@ export const NearbyStopMap = ({
         onSelectStop(data.id)
       }
 
-      addMapMarkerActivationListeners(el, handleSelectStop)
+      markerCleanupFns.push(addMapMarkerActivationListeners(el, handleSelectStop))
 
       const marker = new Marker({ element: el })
         .setLngLat(data.position)
@@ -69,6 +70,7 @@ export const NearbyStopMap = ({
     })
 
     return () => {
+      markerCleanupFns.forEach((cleanup) => cleanup())
       markerMap.current.forEach((marker) => {
         marker.remove()
       })

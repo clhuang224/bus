@@ -94,6 +94,7 @@ export const RouteMap = ({
 
   useEffect(() => {
     if (!map || !isMapReady) return
+    const markerCleanupFns: Array<() => void> = []
 
     markerMap.current.forEach((marker) => marker.remove())
     markerMap.current.clear()
@@ -158,7 +159,7 @@ export const RouteMap = ({
         onSelectStop(stop.id)
       }
 
-      addMapMarkerActivationListeners(el, handleSelectStop)
+      markerCleanupFns.push(addMapMarkerActivationListeners(el, handleSelectStop))
 
       const marker = new mapLibre.Marker({ element: el })
         .setLngLat(stop.position)
@@ -211,7 +212,7 @@ export const RouteMap = ({
         })
       }
 
-      addMapMarkerActivationListeners(el, handleOpenVehiclePopup)
+      markerCleanupFns.push(addMapMarkerActivationListeners(el, handleOpenVehiclePopup))
 
       const marker = new mapLibre.Marker({ element: el })
         .setLngLat(vehicle.position)
@@ -231,6 +232,10 @@ export const RouteMap = ({
         maxZoom: 15,
         duration: 800
       })
+    }
+
+    return () => {
+      markerCleanupFns.forEach((cleanup) => cleanup())
     }
   }, [highlightedStopId, isMapReady, map, onSelectStop, positionedStops, routePath, selectedStop, t, vehicles])
 

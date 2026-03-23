@@ -3,7 +3,7 @@ function isEnterKey(event: KeyboardEvent) {
 }
 
 function isSpaceKey(event: KeyboardEvent) {
-  return event.key === ' '
+  return event.key === ' ' || event.key === 'Spacebar' || event.code === 'Space'
 }
 
 export function addMapMarkerActivationListeners(
@@ -33,4 +33,10 @@ export function addMapMarkerActivationListeners(
   element.addEventListener('click', onActivate)
   element.addEventListener('keydown', handleKeyDown)
   element.addEventListener('keyup', handleKeyUp)
+
+  return () => {
+    element.removeEventListener('click', onActivate)
+    element.removeEventListener('keydown', handleKeyDown)
+    element.removeEventListener('keyup', handleKeyUp)
+  }
 }
