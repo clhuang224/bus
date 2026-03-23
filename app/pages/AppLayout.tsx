@@ -15,7 +15,6 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { Outlet, useLocation, useNavigate } from 'react-router'
 import { AppNavLink } from '~/components/AppNavLink'
-import i18n from '~/modules/i18n'
 import {
   APP_FLOATING_ACTION_OFFSET,
   APP_FOOTER_HEIGHT,
@@ -24,13 +23,6 @@ import {
 import { useWatchGeo } from '~/modules/hooks/useWatchGeo'
 import { fetchCityGeoJSON } from '~/modules/slices/cityGeoSlice'
 import type { AppDispatch, RootState } from '~/modules/store'
-
-export function meta() {
-  return [
-    { title: i18n.t('app.name') },
-    { name: 'description', content: i18n.t('app.description') }
-  ]
-}
 
 export default function AppLayout () {
   const dispatch = useDispatch<AppDispatch>()
