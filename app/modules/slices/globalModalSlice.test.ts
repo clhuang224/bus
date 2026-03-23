@@ -8,10 +8,11 @@ import globalModalSlice, {
   closeGlobalModal,
   openGlobalModal
 } from './globalModalSlice'
+import { DEFAULT_APP_LOCALE } from '../consts/i18n'
 
 describe('globalModalSlice', () => {
   afterEach(async () => {
-    await i18n.changeLanguage('zh-TW')
+    await i18n.changeLanguage(DEFAULT_APP_LOCALE)
   })
 
   it('stores modal content and confirm behavior when opened', () => {

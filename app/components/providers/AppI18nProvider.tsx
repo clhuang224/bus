@@ -1,4 +1,5 @@
 import { useEffect, type PropsWithChildren } from 'react'
+import { useLocation } from 'react-router'
 import { useSelector } from 'react-redux'
 import { setLocaleInStorage } from '~/modules/i18n/locale'
 import { selectLocale } from '~/modules/slices/localeSlice'
@@ -22,6 +23,7 @@ function syncDocumentMetadata(locale: string) {
 
 export const AppI18nProvider = ({ children }: PropsWithChildren) => {
   const locale = useSelector(selectLocale)
+  const location = useLocation()
 
   useEffect(() => {
     let cancelled = false
@@ -32,7 +34,6 @@ export const AppI18nProvider = ({ children }: PropsWithChildren) => {
       } finally {
         if (cancelled) return
         document.documentElement.lang = locale
-        syncDocumentMetadata(locale)
 
         try {
           setLocaleInStorage(window.localStorage, locale)
@@ -48,6 +49,11 @@ export const AppI18nProvider = ({ children }: PropsWithChildren) => {
       cancelled = true
     }
   }, [locale])
+
+  useEffect(() => {
+    document.documentElement.lang = locale
+    syncDocumentMetadata(locale)
+  }, [locale, location.key])
 
   return children
 }
