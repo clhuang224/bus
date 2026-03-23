@@ -33,6 +33,15 @@ export const links: Route.LinksFunction = () => [
   }
 ]
 
+export function meta() {
+  const t = i18n.getFixedT(DEFAULT_APP_LOCALE)
+
+  return [
+    { title: t('app.name') },
+    { name: 'description', content: t('app.description') }
+  ]
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang={i18n.resolvedLanguage ?? i18n.language ?? DEFAULT_APP_LOCALE}>
