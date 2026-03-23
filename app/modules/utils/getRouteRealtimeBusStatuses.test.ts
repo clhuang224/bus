@@ -6,11 +6,13 @@ import { DutyStatusType } from '../enums/DutyStatusType'
 import { StopStatusType } from '../enums/StopStatusType'
 import i18n from '../i18n'
 import { getRouteRealtimeBusStatuses } from './getRouteRealtimeBusStatuses'
+import { DEFAULT_APP_LOCALE } from '../consts/i18n'
 
-const fourMinutesAwayLabel = i18n.t('routePage.realtime.minutesAway', { count: 4 })
-const twoMinutesAwayLabel = i18n.t('routePage.realtime.minutesAway', { count: 2 })
-const inServiceLabel = i18n.t('routePage.realtime.inService')
-const comingSoonLabel = i18n.t('routePage.realtime.comingSoon')
+const t = i18n.getFixedT(DEFAULT_APP_LOCALE)
+const fourMinutesAwayLabel = t('routePage.realtime.minutesAway', { count: 4 })
+const twoMinutesAwayLabel = t('routePage.realtime.minutesAway', { count: 2 })
+const inServiceLabel = t('routePage.realtime.inService')
+const comingSoonLabel = t('routePage.realtime.comingSoon')
 
 describe('getRouteRealtimeBusStatuses', () => {
   it('matches a realtime bus with its estimated arrival by plate number and formats minutes', () => {

@@ -10,10 +10,12 @@ import { StopStatusType } from '~/modules/enums/StopStatusType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import { renderRoute } from '~/test/render'
 import Route from './Route'
+import { DEFAULT_APP_LOCALE } from '~/modules/consts/i18n'
 
-const fourMinutesAwayLabel = i18n.t('routePage.realtime.minutesAway', { count: 4 })
-const noEstimateLabel = i18n.t('routePage.realtime.noEstimate')
-const routeRealtimeMessages = getRouteRealtimeMessages(i18n.t)
+const t = i18n.getFixedT(DEFAULT_APP_LOCALE)
+const fourMinutesAwayLabel = t('routePage.realtime.minutesAway', { count: 4 })
+const noEstimateLabel = t('routePage.realtime.noEstimate')
+const routeRealtimeMessages = getRouteRealtimeMessages(t)
 
 const {
   mockToggleFavoriteRouteStop,
