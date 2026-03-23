@@ -12,20 +12,19 @@ import {
 import { NEARBY_DISTANCE_KM } from '~/modules/consts/nearby'
 import { getNearbyMessages } from '~/modules/consts/pageMessages'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
+import { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import type { BusRoute } from '~/modules/interfaces/BusRoute'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import type { Stop } from '~/modules/interfaces/Stop'
 import type { StopOfRoute } from '~/modules/interfaces/StopOfRoute'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
+import { selectLocale } from '~/modules/slices/localeSlice'
 import type { RootState } from '~/modules/store'
 import { getCityByCoords } from '~/modules/utils/getCityByCoords'
+import { getLocalizedText } from '~/modules/utils/getLocalizedText'
 import { normalizeBusRoutesWithDates } from '~/modules/utils/normalizeBusRoutesWithDates'
 
 const disabledNearbyPermissions = [GeoPermissionType.UNSUPPORTED, GeoPermissionType.DENIED]
-const routeNameCollator = new Intl.Collator('zh-Hant-u-co-stroke', {
-  numeric: true
-})
-
 interface UseNearbyDataOptions {
   selectedStopId: string | null
   selectedRouteStopId: string | null
@@ -69,14 +68,16 @@ function groupNearbyStops(
 }
 
 function buildStationRouteBadgesMap(
-  stopOfRoutes: StopOfRoute[]
+  stopOfRoutes: StopOfRoute[],
+  locale: AppLocaleType,
+  routeNameCollator: Intl.Collator
 ) {
   const stationRouteBadges = new Map<string, Array<Pick<StationRoute, 'routeUID' | 'name'>>>()
 
   stopOfRoutes.forEach((stopOfRoute) => {
     const routeBadge = {
       routeUID: stopOfRoute.RouteUID,
-      name: stopOfRoute.SubRouteName.zh_TW || stopOfRoute.RouteName.zh_TW
+      name: getLocalizedText(stopOfRoute.SubRouteName, locale) || getLocalizedText(stopOfRoute.RouteName, locale)
     }
 
     stopOfRoute.Stops.forEach((stop) => {
@@ -97,7 +98,8 @@ function buildStationRouteBadgesMap(
 function buildStationRoutes(
   routes: BusRoute<Date | null>[],
   stopOfRoutes: StopOfRoute[],
-  selectedRouteStopId: string | null
+  selectedRouteStopId: string | null,
+  locale: AppLocaleType
 ): StationRoute[] {
   if (!selectedRouteStopId || routes.length === 0) return []
 
@@ -108,17 +110,23 @@ function buildStationRoutes(
   const routeFallbackDestinationMap = new Map<string, string>()
 
   routes.forEach((route) => {
-    routeFallbackDepartureMap.set(route.RouteUID, route.DepartureStopName.zh_TW || route.RouteName.zh_TW)
-    routeFallbackDestinationMap.set(route.RouteUID, route.DestinationStopName.zh_TW || route.RouteName.zh_TW)
+    routeFallbackDepartureMap.set(
+      route.RouteUID,
+      getLocalizedText(route.DepartureStopName, locale) || getLocalizedText(route.RouteName, locale)
+    )
+    routeFallbackDestinationMap.set(
+      route.RouteUID,
+      getLocalizedText(route.DestinationStopName, locale) || getLocalizedText(route.RouteName, locale)
+    )
 
     route.SubRoutes.forEach((subRoute) => {
       routeDepartureMap.set(
         `${subRoute.SubRouteUID}-${subRoute.Direction}`,
-        subRoute.DepartureStopName.zh_TW
+        getLocalizedText(subRoute.DepartureStopName, locale)
       )
       routeDestinationMap.set(
         `${subRoute.SubRouteUID}-${subRoute.Direction}`,
-        subRoute.DestinationStopName.zh_TW
+        getLocalizedText(subRoute.DestinationStopName, locale)
       )
     })
   })
@@ -129,7 +137,7 @@ function buildStationRoutes(
       id: routeKey,
       routeUID: stopOfRoute.RouteUID,
       city: stopOfRoute.City,
-      name: stopOfRoute.SubRouteName.zh_TW || stopOfRoute.RouteName.zh_TW,
+      name: getLocalizedText(stopOfRoute.SubRouteName, locale) || getLocalizedText(stopOfRoute.RouteName, locale),
       departure: routeDepartureMap.get(routeKey) ?? routeFallbackDepartureMap.get(stopOfRoute.RouteUID) ?? '',
       destination: routeDestinationMap.get(routeKey) ?? routeFallbackDestinationMap.get(stopOfRoute.RouteUID) ?? '',
       direction: stopOfRoute.Direction
@@ -154,11 +162,13 @@ export function useNearbyData({
   selectedRouteStopId
 }: UseNearbyDataOptions) {
   const { t } = useTranslation()
+  const locale = useSelector(selectLocale)
   const { coords, error: geolocationError, permission } = useSelector((state: RootState) => state.geolocation)
   const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
   const currentCity = getCityByCoords(coords, geojson)
   const currentArea = currentCity ? cityMapArea[currentCity] : null
   const isNearbyDisabled = disabledNearbyPermissions.includes(permission) || geolocationError !== null
+  const routeNameCollator = useMemo(() => new Intl.Collator(locale, { numeric: true }), [locale])
 
   const {
     data: allStops,
@@ -200,8 +210,8 @@ export function useNearbyData({
   const markers = useMemo(() => nearbyStopGroups.map((stopGroup) => ({
     id: stopGroup.StationID,
     position: stopGroup.position,
-    label: stopGroup.StopName.zh_TW
-  })), [nearbyStopGroups])
+    label: getLocalizedText(stopGroup.StopName, locale)
+  })), [locale, nearbyStopGroups])
 
   const message = useMemo(() => {
     if ([GeoPermissionType.UNSUPPORTED, GeoPermissionType.DENIED].includes(permission)) {
@@ -225,13 +235,13 @@ export function useNearbyData({
   }, [nearbyStopGroups, selectedStopId])
 
   const selectedStationRoutes = useMemo(
-    () => buildStationRoutes(routes, stopOfRoutes, selectedRouteStopId),
-    [routes, selectedRouteStopId, stopOfRoutes]
+    () => buildStationRoutes(routes, stopOfRoutes, selectedRouteStopId, locale),
+    [locale, routes, selectedRouteStopId, stopOfRoutes]
   )
 
   const stationRouteBadgesMap = useMemo(
-    () => buildStationRouteBadgesMap(stopOfRoutes),
-    [stopOfRoutes]
+    () => buildStationRouteBadgesMap(stopOfRoutes, locale, routeNameCollator),
+    [locale, routeNameCollator, stopOfRoutes]
   )
 
   return {

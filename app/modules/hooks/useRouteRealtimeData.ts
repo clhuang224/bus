@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
 import { busApi } from '~/modules/apis/bus'
 import { isTdxRateLimitError } from '~/modules/apis/errors/busError'
 import type { BusRoute, BusSubRoute } from '~/modules/interfaces/BusRoute'
 import type { CityNameType } from '~/modules/enums/CityNameType'
 import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
+import { selectLocale } from '~/modules/slices/localeSlice'
 import { formatEstimatedArrivalLabel, getRouteRealtimeBusStatuses } from '~/modules/utils/getRouteRealtimeBusStatuses'
 import { useDelay } from './useDelay'
 
@@ -27,6 +29,7 @@ export function useRouteRealtimeData({
   id
 }: UseRouteRealtimeDataOptions) {
   const { t } = useTranslation()
+  const locale = useSelector(selectLocale)
   const cityName = city as CityNameType
   const shouldPrepareRealtimeQueries = Boolean(city && id && busRoute && activeSubRoute)
   const [realtimeStartDelayMs, setRealtimeStartDelayMs] = useState<number | null>(null)
@@ -133,9 +136,10 @@ export function useRouteRealtimeData({
 
   const realtimeBusStatuses = useMemo(() => getRouteRealtimeBusStatuses(
     t,
+    locale,
     activeRealtimeNearStops,
     activeEstimatedArrivals
-  ), [activeEstimatedArrivals, activeRealtimeNearStops, t])
+  ), [activeEstimatedArrivals, activeRealtimeNearStops, locale, t])
 
   const realtimeBusesByStopSequence = useMemo(() => {
     return realtimeBusStatuses.reduce<Map<number, typeof realtimeBusStatuses>>((result, realtimeBus) => {

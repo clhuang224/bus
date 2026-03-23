@@ -2,6 +2,7 @@ import { ActionIcon, Flex, Stack, Tabs, Text, useMantineTheme } from '@mantine/c
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
 import { BaseAlert } from '~/components/common/BaseAlert'
 import { MapSidebarLayout } from '~/components/common/MapSidebarLayout'
 import { useLocation, useNavigate, useParams } from 'react-router'
@@ -12,9 +13,12 @@ import { useRouteBaseData } from '~/modules/hooks/useRouteBaseData'
 import { useRouteRealtimeData } from '~/modules/hooks/useRouteRealtimeData'
 import { RiArrowLeftSLine } from '@remixicon/react'
 import { AppBadge } from '~/components/common/AppBadge'
+import { selectLocale } from '~/modules/slices/localeSlice'
+import { getLocalizedText } from '~/modules/utils/getLocalizedText'
 
 export default function Route() {
   const { t } = useTranslation()
+  const locale = useSelector(selectLocale)
   const { city, id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
@@ -65,6 +69,9 @@ export default function Route() {
       null,
     realtimeBuses: realtimeBusesByStopSequence.get(stop.sequence) ?? []
   })), [baseTimelineStops, estimatedArrivalLabelsByStopKey, realtimeBusesByStopSequence])
+  const routeName = busRoute ? getLocalizedText(busRoute.RouteName, locale) : null
+  const routeDeparture = busRoute ? getLocalizedText(busRoute.DepartureStopName, locale) : null
+  const routeDestination = busRoute ? getLocalizedText(busRoute.DestinationStopName, locale) : null
 
   useEffect(() => {
     if (isSm) {
@@ -131,13 +138,13 @@ export default function Route() {
               <ActionIcon aria-label={t('routePage.backToRoutes')} onClick={handleBack}>
                 <RiArrowLeftSLine size={18} />
               </ActionIcon>
-              {busRoute && (
-                <AppBadge type="route" size="xl">{busRoute.RouteName.zh_TW}</AppBadge>
+              {routeName && (
+                <AppBadge type="route" size="xl">{routeName}</AppBadge>
               )}
             </Flex>
-            {busRoute && (
+            {routeDeparture && routeDestination && (
               <Text size="sm" c="dimmed" mt="sm">
-                {busRoute.DepartureStopName.zh_TW} - {busRoute.DestinationStopName.zh_TW}
+                {routeDeparture} - {routeDestination}
               </Text>
             )}
           </Stack>

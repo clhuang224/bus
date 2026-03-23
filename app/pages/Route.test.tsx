@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { configureStore } from '@reduxjs/toolkit'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
@@ -8,6 +9,7 @@ import { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
+import localeSlice from '~/modules/slices/localeSlice'
 import { renderRoute } from '~/test/render'
 import Route from './Route'
 import { DEFAULT_APP_LOCALE } from '~/modules/consts/i18n'
@@ -311,9 +313,16 @@ function mockDefaultRouteQueries() {
 function renderRoutePage(
   initialEntries: Array<string | { pathname: string, state?: unknown }> = ['/routes/Taipei/route-1']
 ) {
+  const store = configureStore({
+    reducer: {
+      locale: localeSlice.reducer
+    }
+  })
+
   return renderRoute(<Route />, {
     path: '/routes/:city/:id',
-    initialEntries
+    initialEntries,
+    store
   })
 }
 
