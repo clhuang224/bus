@@ -1,8 +1,8 @@
 import { AreaType } from '../enums/AreaType'
 import { CityNameType } from '../enums/CityNameType'
-import type { zhTW } from '../i18n/locales/zh-TW'
 
-type AreaTranslationKey = `common.area.${keyof typeof zhTW.translation.common.area}`
+type ZhTWLocale = typeof import('../i18n/locales/zh-TW').zhTW
+type AreaTranslationKey = `common.area.${keyof ZhTWLocale['translation']['common']['area']}`
 
 export const areaMapCity: Record<AreaType, CityNameType[]> = {
     [AreaType.TAIPEI]: [CityNameType.TAIPEI, CityNameType.NEW_TAIPEI],

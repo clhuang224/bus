@@ -1,7 +1,8 @@
 import { StopStatusType } from '../enums/StopStatusType'
-import type { zhTW } from '../i18n/locales/zh-TW'
 
-type StopStatusTranslationKey = `routePage.realtime.stopStatus.${keyof typeof zhTW.translation.routePage.realtime.stopStatus}`
+type ZhTWLocale = typeof import('../i18n/locales/zh-TW').zhTW
+type StopStatusTranslationKey =
+  `routePage.realtime.stopStatus.${keyof ZhTWLocale['translation']['routePage']['realtime']['stopStatus']}`
 
 export const stopStatusTranslationKeyMap: Record<StopStatusType, StopStatusTranslationKey> = {
   [StopStatusType.NORMAL]: 'routePage.realtime.stopStatus.normal',
