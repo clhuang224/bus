@@ -15,6 +15,7 @@ import { BearingType } from '~/modules/enums/BearingType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { GeoErrorType } from '~/modules/enums/geo/GeoErrorType'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
+import localeSlice from '~/modules/slices/localeSlice'
 import { renderWithProvidersAndRouter } from '~/test/render'
 
 const {
@@ -271,6 +272,7 @@ function renderNearby({
 } = {}) {
   const store = configureStore({
     reducer: {
+      locale: localeSlice.reducer,
       geolocation: () => ({
         coords,
         error: geolocationError,

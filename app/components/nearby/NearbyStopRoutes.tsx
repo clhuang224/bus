@@ -1,5 +1,5 @@
 import { ScrollArea, Skeleton, Stack, Tabs, Text } from '@mantine/core'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SkeletonList } from '~/components/common/SkeletonList'
 import { DirectionType } from '~/modules/enums/DirectionType'
@@ -13,17 +13,14 @@ interface PropType {
   isLoading?: boolean
 }
 
-const routeNameCollator = new Intl.Collator('zh-Hant-u-co-stroke', {
-  numeric: true
-})
-
 function getDefaultRouteDirection(directions: DirectionType[]) {
   return directions[0] != null ? String(directions[0]) : null
 }
 
 export const NearbyStopRoutes = ({ routes, isLoading = false }: PropType) => {
-  const { t } = useTranslation()
-  const routeSections = getEnumValues(DirectionType)
+  const { t, i18n } = useTranslation()
+  const routeNameCollator = useMemo(() => new Intl.Collator(i18n.resolvedLanguage, { numeric: true }), [i18n.resolvedLanguage])
+  const routeSections = useMemo(() => getEnumValues(DirectionType)
     .map((direction) => ({
       direction,
       label: getDirectionLabel(t, direction),
@@ -31,7 +28,7 @@ export const NearbyStopRoutes = ({ routes, isLoading = false }: PropType) => {
         .filter((route) => route.direction === direction)
         .sort((left, right) => routeNameCollator.compare(left.name, right.name))
     }))
-    .filter((section) => section.routes.length > 0)
+    .filter((section) => section.routes.length > 0), [routeNameCollator, routes, t])
   const [selectedDirection, setSelectedDirection] = useState<string | null>(
     getDefaultRouteDirection(routeSections.map((section) => section.direction))
   )

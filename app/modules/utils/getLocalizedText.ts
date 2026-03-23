@@ -9,10 +9,12 @@ export function getLocalizedText(
 ) {
   if (!text) return ''
 
+  const zhText = text.zh_TW?.trim() ?? ''
+  const englishText = text.en?.trim() ?? ''
+
   if (locale === AppLocaleType.EN) {
-    const englishText = text.en?.trim()
     if (englishText) return englishText
   }
 
-  return text.zh_TW
+  return zhText
 }

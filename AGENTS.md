@@ -347,6 +347,8 @@ Current app locale rules:
 
 For TDX-backed localized text such as route names, stop names, departure labels, or destination labels, do not assume `.zh_TW` is always the rendered field going forward. Follow the current i18n rollout plan and keep locale-aware access explicit and readable as those screens migrate.
 
+TDX English route and subroute names may be less specific than the Traditional Chinese source data. When multiple nearby routes appear to share the same English name, do not assume they are the same service from display text alone; use the Traditional Chinese name to double-check whether they are actually different variants.
+
 ### UI Structure
 
 Prefer components that express domain concepts clearly.
