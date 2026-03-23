@@ -106,13 +106,7 @@ export function getRouteRealtimeBusStatuses(
           ? stopMatchedArrival
           : nextEstimatedArrival ?? stopMatchedArrival)
       const estimateLabel = matchedArrival
-        ? formatEstimatedArrivalLabel(
-            t,
-            matchedArrival.EstimateTime,
-            matchedArrival.EstimateTime == null
-              ? matchedArrival.StopStatus
-              : matchedArrival.StopStatus
-          )
+        ? formatEstimatedArrivalLabel(t, matchedArrival.EstimateTime, matchedArrival.StopStatus)
         : getRealtimeFallbackLabel(t, StopStatusType.UNKNOWN)
       const shouldUseRealtimeFallbackLabel =
         matchedArrival != null &&
