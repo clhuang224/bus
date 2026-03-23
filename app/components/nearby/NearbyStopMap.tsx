@@ -4,7 +4,8 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import type { LngLat, LatLng } from '~/modules/types/CoordsType'
-import { createMapMarkerElement } from '~/modules/utils/createMapMarkerElement'
+import { addMapMarkerActivationListeners } from '~/modules/utils/map/addMapMarkerActivationListeners'
+import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
 import BaseMap from '../common/BaseMap'
 
 interface PropType {
@@ -47,17 +48,18 @@ export const NearbyStopMap = ({
         datasetLabel: data.label,
         fontSize: '16px',
         fontWeight: 'bold',
+        interactive: true,
         textContent: '🚏',
         type: 'stop'
       })
 
-      const handleSelectStop = (event: MouseEvent) => {
+      const handleSelectStop = (event: MouseEvent | KeyboardEvent) => {
         event.preventDefault()
         event.stopPropagation()
         onSelectStop(data.id)
       }
 
-      el.addEventListener('click', handleSelectStop)
+      addMapMarkerActivationListeners(el, handleSelectStop)
 
       const marker = new Marker({ element: el })
         .setLngLat(data.position)

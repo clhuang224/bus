@@ -7,6 +7,7 @@ interface CreateMapMarkerElementOptions {
   datasetLabel?: string
   fontSize?: string
   fontWeight?: string
+  interactive?: boolean
   textContent?: string
   title?: string
   type: MapMarkerType
@@ -49,6 +50,7 @@ export const createMapMarkerElement = ({
   datasetLabel,
   fontSize,
   fontWeight,
+  interactive = false,
   textContent,
   title,
   type
@@ -62,7 +64,7 @@ export const createMapMarkerElement = ({
     justifyContent: 'center',
     backgroundColor: backgroundColor ?? markerStyleMap[type].backgroundColor,
     boxShadow,
-    cursor: 'pointer',
+    cursor: interactive ? 'pointer' : 'default',
     fontSize: fontSize ?? markerStyleMap[type].fontSize,
     fontWeight: fontWeight ?? markerStyleMap[type].fontWeight
   } satisfies Partial<CSSStyleDeclaration>)
@@ -73,6 +75,13 @@ export const createMapMarkerElement = ({
 
   if (ariaLabel) {
     element.setAttribute('aria-label', ariaLabel)
+  }
+
+  if (interactive) {
+    element.setAttribute('role', 'button')
+    element.tabIndex = 0
+  } else if (ariaLabel) {
+    element.setAttribute('role', 'img')
   }
 
   if (textContent) {

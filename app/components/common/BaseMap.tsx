@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import type { LatLng } from '~/modules/types/CoordsType'
 import type { RootState } from '~/modules/store'
-import { createMapMarkerElement } from '~/modules/utils/createMapMarkerElement'
+import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
 
 interface PropType {
   center: LatLng | null
