@@ -18,6 +18,7 @@ import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import type { Stop } from '~/modules/interfaces/Stop'
 import type { StopOfRoute } from '~/modules/interfaces/StopOfRoute'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
+import { useLocalizedTextCollator } from '~/modules/hooks/useLocalizedTextCollator'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import type { RootState } from '~/modules/store'
 import { getCityByCoords } from '~/modules/utils/getCityByCoords'
@@ -168,7 +169,7 @@ export function useNearbyData({
   const currentCity = getCityByCoords(coords, geojson)
   const currentArea = currentCity ? cityMapArea[currentCity] : null
   const isNearbyDisabled = disabledNearbyPermissions.includes(permission) || geolocationError !== null
-  const routeNameCollator = useMemo(() => new Intl.Collator(locale, { numeric: true }), [locale])
+  const routeNameCollator = useLocalizedTextCollator()
 
   const {
     data: allStops,

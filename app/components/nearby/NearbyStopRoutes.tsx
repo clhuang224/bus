@@ -2,6 +2,7 @@ import { ScrollArea, Skeleton, Stack, Tabs, Text } from '@mantine/core'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SkeletonList } from '~/components/common/SkeletonList'
+import { useLocalizedTextCollator } from '~/modules/hooks/useLocalizedTextCollator'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
 import { getEnumValues } from '~/modules/utils/getEnumValues'
@@ -18,8 +19,8 @@ function getDefaultRouteDirection(directions: DirectionType[]) {
 }
 
 export const NearbyStopRoutes = ({ routes, isLoading = false }: PropType) => {
-  const { t, i18n } = useTranslation()
-  const routeNameCollator = useMemo(() => new Intl.Collator(i18n.resolvedLanguage, { numeric: true }), [i18n.resolvedLanguage])
+  const { t } = useTranslation()
+  const routeNameCollator = useLocalizedTextCollator()
   const routeSections = useMemo(() => getEnumValues(DirectionType)
     .map((direction) => ({
       direction,

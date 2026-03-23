@@ -246,18 +246,18 @@ const targetFavoriteRouteStop: FavoriteRouteStop = {
   favoriteId: 'route-1-subroute-1-1-station-c',
   city: CityNameType.TAIPEI,
   routeUID: 'route-1',
-  routeName: '藍1',
+  routeName: { zh_TW: '藍1', en: 'Blue 1' },
   subRouteUID: 'subroute-1',
-  subRouteName: '藍1',
+  subRouteName: { zh_TW: '藍1', en: 'Blue 1' },
   direction: DirectionType.RETURN,
   stopUID: 'stop-c',
   stopID: 'stop-c',
   stationID: 'station-c',
   stationKey: 'station-c',
-  stopName: '市政府',
+  stopName: { zh_TW: '市政府', en: 'City Hall' },
   stopSequence: 2,
-  departure: '捷運昆陽站',
-  destination: '市政府'
+  departure: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
+  destination: { zh_TW: '市政府', en: 'City Hall' }
 }
 
 function resetRouteMocks() {

@@ -150,24 +150,18 @@ export function useRouteBaseData({
         favoriteId: `${busRoute.RouteUID}-${activeSubRoute.SubRouteUID}-${activeSubRoute.Direction}-${stationKey}`,
         city: busRoute.City,
         routeUID: busRoute.RouteUID,
-        routeName: getLocalizedText(busRoute.RouteName, locale),
+        routeName: busRoute.RouteName,
         subRouteUID: activeSubRoute.SubRouteUID,
-        subRouteName: getLocalizedText(activeSubRoute.SubRouteName, locale),
+        subRouteName: activeSubRoute.SubRouteName,
         direction: activeSubRoute.Direction,
         stopUID: stop.StopUID,
         stopID: stop.StopID,
         stationID: stop.StationID ?? null,
         stationKey,
-        stopName: getLocalizedText(stop.StopName, locale),
+        stopName: stop.StopName,
         stopSequence: stop.StopSequence,
-        departure: getLocalizedText(
-          activeSubRoute.DepartureStopName ?? busRoute.DepartureStopName,
-          locale
-        ),
-        destination: getLocalizedText(
-          activeSubRoute.DestinationStopName ?? busRoute.DestinationStopName,
-          locale
-        )
+        departure: activeSubRoute.DepartureStopName ?? busRoute.DepartureStopName,
+        destination: activeSubRoute.DestinationStopName ?? busRoute.DestinationStopName
       }
 
       return {

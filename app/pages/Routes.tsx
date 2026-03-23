@@ -12,6 +12,7 @@ import { getSearchMessages } from '~/modules/consts/pageMessages'
 import { busApi } from '~/modules/apis/bus'
 import type { BusRoute } from '~/modules/interfaces/BusRoute'
 import { AppLocaleType } from '~/modules/enums/AppLocaleType'
+import { useLocalizedTextCollator } from '~/modules/hooks/useLocalizedTextCollator'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { setKeyword, setSelectedArea } from '~/modules/slices/routeSearchSlice'
 import type { AppDispatch, RootState } from '~/modules/store'
@@ -52,10 +53,7 @@ export default function Routes() {
   const area = selectedArea ?? currentArea ?? AreaType.TAIPEI
   const { data: routeData = [], isLoading, error } = busApi.useGetRoutesByAreaQuery(area)
   const routes = useMemo(() => normalizeBusRoutesWithDates(routeData), [routeData])
-  const routeNameCollator = useMemo(() => new Intl.Collator(
-    locale === AppLocaleType.EN ? 'en' : 'zh-Hant-u-co-stroke',
-    { numeric: true }
-  ), [locale])
+  const routeNameCollator = useLocalizedTextCollator()
 
   const filteredRoutes = useMemo(() => {
     const normalizedKeyword = keyword.trim().toLowerCase()

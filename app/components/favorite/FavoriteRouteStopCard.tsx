@@ -1,11 +1,14 @@
 import { ActionIcon, Box, Card, Flex, Group, Stack, Text } from '@mantine/core'
 import { RiHeart2Fill } from '@remixicon/react'
 import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
 import { Link } from 'react-router'
 import { AppBadge } from '~/components/common/AppBadge'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
+import { selectLocale } from '~/modules/slices/localeSlice'
 import { getCityLabel } from '~/modules/utils/getCityLabel'
 import { getDirectionLabel } from '~/modules/utils/getDirectionLabel'
+import { getLocalizedText } from '~/modules/utils/getLocalizedText'
 
 interface PropType {
   favoriteRouteStop: FavoriteRouteStop
@@ -14,6 +17,12 @@ interface PropType {
 
 export const FavoriteRouteStopCard = ({ favoriteRouteStop, onRemove }: PropType) => {
   const { t } = useTranslation()
+  const locale = useSelector(selectLocale)
+  const routeName = getLocalizedText(favoriteRouteStop.routeName, locale)
+  const subRouteName = getLocalizedText(favoriteRouteStop.subRouteName, locale)
+  const stopName = getLocalizedText(favoriteRouteStop.stopName, locale)
+  const departure = getLocalizedText(favoriteRouteStop.departure, locale)
+  const destination = getLocalizedText(favoriteRouteStop.destination, locale)
 
   return (
     <Card
@@ -39,8 +48,8 @@ export const FavoriteRouteStopCard = ({ favoriteRouteStop, onRemove }: PropType)
               <Group gap="xs" wrap="wrap">
                 <AppBadge type="route">
                   {[
-                    favoriteRouteStop.routeName,
-                    favoriteRouteStop.subRouteName === favoriteRouteStop.routeName ? null : favoriteRouteStop.subRouteName,
+                    routeName,
+                    subRouteName === routeName ? null : subRouteName,
                     getDirectionLabel(t, favoriteRouteStop.direction)
                   ].filter(Boolean).join(' ')}
                 </AppBadge>
@@ -49,12 +58,12 @@ export const FavoriteRouteStopCard = ({ favoriteRouteStop, onRemove }: PropType)
                 </AppBadge>
               </Group>
               <Text p="sm">
-                {favoriteRouteStop.stopSequence}. {favoriteRouteStop.stopName}
+                {favoriteRouteStop.stopSequence}. {stopName}
               </Text>
               <Text size="xs" c="dimmed">
                 {t('components.favoriteRouteStopCard.terminal', {
-                  departure: favoriteRouteStop.departure,
-                  destination: favoriteRouteStop.destination
+                  departure,
+                  destination
                 })}
               </Text>
             </Stack>

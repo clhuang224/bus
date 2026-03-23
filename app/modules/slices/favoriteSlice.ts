@@ -1,7 +1,62 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { FavoriteRouteStop } from '../interfaces/FavoriteRouteStop'
+import type { LocalizedText } from '../types/LocalizedText'
 
 const FAVORITE_ROUTE_STOPS_STORAGE_KEY = 'favoriteRouteStops'
+
+function toLocalizedText(value: unknown): LocalizedText | null {
+  if (typeof value === 'string') {
+    return {
+      zh_TW: value,
+      en: ''
+    }
+  }
+
+  const localizedValue = value as Record<string, unknown> | null
+  if (
+    typeof value === 'object' &&
+    value !== null &&
+    'zh_TW' in value &&
+    'en' in value &&
+    typeof localizedValue?.zh_TW === 'string' &&
+    typeof localizedValue.en === 'string'
+  ) {
+    return value as LocalizedText
+  }
+
+  return null
+}
+
+function normalizeStoredFavoriteRouteStop(item: unknown): FavoriteRouteStop | null {
+  const favoriteRouteStop = item as Record<string, unknown> | null
+  if (
+    typeof item !== 'object' ||
+    item === null ||
+    !('favoriteId' in item) ||
+    typeof favoriteRouteStop?.favoriteId !== 'string'
+  ) {
+    return null
+  }
+
+  const routeName = toLocalizedText(favoriteRouteStop.routeName)
+  const subRouteName = toLocalizedText(favoriteRouteStop.subRouteName)
+  const stopName = toLocalizedText(favoriteRouteStop.stopName)
+  const departure = toLocalizedText(favoriteRouteStop.departure)
+  const destination = toLocalizedText(favoriteRouteStop.destination)
+
+  if (!routeName || !subRouteName || !stopName || !departure || !destination) {
+    return null
+  }
+
+  return {
+    ...(item as Omit<FavoriteRouteStop, 'routeName' | 'subRouteName' | 'stopName' | 'departure' | 'destination'>),
+    routeName,
+    subRouteName,
+    stopName,
+    departure,
+    destination
+  }
+}
 
 function loadStoredFavoriteRouteStops() {
   const storedValue = localStorage.getItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY)
@@ -10,12 +65,11 @@ function loadStoredFavoriteRouteStops() {
   const parsedValue = JSON.parse(storedValue) as unknown
   if (!Array.isArray(parsedValue)) return [] as FavoriteRouteStop[]
 
-  return parsedValue.filter((item): item is FavoriteRouteStop =>
-    typeof item === 'object' &&
-    item !== null &&
-    'favoriteId' in item &&
-    typeof item.favoriteId === 'string'
-  )
+  return parsedValue.flatMap((item) => {
+    const favoriteRouteStop = normalizeStoredFavoriteRouteStop(item)
+
+    return favoriteRouteStop ? [favoriteRouteStop] : []
+  })
 }
 
 function persistFavoriteRouteStops(routeStops: FavoriteRouteStop[]) {
