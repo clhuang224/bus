@@ -165,6 +165,15 @@ export const zhTW = {
         }
       }
     },
+    errorBoundary: {
+      default: {
+        title: '發生錯誤'
+      },
+      notFound: {
+        title: '404',
+        description: '找不到你要的頁面。'
+      }
+    },
     messages: {
       nearby: {
         loadStopsError: {

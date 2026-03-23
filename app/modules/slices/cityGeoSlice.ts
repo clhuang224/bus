@@ -42,21 +42,21 @@ export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
   try {
     const url = 'https://cdn.jsdelivr.net/npm/taiwan-atlas/counties-10t.json'
     const res = await fetch(url)
-    if (!res.ok) throw new Error('API 取得失敗')
+    if (!res.ok) throw new Error('Failed to fetch city GeoJSON API.')
     const topo: Topology = await res.json()
     const geo = feature(topo, topo.objects.counties)
     if (geo.type === 'FeatureCollection') {
       dispatch(setGeoJSON(geo))
       localStorage.setItem('cityGeoJSON', JSON.stringify(geo))
     } else {
-      throw new Error('取得的 TopoJSON 不是 FeatureCollection')
+      throw new Error('Fetched TopoJSON is not a FeatureCollection.')
     }
   } catch (err) {
     console.error('fetchCityGeoJSON error:', err)
     const backup = localStorage.getItem('cityGeoJSON')
     if (backup) {
       dispatch(setGeoJSON(JSON.parse(backup)))
-      dispatch(setError('API 取得失敗，已使用備份資料'))
+      dispatch(setError('Failed to fetch city GeoJSON API. Using cached backup data.'))
     }
   }
 }

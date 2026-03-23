@@ -165,6 +165,15 @@ export const en = {
         }
       }
     },
+    errorBoundary: {
+      default: {
+        title: 'Error'
+      },
+      notFound: {
+        title: '404',
+        description: 'The requested page could not be found.'
+      }
+    },
     messages: {
       nearby: {
         loadStopsError: {
