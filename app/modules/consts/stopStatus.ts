@@ -1,5 +1,5 @@
 import { StopStatusType } from '../enums/StopStatusType'
-import { zhTW } from '../i18n/locales/zh-TW'
+import type { zhTW } from '../i18n/locales/zh-TW'
 
 type StopStatusTranslationKey = `routePage.realtime.stopStatus.${keyof typeof zhTW.translation.routePage.realtime.stopStatus}`
 

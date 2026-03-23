@@ -1,6 +1,6 @@
 import { AreaType } from '../enums/AreaType'
 import { CityNameType } from '../enums/CityNameType'
-import { zhTW } from '../i18n/locales/zh-TW'
+import type { zhTW } from '../i18n/locales/zh-TW'
 
 type AreaTranslationKey = `common.area.${keyof typeof zhTW.translation.common.area}`
 

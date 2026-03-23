@@ -1,5 +1,5 @@
 import { DirectionType } from '../enums/DirectionType'
-import { zhTW } from '../i18n/locales/zh-TW'
+import type { zhTW } from '../i18n/locales/zh-TW'
 
 type DirectionTranslationKey = `common.direction.${keyof typeof zhTW.translation.common.direction}`
 

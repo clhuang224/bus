@@ -1,6 +1,6 @@
 import { CityNameType } from '../enums/CityNameType'
 import { CountyIdType } from '../enums/CountyIdType'
-import { zhTW } from '../i18n/locales/zh-TW'
+import type { zhTW } from '../i18n/locales/zh-TW'
 
 type CityTranslationKey = `common.city.${keyof typeof zhTW.translation.common.city}`
 
