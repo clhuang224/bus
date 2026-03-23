@@ -1,6 +1,9 @@
 import { AreaType } from '../enums/AreaType'
 import { CityNameType } from '../enums/CityNameType'
 
+type ZhTWLocale = typeof import('../i18n/locales/zh-TW').zhTW
+type AreaTranslationKey = `common.area.${keyof ZhTWLocale['translation']['common']['area']}`
+
 export const areaMapCity: Record<AreaType, CityNameType[]> = {
     [AreaType.TAIPEI]: [CityNameType.TAIPEI, CityNameType.NEW_TAIPEI],
     [AreaType.TAOYUAN]: [CityNameType.TAOYUAN],
@@ -23,26 +26,26 @@ export const areaMapCity: Record<AreaType, CityNameType[]> = {
     [AreaType.LIENCHIANG]: [CityNameType.LIENCHIANG_COUNTY]
 }
 
-export const areaMapAreaName: Record<AreaType, string> = {
-    [AreaType.TAIPEI]: '雙北',
-    [AreaType.TAOYUAN]: '桃園',
-    [AreaType.TAICHUNG]: '台中',
-    [AreaType.TAINAN]: '台南',
-    [AreaType.KAOHSIUNG]: '高雄',
-    [AreaType.KEELUNG]: '基隆',
-    [AreaType.HSINCHU]: '新竹',
-    [AreaType.MIAOLI]: '苗栗',
-    [AreaType.CHANGHUA]: '彰化',
-    [AreaType.NANTOU]: '南投',
-    [AreaType.YUNLIN]: '雲林',
-    [AreaType.CHIAYI]: '嘉義',
-    [AreaType.PINGTUNG]: '屏東',
-    [AreaType.YILAN]: '宜蘭',
-    [AreaType.HUALIEN]: '花蓮',
-    [AreaType.TAITUNG]: '台東',
-    [AreaType.KINMEN]: '金門',
-    [AreaType.PENGHU]: '澎湖',
-    [AreaType.LIENCHIANG]: '連江'
+export const areaTranslationKeyMap: Record<AreaType, AreaTranslationKey> = {
+    [AreaType.TAIPEI]: 'common.area.Taipei',
+    [AreaType.TAOYUAN]: 'common.area.Taoyuan',
+    [AreaType.TAICHUNG]: 'common.area.Taichung',
+    [AreaType.TAINAN]: 'common.area.Tainan',
+    [AreaType.KAOHSIUNG]: 'common.area.Kaohsiung',
+    [AreaType.KEELUNG]: 'common.area.Keelung',
+    [AreaType.HSINCHU]: 'common.area.Hsinchu',
+    [AreaType.MIAOLI]: 'common.area.Miaoli',
+    [AreaType.CHANGHUA]: 'common.area.Changhua',
+    [AreaType.NANTOU]: 'common.area.Nantou',
+    [AreaType.YUNLIN]: 'common.area.Yunlin',
+    [AreaType.CHIAYI]: 'common.area.Chiayi',
+    [AreaType.PINGTUNG]: 'common.area.Pingtung',
+    [AreaType.YILAN]: 'common.area.Yilan',
+    [AreaType.HUALIEN]: 'common.area.Hualien',
+    [AreaType.TAITUNG]: 'common.area.Taitung',
+    [AreaType.KINMEN]: 'common.area.Kinmen',
+    [AreaType.PENGHU]: 'common.area.Penghu',
+    [AreaType.LIENCHIANG]: 'common.area.Lienchiang'
 }
 
 export const cityMapArea = Object.entries(areaMapCity).reduce((result, [area, cities]) => {

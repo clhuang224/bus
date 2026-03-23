@@ -3,9 +3,9 @@ import { RiHeart2Fill } from '@remixicon/react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { AppBadge } from '~/components/common/AppBadge'
-import { cityMapName } from '~/modules/consts/city'
-import { directionMapName } from '~/modules/consts/direction'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
+import { getCityLabel } from '~/modules/utils/getCityLabel'
+import { getDirectionLabel } from '~/modules/utils/getDirectionLabel'
 
 interface PropType {
   favoriteRouteStop: FavoriteRouteStop
@@ -41,11 +41,11 @@ export const FavoriteRouteStopCard = ({ favoriteRouteStop, onRemove }: PropType)
                   {[
                     favoriteRouteStop.routeName,
                     favoriteRouteStop.subRouteName === favoriteRouteStop.routeName ? null : favoriteRouteStop.subRouteName,
-                    directionMapName[favoriteRouteStop.direction]
+                    getDirectionLabel(t, favoriteRouteStop.direction)
                   ].filter(Boolean).join(' ')}
                 </AppBadge>
                 <AppBadge type="city">
-                  {cityMapName[favoriteRouteStop.city]}
+                  {getCityLabel(t, favoriteRouteStop.city)}
                 </AppBadge>
               </Group>
               <Text p="sm">

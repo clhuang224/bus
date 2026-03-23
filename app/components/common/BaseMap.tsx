@@ -3,10 +3,11 @@ import { useId } from '@mantine/hooks'
 import mapLibre, { Map, Marker, LngLat as MapLngLat } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import type { LatLng } from '~/modules/types/CoordsType'
 import type { RootState } from '~/modules/store'
-import { createMapMarkerElement } from '~/modules/utils/createMapMarkerElement'
+import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
 
 interface PropType {
   center: LatLng | null
@@ -16,6 +17,7 @@ interface PropType {
 }
 
 const BaseMap = ({ center, zoom = 16, showUserLocation = false, onLoad }: PropType) => {
+  const { t } = useTranslation()
   const id = useId()
   const [map, setMap] = useState<Map | null>(null)
   const userMarkerRef = useRef<Marker | null>(null)
@@ -96,6 +98,7 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, onLoad }: PropTy
     }
 
     const el = createMapMarkerElement({
+      ariaLabel: t('components.baseMap.userLocationMarkerAriaLabel'),
       boxShadow: '0 0 10px rgba(0,0,0,0.3)',
       type: 'user'
     })
@@ -108,7 +111,7 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, onLoad }: PropTy
       userMarkerRef.current?.remove()
       userMarkerRef.current = null
     }
-  }, [map, showUserLocation, coords])
+  }, [coords, map, showUserLocation, t])
 
   return <Box id={id} style={{ width: '100%', height: '100%' }} />
 }

@@ -2,7 +2,7 @@ import { ActionIcon, Alert, Badge, Box, Group, ScrollArea, Skeleton, Stack, Text
 import { RiHeart2Fill, RiHeart2Line } from '@remixicon/react'
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { routeRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
+import { getRouteRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
 import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
 import { useScrollSelectedItem } from '~/modules/hooks/useScrollSelectedItem'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
@@ -48,6 +48,7 @@ export const RouteStopList = ({
 }: PropType) => {
   const { t } = useTranslation()
   const stopItemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
+  const routeRealtimeMessages = getRouteRealtimeMessages(t)
 
   useScrollSelectedItem({
     itemElementRefs: stopItemRefs,

@@ -1,4 +1,5 @@
 import { Button, Flex, Modal } from '@mantine/core'
+import { useTranslation } from 'react-i18next'
 
 type ModalVariant = 'alert' | 'confirm'
 
@@ -20,10 +21,11 @@ const BaseModal = ({
   title,
   children,
   variant = 'alert',
-  confirmText = '確定',
-  cancelText = '取消'
+  confirmText,
+  cancelText
 }: PropType) => {
   const isConfirm = variant === 'confirm'
+  const { t } = useTranslation()
 
   return (
     <Modal
@@ -39,10 +41,10 @@ const BaseModal = ({
       <Flex justify="flex-end" mt="md" gap="sm">
         {isConfirm && onCancel && (
           <Button variant="default" onClick={onCancel}>
-            {cancelText}
+            {cancelText ?? t('common.modal.cancel')}
           </Button>
         )}
-        <Button onClick={onConfirm}>{confirmText}</Button>
+        <Button onClick={onConfirm}>{confirmText ?? t('common.modal.confirm')}</Button>
       </Flex>
     </Modal>
   )

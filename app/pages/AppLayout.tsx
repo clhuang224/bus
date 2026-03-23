@@ -24,13 +24,6 @@ import { useWatchGeo } from '~/modules/hooks/useWatchGeo'
 import { fetchCityGeoJSON } from '~/modules/slices/cityGeoSlice'
 import type { AppDispatch, RootState } from '~/modules/store'
 
-export function meta() {
-  return [
-    { title: 'Finding the Bus' },
-    { name: 'description', content: 'Go find the bus you\'ve been waiting for your whole life. (Just kidding.)' }
-  ]
-}
-
 export default function AppLayout () {
   const dispatch = useDispatch<AppDispatch>()
   const location = useLocation()
@@ -96,7 +89,9 @@ export default function AppLayout () {
           </Flex>
           <Flex ml="auto">
             <AppNavLink
-              label={settingNav.name}
+              ariaLabel={settingNav.name}
+              icon={settingNav.icon}
+              iconActive={settingNav.iconActive}
               to={settingNav.path}
             />
           </Flex>

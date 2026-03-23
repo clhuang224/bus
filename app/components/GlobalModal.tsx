@@ -38,8 +38,8 @@ export const GlobalModal = () => {
       onCancel={() => dispatch(closeGlobalModal())}
       title={title}
       variant={variant}
-      confirmText={confirmText}
-      cancelText={cancelText}
+      confirmText={confirmText ?? undefined}
+      cancelText={cancelText ?? undefined}
     >
       {message}
     </BaseModal>

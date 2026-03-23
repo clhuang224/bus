@@ -1,9 +1,12 @@
 import { DirectionType } from '../enums/DirectionType'
 
-export const directionMapName: Record<DirectionType, string> = {
-  [DirectionType.GO]: '去程',
-  [DirectionType.RETURN]: '返程',
-  [DirectionType.LOOP]: '迴圈',
-  [DirectionType.SHUTTLE]: '循環',
-  [DirectionType.UNKNOWN]: '未知'
+type ZhTWLocale = typeof import('../i18n/locales/zh-TW').zhTW
+type DirectionTranslationKey = `common.direction.${keyof ZhTWLocale['translation']['common']['direction']}`
+
+export const directionTranslationKeyMap: Record<DirectionType, DirectionTranslationKey> = {
+  [DirectionType.GO]: 'common.direction.go',
+  [DirectionType.RETURN]: 'common.direction.return',
+  [DirectionType.LOOP]: 'common.direction.loop',
+  [DirectionType.SHUTTLE]: 'common.direction.shuttle',
+  [DirectionType.UNKNOWN]: 'common.direction.unknown'
 }

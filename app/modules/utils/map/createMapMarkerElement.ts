@@ -1,11 +1,13 @@
 type MapMarkerType = 'stop' | 'vehicle' | 'user'
 
 interface CreateMapMarkerElementOptions {
+  ariaLabel?: string
   backgroundColor?: string
   boxShadow?: string
   datasetLabel?: string
   fontSize?: string
   fontWeight?: string
+  interactive?: boolean
   textContent?: string
   title?: string
   type: MapMarkerType
@@ -42,11 +44,13 @@ const markerStyleMap: Record<MapMarkerType, Partial<CSSStyleDeclaration>> = {
 }
 
 export const createMapMarkerElement = ({
+  ariaLabel,
   backgroundColor,
   boxShadow,
   datasetLabel,
   fontSize,
   fontWeight,
+  interactive = false,
   textContent,
   title,
   type
@@ -60,13 +64,24 @@ export const createMapMarkerElement = ({
     justifyContent: 'center',
     backgroundColor: backgroundColor ?? markerStyleMap[type].backgroundColor,
     boxShadow,
-    cursor: 'pointer',
+    cursor: interactive ? 'pointer' : 'default',
     fontSize: fontSize ?? markerStyleMap[type].fontSize,
     fontWeight: fontWeight ?? markerStyleMap[type].fontWeight
   } satisfies Partial<CSSStyleDeclaration>)
 
   if (datasetLabel) {
     element.dataset.label = datasetLabel
+  }
+
+  if (ariaLabel) {
+    element.setAttribute('aria-label', ariaLabel)
+  }
+
+  if (interactive) {
+    element.setAttribute('role', 'button')
+    element.tabIndex = 0
+  } else if (ariaLabel) {
+    element.setAttribute('role', 'img')
   }
 
   if (textContent) {

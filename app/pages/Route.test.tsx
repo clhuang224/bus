@@ -3,13 +3,19 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
-import { routeRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
+import { getRouteRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import { renderRoute } from '~/test/render'
 import Route from './Route'
+import { DEFAULT_APP_LOCALE } from '~/modules/consts/i18n'
+
+const t = i18n.getFixedT(DEFAULT_APP_LOCALE)
+const fourMinutesAwayLabel = t('routePage.realtime.minutesAway', { count: 4 })
+const noEstimateLabel = t('routePage.realtime.noEstimate')
+const routeRealtimeMessages = getRouteRealtimeMessages(t)
 
 const {
   mockToggleFavoriteRouteStop,
@@ -336,7 +342,7 @@ describe('Route', () => {
 
     await waitFor(() => {
       expect(screen.getByText('市政府').closest('[data-highlighted="true"]')).toBeInTheDocument()
-      expect(screen.getByText('4 分後到站')).toBeInTheDocument()
+      expect(screen.getByText(fourMinutesAwayLabel)).toBeInTheDocument()
     })
   })
 
@@ -441,7 +447,7 @@ describe('Route', () => {
     fireEvent.click(screen.getByRole('tab', { name: '返程' }))
 
     await waitFor(() => {
-      expect(screen.getByText('4 分後到站')).toBeInTheDocument()
+      expect(screen.getByText(fourMinutesAwayLabel)).toBeInTheDocument()
       expect(screen.queryByText(routeRealtimeMessages.noRealtimeData.description)).not.toBeInTheDocument()
     })
   })
@@ -472,8 +478,8 @@ describe('Route', () => {
     fireEvent.click(screen.getByRole('tab', { name: '返程' }))
 
     await waitFor(() => {
-      expect(screen.getByText('4 分後到站')).toBeInTheDocument()
-      expect(screen.queryByText('暫無預估')).not.toBeInTheDocument()
+      expect(screen.getByText(fourMinutesAwayLabel)).toBeInTheDocument()
+      expect(screen.queryByText(noEstimateLabel)).not.toBeInTheDocument()
     })
   })
 

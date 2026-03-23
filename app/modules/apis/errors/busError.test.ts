@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   getTdxHttpErrorStatus,
   getBusErrorModal,
-  isTdxRateLimitError,
-  tdxSystemErrorModal,
-  tdxUnauthorizedModal
+  getTdxSystemErrorModal,
+  getTdxUnauthorizedModal,
+  isTdxRateLimitError
 } from './busError'
 
 describe('getTdxHttpErrorStatus', () => {
@@ -64,7 +64,7 @@ describe('getBusErrorModal', () => {
         status: 401,
         data: {}
       })
-    ).toBe(tdxUnauthorizedModal)
+    ).toEqual(getTdxUnauthorizedModal())
   })
 
   it('returns the unauthorized modal when a 401 is wrapped as a parsing error', () => {
@@ -75,7 +75,7 @@ describe('getBusErrorModal', () => {
         data: 'Unauthorized',
         error: 'SyntaxError: Unexpected token U in JSON at position 0'
       })
-    ).toBe(tdxUnauthorizedModal)
+    ).toEqual(getTdxUnauthorizedModal())
   })
 
   it('does not open a modal for 429 errors', () => {
@@ -104,7 +104,7 @@ describe('getBusErrorModal', () => {
         status: 503,
         data: {}
       })
-    ).toBe(tdxSystemErrorModal)
+    ).toEqual(getTdxSystemErrorModal())
   })
 
   it('returns the system modal for parsing errors from non-auth non-rate-limit responses', () => {
@@ -115,7 +115,7 @@ describe('getBusErrorModal', () => {
         data: '<html>server error</html>',
         error: 'SyntaxError: Unexpected token < in JSON at position 0'
       })
-    ).toBe(tdxSystemErrorModal)
+    ).toEqual(getTdxSystemErrorModal())
   })
 
   it('does not open a modal for fetch errors', () => {

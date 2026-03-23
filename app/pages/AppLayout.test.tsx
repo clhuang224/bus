@@ -49,7 +49,9 @@ vi.mock('@mantine/hooks', async () => {
 })
 
 vi.mock('~/components/AppNavLink', () => ({
-  AppNavLink: ({ label }: { label: string }) => <div>{label}</div>
+  AppNavLink: ({ label, ariaLabel }: { label?: string, ariaLabel?: string }) => (
+    <div aria-label={ariaLabel ?? label}>{label}</div>
+  )
 }))
 
 vi.mock('~/modules/hooks/useWatchGeo', () => ({
@@ -114,7 +116,7 @@ describe('AppLayout', () => {
     expect(mockDispatch).not.toHaveBeenCalled()
   })
 
-  it('renders the settings navigation entry in the desktop header', () => {
+  it('renders an accessible settings navigation entry in the desktop header', () => {
     mockUseSelector.mockImplementation((selector: (state: unknown) => unknown) => selector({
       geolocation: {
         coords: null
@@ -128,7 +130,7 @@ describe('AppLayout', () => {
 
     expect(mockFetchCityGeoJSON).toHaveBeenCalledOnce()
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'cityGeo/fetchCityGeoJSON' })
-    expect(screen.getAllByText(i18n.t('layout.nav.settings')).length).toBeGreaterThan(0)
+    expect(screen.getByLabelText(i18n.t('layout.nav.settings'))).toBeInTheDocument()
   })
 
   it('uses the settings action icon outside the settings page on mobile', () => {

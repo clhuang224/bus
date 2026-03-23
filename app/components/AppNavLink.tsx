@@ -1,13 +1,20 @@
 import { Flex, NavLink } from '@mantine/core'
 import type { ReactElement } from 'react'
 import { Link, useMatch, useResolvedPath } from 'react-router'
+import type { RequireAtLeastOne } from '~/modules/types/RequireAtLeastOne'
 
-export interface AppNavLinkPropType {
+interface AppNavLinkBaseProps {
   to: string
-	label: string
-	icon?: ReactElement
-	iconActive?: ReactElement
+  icon?: ReactElement
+  iconActive?: ReactElement
 }
+
+type AppNavLinkAccessibleName = RequireAtLeastOne<{
+  label: string
+  ariaLabel: string
+}>
+
+export type AppNavLinkPropType = AppNavLinkBaseProps & AppNavLinkAccessibleName
 
 export const AppNavLink = (props: AppNavLinkPropType) => {
   const resolvedPath = useResolvedPath(props.to)
@@ -17,10 +24,11 @@ export const AppNavLink = (props: AppNavLinkPropType) => {
     <NavLink
       component={Link}
       to={props.to}
+      aria-label={props.ariaLabel ?? props.label}
       label={(
         <Flex align="center" justify="center" direction="column">
           {props.label}
-          {props.icon && isActive ? props.iconActive : props.icon}
+          {isActive ? (props.iconActive ?? props.icon) : props.icon}
         </Flex>
       )}
       active={isActive}

@@ -4,6 +4,65 @@ export const en = {
       name: 'Finding the Bus',
       description: 'Find the bus you need, faster.'
     },
+    common: {
+      modal: {
+        confirm: 'Confirm',
+        cancel: 'Cancel',
+        refresh: 'Refresh page'
+      },
+      area: {
+        Taipei: 'Taipei Area',
+        Taoyuan: 'Taoyuan',
+        Taichung: 'Taichung',
+        Tainan: 'Tainan',
+        Kaohsiung: 'Kaohsiung',
+        Keelung: 'Keelung',
+        Hsinchu: 'Hsinchu',
+        Miaoli: 'Miaoli',
+        Changhua: 'Changhua',
+        Nantou: 'Nantou',
+        Yunlin: 'Yunlin',
+        Chiayi: 'Chiayi',
+        Pingtung: 'Pingtung',
+        Yilan: 'Yilan',
+        Hualien: 'Hualien',
+        Taitung: 'Taitung',
+        Kinmen: 'Kinmen',
+        Penghu: 'Penghu',
+        Lienchiang: 'Lienchiang'
+      },
+      city: {
+        Taipei: 'Taipei City',
+        NewTaipei: 'New Taipei City',
+        Taoyuan: 'Taoyuan City',
+        Taichung: 'Taichung City',
+        Tainan: 'Tainan City',
+        Kaohsiung: 'Kaohsiung City',
+        Keelung: 'Keelung City',
+        Hsinchu: 'Hsinchu City',
+        HsinchuCounty: 'Hsinchu County',
+        MiaoliCounty: 'Miaoli County',
+        ChanghuaCounty: 'Changhua County',
+        NantouCounty: 'Nantou County',
+        YunlinCounty: 'Yunlin County',
+        ChiayiCounty: 'Chiayi County',
+        Chiayi: 'Chiayi City',
+        PingtungCounty: 'Pingtung County',
+        YilanCounty: 'Yilan County',
+        HualienCounty: 'Hualien County',
+        TaitungCounty: 'Taitung County',
+        KinmenCounty: 'Kinmen County',
+        PenghuCounty: 'Penghu County',
+        LienchiangCounty: 'Lienchiang County'
+      },
+      direction: {
+        go: 'Outbound',
+        return: 'Inbound',
+        loop: 'Loop',
+        shuttle: 'Shuttle',
+        unknown: 'Unknown'
+      }
+    },
     layout: {
       nav: {
         favorite: 'Favorites',
@@ -36,17 +95,35 @@ export const en = {
     components: {
       searchInput: {
         ariaLabel: 'Search bus routes',
-        placeholder: 'Search by route, departure stop, or destination'
+        placeholder: 'Search routes or stops',
+        clearAriaLabel: 'Clear search keyword'
+      },
+      areaSelect: {
+        ariaLabel: 'Choose area'
       },
       favoriteRouteStopCard: {
         removeAriaLabel: 'Remove favorite route stop',
         terminalLabel: 'Terminals',
         terminal: '{{departure}} → {{destination}}'
       },
+      routeInfoCard: {
+        terminal: 'Terminals: {{departure}} → {{destination}}'
+      },
       routeStopList: {
         addFavoriteAriaLabel: 'Save route stop',
         removeFavoriteAriaLabel: 'Remove saved route stop',
         missingPlate: 'Plate unavailable'
+      },
+      routeMap: {
+        stopMarkerAriaLabel: '{{stopName}}, stop {{sequence}}',
+        vehicleMarkerAriaLabel: '{{plateNumb}}, recent stop {{stopName}}, estimated arrival {{estimateLabel}}',
+        vehiclePopup: {
+          recentStop: 'Recent stop',
+          estimate: 'Estimated arrival'
+        }
+      },
+      baseMap: {
+        userLocationMarkerAriaLabel: 'Current location'
       },
       mapSidebarLayout: {
         openNearbyStops: 'Open nearby stops list',
@@ -59,12 +136,43 @@ export const en = {
         notProvided: 'Not provided',
         viewRoutesAriaLabel: 'View routes for {{stopName}}'
       },
+      nearbyStopRoutes: {
+        title: 'Routes at this stop',
+        empty: 'No route information is currently available for this stop'
+      },
+      nearbyStopMap: {
+        stopMarkerAriaLabel: 'Nearby stop {{stopName}}'
+      },
       nearbySidebarContent: {
         backAriaLabel: 'Back to nearby stops list'
       }
     },
     routePage: {
-      backToRoutes: 'Back to routes'
+      backToRoutes: 'Back to routes',
+      realtime: {
+        inService: 'In service',
+        comingSoon: 'Coming soon',
+        noEstimate: 'No estimate available',
+        minutesAway_one: 'Arriving in {{count}} min',
+        minutesAway_other: 'Arriving in {{count}} mins',
+        stopStatus: {
+          normal: 'Normal',
+          notYetDeparted: 'Not departed yet',
+          noStopDueToTrafficControl: 'Skipping stop due to traffic control',
+          lastBusPassed: 'Last bus has passed',
+          notInServiceToday: 'Not in service today',
+          unknown: 'Unknown status'
+        }
+      }
+    },
+    errorBoundary: {
+      default: {
+        title: 'Error'
+      },
+      notFound: {
+        title: '404',
+        description: 'The requested page could not be found.'
+      }
     },
     messages: {
       nearby: {
@@ -101,6 +209,42 @@ export const en = {
         emptyRoute: {
           title: 'Route not found',
           description: 'We could not find data for this bus route.'
+        }
+      },
+      routeRealtime: {
+        loading: {
+          title: 'Updating',
+          description: 'Refreshing realtime bus data...'
+        },
+        error: {
+          title: 'Realtime bus',
+          description: 'Realtime bus data is temporarily incomplete.'
+        },
+        rateLimited: {
+          title: 'Realtime bus',
+          description: 'Too many people are querying right now. Realtime bus data will retry shortly.'
+        },
+        noService: {
+          title: 'Service status',
+          description: 'There are no active services right now'
+        },
+        noRealtimeData: {
+          title: 'Realtime bus',
+          description: 'No realtime bus information is available right now. Service may have ended or upstream data may be temporarily incomplete.'
+        }
+      },
+      busService: {
+        unauthorized: {
+          title: 'Bus data service authentication failed',
+          description: 'The app could not authenticate with the bus data service right now. Please try again later.'
+        },
+        rateLimited: {
+          title: 'Too many queries right now',
+          description: 'The system cannot fetch bus data at the moment. Please wait a bit and try again.'
+        },
+        systemError: {
+          title: 'The system is temporarily unavailable',
+          description: 'Bus data is temporarily unavailable. Please try again later.'
         }
       },
       geo: {

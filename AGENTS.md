@@ -134,6 +134,19 @@ Good fits:
 
 If something is primarily an object model with named fields, it probably belongs in `interfaces/` instead.
 
+When a file only needs another module for type extraction, prefer type-only references that do not pull the module into the runtime graph unnecessarily.
+
+Prefer patterns such as:
+
+- `type LocaleShape = typeof import('../i18n/locales/zh-TW').zhTW`
+
+Avoid patterns such as:
+
+- value imports used only for type extraction
+- `import type { zhTW } ...` combined with `typeof zhTW`
+
+This keeps type references explicit, avoids unnecessary runtime imports, and makes translation-key typing easier to maintain.
+
 ### `app/modules/enums/`
 
 Use enums for stable, domain-level categorical values such as city, direction, or status types.

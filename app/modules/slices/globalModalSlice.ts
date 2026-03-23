@@ -9,8 +9,8 @@ interface GlobalModalState {
   title: string
   message: string
   variant: GlobalModalVariant
-  confirmText: string
-  cancelText: string
+  confirmText: string | null
+  cancelText: string | null
   confirmAction: GlobalModalConfirmAction
 }
 
@@ -22,8 +22,8 @@ const initialState: GlobalModalState = {
   title: '',
   message: '',
   variant: 'alert',
-  confirmText: '確定',
-  cancelText: '取消',
+  confirmText: null,
+  cancelText: null,
   confirmAction: 'close'
 }
 
@@ -39,8 +39,8 @@ const globalModalSlice = createSlice({
       state.title = action.payload.title
       state.message = action.payload.message
       state.variant = action.payload.variant
-      state.confirmText = action.payload.confirmText ?? initialState.confirmText
-      state.cancelText = action.payload.cancelText ?? initialState.cancelText
+      state.confirmText = action.payload.confirmText ?? null
+      state.cancelText = action.payload.cancelText ?? null
       state.confirmAction = action.payload.confirmAction ?? initialState.confirmAction
     },
     closeGlobalModal: (state) => {

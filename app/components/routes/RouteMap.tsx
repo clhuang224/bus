@@ -1,8 +1,10 @@
 import type { Map as MapLibreMap, Marker, Popup } from 'maplibre-gl'
 import mapLibre from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { LngLat, LatLng } from '~/modules/types/CoordsType'
-import { createMapMarkerElement } from '~/modules/utils/createMapMarkerElement'
+import { addMapMarkerActivationListeners } from '~/modules/utils/map/addMapMarkerActivationListeners'
+import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
 import BaseMap from '../common/BaseMap'
 
 export interface RouteMapStop {
@@ -52,6 +54,7 @@ export const RouteMap = ({
   stops,
   vehicles = []
 }: PropType) => {
+  const { t } = useTranslation()
   const [map, setMap] = useState<MapLibreMap | null>(null)
   const [isMapReady, setIsMapReady] = useState(false)
   const markerMap = useRef<Map<string, Marker>>(new Map())
@@ -91,6 +94,7 @@ export const RouteMap = ({
 
   useEffect(() => {
     if (!map || !isMapReady) return
+    const markerCleanupFns: Array<() => void> = []
 
     markerMap.current.forEach((marker) => marker.remove())
     markerMap.current.clear()
@@ -137,20 +141,25 @@ export const RouteMap = ({
     positionedStops.forEach((stop) => {
       const isHighlighted = stop.id === highlightedStopId
       const el = createMapMarkerElement({
+        ariaLabel: t('components.routeMap.stopMarkerAriaLabel', {
+          stopName: stop.name,
+          sequence: stop.sequence
+        }),
         backgroundColor: isHighlighted ? HIGHLIGHTED_STOP_COLOR : ROUTE_COLOR,
         datasetLabel: stop.name,
+        interactive: true,
         textContent: String(stop.sequence),
         title: stop.name,
         type: 'stop'
       })
 
-      const handleSelectStop = (event: MouseEvent) => {
+      const handleSelectStop = (event: MouseEvent | KeyboardEvent) => {
         event.preventDefault()
         event.stopPropagation()
         onSelectStop(stop.id)
       }
 
-      el.addEventListener('click', handleSelectStop)
+      markerCleanupFns.push(addMapMarkerActivationListeners(el, handleSelectStop))
 
       const marker = new mapLibre.Marker({ element: el })
         .setLngLat(stop.position)
@@ -160,13 +169,24 @@ export const RouteMap = ({
     })
 
     vehicles.forEach((vehicle) => {
+      const vehicleLabel = t('components.routeMap.vehicleMarkerAriaLabel', {
+        plateNumb: vehicle.plateNumb ?? t('components.routeStopList.missingPlate'),
+        stopName: vehicle.stopName,
+        estimateLabel: vehicle.estimateLabel
+      })
       const el = createMapMarkerElement({
-        datasetLabel: `${vehicle.plateNumb ?? '未提供車牌'}\n最近站牌：${vehicle.stopName}\n預估到站：${vehicle.estimateLabel}`,
+        ariaLabel: vehicleLabel,
+        datasetLabel: [
+          vehicle.plateNumb ?? t('components.routeStopList.missingPlate'),
+          `${t('components.routeMap.vehiclePopup.recentStop')}: ${vehicle.stopName}`,
+          `${t('components.routeMap.vehiclePopup.estimate')}: ${vehicle.estimateLabel}`
+        ].join('\n'),
+        interactive: true,
         textContent: '🚌',
         type: 'vehicle'
       })
 
-      const handleOpenVehiclePopup = (event: MouseEvent) => {
+      const handleOpenVehiclePopup = (event: MouseEvent | KeyboardEvent) => {
         event.preventDefault()
         event.stopPropagation()
 
@@ -192,7 +212,7 @@ export const RouteMap = ({
         })
       }
 
-      el.addEventListener('click', handleOpenVehiclePopup)
+      markerCleanupFns.push(addMapMarkerActivationListeners(el, handleOpenVehiclePopup))
 
       const marker = new mapLibre.Marker({ element: el })
         .setLngLat(vehicle.position)
@@ -213,7 +233,11 @@ export const RouteMap = ({
         duration: 800
       })
     }
-  }, [highlightedStopId, isMapReady, map, onSelectStop, positionedStops, routePath, selectedStop, vehicles])
+
+    return () => {
+      markerCleanupFns.forEach((cleanup) => cleanup())
+    }
+  }, [highlightedStopId, isMapReady, map, onSelectStop, positionedStops, routePath, selectedStop, t, vehicles])
 
   useEffect(() => {
     if (!map || !markerMap.current.size) return

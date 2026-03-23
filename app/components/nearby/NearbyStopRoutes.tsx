@@ -1,10 +1,11 @@
 import { ScrollArea, Skeleton, Stack, Tabs, Text } from '@mantine/core'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { SkeletonList } from '~/components/common/SkeletonList'
-import { directionMapName } from '~/modules/consts/direction'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
 import { getEnumValues } from '~/modules/utils/getEnumValues'
+import { getDirectionLabel } from '~/modules/utils/getDirectionLabel'
 import { RouteInfoCard } from '../routes/RouteInfoCard'
 
 interface PropType {
@@ -21,10 +22,11 @@ function getDefaultRouteDirection(directions: DirectionType[]) {
 }
 
 export const NearbyStopRoutes = ({ routes, isLoading = false }: PropType) => {
+  const { t } = useTranslation()
   const routeSections = getEnumValues(DirectionType)
     .map((direction) => ({
       direction,
-      label: directionMapName[direction],
+      label: getDirectionLabel(t, direction),
       routes: routes
         .filter((route) => route.direction === direction)
         .sort((left, right) => routeNameCollator.compare(left.name, right.name))
@@ -56,11 +58,11 @@ export const NearbyStopRoutes = ({ routes, isLoading = false }: PropType) => {
   if (isLoading) {
     return (
       <Stack gap="sm" style={{ flex: 1, minHeight: 0 }}>
-        <Text size="sm" c="dimmed">此站路線</Text>
+        <Text size="sm" c="dimmed">{t('components.nearbyStopRoutes.title')}</Text>
         <Tabs value={null}>
           <Tabs.List>
-            <Tabs.Tab value="loading-go">去程</Tabs.Tab>
-            <Tabs.Tab value="loading-return">返程</Tabs.Tab>
+            <Tabs.Tab value="loading-go">{t('common.direction.go')}</Tabs.Tab>
+            <Tabs.Tab value="loading-return">{t('common.direction.return')}</Tabs.Tab>
           </Tabs.List>
         </Tabs>
         <ScrollArea style={{ flex: 1, minHeight: 0 }} data-testid="nearby-stop-routes-skeleton">
@@ -75,15 +77,15 @@ export const NearbyStopRoutes = ({ routes, isLoading = false }: PropType) => {
   if (routeSections.length === 0) {
     return (
       <Stack gap={4}>
-        <Text size="sm" c="dimmed">此站路線</Text>
-        <Text size="sm">目前沒有可顯示的路線資訊</Text>
+        <Text size="sm" c="dimmed">{t('components.nearbyStopRoutes.title')}</Text>
+        <Text size="sm">{t('components.nearbyStopRoutes.empty')}</Text>
       </Stack>
     )
   }
 
   return (
     <Stack gap="sm" style={{ flex: 1, minHeight: 0 }}>
-      <Text size="sm" c="dimmed">此站路線</Text>
+      <Text size="sm" c="dimmed">{t('components.nearbyStopRoutes.title')}</Text>
       <Tabs
         value={selectedDirection}
         onChange={setSelectedDirection}

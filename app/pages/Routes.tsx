@@ -1,4 +1,4 @@
-import { Card, Flex, Group, ScrollArea, Skeleton, Stack, Title } from '@mantine/core'
+import { Card, Flex, ScrollArea, Skeleton, Stack, Title } from '@mantine/core'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
@@ -87,13 +87,13 @@ export default function Routes() {
           <Stack gap={4}>
             <Title order={3}>{t('pages.routes.title')}</Title>
           </Stack>
-          <Group>
+          <Flex gap="sm" align="stretch">
             <AreaSelect value={area} onChange={(nextArea) => dispatch(setSelectedArea(nextArea))} />
             <SearchInput
               value={keyword}
               onChange={(nextKeyword) => dispatch(setKeyword(nextKeyword))}
             />
-          </Group>
+          </Flex>
           {message && <BaseAlert {...message} />}
           <ScrollArea style={{ flex: 1, minHeight: 0 }}>
             <Stack gap="sm">

@@ -2,9 +2,9 @@ import { ActionIcon, Flex, Skeleton, Stack, Text } from '@mantine/core'
 import { RiArrowRightSLine } from '@remixicon/react'
 import { useTranslation } from 'react-i18next'
 import { AppBadge } from '~/components/common/AppBadge'
-import { cityMapName } from '~/modules/consts/city'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
+import { getCityLabel } from '~/modules/utils/getCityLabel'
 
 interface PropType {
   stopGroup: NearbyStopGroup
@@ -32,7 +32,7 @@ export const NearbyStopDetail = ({
       label: t('components.nearbyStopDetail.cityLabel'),
       content: (
         <Text size="sm">
-          {stopGroup.City ? cityMapName[stopGroup.City] : t('components.nearbyStopDetail.notProvided')}
+          {stopGroup.City ? getCityLabel(t, stopGroup.City) : t('components.nearbyStopDetail.notProvided')}
         </Text>
       )
     },

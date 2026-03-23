@@ -2,8 +2,10 @@ import mapLibre, { Marker, Popup } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import type { LngLat, LatLng } from '~/modules/types/CoordsType'
-import { createMapMarkerElement } from '~/modules/utils/createMapMarkerElement'
+import { addMapMarkerActivationListeners } from '~/modules/utils/map/addMapMarkerActivationListeners'
+import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
 import BaseMap from '../common/BaseMap'
 
 interface PropType {
@@ -27,6 +29,7 @@ export const NearbyStopMap = ({
   isSm = false,
   onSelectStop
 }: PropType) => {
+  const { t } = useTranslation()
   const [map, setMap] = useState<mapLibre.Map | null>(null)
   const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(null)
   const markerMap = useRef<Map<string, Marker>>(new Map<string, Marker>())
@@ -34,27 +37,30 @@ export const NearbyStopMap = ({
 
   useEffect(() => {
     if (!map) return
+    const markerCleanupFns: Array<() => void> = []
 
     markerMap.current.forEach((marker) => marker.remove())
     markerMap.current.clear()
 
     markers.forEach(data => {
       const el = createMapMarkerElement({
+        ariaLabel: t('components.nearbyStopMap.stopMarkerAriaLabel', { stopName: data.label }),
         backgroundColor: 'var(--mantine-primary-color-filled)',
         datasetLabel: data.label,
         fontSize: '16px',
         fontWeight: 'bold',
+        interactive: true,
         textContent: '🚏',
         type: 'stop'
       })
 
-      const handleSelectStop = (event: MouseEvent) => {
+      const handleSelectStop = (event: MouseEvent | KeyboardEvent) => {
         event.preventDefault()
         event.stopPropagation()
         onSelectStop(data.id)
       }
 
-      el.addEventListener('click', handleSelectStop)
+      markerCleanupFns.push(addMapMarkerActivationListeners(el, handleSelectStop))
 
       const marker = new Marker({ element: el })
         .setLngLat(data.position)
@@ -64,12 +70,13 @@ export const NearbyStopMap = ({
     })
 
     return () => {
+      markerCleanupFns.forEach((cleanup) => cleanup())
       markerMap.current.forEach((marker) => {
         marker.remove()
       })
       markerMap.current.clear()
     }
-  }, [map, markers, onSelectStop])
+  }, [map, markers, onSelectStop, t])
 
   useEffect(() => {
     if (!map || !markerMap.current.size) return
