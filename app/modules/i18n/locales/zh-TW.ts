@@ -95,7 +95,7 @@ export const zhTW = {
     components: {
       searchInput: {
         ariaLabel: '搜尋公車路線',
-        placeholder: '輸入關鍵字以搜尋路線、起點或終點',
+        placeholder: '搜尋路線、起點或終點',
         clearAriaLabel: '清除搜尋關鍵字'
       },
       areaSelect: {

@@ -11,7 +11,7 @@ export const en = {
         refresh: 'Refresh page'
       },
       area: {
-        Taipei: 'Taipei and New Taipei',
+        Taipei: 'Taipei Area',
         Taoyuan: 'Taoyuan',
         Taichung: 'Taichung',
         Tainan: 'Tainan',
@@ -95,7 +95,7 @@ export const en = {
     components: {
       searchInput: {
         ariaLabel: 'Search bus routes',
-        placeholder: 'Search by route, departure stop, or destination',
+        placeholder: 'Search routes or stops',
         clearAriaLabel: 'Clear search keyword'
       },
       areaSelect: {
