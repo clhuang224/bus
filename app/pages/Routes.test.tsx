@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 
-import { configureStore } from '@reduxjs/toolkit'
+import type { Reducer, UnknownAction } from '@reduxjs/toolkit'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
 import { AreaType } from '~/modules/enums/AreaType'
+import { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import routeSearchSlice from '~/modules/slices/routeSearchSlice'
+import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
 import Routes from './Routes'
 
@@ -105,21 +107,37 @@ const routesData = [
   }
 ]
 
+type RoutesTestState = {
+  geolocation: {
+    coords: [number, number]
+  }
+  cityGeo: {
+    geojson: null
+  }
+  routeSearch: {
+    keyword: string
+    selectedArea: AreaType | null
+  }
+}
+
 function createStore(preloadedRouteSearchState?: {
   keyword?: string
   selectedArea?: AreaType | null
 }) {
-  return configureStore({
+  return createTestStore<RoutesTestState>({
     reducer: {
-      geolocation: () => ({
+      geolocation: (() => ({
         coords: [25.033, 121.5654] as [number, number]
-      }),
-      cityGeo: () => ({
+      })) as unknown as Reducer<unknown, UnknownAction>,
+      cityGeo: (() => ({
         geojson: null
-      }),
-      routeSearch: routeSearchSlice.reducer
+      })) as unknown as Reducer<unknown, UnknownAction>,
+      routeSearch: routeSearchSlice.reducer as unknown as Reducer<unknown, UnknownAction>
     },
     preloadedState: {
+      locale: {
+        value: AppLocaleType.ZH_TW
+      },
       routeSearch: {
         keyword: preloadedRouteSearchState?.keyword ?? '',
         selectedArea: preloadedRouteSearchState?.selectedArea ?? null

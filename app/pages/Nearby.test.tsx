@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { configureStore } from '@reduxjs/toolkit'
+import type { Reducer, UnknownAction } from '@reduxjs/toolkit'
 import { act, fireEvent, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import Nearby from './Nearby'
@@ -15,7 +15,8 @@ import { BearingType } from '~/modules/enums/BearingType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { GeoErrorType } from '~/modules/enums/geo/GeoErrorType'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
-import localeSlice from '~/modules/slices/localeSlice'
+import { createTestStore } from '~/test/createTestStore'
+import { mockMatchMedia } from '~/test/mockMatchMedia'
 import { renderWithProvidersAndRouter } from '~/test/render'
 
 const {
@@ -235,6 +236,20 @@ const routesData = [
   }
 ]
 
+type NearbyTestState = {
+  geolocation: {
+    coords: [number, number] | null
+    error: GeoErrorType | null
+    permission: GeoPermissionType
+    watching: boolean
+  }
+  cityGeo: {
+    geojson: null
+    loading: boolean
+    error: null
+  }
+}
+
 function resetNearbyMocks() {
   mockUseGetRoutesByAreaQuery.mockReset()
   mockUseGetStopsByNearbyAreaQuery.mockReset()
@@ -270,20 +285,19 @@ function renderNearby({
     isLoading?: boolean
   }
 } = {}) {
-  const store = configureStore({
+  const store = createTestStore<NearbyTestState>({
     reducer: {
-      locale: localeSlice.reducer,
-      geolocation: () => ({
+      geolocation: (() => ({
         coords,
         error: geolocationError,
         permission,
         watching: false
-      }),
-      cityGeo: () => ({
+      })) as unknown as Reducer<unknown, UnknownAction>,
+      cityGeo: (() => ({
         geojson: null,
         loading: false,
         error: null
-      })
+      })) as unknown as Reducer<unknown, UnknownAction>
     }
   })
 
@@ -313,16 +327,7 @@ function renderNearby({
 
 describe('Nearby', () => {
   beforeEach(() => {
-    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn()
-    }))
+    mockMatchMedia()
 
     resetNearbyMocks()
   })
@@ -341,16 +346,9 @@ describe('Nearby', () => {
   })
 
   it('opens the drawer by default on small screens', () => {
-    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
-      matches: query.includes(themeBreakpointsSmMaxWidth()),
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn()
-    }))
+    mockMatchMedia({
+      matches: (query) => query.includes(themeBreakpointsSmMaxWidth())
+    })
 
     renderNearby({
       coords: [25.033, 121.5654],

@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 
-import { configureStore } from '@reduxjs/toolkit'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
@@ -9,7 +8,8 @@ import { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
-import localeSlice from '~/modules/slices/localeSlice'
+import { createTestStore } from '~/test/createTestStore'
+import { mockMatchMedia } from '~/test/mockMatchMedia'
 import { renderRoute } from '~/test/render'
 import Route from './Route'
 import { DEFAULT_APP_LOCALE } from '~/modules/consts/i18n'
@@ -313,11 +313,7 @@ function mockDefaultRouteQueries() {
 function renderRoutePage(
   initialEntries: Array<string | { pathname: string, state?: unknown }> = ['/routes/Taipei/route-1']
 ) {
-  const store = configureStore({
-    reducer: {
-      locale: localeSlice.reducer
-    }
-  })
+  const store = createTestStore()
 
   return renderRoute(<Route />, {
     path: '/routes/:city/:id',
@@ -328,16 +324,7 @@ function renderRoutePage(
 
 describe('Route', () => {
   beforeEach(() => {
-    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn()
-    }))
+    mockMatchMedia()
 
     resetRouteMocks()
     mockDefaultRouteQueries()
@@ -529,16 +516,9 @@ describe('Route', () => {
   })
 
   it('opens the drawer by default on small screens', async () => {
-    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
-      matches: query.includes(themeBreakpointsSmMaxWidth()),
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn()
-    }))
+    mockMatchMedia({
+      matches: (query) => query.includes(themeBreakpointsSmMaxWidth())
+    })
 
     renderRoutePage()
 

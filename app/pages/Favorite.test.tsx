@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { configureStore } from '@reduxjs/toolkit'
+import type { Reducer, UnknownAction } from '@reduxjs/toolkit'
 import { fireEvent, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { getFavoriteMessages } from '~/modules/consts/pageMessages'
@@ -10,7 +10,7 @@ import { CityNameType } from '~/modules/enums/CityNameType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import i18n from '~/modules/i18n'
 import favoriteSlice from '~/modules/slices/favoriteSlice'
-import localeSlice from '~/modules/slices/localeSlice'
+import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
 import Favorite from './Favorite'
 
@@ -88,16 +88,21 @@ const unsortedFavoriteRouteStops: FavoriteRouteStop[] = [
   }
 ]
 
+type FavoriteTestState = {
+  favorite: {
+    routeStops: FavoriteRouteStop[]
+  }
+}
+
 function renderFavoritePage(
   routeStops: FavoriteRouteStop[] = favoriteRouteStops,
   locale: AppLocaleType = AppLocaleType.ZH_TW
 ) {
   localStorage.setItem('favoriteRouteStops', JSON.stringify(routeStops))
 
-  const store = configureStore({
+  const store = createTestStore<FavoriteTestState>({
     reducer: {
-      favorite: favoriteSlice.reducer,
-      locale: localeSlice.reducer
+      favorite: favoriteSlice.reducer as unknown as Reducer<unknown, UnknownAction>
     },
     preloadedState: {
       favorite: {
