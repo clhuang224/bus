@@ -24,7 +24,7 @@ describe('globalModalSlice', () => {
     expect(state).toMatchObject({
       opened: true,
       ...tdxRateLimitModal,
-      cancelText: i18n.t('common.modal.cancel'),
+      cancelText: null,
       confirmAction: 'refresh'
     })
   })
@@ -43,13 +43,13 @@ describe('globalModalSlice', () => {
       title: '',
       message: '',
       variant: 'alert',
-      confirmText: i18n.t('common.modal.confirm'),
-      cancelText: i18n.t('common.modal.cancel'),
+      confirmText: null,
+      cancelText: null,
       confirmAction: 'close'
     })
   })
 
-  it('uses the current locale for default modal button labels', async () => {
+  it('keeps default modal button labels out of reducer state', async () => {
     await i18n.changeLanguage('en')
 
     const state = globalModalSlice.reducer(undefined, openGlobalModal({
@@ -58,7 +58,7 @@ describe('globalModalSlice', () => {
       variant: 'alert'
     }))
 
-    expect(state.confirmText).toBe(i18n.t('common.modal.confirm'))
-    expect(state.cancelText).toBe(i18n.t('common.modal.cancel'))
+    expect(state.confirmText).toBeNull()
+    expect(state.cancelText).toBeNull()
   })
 })
