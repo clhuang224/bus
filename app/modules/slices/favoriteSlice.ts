@@ -8,7 +8,14 @@ function loadStoredFavoriteRouteStops() {
   const storedValue = localStorage.getItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY)
   if (!storedValue) return [] as FavoriteRouteStop[]
 
-  const parsedValue = JSON.parse(storedValue) as unknown
+  let parsedValue: unknown
+  try {
+    parsedValue = JSON.parse(storedValue)
+  } catch {
+    localStorage.removeItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY)
+    return [] as FavoriteRouteStop[]
+  }
+
   if (!Array.isArray(parsedValue)) return [] as FavoriteRouteStop[]
 
   return parsedValue.flatMap((item) => {

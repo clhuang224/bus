@@ -206,4 +206,29 @@ describe('Favorite', () => {
 
     expect(screen.getByText(getFavoriteMessages(i18n.t).emptyFavoriteRouteStops.title)).toBeInTheDocument()
   })
+
+  it('falls back to the empty state when localStorage contains invalid JSON', () => {
+    localStorage.setItem('favoriteRouteStops', '{invalid-json')
+
+    const store = createTestStore<FavoriteTestState>({
+      reducer: {
+        favorite: favoriteSlice.reducer as unknown as Reducer<unknown, UnknownAction>
+      },
+      preloadedState: {
+        favorite: {
+          routeStops: []
+        },
+        locale: {
+          value: AppLocaleType.ZH_TW
+        }
+      }
+    })
+
+    renderWithProvidersAndRouter(<Favorite />, {
+      store
+    })
+
+    expect(screen.getByText(getFavoriteMessages(i18n.t).emptyFavoriteRouteStops.title)).toBeInTheDocument()
+    expect(localStorage.getItem('favoriteRouteStops')).toBeNull()
+  })
 })
