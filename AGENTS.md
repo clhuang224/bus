@@ -1,6 +1,6 @@
 # Project Guide
 
-[English](./AGENTS.md) | [繁體中文](./AGENTS.zh-TW.md)
+[English](./AGENTS.md) | [繁體中文](./docs/AGENTS.zh-TW.md)
 
 This document explains how this project is organized, how data flows through the app, and which conventions to follow when adding or changing features.
 

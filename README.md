@@ -1,12 +1,12 @@
 # Finding the Bus
 
-[English](./README.md) | [繁體中文](./README.zh-TW.md)
+[English](./README.md) | [繁體中文](./docs/README.zh-TW.md)
 
 A bus-focused single-page application for route lookup, nearby stops, and real-time transit information in Taiwan.
 
 ## Screenshot
 
-![demo](./demo.png)
+![demo](./docs/assets/demo.png)
 
 ## Features
 

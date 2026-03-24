@@ -1,12 +1,12 @@
 # Finding the Bus
 
-[English](./README.md) | [繁體中文](./README.zh-TW.md)
+[English](../README.md) | [繁體中文](./README.zh-TW.md)
 
 這是一個以台灣公車查詢為主的單頁應用，提供路線搜尋、附近站牌，以及即時公車資訊。
 
 ## 畫面預覽
 
-![demo](./demo.zh-TW.png)
+![demo](./assets/demo.zh-TW.png)
 
 ## 功能特色
 
