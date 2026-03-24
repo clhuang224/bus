@@ -5,7 +5,7 @@ import { SkeletonList } from '~/components/common/SkeletonList'
 import { useLocalizedTextCollator } from '~/modules/hooks/useLocalizedTextCollator'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
-import { getDirectionLabel } from '~/modules/utils/i18n/getDirectionLabel'
+import { getDirectionTranslationKey } from '~/modules/utils/i18n/getDirectionTranslationKey'
 import { getEnumValues } from '~/modules/utils/shared/getEnumValues'
 import { RouteInfoCard } from '../routes/RouteInfoCard'
 
@@ -24,7 +24,7 @@ export const NearbyStopRoutes = ({ routes, isLoading = false }: PropType) => {
   const routeSections = useMemo(() => getEnumValues(DirectionType)
     .map((direction) => ({
       direction,
-      label: getDirectionLabel(t, direction),
+      label: t(getDirectionTranslationKey(direction)),
       routes: routes
         .filter((route) => route.direction === direction)
         .sort((left, right) => routeNameCollator.compare(left.name, right.name))

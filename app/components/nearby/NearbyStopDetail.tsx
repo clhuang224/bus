@@ -6,7 +6,7 @@ import { AppBadge } from '~/components/common/AppBadge'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
 import { selectLocale } from '~/modules/slices/localeSlice'
-import { getCityLabel } from '~/modules/utils/i18n/getCityLabel'
+import { getCityTranslationKey } from '~/modules/utils/i18n/getCityTranslationKey'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 
 interface PropType {
@@ -37,7 +37,7 @@ export const NearbyStopDetail = ({
       label: t('components.nearbyStopDetail.cityLabel'),
       content: (
         <Text size="sm">
-          {stopGroup.City ? getCityLabel(t, stopGroup.City) : t('components.nearbyStopDetail.notProvided')}
+          {stopGroup.City ? t(getCityTranslationKey(stopGroup.City)) : t('components.nearbyStopDetail.notProvided')}
         </Text>
       )
     },

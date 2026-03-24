@@ -218,6 +218,23 @@ describe('Routes', () => {
     expect(screen.getAllByText('藍1')).toHaveLength(1)
   })
 
+  it('renders available terminal text when only one terminal value is present', () => {
+    mockUseGetRoutesByAreaQuery.mockReturnValue({
+      data: [{
+        ...routesData[0],
+        DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
+        DestinationStopName: { zh_TW: '', en: '' }
+      }],
+      isLoading: false,
+      error: null
+    })
+
+    renderRoutes()
+
+    expect(screen.getByText('起點站: 市政府')).toBeInTheDocument()
+    expect(screen.queryByText('起訖站: 市政府')).not.toBeInTheDocument()
+  })
+
   it('filters routes by the entered keyword', async () => {
     const { store } = renderRoutes()
 

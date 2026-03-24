@@ -6,9 +6,10 @@ import { Link } from 'react-router'
 import { AppBadge } from '~/components/common/AppBadge'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import { selectLocale } from '~/modules/slices/localeSlice'
-import { getCityLabel } from '~/modules/utils/i18n/getCityLabel'
-import { getDirectionLabel } from '~/modules/utils/i18n/getDirectionLabel'
+import { getCityTranslationKey } from '~/modules/utils/i18n/getCityTranslationKey'
+import { getDirectionTranslationKey } from '~/modules/utils/i18n/getDirectionTranslationKey'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
+import { getTerminalDisplay } from '~/modules/utils/i18n/getTerminalDisplay'
 
 interface PropType {
   favoriteRouteStop: FavoriteRouteStop
@@ -23,6 +24,7 @@ export const FavoriteRouteStopCard = ({ favoriteRouteStop, onRemove }: PropType)
   const stopName = getLocalizedText(favoriteRouteStop.stopName, locale)
   const departure = getLocalizedText(favoriteRouteStop.departure, locale)
   const destination = getLocalizedText(favoriteRouteStop.destination, locale)
+  const terminalDisplay = getTerminalDisplay(departure, destination)
 
   return (
     <Card
@@ -50,22 +52,21 @@ export const FavoriteRouteStopCard = ({ favoriteRouteStop, onRemove }: PropType)
                   {[
                     routeName,
                     subRouteName === routeName ? null : subRouteName,
-                    getDirectionLabel(t, favoriteRouteStop.direction)
+                    t(getDirectionTranslationKey(favoriteRouteStop.direction))
                   ].filter(Boolean).join(' ')}
                 </AppBadge>
                 <AppBadge type="city">
-                  {getCityLabel(t, favoriteRouteStop.city)}
+                  {t(getCityTranslationKey(favoriteRouteStop.city))}
                 </AppBadge>
               </Group>
               <Text p="sm">
                 {favoriteRouteStop.stopSequence}. {stopName}
               </Text>
-              <Text size="xs" c="dimmed">
-                {t('components.favoriteRouteStopCard.terminal', {
-                  departure,
-                  destination
-                })}
-              </Text>
+              {terminalDisplay && (
+                <Text size="xs" c="dimmed">
+                  {t(`components.favoriteRouteStopCard.${terminalDisplay.labelKey}`)}: {terminalDisplay.text}
+                </Text>
+              )}
             </Stack>
           </Box>
           <ActionIcon

@@ -336,6 +336,8 @@ Use Traditional Chinese as the default source language for user-facing UI copy s
 
 For translatable UI copy, do not hard-code those strings directly in pages or shared components. Prefer `react-i18next` translation keys and keep the source strings in `app/modules/i18n/locales/`.
 
+For shared i18n helpers that map domain values to translated labels, prefer returning translation keys from `utils/` and call `t(...)` at the component or hook layer instead of passing `t` into the utility. Keep `utils/` pure where practical, and make the i18n dependency visible at the render boundary.
+
 Current app locale rules:
 
 - supported locales are currently limited to `zh-TW` and `en`

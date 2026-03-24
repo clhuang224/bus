@@ -104,9 +104,14 @@ export const zhTW = {
       favoriteRouteStopCard: {
         removeAriaLabel: '移除收藏站牌路線',
         terminalLabel: '起訖站',
+        departureLabel: '起點站',
+        destinationLabel: '終點站',
         terminal: '{{departure}} → {{destination}}'
       },
       routeInfoCard: {
+        terminalLabel: '起訖站',
+        departureLabel: '起點站',
+        destinationLabel: '終點站',
         terminal: '起訖站： {{departure}} → {{destination}}'
       },
       routeStopList: {

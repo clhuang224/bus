@@ -168,6 +168,17 @@ describe('Favorite', () => {
     expect(screen.getByText(/City Hall.*MRT Kunyang Station/)).toBeInTheDocument()
   })
 
+  it('renders available terminal text when only one terminal value is present', () => {
+    renderFavoritePage([{
+      ...favoriteRouteStops[0],
+      departure: { zh_TW: '市政府', en: 'City Hall' },
+      destination: { zh_TW: '', en: '' }
+    }])
+
+    expect(screen.getByText('起點站: 市政府')).toBeInTheDocument()
+    expect(screen.queryByText('起訖站: 市政府')).not.toBeInTheDocument()
+  })
+
   it('sorts favorite route stops by route name and stop sequence', () => {
     renderFavoritePage(unsortedFavoriteRouteStops)
 

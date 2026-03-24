@@ -9,7 +9,7 @@ import type { BusSubRoute } from '~/modules/interfaces/BusRoute'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import type { StopOfRouteStop } from '~/modules/interfaces/StopOfRoute'
 import { selectLocale } from '~/modules/slices/localeSlice'
-import { getDirectionLabel } from '~/modules/utils/i18n/getDirectionLabel'
+import { getDirectionTranslationKey } from '~/modules/utils/i18n/getDirectionTranslationKey'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 import { normalizeBusRoutesWithDates } from '~/modules/utils/route/normalizeBusRoutesWithDates'
 
@@ -90,7 +90,7 @@ export function useRouteBaseData({
         getLocalizedText(subRoute.SubRouteName, locale).trim() === routeName
           ? null
           : getLocalizedText(subRoute.SubRouteName, locale).trim(),
-        getDirectionLabel(t, subRoute.Direction)
+        t(getDirectionTranslationKey(subRoute.Direction))
       ].filter(Boolean).join(' '),
       subRouteUID: subRoute.SubRouteUID,
       direction: subRoute.Direction

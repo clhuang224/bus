@@ -14,6 +14,7 @@ import { useRouteRealtimeData } from '~/modules/hooks/useRouteRealtimeData'
 import { RiArrowLeftSLine } from '@remixicon/react'
 import { AppBadge } from '~/components/common/AppBadge'
 import { selectLocale } from '~/modules/slices/localeSlice'
+import { getTerminalDisplay } from '~/modules/utils/i18n/getTerminalDisplay'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 
 export default function Route() {
@@ -72,7 +73,7 @@ export default function Route() {
   const routeName = busRoute ? getLocalizedText(busRoute.RouteName, locale) : null
   const routeDeparture = busRoute ? getLocalizedText(busRoute.DepartureStopName, locale) : null
   const routeDestination = busRoute ? getLocalizedText(busRoute.DestinationStopName, locale) : null
-  const routeTerminalLabel = [routeDeparture, routeDestination].filter(Boolean).join(' - ')
+  const routeTerminalDisplay = getTerminalDisplay(routeDeparture, routeDestination, ' - ')
 
   useEffect(() => {
     if (isSm) {
@@ -143,9 +144,9 @@ export default function Route() {
                 <AppBadge type="route" size="xl">{routeName}</AppBadge>
               )}
             </Flex>
-            {routeTerminalLabel && (
+            {routeTerminalDisplay && (
               <Text size="sm" c="dimmed" mt="sm">
-                {routeTerminalLabel}
+                {routeTerminalDisplay.text}
               </Text>
             )}
           </Stack>
