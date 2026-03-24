@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { FavoriteRouteStop } from '../interfaces/FavoriteRouteStop'
+import { normalizeStoredFavoriteRouteStop } from '../utils/favorite/normalizeStoredFavoriteRouteStop'
 
 const FAVORITE_ROUTE_STOPS_STORAGE_KEY = 'favoriteRouteStops'
 
@@ -7,15 +8,21 @@ function loadStoredFavoriteRouteStops() {
   const storedValue = localStorage.getItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY)
   if (!storedValue) return [] as FavoriteRouteStop[]
 
-  const parsedValue = JSON.parse(storedValue) as unknown
+  let parsedValue: unknown
+  try {
+    parsedValue = JSON.parse(storedValue)
+  } catch {
+    localStorage.removeItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY)
+    return [] as FavoriteRouteStop[]
+  }
+
   if (!Array.isArray(parsedValue)) return [] as FavoriteRouteStop[]
 
-  return parsedValue.filter((item): item is FavoriteRouteStop =>
-    typeof item === 'object' &&
-    item !== null &&
-    'favoriteId' in item &&
-    typeof item.favoriteId === 'string'
-  )
+  return parsedValue.flatMap((item) => {
+    const favoriteRouteStop = normalizeStoredFavoriteRouteStop(item)
+
+    return favoriteRouteStop ? [favoriteRouteStop] : []
+  })
 }
 
 function persistFavoriteRouteStops(routeStops: FavoriteRouteStop[]) {

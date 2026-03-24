@@ -1,5 +1,5 @@
 import { CityNameType } from '../enums/CityNameType'
-import { getEnumValues } from '../utils/getEnumValues'
+import { getEnumValues } from '../utils/shared/getEnumValues'
 
 export const defaultCoords = null
 export const defaultZoom = 12

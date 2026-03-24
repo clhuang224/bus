@@ -1,10 +1,13 @@
 import { ActionIcon, Flex, Skeleton, Stack, Text } from '@mantine/core'
 import { RiArrowRightSLine } from '@remixicon/react'
 import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
 import { AppBadge } from '~/components/common/AppBadge'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
-import { getCityLabel } from '~/modules/utils/getCityLabel'
+import { selectLocale } from '~/modules/slices/localeSlice'
+import { getCityTranslationKey } from '~/modules/utils/i18n/getCityTranslationKey'
+import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 
 interface PropType {
   stopGroup: NearbyStopGroup
@@ -22,9 +25,11 @@ export const NearbyStopDetail = ({
   displayMode = 'content'
 }: PropType) => {
   const { t } = useTranslation()
+  const locale = useSelector(selectLocale)
+  const stopName = getLocalizedText(stopGroup.StopName, locale)
 
   if (displayMode === 'title') {
-    return <Text>{stopGroup.StopName.zh_TW}</Text>
+    return <Text>{stopName}</Text>
   }
 
   const detailSections = [
@@ -32,7 +37,7 @@ export const NearbyStopDetail = ({
       label: t('components.nearbyStopDetail.cityLabel'),
       content: (
         <Text size="sm">
-          {stopGroup.City ? getCityLabel(t, stopGroup.City) : t('components.nearbyStopDetail.notProvided')}
+          {stopGroup.City ? t(getCityTranslationKey(stopGroup.City)) : t('components.nearbyStopDetail.notProvided')}
         </Text>
       )
     },
@@ -70,7 +75,7 @@ export const NearbyStopDetail = ({
   return (
     <Stack gap="xs">
       {displayMode === 'full' && (
-          <Text>{stopGroup.StopName.zh_TW}</Text>
+          <Text>{stopName}</Text>
       )}
       {detailSections.map((section) => (
         <Stack key={section.label} gap={4}>
@@ -80,7 +85,7 @@ export const NearbyStopDetail = ({
       ))}
       <ActionIcon
         ml="auto"
-        aria-label={t('components.nearbyStopDetail.viewRoutesAriaLabel', { stopName: stopGroup.StopName.zh_TW })}
+        aria-label={t('components.nearbyStopDetail.viewRoutesAriaLabel', { stopName })}
         onClick={() => onViewRoutes(stopGroup.StationID)}
       >
         <RiArrowRightSLine size={18}/>

@@ -1,11 +1,12 @@
 import { ScrollArea, Skeleton, Stack, Tabs, Text } from '@mantine/core'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SkeletonList } from '~/components/common/SkeletonList'
+import { useLocalizedTextCollator } from '~/modules/hooks/useLocalizedTextCollator'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
-import { getEnumValues } from '~/modules/utils/getEnumValues'
-import { getDirectionLabel } from '~/modules/utils/getDirectionLabel'
+import { getDirectionTranslationKey } from '~/modules/utils/i18n/getDirectionTranslationKey'
+import { getEnumValues } from '~/modules/utils/shared/getEnumValues'
 import { RouteInfoCard } from '../routes/RouteInfoCard'
 
 interface PropType {
@@ -13,25 +14,22 @@ interface PropType {
   isLoading?: boolean
 }
 
-const routeNameCollator = new Intl.Collator('zh-Hant-u-co-stroke', {
-  numeric: true
-})
-
 function getDefaultRouteDirection(directions: DirectionType[]) {
   return directions[0] != null ? String(directions[0]) : null
 }
 
 export const NearbyStopRoutes = ({ routes, isLoading = false }: PropType) => {
   const { t } = useTranslation()
-  const routeSections = getEnumValues(DirectionType)
+  const routeNameCollator = useLocalizedTextCollator()
+  const routeSections = useMemo(() => getEnumValues(DirectionType)
     .map((direction) => ({
       direction,
-      label: getDirectionLabel(t, direction),
+      label: t(getDirectionTranslationKey(direction)),
       routes: routes
         .filter((route) => route.direction === direction)
         .sort((left, right) => routeNameCollator.compare(left.name, right.name))
     }))
-    .filter((section) => section.routes.length > 0)
+    .filter((section) => section.routes.length > 0), [routeNameCollator, routes, t])
   const [selectedDirection, setSelectedDirection] = useState<string | null>(
     getDefaultRouteDirection(routeSections.map((section) => section.direction))
   )

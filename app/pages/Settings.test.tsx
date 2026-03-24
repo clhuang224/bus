@@ -1,13 +1,12 @@
 // @vitest-environment jsdom
 
-import { configureStore } from '@reduxjs/toolkit'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppI18nProvider } from '~/components/providers/AppI18nProvider'
 import { APP_LOCALE_STORAGE_KEY } from '~/modules/consts/i18n'
 import { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import i18n from '~/modules/i18n'
-import localeSlice from '~/modules/slices/localeSlice'
+import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
 import Settings from './Settings'
 
@@ -36,10 +35,7 @@ vi.mock('react-router', async () => {
 })
 
 function renderSettingsPage(initialLocale = AppLocaleType.ZH_TW) {
-  const store = configureStore({
-    reducer: {
-      locale: localeSlice.reducer
-    },
+  const store = createTestStore<Record<never, never>>({
     preloadedState: {
       locale: {
         value: initialLocale

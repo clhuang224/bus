@@ -1,29 +1,34 @@
 import { Flex, ScrollArea, Stack, Title } from '@mantine/core'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
 import { BaseAlert } from '~/components/common/BaseAlert'
 import { FavoriteRouteStopCard } from '~/components/favorite/FavoriteRouteStopCard'
 import { APP_PAGE_PADDING } from '~/modules/consts/layout'
 import { getFavoriteMessages } from '~/modules/consts/pageMessages'
 import { useFavoriteRouteStops } from '~/modules/hooks/useFavoriteRouteStops'
-
-const favoriteRouteStopCollator = new Intl.Collator('zh-Hant-u-co-stroke', {
-  numeric: true
-})
+import { useLocalizedTextCollator } from '~/modules/hooks/useLocalizedTextCollator'
+import { selectLocale } from '~/modules/slices/localeSlice'
+import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 
 export default function Favorite() {
   const { t } = useTranslation()
+  const locale = useSelector(selectLocale)
+  const favoriteRouteStopCollator = useLocalizedTextCollator()
   const { favoriteRouteStops, removeFavoriteRouteStop } = useFavoriteRouteStops()
   const favoriteMessages = getFavoriteMessages(t)
 
   const sortedFavoriteRouteStops = useMemo(() => {
     return [...favoriteRouteStops].sort((left, right) => {
-      const routeResult = favoriteRouteStopCollator.compare(left.routeName, right.routeName)
+      const routeResult = favoriteRouteStopCollator.compare(
+        getLocalizedText(left.routeName, locale),
+        getLocalizedText(right.routeName, locale)
+      )
       if (routeResult !== 0) return routeResult
 
       return left.stopSequence - right.stopSequence
     })
-  }, [favoriteRouteStops])
+  }, [favoriteRouteStops, favoriteRouteStopCollator, locale])
 
   return (
     <Flex justify="center" h="100%">

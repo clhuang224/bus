@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CityNameType } from '../enums/CityNameType'
+import { CityNameType } from '../../enums/CityNameType'
 import {
   buildNearbyStopOfRouteQuery,
   buildNearbyStopQuery,

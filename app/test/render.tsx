@@ -16,6 +16,7 @@ interface RenderWithProvidersAndRouterOptions extends RenderWithStoreOptions {
 interface RenderRouteOptions extends Omit<RenderOptions, 'wrapper'> {
   initialEntries?: Array<string | { pathname: string, state?: unknown }>
   path: string
+  store?: EnhancedStore
 }
 
 function MantineWrapper({ children }: PropsWithChildren) {
@@ -65,19 +66,24 @@ export function renderRoute(
   {
     initialEntries = ['/'],
     path,
+    store,
     ...options
   }: RenderRouteOptions
 ) {
   return render(ui, {
-    wrapper: ({ children }: PropsWithChildren) => (
-      <MantineProvider>
-        <MemoryRouter initialEntries={initialEntries}>
-          <RouterRoutes>
-            <RouterRoute path={path} element={children} />
-          </RouterRoutes>
-        </MemoryRouter>
-      </MantineProvider>
-    ),
+    wrapper: ({ children }: PropsWithChildren) => {
+      const routedContent = (
+        <MantineProvider>
+          <MemoryRouter initialEntries={initialEntries}>
+            <RouterRoutes>
+              <RouterRoute path={path} element={children} />
+            </RouterRoutes>
+          </MemoryRouter>
+        </MantineProvider>
+      )
+
+      return store ? <Provider store={store}>{routedContent}</Provider> : routedContent
+    },
     ...options
   })
 }

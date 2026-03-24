@@ -4,15 +4,17 @@ import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
 import { getRouteRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
+import { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
+import { createTestStore } from '~/test/createTestStore'
+import { mockMatchMedia } from '~/test/mockMatchMedia'
 import { renderRoute } from '~/test/render'
 import Route from './Route'
-import { DEFAULT_APP_LOCALE } from '~/modules/consts/i18n'
 
-const t = i18n.getFixedT(DEFAULT_APP_LOCALE)
+const t = i18n.getFixedT(AppLocaleType.ZH_TW)
 const fourMinutesAwayLabel = t('routePage.realtime.minutesAway', { count: 4 })
 const noEstimateLabel = t('routePage.realtime.noEstimate')
 const routeRealtimeMessages = getRouteRealtimeMessages(t)
@@ -244,18 +246,18 @@ const targetFavoriteRouteStop: FavoriteRouteStop = {
   favoriteId: 'route-1-subroute-1-1-station-c',
   city: CityNameType.TAIPEI,
   routeUID: 'route-1',
-  routeName: '藍1',
+  routeName: { zh_TW: '藍1', en: 'Blue 1' },
   subRouteUID: 'subroute-1',
-  subRouteName: '藍1',
+  subRouteName: { zh_TW: '藍1', en: 'Blue 1' },
   direction: DirectionType.RETURN,
   stopUID: 'stop-c',
   stopID: 'stop-c',
   stationID: 'station-c',
   stationKey: 'station-c',
-  stopName: '市政府',
+  stopName: { zh_TW: '市政府', en: 'City Hall' },
   stopSequence: 2,
-  departure: '捷運昆陽站',
-  destination: '市政府'
+  departure: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
+  destination: { zh_TW: '市政府', en: 'City Hall' }
 }
 
 function resetRouteMocks() {
@@ -311,24 +313,18 @@ function mockDefaultRouteQueries() {
 function renderRoutePage(
   initialEntries: Array<string | { pathname: string, state?: unknown }> = ['/routes/Taipei/route-1']
 ) {
+  const store = createTestStore()
+
   return renderRoute(<Route />, {
     path: '/routes/:city/:id',
-    initialEntries
+    initialEntries,
+    store
   })
 }
 
 describe('Route', () => {
   beforeEach(() => {
-    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn()
-    }))
+    mockMatchMedia()
 
     resetRouteMocks()
     mockDefaultRouteQueries()
@@ -368,6 +364,25 @@ describe('Route', () => {
     expect(screen.getByLabelText(i18n.t('routePage.backToRoutes'))).toBeInTheDocument()
     expect(screen.queryByText('藍1')).not.toBeInTheDocument()
     expect(screen.queryByText('載入中')).not.toBeInTheDocument()
+  })
+
+  it('renders available terminal text when only one terminal name is present', () => {
+    mockUseGetRoutesByCityQuery.mockReturnValue({
+      data: [{
+        ...routeData[0],
+        DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
+        DestinationStopName: { zh_TW: '', en: '' }
+      }],
+      isLoading: false,
+      error: null
+    })
+
+    renderRoutePage()
+
+    expect(
+      screen.getByText((content, element) => content === '市政府' && element?.getAttribute('data-size') === 'sm')
+    ).toBeInTheDocument()
+    expect(screen.queryByText('市政府 -')).not.toBeInTheDocument()
   })
 
   it('shows an inline warning when realtime queries are rate limited', async () => {
@@ -520,16 +535,9 @@ describe('Route', () => {
   })
 
   it('opens the drawer by default on small screens', async () => {
-    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
-      matches: query.includes(themeBreakpointsSmMaxWidth()),
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn()
-    }))
+    mockMatchMedia({
+      matches: (query) => query.includes(themeBreakpointsSmMaxWidth())
+    })
 
     renderRoutePage()
 

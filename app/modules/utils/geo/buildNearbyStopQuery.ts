@@ -1,6 +1,6 @@
-import type { CityNameType } from '../enums/CityNameType'
-import { NEARBY_DISTANCE_KM } from '../consts/nearby'
-import type { LatLng } from '../types/CoordsType'
+import type { CityNameType } from '../../enums/CityNameType'
+import { NEARBY_DISTANCE_KM } from '../../consts/nearby'
+import type { LatLng } from '../../types/CoordsType'
 import { getLatitudeKilometersPerDegree, getLongitudeKilometersPerDegree } from './getGeoKilometersPerDegree'
 
 const STOP_SELECT_FIELDS = [

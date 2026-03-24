@@ -2,8 +2,8 @@ import { Select } from '@mantine/core'
 import { useEffect, useState, type ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AreaType } from '~/modules/enums/AreaType'
-import { getAreaLabel } from '~/modules/utils/getAreaLabel'
-import { getEnumValues } from '~/modules/utils/getEnumValues'
+import { getAreaTranslationKey } from '~/modules/utils/i18n/getAreaTranslationKey'
+import { getEnumValues } from '~/modules/utils/shared/getEnumValues'
 
 export interface AreaSelectPropType {
   value: AreaType
@@ -20,7 +20,7 @@ export const AreaSelect = (props: AreaSelectPropType): ReactElement => {
   }, [props.value])
 
   const options = getEnumValues(AreaType).map((area) => ({
-    label: getAreaLabel(t, area),
+    label: t(getAreaTranslationKey(area)),
     value: area
   }))
 

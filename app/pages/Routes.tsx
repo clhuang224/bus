@@ -11,14 +11,14 @@ import { AreaType } from '~/modules/enums/AreaType'
 import { getSearchMessages } from '~/modules/consts/pageMessages'
 import { busApi } from '~/modules/apis/bus'
 import type { BusRoute } from '~/modules/interfaces/BusRoute'
+import type { AppLocaleType } from '~/modules/enums/AppLocaleType'
+import { useLocalizedTextCollator } from '~/modules/hooks/useLocalizedTextCollator'
+import { selectLocale } from '~/modules/slices/localeSlice'
 import { setKeyword, setSelectedArea } from '~/modules/slices/routeSearchSlice'
 import type { AppDispatch, RootState } from '~/modules/store'
-import { getAreaByCoords } from '~/modules/utils/getAreaByCoords'
-import { normalizeBusRoutesWithDates } from '~/modules/utils/normalizeBusRoutesWithDates'
-
-const routeNameCollator = new Intl.Collator('zh-Hant-u-co-stroke', {
-  numeric: true
-})
+import { getAreaByCoords } from '~/modules/utils/geo/getAreaByCoords'
+import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
+import { normalizeBusRoutesWithDates } from '~/modules/utils/route/normalizeBusRoutesWithDates'
 
 function deduplicateRoutes(routes: BusRoute<Date | null>[]) {
   return Array.from(
@@ -32,19 +32,20 @@ function deduplicateRoutes(routes: BusRoute<Date | null>[]) {
   )
 }
 
-function matchesRouteKeyword(route: BusRoute<Date | null>, keyword: string) {
+function matchesRouteKeyword(route: BusRoute<Date | null>, keyword: string, locale: AppLocaleType) {
   if (!keyword) return true
 
   return [
-    route.RouteName.zh_TW,
-    route.DepartureStopName.zh_TW,
-    route.DestinationStopName.zh_TW
+    getLocalizedText(route.RouteName, locale),
+    getLocalizedText(route.DepartureStopName, locale),
+    getLocalizedText(route.DestinationStopName, locale)
   ].some((value) => value.toLowerCase().includes(keyword))
 }
 
 export default function Routes() {
   const dispatch = useDispatch<AppDispatch>()
   const { t } = useTranslation()
+  const locale = useSelector(selectLocale)
   const { coords } = useSelector((state: RootState) => state.geolocation)
   const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
   const { keyword, selectedArea } = useSelector((state: RootState) => state.routeSearch)
@@ -52,14 +53,18 @@ export default function Routes() {
   const area = selectedArea ?? currentArea ?? AreaType.TAIPEI
   const { data: routeData = [], isLoading, error } = busApi.useGetRoutesByAreaQuery(area)
   const routes = useMemo(() => normalizeBusRoutesWithDates(routeData), [routeData])
+  const routeNameCollator = useLocalizedTextCollator()
 
   const filteredRoutes = useMemo(() => {
     const normalizedKeyword = keyword.trim().toLowerCase()
 
     return deduplicateRoutes(routes)
-      .filter((route) => matchesRouteKeyword(route, normalizedKeyword))
-      .sort((left, right) => routeNameCollator.compare(left.RouteName.zh_TW, right.RouteName.zh_TW))
-  }, [keyword, routes])
+      .filter((route) => matchesRouteKeyword(route, normalizedKeyword, locale))
+      .sort((left, right) => routeNameCollator.compare(
+        getLocalizedText(left.RouteName, locale),
+        getLocalizedText(right.RouteName, locale)
+      ))
+  }, [keyword, locale, routeNameCollator, routes])
 
   const routeCardSkeletons = Array.from({ length: 6 }, (_, index) => (
     <Card key={index} withBorder radius="md" p="xs" shadow="xs" data-testid="routes-skeleton-card">
@@ -103,10 +108,10 @@ export default function Routes() {
                   <RouteInfoCard
                     key={route.RouteUID}
                     to={`/routes/${route.City}/${route.RouteUID}`}
-                    name={route.RouteName.zh_TW}
+                    name={getLocalizedText(route.RouteName, locale)}
                     city={route.City}
-                    departure={route.DepartureStopName.zh_TW}
-                    destination={route.DestinationStopName.zh_TW}
+                    departure={getLocalizedText(route.DepartureStopName, locale)}
+                    destination={getLocalizedText(route.DestinationStopName, locale)}
                   />
                 ))}
             </Stack>

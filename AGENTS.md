@@ -336,6 +336,8 @@ Use Traditional Chinese as the default source language for user-facing UI copy s
 
 For translatable UI copy, do not hard-code those strings directly in pages or shared components. Prefer `react-i18next` translation keys and keep the source strings in `app/modules/i18n/locales/`.
 
+For shared i18n helpers that map domain values to translated labels, prefer returning translation keys from `utils/` and call `t(...)` at the component or hook layer instead of passing `t` into the utility. Keep `utils/` pure where practical, and make the i18n dependency visible at the render boundary.
+
 Current app locale rules:
 
 - supported locales are currently limited to `zh-TW` and `en`
@@ -346,6 +348,8 @@ Current app locale rules:
 - when adding new translatable static copy, prefer extending the existing locale resource shape instead of creating one-off local translation objects
 
 For TDX-backed localized text such as route names, stop names, departure labels, or destination labels, do not assume `.zh_TW` is always the rendered field going forward. Follow the current i18n rollout plan and keep locale-aware access explicit and readable as those screens migrate.
+
+TDX English route and subroute names may be less specific than the Traditional Chinese source data. When multiple nearby routes appear to share the same English name, do not assume they are the same service from display text alone; use the Traditional Chinese name to double-check whether they are actually different variants.
 
 ### UI Structure
 

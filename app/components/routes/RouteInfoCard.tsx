@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { AppBadge } from '~/components/common/AppBadge'
 import type { CityNameType } from '~/modules/enums/CityNameType'
-import { getCityLabel } from '~/modules/utils/getCityLabel'
+import { getCityTranslationKey } from '~/modules/utils/i18n/getCityTranslationKey'
+import { getTerminalDisplay } from '~/modules/utils/i18n/getTerminalDisplay'
 
 interface PropType {
   to: string
@@ -21,6 +22,7 @@ export const RouteInfoCard = ({
   destination
 }: PropType) => {
   const { t } = useTranslation()
+  const terminalDisplay = getTerminalDisplay(departure, destination)
 
   return (
     <Card
@@ -44,12 +46,14 @@ export const RouteInfoCard = ({
                 {name}
               </AppBadge>
               <AppBadge type="city">
-                {getCityLabel(t, city)}
+                {t(getCityTranslationKey(city))}
               </AppBadge>
             </Flex>
-            <Text size="xs" c="dimmed">
-              {t('components.routeInfoCard.terminal', { departure, destination })}
-            </Text>
+            {terminalDisplay && (
+              <Text size="xs" c="dimmed">
+                {t(`components.routeInfoCard.${terminalDisplay.labelKey}`)}: {terminalDisplay.text}
+              </Text>
+            )}
           </Stack>
         )}
       />

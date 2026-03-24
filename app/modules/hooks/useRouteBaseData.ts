@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
 import { busApi } from '~/modules/apis/bus'
 import { getRouteMessages } from '~/modules/consts/pageMessages'
 import type { CityNameType } from '~/modules/enums/CityNameType'
@@ -7,8 +8,10 @@ import { DirectionType } from '~/modules/enums/DirectionType'
 import type { BusSubRoute } from '~/modules/interfaces/BusRoute'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import type { StopOfRouteStop } from '~/modules/interfaces/StopOfRoute'
-import { getDirectionLabel } from '~/modules/utils/getDirectionLabel'
-import { normalizeBusRoutesWithDates } from '~/modules/utils/normalizeBusRoutesWithDates'
+import { selectLocale } from '~/modules/slices/localeSlice'
+import { getDirectionTranslationKey } from '~/modules/utils/i18n/getDirectionTranslationKey'
+import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
+import { normalizeBusRoutesWithDates } from '~/modules/utils/route/normalizeBusRoutesWithDates'
 
 export interface RouteTab {
   id: string
@@ -46,6 +49,7 @@ export function useRouteBaseData({
   locationState
 }: UseRouteBaseDataOptions) {
   const { t } = useTranslation()
+  const locale = useSelector(selectLocale)
   const cityName = city as CityNameType
 
   const { data: routeData = [], isLoading: isRoutesLoading, error: routesError } = busApi.useGetRoutesByCityQuery(
@@ -78,18 +82,20 @@ export function useRouteBaseData({
   const routeTabs = useMemo<RouteTab[]>(() => {
     if (!busRoute) return []
 
-    const routeName = busRoute.RouteName.zh_TW.trim()
+    const routeName = getLocalizedText(busRoute.RouteName, locale).trim()
 
     return busRoute.SubRoutes.map((subRoute) => ({
       id: `${subRoute.SubRouteUID}-${subRoute.Direction}`,
       label: [
-        subRoute.SubRouteName.zh_TW.trim() === routeName ? null : subRoute.SubRouteName.zh_TW.trim(),
-        getDirectionLabel(t, subRoute.Direction)
+        getLocalizedText(subRoute.SubRouteName, locale).trim() === routeName
+          ? null
+          : getLocalizedText(subRoute.SubRouteName, locale).trim(),
+        t(getDirectionTranslationKey(subRoute.Direction))
       ].filter(Boolean).join(' '),
       subRouteUID: subRoute.SubRouteUID,
       direction: subRoute.Direction
     }))
-  }, [busRoute])
+  }, [busRoute, locale, t])
 
   const defaultActiveTabId = useMemo(() => {
     if (!routeTabs.length) return null
@@ -144,39 +150,39 @@ export function useRouteBaseData({
         favoriteId: `${busRoute.RouteUID}-${activeSubRoute.SubRouteUID}-${activeSubRoute.Direction}-${stationKey}`,
         city: busRoute.City,
         routeUID: busRoute.RouteUID,
-        routeName: busRoute.RouteName.zh_TW,
+        routeName: busRoute.RouteName,
         subRouteUID: activeSubRoute.SubRouteUID,
-        subRouteName: activeSubRoute.SubRouteName.zh_TW,
+        subRouteName: activeSubRoute.SubRouteName,
         direction: activeSubRoute.Direction,
         stopUID: stop.StopUID,
         stopID: stop.StopID,
         stationID: stop.StationID ?? null,
         stationKey,
-        stopName: stop.StopName.zh_TW,
+        stopName: stop.StopName,
         stopSequence: stop.StopSequence,
-        departure: activeSubRoute.DepartureStopName?.zh_TW || busRoute.DepartureStopName.zh_TW,
-        destination: activeSubRoute.DestinationStopName?.zh_TW || busRoute.DestinationStopName.zh_TW
+        departure: activeSubRoute.DepartureStopName ?? busRoute.DepartureStopName,
+        destination: activeSubRoute.DestinationStopName ?? busRoute.DestinationStopName
       }
 
       return {
         id: stop.StopUID,
         favoriteRouteStop,
-        name: stop.StopName.zh_TW,
+        name: getLocalizedText(stop.StopName, locale),
         sequence: stop.StopSequence,
         stopID: stop.StopID,
         isFavorite: isFavoriteRouteStop(favoriteRouteStop.favoriteId)
       }
     })
-  }, [activeStopOfRoute, activeSubRoute, busRoute, isFavoriteRouteStop])
+  }, [activeStopOfRoute, activeSubRoute, busRoute, isFavoriteRouteStop, locale])
 
   const routeMapStops = useMemo(() => {
     return (activeStopOfRoute?.Stops ?? []).map((stop: StopOfRouteStop) => ({
       id: stop.StopUID,
-      name: stop.StopName.zh_TW,
+      name: getLocalizedText(stop.StopName, locale),
       sequence: stop.StopSequence,
       position: stopPositionMap.get(stop.StopUID) ?? stopPositionMap.get(stop.StopID) ?? null
     }))
-  }, [activeStopOfRoute, stopPositionMap])
+  }, [activeStopOfRoute, locale, stopPositionMap])
 
   const highlightedStopId = useMemo(() => {
     if (!targetFavoriteRouteStop || !activeSubRoute || !activeStopOfRoute || !busRoute) return null

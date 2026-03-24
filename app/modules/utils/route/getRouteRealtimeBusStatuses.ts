@@ -1,9 +1,11 @@
 import type { TFunction } from 'i18next'
-import { stopStatusTranslationKeyMap } from '../consts/stopStatus'
-import { StopStatusType } from '../enums/StopStatusType'
-import type { EstimatedArrival } from '../interfaces/EstimatedArrival'
-import type { RealtimeNearStop } from '../interfaces/RealtimeNearStop'
-import type { RouteRealtimeBusStatus } from '../interfaces/RouteRealtimeBusStatus'
+import type { AppLocaleType } from '../../enums/AppLocaleType'
+import { stopStatusTranslationKeyMap } from '../../consts/stopStatus'
+import { StopStatusType } from '../../enums/StopStatusType'
+import type { EstimatedArrival } from '../../interfaces/EstimatedArrival'
+import type { RealtimeNearStop } from '../../interfaces/RealtimeNearStop'
+import type { RouteRealtimeBusStatus } from '../../interfaces/RouteRealtimeBusStatus'
+import { getLocalizedText } from '../i18n/getLocalizedText'
 
 function normalizePlateNumb(plateNumb: string | null | undefined) {
   return plateNumb?.trim().toUpperCase() ?? null
@@ -49,6 +51,7 @@ export function formatEstimatedArrivalLabel(t: TFunction, estimateTime: number |
 
 export function getRouteRealtimeBusStatuses(
   t: TFunction,
+  locale: AppLocaleType,
   realtimeBuses: RealtimeNearStop[],
   estimatedArrivals: EstimatedArrival[]
 ): RouteRealtimeBusStatus[] {
@@ -124,7 +127,7 @@ export function getRouteRealtimeBusStatuses(
         id: realtimeBus.PlateNumb ?? `${realtimeBus.SubRouteUID}-${realtimeBus.Direction}-${realtimeBus.StopUID}`,
         plateNumb: realtimeBus.PlateNumb,
         position: realtimeBus.position,
-        stopName: realtimeBus.StopName.zh_TW,
+        stopName: getLocalizedText(realtimeBus.StopName, locale),
         stopSequence: realtimeBus.StopSequence,
         subRouteUID: realtimeBus.SubRouteUID
       }

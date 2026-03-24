@@ -1,10 +1,10 @@
-import type { CityNameType } from '../enums/CityNameType'
-import type { BusRoute, TdxBusRoute } from '../interfaces/BusRoute'
-import type { EstimatedArrival, TdxEstimatedArrival } from '../interfaces/EstimatedArrival'
-import type { RealtimeNearStop, TdxRealtimeNearStop } from '../interfaces/RealtimeNearStop'
-import type { RouteShape, TdxRouteShape } from '../interfaces/RouteShape'
-import type { StopOfRoute, TdxStopOfRoute } from '../interfaces/StopOfRoute'
-import type { Stop, TdxStop } from '../interfaces/Stop'
+import type { CityNameType } from '../../enums/CityNameType'
+import type { BusRoute, TdxBusRoute } from '../../interfaces/BusRoute'
+import type { EstimatedArrival, TdxEstimatedArrival } from '../../interfaces/EstimatedArrival'
+import type { RealtimeNearStop, TdxRealtimeNearStop } from '../../interfaces/RealtimeNearStop'
+import type { RouteShape, TdxRouteShape } from '../../interfaces/RouteShape'
+import type { StopOfRoute, TdxStopOfRoute } from '../../interfaces/StopOfRoute'
+import type { Stop, TdxStop } from '../../interfaces/Stop'
 import { toLngLat, toLocalizedText } from './normalizeTdxFields'
 import { parseRouteShapePath } from './parseRouteShapePath'
 
@@ -37,30 +37,30 @@ export function transformBusRoute(busRoute: TdxBusRoute<string>): BusRoute<strin
     })),
     RouteName: toLocalizedText(busRoute.RouteName),
     DepartureStopName: {
-      zh_TW: busRoute.DepartureStopNameZh,
-      en: busRoute.DepartureStopNameEn
+      zh_TW: busRoute.DepartureStopNameZh ?? '',
+      en: busRoute.DepartureStopNameEn ?? ''
     },
     DestinationStopName: {
-      zh_TW: busRoute.DestinationStopNameZh,
-      en: busRoute.DestinationStopNameEn
+      zh_TW: busRoute.DestinationStopNameZh ?? '',
+      en: busRoute.DestinationStopNameEn ?? ''
     },
     TicketPriceDescription: {
-      zh_TW: busRoute.TicketPriceDescriptionZh,
-      en: busRoute.TicketPriceDescriptionEn
+      zh_TW: busRoute.TicketPriceDescriptionZh ?? '',
+      en: busRoute.TicketPriceDescriptionEn ?? ''
     },
     FareBufferZoneDescription: {
-      zh_TW: busRoute.FareBufferZoneDescriptionZh,
-      en: busRoute.FareBufferZoneDescriptionEn
+      zh_TW: busRoute.FareBufferZoneDescriptionZh ?? '',
+      en: busRoute.FareBufferZoneDescriptionEn ?? ''
     },
     SubRoutes: (busRoute.SubRoutes ?? []).map((busSubRoute) => ({
       ...busSubRoute,
       DepartureStopName: {
-        zh_TW: busSubRoute.DepartureStopNameZh,
-        en: busSubRoute.DepartureStopNameEn
+        zh_TW: busSubRoute.DepartureStopNameZh ?? busRoute.DepartureStopNameZh ?? '',
+        en: busSubRoute.DepartureStopNameEn ?? busRoute.DepartureStopNameEn ?? ''
       },
       DestinationStopName: {
-        zh_TW: busSubRoute.DestinationStopNameZh,
-        en: busSubRoute.DestinationStopNameEn
+        zh_TW: busSubRoute.DestinationStopNameZh ?? busRoute.DestinationStopNameZh ?? '',
+        en: busSubRoute.DestinationStopNameEn ?? busRoute.DestinationStopNameEn ?? ''
       },
       SubRouteName: toLocalizedText(busSubRoute.SubRouteName, busRoute.RouteName)
     }))

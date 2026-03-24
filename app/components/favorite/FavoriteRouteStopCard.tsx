@@ -1,11 +1,15 @@
 import { ActionIcon, Box, Card, Flex, Group, Stack, Text } from '@mantine/core'
 import { RiHeart2Fill } from '@remixicon/react'
 import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
 import { Link } from 'react-router'
 import { AppBadge } from '~/components/common/AppBadge'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
-import { getCityLabel } from '~/modules/utils/getCityLabel'
-import { getDirectionLabel } from '~/modules/utils/getDirectionLabel'
+import { selectLocale } from '~/modules/slices/localeSlice'
+import { getCityTranslationKey } from '~/modules/utils/i18n/getCityTranslationKey'
+import { getDirectionTranslationKey } from '~/modules/utils/i18n/getDirectionTranslationKey'
+import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
+import { getTerminalDisplay } from '~/modules/utils/i18n/getTerminalDisplay'
 
 interface PropType {
   favoriteRouteStop: FavoriteRouteStop
@@ -14,6 +18,13 @@ interface PropType {
 
 export const FavoriteRouteStopCard = ({ favoriteRouteStop, onRemove }: PropType) => {
   const { t } = useTranslation()
+  const locale = useSelector(selectLocale)
+  const routeName = getLocalizedText(favoriteRouteStop.routeName, locale)
+  const subRouteName = getLocalizedText(favoriteRouteStop.subRouteName, locale)
+  const stopName = getLocalizedText(favoriteRouteStop.stopName, locale)
+  const departure = getLocalizedText(favoriteRouteStop.departure, locale)
+  const destination = getLocalizedText(favoriteRouteStop.destination, locale)
+  const terminalDisplay = getTerminalDisplay(departure, destination)
 
   return (
     <Card
@@ -39,24 +50,23 @@ export const FavoriteRouteStopCard = ({ favoriteRouteStop, onRemove }: PropType)
               <Group gap="xs" wrap="wrap">
                 <AppBadge type="route">
                   {[
-                    favoriteRouteStop.routeName,
-                    favoriteRouteStop.subRouteName === favoriteRouteStop.routeName ? null : favoriteRouteStop.subRouteName,
-                    getDirectionLabel(t, favoriteRouteStop.direction)
+                    routeName,
+                    subRouteName === routeName ? null : subRouteName,
+                    t(getDirectionTranslationKey(favoriteRouteStop.direction))
                   ].filter(Boolean).join(' ')}
                 </AppBadge>
                 <AppBadge type="city">
-                  {getCityLabel(t, favoriteRouteStop.city)}
+                  {t(getCityTranslationKey(favoriteRouteStop.city))}
                 </AppBadge>
               </Group>
               <Text p="sm">
-                {favoriteRouteStop.stopSequence}. {favoriteRouteStop.stopName}
+                {favoriteRouteStop.stopSequence}. {stopName}
               </Text>
-              <Text size="xs" c="dimmed">
-                {t('components.favoriteRouteStopCard.terminal', {
-                  departure: favoriteRouteStop.departure,
-                  destination: favoriteRouteStop.destination
-                })}
-              </Text>
+              {terminalDisplay && (
+                <Text size="xs" c="dimmed">
+                  {t(`components.favoriteRouteStopCard.${terminalDisplay.labelKey}`)}: {terminalDisplay.text}
+                </Text>
+              )}
             </Stack>
           </Box>
           <ActionIcon

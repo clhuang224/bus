@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { FeatureCollection } from 'geojson'
-import { AreaType } from '../enums/AreaType'
-import { CityNameType } from '../enums/CityNameType'
+import { AreaType } from '../../enums/AreaType'
+import { CityNameType } from '../../enums/CityNameType'
 import { getAreaByCoords } from './getAreaByCoords'
 
 const mockGeojson: FeatureCollection = {

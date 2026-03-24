@@ -1,4 +1,4 @@
-import type { BusRoute, BusSubRoute } from '../interfaces/BusRoute'
+import type { BusRoute, BusSubRoute } from '../../interfaces/BusRoute'
 
 function toDateOrNull(value: string): Date | null {
   if (!value) return null
