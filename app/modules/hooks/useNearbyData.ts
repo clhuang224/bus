@@ -12,7 +12,7 @@ import {
 import { NEARBY_DISTANCE_KM } from '~/modules/consts/nearby'
 import { getNearbyMessages } from '~/modules/consts/pageMessages'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
-import { AppLocaleType } from '~/modules/enums/AppLocaleType'
+import type { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import type { BusRoute } from '~/modules/interfaces/BusRoute'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import type { Stop } from '~/modules/interfaces/Stop'

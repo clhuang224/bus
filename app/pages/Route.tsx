@@ -72,6 +72,7 @@ export default function Route() {
   const routeName = busRoute ? getLocalizedText(busRoute.RouteName, locale) : null
   const routeDeparture = busRoute ? getLocalizedText(busRoute.DepartureStopName, locale) : null
   const routeDestination = busRoute ? getLocalizedText(busRoute.DestinationStopName, locale) : null
+  const routeTerminalLabel = [routeDeparture, routeDestination].filter(Boolean).join(' - ')
 
   useEffect(() => {
     if (isSm) {
@@ -142,9 +143,9 @@ export default function Route() {
                 <AppBadge type="route" size="xl">{routeName}</AppBadge>
               )}
             </Flex>
-            {routeDeparture && routeDestination && (
+            {routeTerminalLabel && (
               <Text size="sm" c="dimmed" mt="sm">
-                {routeDeparture} - {routeDestination}
+                {routeTerminalLabel}
               </Text>
             )}
           </Stack>

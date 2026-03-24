@@ -4,6 +4,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
 import { getRouteRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
+import { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
@@ -12,9 +13,8 @@ import { createTestStore } from '~/test/createTestStore'
 import { mockMatchMedia } from '~/test/mockMatchMedia'
 import { renderRoute } from '~/test/render'
 import Route from './Route'
-import { DEFAULT_APP_LOCALE } from '~/modules/consts/i18n'
 
-const t = i18n.getFixedT(DEFAULT_APP_LOCALE)
+const t = i18n.getFixedT(AppLocaleType.ZH_TW)
 const fourMinutesAwayLabel = t('routePage.realtime.minutesAway', { count: 4 })
 const noEstimateLabel = t('routePage.realtime.noEstimate')
 const routeRealtimeMessages = getRouteRealtimeMessages(t)
@@ -364,6 +364,25 @@ describe('Route', () => {
     expect(screen.getByLabelText(i18n.t('routePage.backToRoutes'))).toBeInTheDocument()
     expect(screen.queryByText('藍1')).not.toBeInTheDocument()
     expect(screen.queryByText('載入中')).not.toBeInTheDocument()
+  })
+
+  it('renders available terminal text when only one terminal name is present', () => {
+    mockUseGetRoutesByCityQuery.mockReturnValue({
+      data: [{
+        ...routeData[0],
+        DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
+        DestinationStopName: { zh_TW: '', en: '' }
+      }],
+      isLoading: false,
+      error: null
+    })
+
+    renderRoutePage()
+
+    expect(
+      screen.getByText((content, element) => content === '市政府' && element?.getAttribute('data-size') === 'sm')
+    ).toBeInTheDocument()
+    expect(screen.queryByText('市政府 -')).not.toBeInTheDocument()
   })
 
   it('shows an inline warning when realtime queries are rate limited', async () => {

@@ -1,5 +1,5 @@
 import type { TFunction } from 'i18next'
-import { AppLocaleType } from '../../enums/AppLocaleType'
+import type { AppLocaleType } from '../../enums/AppLocaleType'
 import { stopStatusTranslationKeyMap } from '../../consts/stopStatus'
 import { StopStatusType } from '../../enums/StopStatusType'
 import type { EstimatedArrival } from '../../interfaces/EstimatedArrival'
