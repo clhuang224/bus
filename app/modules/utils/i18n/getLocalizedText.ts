@@ -13,7 +13,10 @@ export function getLocalizedText(
 ) {
   if (!text) return ''
 
-  const zhText = ('zh-TW' in text ? text['zh-TW'] : text.zh_TW)?.trim() ?? ''
+  const zhTwModern = ('zh-TW' in text ? text['zh-TW'] : undefined)?.trim() ?? ''
+  const zhTwLegacy = ('zh_TW' in text ? text.zh_TW : undefined)?.trim() ?? ''
+  const zhText = zhTwModern || zhTwLegacy
+
   const englishText = text.en?.trim() ?? ''
 
   if (locale === AppLocaleType.EN) {
