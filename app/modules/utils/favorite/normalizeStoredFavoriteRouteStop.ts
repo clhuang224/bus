@@ -38,7 +38,10 @@ function toStoredLocalizedText(value: unknown): LocalizedText | null {
   const localizedValue = value as Record<string, unknown> | null
   if (typeof value === 'object' && value !== null && typeof localizedValue?.en === 'string') {
     if (typeof localizedValue['zh-TW'] === 'string') {
-      return value as LocalizedText
+      return {
+        'zh-TW': localizedValue['zh-TW'],
+        en: localizedValue.en
+      }
     }
 
     if (typeof localizedValue.zh_TW === 'string') {
