@@ -1,5 +1,7 @@
 # Project Guide
 
+[English](./AGENTS.md) | [繁體中文](./docs/AGENTS.zh-TW.md)
+
 This document explains how this project is organized, how data flows through the app, and which conventions to follow when adding or changing features.
 
 Use this as the default guide for new work. When a change touches multiple areas, prefer keeping the structure and naming consistent with the patterns described here instead of introducing a new local style.
@@ -347,7 +349,7 @@ Current app locale rules:
 - `AppI18nProvider` is responsible for syncing the active locale to both `i18n` and `document.documentElement.lang`
 - when adding new translatable static copy, prefer extending the existing locale resource shape instead of creating one-off local translation objects
 
-For TDX-backed localized text such as route names, stop names, departure labels, or destination labels, do not assume `.zh_TW` is always the rendered field going forward. Follow the current i18n rollout plan and keep locale-aware access explicit and readable as those screens migrate.
+For TDX-backed localized text such as route names, stop names, departure labels, or destination labels, do not assume `['zh-TW']` is always the rendered field going forward. Follow the current i18n rollout plan and keep locale-aware access explicit and readable as those screens migrate.
 
 TDX English route and subroute names may be less specific than the Traditional Chinese source data. When multiple nearby routes appear to share the same English name, do not assume they are the same service from display text alone; use the Traditional Chinese name to double-check whether they are actually different variants.
 

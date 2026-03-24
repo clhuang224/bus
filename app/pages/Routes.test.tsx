@@ -12,6 +12,9 @@ import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
 import Routes from './Routes'
 
+const t = i18n.getFixedT(AppLocaleType.ZH_TW)
+const routeInfoOriginLabel = `${t('components.routeInfoCard.departureLabel')}: 市政府`
+
 const { mockUseGetRoutesByAreaQuery } = vi.hoisted(() => ({
   mockUseGetRoutesByAreaQuery: vi.fn()
 }))
@@ -54,11 +57,11 @@ const routesData = [
     ProviderID: 'provider-1',
     SubRoutes: [],
     BusRouteType: 0,
-    RouteName: { zh_TW: '藍1', en: 'Blue 1' },
-    DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
-    DestinationStopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
-    TicketPriceDescription: { zh_TW: '', en: '' },
-    FareBufferZoneDescription: { zh_TW: '', en: '' },
+    RouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
+    DepartureStopName: { 'zh-TW': '市政府', en: 'City Hall' },
+    DestinationStopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+    TicketPriceDescription: { 'zh-TW': '', en: '' },
+    FareBufferZoneDescription: { 'zh-TW': '', en: '' },
     RouteMapImageUrl: '',
     City: CityNameType.TAIPEI,
     CityCode: 'TPE',
@@ -74,11 +77,11 @@ const routesData = [
     ProviderID: 'provider-1-duplicate',
     SubRoutes: [],
     BusRouteType: 0,
-    RouteName: { zh_TW: '藍1', en: 'Blue 1' },
-    DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
-    DestinationStopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
-    TicketPriceDescription: { zh_TW: '', en: '' },
-    FareBufferZoneDescription: { zh_TW: '', en: '' },
+    RouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
+    DepartureStopName: { 'zh-TW': '市政府', en: 'City Hall' },
+    DestinationStopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+    TicketPriceDescription: { 'zh-TW': '', en: '' },
+    FareBufferZoneDescription: { 'zh-TW': '', en: '' },
     RouteMapImageUrl: '',
     City: CityNameType.NEW_TAIPEI,
     CityCode: 'NWT',
@@ -94,11 +97,11 @@ const routesData = [
     ProviderID: 'provider-2',
     SubRoutes: [],
     BusRouteType: 0,
-    RouteName: { zh_TW: '紅25', en: 'Red 25' },
-    DepartureStopName: { zh_TW: '台北車站', en: 'Taipei Main Station' },
-    DestinationStopName: { zh_TW: '北門', en: 'Beimen' },
-    TicketPriceDescription: { zh_TW: '', en: '' },
-    FareBufferZoneDescription: { zh_TW: '', en: '' },
+    RouteName: { 'zh-TW': '紅25', en: 'Red 25' },
+    DepartureStopName: { 'zh-TW': '台北車站', en: 'Taipei Main Station' },
+    DestinationStopName: { 'zh-TW': '北門', en: 'Beimen' },
+    TicketPriceDescription: { 'zh-TW': '', en: '' },
+    FareBufferZoneDescription: { 'zh-TW': '', en: '' },
     RouteMapImageUrl: '',
     City: CityNameType.TAIPEI,
     CityCode: 'TPE',
@@ -222,8 +225,8 @@ describe('Routes', () => {
     mockUseGetRoutesByAreaQuery.mockReturnValue({
       data: [{
         ...routesData[0],
-        DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
-        DestinationStopName: { zh_TW: '', en: '' }
+        DepartureStopName: { 'zh-TW': '市政府', en: 'City Hall' },
+        DestinationStopName: { 'zh-TW': '', en: '' }
       }],
       isLoading: false,
       error: null
@@ -231,8 +234,8 @@ describe('Routes', () => {
 
     renderRoutes()
 
-    expect(screen.getByText('起點站: 市政府')).toBeInTheDocument()
-    expect(screen.queryByText('起訖站: 市政府')).not.toBeInTheDocument()
+    expect(screen.getByText(routeInfoOriginLabel)).toBeInTheDocument()
+    expect(screen.queryByText(`${i18n.t('components.routeInfoCard.terminalLabel')}: 市政府`)).not.toBeInTheDocument()
   })
 
   it('filters routes by the entered keyword', async () => {

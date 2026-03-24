@@ -30,21 +30,26 @@ function isDirection(value: unknown): value is DirectionType {
 function toStoredLocalizedText(value: unknown): LocalizedText | null {
   if (typeof value === 'string') {
     return {
-      zh_TW: value,
+      'zh-TW': value,
       en: ''
     }
   }
 
   const localizedValue = value as Record<string, unknown> | null
-  if (
-    typeof value === 'object' &&
-    value !== null &&
-    'zh_TW' in value &&
-    'en' in value &&
-    typeof localizedValue?.zh_TW === 'string' &&
-    typeof localizedValue.en === 'string'
-  ) {
-    return value as LocalizedText
+  if (typeof value === 'object' && value !== null && typeof localizedValue?.en === 'string') {
+    if (typeof localizedValue['zh-TW'] === 'string') {
+      return {
+        'zh-TW': localizedValue['zh-TW'],
+        en: localizedValue.en
+      }
+    }
+
+    if (typeof localizedValue.zh_TW === 'string') {
+      return {
+        'zh-TW': localizedValue.zh_TW,
+        en: localizedValue.en
+      }
+    }
   }
 
   return null

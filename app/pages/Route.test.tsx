@@ -94,35 +94,35 @@ const routeData = [
         SubRouteUID: 'subroute-0',
         SubRouteID: 'subroute-0',
         OperatorIDs: [],
-        SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+        SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
         Direction: DirectionType.GO,
         FirstBusTime: '06:00',
         LastBusTime: '22:00',
         HolidayFirstBusTime: '06:00',
         HolidayLastBusTime: '22:00',
-        DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
-        DestinationStopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' }
+        DepartureStopName: { 'zh-TW': '市政府', en: 'City Hall' },
+        DestinationStopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' }
       },
       {
         SubRouteUID: 'subroute-1',
         SubRouteID: 'subroute-1',
         OperatorIDs: [],
-        SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+        SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
         Direction: DirectionType.RETURN,
         FirstBusTime: '06:00',
         LastBusTime: '22:00',
         HolidayFirstBusTime: '06:00',
         HolidayLastBusTime: '22:00',
-        DepartureStopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
-        DestinationStopName: { zh_TW: '市政府', en: 'City Hall' }
+        DepartureStopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+        DestinationStopName: { 'zh-TW': '市政府', en: 'City Hall' }
       }
     ],
     BusRouteType: 0,
-    RouteName: { zh_TW: '藍1', en: 'Blue 1' },
-    DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
-    DestinationStopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
-    TicketPriceDescription: { zh_TW: '', en: '' },
-    FareBufferZoneDescription: { zh_TW: '', en: '' },
+    RouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
+    DepartureStopName: { 'zh-TW': '市政府', en: 'City Hall' },
+    DestinationStopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+    TicketPriceDescription: { 'zh-TW': '', en: '' },
+    FareBufferZoneDescription: { 'zh-TW': '', en: '' },
     RouteMapImageUrl: '',
     City: CityNameType.TAIPEI,
     CityCode: 'TPE',
@@ -135,17 +135,17 @@ const stopOfRoutesData = [
   {
     RouteUID: 'route-1',
     RouteID: 'route-1',
-    RouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    RouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
     SubRouteUID: 'subroute-0',
     SubRouteID: 'subroute-0',
-    SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
     Direction: DirectionType.GO,
     City: CityNameType.TAIPEI,
     Stops: [
       {
         StopUID: 'stop-a',
         StopID: 'stop-a',
-        StopName: { zh_TW: '市政府', en: 'City Hall' },
+        StopName: { 'zh-TW': '市政府', en: 'City Hall' },
         StopSequence: 1,
         StationID: 'station-a'
       }
@@ -154,24 +154,24 @@ const stopOfRoutesData = [
   {
     RouteUID: 'route-1',
     RouteID: 'route-1',
-    RouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    RouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
     SubRouteUID: 'subroute-1',
     SubRouteID: 'subroute-1',
-    SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
     Direction: DirectionType.RETURN,
     City: CityNameType.TAIPEI,
     Stops: [
       {
         StopUID: 'stop-b',
         StopID: 'stop-b',
-        StopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
+        StopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
         StopSequence: 1,
         StationID: 'station-b'
       },
       {
         StopUID: 'stop-c',
         StopID: 'stop-c',
-        StopName: { zh_TW: '市政府', en: 'City Hall' },
+        StopName: { 'zh-TW': '市政府', en: 'City Hall' },
         StopSequence: 2,
         StationID: 'station-c'
       }
@@ -183,13 +183,13 @@ const stopsByCityData = [
   {
     StopUID: 'stop-b',
     StopID: 'stop-b',
-    StopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
+    StopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
     position: [121.6, 25.05] as [number, number]
   },
   {
     StopUID: 'stop-c',
     StopID: 'stop-c',
-    StopName: { zh_TW: '市政府', en: 'City Hall' },
+    StopName: { 'zh-TW': '市政府', en: 'City Hall' },
     position: [121.56, 25.04] as [number, number]
   }
 ]
@@ -199,13 +199,13 @@ const estimatedArrivalsData = [
     PlateNumb: 'ABC-123',
     StopUID: 'stop-c',
     StopID: 'stop-c',
-    StopName: { zh_TW: '市政府', en: 'City Hall' },
+    StopName: { 'zh-TW': '市政府', en: 'City Hall' },
     RouteUID: 'route-1',
     RouteID: 'route-1',
-    RouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    RouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
     SubRouteUID: 'subroute-1',
     SubRouteID: 'subroute-1',
-    SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
     Direction: DirectionType.RETURN,
     StopSequence: 2,
     EstimateTime: 181,
@@ -222,14 +222,14 @@ const realtimeNearStopsData = [
     OperatorID: 'operator-1',
     RouteUID: 'route-1',
     RouteID: 'route-1',
-    RouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    RouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
     SubRouteUID: 'subroute-1',
     SubRouteID: 'subroute-1',
-    SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
     Direction: DirectionType.RETURN,
     StopUID: 'stop-c',
     StopID: 'stop-c',
-    StopName: { zh_TW: '市政府', en: 'City Hall' },
+    StopName: { 'zh-TW': '市政府', en: 'City Hall' },
     StopSequence: 2,
     DutyStatus: 0,
     BusStatus: 0,
@@ -246,18 +246,18 @@ const targetFavoriteRouteStop: FavoriteRouteStop = {
   favoriteId: 'route-1-subroute-1-1-station-c',
   city: CityNameType.TAIPEI,
   routeUID: 'route-1',
-  routeName: { zh_TW: '藍1', en: 'Blue 1' },
+  routeName: { 'zh-TW': '藍1', en: 'Blue 1' },
   subRouteUID: 'subroute-1',
-  subRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+  subRouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
   direction: DirectionType.RETURN,
   stopUID: 'stop-c',
   stopID: 'stop-c',
   stationID: 'station-c',
   stationKey: 'station-c',
-  stopName: { zh_TW: '市政府', en: 'City Hall' },
+  stopName: { 'zh-TW': '市政府', en: 'City Hall' },
   stopSequence: 2,
-  departure: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
-  destination: { zh_TW: '市政府', en: 'City Hall' }
+  departure: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+  destination: { 'zh-TW': '市政府', en: 'City Hall' }
 }
 
 function resetRouteMocks() {
@@ -370,8 +370,8 @@ describe('Route', () => {
     mockUseGetRoutesByCityQuery.mockReturnValue({
       data: [{
         ...routeData[0],
-        DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
-        DestinationStopName: { zh_TW: '', en: '' }
+        DepartureStopName: { 'zh-TW': '市政府', en: 'City Hall' },
+        DestinationStopName: { 'zh-TW': '', en: '' }
       }],
       isLoading: false,
       error: null
@@ -474,7 +474,7 @@ describe('Route', () => {
         RouteUID: 'route-1',
         SubRouteUID: 'route-1',
         SubRouteID: 'route-1',
-        SubRouteName: { zh_TW: '藍1', en: 'Blue 1' }
+        SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1' }
       }],
       isError: false,
       isLoading: false,
@@ -507,7 +507,7 @@ describe('Route', () => {
         Direction: DirectionType.GO,
         StopUID: 'stop-a',
         StopID: 'stop-a',
-        StopName: { zh_TW: '市政府', en: 'City Hall' },
+        StopName: { 'zh-TW': '市政府', en: 'City Hall' },
         StopSequence: 1,
         PlateNumb: undefined,
         EstimateTime: null,

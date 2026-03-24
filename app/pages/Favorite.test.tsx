@@ -14,23 +14,26 @@ import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
 import Favorite from './Favorite'
 
+const t = i18n.getFixedT(AppLocaleType.ZH_TW)
+const favoriteTerminalOriginLabel = `${t('components.favoriteRouteStopCard.departureLabel')}: 市政府`
+
 const favoriteRouteStops: FavoriteRouteStop[] = [
   {
     favoriteId: 'route-1-subroute-1-0-station-1',
     city: CityNameType.TAIPEI,
     routeUID: 'route-1',
-    routeName: { zh_TW: '藍1', en: 'Blue 1' },
+    routeName: { 'zh-TW': '藍1', en: 'Blue 1' },
     subRouteUID: 'subroute-1',
-    subRouteName: { zh_TW: '往捷運昆陽站', en: 'To MRT Kunyang Station' },
+    subRouteName: { 'zh-TW': '往捷運昆陽站', en: 'To MRT Kunyang Station' },
     direction: DirectionType.GO,
     stopUID: 'stop-1',
     stopID: 'stop-id-1',
     stationID: 'station-1',
     stationKey: 'station-1',
-    stopName: { zh_TW: '市政府', en: 'City Hall' },
+    stopName: { 'zh-TW': '市政府', en: 'City Hall' },
     stopSequence: 1,
-    departure: { zh_TW: '市政府', en: 'City Hall' },
-    destination: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' }
+    departure: { 'zh-TW': '市政府', en: 'City Hall' },
+    destination: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' }
   }
 ]
 
@@ -39,52 +42,52 @@ const unsortedFavoriteRouteStops: FavoriteRouteStop[] = [
     favoriteId: 'route-2-subroute-1-0-station-2',
     city: CityNameType.TAIPEI,
     routeUID: 'route-2',
-    routeName: { zh_TW: '藍2', en: 'Blue 20' },
+    routeName: { 'zh-TW': '藍2', en: 'Blue 20' },
     subRouteUID: 'subroute-2-1',
-    subRouteName: { zh_TW: '往市府轉運站', en: 'To City Hall Bus Station' },
+    subRouteName: { 'zh-TW': '往市府轉運站', en: 'To City Hall Bus Station' },
     direction: DirectionType.GO,
     stopUID: 'stop-2',
     stopID: 'stop-id-2',
     stationID: 'station-2',
     stationKey: 'station-2',
-    stopName: { zh_TW: '忠孝敦化', en: 'Zhongxiao Dunhua' },
+    stopName: { 'zh-TW': '忠孝敦化', en: 'Zhongxiao Dunhua' },
     stopSequence: 2,
-    departure: { zh_TW: '忠孝敦化', en: 'Zhongxiao Dunhua' },
-    destination: { zh_TW: '市府轉運站', en: 'City Hall Bus Station' }
+    departure: { 'zh-TW': '忠孝敦化', en: 'Zhongxiao Dunhua' },
+    destination: { 'zh-TW': '市府轉運站', en: 'City Hall Bus Station' }
   },
   {
     favoriteId: 'route-1-subroute-2-0-station-3',
     city: CityNameType.TAIPEI,
     routeUID: 'route-1',
-    routeName: { zh_TW: '藍1', en: 'Blue 1' },
+    routeName: { 'zh-TW': '藍1', en: 'Blue 1' },
     subRouteUID: 'subroute-1-2',
-    subRouteName: { zh_TW: '往捷運昆陽站', en: 'To MRT Kunyang Station' },
+    subRouteName: { 'zh-TW': '往捷運昆陽站', en: 'To MRT Kunyang Station' },
     direction: DirectionType.GO,
     stopUID: 'stop-3',
     stopID: 'stop-id-3',
     stationID: 'station-3',
     stationKey: 'station-3',
-    stopName: { zh_TW: '國父紀念館', en: 'Sun Yat-Sen Memorial Hall' },
+    stopName: { 'zh-TW': '國父紀念館', en: 'Sun Yat-Sen Memorial Hall' },
     stopSequence: 2,
-    departure: { zh_TW: '市政府', en: 'City Hall' },
-    destination: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' }
+    departure: { 'zh-TW': '市政府', en: 'City Hall' },
+    destination: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' }
   },
   {
     favoriteId: 'route-1-subroute-1-0-station-1',
     city: CityNameType.TAIPEI,
     routeUID: 'route-1',
-    routeName: { zh_TW: '藍1', en: 'Blue 1' },
+    routeName: { 'zh-TW': '藍1', en: 'Blue 1' },
     subRouteUID: 'subroute-1-1',
-    subRouteName: { zh_TW: '往捷運昆陽站', en: 'To MRT Kunyang Station' },
+    subRouteName: { 'zh-TW': '往捷運昆陽站', en: 'To MRT Kunyang Station' },
     direction: DirectionType.GO,
     stopUID: 'stop-1',
     stopID: 'stop-id-1',
     stationID: 'station-1',
     stationKey: 'station-1',
-    stopName: { zh_TW: '市政府', en: 'City Hall' },
+    stopName: { 'zh-TW': '市政府', en: 'City Hall' },
     stopSequence: 1,
-    departure: { zh_TW: '市政府', en: 'City Hall' },
-    destination: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' }
+    departure: { 'zh-TW': '市政府', en: 'City Hall' },
+    destination: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' }
   }
 ]
 
@@ -171,12 +174,14 @@ describe('Favorite', () => {
   it('renders available terminal text when only one terminal value is present', () => {
     renderFavoritePage([{
       ...favoriteRouteStops[0],
-      departure: { zh_TW: '市政府', en: 'City Hall' },
-      destination: { zh_TW: '', en: '' }
+      departure: { 'zh-TW': '市政府', en: 'City Hall' },
+      destination: { 'zh-TW': '', en: '' }
     }])
 
-    expect(screen.getByText('起點站: 市政府')).toBeInTheDocument()
-    expect(screen.queryByText('起訖站: 市政府')).not.toBeInTheDocument()
+    expect(screen.getByText(favoriteTerminalOriginLabel)).toBeInTheDocument()
+    expect(
+      screen.queryByText(`${i18n.t('components.favoriteRouteStopCard.terminalLabel')}: 市政府`)
+    ).not.toBeInTheDocument()
   })
 
   it('sorts favorite route stops by route name and stop sequence', () => {
@@ -207,15 +212,41 @@ describe('Favorite', () => {
     renderFavoritePageFromLocalStorage([
       {
         favoriteId: 'broken-favorite',
+        routeName: { 'zh-TW': '藍1', en: 'Blue 1' },
+        subRouteName: { 'zh-TW': '往捷運昆陽站', en: 'To MRT Kunyang Station' },
+        stopName: { 'zh-TW': '市政府', en: 'City Hall' },
+        departure: { 'zh-TW': '市政府', en: 'City Hall' },
+        destination: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' }
+      }
+    ])
+
+    expect(screen.getByText(getFavoriteMessages(i18n.t).emptyFavoriteRouteStops.title)).toBeInTheDocument()
+  })
+
+  it('loads legacy favorite route stops that still use zh_TW localized text keys', () => {
+    renderFavoritePageFromLocalStorage([
+      {
+        favoriteId: 'route-1-subroute-1-0-station-1',
+        city: CityNameType.TAIPEI,
+        routeUID: 'route-1',
         routeName: { zh_TW: '藍1', en: 'Blue 1' },
+        subRouteUID: 'subroute-1',
         subRouteName: { zh_TW: '往捷運昆陽站', en: 'To MRT Kunyang Station' },
+        direction: DirectionType.GO,
+        stopUID: 'stop-1',
+        stopID: 'stop-id-1',
+        stationID: 'station-1',
+        stationKey: 'station-1',
         stopName: { zh_TW: '市政府', en: 'City Hall' },
+        stopSequence: 1,
         departure: { zh_TW: '市政府', en: 'City Hall' },
         destination: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' }
       }
     ])
 
-    expect(screen.getByText(getFavoriteMessages(i18n.t).emptyFavoriteRouteStops.title)).toBeInTheDocument()
+    expect(screen.getByText(/藍1/)).toBeInTheDocument()
+    expect(screen.getByText('1. 市政府')).toBeInTheDocument()
+    expect(screen.getByText(/市政府.*捷運昆陽站/)).toBeInTheDocument()
   })
 
   it('falls back to the empty state when localStorage contains invalid JSON', () => {
