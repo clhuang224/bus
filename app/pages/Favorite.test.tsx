@@ -14,7 +14,8 @@ import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
 import Favorite from './Favorite'
 
-const favoriteTerminalOriginLabel = `${i18n.t('components.favoriteRouteStopCard.departureLabel')}: 市政府`
+const t = i18n.getFixedT(AppLocaleType.ZH_TW)
+const favoriteTerminalOriginLabel = `${t('components.favoriteRouteStopCard.departureLabel')}: 市政府`
 
 const favoriteRouteStops: FavoriteRouteStop[] = [
   {

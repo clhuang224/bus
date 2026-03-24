@@ -12,7 +12,8 @@ import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
 import Routes from './Routes'
 
-const routeInfoOriginLabel = `${i18n.t('components.routeInfoCard.departureLabel')}: 市政府`
+const t = i18n.getFixedT(AppLocaleType.ZH_TW)
+const routeInfoOriginLabel = `${t('components.routeInfoCard.departureLabel')}: 市政府`
 
 const { mockUseGetRoutesByAreaQuery } = vi.hoisted(() => ({
   mockUseGetRoutesByAreaQuery: vi.fn()
