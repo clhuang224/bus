@@ -14,7 +14,7 @@ import { useRouteRealtimeData } from '~/modules/hooks/useRouteRealtimeData'
 import { RiArrowLeftSLine } from '@remixicon/react'
 import { AppBadge } from '~/components/common/AppBadge'
 import { selectLocale } from '~/modules/slices/localeSlice'
-import { getLocalizedText } from '~/modules/utils/getLocalizedText'
+import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 
 export default function Route() {
   const { t } = useTranslation()

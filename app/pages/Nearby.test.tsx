@@ -39,7 +39,7 @@ vi.mock('~/modules/apis/bus', () => ({
   }
 }))
 
-vi.mock('~/modules/utils/getCityByCoords', () => ({
+vi.mock('~/modules/utils/geo/getCityByCoords', () => ({
   getCityByCoords: () => CityNameType.TAIPEI
 }))
 

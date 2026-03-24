@@ -1,4 +1,4 @@
-import type { LngLat } from '../types/CoordsType'
+import type { LngLat } from '../../types/CoordsType'
 
 function decodeEncodedPolyline(encodedPolyline: string): LngLat[] {
   const coordinates: LngLat[] = []

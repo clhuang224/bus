@@ -6,8 +6,8 @@ import { AppBadge } from '~/components/common/AppBadge'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
 import { selectLocale } from '~/modules/slices/localeSlice'
-import { getCityLabel } from '~/modules/utils/getCityLabel'
-import { getLocalizedText } from '~/modules/utils/getLocalizedText'
+import { getCityLabel } from '~/modules/utils/i18n/getCityLabel'
+import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 
 interface PropType {
   stopGroup: NearbyStopGroup

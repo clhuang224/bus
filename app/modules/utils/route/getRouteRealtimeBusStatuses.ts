@@ -1,11 +1,11 @@
 import type { TFunction } from 'i18next'
-import { AppLocaleType } from '../enums/AppLocaleType'
-import { stopStatusTranslationKeyMap } from '../consts/stopStatus'
-import { StopStatusType } from '../enums/StopStatusType'
-import type { EstimatedArrival } from '../interfaces/EstimatedArrival'
-import type { RealtimeNearStop } from '../interfaces/RealtimeNearStop'
-import type { RouteRealtimeBusStatus } from '../interfaces/RouteRealtimeBusStatus'
-import { getLocalizedText } from './getLocalizedText'
+import { AppLocaleType } from '../../enums/AppLocaleType'
+import { stopStatusTranslationKeyMap } from '../../consts/stopStatus'
+import { StopStatusType } from '../../enums/StopStatusType'
+import type { EstimatedArrival } from '../../interfaces/EstimatedArrival'
+import type { RealtimeNearStop } from '../../interfaces/RealtimeNearStop'
+import type { RouteRealtimeBusStatus } from '../../interfaces/RouteRealtimeBusStatus'
+import { getLocalizedText } from '../i18n/getLocalizedText'
 
 function normalizePlateNumb(plateNumb: string | null | undefined) {
   return plateNumb?.trim().toUpperCase() ?? null

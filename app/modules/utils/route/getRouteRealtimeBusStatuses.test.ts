@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { BusStatusType } from '../enums/BusStatusType'
-import { CityNameType } from '../enums/CityNameType'
-import { DirectionType } from '../enums/DirectionType'
-import { DutyStatusType } from '../enums/DutyStatusType'
-import { AppLocaleType } from '../enums/AppLocaleType'
-import { StopStatusType } from '../enums/StopStatusType'
-import i18n from '../i18n'
+import { BusStatusType } from '../../enums/BusStatusType'
+import { CityNameType } from '../../enums/CityNameType'
+import { DirectionType } from '../../enums/DirectionType'
+import { DutyStatusType } from '../../enums/DutyStatusType'
+import { AppLocaleType } from '../../enums/AppLocaleType'
+import { StopStatusType } from '../../enums/StopStatusType'
+import i18n from '../../i18n'
 import { getRouteRealtimeBusStatuses } from './getRouteRealtimeBusStatuses'
-import { DEFAULT_APP_LOCALE } from '../consts/i18n'
+import { DEFAULT_APP_LOCALE } from '../../consts/i18n'
 
 const t = i18n.getFixedT(DEFAULT_APP_LOCALE)
 const enT = i18n.getFixedT(AppLocaleType.EN)

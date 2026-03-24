@@ -9,9 +9,9 @@ import type { BusSubRoute } from '~/modules/interfaces/BusRoute'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import type { StopOfRouteStop } from '~/modules/interfaces/StopOfRoute'
 import { selectLocale } from '~/modules/slices/localeSlice'
-import { getDirectionLabel } from '~/modules/utils/getDirectionLabel'
-import { getLocalizedText } from '~/modules/utils/getLocalizedText'
-import { normalizeBusRoutesWithDates } from '~/modules/utils/normalizeBusRoutesWithDates'
+import { getDirectionLabel } from '~/modules/utils/i18n/getDirectionLabel'
+import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
+import { normalizeBusRoutesWithDates } from '~/modules/utils/route/normalizeBusRoutesWithDates'
 
 export interface RouteTab {
   id: string

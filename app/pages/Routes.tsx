@@ -16,9 +16,9 @@ import { useLocalizedTextCollator } from '~/modules/hooks/useLocalizedTextCollat
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { setKeyword, setSelectedArea } from '~/modules/slices/routeSearchSlice'
 import type { AppDispatch, RootState } from '~/modules/store'
-import { getAreaByCoords } from '~/modules/utils/getAreaByCoords'
-import { getLocalizedText } from '~/modules/utils/getLocalizedText'
-import { normalizeBusRoutesWithDates } from '~/modules/utils/normalizeBusRoutesWithDates'
+import { getAreaByCoords } from '~/modules/utils/geo/getAreaByCoords'
+import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
+import { normalizeBusRoutesWithDates } from '~/modules/utils/route/normalizeBusRoutesWithDates'
 
 function deduplicateRoutes(routes: BusRoute<Date | null>[]) {
   return Array.from(

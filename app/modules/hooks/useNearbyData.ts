@@ -21,9 +21,9 @@ import type { StationRoute } from '~/modules/interfaces/StationRoute'
 import { useLocalizedTextCollator } from '~/modules/hooks/useLocalizedTextCollator'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import type { RootState } from '~/modules/store'
-import { getCityByCoords } from '~/modules/utils/getCityByCoords'
-import { getLocalizedText } from '~/modules/utils/getLocalizedText'
-import { normalizeBusRoutesWithDates } from '~/modules/utils/normalizeBusRoutesWithDates'
+import { getCityByCoords } from '~/modules/utils/geo/getCityByCoords'
+import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
+import { normalizeBusRoutesWithDates } from '~/modules/utils/route/normalizeBusRoutesWithDates'
 
 const disabledNearbyPermissions = [GeoPermissionType.UNSUPPORTED, GeoPermissionType.DENIED]
 interface UseNearbyDataOptions {

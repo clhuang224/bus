@@ -1,10 +1,10 @@
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon'
 import { point } from '@turf/helpers'
 import type { Feature, FeatureCollection, MultiPolygon, Polygon } from 'geojson'
-import { cityMapNameToCity, countyIdMapCity } from '../consts/city'
-import { CityNameType } from '../enums/CityNameType'
-import { CountyIdType } from '../enums/CountyIdType'
-import type { LatLng } from '../types/CoordsType'
+import { cityMapNameToCity, countyIdMapCity } from '../../consts/city'
+import { CityNameType } from '../../enums/CityNameType'
+import { CountyIdType } from '../../enums/CountyIdType'
+import type { LatLng } from '../../types/CoordsType'
 
 interface CityProperties {
   name?: string

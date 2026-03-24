@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { AppBadge } from '~/components/common/AppBadge'
 import type { CityNameType } from '~/modules/enums/CityNameType'
-import { getCityLabel } from '~/modules/utils/getCityLabel'
+import { getCityLabel } from '~/modules/utils/i18n/getCityLabel'
 
 interface PropType {
   to: string

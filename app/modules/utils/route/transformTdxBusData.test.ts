@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { CityNameType } from '../enums/CityNameType'
-import { DirectionType } from '../enums/DirectionType'
+import { CityNameType } from '../../enums/CityNameType'
+import { DirectionType } from '../../enums/DirectionType'
 import { transformBusRoute, transformEstimatedArrival, transformRealtimeNearStop, transformStop } from './transformTdxBusData'
 
 describe('transformTdxBusData', () => {

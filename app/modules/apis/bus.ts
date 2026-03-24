@@ -11,7 +11,7 @@ import { getBusErrorModal } from './errors/busError'
 import { openGlobalModal } from '../slices/globalModalSlice'
 import { areaMapCity } from '../consts/area'
 import type { LatLng } from '../types/CoordsType'
-import { buildNearbyStopOfRouteQuery, buildNearbyStopQuery } from '../utils/buildNearbyStopQuery'
+import { buildNearbyStopOfRouteQuery, buildNearbyStopQuery } from '../utils/geo/buildNearbyStopQuery'
 import {
   transformBusRoute,
   transformEstimatedArrival,
@@ -19,7 +19,7 @@ import {
   transformRouteShape,
   transformStops,
   transformStopOfRoute
-} from '../utils/transformTdxBusData'
+} from '../utils/route/transformTdxBusData'
 
 if (!import.meta.env.VITE_PROXY_API_BASE_URL) {
   throw new Error('VITE_PROXY_API_BASE_URL is required. Follow the proxy setup in README.md.')

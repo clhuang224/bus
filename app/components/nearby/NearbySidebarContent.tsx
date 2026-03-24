@@ -9,8 +9,8 @@ import type { AlertMessageConfig } from '~/modules/interfaces/AlertMessageConfig
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
 import { selectLocale } from '~/modules/slices/localeSlice'
-import { getCityLabel } from '~/modules/utils/getCityLabel'
-import { getLocalizedText } from '~/modules/utils/getLocalizedText'
+import { getCityLabel } from '~/modules/utils/i18n/getCityLabel'
+import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 import { NearbyStopDetail } from './NearbyStopDetail'
 import { NearbyStopRoutes } from './NearbyStopRoutes'
 

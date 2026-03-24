@@ -5,8 +5,8 @@ import { SkeletonList } from '~/components/common/SkeletonList'
 import { useLocalizedTextCollator } from '~/modules/hooks/useLocalizedTextCollator'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
-import { getEnumValues } from '~/modules/utils/getEnumValues'
-import { getDirectionLabel } from '~/modules/utils/getDirectionLabel'
+import { getDirectionLabel } from '~/modules/utils/i18n/getDirectionLabel'
+import { getEnumValues } from '~/modules/utils/shared/getEnumValues'
 import { RouteInfoCard } from '../routes/RouteInfoCard'
 
 interface PropType {

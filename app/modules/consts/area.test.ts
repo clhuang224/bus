@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { areaMapCity, areaTranslationKeyMap, cityMapArea } from './area'
 import { AreaType } from '../enums/AreaType'
 import { CityNameType } from '../enums/CityNameType'
-import { getEnumValues } from '../utils/getEnumValues'
+import { getEnumValues } from '../utils/shared/getEnumValues'
 
 describe('area mappings', () => {
   it('defines a display name and at least one city for every area', () => {

@@ -82,7 +82,13 @@ app/
 │   ├── interfaces/    # Domain and API models
 │   ├── slices/        # Redux slices
 │   ├── types/         # Shared type helpers
-│   ├── utils/         # Shared helpers
+│   ├── utils/         # Shared helpers grouped by domain
+│   │   ├── favorite/  # Favorite persistence normalization
+│   │   ├── geo/       # Coordinate, area, city, and nearby query helpers
+│   │   ├── i18n/      # Localized text and label helpers
+│   │   ├── map/       # Map marker DOM helpers
+│   │   ├── route/     # Route data transforms, realtime, and shape helpers
+│   │   └── shared/    # Small cross-domain utilities
 │   └── store.ts       # Redux store
 ├── pages/             # Route pages, including Favorite, Routes, Nearby, Route, and Settings
 ├── test/              # Shared test setup and render helpers

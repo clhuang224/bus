@@ -9,7 +9,7 @@ import { getFavoriteMessages } from '~/modules/consts/pageMessages'
 import { useFavoriteRouteStops } from '~/modules/hooks/useFavoriteRouteStops'
 import { useLocalizedTextCollator } from '~/modules/hooks/useLocalizedTextCollator'
 import { selectLocale } from '~/modules/slices/localeSlice'
-import { getLocalizedText } from '~/modules/utils/getLocalizedText'
+import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 
 export default function Favorite() {
   const { t } = useTranslation()

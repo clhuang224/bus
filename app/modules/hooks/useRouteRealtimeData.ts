@@ -8,7 +8,7 @@ import type { CityNameType } from '~/modules/enums/CityNameType'
 import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
 import { selectLocale } from '~/modules/slices/localeSlice'
-import { formatEstimatedArrivalLabel, getRouteRealtimeBusStatuses } from '~/modules/utils/getRouteRealtimeBusStatuses'
+import { formatEstimatedArrivalLabel, getRouteRealtimeBusStatuses } from '~/modules/utils/route/getRouteRealtimeBusStatuses'
 import { useDelay } from './useDelay'
 
 const REALTIME_POLLING_INTERVAL = 30000

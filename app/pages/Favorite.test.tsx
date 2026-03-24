@@ -119,6 +119,28 @@ function renderFavoritePage(
   })
 }
 
+function renderFavoritePageFromLocalStorage(storedRouteStops: unknown, locale: AppLocaleType = AppLocaleType.ZH_TW) {
+  localStorage.setItem('favoriteRouteStops', JSON.stringify(storedRouteStops))
+
+  const store = createTestStore<FavoriteTestState>({
+    reducer: {
+      favorite: favoriteSlice.reducer as unknown as Reducer<unknown, UnknownAction>
+    },
+    preloadedState: {
+      favorite: {
+        routeStops: []
+      },
+      locale: {
+        value: locale
+      }
+    }
+  })
+
+  return renderWithProvidersAndRouter(<Favorite />, {
+    store
+  })
+}
+
 describe('Favorite', () => {
   beforeEach(() => {
     localStorage.clear()
@@ -166,6 +188,21 @@ describe('Favorite', () => {
     fireEvent.click(
       screen.getByRole('button', { name: i18n.t('components.favoriteRouteStopCard.removeAriaLabel') })
     )
+
+    expect(screen.getByText(getFavoriteMessages(i18n.t).emptyFavoriteRouteStops.title)).toBeInTheDocument()
+  })
+
+  it('ignores malformed favorite route stops from localStorage', () => {
+    renderFavoritePageFromLocalStorage([
+      {
+        favoriteId: 'broken-favorite',
+        routeName: { zh_TW: '藍1', en: 'Blue 1' },
+        subRouteName: { zh_TW: '往捷運昆陽站', en: 'To MRT Kunyang Station' },
+        stopName: { zh_TW: '市政府', en: 'City Hall' },
+        departure: { zh_TW: '市政府', en: 'City Hall' },
+        destination: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' }
+      }
+    ])
 
     expect(screen.getByText(getFavoriteMessages(i18n.t).emptyFavoriteRouteStops.title)).toBeInTheDocument()
   })

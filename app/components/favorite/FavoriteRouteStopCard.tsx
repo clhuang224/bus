@@ -6,9 +6,9 @@ import { Link } from 'react-router'
 import { AppBadge } from '~/components/common/AppBadge'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import { selectLocale } from '~/modules/slices/localeSlice'
-import { getCityLabel } from '~/modules/utils/getCityLabel'
-import { getDirectionLabel } from '~/modules/utils/getDirectionLabel'
-import { getLocalizedText } from '~/modules/utils/getLocalizedText'
+import { getCityLabel } from '~/modules/utils/i18n/getCityLabel'
+import { getDirectionLabel } from '~/modules/utils/i18n/getDirectionLabel'
+import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 
 interface PropType {
   favoriteRouteStop: FavoriteRouteStop

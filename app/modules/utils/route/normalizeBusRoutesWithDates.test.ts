@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { CityNameType } from '../enums/CityNameType'
-import { DirectionType } from '../enums/DirectionType'
-import type { BusRoute } from '../interfaces/BusRoute'
+import { CityNameType } from '../../enums/CityNameType'
+import { DirectionType } from '../../enums/DirectionType'
+import type { BusRoute } from '../../interfaces/BusRoute'
 import { normalizeBusRoutesWithDates } from './normalizeBusRoutesWithDates'
 
 describe('normalizeBusRoutesWithDates', () => {
