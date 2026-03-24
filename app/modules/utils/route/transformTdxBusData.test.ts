@@ -26,7 +26,7 @@ describe('transformTdxBusData', () => {
       SubRouteUID: 'route-1',
       SubRouteID: 'route-1',
       SubRouteName: {
-        zh_TW: '藍1',
+        'zh-TW': '藍1',
         en: 'Blue 1'
       }
     }))
@@ -119,11 +119,11 @@ describe('transformTdxBusData', () => {
       VersionID: 0
     }).SubRoutes[0]).toEqual(expect.objectContaining({
       DepartureStopName: {
-        zh_TW: '圓環',
+        'zh-TW': '圓環',
         en: 'Yuanhuan'
       },
       DestinationStopName: {
-        zh_TW: '大龍峒',
+        'zh-TW': '大龍峒',
         en: 'Dalongdong'
       }
     }))

@@ -8,7 +8,7 @@ describe('normalizeTdxFields', () => {
         Zh_tw: '藍1',
         En: 'Blue 1'
       })).toEqual({
-        zh_TW: '藍1',
+        'zh-TW': '藍1',
         en: 'Blue 1'
       })
     })
@@ -18,14 +18,14 @@ describe('normalizeTdxFields', () => {
         Zh_tw: '藍1',
         En: 'Blue 1'
       })).toEqual({
-        zh_TW: '藍1',
+        'zh-TW': '藍1',
         en: 'Blue 1'
       })
     })
 
     it('returns empty strings when both localized values are missing', () => {
       expect(toLocalizedText()).toEqual({
-        zh_TW: '',
+        'zh-TW': '',
         en: ''
       })
     })

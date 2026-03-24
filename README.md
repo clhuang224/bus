@@ -55,7 +55,7 @@ The app currently supports both `zh-TW` and `en`.
 - Users can switch the interface language from the Settings page.
 - The selected language is saved in local storage and restored on the next visit.
 - Static UI copy comes from shared translation resources.
-- API-backed route, subroute, stop, departure, and destination text follows the active locale, preferring English when available and falling back to `zh_TW` when English data is missing.
+- API-backed route, subroute, stop, departure, and destination text follows the active locale, preferring English when available and falling back to `zh-TW` when English data is missing.
 
 ## Tech Stack
 

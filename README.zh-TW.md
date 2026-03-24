@@ -55,7 +55,7 @@
 - 使用者可以在 `Settings` 頁切換介面語言。
 - 選定的語言會存進 local storage，重新開啟後會自動還原。
 - 靜態 UI 文案來自共用翻譯資源。
-- TDX API 回傳的 route、subroute、stop、departure、destination 文字也會跟著目前語系顯示；在英文模式下會優先使用 `en`，如果英文資料缺值，則回退到 `zh_TW`。
+- TDX API 回傳的 route、subroute、stop、departure、destination 文字也會跟著目前語系顯示；在英文模式下會優先使用 `en`，如果英文資料缺值，則回退到 `zh-TW`。
 
 ## 技術棧
 

@@ -16,18 +16,18 @@ const favoriteRouteStop = {
   favoriteId: 'favorite-1',
   city: CityNameType.TAIPEI,
   routeUID: 'route-1',
-  routeName: { zh_TW: '藍1', en: 'Blue 1' },
+  routeName: { 'zh-TW': '藍1', en: 'Blue 1' },
   subRouteUID: 'subroute-1',
-  subRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+  subRouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
   direction: DirectionType.GO,
   stopUID: 'stop-1',
   stopID: 'stop-1',
   stationID: 'station-1',
   stationKey: 'station-1',
-  stopName: { zh_TW: '市政府', en: 'City Hall' },
+  stopName: { 'zh-TW': '市政府', en: 'City Hall' },
   stopSequence: 1,
-  departure: { zh_TW: '市政府', en: 'City Hall' },
-  destination: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' }
+  departure: { 'zh-TW': '市政府', en: 'City Hall' },
+  destination: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' }
 }
 
 const realtimeBus: RouteRealtimeBusStatus = {

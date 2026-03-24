@@ -6,7 +6,7 @@ export function toLocalizedText(
   defaultText?: TdxLocalizedText | null
 ): LocalizedText {
   return {
-    zh_TW: text?.Zh_tw ?? defaultText?.Zh_tw ?? '',
+    'zh-TW': text?.Zh_tw ?? defaultText?.Zh_tw ?? '',
     en: text?.En ?? defaultText?.En ?? ''
   }
 }

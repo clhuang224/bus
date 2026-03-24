@@ -285,10 +285,10 @@ Store 比較適合用在：
 
 對於 TDX-backed localized text，例如 route、subroute、stop、departure、destination：
 
-- 不要再假設 `.zh_TW` 一定是 render 出去的值
+- 不要再假設 `['zh-TW']` 一定是 render 出去的值
 - 應維持 locale-aware access 明確而且好讀
 - 英文模式優先取 `en`
-- 如果英文缺值，則回退 `zh_TW`
+- 如果英文缺值，則回退 `zh-TW`
 
 ### UI 結構
 

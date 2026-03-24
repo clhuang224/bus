@@ -80,7 +80,7 @@ const nearbyStopsData = [
     StationID: 'station-1',
     StationGroupID: 'group-1',
     StopID: 'stop-id-1',
-    StopName: { zh_TW: '市政府', en: 'City Hall' },
+    StopName: { 'zh-TW': '市政府', en: 'City Hall' },
     GeoHash: 'wsqqefdz0',
     City: CityNameType.TAIPEI,
     StopAddress: 'Address 1',
@@ -96,7 +96,7 @@ const nearbyStopsData = [
     StationID: 'station-1',
     StationGroupID: 'group-1',
     StopID: 'stop-id-2',
-    StopName: { zh_TW: '市政府', en: 'City Hall' },
+    StopName: { 'zh-TW': '市政府', en: 'City Hall' },
     GeoHash: 'wsqqefcw6',
     City: CityNameType.TAIPEI,
     StopAddress: 'Address 2',
@@ -112,7 +112,7 @@ const nearbyStopsData = [
     StationID: 'station-2',
     StationGroupID: 'group-2',
     StopID: 'stop-id-3',
-    StopName: { zh_TW: '台北車站', en: 'Taipei Main Station' },
+    StopName: { 'zh-TW': '台北車站', en: 'Taipei Main Station' },
     GeoHash: 'wsqqeepb5',
     City: CityNameType.TAIPEI,
     StopAddress: 'Address 3',
@@ -128,11 +128,11 @@ const stopOfRoutesData = [
   {
     RouteUID: 'route-1',
     RouteID: '1',
-    RouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    RouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
     SubRouteUID: 'subroute-1',
     SubRouteID: '1',
     City: CityNameType.TAIPEI,
-    SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
     Direction: 0,
     Stops: [
       {
@@ -140,18 +140,18 @@ const stopOfRoutesData = [
         StopID: 'stop-id-1',
         StationID: 'station-1',
         StopSequence: 1,
-        StopName: { zh_TW: '市政府', en: 'City Hall' }
+        StopName: { 'zh-TW': '市政府', en: 'City Hall' }
       }
     ]
   },
   {
     RouteUID: 'route-2',
     RouteID: '2',
-    RouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    RouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
     SubRouteUID: 'subroute-2',
     SubRouteID: '2',
     City: CityNameType.NEW_TAIPEI,
-    SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+    SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
     Direction: 1,
     Stops: [
       {
@@ -159,7 +159,7 @@ const stopOfRoutesData = [
         StopID: 'stop-id-2',
         StationID: 'station-1',
         StopSequence: 2,
-        StopName: { zh_TW: '市政府', en: 'City Hall' }
+        StopName: { 'zh-TW': '市政府', en: 'City Hall' }
       }
     ]
   }
@@ -173,11 +173,11 @@ const routesData = [
     Operators: [],
     AuthorityID: '005',
     ProviderID: 'provider-1',
-    RouteName: { zh_TW: '藍1', en: 'Blue 1' },
-    DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
-    DestinationStopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
-    TicketPriceDescription: { zh_TW: '', en: '' },
-    FareBufferZoneDescription: { zh_TW: '', en: '' },
+    RouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
+    DepartureStopName: { 'zh-TW': '市政府', en: 'City Hall' },
+    DestinationStopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+    TicketPriceDescription: { 'zh-TW': '', en: '' },
+    FareBufferZoneDescription: { 'zh-TW': '', en: '' },
     RouteMapImageUrl: '',
     City: CityNameType.TAIPEI,
     CityCode: 'TPE',
@@ -189,14 +189,14 @@ const routesData = [
         SubRouteUID: 'subroute-1',
         SubRouteID: '1',
         OperatorIDs: [],
-        SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+        SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
         Direction: 0,
         FirstBusTime: '',
         LastBusTime: '',
         HolidayFirstBusTime: '',
         HolidayLastBusTime: '',
-        DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
-        DestinationStopName: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' }
+        DepartureStopName: { 'zh-TW': '市政府', en: 'City Hall' },
+        DestinationStopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' }
       }
     ]
   },
@@ -207,11 +207,11 @@ const routesData = [
     Operators: [],
     AuthorityID: '005',
     ProviderID: 'provider-2',
-    RouteName: { zh_TW: '藍1', en: 'Blue 1' },
-    DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
-    DestinationStopName: { zh_TW: '板橋公車站', en: 'Banqiao Bus Station' },
-    TicketPriceDescription: { zh_TW: '', en: '' },
-    FareBufferZoneDescription: { zh_TW: '', en: '' },
+    RouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
+    DepartureStopName: { 'zh-TW': '市政府', en: 'City Hall' },
+    DestinationStopName: { 'zh-TW': '板橋公車站', en: 'Banqiao Bus Station' },
+    TicketPriceDescription: { 'zh-TW': '', en: '' },
+    FareBufferZoneDescription: { 'zh-TW': '', en: '' },
     RouteMapImageUrl: '',
     City: CityNameType.NEW_TAIPEI,
     CityCode: 'NWT',
@@ -223,14 +223,14 @@ const routesData = [
         SubRouteUID: 'subroute-2',
         SubRouteID: '2',
         OperatorIDs: [],
-        SubRouteName: { zh_TW: '藍1', en: 'Blue 1' },
+        SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
         Direction: 1,
         FirstBusTime: '',
         LastBusTime: '',
         HolidayFirstBusTime: '',
         HolidayLastBusTime: '',
-        DepartureStopName: { zh_TW: '市政府', en: 'City Hall' },
-        DestinationStopName: { zh_TW: '板橋公車站', en: 'Banqiao Bus Station' }
+        DepartureStopName: { 'zh-TW': '市政府', en: 'City Hall' },
+        DestinationStopName: { 'zh-TW': '板橋公車站', en: 'Banqiao Bus Station' }
       }
     ]
   }
