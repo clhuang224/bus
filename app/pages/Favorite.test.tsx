@@ -14,6 +14,8 @@ import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
 import Favorite from './Favorite'
 
+const favoriteTerminalOriginLabel = `${i18n.t('components.favoriteRouteStopCard.departureLabel')}: 市政府`
+
 const favoriteRouteStops: FavoriteRouteStop[] = [
   {
     favoriteId: 'route-1-subroute-1-0-station-1',
@@ -175,8 +177,10 @@ describe('Favorite', () => {
       destination: { zh_TW: '', en: '' }
     }])
 
-    expect(screen.getByText('起點站: 市政府')).toBeInTheDocument()
-    expect(screen.queryByText('起訖站: 市政府')).not.toBeInTheDocument()
+    expect(screen.getByText(favoriteTerminalOriginLabel)).toBeInTheDocument()
+    expect(
+      screen.queryByText(`${i18n.t('components.favoriteRouteStopCard.terminalLabel')}: 市政府`)
+    ).not.toBeInTheDocument()
   })
 
   it('sorts favorite route stops by route name and stop sequence', () => {

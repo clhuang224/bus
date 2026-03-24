@@ -12,6 +12,8 @@ import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
 import Routes from './Routes'
 
+const routeInfoOriginLabel = `${i18n.t('components.routeInfoCard.departureLabel')}: 市政府`
+
 const { mockUseGetRoutesByAreaQuery } = vi.hoisted(() => ({
   mockUseGetRoutesByAreaQuery: vi.fn()
 }))
@@ -231,8 +233,8 @@ describe('Routes', () => {
 
     renderRoutes()
 
-    expect(screen.getByText('起點站: 市政府')).toBeInTheDocument()
-    expect(screen.queryByText('起訖站: 市政府')).not.toBeInTheDocument()
+    expect(screen.getByText(routeInfoOriginLabel)).toBeInTheDocument()
+    expect(screen.queryByText(`${i18n.t('components.routeInfoCard.terminalLabel')}: 市政府`)).not.toBeInTheDocument()
   })
 
   it('filters routes by the entered keyword', async () => {

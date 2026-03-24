@@ -1,5 +1,7 @@
 # Finding the Bus
 
+[English](./README.md) | [繁體中文](./README.zh-TW.md)
+
 A bus-focused single-page application for route lookup, nearby stops, and real-time transit information in Taiwan.
 
 ## Screenshot
@@ -52,6 +54,8 @@ The app currently supports both `zh-TW` and `en`.
 
 - Users can switch the interface language from the Settings page.
 - The selected language is saved in local storage and restored on the next visit.
+- Static UI copy comes from shared translation resources.
+- API-backed route, subroute, stop, departure, and destination text follows the active locale, preferring English when available and falling back to `zh_TW` when English data is missing.
 
 ## Tech Stack
 

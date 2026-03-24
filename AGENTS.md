@@ -1,5 +1,7 @@
 # Project Guide
 
+[English](./AGENTS.md) | [繁體中文](./AGENTS.zh-TW.md)
+
 This document explains how this project is organized, how data flows through the app, and which conventions to follow when adding or changing features.
 
 Use this as the default guide for new work. When a change touches multiple areas, prefer keeping the structure and naming consistent with the patterns described here instead of introducing a new local style.

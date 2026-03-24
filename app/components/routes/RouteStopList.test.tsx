@@ -2,12 +2,15 @@
 
 import { fireEvent, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
+import { DEFAULT_APP_LOCALE } from '~/modules/consts/i18n'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import i18n from '~/modules/i18n'
 import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeBusStatus'
 import { renderWithMantine } from '~/test/render'
 import { RouteStopList } from './RouteStopList'
+
+const t = i18n.getFixedT(DEFAULT_APP_LOCALE)
 
 const favoriteRouteStop = {
   favoriteId: 'favorite-1',
@@ -29,7 +32,7 @@ const favoriteRouteStop = {
 
 const realtimeBus: RouteRealtimeBusStatus = {
   direction: DirectionType.GO,
-  estimateLabel: '4 分後到站',
+  estimateLabel: t('routePage.realtime.minutesAway', { count: 4 }),
   estimateMinutes: 4,
   id: 'bus-1',
   plateNumb: 'ABC-123',
@@ -93,10 +96,12 @@ describe('RouteStopList', () => {
   })
 
   it('renders estimated arrival text for a stop', () => {
+    const estimateLabel = t('routePage.realtime.minutesAway', { count: 4 })
+
     renderWithMantine(
       <RouteStopList
         stops={[{
-          estimatedArrivalLabel: '4 分後到站',
+          estimatedArrivalLabel: estimateLabel,
           id: 'stop-1',
           favoriteRouteStop,
           name: '市政府',
@@ -109,14 +114,16 @@ describe('RouteStopList', () => {
       />
     )
 
-    expect(screen.getByText('4 分後到站')).toBeInTheDocument()
+    expect(screen.getByText(estimateLabel)).toBeInTheDocument()
   })
 
   it('renders realtime bus plate badges without replacing stop ETA text', () => {
+    const estimateLabel = t('routePage.realtime.minutesAway', { count: 6 })
+
     renderWithMantine(
       <RouteStopList
         stops={[{
-          estimatedArrivalLabel: '6 分後到站',
+          estimatedArrivalLabel: estimateLabel,
           id: 'stop-1',
           favoriteRouteStop,
           name: '市政府',
@@ -130,6 +137,6 @@ describe('RouteStopList', () => {
     )
 
     expect(screen.getByText('ABC-123')).toBeInTheDocument()
-    expect(screen.getByText('6 分後到站')).toBeInTheDocument()
+    expect(screen.getByText(estimateLabel)).toBeInTheDocument()
   })
 })
