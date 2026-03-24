@@ -222,6 +222,32 @@ describe('Favorite', () => {
     expect(screen.getByText(getFavoriteMessages(i18n.t).emptyFavoriteRouteStops.title)).toBeInTheDocument()
   })
 
+  it('loads legacy favorite route stops that still use zh_TW localized text keys', () => {
+    renderFavoritePageFromLocalStorage([
+      {
+        favoriteId: 'route-1-subroute-1-0-station-1',
+        city: CityNameType.TAIPEI,
+        routeUID: 'route-1',
+        routeName: { zh_TW: '藍1', en: 'Blue 1' },
+        subRouteUID: 'subroute-1',
+        subRouteName: { zh_TW: '往捷運昆陽站', en: 'To MRT Kunyang Station' },
+        direction: DirectionType.GO,
+        stopUID: 'stop-1',
+        stopID: 'stop-id-1',
+        stationID: 'station-1',
+        stationKey: 'station-1',
+        stopName: { zh_TW: '市政府', en: 'City Hall' },
+        stopSequence: 1,
+        departure: { zh_TW: '市政府', en: 'City Hall' },
+        destination: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' }
+      }
+    ])
+
+    expect(screen.getByText(/藍1/)).toBeInTheDocument()
+    expect(screen.getByText('1. 市政府')).toBeInTheDocument()
+    expect(screen.getByText(/市政府.*捷運昆陽站/)).toBeInTheDocument()
+  })
+
   it('falls back to the empty state when localStorage contains invalid JSON', () => {
     localStorage.setItem('favoriteRouteStops', '{invalid-json')
 
