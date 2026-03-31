@@ -4,6 +4,10 @@
 
 A bus-focused single-page application for route lookup, nearby stops, and real-time transit information in Taiwan.
 
+## How To Use
+
+Visit [bus.lynns.me](https://bus.lynns.me) to start using the app.
+
 ## Screenshot
 
 ![demo](./docs/assets/demo.png)

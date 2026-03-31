@@ -4,6 +4,10 @@
 
 這是一個以台灣公車查詢為主的單頁應用，提供路線搜尋、附近站牌，以及即時公車資訊。
 
+## 如何使用
+
+直接前往 [bus.lynns.me](https://bus.lynns.me) 即可開始使用。
+
 ## 畫面預覽
 
 ![demo](./assets/demo.zh-TW.png)
