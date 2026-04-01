@@ -67,7 +67,7 @@
 - **Language:** TypeScript
 - **UI:** Mantine
 - **State and Data:** Redux Toolkit 與 RTK Query
-- **Maps:** MapLibre GL JS 搭配 CARTO raster tiles
+- **Maps:** MapLibre GL JS 搭配 OpenFreeMap 圖磚
 - **API Proxy:** Cloudflare Workers
 - **Worker Tooling:** Wrangler
 - **Geospatial Utilities:** Turf.js

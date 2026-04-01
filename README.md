@@ -67,7 +67,7 @@ The app currently supports both `zh-TW` and `en`.
 - **Language:** TypeScript
 - **UI:** Mantine
 - **State and Data:** Redux Toolkit and RTK Query
-- **Maps:** MapLibre GL JS with CARTO raster tiles
+- **Maps:** MapLibre GL JS with OpenFreeMap tiles
 - **API Proxy:** Cloudflare Workers
 - **Worker Tooling:** Wrangler
 - **Geospatial Utilities:** Turf.js

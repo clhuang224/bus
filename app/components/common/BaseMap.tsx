@@ -33,47 +33,24 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, onLoad }: PropTy
   useLayoutEffect(() => {
     const mapInstance = new mapLibre.Map({
       container: id,
-      style: {
-        version: 8,
-        sources: {
-          carto: {
-            type: 'raster',
-            tiles: [
-              'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-              'https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-              'https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-              'https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
-            ],
-            tileSize: 256,
-            attribution:
-              '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          }
-        },
-        layers: [
-          {
-            id: 'background',
-            type: 'background',
-            paint: {
-              'background-color': '#E0E0E0'
-            }
-          },
-          {
-            id: 'carto-base',
-            type: 'raster',
-            source: 'carto',
-            minzoom: 0,
-            maxzoom: 17
-          }
-        ]
-      },
+      style: 'https://tiles.openfreemap.org/styles/positron',
       center: center ? [center[1], center[0]] : [121.53969560512759, 25.059928238479156],
-      zoom: zoom
+      zoom
     })
     setMap(mapInstance)
 
-    onLoadRef.current?.(mapInstance)
+    const handleLoad = () => {
+      onLoadRef.current?.(mapInstance)
+    }
+
+    if (mapInstance.isStyleLoaded()) {
+      handleLoad()
+    } else {
+      mapInstance.once('load', handleLoad)
+    }
 
     return () => {
+      mapInstance.off('load', handleLoad)
       mapInstance.remove()
     }
   }, [id])
