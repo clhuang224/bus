@@ -1,7 +1,5 @@
 # Project Guide
 
-[English](./AGENTS.md) | [繁體中文](./docs/AGENTS.zh-TW.md)
-
 This document explains how this project is organized, how data flows through the app, and which conventions to follow when adding or changing features.
 
 Use this as the default guide for new work. When a change touches multiple areas, prefer keeping the structure and naming consistent with the patterns described here instead of introducing a new local style.
@@ -280,12 +278,13 @@ When handling API or query errors, prefer interpreting the error by its actual t
 
 Avoid `Boolean(error)` style checks when the UI behavior depends on the difference between those states.
 
-For route realtime UI, treat `RealTimeNearStop` as stronger evidence that a vehicle is already in service than an `EstimatedTimeOfArrival` row that still says `StopStatus = 1` for the current stop. When the realtime feed shows a bus on the route but the matched ETA row is still "not yet departed" or otherwise lacks a usable countdown, prefer either:
+For route realtime vehicle ETA matching, use `RealTimeNearStop.A2EventType` as the primary signal for whether the bus is arriving at the current stop or has already departed it.
 
-- the next downstream ETA with a real countdown, or
-- a neutral in-service label such as `行駛中`
+- when `A2EventType` indicates arriving, prefer the current stop ETA
+- when `A2EventType` indicates departed, prefer the next downstream ETA
+- only fall back to neutral realtime messaging such as `In service` when the matched ETA data does not provide a usable countdown
 
-Do not regress the route page back to showing `尚未發車` for a vehicle that the realtime feed already places on the road.
+Do not regress the route page back to showing `Not departed yet` for a vehicle that the realtime feed already places on the road, and do not let a stale current-stop ETA override the `A2EventType`-based current-vs-next-stop choice.
 
 For the `Route` page specifically, keep the stop list as a stop-based ETA view whose ETA labels come directly from `EstimatedTimeOfArrival`, matched to the stop by stable stop identifiers such as `StopUID` / `StopID` when available. If realtime vehicle information is shown in the list, limit it to location-style cues such as vehicle plate badges placed beside the stop row, and do not let those badges replace, derive, or redefine the stop's ETA text. `EstimatedTimeOfArrival` answers "when does this stop get service", `RealTimeNearStop` answers "which stop is a vehicle near right now", and `RealTimeByFrequency` answers "where is the vehicle GPS position right now", so keep those data flows separate in both code and UI.
 
@@ -295,6 +294,7 @@ For route realtime specifically:
 
 - prefer delaying initial realtime requests slightly after the base route data has loaded instead of firing every route-detail request at once on first paint
 - when a realtime request receives `429`, prefer a short automatic backoff before retrying instead of immediately hammering the upstream again
+- for `RealTimeByFrequency`, prefer keeping the request narrowed by stable route identifiers, but avoid `$select` combinations that upstream rejects with `400`; reliability is more important than aggressively trimming that response
 - use user-facing copy that clearly distinguishes "too many people are querying right now" from generic upstream outages or empty realtime data
 - reflect shared rate-limit caveats in `README.md` so deployers understand that concurrent usage can temporarily make realtime queries unavailable
 
