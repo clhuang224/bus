@@ -66,8 +66,8 @@ export default function Route() {
     hasRealtimeError,
     isRealtimeLoading,
     isRealtimeRateLimited,
+    realtimeMapVehicles,
     realtimeBusesByStopSequence,
-    realtimeBusStatuses,
     realtimeInfoState
   } = useRouteRealtimeData(routeRealtimeOptions)
   const timelineStops = useMemo(() => baseTimelineStops.map((stop) => ({
@@ -221,17 +221,7 @@ export default function Route() {
         onSelectStop={handleSelectStopFromMap}
         routePath={activeRoutePath}
         stops={routeMapStops}
-        vehicles={realtimeBusStatuses.flatMap((bus) => (
-          bus.position == null
-            ? []
-            : [{
-                id: bus.id,
-                estimateLabel: bus.estimateLabel,
-                plateNumb: bus.plateNumb,
-                position: bus.position,
-                stopName: bus.stopName
-              }]
-        ))}
+        vehicles={realtimeMapVehicles}
       />
     </MapSidebarLayout>
   )

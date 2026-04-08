@@ -13,10 +13,12 @@ import { useRouteRealtimeData } from './useRouteRealtimeData'
 
 const {
   mockUseGetEstimatedArrivalByRouteQuery,
+  mockUseGetRealtimeByFrequencyByRouteQuery,
   mockUseGetRealtimeNearStopsByRouteQuery,
   mockUseGetRouteShapesByRouteQuery
 } = vi.hoisted(() => ({
   mockUseGetEstimatedArrivalByRouteQuery: vi.fn(),
+  mockUseGetRealtimeByFrequencyByRouteQuery: vi.fn(),
   mockUseGetRealtimeNearStopsByRouteQuery: vi.fn(),
   mockUseGetRouteShapesByRouteQuery: vi.fn()
 }))
@@ -24,6 +26,7 @@ const {
 vi.mock('~/modules/apis/bus', () => ({
   busApi: {
     useGetEstimatedArrivalByRouteQuery: mockUseGetEstimatedArrivalByRouteQuery,
+    useGetRealtimeByFrequencyByRouteQuery: mockUseGetRealtimeByFrequencyByRouteQuery,
     useGetRealtimeNearStopsByRouteQuery: mockUseGetRealtimeNearStopsByRouteQuery,
     useGetRouteShapesByRouteQuery: mockUseGetRouteShapesByRouteQuery
   }
@@ -73,9 +76,14 @@ describe('useRouteRealtimeData', () => {
     vi.useFakeTimers()
 
     mockUseGetEstimatedArrivalByRouteQuery.mockReset()
+    mockUseGetRealtimeByFrequencyByRouteQuery.mockReset()
     mockUseGetRealtimeNearStopsByRouteQuery.mockReset()
     mockUseGetRouteShapesByRouteQuery.mockReset()
 
+    mockUseGetRealtimeByFrequencyByRouteQuery.mockReturnValue({
+      data: [],
+      error: null
+    })
     mockUseGetRouteShapesByRouteQuery.mockReturnValue({
       data: []
     })
@@ -103,6 +111,12 @@ describe('useRouteRealtimeData', () => {
       data: [],
       error: estimatedError,
       isError: options.skip ? false : estimatedError != null,
+      isLoading: false
+    }))
+    mockUseGetRealtimeByFrequencyByRouteQuery.mockImplementation(() => ({
+      data: [],
+      error: null,
+      isError: false,
       isLoading: false
     }))
     mockUseGetRealtimeNearStopsByRouteQuery.mockImplementation((_args, options: RealtimeQueryOptions) => ({

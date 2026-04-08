@@ -123,6 +123,7 @@ export const zhTW = {
         vehicleMarkerAriaLabel: '{{plateNumb}}，最近站牌 {{stopName}}，預估到站 {{estimateLabel}}',
         vehiclePopup: {
           recentStop: '最近站牌',
+          recentStopUnknown: '未知',
           estimate: '預估到站'
         }
       },

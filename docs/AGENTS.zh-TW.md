@@ -227,12 +227,14 @@ Store 比較適合用在：
 在 `Route` 頁裡：
 
 - `EstimatedTimeOfArrival` 回答的是「這個 stop 什麼時候會被服務」
-- `RealTimeNearStop` 回答的是「車現在在哪裡」
+- `RealTimeNearStop` 回答的是「車目前靠近哪一站」
+- `RealTimeByFrequency` 回答的是「車目前的 GPS 位置在哪裡」
 
 因此：
 
 - stop list 的 ETA 文案應直接來自 `EstimatedTimeOfArrival`
-- realtime bus 只應該作為 location cue，例如 plate badge 或 map marker
+- `RealTimeNearStop` 只應該作為 stop list 上的 location cue，例如 plate badge
+- map marker 應優先使用 `RealTimeByFrequency` 的 `BusPosition`
 - 不要讓 realtime vehicle cue 覆蓋 stop ETA 本身的語意
 
 當 realtime feed 已經顯示車輛正在路上，但 matched ETA row 仍顯示 `StopStatus = 1` 或沒有可用倒數時，請避免退回顯示 `尚未發車` 這種違反 realtime 證據的文案。

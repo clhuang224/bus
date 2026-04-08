@@ -123,6 +123,7 @@ export const en = {
         vehicleMarkerAriaLabel: '{{plateNumb}}, recent stop {{stopName}}, estimated arrival {{estimateLabel}}',
         vehiclePopup: {
           recentStop: 'Recent stop',
+          recentStopUnknown: 'Unknown',
           estimate: 'Estimated arrival'
         }
       },

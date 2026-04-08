@@ -287,7 +287,7 @@ For route realtime UI, treat `RealTimeNearStop` as stronger evidence that a vehi
 
 Do not regress the route page back to showing `尚未發車` for a vehicle that the realtime feed already places on the road.
 
-For the `Route` page specifically, keep the stop list as a stop-based ETA view whose ETA labels come directly from `EstimatedTimeOfArrival`, matched to the stop by stable stop identifiers such as `StopUID` / `StopID` when available. If realtime vehicle information is shown in the list, limit it to location-style cues such as vehicle plate badges placed beside the stop row, and do not let those badges replace, derive, or redefine the stop's ETA text. `EstimatedTimeOfArrival` answers "when does this stop get service", while `RealTimeNearStop` answers "where is a vehicle now", so keep those data flows separate in both code and UI.
+For the `Route` page specifically, keep the stop list as a stop-based ETA view whose ETA labels come directly from `EstimatedTimeOfArrival`, matched to the stop by stable stop identifiers such as `StopUID` / `StopID` when available. If realtime vehicle information is shown in the list, limit it to location-style cues such as vehicle plate badges placed beside the stop row, and do not let those badges replace, derive, or redefine the stop's ETA text. `EstimatedTimeOfArrival` answers "when does this stop get service", `RealTimeNearStop` answers "which stop is a vehicle near right now", and `RealTimeByFrequency` answers "where is the vehicle GPS position right now", so keep those data flows separate in both code and UI.
 
 Because the deployed TDX proxy key is shared by all visitors, design request timing with the TDX per-key second-level limit in mind. Avoid route-detail request bursts that stack multiple realtime calls into the same second as large base-data requests when a small delay or staged startup would preserve the user experience.
 
@@ -312,9 +312,9 @@ Do not reintroduce a frontend `VITE_TDX_TOKEN` flow as a normal path. Both local
 
 For TDX rate-limit planning, use the current `Route` page behavior as a rough baseline:
 
-- the page issues 2 real-time requests per polling cycle: `EstimatedTimeOfArrival` and `RealTimeNearStop`
+- the page issues 3 real-time requests per polling cycle: `EstimatedTimeOfArrival`, `RealTimeNearStop`, and `RealTimeByFrequency`
 - the current polling interval is 30 seconds
-- when the page is visible, that is roughly 4 requests per minute for one open `Route` page
+- when the page is visible, that is roughly 6 requests per minute for one open `Route` page
 - extra traffic can still happen on reconnect, route changes, hard refresh, or multiple open tabs
 
 This means the bronze-tier limit of `5 requests/second/key` can still be too tight for sustained route-detail real-time usage once hard refreshes, reconnects, and multiple concurrent users are factored in. In practice, request pacing and backoff are still necessary even on the paid per-second tier.

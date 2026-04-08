@@ -1,6 +1,7 @@
 import type { CityNameType } from '../../enums/CityNameType'
 import type { BusRoute, TdxBusRoute } from '../../interfaces/BusRoute'
 import type { EstimatedArrival, TdxEstimatedArrival } from '../../interfaces/EstimatedArrival'
+import type { RealtimeByFrequency, TdxRealtimeByFrequency } from '../../interfaces/RealtimeByFrequency'
 import type { RealtimeNearStop, TdxRealtimeNearStop } from '../../interfaces/RealtimeNearStop'
 import type { RouteShape, TdxRouteShape } from '../../interfaces/RouteShape'
 import type { StopOfRoute, TdxStopOfRoute } from '../../interfaces/StopOfRoute'
@@ -114,8 +115,20 @@ export function transformRealtimeNearStop(
     City: city,
     RouteName: toLocalizedText(realtimeNearStop.RouteName),
     StopName: toLocalizedText(realtimeNearStop.StopName),
-    SubRouteName: toLocalizedText(realtimeNearStop.SubRouteName, realtimeNearStop.RouteName),
-    position: toLngLat(realtimeNearStop.BusPosition)
+    SubRouteName: toLocalizedText(realtimeNearStop.SubRouteName, realtimeNearStop.RouteName)
+  }
+}
+
+export function transformRealtimeByFrequency(
+  realtimeByFrequency: TdxRealtimeByFrequency,
+  city: CityNameType
+): RealtimeByFrequency {
+  return {
+    ...realtimeByFrequency,
+    City: city,
+    RouteName: toLocalizedText(realtimeByFrequency.RouteName),
+    SubRouteName: toLocalizedText(realtimeByFrequency.SubRouteName, realtimeByFrequency.RouteName),
+    position: toLngLat(realtimeByFrequency.BusPosition)
   }
 }
 
