@@ -17,7 +17,7 @@ export interface RouteMapStop {
 export interface RouteMapVehicle {
   id: string
   estimateLabel: string
-  plateNumb: string | null
+  plateNumb: string
   position: LngLat
   stopName: string
 }
@@ -170,14 +170,14 @@ export const RouteMap = ({
 
     vehicles.forEach((vehicle) => {
       const vehicleLabel = t('components.routeMap.vehicleMarkerAriaLabel', {
-        plateNumb: vehicle.plateNumb ?? t('components.routeStopList.missingPlate'),
+        plateNumb: vehicle.plateNumb,
         stopName: vehicle.stopName,
         estimateLabel: vehicle.estimateLabel
       })
       const el = createMapMarkerElement({
         ariaLabel: vehicleLabel,
         datasetLabel: [
-          vehicle.plateNumb ?? t('components.routeStopList.missingPlate'),
+          vehicle.plateNumb,
           `${t('components.routeMap.vehiclePopup.recentStop')}: ${vehicle.stopName}`,
           `${t('components.routeMap.vehiclePopup.estimate')}: ${vehicle.estimateLabel}`
         ].join('\n'),

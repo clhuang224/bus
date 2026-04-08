@@ -36,7 +36,6 @@ const realtimeBus: RouteRealtimeBusStatus = {
   estimateMinutes: 4,
   id: 'bus-1',
   plateNumb: 'ABC-123',
-  position: [121.56, 25.04],
   stopName: '市政府',
   stopSequence: 1,
   subRouteUID: 'subroute-1'

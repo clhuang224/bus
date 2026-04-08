@@ -7,8 +7,8 @@ import type { RealtimeNearStop } from '../../interfaces/RealtimeNearStop'
 import type { RouteRealtimeBusStatus } from '../../interfaces/RouteRealtimeBusStatus'
 import { getLocalizedText } from '../i18n/getLocalizedText'
 
-function normalizePlateNumb(plateNumb: string | null | undefined) {
-  return plateNumb?.trim().toUpperCase() ?? null
+function normalizePlateNumb(plateNumb: string) {
+  return plateNumb.trim().toUpperCase()
 }
 
 function getStopStatusLabel(t: TFunction, stopStatus: StopStatusType) {
@@ -59,10 +59,13 @@ export function getRouteRealtimeBusStatuses(
     .map((realtimeBus) => {
       const realtimePlateNumb = normalizePlateNumb(realtimeBus.PlateNumb)
       const plateMatchedArrival = estimatedArrivals.find((estimatedArrival) => {
+        if (!estimatedArrival.PlateNumb) {
+          return false
+        }
+
         const estimatedArrivalPlateNumb = normalizePlateNumb(estimatedArrival.PlateNumb)
 
         if (
-          realtimePlateNumb &&
           estimatedArrivalPlateNumb &&
           realtimePlateNumb === estimatedArrivalPlateNumb
         ) {
@@ -124,12 +127,11 @@ export function getRouteRealtimeBusStatuses(
         estimateMinutes: matchedArrival?.EstimateTime != null
           ? Math.ceil(matchedArrival.EstimateTime / 60)
           : null,
-        id: realtimeBus.PlateNumb ?? `${realtimeBus.SubRouteUID}-${realtimeBus.Direction}-${realtimeBus.StopUID}`,
+        id: realtimeBus.PlateNumb,
         plateNumb: realtimeBus.PlateNumb,
-        position: realtimeBus.position,
         stopName: getLocalizedText(realtimeBus.StopName, locale),
         stopSequence: realtimeBus.StopSequence,
-        subRouteUID: realtimeBus.SubRouteUID
+        subRouteUID: realtimeBus.SubRouteUID ?? ''
       }
     })
     .sort((left, right) => {

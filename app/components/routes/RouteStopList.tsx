@@ -155,7 +155,7 @@ export const RouteStopList = ({
                             <Group gap="xs" wrap="wrap" justify="flex-end">
                               {stop.realtimeBuses.map((bus) => (
                                 <Badge key={bus.id} color="orange" variant="light" size="sm">
-                                  {bus.plateNumb ?? t('components.routeStopList.missingPlate')}
+                                  {bus.plateNumb}
                                 </Badge>
                               ))}
                             </Group>

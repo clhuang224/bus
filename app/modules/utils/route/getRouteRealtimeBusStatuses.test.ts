@@ -36,6 +36,7 @@ describe('getRouteRealtimeBusStatuses', () => {
       BusStatus: BusStatusType.NORMAL,
       A2EventType: 0,
       GPSTime: '2026-03-20T10:00:00+08:00',
+      TripStartTimeType: 0,
       SrcUpdateTime: '2026-03-20T10:00:00+08:00',
       UpdateTime: '2026-03-20T10:00:00+08:00',
       position: [121.56, 25.04] as [number, number],
@@ -74,7 +75,7 @@ describe('getRouteRealtimeBusStatuses', () => {
 
   it('falls back to stop status text when estimate time is unavailable', () => {
     const realtimeBuses = [{
-      PlateNumb: null,
+      PlateNumb: 'BUS-002',
       OperatorID: 'operator-1',
       RouteUID: 'route-1',
       RouteID: 'route-1',
@@ -91,6 +92,7 @@ describe('getRouteRealtimeBusStatuses', () => {
       BusStatus: BusStatusType.NORMAL,
       A2EventType: 0,
       GPSTime: '2026-03-20T10:00:00+08:00',
+      TripStartTimeType: 0,
       SrcUpdateTime: '2026-03-20T10:00:00+08:00',
       UpdateTime: '2026-03-20T10:00:00+08:00',
       position: [121.6, 25.05] as [number, number],
@@ -98,7 +100,7 @@ describe('getRouteRealtimeBusStatuses', () => {
     }]
 
     const estimatedArrivals = [{
-      PlateNumb: null,
+      PlateNumb: 'BUS-003',
       StopUID: 'stop-2',
       StopID: 'stop-2',
       StopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
@@ -128,7 +130,7 @@ describe('getRouteRealtimeBusStatuses', () => {
 
   it('matches realtime buses by stop sequence when stop ids differ across endpoints', () => {
     const realtimeBuses = [{
-      PlateNumb: null,
+      PlateNumb: 'BUS-004',
       OperatorID: 'operator-1',
       RouteUID: 'route-1',
       RouteID: 'route-1',
@@ -145,6 +147,7 @@ describe('getRouteRealtimeBusStatuses', () => {
       BusStatus: BusStatusType.NORMAL,
       A2EventType: 0,
       GPSTime: '2026-03-20T10:00:00+08:00',
+      TripStartTimeType: 0,
       SrcUpdateTime: '2026-03-20T10:00:00+08:00',
       UpdateTime: '2026-03-20T10:00:00+08:00',
       position: [121.56, 25.04] as [number, number],
@@ -152,7 +155,7 @@ describe('getRouteRealtimeBusStatuses', () => {
     }]
 
     const estimatedArrivals = [{
-      PlateNumb: null,
+      PlateNumb: 'BUS-005',
       StopUID: 'stop-eta',
       StopID: 'stop-eta',
       StopName: { 'zh-TW': '市政府', en: 'City Hall' },
@@ -199,6 +202,7 @@ describe('getRouteRealtimeBusStatuses', () => {
       BusStatus: BusStatusType.NORMAL,
       A2EventType: 0,
       GPSTime: '2026-03-20T10:00:00+08:00',
+      TripStartTimeType: 0,
       SrcUpdateTime: '2026-03-20T10:00:00+08:00',
       UpdateTime: '2026-03-20T10:00:00+08:00',
       position: [121.56, 25.04] as [number, number],
@@ -253,6 +257,7 @@ describe('getRouteRealtimeBusStatuses', () => {
       BusStatus: BusStatusType.NORMAL,
       A2EventType: 0,
       GPSTime: '2026-03-20T10:00:00+08:00',
+      TripStartTimeType: 0,
       SrcUpdateTime: '2026-03-20T10:00:00+08:00',
       UpdateTime: '2026-03-20T10:00:00+08:00',
       position: [121.56, 25.04] as [number, number],
@@ -261,7 +266,7 @@ describe('getRouteRealtimeBusStatuses', () => {
 
     const estimatedArrivals = [
       {
-        PlateNumb: null,
+        PlateNumb: 'ETA-015',
         StopUID: 'stop-15',
         StopID: 'stop-15',
         StopName: { 'zh-TW': '蘆洲監理站', en: 'Luzhou Motor Vehicles Office' },
@@ -280,7 +285,7 @@ describe('getRouteRealtimeBusStatuses', () => {
         City: CityNameType.TAIPEI
       },
       {
-        PlateNumb: null,
+        PlateNumb: 'ETA-016',
         StopUID: 'stop-16',
         StopID: 'stop-16',
         StopName: { 'zh-TW': '蘆洲派出所', en: 'Luzhou Police Station' },
@@ -328,6 +333,7 @@ describe('getRouteRealtimeBusStatuses', () => {
       BusStatus: BusStatusType.NORMAL,
       A2EventType: 1,
       GPSTime: '2026-03-22T18:55:15+08:00',
+      TripStartTimeType: 0,
       SrcUpdateTime: '2026-03-22T18:56:10+08:00',
       UpdateTime: '2026-03-22T18:56:19+08:00',
       position: null,
@@ -336,7 +342,7 @@ describe('getRouteRealtimeBusStatuses', () => {
 
     const estimatedArrivals = [
       {
-        PlateNumb: null,
+        PlateNumb: 'ETA-TPE10024',
         StopUID: 'TPE10024',
         StopID: '10024',
         StopName: { 'zh-TW': '三和國中', en: 'Sanhe Junior High School' },
@@ -355,7 +361,7 @@ describe('getRouteRealtimeBusStatuses', () => {
         City: CityNameType.TAIPEI
       },
       {
-        PlateNumb: null,
+        PlateNumb: 'ETA-TPE10025',
         StopUID: 'TPE10026',
         StopID: '10026',
         StopName: { 'zh-TW': '格致中學(三和路)', en: 'Ger-Jyh Senior High School(Sanhe Rd.)' },
@@ -404,6 +410,7 @@ describe('getRouteRealtimeBusStatuses', () => {
         BusStatus: BusStatusType.NORMAL,
         A2EventType: 0,
         GPSTime: '2026-03-20T10:00:00+08:00',
+        TripStartTimeType: 0,
         SrcUpdateTime: '2026-03-20T10:00:00+08:00',
         UpdateTime: '2026-03-20T10:00:00+08:00',
         position: [121.56, 25.04] as [number, number],
@@ -427,6 +434,7 @@ describe('getRouteRealtimeBusStatuses', () => {
         BusStatus: BusStatusType.NORMAL,
         A2EventType: 0,
         GPSTime: '2026-03-20T10:00:00+08:00',
+        TripStartTimeType: 0,
         SrcUpdateTime: '2026-03-20T10:00:00+08:00',
         UpdateTime: '2026-03-20T10:00:00+08:00',
         position: [121.6, 25.05] as [number, number],

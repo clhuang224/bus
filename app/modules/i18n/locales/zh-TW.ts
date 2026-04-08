@@ -116,8 +116,7 @@ export const zhTW = {
       },
       routeStopList: {
         addFavoriteAriaLabel: '收藏站牌路線',
-        removeFavoriteAriaLabel: '取消收藏站牌路線',
-        missingPlate: '未提供車牌'
+        removeFavoriteAriaLabel: '取消收藏站牌路線'
       },
       routeMap: {
         stopMarkerAriaLabel: '{{stopName}}，第 {{sequence}} 站',

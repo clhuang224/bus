@@ -116,8 +116,7 @@ export const en = {
       },
       routeStopList: {
         addFavoriteAriaLabel: 'Save route stop',
-        removeFavoriteAriaLabel: 'Remove saved route stop',
-        missingPlate: 'Plate unavailable'
+        removeFavoriteAriaLabel: 'Remove saved route stop'
       },
       routeMap: {
         stopMarkerAriaLabel: '{{stopName}}, stop {{sequence}}',
