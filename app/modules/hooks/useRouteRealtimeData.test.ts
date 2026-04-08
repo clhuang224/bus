@@ -3,7 +3,7 @@
 import { act, renderHook } from '@testing-library/react'
 import { createElement, type PropsWithChildren } from 'react'
 import { Provider } from 'react-redux'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { BusRoute, BusSubRoute } from '~/modules/interfaces/BusRoute'
 import { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import { CityNameType } from '~/modules/enums/CityNameType'
@@ -79,6 +79,11 @@ describe('useRouteRealtimeData', () => {
     mockUseGetRouteShapesByRouteQuery.mockReturnValue({
       data: []
     })
+  })
+
+  afterEach(() => {
+    vi.clearAllTimers()
+    vi.useRealTimers()
   })
 
   it('restarts realtime backoff for repeated 429 responses in the same session', () => {
