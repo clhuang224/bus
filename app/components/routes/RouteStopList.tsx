@@ -167,6 +167,8 @@ export const RouteStopList = ({
                               {stop.realtimeBuses.map((bus) => (
                                 <Badge
                                   key={bus.id}
+                                  component="button"
+                                  type="button"
                                   color="orange"
                                   variant="light"
                                   size="sm"
