@@ -9,10 +9,10 @@ importers:
   .:
     dependencies:
       '@mantine/core':
-        specifier: 8.2.1
+        specifier: ^8.2.1
         version: 8.2.1(@mantine/hooks@8.2.1(react@19.1.0))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@mantine/hooks':
-        specifier: 8.2.1
+        specifier: ^8.2.1
         version: 8.2.1(react@19.1.0)
       '@react-router/node':
         specifier: ^7.14.0
