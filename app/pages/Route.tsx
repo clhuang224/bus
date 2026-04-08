@@ -130,6 +130,7 @@ export default function Route() {
 
   const handleSelectVehicleFromList = (vehicleId: string) => {
     setSelectedVehicleId(vehicleId)
+    setSelectedStopId(null)
   }
 
   const handleSelectVehicleFromMap = (vehicleId: string) => {
