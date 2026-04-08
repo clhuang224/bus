@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux'
 import { busApi } from '~/modules/apis/bus'
 import { isTdxRateLimitError } from '~/modules/apis/errors/busError'
 import type { BusRoute, BusSubRoute } from '~/modules/interfaces/BusRoute'
-import type { CityNameType } from '~/modules/enums/CityNameType'
+import { CityNameType } from '~/modules/enums/CityNameType'
 import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
 import { selectLocale } from '~/modules/slices/localeSlice'
@@ -26,29 +26,29 @@ type RealtimeQueryState =
   | { status: RealtimeQueryStatus.READY }
 
 interface UseRouteRealtimeDataOptions {
-  activeSubRoute: BusSubRoute<Date | null> | null
-  busRoute: BusRoute<Date | null> | undefined
-  city: string | undefined
-  id: string | undefined
+  activeSubRoute: BusSubRoute<Date | null>
+  busRoute: BusRoute<Date | null>
+  city: CityNameType
+  id: string
 }
 
-export function useRouteRealtimeData({
-  activeSubRoute,
-  busRoute,
-  city,
-  id
-}: UseRouteRealtimeDataOptions) {
+export function useRouteRealtimeData(options: UseRouteRealtimeDataOptions | null) {
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
-  const cityName = city as CityNameType
-  const hasRealtimeContext = Boolean(city && id && busRoute && activeSubRoute)
+  const activeSubRoute = options?.activeSubRoute ?? null
+  const busRoute = options?.busRoute ?? null
+
+  // Keep RTK Query args well-typed; skip prevents requests until realtime options are ready.
+  const realtimeQueryArgs = options
+    ? { city: options.city, routeUID: options.id }
+    : { city: CityNameType.TAIPEI, routeUID: '' }
   const [realtimeQueryState, setRealtimeQueryState] = useState<RealtimeQueryState>({
     status: RealtimeQueryStatus.IDLE
   })
   const hasAppliedRateLimitBackoff = useRef(false)
 
   useEffect(() => {
-    if (!hasRealtimeContext) {
+    if (!options) {
       setRealtimeQueryState({ status: RealtimeQueryStatus.IDLE })
       return
     }
@@ -57,7 +57,7 @@ export function useRouteRealtimeData({
       status: RealtimeQueryStatus.WAITING,
       waitMs: REALTIME_INITIAL_DELAY_MS
     })
-  }, [activeSubRoute?.Direction, activeSubRoute?.SubRouteUID, busRoute, city, id, hasRealtimeContext])
+  }, [activeSubRoute?.Direction, activeSubRoute?.SubRouteUID, busRoute?.RouteUID, options?.id, options?.city])
 
   useEffect(() => {
     if (realtimeQueryState.status !== RealtimeQueryStatus.WAITING) {
@@ -73,8 +73,7 @@ export function useRouteRealtimeData({
     }
   }, [realtimeQueryState])
 
-  const shouldSkipRealtimeQueries = !hasRealtimeContext ||
-    realtimeQueryState.status !== RealtimeQueryStatus.READY
+  const skipRealtime = !options || realtimeQueryState.status !== RealtimeQueryStatus.READY
 
   const {
     data: estimatedArrivals = [],
@@ -82,9 +81,9 @@ export function useRouteRealtimeData({
     isError: isEstimatedArrivalsError,
     isLoading: isEstimatedArrivalsLoading
   } = busApi.useGetEstimatedArrivalByRouteQuery(
-    { city: cityName, routeUID: id! },
+    realtimeQueryArgs,
     {
-      skip: shouldSkipRealtimeQueries,
+      skip: skipRealtime,
       pollingInterval: REALTIME_POLLING_INTERVAL,
       skipPollingIfUnfocused: true,
       refetchOnReconnect: true
@@ -96,17 +95,17 @@ export function useRouteRealtimeData({
     isError: isRealtimeNearStopsError,
     isLoading: isRealtimeNearStopsLoading
   } = busApi.useGetRealtimeNearStopsByRouteQuery(
-    { city: cityName, routeUID: id! },
+    realtimeQueryArgs,
     {
-      skip: shouldSkipRealtimeQueries,
+      skip: skipRealtime,
       pollingInterval: REALTIME_POLLING_INTERVAL,
       skipPollingIfUnfocused: true,
       refetchOnReconnect: true
     }
   )
   const { data: routeShapes = [] } = busApi.useGetRouteShapesByRouteQuery(
-    { city: cityName, routeUID: id! },
-    { skip: shouldSkipRealtimeQueries }
+    realtimeQueryArgs,
+    { skip: skipRealtime }
   )
 
   const isRealtimeRateLimited = isTdxRateLimitError(estimatedArrivalsError) || isTdxRateLimitError(realtimeNearStopsError)
