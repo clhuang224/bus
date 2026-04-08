@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { busApi } from '~/modules/apis/bus'
 import { getRouteMessages } from '~/modules/consts/pageMessages'
-import type { CityNameType } from '~/modules/enums/CityNameType'
+import { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import type { BusSubRoute } from '~/modules/interfaces/BusRoute'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
@@ -31,8 +31,8 @@ export interface RouteBaseTimelineStop {
 
 interface UseRouteBaseDataOptions {
   activeTab: string | null
-  city: string | undefined
-  id: string | undefined
+  city: CityNameType
+  id: string
   isFavoriteRouteStop: (favoriteId: string) => boolean
   locationState: unknown
 }
@@ -41,36 +41,40 @@ interface RouteLocationState {
   favoriteRouteStop?: FavoriteRouteStop
 }
 
-export function useRouteBaseData({
-  activeTab,
-  city,
-  id,
-  isFavoriteRouteStop,
-  locationState
-}: UseRouteBaseDataOptions) {
+export function useRouteBaseData(
+  options: UseRouteBaseDataOptions | null
+) {
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
-  const cityName = city as CityNameType
+  const activeTab = options?.activeTab ?? null
+  const id = options?.id
+  const isFavoriteRouteStop = options?.isFavoriteRouteStop ?? (() => false)
+  const locationState = options?.locationState
+
+  // Keep RTK Query args well-typed; skip prevents requests until route options are ready.
+  const routeQueryCity = options?.city ?? CityNameType.TAIPEI
 
   const { data: routeData = [], isLoading: isRoutesLoading, error: routesError } = busApi.useGetRoutesByCityQuery(
-    cityName,
-    { skip: !city || !id }
+    routeQueryCity,
+    { skip: !options }
   )
   const { data: stopOfRoutes = [], isLoading: isStopOfRoutesLoading, error: stopOfRoutesError } =
     busApi.useGetStopOfRoutesByCityQuery(
-      { city: cityName, routeUID: id },
-      { skip: !city || !id }
+      { city: routeQueryCity, routeUID: id },
+      { skip: !options }
     )
   const { data: stopsByCity = [], isLoading: isStopsLoading, error: stopsError } =
-    busApi.useGetStopsByCityQuery(cityName, { skip: !city || !id })
+    busApi.useGetStopsByCityQuery(routeQueryCity, { skip: !options })
 
   const targetFavoriteRouteStop = useMemo(() => {
+    if (!options) return null
+
     const favoriteRouteStop = (locationState as RouteLocationState | null)?.favoriteRouteStop
     if (!favoriteRouteStop) return null
-    if (favoriteRouteStop.city !== cityName || favoriteRouteStop.routeUID !== id) return null
+    if (favoriteRouteStop.city !== options.city || favoriteRouteStop.routeUID !== id) return null
 
     return favoriteRouteStop
-  }, [cityName, id, locationState])
+  }, [id, locationState, options])
 
   const routes = useMemo(() => normalizeBusRoutesWithDates(routeData), [routeData])
 

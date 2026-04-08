@@ -4,52 +4,76 @@ import { useSelector } from 'react-redux'
 import { busApi } from '~/modules/apis/bus'
 import { isTdxRateLimitError } from '~/modules/apis/errors/busError'
 import type { BusRoute, BusSubRoute } from '~/modules/interfaces/BusRoute'
-import type { CityNameType } from '~/modules/enums/CityNameType'
+import { CityNameType } from '~/modules/enums/CityNameType'
 import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { formatEstimatedArrivalLabel, getRouteRealtimeBusStatuses } from '~/modules/utils/route/getRouteRealtimeBusStatuses'
-import { useDelay } from './useDelay'
 
 const REALTIME_POLLING_INTERVAL = 30000
 const REALTIME_INITIAL_DELAY_MS = 1200
 const REALTIME_RATE_LIMIT_BACKOFF_MS = 3000
 
-interface UseRouteRealtimeDataOptions {
-  activeSubRoute: BusSubRoute<Date | null> | null
-  busRoute: BusRoute<Date | null> | undefined
-  city: string | undefined
-  id: string | undefined
+enum RealtimeQueryStatus {
+  IDLE,
+  WAITING,
+  READY
 }
 
-export function useRouteRealtimeData({
-  activeSubRoute,
-  busRoute,
-  city,
-  id
-}: UseRouteRealtimeDataOptions) {
+type RealtimeQueryState =
+  | { status: RealtimeQueryStatus.IDLE }
+  | { status: RealtimeQueryStatus.WAITING, waitMs: number }
+  | { status: RealtimeQueryStatus.READY }
+
+interface UseRouteRealtimeDataOptions {
+  activeSubRoute: BusSubRoute<Date | null>
+  busRoute: BusRoute<Date | null>
+  city: CityNameType
+  id: string
+}
+
+export function useRouteRealtimeData(options: UseRouteRealtimeDataOptions | null) {
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
-  const cityName = city as CityNameType
-  const shouldPrepareRealtimeQueries = Boolean(city && id && busRoute && activeSubRoute)
-  const [realtimeStartDelayMs, setRealtimeStartDelayMs] = useState<number | null>(null)
+  const activeSubRoute = options?.activeSubRoute ?? null
+  const busRoute = options?.busRoute ?? null
+
+  // Keep RTK Query args well-typed; skip prevents requests until realtime options are ready.
+  const realtimeQueryArgs = options
+    ? { city: options.city, routeUID: options.id }
+    : { city: CityNameType.TAIPEI, routeUID: '' }
+  const [realtimeQueryState, setRealtimeQueryState] = useState<RealtimeQueryState>({
+    status: RealtimeQueryStatus.IDLE
+  })
   const hasAppliedRateLimitBackoff = useRef(false)
 
   useEffect(() => {
-    if (!shouldPrepareRealtimeQueries) {
-      setRealtimeStartDelayMs(null)
+    if (!options) {
+      setRealtimeQueryState({ status: RealtimeQueryStatus.IDLE })
       return
     }
 
-    setRealtimeStartDelayMs(REALTIME_INITIAL_DELAY_MS)
-  }, [activeSubRoute?.Direction, activeSubRoute?.SubRouteUID, busRoute, city, id, shouldPrepareRealtimeQueries])
+    setRealtimeQueryState({
+      status: RealtimeQueryStatus.WAITING,
+      waitMs: REALTIME_INITIAL_DELAY_MS
+    })
+  }, [activeSubRoute?.Direction, activeSubRoute?.SubRouteUID, busRoute?.RouteUID, options?.id, options?.city])
 
-  const canStartRealtime = useDelay({
-    delayMs: realtimeStartDelayMs,
-    enabled: shouldPrepareRealtimeQueries
-  })
+  useEffect(() => {
+    if (realtimeQueryState.status !== RealtimeQueryStatus.WAITING) {
+      return
+    }
 
-  const shouldSkipRealtimeQueries = !shouldPrepareRealtimeQueries || !canStartRealtime
+    const timeoutId = window.setTimeout(() => {
+      setRealtimeQueryState({ status: RealtimeQueryStatus.READY })
+    }, realtimeQueryState.waitMs)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [realtimeQueryState])
+
+  const skipRealtime = !options || realtimeQueryState.status !== RealtimeQueryStatus.READY
 
   const {
     data: estimatedArrivals = [],
@@ -57,9 +81,9 @@ export function useRouteRealtimeData({
     isError: isEstimatedArrivalsError,
     isLoading: isEstimatedArrivalsLoading
   } = busApi.useGetEstimatedArrivalByRouteQuery(
-    { city: cityName, routeUID: id! },
+    realtimeQueryArgs,
     {
-      skip: shouldSkipRealtimeQueries,
+      skip: skipRealtime,
       pollingInterval: REALTIME_POLLING_INTERVAL,
       skipPollingIfUnfocused: true,
       refetchOnReconnect: true
@@ -71,17 +95,17 @@ export function useRouteRealtimeData({
     isError: isRealtimeNearStopsError,
     isLoading: isRealtimeNearStopsLoading
   } = busApi.useGetRealtimeNearStopsByRouteQuery(
-    { city: cityName, routeUID: id! },
+    realtimeQueryArgs,
     {
-      skip: shouldSkipRealtimeQueries,
+      skip: skipRealtime,
       pollingInterval: REALTIME_POLLING_INTERVAL,
       skipPollingIfUnfocused: true,
       refetchOnReconnect: true
     }
   )
   const { data: routeShapes = [] } = busApi.useGetRouteShapesByRouteQuery(
-    { city: cityName, routeUID: id! },
-    { skip: shouldSkipRealtimeQueries }
+    realtimeQueryArgs,
+    { skip: skipRealtime }
   )
 
   const isRealtimeRateLimited = isTdxRateLimitError(estimatedArrivalsError) || isTdxRateLimitError(realtimeNearStopsError)
@@ -97,7 +121,10 @@ export function useRouteRealtimeData({
     }
 
     hasAppliedRateLimitBackoff.current = true
-    setRealtimeStartDelayMs(REALTIME_RATE_LIMIT_BACKOFF_MS)
+    setRealtimeQueryState({
+      status: RealtimeQueryStatus.WAITING,
+      waitMs: REALTIME_RATE_LIMIT_BACKOFF_MS
+    })
   }, [isRealtimeRateLimited])
 
   const directionMatchedEstimatedArrivals = useMemo(() => {

@@ -16,6 +16,7 @@ import { AppBadge } from '~/components/common/AppBadge'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { getTerminalDisplay } from '~/modules/utils/i18n/getTerminalDisplay'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
+import { isCityName } from '~/modules/utils/shared/isCityName'
 
 export default function Route() {
   const { t } = useTranslation()
@@ -30,6 +31,15 @@ export default function Route() {
   const { isFavoriteRouteStop, toggleFavoriteRouteStop } = useFavoriteRouteStops()
   const [activeTab, setActiveTab] = useState<string | null>(null)
   const [selectedStopId, setSelectedStopId] = useState<string | null>(null)
+  const routeBaseOptions = city && isCityName(city) && id
+    ? {
+        activeTab,
+        city,
+        id,
+        isFavoriteRouteStop,
+        locationState: location.state
+      }
+    : null
   const {
     activeSubRoute,
     baseTimelineStops,
@@ -41,13 +51,15 @@ export default function Route() {
     defaultActiveTabId,
     routeMapStops,
     routeTabs
-  } = useRouteBaseData({
-    activeTab,
-    city,
-    id,
-    isFavoriteRouteStop,
-    locationState: location.state
-  })
+  } = useRouteBaseData(routeBaseOptions)
+  const routeRealtimeOptions = city && isCityName(city) && id && busRoute && activeSubRoute
+    ? {
+        activeSubRoute,
+        busRoute,
+        city,
+        id
+      }
+    : null
   const {
     activeRoutePath,
     estimatedArrivalLabelsByStopKey,
@@ -57,12 +69,7 @@ export default function Route() {
     realtimeBusesByStopSequence,
     realtimeBusStatuses,
     realtimeInfoState
-  } = useRouteRealtimeData({
-    activeSubRoute,
-    busRoute,
-    city,
-    id
-  })
+  } = useRouteRealtimeData(routeRealtimeOptions)
   const timelineStops = useMemo(() => baseTimelineStops.map((stop) => ({
     ...stop,
     estimatedArrivalLabel: estimatedArrivalLabelsByStopKey.get(stop.id) ??

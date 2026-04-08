@@ -1,10 +1,9 @@
-import { CityNameType } from '../../enums/CityNameType'
 import { DirectionType } from '../../enums/DirectionType'
 import type { FavoriteRouteStop } from '../../interfaces/FavoriteRouteStop'
 import type { LocalizedText } from '../../types/LocalizedText'
 import { getEnumValues } from '../shared/getEnumValues'
+import { isCityName } from '../shared/isCityName'
 
-const cityNameValues = getEnumValues(CityNameType)
 const directionValues = getEnumValues(DirectionType)
 
 function isString(value: unknown): value is string {
@@ -17,10 +16,6 @@ function isNullableString(value: unknown): value is string | null {
 
 function isNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value)
-}
-
-function isCityName(value: unknown): value is CityNameType {
-  return isString(value) && cityNameValues.includes(value as CityNameType)
 }
 
 function isDirection(value: unknown): value is DirectionType {
