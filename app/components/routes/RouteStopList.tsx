@@ -28,6 +28,7 @@ interface PropType {
   isRealtimeLoading?: boolean
   listScrollBehavior?: ScrollLogicalPosition
   onSelectStop: (stopId: string) => void
+  onSelectVehicle: (vehicleId: string) => void
   onToggleFavorite: (routeStop: FavoriteRouteStop) => void
   selectedStopId?: string | null
   stops: RouteStopListItem[]
@@ -42,6 +43,7 @@ export const RouteStopList = ({
   isRealtimeLoading = false,
   listScrollBehavior = 'nearest',
   onSelectStop,
+  onSelectVehicle,
   onToggleFavorite,
   selectedStopId = null,
   stops
@@ -133,15 +135,24 @@ export const RouteStopList = ({
                         px="xs"
                         py={4}
                         bg={isHighlighted ? 'blue.0' : undefined}
-                        style={{ borderRadius: 'var(--mantine-radius-sm)', cursor: 'pointer' }}
-                        onClick={() => onSelectStop(stop.id)}
+                        style={{ borderRadius: 'var(--mantine-radius-sm)' }}
                       >
                         <Group justify="space-between" align="flex-start" wrap="nowrap">
                           <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
                             <Text
+                              component="button"
+                              type="button"
                               fw={isHighlighted || isSelected ? 700 : undefined}
                               c={isHighlighted ? 'blue.8' : undefined}
-                              style={{ minWidth: 0 }}
+                              style={{
+                                minWidth: 0,
+                                cursor: 'pointer',
+                                background: 'none',
+                                border: 0,
+                                padding: 0,
+                                textAlign: 'left'
+                              }}
+                              onClick={() => onSelectStop(stop.id)}
                             >
                               {stop.name}
                             </Text>
@@ -154,7 +165,17 @@ export const RouteStopList = ({
                           <Group pr="sm" gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
                             <Group gap="xs" wrap="wrap" justify="flex-end">
                               {stop.realtimeBuses.map((bus) => (
-                                <Badge key={bus.id} color="orange" variant="light" size="sm">
+                                <Badge
+                                  key={bus.id}
+                                  color="orange"
+                                  variant="light"
+                                  size="sm"
+                                  style={{ cursor: 'pointer' }}
+                                  onClick={(event) => {
+                                    event.stopPropagation()
+                                    onSelectVehicle(bus.id)
+                                  }}
+                                >
                                   {bus.plateNumb}
                                 </Badge>
                               ))}

@@ -546,6 +546,80 @@ describe('Route', () => {
     })
   })
 
+  it('selects only the stop when choosing a stop title from the list', async () => {
+    renderRoutePage()
+
+    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
+
+    await waitFor(() => {
+      expect(screen.getByText(fourMinutesAwayLabel)).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByText('市政府'))
+
+    await waitFor(() => {
+      const latestCall = mockRouteMap.mock.calls[mockRouteMap.mock.calls.length - 1] as unknown as
+        | [{ selectedStop: string | null, selectedVehicleId: string | null }]
+        | undefined
+      const latestRouteMapProps = latestCall?.[0]
+
+      expect(latestRouteMapProps?.selectedStop).toBe('stop-c')
+      expect(latestRouteMapProps?.selectedVehicleId).toBeNull()
+    })
+  })
+
+  it('selects only the vehicle when clicking a realtime plate badge in the list', async () => {
+    renderRoutePage()
+
+    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('ABC-123')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByText('ABC-123'))
+
+    await waitFor(() => {
+      const latestCall = mockRouteMap.mock.calls[mockRouteMap.mock.calls.length - 1] as unknown as
+        | [{ selectedStop: string | null, selectedVehicleId: string | null }]
+        | undefined
+      const latestRouteMapProps = latestCall?.[0]
+
+      expect(latestRouteMapProps?.selectedStop).toBeNull()
+      expect(latestRouteMapProps?.selectedVehicleId).toBe('ABC-123')
+    })
+  })
+
+  it('selects the matching stop in the list when clicking a vehicle marker on the map', async () => {
+    renderRoutePage()
+
+    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
+
+    await waitFor(() => {
+      expect(mockRouteMap).toHaveBeenCalled()
+    })
+
+    const latestCall = mockRouteMap.mock.calls[mockRouteMap.mock.calls.length - 1] as unknown as
+      | [{
+        onSelectVehicle: (vehicleId: string) => void
+        selectedStop: string | null
+        selectedVehicleId: string | null
+      }]
+      | undefined
+
+    latestCall?.[0].onSelectVehicle('ABC-123')
+
+    await waitFor(() => {
+      const updatedCall = mockRouteMap.mock.calls[mockRouteMap.mock.calls.length - 1] as unknown as
+        | [{ selectedStop: string | null, selectedVehicleId: string | null }]
+        | undefined
+      const latestRouteMapProps = updatedCall?.[0]
+
+      expect(latestRouteMapProps?.selectedStop).toBe('stop-c')
+      expect(latestRouteMapProps?.selectedVehicleId).toBe('ABC-123')
+    })
+  })
+
   it('uses route-level ETA data when subroute fields are omitted by upstream', async () => {
     mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
       data: [{

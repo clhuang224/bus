@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { A2EventType } from '../../enums/A2EventType'
 import { BusStatusType } from '../../enums/BusStatusType'
 import { CityNameType } from '../../enums/CityNameType'
 import { DirectionType } from '../../enums/DirectionType'
@@ -34,7 +35,7 @@ describe('getRouteRealtimeBusStatuses', () => {
       StopSequence: 5,
       DutyStatus: DutyStatusType.NORMAL,
       BusStatus: BusStatusType.NORMAL,
-      A2EventType: 0,
+      A2EventType: A2EventType.DEPARTED,
       GPSTime: '2026-03-20T10:00:00+08:00',
       TripStartTimeType: 0,
       SrcUpdateTime: '2026-03-20T10:00:00+08:00',
@@ -90,7 +91,7 @@ describe('getRouteRealtimeBusStatuses', () => {
       StopSequence: 6,
       DutyStatus: DutyStatusType.NORMAL,
       BusStatus: BusStatusType.NORMAL,
-      A2EventType: 0,
+      A2EventType: A2EventType.DEPARTED,
       GPSTime: '2026-03-20T10:00:00+08:00',
       TripStartTimeType: 0,
       SrcUpdateTime: '2026-03-20T10:00:00+08:00',
@@ -145,7 +146,7 @@ describe('getRouteRealtimeBusStatuses', () => {
       StopSequence: 5,
       DutyStatus: DutyStatusType.NORMAL,
       BusStatus: BusStatusType.NORMAL,
-      A2EventType: 0,
+      A2EventType: A2EventType.DEPARTED,
       GPSTime: '2026-03-20T10:00:00+08:00',
       TripStartTimeType: 0,
       SrcUpdateTime: '2026-03-20T10:00:00+08:00',
@@ -200,7 +201,7 @@ describe('getRouteRealtimeBusStatuses', () => {
       StopSequence: 5,
       DutyStatus: DutyStatusType.NORMAL,
       BusStatus: BusStatusType.NORMAL,
-      A2EventType: 0,
+      A2EventType: A2EventType.DEPARTED,
       GPSTime: '2026-03-20T10:00:00+08:00',
       TripStartTimeType: 0,
       SrcUpdateTime: '2026-03-20T10:00:00+08:00',
@@ -255,7 +256,7 @@ describe('getRouteRealtimeBusStatuses', () => {
       StopSequence: 15,
       DutyStatus: DutyStatusType.NORMAL,
       BusStatus: BusStatusType.NORMAL,
-      A2EventType: 0,
+      A2EventType: A2EventType.DEPARTED,
       GPSTime: '2026-03-20T10:00:00+08:00',
       TripStartTimeType: 0,
       SrcUpdateTime: '2026-03-20T10:00:00+08:00',
@@ -314,7 +315,83 @@ describe('getRouteRealtimeBusStatuses', () => {
     ])
   })
 
-  it('uses the next stop ETA for the 225-style upstream shape when the current stop remains not yet departed', () => {
+  it('uses the next downstream ETA when the matched stop already reports last bus passed', () => {
+    const realtimeBuses = [{
+      PlateNumb: 'KKA-0365',
+      OperatorID: 'operator-1',
+      RouteUID: 'route-1',
+      RouteID: 'route-1',
+      RouteName: { 'zh-TW': '棕12', en: 'Brown 12' },
+      SubRouteUID: 'subroute-1',
+      SubRouteID: 'subroute-1',
+      SubRouteName: { 'zh-TW': '棕12', en: 'Brown 12' },
+      Direction: DirectionType.GO,
+      StopUID: 'stop-current',
+      StopID: 'stop-current',
+      StopName: { 'zh-TW': '捷運台電大樓站', en: 'MRT Taipower Building Station' },
+      StopSequence: 10,
+      DutyStatus: DutyStatusType.NORMAL,
+      BusStatus: BusStatusType.NORMAL,
+      A2EventType: A2EventType.DEPARTED,
+      GPSTime: '2026-04-09T10:00:00+08:00',
+      TripStartTimeType: 0,
+      SrcUpdateTime: '2026-04-09T10:00:00+08:00',
+      UpdateTime: '2026-04-09T10:00:00+08:00',
+      position: [121.53, 25.026] as [number, number],
+      City: CityNameType.TAIPEI
+    }]
+
+    const estimatedArrivals = [
+      {
+        PlateNumb: 'KKA-0365',
+        StopUID: 'stop-current',
+        StopID: 'stop-current',
+        StopName: { 'zh-TW': '捷運台電大樓站', en: 'MRT Taipower Building Station' },
+        RouteUID: 'route-1',
+        RouteID: 'route-1',
+        RouteName: { 'zh-TW': '棕12', en: 'Brown 12' },
+        SubRouteUID: 'subroute-1',
+        SubRouteID: 'subroute-1',
+        SubRouteName: { 'zh-TW': '棕12', en: 'Brown 12' },
+        Direction: DirectionType.GO,
+        StopSequence: 10,
+        EstimateTime: null,
+        StopStatus: StopStatusType.LAST_BUS_PASSED,
+        MessageType: 0,
+        UpdateTime: '2026-04-09T10:00:00+08:00',
+        City: CityNameType.TAIPEI
+      },
+      {
+        PlateNumb: null,
+        StopUID: 'stop-next',
+        StopID: 'stop-next',
+        StopName: { 'zh-TW': '台電大樓', en: 'Taipower Building' },
+        RouteUID: 'route-1',
+        RouteID: 'route-1',
+        RouteName: { 'zh-TW': '棕12', en: 'Brown 12' },
+        SubRouteUID: 'subroute-1',
+        SubRouteID: 'subroute-1',
+        SubRouteName: { 'zh-TW': '棕12', en: 'Brown 12' },
+        Direction: DirectionType.GO,
+        StopSequence: 11,
+        EstimateTime: 120,
+        StopStatus: StopStatusType.NORMAL,
+        MessageType: 0,
+        UpdateTime: '2026-04-09T10:00:00+08:00',
+        City: CityNameType.TAIPEI
+      }
+    ]
+
+    expect(getRouteRealtimeBusStatuses(i18n.t, DEFAULT_APP_LOCALE, realtimeBuses, estimatedArrivals)).toEqual([
+      expect.objectContaining({
+        estimateLabel: twoMinutesAwayLabel,
+        estimateMinutes: 2,
+        plateNumb: 'KKA-0365'
+      })
+    ])
+  })
+
+  it('uses the current stop status for the 225-style upstream shape when the bus is arriving', () => {
     const realtimeBuses = [{
       PlateNumb: 'KKA-0151',
       OperatorID: '400',
@@ -331,7 +408,7 @@ describe('getRouteRealtimeBusStatuses', () => {
       StopSequence: 23,
       DutyStatus: DutyStatusType.NORMAL,
       BusStatus: BusStatusType.NORMAL,
-      A2EventType: 1,
+      A2EventType: A2EventType.ARRIVING,
       GPSTime: '2026-03-22T18:55:15+08:00',
       TripStartTimeType: 0,
       SrcUpdateTime: '2026-03-22T18:56:10+08:00',
@@ -383,8 +460,8 @@ describe('getRouteRealtimeBusStatuses', () => {
 
     expect(getRouteRealtimeBusStatuses(i18n.t, DEFAULT_APP_LOCALE, realtimeBuses, estimatedArrivals)).toEqual([
       expect.objectContaining({
-        estimateLabel: twoMinutesAwayLabel,
-        estimateMinutes: 2,
+        estimateLabel: inServiceLabel,
+        estimateMinutes: null,
         plateNumb: 'KKA-0151'
       })
     ])
@@ -408,7 +485,7 @@ describe('getRouteRealtimeBusStatuses', () => {
         StopSequence: 5,
         DutyStatus: DutyStatusType.NORMAL,
         BusStatus: BusStatusType.NORMAL,
-        A2EventType: 0,
+        A2EventType: A2EventType.DEPARTED,
         GPSTime: '2026-03-20T10:00:00+08:00',
         TripStartTimeType: 0,
         SrcUpdateTime: '2026-03-20T10:00:00+08:00',
@@ -432,7 +509,7 @@ describe('getRouteRealtimeBusStatuses', () => {
         StopSequence: 6,
         DutyStatus: DutyStatusType.NORMAL,
         BusStatus: BusStatusType.NORMAL,
-        A2EventType: 0,
+        A2EventType: A2EventType.DEPARTED,
         GPSTime: '2026-03-20T10:00:00+08:00',
         TripStartTimeType: 0,
         SrcUpdateTime: '2026-03-20T10:00:00+08:00',

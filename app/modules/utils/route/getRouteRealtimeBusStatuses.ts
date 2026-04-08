@@ -1,4 +1,5 @@
 import type { TFunction } from 'i18next'
+import { A2EventType } from '../../enums/A2EventType'
 import type { AppLocaleType } from '../../enums/AppLocaleType'
 import { stopStatusTranslationKeyMap } from '../../consts/stopStatus'
 import { StopStatusType } from '../../enums/StopStatusType'
@@ -21,22 +22,6 @@ function getRealtimeFallbackLabel(t: TFunction, stopStatus: StopStatusType) {
   }
 
   return getStopStatusLabel(t, stopStatus)
-}
-
-function isStrongArrivalMatch(estimatedArrival: EstimatedArrival | undefined) {
-  if (!estimatedArrival) {
-    return false
-  }
-
-  if (estimatedArrival.EstimateTime != null) {
-    return true
-  }
-
-  return ![
-    StopStatusType.NORMAL,
-    StopStatusType.NOT_YET_DEPARTED,
-    StopStatusType.UNKNOWN
-  ].includes(estimatedArrival.StopStatus)
 }
 
 export function formatEstimatedArrivalLabel(t: TFunction, estimateTime: number | null, stopStatus: StopStatusType) {
@@ -107,10 +92,9 @@ export function getRouteRealtimeBusStatuses(
 
           return left.StopSequence - right.StopSequence
         })[0]
-      const matchedArrival = plateMatchedArrival ??
-        (isStrongArrivalMatch(stopMatchedArrival)
-          ? stopMatchedArrival
-          : nextEstimatedArrival ?? stopMatchedArrival)
+      const matchedArrival = realtimeBus.A2EventType === A2EventType.DEPARTED
+        ? nextEstimatedArrival ?? plateMatchedArrival ?? stopMatchedArrival
+        : stopMatchedArrival ?? plateMatchedArrival ?? nextEstimatedArrival
       const estimateLabel = matchedArrival
         ? formatEstimatedArrivalLabel(t, matchedArrival.EstimateTime, matchedArrival.StopStatus)
         : getRealtimeFallbackLabel(t, StopStatusType.UNKNOWN)

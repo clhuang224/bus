@@ -44,6 +44,7 @@ const realtimeBus: RouteRealtimeBusStatus = {
 describe('RouteStopList', () => {
   it('selects a stop when the stop row is clicked', () => {
     const handleSelectStop = vi.fn()
+    const handleSelectVehicle = vi.fn()
     const handleToggleFavorite = vi.fn()
 
     renderWithMantine(
@@ -58,6 +59,7 @@ describe('RouteStopList', () => {
           isFavorite: false
         }]}
         onSelectStop={handleSelectStop}
+        onSelectVehicle={handleSelectVehicle}
         onToggleFavorite={handleToggleFavorite}
       />
     )
@@ -65,11 +67,13 @@ describe('RouteStopList', () => {
     fireEvent.click(screen.getByText('市政府'))
 
     expect(handleSelectStop).toHaveBeenCalledWith('stop-1')
+    expect(handleSelectVehicle).not.toHaveBeenCalled()
     expect(handleToggleFavorite).not.toHaveBeenCalled()
   })
 
   it('does not select the stop when toggling favorite', () => {
     const handleSelectStop = vi.fn()
+    const handleSelectVehicle = vi.fn()
     const handleToggleFavorite = vi.fn()
 
     renderWithMantine(
@@ -84,6 +88,7 @@ describe('RouteStopList', () => {
           isFavorite: false
         }]}
         onSelectStop={handleSelectStop}
+        onSelectVehicle={handleSelectVehicle}
         onToggleFavorite={handleToggleFavorite}
       />
     )
@@ -92,6 +97,7 @@ describe('RouteStopList', () => {
 
     expect(handleToggleFavorite).toHaveBeenCalledWith(favoriteRouteStop)
     expect(handleSelectStop).not.toHaveBeenCalled()
+    expect(handleSelectVehicle).not.toHaveBeenCalled()
   })
 
   it('renders estimated arrival text for a stop', () => {
@@ -109,6 +115,7 @@ describe('RouteStopList', () => {
           isFavorite: false
         }]}
         onSelectStop={vi.fn()}
+        onSelectVehicle={vi.fn()}
         onToggleFavorite={vi.fn()}
       />
     )
@@ -131,11 +138,41 @@ describe('RouteStopList', () => {
           isFavorite: false
         }]}
         onSelectStop={vi.fn()}
+        onSelectVehicle={vi.fn()}
         onToggleFavorite={vi.fn()}
       />
     )
 
     expect(screen.getByText('ABC-123')).toBeInTheDocument()
     expect(screen.getByText(estimateLabel)).toBeInTheDocument()
+  })
+
+  it('selects only the vehicle when clicking a plate badge', () => {
+    const handleSelectStop = vi.fn()
+    const handleSelectVehicle = vi.fn()
+    const handleToggleFavorite = vi.fn()
+
+    renderWithMantine(
+      <RouteStopList
+        stops={[{
+          estimatedArrivalLabel: null,
+          id: 'stop-1',
+          favoriteRouteStop,
+          name: '市政府',
+          realtimeBuses: [realtimeBus],
+          sequence: 1,
+          isFavorite: false
+        }]}
+        onSelectStop={handleSelectStop}
+        onSelectVehicle={handleSelectVehicle}
+        onToggleFavorite={handleToggleFavorite}
+      />
+    )
+
+    fireEvent.click(screen.getByText('ABC-123'))
+
+    expect(handleSelectVehicle).toHaveBeenCalledWith('bus-1')
+    expect(handleSelectStop).not.toHaveBeenCalled()
+    expect(handleToggleFavorite).not.toHaveBeenCalled()
   })
 })

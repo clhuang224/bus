@@ -31,6 +31,7 @@ export default function Route() {
   const { isFavoriteRouteStop, toggleFavoriteRouteStop } = useFavoriteRouteStops()
   const [activeTab, setActiveTab] = useState<string | null>(null)
   const [selectedStopId, setSelectedStopId] = useState<string | null>(null)
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null)
   const routeBaseOptions = city && isCityName(city) && id
     ? {
         activeTab,
@@ -110,18 +111,39 @@ export default function Route() {
     setSelectedStopId(null)
   }, [selectedStopId, timelineStops])
 
+  useEffect(() => {
+    if (!selectedVehicleId) return
+    if (realtimeMapVehicles.some((vehicle) => vehicle.id === selectedVehicleId)) return
+
+    setSelectedVehicleId(null)
+  }, [realtimeMapVehicles, selectedVehicleId])
+
   const handleSelectStopFromList = (stopId: string) => {
     setListScrollBehavior('nearest')
     setSelectedStopId(stopId)
+    setSelectedVehicleId(null)
 
     if (isSm) {
       closeSidebar()
     }
   }
 
+  const handleSelectVehicleFromList = (vehicleId: string) => {
+    setSelectedVehicleId(vehicleId)
+  }
+
+  const handleSelectVehicleFromMap = (vehicleId: string) => {
+    setListScrollBehavior('start')
+    setSelectedVehicleId(vehicleId)
+    setSelectedStopId(
+      timelineStops.find((stop) => stop.realtimeBuses.some((bus) => bus.id === vehicleId))?.id ?? null
+    )
+  }
+
   const handleSelectStopFromMap = (stopId: string | null) => {
     setListScrollBehavior('start')
     setSelectedStopId(stopId)
+    setSelectedVehicleId(null)
   }
 
   const handleBack = () => {
@@ -198,6 +220,7 @@ export default function Route() {
                     isRealtimeRateLimited={isRealtimeRateLimited}
                     listScrollBehavior={listScrollBehavior}
                     onSelectStop={handleSelectStopFromList}
+                    onSelectVehicle={handleSelectVehicleFromList}
                     realtimeInfoState={realtimeInfoState}
                     stops={timelineStops}
                     onToggleFavorite={toggleFavoriteRouteStop}
@@ -218,7 +241,9 @@ export default function Route() {
       <RouteMap
         highlightedStopId={highlightedStopId}
         selectedStop={selectedStopId}
+        selectedVehicleId={selectedVehicleId}
         onSelectStop={handleSelectStopFromMap}
+        onSelectVehicle={handleSelectVehicleFromMap}
         routePath={activeRoutePath}
         stops={routeMapStops}
         vehicles={realtimeMapVehicles}
