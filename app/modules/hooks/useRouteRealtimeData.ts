@@ -9,11 +9,21 @@ import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { formatEstimatedArrivalLabel, getRouteRealtimeBusStatuses } from '~/modules/utils/route/getRouteRealtimeBusStatuses'
-import { useDelay } from './useDelay'
 
 const REALTIME_POLLING_INTERVAL = 30000
 const REALTIME_INITIAL_DELAY_MS = 1200
 const REALTIME_RATE_LIMIT_BACKOFF_MS = 3000
+
+enum RealtimeQueryStatus {
+  IDLE,
+  WAITING,
+  READY
+}
+
+type RealtimeQueryState =
+  | { status: RealtimeQueryStatus.IDLE }
+  | { status: RealtimeQueryStatus.WAITING, waitMs: number }
+  | { status: RealtimeQueryStatus.READY }
 
 interface UseRouteRealtimeDataOptions {
   activeSubRoute: BusSubRoute<Date | null> | null
@@ -31,25 +41,40 @@ export function useRouteRealtimeData({
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
   const cityName = city as CityNameType
-  const shouldPrepareRealtimeQueries = Boolean(city && id && busRoute && activeSubRoute)
-  const [realtimeStartDelayMs, setRealtimeStartDelayMs] = useState<number | null>(null)
+  const hasRealtimeContext = Boolean(city && id && busRoute && activeSubRoute)
+  const [realtimeQueryState, setRealtimeQueryState] = useState<RealtimeQueryState>({
+    status: RealtimeQueryStatus.IDLE
+  })
   const hasAppliedRateLimitBackoff = useRef(false)
 
   useEffect(() => {
-    if (!shouldPrepareRealtimeQueries) {
-      setRealtimeStartDelayMs(null)
+    if (!hasRealtimeContext) {
+      setRealtimeQueryState({ status: RealtimeQueryStatus.IDLE })
       return
     }
 
-    setRealtimeStartDelayMs(REALTIME_INITIAL_DELAY_MS)
-  }, [activeSubRoute?.Direction, activeSubRoute?.SubRouteUID, busRoute, city, id, shouldPrepareRealtimeQueries])
+    setRealtimeQueryState({
+      status: RealtimeQueryStatus.WAITING,
+      waitMs: REALTIME_INITIAL_DELAY_MS
+    })
+  }, [activeSubRoute?.Direction, activeSubRoute?.SubRouteUID, busRoute, city, id, hasRealtimeContext])
 
-  const canStartRealtime = useDelay({
-    delayMs: realtimeStartDelayMs,
-    enabled: shouldPrepareRealtimeQueries
-  })
+  useEffect(() => {
+    if (realtimeQueryState.status !== RealtimeQueryStatus.WAITING) {
+      return
+    }
 
-  const shouldSkipRealtimeQueries = !shouldPrepareRealtimeQueries || !canStartRealtime
+    const timeoutId = window.setTimeout(() => {
+      setRealtimeQueryState({ status: RealtimeQueryStatus.READY })
+    }, realtimeQueryState.waitMs)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [realtimeQueryState])
+
+  const shouldSkipRealtimeQueries = !hasRealtimeContext ||
+    realtimeQueryState.status !== RealtimeQueryStatus.READY
 
   const {
     data: estimatedArrivals = [],
@@ -97,7 +122,10 @@ export function useRouteRealtimeData({
     }
 
     hasAppliedRateLimitBackoff.current = true
-    setRealtimeStartDelayMs(REALTIME_RATE_LIMIT_BACKOFF_MS)
+    setRealtimeQueryState({
+      status: RealtimeQueryStatus.WAITING,
+      waitMs: REALTIME_RATE_LIMIT_BACKOFF_MS
+    })
   }, [isRealtimeRateLimited])
 
   const directionMatchedEstimatedArrivals = useMemo(() => {
