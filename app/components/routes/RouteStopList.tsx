@@ -1,5 +1,5 @@
 import { ActionIcon, Alert, Badge, Box, Group, ScrollArea, Skeleton, Stack, Text, Timeline } from '@mantine/core'
-import { RiHeart2Fill, RiHeart2Line } from '@remixicon/react'
+import { RiBus2Fill, RiHeart2Fill, RiHeart2Line } from '@remixicon/react'
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getRouteRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
@@ -31,6 +31,7 @@ interface PropType {
   onSelectVehicle: (vehicleId: string) => void
   onToggleFavorite: (routeStop: FavoriteRouteStop) => void
   selectedStopId?: string | null
+  selectedVehicleId?: string | null
   stops: RouteStopListItem[]
 }
 
@@ -46,6 +47,7 @@ export const RouteStopList = ({
   onSelectVehicle,
   onToggleFavorite,
   selectedStopId = null,
+  selectedVehicleId = null,
   stops
 }: PropType) => {
   const { t } = useTranslation()
@@ -162,17 +164,23 @@ export const RouteStopList = ({
                               </Text>
                             )}
                           </Stack>
-                          <Group pr="sm" gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
+                            <Group pr="sm" gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
                             <Group gap="xs" wrap="wrap" justify="flex-end">
                               {stop.realtimeBuses.map((bus) => (
                                 <Badge
                                   key={bus.id}
                                   component="button"
                                   type="button"
+                                  aria-pressed={bus.id === selectedVehicleId}
                                   color="orange"
                                   variant="light"
-                                  size="sm"
-                                  style={{ cursor: 'pointer' }}
+                                  size="md"
+                                  radius="sm"
+                                  leftSection={<RiBus2Fill size="1em" />}
+                                  style={{
+                                    cursor: 'pointer',
+                                    fontWeight: bus.id === selectedVehicleId ? 700 : undefined
+                                  }}
                                   onClick={(event) => {
                                     event.stopPropagation()
                                     onSelectVehicle(bus.id)

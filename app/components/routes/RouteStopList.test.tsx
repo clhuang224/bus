@@ -175,4 +175,26 @@ describe('RouteStopList', () => {
     expect(handleSelectStop).not.toHaveBeenCalled()
     expect(handleToggleFavorite).not.toHaveBeenCalled()
   })
+
+  it('marks the selected vehicle badge as pressed', () => {
+    renderWithMantine(
+      <RouteStopList
+        stops={[{
+          estimatedArrivalLabel: null,
+          id: 'stop-1',
+          favoriteRouteStop,
+          name: '市政府',
+          realtimeBuses: [realtimeBus],
+          sequence: 1,
+          isFavorite: false
+        }]}
+        onSelectStop={vi.fn()}
+        onSelectVehicle={vi.fn()}
+        onToggleFavorite={vi.fn()}
+        selectedVehicleId="bus-1"
+      />
+    )
+
+    expect(screen.getByRole('button', { name: 'ABC-123' })).toHaveAttribute('aria-pressed', 'true')
+  })
 })

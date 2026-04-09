@@ -226,6 +226,7 @@ export default function Route() {
                     stops={timelineStops}
                     onToggleFavorite={toggleFavoriteRouteStop}
                     selectedStopId={selectedStopId}
+                    selectedVehicleId={selectedVehicleId}
                   />
                 </Tabs.Panel>
               ))}
