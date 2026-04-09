@@ -1,6 +1,6 @@
 import { ActionIcon, Flex, Stack, Tabs, Text, useMantineTheme } from '@mantine/core'
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { BaseAlert } from '~/components/common/BaseAlert'
@@ -118,7 +118,7 @@ export default function Route() {
     setSelectedVehicleId(null)
   }, [selectedVehicleId, timelineStops])
 
-  const handleSelectStopFromList = (stopId: string) => {
+  const handleSelectStopFromList = useCallback((stopId: string) => {
     setListScrollBehavior('nearest')
     setSelectedStopId(stopId)
     setSelectedVehicleId(null)
@@ -126,35 +126,35 @@ export default function Route() {
     if (isSm) {
       closeSidebar()
     }
-  }
+  }, [closeSidebar, isSm])
 
-  const handleSelectVehicleFromList = (vehicleId: string) => {
+  const handleSelectVehicleFromList = useCallback((vehicleId: string) => {
     setSelectedVehicleId(vehicleId)
     setSelectedStopId(null)
-  }
+  }, [])
 
-  const handleSelectVehicleFromMap = (vehicleId: string) => {
+  const handleSelectVehicleFromMap = useCallback((vehicleId: string) => {
     setListScrollBehavior('start')
     setSelectedVehicleId(vehicleId)
     setSelectedStopId(
       timelineStops.find((stop) => stop.realtimeBuses.some((bus) => bus.id === vehicleId))?.id ?? null
     )
-  }
+  }, [timelineStops])
 
-  const handleSelectStopFromMap = (stopId: string | null) => {
+  const handleSelectStopFromMap = useCallback((stopId: string | null) => {
     setListScrollBehavior('start')
     setSelectedStopId(stopId)
     setSelectedVehicleId(null)
-  }
+  }, [])
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     if ((window.history.state?.idx ?? 0) > 0) {
       navigate(-1)
       return
     }
 
     navigate('/routes')
-  }
+  }, [navigate])
 
   return (
     <MapSidebarLayout
