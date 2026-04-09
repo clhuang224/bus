@@ -93,6 +93,7 @@ export const NearbyStopMap = ({
     if (!marker) return
 
     const popup = new Popup({
+      closeButton: false,
       offset: 25,
       closeOnClick: false
     }).setLngLat(marker.getLngLat())
@@ -113,7 +114,6 @@ export const NearbyStopMap = ({
       if (!popupRef.current) return
       popupRef.current.remove()
       popupRef.current = null
-      setPopupContainer(null)
     }
   }, [map, markers, selectedStop, selectedStopPopupContent])
 

@@ -248,6 +248,7 @@ export const RouteMap = ({
       const container = document.createElement('div')
 
       const popup = new mapLibre.Popup({
+        closeButton: false,
         offset: 20,
         closeOnClick: false
       })
@@ -271,6 +272,7 @@ export const RouteMap = ({
     if (!marker) return
 
     const popup = new mapLibre.Popup({
+      closeButton: false,
       offset: 25,
       closeOnClick: false
     })
