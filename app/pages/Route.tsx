@@ -131,7 +131,11 @@ export default function Route() {
   const handleSelectVehicleFromList = useCallback((vehicleId: string) => {
     setSelectedVehicleId(vehicleId)
     setSelectedStopId(null)
-  }, [])
+
+    if (isSm) {
+      closeSidebar()
+    }
+  }, [closeSidebar, isSm])
 
   const handleSelectVehicleFromMap = useCallback((vehicleId: string) => {
     setListScrollBehavior('start')
