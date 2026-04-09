@@ -214,7 +214,7 @@ export const RouteMap = ({
       vehicleMarkerMap.current.set(vehicle.id, marker)
     })
 
-    if (positionedStops.length > 0 && !selectedStop) {
+    if (positionedStops.length > 0 && !selectedStop && !selectedVehicleId) {
       const bounds = positionedStops.reduce(
         (result, stop) => result.extend(stop.position),
         new mapLibre.LngLatBounds(positionedStops[0].position, positionedStops[0].position)
@@ -230,7 +230,7 @@ export const RouteMap = ({
     return () => {
       markerCleanupFns.forEach((cleanup) => cleanup())
     }
-  }, [highlightedStopId, isMapReady, map, onSelectStop, onSelectVehicle, positionedStops, routePath, selectedStop, t, vehicles])
+  }, [highlightedStopId, isMapReady, map, onSelectStop, onSelectVehicle, positionedStops, routePath, selectedStop, selectedVehicleId, t, vehicles])
 
   useEffect(() => {
     if (!map) return
