@@ -7,10 +7,7 @@ import type { EstimatedArrival } from '../../interfaces/EstimatedArrival'
 import type { RealtimeNearStop } from '../../interfaces/RealtimeNearStop'
 import type { RouteRealtimeBusStatus } from '../../interfaces/RouteRealtimeBusStatus'
 import { getLocalizedText } from '../i18n/getLocalizedText'
-
-function normalizePlateNumb(plateNumb: string) {
-  return plateNumb.trim().toUpperCase()
-}
+import { normalizePlateNumb } from './normalizePlateNumb'
 
 function getStopStatusLabel(t: TFunction, stopStatus: StopStatusType) {
   return t(stopStatusTranslationKeyMap[stopStatus])
@@ -111,7 +108,7 @@ export function getRouteRealtimeBusStatuses(
         estimateMinutes: matchedArrival?.EstimateTime != null
           ? Math.ceil(matchedArrival.EstimateTime / 60)
           : null,
-        id: realtimeBus.PlateNumb,
+        id: realtimePlateNumb,
         plateNumb: realtimeBus.PlateNumb,
         stopName: getLocalizedText(realtimeBus.StopName, locale),
         stopSequence: realtimeBus.StopSequence,

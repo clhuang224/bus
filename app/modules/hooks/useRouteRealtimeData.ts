@@ -9,6 +9,7 @@ import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { formatEstimatedArrivalLabel, getRouteRealtimeBusStatuses } from '~/modules/utils/route/getRouteRealtimeBusStatuses'
+import { normalizePlateNumb } from '~/modules/utils/route/normalizePlateNumb'
 
 const REALTIME_POLLING_INTERVAL = 30000
 const REALTIME_INITIAL_DELAY_MS = 1200
@@ -186,16 +187,17 @@ export function useRouteRealtimeData(options: UseRouteRealtimeDataOptions | null
   ), [activeEstimatedArrivals, activeRealtimeNearStops, locale, t])
   const realtimeMapVehicles = useMemo(() => {
     const realtimeStatusesByPlate = realtimeBusStatuses.reduce<Map<string, typeof realtimeBusStatuses[number]>>((result, realtimeBusStatus) => {
-      result.set(realtimeBusStatus.plateNumb, realtimeBusStatus)
+      result.set(normalizePlateNumb(realtimeBusStatus.plateNumb), realtimeBusStatus)
       return result
     }, new Map())
 
     return activeRealtimeByFrequency.map((realtimeVehicle) => {
-      const matchedStatus = realtimeStatusesByPlate.get(realtimeVehicle.PlateNumb)
+      const vehicleId = normalizePlateNumb(realtimeVehicle.PlateNumb)
+      const matchedStatus = realtimeStatusesByPlate.get(vehicleId)
 
       return {
         estimateLabel: matchedStatus?.estimateLabel ?? t('routePage.realtime.inService'),
-        id: realtimeVehicle.PlateNumb,
+        id: vehicleId,
         plateNumb: realtimeVehicle.PlateNumb,
         position: realtimeVehicle.position,
         stopName: matchedStatus?.stopName ?? t('components.routeMap.vehiclePopup.recentStopUnknown')
