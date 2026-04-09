@@ -326,14 +326,20 @@ export const RouteMap = ({
       />
       {popupContainer && selectedVehicle
         ? createPortal(
-          <Stack gap={4}>
-            <Text fw={700}>{selectedVehicle.plateNumb}</Text>
-            <Text size="sm">
-              {t('components.routeMap.vehiclePopup.recentStop')}: {selectedVehicle.stopName}
-            </Text>
-            <Text size="sm">
-              {t('components.routeMap.vehiclePopup.estimate')}: {selectedVehicle.estimateLabel}
-            </Text>
+          <Stack gap="xs">
+            <Text>{selectedVehicle.plateNumb}</Text>
+            <Stack gap={4}>
+              <Text size="sm" c="dimmed">
+                {t('components.routeMap.vehiclePopup.recentStop')}
+              </Text>
+              <Text size="sm">{selectedVehicle.stopName}</Text>
+            </Stack>
+            <Stack gap={4}>
+              <Text size="sm" c="dimmed">
+                {t('components.routeMap.vehiclePopup.estimate')}
+              </Text>
+              <Text size="sm">{selectedVehicle.estimateLabel}</Text>
+            </Stack>
           </Stack>,
           popupContainer
         )
