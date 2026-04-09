@@ -113,10 +113,10 @@ export default function Route() {
 
   useEffect(() => {
     if (!selectedVehicleId) return
-    if (realtimeMapVehicles.some((vehicle) => vehicle.id === selectedVehicleId)) return
+    if (timelineStops.some((stop) => stop.realtimeBuses.some((bus) => bus.id === selectedVehicleId))) return
 
     setSelectedVehicleId(null)
-  }, [realtimeMapVehicles, selectedVehicleId])
+  }, [selectedVehicleId, timelineStops])
 
   const handleSelectStopFromList = (stopId: string) => {
     setListScrollBehavior('nearest')
