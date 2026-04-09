@@ -1,41 +1,44 @@
+import type { A2EventType } from '../enums/A2EventType'
 import type { BusStatusType } from '../enums/BusStatusType'
 import type { CityNameType } from '../enums/CityNameType'
 import type { DirectionType } from '../enums/DirectionType'
 import type { DutyStatusType } from '../enums/DutyStatusType'
-import type { LngLat } from '../types/CoordsType'
+import type { MessageType } from '../enums/MessageType'
+import type { TripStartTimeType } from '../enums/TripStartTimeType'
 import type { LocalizedText, TdxLocalizedText } from '../types/LocalizedText'
 
-export interface TdxRealtimeNearStop<L = TdxLocalizedText> {
-  PlateNumb: string | null
-  OperatorID: string
-  RouteUID: string
-  RouteID: string
-  RouteName: L
-  SubRouteUID: string
-  SubRouteID: string
-  SubRouteName: L
+export interface TdxRealtimeNearStop<L = TdxLocalizedText, D = string> {
+  PlateNumb: string
+  OperatorID: string | null
+  OperatorNo?: string | null
+  RouteUID: string | null
+  RouteID: string | null
+  RouteName: L | null
+  SubRouteUID: string | null
+  SubRouteID: string | null
+  SubRouteName: L | null
   Direction: DirectionType
-  StopUID: string
-  StopID: string
-  StopName: L
+  StopUID: string | null
+  StopID: string | null
+  StopName: L | null
   StopSequence: number
-  DutyStatus: DutyStatusType
-  BusStatus: BusStatusType
-  A2EventType: number
-  GPSTime: string
-  SrcUpdateTime: string
-  UpdateTime: string
-  BusPosition?: {
-    PositionLon: number
-    PositionLat: number
-    GeoHash?: string | null
-  } | null
+  MessageType?: MessageType | null
+  DutyStatus: DutyStatusType | null
+  BusStatus: BusStatusType | null
+  A2EventType?: A2EventType | null
+  GPSTime: D
+  TripStartTimeType: TripStartTimeType
+  TripStartTime?: D | null
+  TransTime?: D | null
+  SrcRecTime?: D | null
+  SrcTransTime?: D | null
+  SrcUpdateTime?: D | null
+  UpdateTime: D
 }
 
-export interface RealtimeNearStop extends Omit<TdxRealtimeNearStop<LocalizedText>, 'RouteName' | 'SubRouteName' | 'StopName' | 'BusPosition'> {
+export interface RealtimeNearStop<D = string> extends Omit<TdxRealtimeNearStop<LocalizedText, D>, 'RouteName' | 'SubRouteName' | 'StopName'> {
   City: CityNameType
   RouteName: LocalizedText
   SubRouteName: LocalizedText
   StopName: LocalizedText
-  position: LngLat | null
 }

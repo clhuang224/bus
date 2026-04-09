@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { CityNameType } from '../../enums/CityNameType'
 import { DirectionType } from '../../enums/DirectionType'
-import { transformBusRoute, transformEstimatedArrival, transformRealtimeNearStop, transformStop } from './transformTdxBusData'
+import {
+  transformBusRoute,
+  transformEstimatedArrival,
+  transformRealtimeByFrequency,
+  transformRealtimeNearStop,
+  transformStop
+} from './transformTdxBusData'
 
 describe('transformTdxBusData', () => {
   it('falls back to route name when estimated arrival sub route name is missing', () => {
@@ -36,6 +42,7 @@ describe('transformTdxBusData', () => {
     expect(transformRealtimeNearStop({
       PlateNumb: 'ABC-123',
       OperatorID: 'operator-1',
+      OperatorNo: null,
       RouteUID: 'route-1',
       RouteID: 'route-1',
       RouteName: { Zh_tw: '藍1', En: 'Blue 1' },
@@ -47,17 +54,55 @@ describe('transformTdxBusData', () => {
       StopID: 'stop-1',
       StopName: { Zh_tw: '市政府', En: 'City Hall' },
       StopSequence: 1,
+      MessageType: 0,
       DutyStatus: 0,
       BusStatus: 0,
       A2EventType: 0,
       GPSTime: '2026-03-20T10:00:00+08:00',
+      TripStartTimeType: 0,
+      TripStartTime: null,
+      TransTime: null,
+      SrcRecTime: null,
+      SrcTransTime: null,
+      SrcUpdateTime: '2026-03-20T10:00:00+08:00',
+      UpdateTime: '2026-03-20T10:00:00+08:00'
+    }, CityNameType.TAIPEI)).toEqual(expect.objectContaining({
+      City: CityNameType.TAIPEI,
+      PlateNumb: 'ABC-123'
+    }))
+  })
+
+  it('transforms realtime by frequency entries into map-ready positions', () => {
+    expect(transformRealtimeByFrequency({
+      PlateNumb: 'ABC-123',
+      OperatorID: 'operator-1',
+      OperatorNo: null,
+      RouteUID: 'route-1',
+      RouteID: 'route-1',
+      RouteName: { Zh_tw: '藍1', En: 'Blue 1' },
+      SubRouteUID: 'subroute-1',
+      SubRouteID: 'subroute-1',
+      SubRouteName: { Zh_tw: '藍1', En: 'Blue 1' },
+      Direction: DirectionType.GO,
+      Speed: null,
+      Azimuth: null,
+      DutyStatus: 0,
+      BusStatus: 0,
+      MessageType: 0,
+      GPSTime: '2026-03-20T10:00:00+08:00',
+      TransTime: null,
+      SrcRecTime: null,
+      SrcTransTime: null,
       SrcUpdateTime: '2026-03-20T10:00:00+08:00',
       UpdateTime: '2026-03-20T10:00:00+08:00',
-      BusPosition: undefined as never
+      BusPosition: {
+        PositionLon: 121.56,
+        PositionLat: 25.04
+      }
     }, CityNameType.TAIPEI)).toEqual(expect.objectContaining({
       City: CityNameType.TAIPEI,
       PlateNumb: 'ABC-123',
-      position: null
+      position: [121.56, 25.04]
     }))
   })
 

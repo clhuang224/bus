@@ -116,14 +116,14 @@ export const en = {
       },
       routeStopList: {
         addFavoriteAriaLabel: 'Save route stop',
-        removeFavoriteAriaLabel: 'Remove saved route stop',
-        missingPlate: 'Plate unavailable'
+        removeFavoriteAriaLabel: 'Remove saved route stop'
       },
       routeMap: {
         stopMarkerAriaLabel: '{{stopName}}, stop {{sequence}}',
         vehicleMarkerAriaLabel: '{{plateNumb}}, recent stop {{stopName}}, estimated arrival {{estimateLabel}}',
         vehiclePopup: {
           recentStop: 'Recent stop',
+          recentStopUnknown: 'Unknown',
           estimate: 'Estimated arrival'
         }
       },

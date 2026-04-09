@@ -5,7 +5,7 @@
   "scripts": {
     "prepare": "husky",
     "build": "react-router build",
-    "dev": "pnpm run dev:proxy & pnpm run dev:app",
+    "dev": "concurrently -k -n proxy,app \"pnpm run dev:proxy\" \"pnpm run dev:app\"",
     "dev:app": "react-router dev",
     "dev:proxy": "wrangler dev --config workers/tdx-proxy/wrangler.jsonc --port 3000",
     "deploy:proxy": "wrangler deploy --config workers/tdx-proxy/wrangler.jsonc",
@@ -46,6 +46,7 @@
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@types/topojson-specification": "^1.0.5",
+    "concurrently": "^9.2.1",
     "eslint": "^9.31.0",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^16.3.0",

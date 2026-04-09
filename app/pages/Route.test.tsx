@@ -22,19 +22,23 @@ const routeRealtimeMessages = getRouteRealtimeMessages(t)
 const {
   mockToggleFavoriteRouteStop,
   mockUseGetEstimatedArrivalByRouteQuery,
+  mockUseGetRealtimeByFrequencyByRouteQuery,
   mockUseGetRealtimeNearStopsByRouteQuery,
   mockUseGetRouteShapesByRouteQuery,
   mockUseGetRoutesByCityQuery,
   mockUseGetStopOfRoutesByCityQuery,
-  mockUseGetStopsByCityQuery
+  mockUseGetStopsByCityQuery,
+  mockRouteMap
 } = vi.hoisted(() => ({
   mockToggleFavoriteRouteStop: vi.fn(),
   mockUseGetEstimatedArrivalByRouteQuery: vi.fn(),
+  mockUseGetRealtimeByFrequencyByRouteQuery: vi.fn(),
   mockUseGetRealtimeNearStopsByRouteQuery: vi.fn(),
   mockUseGetRouteShapesByRouteQuery: vi.fn(),
   mockUseGetRoutesByCityQuery: vi.fn(),
   mockUseGetStopOfRoutesByCityQuery: vi.fn(),
-  mockUseGetStopsByCityQuery: vi.fn()
+  mockUseGetStopsByCityQuery: vi.fn(),
+  mockRouteMap: vi.fn(() => <div>route-map</div>)
 }))
 
 vi.mock('~/components/common/MapSidebarLayout', () => ({
@@ -58,6 +62,7 @@ vi.mock('~/components/common/MapSidebarLayout', () => ({
 vi.mock('~/modules/apis/bus', () => ({
   busApi: {
     useGetEstimatedArrivalByRouteQuery: mockUseGetEstimatedArrivalByRouteQuery,
+    useGetRealtimeByFrequencyByRouteQuery: mockUseGetRealtimeByFrequencyByRouteQuery,
     useGetRealtimeNearStopsByRouteQuery: mockUseGetRealtimeNearStopsByRouteQuery,
     useGetRouteShapesByRouteQuery: mockUseGetRouteShapesByRouteQuery,
     useGetRoutesByCityQuery: mockUseGetRoutesByCityQuery,
@@ -67,7 +72,7 @@ vi.mock('~/modules/apis/bus', () => ({
 }))
 
 vi.mock('~/components/routes/RouteMap', () => ({
-  RouteMap: () => <div>route-map</div>
+  RouteMap: mockRouteMap
 }))
 
 vi.mock('~/components/common/AppBadge', () => ({
@@ -242,6 +247,34 @@ const realtimeNearStopsData = [
   }
 ]
 
+const realtimeByFrequencyData = [
+  {
+    PlateNumb: 'ABC-123',
+    OperatorID: 'operator-1',
+    OperatorNo: null,
+    RouteUID: 'route-1',
+    RouteID: 'route-1',
+    RouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
+    SubRouteUID: 'subroute-1',
+    SubRouteID: 'subroute-1',
+    SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
+    Direction: DirectionType.RETURN,
+    Speed: null,
+    Azimuth: null,
+    DutyStatus: 0,
+    BusStatus: 0,
+    MessageType: 0,
+    GPSTime: '2026-03-19T10:00:00+08:00',
+    TransTime: null,
+    SrcRecTime: null,
+    SrcTransTime: null,
+    SrcUpdateTime: '2026-03-19T10:00:00+08:00',
+    UpdateTime: '2026-03-19T10:00:00+08:00',
+    position: [121.58, 25.045] as [number, number],
+    City: CityNameType.TAIPEI
+  }
+]
+
 const targetFavoriteRouteStop: FavoriteRouteStop = {
   favoriteId: 'route-1-subroute-1-1-station-c',
   city: CityNameType.TAIPEI,
@@ -263,11 +296,13 @@ const targetFavoriteRouteStop: FavoriteRouteStop = {
 function resetRouteMocks() {
   mockToggleFavoriteRouteStop.mockReset()
   mockUseGetEstimatedArrivalByRouteQuery.mockReset()
+  mockUseGetRealtimeByFrequencyByRouteQuery.mockReset()
   mockUseGetRealtimeNearStopsByRouteQuery.mockReset()
   mockUseGetRouteShapesByRouteQuery.mockReset()
   mockUseGetRoutesByCityQuery.mockReset()
   mockUseGetStopOfRoutesByCityQuery.mockReset()
   mockUseGetStopsByCityQuery.mockReset()
+  mockRouteMap.mockClear()
 }
 
 function mockDefaultRouteQueries() {
@@ -298,6 +333,13 @@ function mockDefaultRouteQueries() {
 
   mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
     data: realtimeNearStopsData,
+    isError: false,
+    isLoading: false,
+    error: null
+  })
+
+  mockUseGetRealtimeByFrequencyByRouteQuery.mockReturnValue({
+    data: realtimeByFrequencyData,
     isError: false,
     isLoading: false,
     error: null
@@ -464,6 +506,117 @@ describe('Route', () => {
     await waitFor(() => {
       expect(screen.getByText(fourMinutesAwayLabel)).toBeInTheDocument()
       expect(screen.queryByText(routeRealtimeMessages.noRealtimeData.description)).not.toBeInTheDocument()
+    })
+  })
+
+  it('uses realtime by frequency positions for route map vehicles instead of near-stop positions', async () => {
+    mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
+      data: [{
+        ...realtimeNearStopsData[0],
+        position: null
+      }],
+      isError: false,
+      isLoading: false,
+      error: null
+    })
+
+    mockUseGetRealtimeByFrequencyByRouteQuery.mockReturnValue({
+      data: realtimeByFrequencyData,
+      isError: false,
+      isLoading: false,
+      error: null
+    })
+
+    renderRoutePage()
+
+    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
+
+    await waitFor(() => {
+      const latestCall = mockRouteMap.mock.calls[mockRouteMap.mock.calls.length - 1] as unknown as
+        | [{ vehicles: unknown[] }]
+        | undefined
+      const latestRouteMapProps = latestCall?.[0]
+
+      expect(latestRouteMapProps?.vehicles).toEqual([
+        expect.objectContaining({
+          plateNumb: 'ABC-123',
+          position: [121.58, 25.045]
+        })
+      ])
+    })
+  })
+
+  it('selects only the stop when choosing a stop title from the list', async () => {
+    renderRoutePage()
+
+    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
+
+    await waitFor(() => {
+      expect(screen.getByText(fourMinutesAwayLabel)).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByText('市政府'))
+
+    await waitFor(() => {
+      const latestCall = mockRouteMap.mock.calls[mockRouteMap.mock.calls.length - 1] as unknown as
+        | [{ selectedStop: string | null, selectedVehicleId: string | null }]
+        | undefined
+      const latestRouteMapProps = latestCall?.[0]
+
+      expect(latestRouteMapProps?.selectedStop).toBe('stop-c')
+      expect(latestRouteMapProps?.selectedVehicleId).toBeNull()
+    })
+  })
+
+  it('selects only the vehicle when clicking a realtime plate badge in the list', async () => {
+    renderRoutePage()
+
+    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('ABC-123')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByText('ABC-123'))
+
+    await waitFor(() => {
+      const latestCall = mockRouteMap.mock.calls[mockRouteMap.mock.calls.length - 1] as unknown as
+        | [{ selectedStop: string | null, selectedVehicleId: string | null }]
+        | undefined
+      const latestRouteMapProps = latestCall?.[0]
+
+      expect(latestRouteMapProps?.selectedStop).toBeNull()
+      expect(latestRouteMapProps?.selectedVehicleId).toBe('ABC-123')
+    })
+  })
+
+  it('selects the matching stop in the list when clicking a vehicle marker on the map', async () => {
+    renderRoutePage()
+
+    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
+
+    await waitFor(() => {
+      expect(mockRouteMap).toHaveBeenCalled()
+    })
+
+    const latestCall = mockRouteMap.mock.calls[mockRouteMap.mock.calls.length - 1] as unknown as
+      | [{
+        onSelectVehicle: (vehicleId: string) => void
+        selectedStop: string | null
+        selectedVehicleId: string | null
+      }]
+      | undefined
+
+    latestCall?.[0].onSelectVehicle('ABC-123')
+
+    await waitFor(() => {
+      const updatedCall = mockRouteMap.mock.calls[mockRouteMap.mock.calls.length - 1] as unknown as
+        | [{ selectedStop: string | null, selectedVehicleId: string | null }]
+        | undefined
+      const latestRouteMapProps = updatedCall?.[0]
+
+      expect(latestRouteMapProps?.selectedStop).toBe('stop-c')
+      expect(latestRouteMapProps?.selectedVehicleId).toBe('ABC-123')
     })
   })
 

@@ -3,6 +3,7 @@ import type { BusRoute, TdxBusRoute } from '../interfaces/BusRoute'
 import type { AreaType } from '../enums/AreaType'
 import type { CityNameType } from '../enums/CityNameType'
 import type { EstimatedArrival, TdxEstimatedArrival } from '../interfaces/EstimatedArrival'
+import type { RealtimeByFrequency, TdxRealtimeByFrequency } from '../interfaces/RealtimeByFrequency'
 import type { RealtimeNearStop, TdxRealtimeNearStop } from '../interfaces/RealtimeNearStop'
 import type { RouteShape, TdxRouteShape } from '../interfaces/RouteShape'
 import type { StopOfRoute, TdxStopOfRoute } from '../interfaces/StopOfRoute'
@@ -15,6 +16,7 @@ import { buildNearbyStopOfRouteQuery, buildNearbyStopQuery } from '../utils/geo/
 import {
   transformBusRoute,
   transformEstimatedArrival,
+  transformRealtimeByFrequency,
   transformRealtimeNearStop,
   transformRouteShape,
   transformStops,
@@ -147,6 +149,12 @@ export const busApi = createApi({
       transformResponse: (res: TdxRealtimeNearStop[], _meta, { city }) =>
         res.map((realtimeNearStop) => transformRealtimeNearStop(realtimeNearStop, city))
     }),
+    getRealtimeByFrequencyByRoute: build.query<RealtimeByFrequency[], { city: CityNameType, routeUID: string }>({
+      query: ({ city, routeUID }) =>
+        `/RealTimeByFrequency/City/${city}?%24filter=RouteUID%20eq%20'${routeUID}'&%24format=JSON`,
+      transformResponse: (res: TdxRealtimeByFrequency[], _meta, { city }) =>
+        res.map((realtimeByFrequency) => transformRealtimeByFrequency(realtimeByFrequency, city))
+    }),
     getRouteShapesByRoute: build.query<RouteShape[], { city: CityNameType, routeUID: string }>({
       query: ({ city, routeUID }) => `/Shape/City/${city}?%24filter=RouteUID%20eq%20'${routeUID}'&%24format=JSON`,
       transformResponse: (res: TdxRouteShape[], _meta, { city }) =>
@@ -157,6 +165,7 @@ export const busApi = createApi({
 
 export const {
   useGetEstimatedArrivalByRouteQuery,
+  useGetRealtimeByFrequencyByRouteQuery,
   useGetRealtimeNearStopsByRouteQuery,
   useGetRouteShapesByRouteQuery,
   useGetRoutesByCityQuery,

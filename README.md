@@ -31,7 +31,7 @@ The Route page combines stop lists, map interaction, and real-time transit data.
 - The stop list and map stay in sync: selecting a stop in one view updates the other.
 - Each stop shows stop-level ETA based directly on `EstimatedTimeOfArrival` when upstream ETA data is available.
 - Real-time vehicle plates are shown as separate location cues in the stop list and do not define the stop ETA.
-- Real-time buses are displayed on the route map when live vehicle data is available.
+- Route map vehicle markers use live GPS coordinates from `RealTimeByFrequency` when upstream realtime position data is available.
 - The app shows real-time status messaging such as temporary data issues or non-operating service periods.
 
 ### Nearby Stops
@@ -121,7 +121,7 @@ The app uses TDX data for:
 
 - route search and route detail lookups
 - stop and station discovery for nearby views
-- stop-level ETA and realtime vehicle location
+- stop-level ETA, near-stop vehicle cues, and live map vehicle positions
 - official route shape rendering on maps
 
 Current endpoint usage:
@@ -132,7 +132,8 @@ Current endpoint usage:
 | `/StopOfRoute/City/:city` | route stop lists and nearby route relationships |
 | `/Stop/City/:city` | nearby stop discovery and map stop positions |
 | `/EstimatedTimeOfArrival/City/:city` | stop-level ETA |
-| `/RealTimeNearStop/City/:city` | realtime vehicle positions and stop-list vehicle cues |
+| `/RealTimeNearStop/City/:city` | stop-list vehicle cues and near-stop status |
+| `/RealTimeByFrequency/City/:city` | route map vehicle GPS positions |
 | `/Shape/City/:city` | route map path rendering |
 
 Realtime data is best-effort and may be temporarily unavailable when the shared proxy-backed key hits upstream rate limits.

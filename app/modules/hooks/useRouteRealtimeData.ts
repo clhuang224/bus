@@ -9,6 +9,7 @@ import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { formatEstimatedArrivalLabel, getRouteRealtimeBusStatuses } from '~/modules/utils/route/getRouteRealtimeBusStatuses'
+import { normalizePlateNumb } from '~/modules/utils/route/normalizePlateNumb'
 
 const REALTIME_POLLING_INTERVAL = 30000
 const REALTIME_INITIAL_DELAY_MS = 1200
@@ -90,6 +91,17 @@ export function useRouteRealtimeData(options: UseRouteRealtimeDataOptions | null
     }
   )
   const {
+    data: realtimeByFrequency = []
+  } = busApi.useGetRealtimeByFrequencyByRouteQuery(
+    realtimeQueryArgs,
+    {
+      skip: skipRealtime,
+      pollingInterval: REALTIME_POLLING_INTERVAL,
+      skipPollingIfUnfocused: true,
+      refetchOnReconnect: true
+    }
+  )
+  const {
     data: realtimeNearStops = [],
     error: realtimeNearStopsError,
     isError: isRealtimeNearStopsError,
@@ -108,7 +120,8 @@ export function useRouteRealtimeData(options: UseRouteRealtimeDataOptions | null
     { skip: skipRealtime }
   )
 
-  const isRealtimeRateLimited = isTdxRateLimitError(estimatedArrivalsError) || isTdxRateLimitError(realtimeNearStopsError)
+  const isRealtimeRateLimited = isTdxRateLimitError(estimatedArrivalsError) ||
+    isTdxRateLimitError(realtimeNearStopsError)
 
   useEffect(() => {
     if (!isRealtimeRateLimited) {
@@ -160,6 +173,11 @@ export function useRouteRealtimeData(options: UseRouteRealtimeDataOptions | null
     realtimeNearStop.SubRouteUID === activeSubRoute?.SubRouteUID &&
     realtimeNearStop.Direction === activeSubRoute?.Direction
   ), [activeSubRoute, realtimeNearStops])
+  const activeRealtimeByFrequency = useMemo(() => realtimeByFrequency.filter((realtimeVehicle) =>
+    realtimeVehicle.SubRouteUID === activeSubRoute?.SubRouteUID &&
+    realtimeVehicle.Direction === activeSubRoute?.Direction &&
+    realtimeVehicle.position != null
+  ) as Array<(typeof realtimeByFrequency)[number] & { position: NonNullable<(typeof realtimeByFrequency)[number]['position']> }>, [activeSubRoute, realtimeByFrequency])
 
   const realtimeBusStatuses = useMemo(() => getRouteRealtimeBusStatuses(
     t,
@@ -167,6 +185,25 @@ export function useRouteRealtimeData(options: UseRouteRealtimeDataOptions | null
     activeRealtimeNearStops,
     activeEstimatedArrivals
   ), [activeEstimatedArrivals, activeRealtimeNearStops, locale, t])
+  const realtimeMapVehicles = useMemo(() => {
+    const realtimeStatusesByPlate = realtimeBusStatuses.reduce<Map<string, typeof realtimeBusStatuses[number]>>((result, realtimeBusStatus) => {
+      result.set(normalizePlateNumb(realtimeBusStatus.plateNumb), realtimeBusStatus)
+      return result
+    }, new Map())
+
+    return activeRealtimeByFrequency.map((realtimeVehicle) => {
+      const vehicleId = normalizePlateNumb(realtimeVehicle.PlateNumb)
+      const matchedStatus = realtimeStatusesByPlate.get(vehicleId)
+
+      return {
+        estimateLabel: matchedStatus?.estimateLabel ?? t('routePage.realtime.inService'),
+        id: vehicleId,
+        plateNumb: realtimeVehicle.PlateNumb,
+        position: realtimeVehicle.position,
+        stopName: matchedStatus?.stopName ?? t('components.routeMap.vehiclePopup.recentStopUnknown')
+      }
+    })
+  }, [activeRealtimeByFrequency, realtimeBusStatuses, t])
 
   const realtimeBusesByStopSequence = useMemo(() => {
     return realtimeBusStatuses.reduce<Map<number, typeof realtimeBusStatuses>>((result, realtimeBus) => {
@@ -270,6 +307,7 @@ export function useRouteRealtimeData(options: UseRouteRealtimeDataOptions | null
     hasRealtimeError,
     isRealtimeLoading: isEstimatedArrivalsLoading || isRealtimeNearStopsLoading,
     isRealtimeRateLimited,
+    realtimeMapVehicles,
     realtimeBusesByStopSequence,
     realtimeBusStatuses,
     realtimeInfoState

@@ -1,6 +1,6 @@
 import { ActionIcon, Flex, Stack, Tabs, Text, useMantineTheme } from '@mantine/core'
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { BaseAlert } from '~/components/common/BaseAlert'
@@ -31,6 +31,7 @@ export default function Route() {
   const { isFavoriteRouteStop, toggleFavoriteRouteStop } = useFavoriteRouteStops()
   const [activeTab, setActiveTab] = useState<string | null>(null)
   const [selectedStopId, setSelectedStopId] = useState<string | null>(null)
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null)
   const routeBaseOptions = city && isCityName(city) && id
     ? {
         activeTab,
@@ -66,8 +67,8 @@ export default function Route() {
     hasRealtimeError,
     isRealtimeLoading,
     isRealtimeRateLimited,
+    realtimeMapVehicles,
     realtimeBusesByStopSequence,
-    realtimeBusStatuses,
     realtimeInfoState
   } = useRouteRealtimeData(routeRealtimeOptions)
   const timelineStops = useMemo(() => baseTimelineStops.map((stop) => ({
@@ -110,28 +111,54 @@ export default function Route() {
     setSelectedStopId(null)
   }, [selectedStopId, timelineStops])
 
-  const handleSelectStopFromList = (stopId: string) => {
+  useEffect(() => {
+    if (!selectedVehicleId) return
+    if (timelineStops.some((stop) => stop.realtimeBuses.some((bus) => bus.id === selectedVehicleId))) return
+
+    setSelectedVehicleId(null)
+  }, [selectedVehicleId, timelineStops])
+
+  const handleSelectStopFromList = useCallback((stopId: string) => {
     setListScrollBehavior('nearest')
     setSelectedStopId(stopId)
+    setSelectedVehicleId(null)
 
     if (isSm) {
       closeSidebar()
     }
-  }
+  }, [closeSidebar, isSm])
 
-  const handleSelectStopFromMap = (stopId: string | null) => {
+  const handleSelectVehicleFromList = useCallback((vehicleId: string) => {
+    setSelectedVehicleId(vehicleId)
+    setSelectedStopId(null)
+
+    if (isSm) {
+      closeSidebar()
+    }
+  }, [closeSidebar, isSm])
+
+  const handleSelectVehicleFromMap = useCallback((vehicleId: string) => {
+    setListScrollBehavior('start')
+    setSelectedVehicleId(vehicleId)
+    setSelectedStopId(
+      timelineStops.find((stop) => stop.realtimeBuses.some((bus) => bus.id === vehicleId))?.id ?? null
+    )
+  }, [timelineStops])
+
+  const handleSelectStopFromMap = useCallback((stopId: string | null) => {
     setListScrollBehavior('start')
     setSelectedStopId(stopId)
-  }
+    setSelectedVehicleId(null)
+  }, [])
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     if ((window.history.state?.idx ?? 0) > 0) {
       navigate(-1)
       return
     }
 
     navigate('/routes')
-  }
+  }, [navigate])
 
   return (
     <MapSidebarLayout
@@ -198,10 +225,12 @@ export default function Route() {
                     isRealtimeRateLimited={isRealtimeRateLimited}
                     listScrollBehavior={listScrollBehavior}
                     onSelectStop={handleSelectStopFromList}
+                    onSelectVehicle={handleSelectVehicleFromList}
                     realtimeInfoState={realtimeInfoState}
                     stops={timelineStops}
                     onToggleFavorite={toggleFavoriteRouteStop}
                     selectedStopId={selectedStopId}
+                    selectedVehicleId={selectedVehicleId}
                   />
                 </Tabs.Panel>
               ))}
@@ -218,20 +247,12 @@ export default function Route() {
       <RouteMap
         highlightedStopId={highlightedStopId}
         selectedStop={selectedStopId}
+        selectedVehicleId={selectedVehicleId}
         onSelectStop={handleSelectStopFromMap}
+        onSelectVehicle={handleSelectVehicleFromMap}
         routePath={activeRoutePath}
         stops={routeMapStops}
-        vehicles={realtimeBusStatuses.flatMap((bus) => (
-          bus.position == null
-            ? []
-            : [{
-                id: bus.id,
-                estimateLabel: bus.estimateLabel,
-                plateNumb: bus.plateNumb,
-                position: bus.position,
-                stopName: bus.stopName
-              }]
-        ))}
+        vehicles={realtimeMapVehicles}
       />
     </MapSidebarLayout>
   )

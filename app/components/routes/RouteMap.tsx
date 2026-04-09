@@ -1,6 +1,8 @@
+import { Stack, Text } from '@mantine/core'
 import type { Map as MapLibreMap, Marker, Popup } from 'maplibre-gl'
 import mapLibre from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import type { LngLat, LatLng } from '~/modules/types/CoordsType'
 import { addMapMarkerActivationListeners } from '~/modules/utils/map/addMapMarkerActivationListeners'
@@ -17,7 +19,7 @@ export interface RouteMapStop {
 export interface RouteMapVehicle {
   id: string
   estimateLabel: string
-  plateNumb: string | null
+  plateNumb: string
   position: LngLat
   stopName: string
 }
@@ -25,8 +27,10 @@ export interface RouteMapVehicle {
 interface PropType {
   highlightedStopId?: string | null
   onSelectStop: (stopId: string | null) => void
+  onSelectVehicle: (vehicleId: string) => void
   routePath?: LngLat[]
   selectedStop: string | null
+  selectedVehicleId?: string | null
   stops: RouteMapStop[]
   vehicles?: RouteMapVehicle[]
 }
@@ -49,14 +53,17 @@ function removeRouteLine(map: MapLibreMap) {
 export const RouteMap = ({
   highlightedStopId = null,
   onSelectStop,
+  onSelectVehicle,
   routePath = [],
   selectedStop,
+  selectedVehicleId = null,
   stops,
   vehicles = []
 }: PropType) => {
   const { t } = useTranslation()
   const [map, setMap] = useState<MapLibreMap | null>(null)
   const [isMapReady, setIsMapReady] = useState(false)
+  const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(null)
   const markerMap = useRef<Map<string, Marker>>(new Map())
   const popupRef = useRef<Popup | null>(null)
   const vehicleMarkerMap = useRef<Map<string, Marker>>(new Map())
@@ -65,6 +72,11 @@ export const RouteMap = ({
     () => stops.filter((stop): stop is RouteMapStop & { position: LngLat } => stop.position != null),
     [stops]
   )
+  const vehiclesById = useMemo(
+    () => new Map(vehicles.map((vehicle) => [vehicle.id, vehicle])),
+    [vehicles]
+  )
+  const selectedVehicle = selectedVehicleId ? vehiclesById.get(selectedVehicleId) ?? null : null
 
   const center = positionedStops[0]
     ? [positionedStops[0].position[1], positionedStops[0].position[0]] as LatLng
@@ -170,17 +182,12 @@ export const RouteMap = ({
 
     vehicles.forEach((vehicle) => {
       const vehicleLabel = t('components.routeMap.vehicleMarkerAriaLabel', {
-        plateNumb: vehicle.plateNumb ?? t('components.routeStopList.missingPlate'),
+        plateNumb: vehicle.plateNumb,
         stopName: vehicle.stopName,
         estimateLabel: vehicle.estimateLabel
       })
       const el = createMapMarkerElement({
         ariaLabel: vehicleLabel,
-        datasetLabel: [
-          vehicle.plateNumb ?? t('components.routeStopList.missingPlate'),
-          `${t('components.routeMap.vehiclePopup.recentStop')}: ${vehicle.stopName}`,
-          `${t('components.routeMap.vehiclePopup.estimate')}: ${vehicle.estimateLabel}`
-        ].join('\n'),
         interactive: true,
         textContent: '🚌',
         type: 'vehicle'
@@ -189,21 +196,7 @@ export const RouteMap = ({
       const handleOpenVehiclePopup = (event: MouseEvent | KeyboardEvent) => {
         event.preventDefault()
         event.stopPropagation()
-
-        if (popupRef.current) {
-          popupRef.current.remove()
-          popupRef.current = null
-        }
-
-        const popup = new mapLibre.Popup({
-          offset: 20,
-          closeOnClick: false
-        })
-          .setLngLat(vehicle.position)
-          .setText(el.dataset.label || '')
-          .addTo(map)
-
-        popupRef.current = popup
+        onSelectVehicle(vehicle.id)
 
         map.flyTo({
           center: vehicle.position,
@@ -221,7 +214,7 @@ export const RouteMap = ({
       vehicleMarkerMap.current.set(vehicle.id, marker)
     })
 
-    if (positionedStops.length > 0 && !selectedStop) {
+    if (positionedStops.length > 0 && !selectedStop && !selectedVehicleId) {
       const bounds = positionedStops.reduce(
         (result, stop) => result.extend(stop.position),
         new mapLibre.LngLatBounds(positionedStops[0].position, positionedStops[0].position)
@@ -237,22 +230,49 @@ export const RouteMap = ({
     return () => {
       markerCleanupFns.forEach((cleanup) => cleanup())
     }
-  }, [highlightedStopId, isMapReady, map, onSelectStop, positionedStops, routePath, selectedStop, t, vehicles])
+  }, [highlightedStopId, isMapReady, map, onSelectStop, onSelectVehicle, positionedStops, routePath, selectedStop, selectedVehicleId, t, vehicles])
 
   useEffect(() => {
-    if (!map || !markerMap.current.size) return
+    if (!map) return
 
     if (popupRef.current) {
       popupRef.current.remove()
       popupRef.current = null
     }
+    setPopupContainer(null)
 
-    if (!selectedStop) return
+    if (selectedVehicleId) {
+      const selectedVehicle = vehiclesById.get(selectedVehicleId)
+      if (!selectedVehicle) return
+
+      const container = document.createElement('div')
+
+      const popup = new mapLibre.Popup({
+        closeButton: false,
+        offset: 20,
+        closeOnClick: false
+      })
+        .setLngLat(selectedVehicle.position)
+        .setDOMContent(container)
+        .addTo(map)
+
+      popupRef.current = popup
+      setPopupContainer(container)
+
+      return () => {
+        if (!popupRef.current) return
+        popupRef.current.remove()
+        popupRef.current = null
+      }
+    }
+
+    if (!markerMap.current.size || !selectedStop) return
 
     const marker = markerMap.current.get(selectedStop)
     if (!marker) return
 
     const popup = new mapLibre.Popup({
+      closeButton: false,
       offset: 25,
       closeOnClick: false
     })
@@ -267,10 +287,25 @@ export const RouteMap = ({
       popupRef.current.remove()
       popupRef.current = null
     }
-  }, [map, selectedStop])
+  }, [map, selectedStop, selectedVehicleId, vehiclesById])
 
   useEffect(() => {
-    if (!map || !selectedStop) return
+    if (!map) return
+
+    if (selectedVehicleId) {
+      const selectedVehicleMarker = vehicleMarkerMap.current.get(selectedVehicleId)
+      if (!selectedVehicleMarker) return
+
+      map.flyTo({
+        center: selectedVehicleMarker.getLngLat(),
+        zoom: 16,
+        duration: 800
+      })
+
+      return
+    }
+
+    if (!selectedStop) return
 
     const marker = markerMap.current.get(selectedStop)
     if (!marker) return
@@ -280,7 +315,7 @@ export const RouteMap = ({
       zoom: 16,
       duration: 800
     })
-  }, [map, selectedStop])
+  }, [map, selectedStop, selectedVehicleId])
 
   return (
     <>
@@ -289,6 +324,26 @@ export const RouteMap = ({
         zoom={13}
         onLoad={setMap}
       />
+      {popupContainer && selectedVehicle
+        ? createPortal(
+          <Stack gap="xs">
+            <Text>{selectedVehicle.plateNumb}</Text>
+            <Stack gap={4}>
+              <Text size="sm" c="dimmed">
+                {t('components.routeMap.vehiclePopup.recentStop')}
+              </Text>
+              <Text size="sm">{selectedVehicle.stopName}</Text>
+            </Stack>
+            <Stack gap={4}>
+              <Text size="sm" c="dimmed">
+                {t('components.routeMap.vehiclePopup.estimate')}
+              </Text>
+              <Text size="sm">{selectedVehicle.estimateLabel}</Text>
+            </Stack>
+          </Stack>,
+          popupContainer
+        )
+        : null}
     </>
   )
 }

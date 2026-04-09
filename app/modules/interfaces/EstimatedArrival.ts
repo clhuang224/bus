@@ -1,5 +1,6 @@
 import type { CityNameType } from '../enums/CityNameType'
 import type { DirectionType } from '../enums/DirectionType'
+import type { MessageType } from '../enums/MessageType'
 import type { StopStatusType } from '../enums/StopStatusType'
 import type { LocalizedText, TdxLocalizedText } from '../types/LocalizedText'
 
@@ -18,7 +19,7 @@ export interface TdxEstimatedArrival<L = TdxLocalizedText> {
   StopSequence?: number | null
   EstimateTime: number | null
   StopStatus?: StopStatusType | null
-  MessageType?: number | null
+  MessageType?: MessageType | null
   NextBusTime?: string | null
   SrcUpdateTime?: string | null
   UpdateTime: string
