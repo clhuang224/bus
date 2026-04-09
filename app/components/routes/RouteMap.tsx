@@ -262,7 +262,6 @@ export const RouteMap = ({
         if (!popupRef.current) return
         popupRef.current.remove()
         popupRef.current = null
-        setPopupContainer(null)
       }
     }
 
@@ -285,7 +284,6 @@ export const RouteMap = ({
       if (!popupRef.current) return
       popupRef.current.remove()
       popupRef.current = null
-      setPopupContainer(null)
     }
   }, [map, selectedStop, selectedVehicleId, vehiclesById])
 
