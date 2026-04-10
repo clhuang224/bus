@@ -13,7 +13,7 @@ export interface CityGeoState {
 }
 
 const CITY_BOUNDARY_MISSING_COUNTIES_ERROR = 'City boundary TopoJSON is missing objects.counties.'
-const CITY_BOUNDARY_INVALID_FEATURE_COLLECTION_ERROR = 'City boundary TopoJSON is not a FeatureCollection.'
+const CITY_BOUNDARY_INVALID_FEATURE_COLLECTION_ERROR = 'Converted city boundary GeoJSON is not a FeatureCollection.'
 const CITY_BOUNDARY_CACHE_MISS_ERROR = 'City boundary cache miss.'
 const CITY_BOUNDARY_ASSET_LOAD_ERROR = 'Failed to load city boundary asset.'
 export const CITY_BOUNDARY_LOAD_ERROR = 'Failed to load city boundary data.'
