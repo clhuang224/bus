@@ -7,8 +7,10 @@ import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
 import { useScrollSelectedItem } from '~/modules/hooks/useScrollSelectedItem'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeBusStatus'
+import { VehicleStateType } from '~/modules/enums/VehicleStateType'
 import { SkeletonList } from '../common/SkeletonList'
 import { RouteRealtimeBadge } from './RouteRealtimeBadge'
+import { RouteRealtimeGap } from './RouteRealtimeGap'
 
 export interface RouteStopListItem {
   estimatedArrivalLabel: string | null
@@ -96,9 +98,13 @@ export const RouteStopList = ({
             )
           : (
             <Timeline active={-1} bulletSize={28} lineWidth={2}>
-              {stops.map((stop) => {
+              {stops.map((stop, stopIndex) => {
                 const isHighlighted = stop.id === highlightedStopId
                 const isSelected = stop.id === selectedStopId
+                const nextStop = stops[stopIndex + 1]
+                const stopLevelRealtimeBuses = stop.realtimeBuses.filter((bus) => bus.vehicleState == null)
+                const departedBuses = stop.realtimeBuses.filter((bus) => bus.vehicleState === VehicleStateType.DEPARTED)
+                const arrivingBuses = nextStop?.realtimeBuses.filter((bus) => bus.vehicleState === VehicleStateType.ARRIVING) ?? []
 
                 return (
                   <Timeline.Item
@@ -167,12 +173,11 @@ export const RouteStopList = ({
                           </Stack>
                             <Group pr="sm" gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
                             <Group gap="xs" wrap="wrap" justify="flex-end">
-                              {stop.realtimeBuses.map((bus) => (
+                              {stopLevelRealtimeBuses.map((bus) => (
                                 <RouteRealtimeBadge
                                   key={bus.id}
                                   isSelected={bus.id === selectedVehicleId}
                                   plateNumb={bus.plateNumb}
-                                  vehicleState={bus.vehicleState}
                                   onClick={(event) => {
                                     event.stopPropagation()
                                     onSelectVehicle(bus.id)
@@ -199,6 +204,14 @@ export const RouteStopList = ({
                       </Box>
                     )}
                   >
+                    {nextStop && (
+                      <RouteRealtimeGap
+                        arrivingBuses={arrivingBuses}
+                        departedBuses={departedBuses}
+                        onSelectVehicle={onSelectVehicle}
+                        selectedVehicleId={selectedVehicleId}
+                      />
+                    )}
                   </Timeline.Item>
                 )
               })}
