@@ -2,8 +2,7 @@ import { Box, Group } from '@mantine/core'
 import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeBusStatus'
 import { RouteRealtimeBadge } from './RouteRealtimeBadge'
 
-const ROUTE_STOP_FAVORITE_ACTION_WIDTH = 36
-const ROUTE_STOP_FAVORITE_ACTION_OFFSET = `calc(${ROUTE_STOP_FAVORITE_ACTION_WIDTH / 16}rem * var(--mantine-scale) + var(--mantine-spacing-xs))`
+const ROUTE_STOP_FAVORITE_ACTION_OFFSET = 'calc(var(--ai-size-md) + var(--mantine-spacing-xs))'
 
 interface PropType {
   realtimeBuses: RouteRealtimeBusStatus[]

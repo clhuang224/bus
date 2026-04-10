@@ -285,7 +285,7 @@ describe('RouteStopList', () => {
     expect(screen.getByText('ABC-123').closest('[data-testid="route-realtime-gap-badges"]')).toBeInTheDocument()
     expect(screen.getByTestId('route-realtime-gap')).toHaveStyle('padding-right: var(--mantine-spacing-sm)')
     expect(screen.getByTestId('route-realtime-gap-badges')).toHaveStyle(
-      'padding-right: calc(2.25rem * var(--mantine-scale) + var(--mantine-spacing-xs))'
+      'padding-right: calc(var(--ai-size-md) + var(--mantine-spacing-xs))'
     )
   })
 
