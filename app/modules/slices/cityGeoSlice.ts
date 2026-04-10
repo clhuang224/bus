@@ -39,7 +39,14 @@ const cityGeoSlice = createSlice({
 export const { setGeoJSON, setLoading, setError } = cityGeoSlice.actions
 
 export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
-  dispatch(setLoading(true))
+  const cachedCityGeo = await readCityGeoCache()
+
+  if (cachedCityGeo) {
+    dispatch(setGeoJSON(cachedCityGeo.geojson))
+  } else {
+    dispatch(setLoading(true))
+  }
+
   try {
     const url = 'https://cdn.jsdelivr.net/npm/taiwan-atlas/counties-10t.json'
     const res = await fetch(url)
@@ -57,10 +64,8 @@ export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
     }
   } catch (err) {
     console.error('fetchCityGeoJSON error:', err)
-    const backup = await readCityGeoCache()
-    if (backup) {
-      dispatch(setGeoJSON(backup.geojson))
-      dispatch(setError('Failed to fetch city GeoJSON API. Using cached backup data.'))
+
+    if (cachedCityGeo) {
       return
     }
 

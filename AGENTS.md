@@ -523,6 +523,8 @@ When making changes in this repository:
 - choose readability over clever abstraction
 - if a useful cleanup or follow-up is small enough to complete safely in the current task, prefer doing it directly instead of recording it as future todo work
 
+Prefer naming that matches the actual runtime behavior. For client-side cache bootstrap flows such as reading IndexedDB or localStorage and populating app state on startup, avoid `hydrate` / `hydration` wording by default, since that can be confused with SSR or store rehydration. Prefer names such as `load...FromCache`, `restore...FromCache`, or `initialize...FromCache` unless the code is truly about SSR hydration or a formal rehydration mechanism.
+
 If a new pattern is introduced, it should make the surrounding code easier for the next person to navigate, not just shorter.
 
 Use file length as a readability signal. When a file approaches or exceeds roughly `300` lines, pause and evaluate whether a clearly named component, hook, or utility should be extracted.
