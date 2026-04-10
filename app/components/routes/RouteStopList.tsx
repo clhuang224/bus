@@ -105,7 +105,7 @@ export const RouteStopList = ({
                 const nextStop = stops[stopIndex + 1]
                 const isLastStop = nextStop == null
                 const stopLevelRealtimeBuses = stop.realtimeBuses.filter((bus) =>
-                  bus.vehicleState == VehicleStateType.AT_STOP ||
+                  bus.vehicleState === VehicleStateType.AT_STOP ||
                   (isFirstStop && bus.vehicleState === VehicleStateType.ARRIVING) ||
                   (isLastStop && bus.vehicleState === VehicleStateType.DEPARTED)
                 )
