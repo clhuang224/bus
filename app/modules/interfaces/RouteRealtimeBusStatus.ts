@@ -1,4 +1,5 @@
 import type { DirectionType } from '../enums/DirectionType'
+import type { VehicleStateType } from '../enums/VehicleStateType'
 
 export interface RouteRealtimeBusStatus {
   direction: DirectionType
@@ -9,4 +10,5 @@ export interface RouteRealtimeBusStatus {
   stopName: string
   stopSequence: number
   subRouteUID: string
+  vehicleState: VehicleStateType
 }

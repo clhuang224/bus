@@ -1,5 +1,5 @@
-import { ActionIcon, Alert, Badge, Box, Group, ScrollArea, Skeleton, Stack, Text, Timeline } from '@mantine/core'
-import { RiBus2Fill, RiHeart2Fill, RiHeart2Line } from '@remixicon/react'
+import { ActionIcon, Alert, Box, Group, ScrollArea, Skeleton, Stack, Text, Timeline } from '@mantine/core'
+import { RiHeart2Fill, RiHeart2Line } from '@remixicon/react'
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getRouteRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
@@ -7,7 +7,10 @@ import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
 import { useScrollSelectedItem } from '~/modules/hooks/useScrollSelectedItem'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeBusStatus'
+import { VehicleStateType } from '~/modules/enums/VehicleStateType'
 import { SkeletonList } from '../common/SkeletonList'
+import { RouteRealtimeBadge } from './RouteRealtimeBadge'
+import { RouteRealtimeGap } from './RouteRealtimeGap'
 
 export interface RouteStopListItem {
   estimatedArrivalLabel: string | null
@@ -95,13 +98,35 @@ export const RouteStopList = ({
             )
           : (
             <Timeline active={-1} bulletSize={28} lineWidth={2}>
-              {stops.map((stop) => {
+              {stops.map((stop, stopIndex) => {
                 const isHighlighted = stop.id === highlightedStopId
                 const isSelected = stop.id === selectedStopId
+                const isFirstStop = stopIndex === 0
+                const nextStop = stops[stopIndex + 1]
+                const isLastStop = nextStop == null
+                const stopLevelRealtimeBuses = stop.realtimeBuses.filter((bus) =>
+                  bus.vehicleState === VehicleStateType.AT_STOP ||
+                  (isFirstStop && bus.vehicleState === VehicleStateType.ARRIVING) ||
+                  (isLastStop && bus.vehicleState === VehicleStateType.DEPARTED)
+                )
+                const departedBuses = isLastStop
+                  ? []
+                  : stop.realtimeBuses.filter((bus) => bus.vehicleState === VehicleStateType.DEPARTED)
+                const arrivingBuses = nextStop?.realtimeBuses.filter((bus) => bus.vehicleState === VehicleStateType.ARRIVING) ?? []
+                const gapRealtimeBuses = [...departedBuses, ...arrivingBuses]
 
                 return (
                   <Timeline.Item
                     key={stop.id}
+                    data-testid={`route-stop-${stop.id}`}
+                    styles={{
+                      item: {
+                        marginTop: 0
+                      },
+                      itemBody: {
+                        marginTop: 0
+                      }
+                    }}
                     bullet={(
                       <Box
                         w={28}
@@ -166,31 +191,16 @@ export const RouteStopList = ({
                           </Stack>
                             <Group pr="sm" gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
                             <Group gap="xs" wrap="wrap" justify="flex-end">
-                              {stop.realtimeBuses.map((bus) => (
-                                <Badge
+                              {stopLevelRealtimeBuses.map((bus) => (
+                                <RouteRealtimeBadge
                                   key={bus.id}
-                                  component="button"
-                                  type="button"
-                                  aria-pressed={bus.id === selectedVehicleId}
-                                  color="orange"
-                                  variant="light"
-                                  size="md"
-                                  radius="sm"
-                                  leftSection={<RiBus2Fill size="1em" />}
-                                  style={{
-                                    boxShadow: bus.id === selectedVehicleId
-                                      ? '0 0 0 1px rgba(245, 124, 0, 0.25), 0 2px 6px rgba(245, 124, 0, 0.18)'
-                                      : undefined,
-                                    cursor: 'pointer',
-                                    fontWeight: bus.id === selectedVehicleId ? 700 : undefined
-                                  }}
+                                  isSelected={bus.id === selectedVehicleId}
+                                  plateNumb={bus.plateNumb}
                                   onClick={(event) => {
                                     event.stopPropagation()
                                     onSelectVehicle(bus.id)
                                   }}
-                                >
-                                  {bus.plateNumb}
-                                </Badge>
+                                />
                               ))}
                             </Group>
                             <ActionIcon
@@ -212,6 +222,13 @@ export const RouteStopList = ({
                       </Box>
                     )}
                   >
+                    {nextStop && (
+                      <RouteRealtimeGap
+                        realtimeBuses={gapRealtimeBuses}
+                        onSelectVehicle={onSelectVehicle}
+                        selectedVehicleId={selectedVehicleId}
+                      />
+                    )}
                   </Timeline.Item>
                 )
               })}

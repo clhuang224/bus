@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { CityNameType } from '../../enums/CityNameType'
 import { DirectionType } from '../../enums/DirectionType'
+import { VehicleStateType } from '../../enums/VehicleStateType'
 import {
   transformBusRoute,
   transformEstimatedArrival,
@@ -68,7 +69,8 @@ describe('transformTdxBusData', () => {
       UpdateTime: '2026-03-20T10:00:00+08:00'
     }, CityNameType.TAIPEI)).toEqual(expect.objectContaining({
       City: CityNameType.TAIPEI,
-      PlateNumb: 'ABC-123'
+      PlateNumb: 'ABC-123',
+      vehicleState: VehicleStateType.DEPARTED
     }))
   })
 

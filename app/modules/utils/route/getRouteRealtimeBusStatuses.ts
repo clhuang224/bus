@@ -1,6 +1,6 @@
 import type { TFunction } from 'i18next'
-import { A2EventType } from '../../enums/A2EventType'
 import type { AppLocaleType } from '../../enums/AppLocaleType'
+import { VehicleStateType } from '../../enums/VehicleStateType'
 import { stopStatusTranslationKeyMap } from '../../consts/stopStatus'
 import { StopStatusType } from '../../enums/StopStatusType'
 import type { EstimatedArrival } from '../../interfaces/EstimatedArrival'
@@ -39,6 +39,7 @@ export function getRouteRealtimeBusStatuses(
 ): RouteRealtimeBusStatus[] {
   return realtimeBuses
     .map((realtimeBus) => {
+      const vehicleState = realtimeBus.vehicleState
       const realtimePlateNumb = normalizePlateNumb(realtimeBus.PlateNumb)
       const plateMatchedArrival = estimatedArrivals.find((estimatedArrival) => {
         if (!estimatedArrival.PlateNumb) {
@@ -89,7 +90,7 @@ export function getRouteRealtimeBusStatuses(
 
           return left.StopSequence - right.StopSequence
         })[0]
-      const matchedArrival = realtimeBus.A2EventType === A2EventType.DEPARTED
+      const matchedArrival = vehicleState === VehicleStateType.DEPARTED
         ? nextEstimatedArrival ?? plateMatchedArrival ?? stopMatchedArrival
         : stopMatchedArrival ?? plateMatchedArrival ?? nextEstimatedArrival
       const estimateLabel = matchedArrival
@@ -112,7 +113,8 @@ export function getRouteRealtimeBusStatuses(
         plateNumb: realtimeBus.PlateNumb,
         stopName: getLocalizedText(realtimeBus.StopName, locale),
         stopSequence: realtimeBus.StopSequence,
-        subRouteUID: realtimeBus.SubRouteUID ?? ''
+        subRouteUID: realtimeBus.SubRouteUID ?? '',
+        vehicleState
       }
     })
     .sort((left, right) => {

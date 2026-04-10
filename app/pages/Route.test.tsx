@@ -8,6 +8,7 @@ import { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
+import { VehicleStateType } from '~/modules/enums/VehicleStateType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import { createTestStore } from '~/test/createTestStore'
 import { mockMatchMedia } from '~/test/mockMatchMedia'
@@ -238,7 +239,7 @@ const realtimeNearStopsData = [
     StopSequence: 2,
     DutyStatus: 0,
     BusStatus: 0,
-    A2EventType: 0,
+    vehicleState: VehicleStateType.DEPARTED,
     GPSTime: '2026-03-19T10:00:00+08:00',
     SrcUpdateTime: '2026-03-19T10:00:00+08:00',
     UpdateTime: '2026-03-19T10:00:00+08:00',
@@ -569,15 +570,28 @@ describe('Route', () => {
   })
 
   it('selects only the vehicle when clicking a realtime plate badge in the list', async () => {
+    mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
+      data: [{
+        ...realtimeNearStopsData[0],
+        StopUID: 'stop-b',
+        StopID: 'stop-b',
+        StopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+        StopSequence: 1
+      }],
+      isError: false,
+      isLoading: false,
+      error: null
+    })
+
     renderRoutePage()
 
     fireEvent.click(screen.getByRole('tab', { name: '返程' }))
 
     await waitFor(() => {
-      expect(screen.getByText('ABC-123')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'ABC-123' })).toBeInTheDocument()
     })
 
-    fireEvent.click(screen.getByText('ABC-123'))
+    fireEvent.click(screen.getByRole('button', { name: 'ABC-123' }))
 
     await waitFor(() => {
       const latestCall = mockRouteMap.mock.calls[mockRouteMap.mock.calls.length - 1] as unknown as

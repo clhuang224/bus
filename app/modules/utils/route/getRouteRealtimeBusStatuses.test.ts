@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { A2EventType } from '../../enums/A2EventType'
 import { BusStatusType } from '../../enums/BusStatusType'
 import { CityNameType } from '../../enums/CityNameType'
 import { DirectionType } from '../../enums/DirectionType'
 import { DutyStatusType } from '../../enums/DutyStatusType'
 import { AppLocaleType } from '../../enums/AppLocaleType'
 import { StopStatusType } from '../../enums/StopStatusType'
+import { VehicleStateType } from '../../enums/VehicleStateType'
 import i18n from '../../i18n'
 import { getRouteRealtimeBusStatuses } from './getRouteRealtimeBusStatuses'
 import { DEFAULT_APP_LOCALE } from '../../consts/i18n'
@@ -35,7 +35,7 @@ describe('getRouteRealtimeBusStatuses', () => {
       StopSequence: 5,
       DutyStatus: DutyStatusType.NORMAL,
       BusStatus: BusStatusType.NORMAL,
-      A2EventType: A2EventType.DEPARTED,
+      vehicleState: VehicleStateType.DEPARTED,
       GPSTime: '2026-03-20T10:00:00+08:00',
       TripStartTimeType: 0,
       SrcUpdateTime: '2026-03-20T10:00:00+08:00',
@@ -69,7 +69,8 @@ describe('getRouteRealtimeBusStatuses', () => {
         estimateLabel: fourMinutesAwayLabel,
         estimateMinutes: 4,
         plateNumb: 'ABC-123',
-        stopName: '市政府'
+        stopName: '市政府',
+        vehicleState: VehicleStateType.DEPARTED
       })
     ])
   })
@@ -91,7 +92,7 @@ describe('getRouteRealtimeBusStatuses', () => {
       StopSequence: 6,
       DutyStatus: DutyStatusType.NORMAL,
       BusStatus: BusStatusType.NORMAL,
-      A2EventType: A2EventType.DEPARTED,
+      vehicleState: VehicleStateType.DEPARTED,
       GPSTime: '2026-03-20T10:00:00+08:00',
       TripStartTimeType: 0,
       SrcUpdateTime: '2026-03-20T10:00:00+08:00',
@@ -146,7 +147,7 @@ describe('getRouteRealtimeBusStatuses', () => {
       StopSequence: 5,
       DutyStatus: DutyStatusType.NORMAL,
       BusStatus: BusStatusType.NORMAL,
-      A2EventType: A2EventType.DEPARTED,
+      vehicleState: VehicleStateType.DEPARTED,
       GPSTime: '2026-03-20T10:00:00+08:00',
       TripStartTimeType: 0,
       SrcUpdateTime: '2026-03-20T10:00:00+08:00',
@@ -201,7 +202,7 @@ describe('getRouteRealtimeBusStatuses', () => {
       StopSequence: 5,
       DutyStatus: DutyStatusType.NORMAL,
       BusStatus: BusStatusType.NORMAL,
-      A2EventType: A2EventType.DEPARTED,
+      vehicleState: VehicleStateType.DEPARTED,
       GPSTime: '2026-03-20T10:00:00+08:00',
       TripStartTimeType: 0,
       SrcUpdateTime: '2026-03-20T10:00:00+08:00',
@@ -256,7 +257,7 @@ describe('getRouteRealtimeBusStatuses', () => {
       StopSequence: 15,
       DutyStatus: DutyStatusType.NORMAL,
       BusStatus: BusStatusType.NORMAL,
-      A2EventType: A2EventType.DEPARTED,
+      vehicleState: VehicleStateType.DEPARTED,
       GPSTime: '2026-03-20T10:00:00+08:00',
       TripStartTimeType: 0,
       SrcUpdateTime: '2026-03-20T10:00:00+08:00',
@@ -332,7 +333,7 @@ describe('getRouteRealtimeBusStatuses', () => {
       StopSequence: 10,
       DutyStatus: DutyStatusType.NORMAL,
       BusStatus: BusStatusType.NORMAL,
-      A2EventType: A2EventType.DEPARTED,
+      vehicleState: VehicleStateType.DEPARTED,
       GPSTime: '2026-04-09T10:00:00+08:00',
       TripStartTimeType: 0,
       SrcUpdateTime: '2026-04-09T10:00:00+08:00',
@@ -408,7 +409,7 @@ describe('getRouteRealtimeBusStatuses', () => {
       StopSequence: 23,
       DutyStatus: DutyStatusType.NORMAL,
       BusStatus: BusStatusType.NORMAL,
-      A2EventType: A2EventType.ARRIVING,
+      vehicleState: VehicleStateType.ARRIVING,
       GPSTime: '2026-03-22T18:55:15+08:00',
       TripStartTimeType: 0,
       SrcUpdateTime: '2026-03-22T18:56:10+08:00',
@@ -485,7 +486,7 @@ describe('getRouteRealtimeBusStatuses', () => {
         StopSequence: 5,
         DutyStatus: DutyStatusType.NORMAL,
         BusStatus: BusStatusType.NORMAL,
-        A2EventType: A2EventType.DEPARTED,
+        vehicleState: VehicleStateType.DEPARTED,
         GPSTime: '2026-03-20T10:00:00+08:00',
         TripStartTimeType: 0,
         SrcUpdateTime: '2026-03-20T10:00:00+08:00',
@@ -509,7 +510,7 @@ describe('getRouteRealtimeBusStatuses', () => {
         StopSequence: 6,
         DutyStatus: DutyStatusType.NORMAL,
         BusStatus: BusStatusType.NORMAL,
-        A2EventType: A2EventType.DEPARTED,
+        vehicleState: VehicleStateType.DEPARTED,
         GPSTime: '2026-03-20T10:00:00+08:00',
         TripStartTimeType: 0,
         SrcUpdateTime: '2026-03-20T10:00:00+08:00',

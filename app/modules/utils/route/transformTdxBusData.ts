@@ -8,6 +8,7 @@ import type { StopOfRoute, TdxStopOfRoute } from '../../interfaces/StopOfRoute'
 import type { Stop, TdxStop } from '../../interfaces/Stop'
 import { toLngLat, toLocalizedText } from './normalizeTdxFields'
 import { parseRouteShapePath } from './parseRouteShapePath'
+import { transformTdxVehicleState } from './transformTdxVehicleState'
 
 export function transformEstimatedArrival(
   estimatedArrival: TdxEstimatedArrival,
@@ -110,12 +111,15 @@ export function transformRealtimeNearStop(
   realtimeNearStop: TdxRealtimeNearStop,
   city: CityNameType
 ): RealtimeNearStop {
+  const { A2EventType, ...restRealtimeNearStop } = realtimeNearStop
+
   return {
-    ...realtimeNearStop,
+    ...restRealtimeNearStop,
     City: city,
     RouteName: toLocalizedText(realtimeNearStop.RouteName),
     StopName: toLocalizedText(realtimeNearStop.StopName),
-    SubRouteName: toLocalizedText(realtimeNearStop.SubRouteName, realtimeNearStop.RouteName)
+    SubRouteName: toLocalizedText(realtimeNearStop.SubRouteName, realtimeNearStop.RouteName),
+    vehicleState: transformTdxVehicleState(A2EventType)
   }
 }
 

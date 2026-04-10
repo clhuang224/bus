@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 
-import { fireEvent, screen } from '@testing-library/react'
+import { fireEvent, screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { DEFAULT_APP_LOCALE } from '~/modules/consts/i18n'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
+import { VehicleStateType } from '~/modules/enums/VehicleStateType'
 import i18n from '~/modules/i18n'
 import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeBusStatus'
 import { renderWithMantine } from '~/test/render'
@@ -38,7 +39,20 @@ const realtimeBus: RouteRealtimeBusStatus = {
   plateNumb: 'ABC-123',
   stopName: '市政府',
   stopSequence: 1,
-  subRouteUID: 'subroute-1'
+  subRouteUID: 'subroute-1',
+  vehicleState: VehicleStateType.ARRIVING
+}
+
+const secondFavoriteRouteStop = {
+  ...favoriteRouteStop,
+  stopID: 'stop-2',
+  stopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+  stopSequence: 2,
+  stopUID: 'stop-2'
+}
+
+function getStopItemById(stopId: string): HTMLElement {
+  return screen.getByTestId(`route-stop-${stopId}`)
 }
 
 describe('RouteStopList', () => {
@@ -128,15 +142,26 @@ describe('RouteStopList', () => {
 
     renderWithMantine(
       <RouteStopList
-        stops={[{
-          estimatedArrivalLabel: estimateLabel,
-          id: 'stop-1',
-          favoriteRouteStop,
-          name: '市政府',
-          realtimeBuses: [realtimeBus],
-          sequence: 1,
-          isFavorite: false
-        }]}
+        stops={[
+          {
+            estimatedArrivalLabel: estimateLabel,
+            id: 'stop-1',
+            favoriteRouteStop,
+            name: '市政府',
+            realtimeBuses: [],
+            sequence: 1,
+            isFavorite: false
+          },
+          {
+            estimatedArrivalLabel: null,
+            id: 'stop-2',
+            favoriteRouteStop: secondFavoriteRouteStop,
+            name: '捷運昆陽站',
+            realtimeBuses: [realtimeBus],
+            sequence: 2,
+            isFavorite: false
+          }
+        ]}
         onSelectStop={vi.fn()}
         onSelectVehicle={vi.fn()}
         onToggleFavorite={vi.fn()}
@@ -154,15 +179,26 @@ describe('RouteStopList', () => {
 
     renderWithMantine(
       <RouteStopList
-        stops={[{
-          estimatedArrivalLabel: null,
-          id: 'stop-1',
-          favoriteRouteStop,
-          name: '市政府',
-          realtimeBuses: [realtimeBus],
-          sequence: 1,
-          isFavorite: false
-        }]}
+        stops={[
+          {
+            estimatedArrivalLabel: null,
+            id: 'stop-1',
+            favoriteRouteStop,
+            name: '市政府',
+            realtimeBuses: [],
+            sequence: 1,
+            isFavorite: false
+          },
+          {
+            estimatedArrivalLabel: null,
+            id: 'stop-2',
+            favoriteRouteStop: secondFavoriteRouteStop,
+            name: '捷運昆陽站',
+            realtimeBuses: [realtimeBus],
+            sequence: 2,
+            isFavorite: false
+          }
+        ]}
         onSelectStop={handleSelectStop}
         onSelectVehicle={handleSelectVehicle}
         onToggleFavorite={handleToggleFavorite}
@@ -179,15 +215,26 @@ describe('RouteStopList', () => {
   it('marks the selected vehicle badge as pressed', () => {
     renderWithMantine(
       <RouteStopList
-        stops={[{
-          estimatedArrivalLabel: null,
-          id: 'stop-1',
-          favoriteRouteStop,
-          name: '市政府',
-          realtimeBuses: [realtimeBus],
-          sequence: 1,
-          isFavorite: false
-        }]}
+        stops={[
+          {
+            estimatedArrivalLabel: null,
+            id: 'stop-1',
+            favoriteRouteStop,
+            name: '市政府',
+            realtimeBuses: [],
+            sequence: 1,
+            isFavorite: false
+          },
+          {
+            estimatedArrivalLabel: null,
+            id: 'stop-2',
+            favoriteRouteStop: secondFavoriteRouteStop,
+            name: '捷運昆陽站',
+            realtimeBuses: [realtimeBus],
+            sequence: 2,
+            isFavorite: false
+          }
+        ]}
         onSelectStop={vi.fn()}
         onSelectVehicle={vi.fn()}
         onToggleFavorite={vi.fn()}
@@ -196,5 +243,166 @@ describe('RouteStopList', () => {
     )
 
     expect(screen.getByRole('button', { name: 'ABC-123' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('renders departed and arriving vehicle badges together in the gap between stops', () => {
+    renderWithMantine(
+      <RouteStopList
+        stops={[
+          {
+            estimatedArrivalLabel: null,
+            id: 'stop-1',
+            favoriteRouteStop,
+            name: '市政府',
+            realtimeBuses: [{
+              ...realtimeBus,
+              id: 'bus-2',
+              plateNumb: 'ABC-456',
+              vehicleState: VehicleStateType.DEPARTED
+            }],
+            sequence: 1,
+            isFavorite: false
+          },
+          {
+            estimatedArrivalLabel: null,
+            id: 'stop-2',
+            favoriteRouteStop: {
+              ...favoriteRouteStop,
+              stopID: 'stop-2',
+              stopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+              stopSequence: 2,
+              stopUID: 'stop-2'
+            },
+            name: '捷運昆陽站',
+            realtimeBuses: [realtimeBus],
+            sequence: 2,
+            isFavorite: false
+          }
+        ]}
+        onSelectStop={vi.fn()}
+        onSelectVehicle={vi.fn()}
+        onToggleFavorite={vi.fn()}
+      />
+    )
+
+    const firstStopItem = getStopItemById('stop-1')
+
+    expect(within(firstStopItem).getByRole('button', { name: 'ABC-456' })).toBeInTheDocument()
+    expect(within(firstStopItem).getByRole('button', { name: 'ABC-123' })).toBeInTheDocument()
+  })
+
+  it('keeps a fixed realtime gap between stops even when no vehicle badges are present', () => {
+    renderWithMantine(
+      <RouteStopList
+        stops={[
+          {
+            estimatedArrivalLabel: null,
+            id: 'stop-1',
+            favoriteRouteStop,
+            name: '市政府',
+            realtimeBuses: [],
+            sequence: 1,
+            isFavorite: false
+          },
+          {
+            estimatedArrivalLabel: null,
+            id: 'stop-2',
+            favoriteRouteStop: secondFavoriteRouteStop,
+            name: '捷運昆陽站',
+            realtimeBuses: [],
+            sequence: 2,
+            isFavorite: false
+          }
+        ]}
+        onSelectStop={vi.fn()}
+        onSelectVehicle={vi.fn()}
+        onToggleFavorite={vi.fn()}
+      />
+    )
+
+    const firstStopItem = getStopItemById('stop-1')
+
+    expect(screen.getByText('市政府')).toBeInTheDocument()
+    expect(screen.getByText('捷運昆陽站')).toBeInTheDocument()
+    expect(within(firstStopItem).queryByRole('button', { name: 'ABC-123' })).not.toBeInTheDocument()
+    expect(within(firstStopItem).queryByRole('button', { name: 'ABC-456' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'ABC-123' })).not.toBeInTheDocument()
+  })
+
+  it('keeps arriving endpoint vehicles on the first stop row', () => {
+    renderWithMantine(
+      <RouteStopList
+        stops={[
+          {
+            estimatedArrivalLabel: null,
+            id: 'stop-1',
+            favoriteRouteStop,
+            name: '市政府',
+            realtimeBuses: [realtimeBus],
+            sequence: 1,
+            isFavorite: false
+          },
+          {
+            estimatedArrivalLabel: null,
+            id: 'stop-2',
+            favoriteRouteStop: secondFavoriteRouteStop,
+            name: '捷運昆陽站',
+            realtimeBuses: [],
+            sequence: 2,
+            isFavorite: false
+          }
+        ]}
+        onSelectStop={vi.fn()}
+        onSelectVehicle={vi.fn()}
+        onToggleFavorite={vi.fn()}
+      />
+    )
+
+    const firstStopItem = getStopItemById('stop-1')
+    const secondStopItem = getStopItemById('stop-2')
+
+    expect(within(firstStopItem).getByRole('button', { name: 'ABC-123' })).toBeInTheDocument()
+    expect(within(secondStopItem).queryByRole('button', { name: 'ABC-123' })).not.toBeInTheDocument()
+  })
+
+  it('keeps departed endpoint vehicles on the last stop row', () => {
+    renderWithMantine(
+      <RouteStopList
+        stops={[
+          {
+            estimatedArrivalLabel: null,
+            id: 'stop-1',
+            favoriteRouteStop,
+            name: '市政府',
+            realtimeBuses: [],
+            sequence: 1,
+            isFavorite: false
+          },
+          {
+            estimatedArrivalLabel: null,
+            id: 'stop-2',
+            favoriteRouteStop: secondFavoriteRouteStop,
+            name: '捷運昆陽站',
+            realtimeBuses: [{
+              ...realtimeBus,
+              id: 'bus-2',
+              plateNumb: 'ABC-456',
+              vehicleState: VehicleStateType.DEPARTED
+            }],
+            sequence: 2,
+            isFavorite: false
+          }
+        ]}
+        onSelectStop={vi.fn()}
+        onSelectVehicle={vi.fn()}
+        onToggleFavorite={vi.fn()}
+      />
+    )
+
+    const firstStopItem = getStopItemById('stop-1')
+    const secondStopItem = getStopItemById('stop-2')
+
+    expect(within(secondStopItem).getByRole('button', { name: 'ABC-456' })).toBeInTheDocument()
+    expect(within(firstStopItem).queryByRole('button', { name: 'ABC-456' })).not.toBeInTheDocument()
   })
 })
