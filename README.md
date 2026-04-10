@@ -144,7 +144,7 @@ Boundary data comes from the counties dataset in [dkaoster/taiwan-atlas](https:/
 
 `https://cdn.jsdelivr.net/npm/taiwan-atlas/counties-10t.json`
 
-The app converts that TopoJSON dataset into GeoJSON to determine the user's city and area for nearby-stop and route-search flows.
+The project vendors that TopoJSON dataset as a local static asset and converts it into GeoJSON at runtime to determine the user's city and area for nearby-stop and route-search flows.
 
 ## Development
 

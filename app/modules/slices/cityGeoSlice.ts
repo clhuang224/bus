@@ -4,6 +4,7 @@ import type { FeatureCollection } from 'geojson'
 import type { Topology } from 'topojson-specification'
 import type { AppDispatch } from '../store'
 import { readCityGeoCache, writeCityGeoCache } from '../utils/geo/cityGeoPersistence'
+import cityBoundaryAssetUrl from '../assets/taiwan-counties-10t.json?url'
 
 export interface CityGeoState {
   geojson: FeatureCollection | null
@@ -58,9 +59,8 @@ export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
   }
 
   try {
-    const url = 'https://cdn.jsdelivr.net/npm/taiwan-atlas/counties-10t.json'
-    const res = await fetch(url)
-    if (!res.ok) throw new Error('Failed to fetch city GeoJSON API.')
+    const res = await fetch(cityBoundaryAssetUrl)
+    if (!res.ok) throw new Error('Failed to load city boundary asset.')
     const topo: Topology = await res.json()
     const geo = getCityGeoFeatureCollection(topo)
 
@@ -76,7 +76,7 @@ export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
       return
     }
 
-    dispatch(setError('Failed to fetch city GeoJSON API.'))
+    dispatch(setError('Failed to load city boundary data.'))
   }
 }
 
