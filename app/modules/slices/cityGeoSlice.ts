@@ -18,6 +18,13 @@ const CITY_BOUNDARY_CACHE_MISS_ERROR = 'City boundary cache miss.'
 const CITY_BOUNDARY_ASSET_LOAD_ERROR = 'Failed to load city boundary asset.'
 export const CITY_BOUNDARY_LOAD_ERROR = 'Failed to load city boundary data.'
 
+class CityBoundaryCacheMissError extends Error {
+  constructor() {
+    super(CITY_BOUNDARY_CACHE_MISS_ERROR)
+    this.name = 'CityBoundaryCacheMissError'
+  }
+}
+
 const initialState: CityGeoState = {
   geojson: null,
   loading: false,
@@ -58,7 +65,7 @@ function convertCityBoundaryToGeoJSON(topo: Topology): FeatureCollection {
 async function loadCityBoundaryFromCache() {
   const cachedCityBoundary = await readCityBoundaryCache()
 
-  if (!cachedCityBoundary) throw new Error(CITY_BOUNDARY_CACHE_MISS_ERROR)
+  if (!cachedCityBoundary) throw new CityBoundaryCacheMissError()
 
   return {
     ...cachedCityBoundary,
@@ -117,7 +124,9 @@ export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
 
     return
   } catch (err) {
-    console.warn('fetchCityGeoJSON cache unavailable, falling back to asset:', err)
+    if (!(err instanceof CityBoundaryCacheMissError)) {
+      console.warn('fetchCityGeoJSON cache unavailable, falling back to asset:', err)
+    }
   }
 
   dispatch(setLoading(true))
