@@ -5,21 +5,21 @@ import { fetchCityGeoJSON, setGeoJSON, setLoading } from './cityGeoSlice'
 
 const {
   mockFeature,
-  mockReadCityGeoCache,
-  mockWriteCityGeoCache
+  mockReadCityBoundaryCache,
+  mockWriteCityBoundaryCache
 } = vi.hoisted(() => ({
   mockFeature: vi.fn(),
-  mockReadCityGeoCache: vi.fn(),
-  mockWriteCityGeoCache: vi.fn()
+  mockReadCityBoundaryCache: vi.fn(),
+  mockWriteCityBoundaryCache: vi.fn()
 }))
 
 vi.mock('topojson-client', () => ({
   feature: mockFeature
 }))
 
-vi.mock('../utils/geo/cityGeoPersistence', () => ({
-  readCityGeoCache: mockReadCityGeoCache,
-  writeCityGeoCache: mockWriteCityGeoCache
+vi.mock('../utils/geo/cityBoundaryIndexedDB', () => ({
+  readCityBoundaryCache: mockReadCityBoundaryCache,
+  writeCityBoundaryCache: mockWriteCityBoundaryCache
 }))
 
 const mockGeoJson: FeatureCollection = {
@@ -45,8 +45,8 @@ const mockTopoJson: Topology = {
 describe('cityGeoSlice', () => {
   beforeEach(() => {
     mockFeature.mockReset()
-    mockReadCityGeoCache.mockReset()
-    mockWriteCityGeoCache.mockReset()
+    mockReadCityBoundaryCache.mockReset()
+    mockWriteCityBoundaryCache.mockReset()
     vi.restoreAllMocks()
   })
 
@@ -58,7 +58,7 @@ describe('cityGeoSlice', () => {
     } as Response)
 
     mockFeature.mockReturnValue(mockGeoJson)
-    mockReadCityGeoCache.mockResolvedValue(null)
+    mockReadCityBoundaryCache.mockResolvedValue(null)
 
     await fetchCityGeoJSON()(dispatch as never)
 
@@ -66,7 +66,7 @@ describe('cityGeoSlice', () => {
     expect(dispatch).toHaveBeenNthCalledWith(1, setLoading(true))
     expect(dispatch).toHaveBeenNthCalledWith(2, setGeoJSON(mockGeoJson))
     expect(mockFeature).toHaveBeenCalledWith(mockTopoJson, mockTopoJson.objects.counties)
-    expect(mockWriteCityGeoCache).toHaveBeenCalledWith({
+    expect(mockWriteCityBoundaryCache).toHaveBeenCalledWith({
       topojson: mockTopoJson,
       updatedAt: expect.any(String)
     })
@@ -79,7 +79,7 @@ describe('cityGeoSlice', () => {
       json: async () => mockTopoJson
     } as Response)
 
-    mockReadCityGeoCache.mockResolvedValue({
+    mockReadCityBoundaryCache.mockResolvedValue({
       topojson: mockTopoJson,
       updatedAt: '2026-04-11T00:00:00.000Z'
     })
@@ -87,7 +87,7 @@ describe('cityGeoSlice', () => {
 
     await fetchCityGeoJSON()(dispatch as never)
 
-    expect(mockReadCityGeoCache).toHaveBeenCalledOnce()
+    expect(mockReadCityBoundaryCache).toHaveBeenCalledOnce()
     expect(fetchMock).toHaveBeenCalledOnce()
     expect(mockFeature).toHaveBeenNthCalledWith(1, mockTopoJson, mockTopoJson.objects.counties)
     expect(mockFeature).toHaveBeenNthCalledWith(2, mockTopoJson, mockTopoJson.objects.counties)
@@ -99,7 +99,7 @@ describe('cityGeoSlice', () => {
     const dispatch = vi.fn()
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('network down'))
 
-    mockReadCityGeoCache.mockResolvedValue({
+    mockReadCityBoundaryCache.mockResolvedValue({
       topojson: mockTopoJson,
       updatedAt: '2026-04-11T00:00:00.000Z'
     })
@@ -108,7 +108,7 @@ describe('cityGeoSlice', () => {
     await fetchCityGeoJSON()(dispatch as never)
 
     expect(fetchMock).toHaveBeenCalledOnce()
-    expect(mockReadCityGeoCache).toHaveBeenCalledOnce()
+    expect(mockReadCityBoundaryCache).toHaveBeenCalledOnce()
     expect(mockFeature).toHaveBeenCalledOnce()
     expect(mockFeature).toHaveBeenCalledWith(mockTopoJson, mockTopoJson.objects.counties)
     expect(dispatch).toHaveBeenCalledTimes(1)
@@ -122,7 +122,7 @@ describe('cityGeoSlice', () => {
       json: async () => mockTopoJson
     } as Response)
 
-    mockReadCityGeoCache.mockResolvedValue(null)
+    mockReadCityBoundaryCache.mockResolvedValue(null)
     mockFeature.mockReturnValue(mockGeoJson)
 
     await fetchCityGeoJSON()(dispatch as never)

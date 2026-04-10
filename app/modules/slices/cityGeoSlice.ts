@@ -3,7 +3,7 @@ import { feature } from 'topojson-client'
 import type { FeatureCollection } from 'geojson'
 import type { Topology } from 'topojson-specification'
 import type { AppDispatch } from '../store'
-import { readCityGeoCache, writeCityGeoCache } from '../utils/geo/cityGeoPersistence'
+import { readCityBoundaryCache, writeCityBoundaryCache } from '../utils/geo/cityBoundaryIndexedDB'
 import cityBoundaryAssetUrl from '../assets/taiwan-counties-10t.json?url'
 
 export interface CityGeoState {
@@ -50,10 +50,10 @@ function getCityGeoFeatureCollection(topo: Topology): FeatureCollection {
 }
 
 export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
-  const cachedCityGeo = await readCityGeoCache()
+  const cachedCityBoundary = await readCityBoundaryCache()
 
-  if (cachedCityGeo) {
-    dispatch(setGeoJSON(getCityGeoFeatureCollection(cachedCityGeo.topojson)))
+  if (cachedCityBoundary) {
+    dispatch(setGeoJSON(getCityGeoFeatureCollection(cachedCityBoundary.topojson)))
   } else {
     dispatch(setLoading(true))
   }
@@ -65,14 +65,14 @@ export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
     const geo = getCityGeoFeatureCollection(topo)
 
     dispatch(setGeoJSON(geo))
-    await writeCityGeoCache({
+    await writeCityBoundaryCache({
       topojson: topo,
       updatedAt: new Date().toISOString()
     })
   } catch (err) {
     console.error('fetchCityGeoJSON error:', err)
 
-    if (cachedCityGeo) {
+    if (cachedCityBoundary) {
       return
     }
 
