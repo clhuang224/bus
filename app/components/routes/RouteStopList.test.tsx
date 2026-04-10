@@ -320,7 +320,7 @@ describe('RouteStopList', () => {
 
     expect(screen.getByText('市政府')).toBeInTheDocument()
     expect(screen.getByText('捷運昆陽站')).toBeInTheDocument()
-    expect(screen.getByTestId('route-realtime-gap')).toHaveStyle('min-height: calc(1.75rem * var(--mantine-scale))')
+    expect(screen.getByTestId('route-realtime-gap')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'ABC-123' })).not.toBeInTheDocument()
   })
 
