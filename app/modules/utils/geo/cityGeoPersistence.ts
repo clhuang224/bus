@@ -1,4 +1,4 @@
-import type { FeatureCollection } from 'geojson'
+import type { Topology } from 'topojson-specification'
 
 const CITY_GEO_DB_NAME = 'bus-city-geo'
 const CITY_GEO_DB_VERSION = 1
@@ -6,7 +6,7 @@ const CITY_GEO_STORE_NAME = 'city-geo-cache'
 const CITY_GEO_CACHE_KEY = 'counties'
 
 export interface CityGeoCacheRecord {
-  geojson: FeatureCollection
+  topojson: Topology
   updatedAt: string
 }
 

@@ -38,11 +38,21 @@ const cityGeoSlice = createSlice({
 
 export const { setGeoJSON, setLoading, setError } = cityGeoSlice.actions
 
+function getCityGeoFeatureCollection(topo: Topology): FeatureCollection {
+  const geo = feature(topo, topo.objects.counties)
+
+  if (geo.type !== 'FeatureCollection') {
+    throw new Error('Fetched TopoJSON is not a FeatureCollection.')
+  }
+
+  return geo
+}
+
 export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
   const cachedCityGeo = await readCityGeoCache()
 
   if (cachedCityGeo) {
-    dispatch(setGeoJSON(cachedCityGeo.geojson))
+    dispatch(setGeoJSON(getCityGeoFeatureCollection(cachedCityGeo.topojson)))
   } else {
     dispatch(setLoading(true))
   }
@@ -52,16 +62,13 @@ export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
     const res = await fetch(url)
     if (!res.ok) throw new Error('Failed to fetch city GeoJSON API.')
     const topo: Topology = await res.json()
-    const geo = feature(topo, topo.objects.counties)
-    if (geo.type === 'FeatureCollection') {
-      dispatch(setGeoJSON(geo))
-      await writeCityGeoCache({
-        geojson: geo,
-        updatedAt: new Date().toISOString()
-      })
-    } else {
-      throw new Error('Fetched TopoJSON is not a FeatureCollection.')
-    }
+    const geo = getCityGeoFeatureCollection(topo)
+
+    dispatch(setGeoJSON(geo))
+    await writeCityGeoCache({
+      topojson: topo,
+      updatedAt: new Date().toISOString()
+    })
   } catch (err) {
     console.error('fetchCityGeoJSON error:', err)
 
