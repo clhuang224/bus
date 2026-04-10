@@ -569,6 +569,19 @@ describe('Route', () => {
   })
 
   it('selects only the vehicle when clicking a realtime plate badge in the list', async () => {
+    mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
+      data: [{
+        ...realtimeNearStopsData[0],
+        StopUID: 'stop-b',
+        StopID: 'stop-b',
+        StopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+        StopSequence: 1
+      }],
+      isError: false,
+      isLoading: false,
+      error: null
+    })
+
     renderRoutePage()
 
     fireEvent.click(screen.getByRole('tab', { name: '返程' }))
