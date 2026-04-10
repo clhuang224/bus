@@ -1,7 +1,7 @@
 import type { FeatureCollection } from 'geojson'
 import type { Topology } from 'topojson-specification'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { fetchCityGeoJSON, setGeoJSON, setLoading } from './cityGeoSlice'
+import { CITY_BOUNDARY_LOAD_ERROR, fetchCityGeoJSON, setError, setGeoJSON, setLoading } from './cityGeoSlice'
 import cityBoundaryAssetUrl from '../assets/taiwan-counties-10t.json?url'
 
 const {
@@ -154,5 +154,19 @@ describe('cityGeoSlice', () => {
     expect(fetchMock).toHaveBeenCalledOnce()
     expect(dispatch).toHaveBeenNthCalledWith(1, setLoading(true))
     expect(dispatch).toHaveBeenNthCalledWith(2, setGeoJSON(mockGeoJson))
+  })
+
+  it('sets an error when cache is unavailable and asset refresh fails', async () => {
+    const dispatch = vi.fn()
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('network down'))
+
+    mockReadCityBoundaryCache.mockResolvedValue(null)
+
+    await fetchCityGeoJSON()(dispatch as never)
+
+    expect(fetchMock).toHaveBeenCalledOnce()
+    expect(dispatch).toHaveBeenNthCalledWith(1, setLoading(true))
+    expect(dispatch).toHaveBeenNthCalledWith(2, setError(CITY_BOUNDARY_LOAD_ERROR))
+    expect(dispatch).toHaveBeenCalledTimes(2)
   })
 })

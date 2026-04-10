@@ -12,6 +12,12 @@ export interface CityGeoState {
   error: string | null
 }
 
+const CITY_BOUNDARY_MISSING_COUNTIES_ERROR = 'City boundary TopoJSON is missing objects.counties.'
+const CITY_BOUNDARY_INVALID_FEATURE_COLLECTION_ERROR = 'City boundary TopoJSON is not a FeatureCollection.'
+const CITY_BOUNDARY_CACHE_MISS_ERROR = 'City boundary cache miss.'
+const CITY_BOUNDARY_ASSET_LOAD_ERROR = 'Failed to load city boundary asset.'
+export const CITY_BOUNDARY_LOAD_ERROR = 'Failed to load city boundary data.'
+
 const initialState: CityGeoState = {
   geojson: null,
   loading: false,
@@ -41,16 +47,10 @@ export const { setGeoJSON, setLoading, setError } = cityGeoSlice.actions
 
 function convertCityBoundaryToGeoJSON(topo: Topology): FeatureCollection {
   const counties = topo.objects?.counties
-
-  if (!counties) {
-    throw new Error('City boundary TopoJSON is missing objects.counties.')
-  }
+  if (!counties) throw new Error(CITY_BOUNDARY_MISSING_COUNTIES_ERROR)
 
   const geo = feature(topo, counties)
-
-  if (geo.type !== 'FeatureCollection') {
-    throw new Error('City boundary TopoJSON is not a FeatureCollection.')
-  }
+  if (geo.type !== 'FeatureCollection') throw new Error(CITY_BOUNDARY_INVALID_FEATURE_COLLECTION_ERROR)
 
   return geo
 }
@@ -58,9 +58,7 @@ function convertCityBoundaryToGeoJSON(topo: Topology): FeatureCollection {
 async function loadCityBoundaryFromCache() {
   const cachedCityBoundary = await readCityBoundaryCache()
 
-  if (!cachedCityBoundary) {
-    throw new Error('City boundary cache miss.')
-  }
+  if (!cachedCityBoundary) throw new Error(CITY_BOUNDARY_CACHE_MISS_ERROR)
 
   return {
     ...cachedCityBoundary,
@@ -71,9 +69,7 @@ async function loadCityBoundaryFromCache() {
 async function loadCityBoundaryFromAsset() {
   const res = await fetch(cityBoundaryAssetUrl)
 
-  if (!res.ok) {
-    throw new Error('Failed to load city boundary asset.')
-  }
+  if (!res.ok) throw new Error(CITY_BOUNDARY_ASSET_LOAD_ERROR)
 
   return res.json() as Promise<Topology>
 }
@@ -130,7 +126,7 @@ export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
     await refreshCityBoundaryFromAsset(dispatch)
   } catch (err) {
     console.error('fetchCityGeoJSON error:', err)
-    dispatch(setError('Failed to load city boundary data.'))
+    dispatch(setError(CITY_BOUNDARY_LOAD_ERROR))
   }
 }
 
