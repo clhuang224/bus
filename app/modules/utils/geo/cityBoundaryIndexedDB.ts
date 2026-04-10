@@ -39,21 +39,34 @@ export async function readCityBoundaryCache() {
     const transaction = database.transaction(CITY_BOUNDARY_STORE_NAME, 'readonly')
     const store = transaction.objectStore(CITY_BOUNDARY_STORE_NAME)
     const request = store.get(CITY_BOUNDARY_CACHE_KEY)
+    let result: CityBoundaryCacheRecord | null = null
+
+    const closeDatabase = () => {
+      database.close()
+    }
 
     request.onerror = () => {
+      closeDatabase()
       reject(request.error ?? new Error('Failed to read city boundary cache from IndexedDB.'))
     }
 
     request.onsuccess = () => {
-      resolve((request.result as CityBoundaryCacheRecord | undefined) ?? null)
+      result = (request.result as CityBoundaryCacheRecord | undefined) ?? null
     }
 
     transaction.oncomplete = () => {
-      database.close()
+      closeDatabase()
+      resolve(result)
     }
 
     transaction.onerror = () => {
+      closeDatabase()
       reject(transaction.error ?? new Error('Failed to complete city boundary read transaction.'))
+    }
+
+    transaction.onabort = () => {
+      closeDatabase()
+      reject(transaction.error ?? new Error('City boundary read transaction was aborted.'))
     }
   })
 }
@@ -64,16 +77,25 @@ export async function writeCityBoundaryCache(record: CityBoundaryCacheRecord) {
   return new Promise<void>((resolve, reject) => {
     const transaction = database.transaction(CITY_BOUNDARY_STORE_NAME, 'readwrite')
     const store = transaction.objectStore(CITY_BOUNDARY_STORE_NAME)
+    const closeDatabase = () => {
+      database.close()
+    }
 
     store.put(record, CITY_BOUNDARY_CACHE_KEY)
 
     transaction.oncomplete = () => {
-      database.close()
+      closeDatabase()
       resolve()
     }
 
     transaction.onerror = () => {
+      closeDatabase()
       reject(transaction.error ?? new Error('Failed to write city boundary cache to IndexedDB.'))
+    }
+
+    transaction.onabort = () => {
+      closeDatabase()
+      reject(transaction.error ?? new Error('City boundary write transaction was aborted.'))
     }
   })
 }
