@@ -3,11 +3,26 @@ import { feature } from 'topojson-client'
 import type { FeatureCollection } from 'geojson'
 import type { Topology } from 'topojson-specification'
 import type { AppDispatch } from '../store'
+import { readCityBoundaryCache, writeCityBoundaryCache } from '../utils/geo/cityBoundaryIndexedDB'
+import cityBoundaryAssetUrl from '../assets/taiwan-counties-10t.json?url'
 
 export interface CityGeoState {
   geojson: FeatureCollection | null
   loading: boolean
   error: string | null
+}
+
+const CITY_BOUNDARY_MISSING_COUNTIES_ERROR = 'City boundary TopoJSON is missing objects.counties.'
+const CITY_BOUNDARY_INVALID_FEATURE_COLLECTION_ERROR = 'Converted city boundary GeoJSON is not a FeatureCollection.'
+const CITY_BOUNDARY_CACHE_MISS_ERROR = 'City boundary cache miss.'
+const CITY_BOUNDARY_ASSET_LOAD_ERROR = 'Failed to load city boundary asset.'
+export const CITY_BOUNDARY_LOAD_ERROR = 'Failed to load city boundary data.'
+
+class CityBoundaryCacheMissError extends Error {
+  constructor() {
+    super(CITY_BOUNDARY_CACHE_MISS_ERROR)
+    this.name = 'CityBoundaryCacheMissError'
+  }
 }
 
 const initialState: CityGeoState = {
@@ -37,27 +52,90 @@ const cityGeoSlice = createSlice({
 
 export const { setGeoJSON, setLoading, setError } = cityGeoSlice.actions
 
-export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
-  dispatch(setLoading(true))
+function convertCityBoundaryToGeoJSON(topo: Topology): FeatureCollection {
+  const counties = topo.objects?.counties
+  if (!counties) throw new Error(CITY_BOUNDARY_MISSING_COUNTIES_ERROR)
+
+  const geo = feature(topo, counties)
+  if (geo.type !== 'FeatureCollection') throw new Error(CITY_BOUNDARY_INVALID_FEATURE_COLLECTION_ERROR)
+
+  return geo
+}
+
+async function loadCityBoundaryFromCache() {
+  const cachedCityBoundary = await readCityBoundaryCache()
+
+  if (!cachedCityBoundary) throw new CityBoundaryCacheMissError()
+
+  return {
+    ...cachedCityBoundary,
+    geojson: convertCityBoundaryToGeoJSON(cachedCityBoundary.topojson)
+  }
+}
+
+async function loadCityBoundaryFromAsset() {
+  const res = await fetch(cityBoundaryAssetUrl)
+
+  if (!res.ok) throw new Error(CITY_BOUNDARY_ASSET_LOAD_ERROR)
+
+  return res.json() as Promise<Topology>
+}
+
+async function cacheCityBoundary(topojson: Topology) {
+  await writeCityBoundaryCache({
+    topojson,
+    assetUrl: cityBoundaryAssetUrl,
+    updatedAt: new Date().toISOString()
+  })
+}
+
+async function refreshCityBoundaryFromAsset(dispatch: AppDispatch) {
+  const topo = await loadCityBoundaryFromAsset()
+  const geo = convertCityBoundaryToGeoJSON(topo)
+
+  dispatch(setGeoJSON(geo))
+
   try {
-    const url = 'https://cdn.jsdelivr.net/npm/taiwan-atlas/counties-10t.json'
-    const res = await fetch(url)
-    if (!res.ok) throw new Error('Failed to fetch city GeoJSON API.')
-    const topo: Topology = await res.json()
-    const geo = feature(topo, topo.objects.counties)
-    if (geo.type === 'FeatureCollection') {
-      dispatch(setGeoJSON(geo))
-      localStorage.setItem('cityGeoJSON', JSON.stringify(geo))
-    } else {
-      throw new Error('Fetched TopoJSON is not a FeatureCollection.')
+    await cacheCityBoundary(topo)
+  } catch (err) {
+    console.warn('city-boundary cache write failed:', err)
+  }
+}
+
+function isCurrentCityBoundaryCache(assetUrl: string | undefined) {
+  return assetUrl === cityBoundaryAssetUrl
+}
+
+export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
+  try {
+    const cachedCityBoundary = await loadCityBoundaryFromCache()
+
+    dispatch(setGeoJSON(cachedCityBoundary.geojson))
+
+    if (isCurrentCityBoundaryCache(cachedCityBoundary.assetUrl)) {
+      return
     }
+
+    try {
+      await refreshCityBoundaryFromAsset(dispatch)
+    } catch (err) {
+      console.error('fetchCityGeoJSON refresh after cache hit failed:', err)
+    }
+
+    return
+  } catch (err) {
+    if (!(err instanceof CityBoundaryCacheMissError)) {
+      console.warn('fetchCityGeoJSON cache unavailable, falling back to asset:', err)
+    }
+  }
+
+  dispatch(setLoading(true))
+
+  try {
+    await refreshCityBoundaryFromAsset(dispatch)
   } catch (err) {
     console.error('fetchCityGeoJSON error:', err)
-    const backup = localStorage.getItem('cityGeoJSON')
-    if (backup) {
-      dispatch(setGeoJSON(JSON.parse(backup)))
-      dispatch(setError('Failed to fetch city GeoJSON API. Using cached backup data.'))
-    }
+    dispatch(setError(CITY_BOUNDARY_LOAD_ERROR))
   }
 }
 
