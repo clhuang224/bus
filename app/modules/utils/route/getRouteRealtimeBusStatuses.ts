@@ -1,6 +1,6 @@
 import type { TFunction } from 'i18next'
 import type { AppLocaleType } from '../../enums/AppLocaleType'
-import { TdxA2EventType } from '../../enums/VehicleStateType'
+import { VehicleStateType } from '../../enums/VehicleStateType'
 import { stopStatusTranslationKeyMap } from '../../consts/stopStatus'
 import { StopStatusType } from '../../enums/StopStatusType'
 import type { EstimatedArrival } from '../../interfaces/EstimatedArrival'
@@ -8,7 +8,6 @@ import type { RealtimeNearStop } from '../../interfaces/RealtimeNearStop'
 import type { RouteRealtimeBusStatus } from '../../interfaces/RouteRealtimeBusStatus'
 import { getLocalizedText } from '../i18n/getLocalizedText'
 import { normalizePlateNumb } from './normalizePlateNumb'
-import { transformTdxVehicleState } from './transformTdxVehicleState'
 
 function getStopStatusLabel(t: TFunction, stopStatus: StopStatusType) {
   return t(stopStatusTranslationKeyMap[stopStatus])
@@ -40,6 +39,7 @@ export function getRouteRealtimeBusStatuses(
 ): RouteRealtimeBusStatus[] {
   return realtimeBuses
     .map((realtimeBus) => {
+      const vehicleState = realtimeBus.vehicleState ?? undefined
       const realtimePlateNumb = normalizePlateNumb(realtimeBus.PlateNumb)
       const plateMatchedArrival = estimatedArrivals.find((estimatedArrival) => {
         if (!estimatedArrival.PlateNumb) {
@@ -90,7 +90,7 @@ export function getRouteRealtimeBusStatuses(
 
           return left.StopSequence - right.StopSequence
         })[0]
-      const matchedArrival = realtimeBus.A2EventType === TdxA2EventType.DEPARTED
+      const matchedArrival = vehicleState === VehicleStateType.DEPARTED
         ? nextEstimatedArrival ?? plateMatchedArrival ?? stopMatchedArrival
         : stopMatchedArrival ?? plateMatchedArrival ?? nextEstimatedArrival
       const estimateLabel = matchedArrival
@@ -114,7 +114,7 @@ export function getRouteRealtimeBusStatuses(
         stopName: getLocalizedText(realtimeBus.StopName, locale),
         stopSequence: realtimeBus.StopSequence,
         subRouteUID: realtimeBus.SubRouteUID ?? '',
-        vehicleState: transformTdxVehicleState(realtimeBus.A2EventType)
+        vehicleState
       }
     })
     .sort((left, right) => {
