@@ -105,10 +105,19 @@ export const RouteStopList = ({
                 const stopLevelRealtimeBuses = stop.realtimeBuses.filter((bus) => bus.vehicleState == null)
                 const departedBuses = stop.realtimeBuses.filter((bus) => bus.vehicleState === VehicleStateType.DEPARTED)
                 const arrivingBuses = nextStop?.realtimeBuses.filter((bus) => bus.vehicleState === VehicleStateType.ARRIVING) ?? []
+                const gapRealtimeBuses = [...departedBuses, ...arrivingBuses]
 
                 return (
                   <Timeline.Item
                     key={stop.id}
+                    styles={{
+                      item: {
+                        marginTop: 0
+                      },
+                      itemBody: {
+                        marginTop: 0
+                      }
+                    }}
                     bullet={(
                       <Box
                         w={28}
@@ -206,8 +215,7 @@ export const RouteStopList = ({
                   >
                     {nextStop && (
                       <RouteRealtimeGap
-                        arrivingBuses={arrivingBuses}
-                        departedBuses={departedBuses}
+                        realtimeBuses={gapRealtimeBuses}
                         onSelectVehicle={onSelectVehicle}
                         selectedVehicleId={selectedVehicleId}
                       />

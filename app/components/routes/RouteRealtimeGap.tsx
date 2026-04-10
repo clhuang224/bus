@@ -1,25 +1,33 @@
-import { Box, Group, Stack } from '@mantine/core'
+import { Box, Group } from '@mantine/core'
 import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeBusStatus'
 import { RouteRealtimeBadge } from './RouteRealtimeBadge'
 
+const ROUTE_STOP_FAVORITE_ACTION_WIDTH = 36
+const ROUTE_STOP_FAVORITE_ACTION_OFFSET = `calc(${ROUTE_STOP_FAVORITE_ACTION_WIDTH / 16}rem * var(--mantine-scale) + var(--mantine-spacing-xs))`
+
 interface PropType {
-  arrivingBuses: RouteRealtimeBusStatus[]
-  departedBuses: RouteRealtimeBusStatus[]
+  realtimeBuses: RouteRealtimeBusStatus[]
   onSelectVehicle: (vehicleId: string) => void
   selectedVehicleId?: string | null
 }
 
 export function RouteRealtimeGap({
-  arrivingBuses,
-  departedBuses,
+  realtimeBuses,
   onSelectVehicle,
   selectedVehicleId = null
 }: PropType) {
   return (
-    <Box data-testid="route-realtime-gap" pr="sm" py={2} mih={44}>
-      <Stack gap={2} align="flex-end" justify="center">
-        <Group data-gap-slot="departed" gap="xs" wrap="wrap" justify="flex-end" mih={20}>
-          {departedBuses.map((bus) => (
+    <Box data-testid="route-realtime-gap" mih={28} pr="sm">
+      <Group wrap="nowrap" justify="flex-end" align="center">
+        <Group
+          data-testid="route-realtime-gap-badges"
+          gap="xs"
+          wrap="wrap"
+          justify="flex-end"
+          pr={ROUTE_STOP_FAVORITE_ACTION_OFFSET}
+          style={{ flex: 1, minHeight: 28 }}
+        >
+          {realtimeBuses.map((bus) => (
             <RouteRealtimeBadge
               key={bus.id}
               isSelected={bus.id === selectedVehicleId}
@@ -31,20 +39,7 @@ export function RouteRealtimeGap({
             />
           ))}
         </Group>
-        <Group data-gap-slot="arriving" gap="xs" wrap="wrap" justify="flex-end" mih={20}>
-          {arrivingBuses.map((bus) => (
-            <RouteRealtimeBadge
-              key={bus.id}
-              isSelected={bus.id === selectedVehicleId}
-              plateNumb={bus.plateNumb}
-              onClick={(event) => {
-                event.stopPropagation()
-                onSelectVehicle(bus.id)
-              }}
-            />
-          ))}
-        </Group>
-      </Stack>
+      </Group>
     </Box>
   )
 }

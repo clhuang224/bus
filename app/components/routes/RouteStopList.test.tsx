@@ -241,7 +241,7 @@ describe('RouteStopList', () => {
     expect(screen.getByRole('button', { name: 'ABC-123' })).toHaveAttribute('aria-pressed', 'true')
   })
 
-  it('renders departed and arriving vehicle badges in the gap between stops', () => {
+  it('renders departed and arriving vehicle badges together in the gap between stops', () => {
     renderWithMantine(
       <RouteStopList
         stops={[
@@ -281,8 +281,12 @@ describe('RouteStopList', () => {
       />
     )
 
-    expect(screen.getByText('ABC-456').closest('[data-gap-slot="departed"]')).toBeInTheDocument()
-    expect(screen.getByText('ABC-123').closest('[data-gap-slot="arriving"]')).toBeInTheDocument()
+    expect(screen.getByText('ABC-456').closest('[data-testid="route-realtime-gap-badges"]')).toBeInTheDocument()
+    expect(screen.getByText('ABC-123').closest('[data-testid="route-realtime-gap-badges"]')).toBeInTheDocument()
+    expect(screen.getByTestId('route-realtime-gap')).toHaveStyle('padding-right: var(--mantine-spacing-sm)')
+    expect(screen.getByTestId('route-realtime-gap-badges')).toHaveStyle(
+      'padding-right: calc(2.25rem * var(--mantine-scale) + var(--mantine-spacing-xs))'
+    )
   })
 
   it('keeps a fixed realtime gap between stops even when no vehicle badges are present', () => {
@@ -316,7 +320,7 @@ describe('RouteStopList', () => {
 
     expect(screen.getByText('市政府')).toBeInTheDocument()
     expect(screen.getByText('捷運昆陽站')).toBeInTheDocument()
-    expect(screen.getByTestId('route-realtime-gap')).toHaveStyle('min-height: calc(2.75rem * var(--mantine-scale))')
+    expect(screen.getByTestId('route-realtime-gap')).toHaveStyle('min-height: calc(1.75rem * var(--mantine-scale))')
     expect(screen.queryByRole('button', { name: 'ABC-123' })).not.toBeInTheDocument()
   })
 })
