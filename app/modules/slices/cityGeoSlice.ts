@@ -43,7 +43,7 @@ function convertCityBoundaryToGeoJSON(topo: Topology): FeatureCollection {
   const geo = feature(topo, topo.objects.counties)
 
   if (geo.type !== 'FeatureCollection') {
-    throw new Error('Fetched TopoJSON is not a FeatureCollection.')
+    throw new Error('City boundary TopoJSON is not a FeatureCollection.')
   }
 
   return geo
