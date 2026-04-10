@@ -12,7 +12,14 @@ export interface CityBoundaryCacheRecord {
 
 function openCityBoundaryDatabase() {
   return new Promise<IDBDatabase>((resolve, reject) => {
-    const request = window.indexedDB.open(CITY_BOUNDARY_DB_NAME, CITY_BOUNDARY_DB_VERSION)
+    const indexedDB = globalThis.indexedDB
+
+    if (!indexedDB) {
+      reject(new Error('IndexedDB is unavailable in this environment.'))
+      return
+    }
+
+    const request = indexedDB.open(CITY_BOUNDARY_DB_NAME, CITY_BOUNDARY_DB_VERSION)
 
     request.onerror = () => {
       reject(request.error ?? new Error('Failed to open city boundary IndexedDB.'))
