@@ -1,6 +1,6 @@
 import type { TFunction } from 'i18next'
-import { A2EventType } from '../../enums/A2EventType'
 import type { AppLocaleType } from '../../enums/AppLocaleType'
+import { TdxA2EventType } from '../../enums/VehicleStateType'
 import { stopStatusTranslationKeyMap } from '../../consts/stopStatus'
 import { StopStatusType } from '../../enums/StopStatusType'
 import type { EstimatedArrival } from '../../interfaces/EstimatedArrival'
@@ -8,6 +8,7 @@ import type { RealtimeNearStop } from '../../interfaces/RealtimeNearStop'
 import type { RouteRealtimeBusStatus } from '../../interfaces/RouteRealtimeBusStatus'
 import { getLocalizedText } from '../i18n/getLocalizedText'
 import { normalizePlateNumb } from './normalizePlateNumb'
+import { transformTdxVehicleState } from './transformTdxVehicleState'
 
 function getStopStatusLabel(t: TFunction, stopStatus: StopStatusType) {
   return t(stopStatusTranslationKeyMap[stopStatus])
@@ -89,7 +90,7 @@ export function getRouteRealtimeBusStatuses(
 
           return left.StopSequence - right.StopSequence
         })[0]
-      const matchedArrival = realtimeBus.A2EventType === A2EventType.DEPARTED
+      const matchedArrival = realtimeBus.A2EventType === TdxA2EventType.DEPARTED
         ? nextEstimatedArrival ?? plateMatchedArrival ?? stopMatchedArrival
         : stopMatchedArrival ?? plateMatchedArrival ?? nextEstimatedArrival
       const estimateLabel = matchedArrival
@@ -101,7 +102,6 @@ export function getRouteRealtimeBusStatuses(
         [StopStatusType.NOT_YET_DEPARTED, StopStatusType.UNKNOWN].includes(matchedArrival.StopStatus)
 
       return {
-        a2EventType: realtimeBus.A2EventType,
         direction: realtimeBus.Direction,
         estimateLabel: shouldUseRealtimeFallbackLabel
           ? getRealtimeFallbackLabel(t, matchedArrival.StopStatus)
@@ -113,7 +113,8 @@ export function getRouteRealtimeBusStatuses(
         plateNumb: realtimeBus.PlateNumb,
         stopName: getLocalizedText(realtimeBus.StopName, locale),
         stopSequence: realtimeBus.StopSequence,
-        subRouteUID: realtimeBus.SubRouteUID ?? ''
+        subRouteUID: realtimeBus.SubRouteUID ?? '',
+        vehicleState: transformTdxVehicleState(realtimeBus.A2EventType)
       }
     })
     .sort((left, right) => {

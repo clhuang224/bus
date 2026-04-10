@@ -170,9 +170,9 @@ export const RouteStopList = ({
                               {stop.realtimeBuses.map((bus) => (
                                 <RouteRealtimeBadge
                                   key={bus.id}
-                                  a2EventType={bus.a2EventType}
                                   isSelected={bus.id === selectedVehicleId}
                                   plateNumb={bus.plateNumb}
+                                  vehicleState={bus.vehicleState}
                                   onClick={(event) => {
                                     event.stopPropagation()
                                     onSelectVehicle(bus.id)

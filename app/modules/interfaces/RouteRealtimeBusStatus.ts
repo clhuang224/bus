@@ -1,8 +1,7 @@
-import type { A2EventType } from '../enums/A2EventType'
 import type { DirectionType } from '../enums/DirectionType'
+import type { VehicleStateType } from '../enums/VehicleStateType'
 
 export interface RouteRealtimeBusStatus {
-  a2EventType?: A2EventType | null
   direction: DirectionType
   estimateLabel: string
   estimateMinutes: number | null
@@ -11,4 +10,5 @@ export interface RouteRealtimeBusStatus {
   stopName: string
   stopSequence: number
   subRouteUID: string
+  vehicleState?: VehicleStateType
 }

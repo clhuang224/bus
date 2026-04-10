@@ -1,4 +1,4 @@
-import type { A2EventType } from '../enums/A2EventType'
+import type { TdxA2EventType } from '../enums/VehicleStateType'
 import type { BusStatusType } from '../enums/BusStatusType'
 import type { CityNameType } from '../enums/CityNameType'
 import type { DirectionType } from '../enums/DirectionType'
@@ -25,7 +25,7 @@ export interface TdxRealtimeNearStop<L = TdxLocalizedText, D = string> {
   MessageType?: MessageType | null
   DutyStatus: DutyStatusType | null
   BusStatus: BusStatusType | null
-  A2EventType?: A2EventType | null
+  A2EventType?: TdxA2EventType | null
   GPSTime: D
   TripStartTimeType: TripStartTimeType
   TripStartTime?: D | null

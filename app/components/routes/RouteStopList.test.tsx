@@ -3,9 +3,9 @@
 import { fireEvent, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { DEFAULT_APP_LOCALE } from '~/modules/consts/i18n'
-import { A2EventType } from '~/modules/enums/A2EventType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
+import { VehicleStateType } from '~/modules/enums/VehicleStateType'
 import i18n from '~/modules/i18n'
 import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeBusStatus'
 import { renderWithMantine } from '~/test/render'
@@ -32,7 +32,6 @@ const favoriteRouteStop = {
 }
 
 const realtimeBus: RouteRealtimeBusStatus = {
-  a2EventType: A2EventType.ARRIVING,
   direction: DirectionType.GO,
   estimateLabel: t('routePage.realtime.minutesAway', { count: 4 }),
   estimateMinutes: 4,
@@ -40,7 +39,8 @@ const realtimeBus: RouteRealtimeBusStatus = {
   plateNumb: 'ABC-123',
   stopName: '市政府',
   stopSequence: 1,
-  subRouteUID: 'subroute-1'
+  subRouteUID: 'subroute-1',
+  vehicleState: VehicleStateType.ARRIVING
 }
 
 describe('RouteStopList', () => {
@@ -212,9 +212,9 @@ describe('RouteStopList', () => {
             realtimeBus,
             {
               ...realtimeBus,
-              a2EventType: A2EventType.DEPARTED,
               id: 'bus-2',
-              plateNumb: 'ABC-456'
+              plateNumb: 'ABC-456',
+              vehicleState: VehicleStateType.DEPARTED
             }
           ],
           sequence: 1,
@@ -226,11 +226,11 @@ describe('RouteStopList', () => {
       />
     )
 
-    expect(screen.getByText('ABC-123').closest('[data-movement-state="arriving"]')).toHaveStyle({
-      transform: 'translateY(-2px)'
+    expect(screen.getByText('ABC-123').closest('[data-vehicle-state="arriving"]')).toHaveStyle({
+      transform: 'translateY(-46px)'
     })
-    expect(screen.getByText('ABC-456').closest('[data-movement-state="departed"]')).toHaveStyle({
-      transform: 'translateY(6px)'
+    expect(screen.getByText('ABC-456').closest('[data-vehicle-state="departed"]')).toHaveStyle({
+      transform: 'translateY(46px)'
     })
   })
 })
