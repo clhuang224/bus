@@ -101,9 +101,17 @@ export const RouteStopList = ({
               {stops.map((stop, stopIndex) => {
                 const isHighlighted = stop.id === highlightedStopId
                 const isSelected = stop.id === selectedStopId
+                const isFirstStop = stopIndex === 0
                 const nextStop = stops[stopIndex + 1]
-                const stopLevelRealtimeBuses = stop.realtimeBuses.filter((bus) => bus.vehicleState == null)
-                const departedBuses = stop.realtimeBuses.filter((bus) => bus.vehicleState === VehicleStateType.DEPARTED)
+                const isLastStop = nextStop == null
+                const stopLevelRealtimeBuses = stop.realtimeBuses.filter((bus) =>
+                  bus.vehicleState == null ||
+                  (isFirstStop && bus.vehicleState === VehicleStateType.ARRIVING) ||
+                  (isLastStop && bus.vehicleState === VehicleStateType.DEPARTED)
+                )
+                const departedBuses = isLastStop
+                  ? []
+                  : stop.realtimeBuses.filter((bus) => bus.vehicleState === VehicleStateType.DEPARTED)
                 const arrivingBuses = nextStop?.realtimeBuses.filter((bus) => bus.vehicleState === VehicleStateType.ARRIVING) ?? []
                 const gapRealtimeBuses = [...departedBuses, ...arrivingBuses]
 

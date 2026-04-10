@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { fireEvent, screen } from '@testing-library/react'
+import { fireEvent, screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { DEFAULT_APP_LOCALE } from '~/modules/consts/i18n'
 import { CityNameType } from '~/modules/enums/CityNameType'
@@ -322,5 +322,76 @@ describe('RouteStopList', () => {
     expect(screen.getByText('捷運昆陽站')).toBeInTheDocument()
     expect(screen.getByTestId('route-realtime-gap')).toHaveStyle('min-height: calc(1.75rem * var(--mantine-scale))')
     expect(screen.queryByRole('button', { name: 'ABC-123' })).not.toBeInTheDocument()
+  })
+
+  it('keeps arriving endpoint vehicles on the first stop row', () => {
+    renderWithMantine(
+      <RouteStopList
+        stops={[
+          {
+            estimatedArrivalLabel: null,
+            id: 'stop-1',
+            favoriteRouteStop,
+            name: '市政府',
+            realtimeBuses: [realtimeBus],
+            sequence: 1,
+            isFavorite: false
+          },
+          {
+            estimatedArrivalLabel: null,
+            id: 'stop-2',
+            favoriteRouteStop: secondFavoriteRouteStop,
+            name: '捷運昆陽站',
+            realtimeBuses: [],
+            sequence: 2,
+            isFavorite: false
+          }
+        ]}
+        onSelectStop={vi.fn()}
+        onSelectVehicle={vi.fn()}
+        onToggleFavorite={vi.fn()}
+      />
+    )
+
+    expect(screen.getByText('ABC-123')).toBeInTheDocument()
+    expect(within(screen.getByTestId('route-realtime-gap-badges')).queryByText('ABC-123')).not.toBeInTheDocument()
+  })
+
+  it('keeps departed endpoint vehicles on the last stop row', () => {
+    renderWithMantine(
+      <RouteStopList
+        stops={[
+          {
+            estimatedArrivalLabel: null,
+            id: 'stop-1',
+            favoriteRouteStop,
+            name: '市政府',
+            realtimeBuses: [],
+            sequence: 1,
+            isFavorite: false
+          },
+          {
+            estimatedArrivalLabel: null,
+            id: 'stop-2',
+            favoriteRouteStop: secondFavoriteRouteStop,
+            name: '捷運昆陽站',
+            realtimeBuses: [{
+              ...realtimeBus,
+              id: 'bus-2',
+              plateNumb: 'ABC-456',
+              vehicleState: VehicleStateType.DEPARTED
+            }],
+            sequence: 2,
+            isFavorite: false
+          }
+        ]}
+        onSelectStop={vi.fn()}
+        onSelectVehicle={vi.fn()}
+        onToggleFavorite={vi.fn()}
+      />
+    )
+
+    expect(screen.getByText('ABC-456')).toBeInTheDocument()
+    expect(within(screen.getByTestId('route-realtime-gap-badges')).queryByText('ABC-456')).not.toBeInTheDocument()
   })
 })
