@@ -40,7 +40,13 @@ const cityGeoSlice = createSlice({
 export const { setGeoJSON, setLoading, setError } = cityGeoSlice.actions
 
 function convertCityBoundaryToGeoJSON(topo: Topology): FeatureCollection {
-  const geo = feature(topo, topo.objects.counties)
+  const counties = topo.objects?.counties
+
+  if (!counties) {
+    throw new Error('City boundary TopoJSON is missing objects.counties.')
+  }
+
+  const geo = feature(topo, counties)
 
   if (geo.type !== 'FeatureCollection') {
     throw new Error('City boundary TopoJSON is not a FeatureCollection.')
