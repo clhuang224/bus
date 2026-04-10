@@ -39,7 +39,7 @@ const cityGeoSlice = createSlice({
 
 export const { setGeoJSON, setLoading, setError } = cityGeoSlice.actions
 
-function getCityGeoFeatureCollection(topo: Topology): FeatureCollection {
+function convertCityBoundaryToGeoJSON(topo: Topology): FeatureCollection {
   const geo = feature(topo, topo.objects.counties)
 
   if (geo.type !== 'FeatureCollection') {
@@ -49,26 +49,51 @@ function getCityGeoFeatureCollection(topo: Topology): FeatureCollection {
   return geo
 }
 
-export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
+async function loadCityBoundaryFromCache() {
   const cachedCityBoundary = await readCityBoundaryCache()
 
+  if (!cachedCityBoundary) {
+    return null
+  }
+
+  return {
+    ...cachedCityBoundary,
+    geojson: convertCityBoundaryToGeoJSON(cachedCityBoundary.topojson)
+  }
+}
+
+async function loadCityBoundaryFromAsset() {
+  const res = await fetch(cityBoundaryAssetUrl)
+
+  if (!res.ok) {
+    throw new Error('Failed to load city boundary asset.')
+  }
+
+  return res.json() as Promise<Topology>
+}
+
+async function cacheCityBoundary(topojson: Topology) {
+  await writeCityBoundaryCache({
+    topojson,
+    updatedAt: new Date().toISOString()
+  })
+}
+
+export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
+  const cachedCityBoundary = await loadCityBoundaryFromCache()
+
   if (cachedCityBoundary) {
-    dispatch(setGeoJSON(getCityGeoFeatureCollection(cachedCityBoundary.topojson)))
+    dispatch(setGeoJSON(cachedCityBoundary.geojson))
   } else {
     dispatch(setLoading(true))
   }
 
   try {
-    const res = await fetch(cityBoundaryAssetUrl)
-    if (!res.ok) throw new Error('Failed to load city boundary asset.')
-    const topo: Topology = await res.json()
-    const geo = getCityGeoFeatureCollection(topo)
+    const topo = await loadCityBoundaryFromAsset()
+    const geo = convertCityBoundaryToGeoJSON(topo)
 
     dispatch(setGeoJSON(geo))
-    await writeCityBoundaryCache({
-      topojson: topo,
-      updatedAt: new Date().toISOString()
-    })
+    await cacheCityBoundary(topo)
   } catch (err) {
     console.error('fetchCityGeoJSON error:', err)
 
