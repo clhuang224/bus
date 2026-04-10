@@ -3,6 +3,7 @@ import { feature } from 'topojson-client'
 import type { FeatureCollection } from 'geojson'
 import type { Topology } from 'topojson-specification'
 import type { AppDispatch } from '../store'
+import { readCityGeoCache, writeCityGeoCache } from '../utils/geo/cityGeoPersistence'
 
 export interface CityGeoState {
   geojson: FeatureCollection | null
@@ -47,17 +48,23 @@ export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
     const geo = feature(topo, topo.objects.counties)
     if (geo.type === 'FeatureCollection') {
       dispatch(setGeoJSON(geo))
-      localStorage.setItem('cityGeoJSON', JSON.stringify(geo))
+      await writeCityGeoCache({
+        geojson: geo,
+        updatedAt: new Date().toISOString()
+      })
     } else {
       throw new Error('Fetched TopoJSON is not a FeatureCollection.')
     }
   } catch (err) {
     console.error('fetchCityGeoJSON error:', err)
-    const backup = localStorage.getItem('cityGeoJSON')
+    const backup = await readCityGeoCache()
     if (backup) {
-      dispatch(setGeoJSON(JSON.parse(backup)))
+      dispatch(setGeoJSON(backup.geojson))
       dispatch(setError('Failed to fetch city GeoJSON API. Using cached backup data.'))
+      return
     }
+
+    dispatch(setError('Failed to fetch city GeoJSON API.'))
   }
 }
 
