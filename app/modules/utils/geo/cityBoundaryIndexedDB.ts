@@ -26,6 +26,10 @@ function openCityBoundaryDatabase() {
       reject(request.error ?? new Error('Failed to open city boundary IndexedDB.'))
     }
 
+    request.onblocked = () => {
+      reject(new Error('City boundary IndexedDB open was blocked by another open connection.'))
+    }
+
     request.onupgradeneeded = () => {
       const database = request.result
 
@@ -35,7 +39,11 @@ function openCityBoundaryDatabase() {
     }
 
     request.onsuccess = () => {
-      resolve(request.result)
+      const database = request.result
+      database.onversionchange = () => {
+        database.close()
+      }
+      resolve(database)
     }
   })
 }
