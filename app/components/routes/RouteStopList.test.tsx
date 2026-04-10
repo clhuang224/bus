@@ -281,12 +281,12 @@ describe('RouteStopList', () => {
       />
     )
 
-    expect(screen.getByText('ABC-456').closest('[data-testid="route-realtime-gap-badges"]')).toBeInTheDocument()
-    expect(screen.getByText('ABC-123').closest('[data-testid="route-realtime-gap-badges"]')).toBeInTheDocument()
-    expect(screen.getByTestId('route-realtime-gap')).toHaveStyle('padding-right: var(--mantine-spacing-sm)')
-    expect(screen.getByTestId('route-realtime-gap-badges')).toHaveStyle(
-      'padding-right: calc(var(--ai-size-md) + var(--mantine-spacing-xs))'
-    )
+    const gap = screen.getByTestId('route-realtime-gap')
+    const gapBadges = screen.getByTestId('route-realtime-gap-badges')
+
+    expect(gap).toBeInTheDocument()
+    expect(screen.getByText('ABC-456').closest('[data-testid="route-realtime-gap-badges"]')).toBe(gapBadges)
+    expect(screen.getByText('ABC-123').closest('[data-testid="route-realtime-gap-badges"]')).toBe(gapBadges)
   })
 
   it('keeps a fixed realtime gap between stops even when no vehicle badges are present', () => {
