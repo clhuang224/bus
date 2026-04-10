@@ -7,6 +7,7 @@ const CITY_BOUNDARY_CACHE_KEY = 'counties'
 
 export interface CityBoundaryCacheRecord {
   topojson: Topology
+  assetUrl?: string
   updatedAt: string
 }
 

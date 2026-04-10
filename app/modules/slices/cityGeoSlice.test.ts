@@ -2,6 +2,7 @@ import type { FeatureCollection } from 'geojson'
 import type { Topology } from 'topojson-specification'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fetchCityGeoJSON, setGeoJSON, setLoading } from './cityGeoSlice'
+import cityBoundaryAssetUrl from '../assets/taiwan-counties-10t.json?url'
 
 const {
   mockFeature,
@@ -68,11 +69,32 @@ describe('cityGeoSlice', () => {
     expect(mockFeature).toHaveBeenCalledWith(mockTopoJson, mockTopoJson.objects.counties)
     expect(mockWriteCityBoundaryCache).toHaveBeenCalledWith({
       topojson: mockTopoJson,
+      assetUrl: cityBoundaryAssetUrl,
       updatedAt: expect.any(String)
     })
   })
 
-  it('loads IndexedDB cache before fetching fresh city geo data', async () => {
+  it('skips asset refresh when IndexedDB cache matches the current asset version', async () => {
+    const dispatch = vi.fn()
+    const fetchMock = vi.spyOn(globalThis, 'fetch')
+
+    mockReadCityBoundaryCache.mockResolvedValue({
+      topojson: mockTopoJson,
+      assetUrl: cityBoundaryAssetUrl,
+      updatedAt: '2026-04-11T00:00:00.000Z'
+    })
+    mockFeature.mockReturnValue(mockGeoJson)
+
+    await fetchCityGeoJSON()(dispatch as never)
+
+    expect(mockReadCityBoundaryCache).toHaveBeenCalledOnce()
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(mockFeature).toHaveBeenCalledOnce()
+    expect(mockFeature).toHaveBeenCalledWith(mockTopoJson, mockTopoJson.objects.counties)
+    expect(dispatch).toHaveBeenNthCalledWith(1, setGeoJSON(mockGeoJson))
+  })
+
+  it('refreshes from the asset when IndexedDB cache is from an older asset version', async () => {
     const dispatch = vi.fn()
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,
@@ -81,6 +103,7 @@ describe('cityGeoSlice', () => {
 
     mockReadCityBoundaryCache.mockResolvedValue({
       topojson: mockTopoJson,
+      assetUrl: '/assets/old-city-boundary.json',
       updatedAt: '2026-04-11T00:00:00.000Z'
     })
     mockFeature.mockReturnValue(mockGeoJson)
@@ -101,6 +124,7 @@ describe('cityGeoSlice', () => {
 
     mockReadCityBoundaryCache.mockResolvedValue({
       topojson: mockTopoJson,
+      assetUrl: '/assets/old-city-boundary.json',
       updatedAt: '2026-04-11T00:00:00.000Z'
     })
     mockFeature.mockReturnValue(mockGeoJson)

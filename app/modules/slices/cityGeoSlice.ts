@@ -81,6 +81,7 @@ async function loadCityBoundaryFromAsset() {
 async function cacheCityBoundary(topojson: Topology) {
   await writeCityBoundaryCache({
     topojson,
+    assetUrl: cityBoundaryAssetUrl,
     updatedAt: new Date().toISOString()
   })
 }
@@ -98,11 +99,19 @@ async function refreshCityBoundaryFromAsset(dispatch: AppDispatch) {
   }
 }
 
+function isCurrentCityBoundaryCache(assetUrl: string | undefined) {
+  return assetUrl === cityBoundaryAssetUrl
+}
+
 export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
   try {
     const cachedCityBoundary = await loadCityBoundaryFromCache()
 
     dispatch(setGeoJSON(cachedCityBoundary.geojson))
+
+    if (isCurrentCityBoundaryCache(cachedCityBoundary.assetUrl)) {
+      return
+    }
 
     try {
       await refreshCityBoundaryFromAsset(dispatch)
