@@ -118,6 +118,7 @@ export const RouteStopList = ({
                 return (
                   <Timeline.Item
                     key={stop.id}
+                    data-testid={`route-stop-${stop.id}`}
                     styles={{
                       item: {
                         marginTop: 0

@@ -51,6 +51,10 @@ const secondFavoriteRouteStop = {
   stopUID: 'stop-2'
 }
 
+function getStopItemById(stopId: string): HTMLElement {
+  return screen.getByTestId(`route-stop-${stopId}`)
+}
+
 describe('RouteStopList', () => {
   it('selects a stop when the stop row is clicked', () => {
     const handleSelectStop = vi.fn()
@@ -281,12 +285,10 @@ describe('RouteStopList', () => {
       />
     )
 
-    const gap = screen.getByTestId('route-realtime-gap')
-    const gapBadges = screen.getByTestId('route-realtime-gap-badges')
+    const firstStopItem = getStopItemById('stop-1')
 
-    expect(gap).toBeInTheDocument()
-    expect(screen.getByText('ABC-456').closest('[data-testid="route-realtime-gap-badges"]')).toBe(gapBadges)
-    expect(screen.getByText('ABC-123').closest('[data-testid="route-realtime-gap-badges"]')).toBe(gapBadges)
+    expect(within(firstStopItem).getByRole('button', { name: 'ABC-456' })).toBeInTheDocument()
+    expect(within(firstStopItem).getByRole('button', { name: 'ABC-123' })).toBeInTheDocument()
   })
 
   it('keeps a fixed realtime gap between stops even when no vehicle badges are present', () => {
@@ -318,9 +320,12 @@ describe('RouteStopList', () => {
       />
     )
 
+    const firstStopItem = getStopItemById('stop-1')
+
     expect(screen.getByText('市政府')).toBeInTheDocument()
     expect(screen.getByText('捷運昆陽站')).toBeInTheDocument()
-    expect(screen.getByTestId('route-realtime-gap')).toBeInTheDocument()
+    expect(within(firstStopItem).queryByRole('button', { name: 'ABC-123' })).not.toBeInTheDocument()
+    expect(within(firstStopItem).queryByRole('button', { name: 'ABC-456' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'ABC-123' })).not.toBeInTheDocument()
   })
 
@@ -353,8 +358,11 @@ describe('RouteStopList', () => {
       />
     )
 
-    expect(screen.getByText('ABC-123')).toBeInTheDocument()
-    expect(within(screen.getByTestId('route-realtime-gap-badges')).queryByText('ABC-123')).not.toBeInTheDocument()
+    const firstStopItem = getStopItemById('stop-1')
+    const secondStopItem = getStopItemById('stop-2')
+
+    expect(within(firstStopItem).getByRole('button', { name: 'ABC-123' })).toBeInTheDocument()
+    expect(within(secondStopItem).queryByRole('button', { name: 'ABC-123' })).not.toBeInTheDocument()
   })
 
   it('keeps departed endpoint vehicles on the last stop row', () => {
@@ -391,7 +399,10 @@ describe('RouteStopList', () => {
       />
     )
 
-    expect(screen.getByText('ABC-456')).toBeInTheDocument()
-    expect(within(screen.getByTestId('route-realtime-gap-badges')).queryByText('ABC-456')).not.toBeInTheDocument()
+    const firstStopItem = getStopItemById('stop-1')
+    const secondStopItem = getStopItemById('stop-2')
+
+    expect(within(secondStopItem).getByRole('button', { name: 'ABC-456' })).toBeInTheDocument()
+    expect(within(firstStopItem).queryByRole('button', { name: 'ABC-456' })).not.toBeInTheDocument()
   })
 })

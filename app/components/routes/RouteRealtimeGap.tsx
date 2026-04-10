@@ -16,10 +16,9 @@ export function RouteRealtimeGap({
   selectedVehicleId = null
 }: PropType) {
   return (
-    <Box data-testid="route-realtime-gap" mih={28} pr="sm">
+    <Box mih={28} pr="sm">
       <Group wrap="nowrap" justify="flex-end" align="center">
         <Group
-          data-testid="route-realtime-gap-badges"
           gap="xs"
           wrap="wrap"
           justify="flex-end"
