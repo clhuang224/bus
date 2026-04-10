@@ -101,6 +101,7 @@ export function getRouteRealtimeBusStatuses(
         [StopStatusType.NOT_YET_DEPARTED, StopStatusType.UNKNOWN].includes(matchedArrival.StopStatus)
 
       return {
+        a2EventType: realtimeBus.A2EventType,
         direction: realtimeBus.Direction,
         estimateLabel: shouldUseRealtimeFallbackLabel
           ? getRealtimeFallbackLabel(t, matchedArrival.StopStatus)

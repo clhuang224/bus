@@ -66,6 +66,7 @@ describe('getRouteRealtimeBusStatuses', () => {
 
     expect(getRouteRealtimeBusStatuses(i18n.t, DEFAULT_APP_LOCALE, realtimeBuses, estimatedArrivals)).toEqual([
       expect.objectContaining({
+        a2EventType: A2EventType.DEPARTED,
         estimateLabel: fourMinutesAwayLabel,
         estimateMinutes: 4,
         plateNumb: 'ABC-123',

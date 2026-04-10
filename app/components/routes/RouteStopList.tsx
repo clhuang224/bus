@@ -1,5 +1,5 @@
-import { ActionIcon, Alert, Badge, Box, Group, ScrollArea, Skeleton, Stack, Text, Timeline } from '@mantine/core'
-import { RiBus2Fill, RiHeart2Fill, RiHeart2Line } from '@remixicon/react'
+import { ActionIcon, Alert, Box, Group, ScrollArea, Skeleton, Stack, Text, Timeline } from '@mantine/core'
+import { RiHeart2Fill, RiHeart2Line } from '@remixicon/react'
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getRouteRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
@@ -8,6 +8,7 @@ import { useScrollSelectedItem } from '~/modules/hooks/useScrollSelectedItem'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeBusStatus'
 import { SkeletonList } from '../common/SkeletonList'
+import { RouteRealtimeBadge } from './RouteRealtimeBadge'
 
 export interface RouteStopListItem {
   estimatedArrivalLabel: string | null
@@ -167,30 +168,16 @@ export const RouteStopList = ({
                             <Group pr="sm" gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
                             <Group gap="xs" wrap="wrap" justify="flex-end">
                               {stop.realtimeBuses.map((bus) => (
-                                <Badge
+                                <RouteRealtimeBadge
                                   key={bus.id}
-                                  component="button"
-                                  type="button"
-                                  aria-pressed={bus.id === selectedVehicleId}
-                                  color="orange"
-                                  variant="light"
-                                  size="md"
-                                  radius="sm"
-                                  leftSection={<RiBus2Fill size="1em" />}
-                                  style={{
-                                    boxShadow: bus.id === selectedVehicleId
-                                      ? '0 0 0 1px rgba(245, 124, 0, 0.25), 0 2px 6px rgba(245, 124, 0, 0.18)'
-                                      : undefined,
-                                    cursor: 'pointer',
-                                    fontWeight: bus.id === selectedVehicleId ? 700 : undefined
-                                  }}
+                                  a2EventType={bus.a2EventType}
+                                  isSelected={bus.id === selectedVehicleId}
+                                  plateNumb={bus.plateNumb}
                                   onClick={(event) => {
                                     event.stopPropagation()
                                     onSelectVehicle(bus.id)
                                   }}
-                                >
-                                  {bus.plateNumb}
-                                </Badge>
+                                />
                               ))}
                             </Group>
                             <ActionIcon

@@ -3,6 +3,7 @@
 import { fireEvent, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { DEFAULT_APP_LOCALE } from '~/modules/consts/i18n'
+import { A2EventType } from '~/modules/enums/A2EventType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import i18n from '~/modules/i18n'
@@ -31,6 +32,7 @@ const favoriteRouteStop = {
 }
 
 const realtimeBus: RouteRealtimeBusStatus = {
+  a2EventType: A2EventType.ARRIVING,
   direction: DirectionType.GO,
   estimateLabel: t('routePage.realtime.minutesAway', { count: 4 }),
   estimateMinutes: 4,
@@ -196,5 +198,39 @@ describe('RouteStopList', () => {
     )
 
     expect(screen.getByRole('button', { name: 'ABC-123' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('offsets realtime plate badges based on movement state', () => {
+    renderWithMantine(
+      <RouteStopList
+        stops={[{
+          estimatedArrivalLabel: null,
+          id: 'stop-1',
+          favoriteRouteStop,
+          name: '市政府',
+          realtimeBuses: [
+            realtimeBus,
+            {
+              ...realtimeBus,
+              a2EventType: A2EventType.DEPARTED,
+              id: 'bus-2',
+              plateNumb: 'ABC-456'
+            }
+          ],
+          sequence: 1,
+          isFavorite: false
+        }]}
+        onSelectStop={vi.fn()}
+        onSelectVehicle={vi.fn()}
+        onToggleFavorite={vi.fn()}
+      />
+    )
+
+    expect(screen.getByText('ABC-123').closest('[data-movement-state="arriving"]')).toHaveStyle({
+      transform: 'translateY(-2px)'
+    })
+    expect(screen.getByText('ABC-456').closest('[data-movement-state="departed"]')).toHaveStyle({
+      transform: 'translateY(6px)'
+    })
   })
 })
