@@ -1,9 +1,9 @@
 import type { Topology } from 'topojson-specification'
 
-const CITY_BOUNDARY_DB_NAME = 'bus-city-geo'
+const CITY_BOUNDARY_DB_NAME = 'bus-city-boundary'
 const CITY_BOUNDARY_DB_VERSION = 1
-const CITY_BOUNDARY_STORE_NAME = 'city-geo-cache'
-const CITY_BOUNDARY_CACHE_KEY = 'counties'
+const CITY_BOUNDARY_STORE_NAME = 'city-boundary-cache'
+const CITY_BOUNDARY_CACHE_KEY = 'city-boundaries'
 
 export interface CityBoundaryCacheRecord {
   topojson: Topology
