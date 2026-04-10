@@ -98,7 +98,7 @@ async function refreshCityBoundaryFromAsset(dispatch: AppDispatch) {
   try {
     await cacheCityBoundary(topo)
   } catch (err) {
-    console.warn('fetchCityGeoJSON cache write failed:', err)
+    console.warn('city-boundary cache write failed:', err)
   }
 }
 
