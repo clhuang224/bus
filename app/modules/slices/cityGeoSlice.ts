@@ -53,7 +53,7 @@ async function loadCityBoundaryFromCache() {
   const cachedCityBoundary = await readCityBoundaryCache()
 
   if (!cachedCityBoundary) {
-    return null
+    throw new Error('City boundary cache miss.')
   }
 
   return {
@@ -79,28 +79,42 @@ async function cacheCityBoundary(topojson: Topology) {
   })
 }
 
-export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
-  const cachedCityBoundary = await loadCityBoundaryFromCache()
+async function refreshCityBoundaryFromAsset(dispatch: AppDispatch) {
+  const topo = await loadCityBoundaryFromAsset()
+  const geo = convertCityBoundaryToGeoJSON(topo)
 
-  if (cachedCityBoundary) {
-    dispatch(setGeoJSON(cachedCityBoundary.geojson))
-  } else {
-    dispatch(setLoading(true))
-  }
+  dispatch(setGeoJSON(geo))
 
   try {
-    const topo = await loadCityBoundaryFromAsset()
-    const geo = convertCityBoundaryToGeoJSON(topo)
-
-    dispatch(setGeoJSON(geo))
     await cacheCityBoundary(topo)
   } catch (err) {
-    console.error('fetchCityGeoJSON error:', err)
+    console.warn('fetchCityGeoJSON cache write failed:', err)
+  }
+}
 
-    if (cachedCityBoundary) {
-      return
+export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
+  try {
+    const cachedCityBoundary = await loadCityBoundaryFromCache()
+
+    dispatch(setGeoJSON(cachedCityBoundary.geojson))
+
+    try {
+      await refreshCityBoundaryFromAsset(dispatch)
+    } catch (err) {
+      console.error('fetchCityGeoJSON refresh after cache hit failed:', err)
     }
 
+    return
+  } catch (err) {
+    console.warn('fetchCityGeoJSON cache unavailable, falling back to asset:', err)
+  }
+
+  dispatch(setLoading(true))
+
+  try {
+    await refreshCityBoundaryFromAsset(dispatch)
+  } catch (err) {
+    console.error('fetchCityGeoJSON error:', err)
     dispatch(setError('Failed to load city boundary data.'))
   }
 }
