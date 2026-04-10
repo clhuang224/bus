@@ -11,8 +11,8 @@ describe('transformTdxVehicleState', () => {
     expect(transformTdxVehicleState(TdxA2EventType.ARRIVING)).toBe(VehicleStateType.ARRIVING)
   })
 
-  it('returns undefined when the event type is missing', () => {
-    expect(transformTdxVehicleState(undefined)).toBeUndefined()
-    expect(transformTdxVehicleState(null)).toBeUndefined()
+  it('returns at-stop vehicle state when the event type is missing', () => {
+    expect(transformTdxVehicleState(undefined)).toBe(VehicleStateType.AT_STOP)
+    expect(transformTdxVehicleState(null)).toBe(VehicleStateType.AT_STOP)
   })
 })
