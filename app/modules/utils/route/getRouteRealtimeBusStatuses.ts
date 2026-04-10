@@ -39,7 +39,7 @@ export function getRouteRealtimeBusStatuses(
 ): RouteRealtimeBusStatus[] {
   return realtimeBuses
     .map((realtimeBus) => {
-      const vehicleState = realtimeBus.vehicleState ?? undefined
+      const vehicleState = realtimeBus.vehicleState
       const realtimePlateNumb = normalizePlateNumb(realtimeBus.PlateNumb)
       const plateMatchedArrival = estimatedArrivals.find((estimatedArrival) => {
         if (!estimatedArrival.PlateNumb) {

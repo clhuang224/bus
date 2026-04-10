@@ -41,5 +41,5 @@ export interface RealtimeNearStop<D = string> extends Omit<TdxRealtimeNearStop<L
   RouteName: LocalizedText
   SubRouteName: LocalizedText
   StopName: LocalizedText
-  vehicleState?: VehicleStateType | null
+  vehicleState: VehicleStateType
 }

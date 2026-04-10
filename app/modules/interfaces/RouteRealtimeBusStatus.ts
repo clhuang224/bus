@@ -10,5 +10,5 @@ export interface RouteRealtimeBusStatus {
   stopName: string
   stopSequence: number
   subRouteUID: string
-  vehicleState?: VehicleStateType
+  vehicleState: VehicleStateType
 }

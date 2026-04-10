@@ -7,6 +7,6 @@ export function transformTdxVehicleState(a2EventType?: TdxA2EventType | null) {
     case TdxA2EventType.ARRIVING:
       return VehicleStateType.ARRIVING
     default:
-      return undefined
+      return VehicleStateType.AT_STOP
   }
 }
