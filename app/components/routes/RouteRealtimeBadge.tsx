@@ -6,9 +6,11 @@ interface PropType {
   isSelected: boolean
   onClick: (event: MouseEvent<HTMLButtonElement>) => void
   plateNumb: string
+  buttonRef?: (node: HTMLButtonElement | null) => void
 }
 
 export function RouteRealtimeBadge({
+  buttonRef,
   isSelected,
   onClick,
   plateNumb
@@ -20,6 +22,7 @@ export function RouteRealtimeBadge({
       }}
     >
       <Badge
+        ref={buttonRef}
         component="button"
         type="button"
         aria-pressed={isSelected}

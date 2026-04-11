@@ -1,6 +1,6 @@
 import { ActionIcon, Alert, Box, Group, ScrollArea, Skeleton, Stack, Text, Timeline } from '@mantine/core'
 import { RiHeart2Fill, RiHeart2Line } from '@remixicon/react'
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getRouteRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
 import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
@@ -55,19 +55,32 @@ export const RouteStopList = ({
 }: PropType) => {
   const { t } = useTranslation()
   const stopItemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
+  const vehicleBadgeRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map())
   const routeRealtimeMessages = getRouteRealtimeMessages(t)
+  const stopIdsKey = useMemo(() => stops.map((stop) => stop.id).join('|'), [stops])
+  const vehicleIdsKey = useMemo(
+    () => stops.flatMap((stop) => stop.realtimeBuses.map((bus) => bus.id)).join('|'),
+    [stops]
+  )
 
   useScrollSelectedItem({
     itemElementRefs: stopItemRefs,
-    listItems: stops,
+    listItems: stopIdsKey,
     selectedItemId: highlightedStopId,
     verticalAlignment: 'center'
   })
 
   useScrollSelectedItem({
     itemElementRefs: stopItemRefs,
-    listItems: stops,
+    listItems: stopIdsKey,
     selectedItemId: selectedStopId,
+    verticalAlignment: listScrollBehavior
+  })
+
+  useScrollSelectedItem({
+    itemElementRefs: vehicleBadgeRefs,
+    listItems: vehicleIdsKey,
+    selectedItemId: selectedVehicleId,
     verticalAlignment: listScrollBehavior
   })
 
@@ -81,6 +94,15 @@ export const RouteStopList = ({
     }
     return null
   })()
+
+  const setVehicleBadgeRef = (vehicleId: string, node: HTMLButtonElement | null) => {
+    if (node) {
+      vehicleBadgeRefs.current.set(vehicleId, node)
+      return
+    }
+
+    vehicleBadgeRefs.current.delete(vehicleId)
+  }
 
   return (
     <Stack h="100%" gap="xs" style={{ minHeight: 0 }}>
@@ -159,19 +181,22 @@ export const RouteStopList = ({
                         }}
                         data-highlighted={isHighlighted || undefined}
                         data-selected={isSelected || undefined}
-                        px="xs"
-                        py={4}
+                        pl="xs"
+                        pt={4}
+                        pb="xs"
                         bg={isHighlighted ? 'blue.0' : undefined}
                         style={{ borderRadius: 'var(--mantine-radius-sm)' }}
                       >
-                        <Group justify="space-between" align="flex-start" wrap="nowrap">
-                          <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
+                        <Stack gap={4} pr="sm">
+                          <Group justify="space-between" align="center" wrap="nowrap">
                             <Text
                               component="button"
                               type="button"
+                              lineClamp={1}
                               fw={isHighlighted || isSelected ? 700 : undefined}
                               c={isHighlighted ? 'blue.8' : undefined}
                               style={{
+                                flex: 1,
                                 minWidth: 0,
                                 cursor: 'pointer',
                                 background: 'none',
@@ -183,26 +208,6 @@ export const RouteStopList = ({
                             >
                               {stop.name}
                             </Text>
-                            {stop.estimatedArrivalLabel && (
-                              <Text size="xs" c="dimmed">
-                                {stop.estimatedArrivalLabel}
-                              </Text>
-                            )}
-                          </Stack>
-                            <Group pr="sm" gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
-                            <Group gap="xs" wrap="wrap" justify="flex-end">
-                              {stopLevelRealtimeBuses.map((bus) => (
-                                <RouteRealtimeBadge
-                                  key={bus.id}
-                                  isSelected={bus.id === selectedVehicleId}
-                                  plateNumb={bus.plateNumb}
-                                  onClick={(event) => {
-                                    event.stopPropagation()
-                                    onSelectVehicle(bus.id)
-                                  }}
-                                />
-                              ))}
-                            </Group>
                             <ActionIcon
                               variant="light"
                               color={stop.isFavorite ? 'pink' : 'gray'}
@@ -218,7 +223,38 @@ export const RouteStopList = ({
                               {stop.isFavorite ? <RiHeart2Fill /> : <RiHeart2Line />}
                             </ActionIcon>
                           </Group>
-                        </Group>
+                          {(stop.estimatedArrivalLabel || stopLevelRealtimeBuses.length > 0) && (
+                            <Group justify="space-between" align="center" wrap="nowrap">
+                              <Box style={{ flex: 1, minWidth: 0 }}>
+                                {stop.estimatedArrivalLabel && (
+                                  <Text size="xs" c="dimmed">
+                                    {stop.estimatedArrivalLabel}
+                                  </Text>
+                                )}
+                              </Box>
+                              <Group
+                                gap="xs"
+                                wrap="wrap"
+                                justify="flex-end"
+                                pr="xl"
+                                style={{ minWidth: 0, maxWidth: '100%' }}
+                              >
+                                {stopLevelRealtimeBuses.map((bus) => (
+                                  <RouteRealtimeBadge
+                                    key={bus.id}
+                                    buttonRef={(node) => setVehicleBadgeRef(bus.id, node)}
+                                    isSelected={bus.id === selectedVehicleId}
+                                    plateNumb={bus.plateNumb}
+                                    onClick={(event) => {
+                                      event.stopPropagation()
+                                      onSelectVehicle(bus.id)
+                                    }}
+                                  />
+                                ))}
+                              </Group>
+                            </Group>
+                          )}
+                        </Stack>
                       </Box>
                     )}
                   >
@@ -226,6 +262,7 @@ export const RouteStopList = ({
                       <RouteRealtimeGap
                         realtimeBuses={gapRealtimeBuses}
                         onSelectVehicle={onSelectVehicle}
+                        setVehicleBadgeRef={setVehicleBadgeRef}
                         selectedVehicleId={selectedVehicleId}
                       />
                     )}
