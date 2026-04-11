@@ -1,8 +1,7 @@
 import type { FavoriteRouteStop } from '../../interfaces/FavoriteRouteStop'
 import { normalizeStoredFavoriteRouteStop } from './normalizeStoredFavoriteRouteStop'
 
-// Keep the legacy localStorage key to preserve existing user favorites across updates.
-export const FAVORITE_ROUTE_STOPS_STORAGE_KEY = 'favoriteRouteStops'
+export const FAVORITE_ROUTE_STOPS_STORAGE_KEY = 'bus-favorite-route-stops'
 const FAVORITE_ROUTE_STOP_STORAGE_UNAVAILABLE_ERROR = 'Favorite route stop storage is unavailable in this environment.'
 
 function getFavoriteRouteStopStorage() {
