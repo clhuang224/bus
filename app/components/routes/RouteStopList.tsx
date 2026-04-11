@@ -232,7 +232,13 @@ export const RouteStopList = ({
                                   </Text>
                                 )}
                               </Box>
-                              <Group gap="xs" wrap="wrap" justify="flex-end" pr="xl" style={{ flexShrink: 0 }}>
+                              <Group
+                                gap="xs"
+                                wrap="wrap"
+                                justify="flex-end"
+                                pr="xl"
+                                style={{ minWidth: 0, maxWidth: '100%' }}
+                              >
                                 {stopLevelRealtimeBuses.map((bus) => (
                                   <RouteRealtimeBadge
                                     key={bus.id}
