@@ -12,20 +12,11 @@ interface PropType {
   children: React.ReactElement
 }
 
-function FavoriteInitializer() {
+function StorageInitializers() {
   const dispatch = useDispatch<AppDispatch>()
 
   useEffect(() => {
     dispatch(favoriteSlice.actions.restoreFavoriteRouteStopsFromStorage(loadFavoriteRouteStopsFromStorage()))
-  }, [dispatch])
-
-  return null
-}
-
-function RouteSearchInitializer() {
-  const dispatch = useDispatch<AppDispatch>()
-
-  useEffect(() => {
     dispatch(routeSearchSlice.actions.restoreRouteSearchFromStorage(loadRouteSearchFromStorage()))
   }, [dispatch])
 
@@ -35,8 +26,7 @@ function RouteSearchInitializer() {
 export const StoreProvider = ({ children }: PropType): React.ReactElement<PropType> => {
   return (
     <Provider store={store}>
-      <FavoriteInitializer />
-      <RouteSearchInitializer />
+      <StorageInitializers />
       {children}
     </Provider>
   )

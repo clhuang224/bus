@@ -1,21 +1,9 @@
 import { AreaType } from '../../enums/AreaType'
 import type { RouteSearchState } from '../../slices/routeSearchSlice'
 import { initialRouteSearchState } from '../../slices/routeSearchSlice'
+import { getLocalStorage } from '../shared/getLocalStorage'
 
 export const ROUTE_SEARCH_STORAGE_KEY = 'bus-route-search'
-const ROUTE_SEARCH_STORAGE_UNAVAILABLE_ERROR = 'Route search storage is unavailable in this environment.'
-
-function getRouteSearchStorage() {
-  if (typeof window === 'undefined') {
-    throw new Error(ROUTE_SEARCH_STORAGE_UNAVAILABLE_ERROR)
-  }
-
-  try {
-    return window.localStorage
-  } catch (error) {
-    throw new Error(ROUTE_SEARCH_STORAGE_UNAVAILABLE_ERROR, { cause: error })
-  }
-}
 
 function isAreaType(value: unknown): value is AreaType {
   return Object.values(AreaType).includes(value as AreaType)
@@ -60,7 +48,7 @@ export function setRouteSearchInStorage(
 
 export function loadRouteSearchFromStorage() {
   try {
-    const storage = getRouteSearchStorage()
+    const storage = getLocalStorage()
     return getRouteSearchFromStorage(storage)
   } catch (error) {
     console.warn('Failed to load route search from localStorage.', error)
@@ -70,7 +58,7 @@ export function loadRouteSearchFromStorage() {
 
 export function persistRouteSearchToStorage(routeSearch: RouteSearchState) {
   try {
-    const storage = getRouteSearchStorage()
+    const storage = getLocalStorage()
     setRouteSearchInStorage(storage, routeSearch)
   } catch (error) {
     console.warn('Failed to persist route search to localStorage.', error)
