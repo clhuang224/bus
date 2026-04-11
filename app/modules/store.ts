@@ -33,15 +33,17 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
+const startAppListening =
+  favoritePersistenceListener.startListening.withTypes<RootState, AppDispatch>()
 
-favoritePersistenceListener.startListening({
+startAppListening({
   matcher: isAnyOf(
     favoriteSlice.actions.setFavoriteRouteStops,
     favoriteSlice.actions.addFavoriteRouteStop,
     favoriteSlice.actions.removeFavoriteRouteStop
   ),
   effect: (_, api) => {
-    cacheFavoriteRouteStops(favoriteSlice.selectors.getFavoriteRouteStops(api.getState() as RootState))
+    cacheFavoriteRouteStops(favoriteSlice.selectors.getFavoriteRouteStops(api.getState()))
   }
 })
 
