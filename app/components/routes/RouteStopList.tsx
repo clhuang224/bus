@@ -55,6 +55,7 @@ export const RouteStopList = ({
 }: PropType) => {
   const { t } = useTranslation()
   const stopItemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
+  const vehicleBadgeRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map())
   const routeRealtimeMessages = getRouteRealtimeMessages(t)
 
   useScrollSelectedItem({
@@ -71,6 +72,13 @@ export const RouteStopList = ({
     verticalAlignment: listScrollBehavior
   })
 
+  useScrollSelectedItem({
+    itemElementRefs: vehicleBadgeRefs,
+    listItems: stops,
+    selectedItemId: selectedVehicleId,
+    verticalAlignment: listScrollBehavior
+  })
+
   const realtimeMessage = (() => {
     if (isLoading) return null
     if (isRealtimeLoading) return routeRealtimeMessages.loading
@@ -81,6 +89,15 @@ export const RouteStopList = ({
     }
     return null
   })()
+
+  const setVehicleBadgeRef = (vehicleId: string, node: HTMLButtonElement | null) => {
+    if (node) {
+      vehicleBadgeRefs.current.set(vehicleId, node)
+      return
+    }
+
+    vehicleBadgeRefs.current.delete(vehicleId)
+  }
 
   return (
     <Stack h="100%" gap="xs" style={{ minHeight: 0 }}>
@@ -189,11 +206,17 @@ export const RouteStopList = ({
                               </Text>
                             )}
                           </Stack>
-                            <Group pr="sm" gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
-                            <Group gap="xs" wrap="wrap" justify="flex-end">
+                          <Stack
+                            gap={6}
+                            align="flex-start"
+                            pr="sm"
+                            style={{ flex: '0 0 auto', minWidth: 'max-content' }}
+                          >
+                            <Group gap="xs" wrap="wrap" justify="flex-start">
                               {stopLevelRealtimeBuses.map((bus) => (
                                 <RouteRealtimeBadge
                                   key={bus.id}
+                                  buttonRef={(node) => setVehicleBadgeRef(bus.id, node)}
                                   isSelected={bus.id === selectedVehicleId}
                                   plateNumb={bus.plateNumb}
                                   onClick={(event) => {
@@ -217,7 +240,7 @@ export const RouteStopList = ({
                             >
                               {stop.isFavorite ? <RiHeart2Fill /> : <RiHeart2Line />}
                             </ActionIcon>
-                          </Group>
+                          </Stack>
                         </Group>
                       </Box>
                     )}
@@ -226,6 +249,7 @@ export const RouteStopList = ({
                       <RouteRealtimeGap
                         realtimeBuses={gapRealtimeBuses}
                         onSelectVehicle={onSelectVehicle}
+                        setVehicleBadgeRef={setVehicleBadgeRef}
                         selectedVehicleId={selectedVehicleId}
                       />
                     )}

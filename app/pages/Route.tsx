@@ -140,10 +140,8 @@ export default function Route() {
   const handleSelectVehicleFromMap = useCallback((vehicleId: string) => {
     setListScrollBehavior('start')
     setSelectedVehicleId(vehicleId)
-    setSelectedStopId(
-      timelineStops.find((stop) => stop.realtimeBuses.some((bus) => bus.id === vehicleId))?.id ?? null
-    )
-  }, [timelineStops])
+    setSelectedStopId(null)
+  }, [])
 
   const handleSelectStopFromMap = useCallback((stopId: string | null) => {
     setListScrollBehavior('start')
