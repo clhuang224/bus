@@ -23,6 +23,7 @@ export function RouteRealtimeGap({
           gap="xs"
           wrap="wrap"
           justify="flex-start"
+          pr="xl"
           style={{ flex: '0 0 auto', minHeight: 28, minWidth: 'max-content' }}
         >
           {realtimeBuses.map((bus) => (
