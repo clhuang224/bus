@@ -43,7 +43,18 @@ startAppListening({
     favoriteSlice.actions.removeFavoriteRouteStop
   ),
   effect: (_, api) => {
-    cacheFavoriteRouteStops(favoriteSlice.selectors.getFavoriteRouteStops(api.getState()))
+    const previousFavoriteRouteStops = favoriteSlice.selectors.getFavoriteRouteStops(
+      api.getOriginalState()
+    )
+    const currentFavoriteRouteStops = favoriteSlice.selectors.getFavoriteRouteStops(
+      api.getState()
+    )
+
+    if (previousFavoriteRouteStops === currentFavoriteRouteStops) {
+      return
+    }
+
+    cacheFavoriteRouteStops(currentFavoriteRouteStops)
   }
 })
 
