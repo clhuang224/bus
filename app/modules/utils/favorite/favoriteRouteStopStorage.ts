@@ -2,16 +2,17 @@ import type { FavoriteRouteStop } from '../../interfaces/FavoriteRouteStop'
 import { normalizeStoredFavoriteRouteStop } from './normalizeStoredFavoriteRouteStop'
 
 export const FAVORITE_ROUTE_STOPS_STORAGE_KEY = 'bus-favorite-route-stops'
+const FAVORITE_ROUTE_STOP_STORAGE_UNAVAILABLE_ERROR = 'Favorite route stop storage is unavailable in this environment.'
 
 function getFavoriteRouteStopStorage() {
   if (typeof window === 'undefined') {
-    return null
+    throw new Error(FAVORITE_ROUTE_STOP_STORAGE_UNAVAILABLE_ERROR)
   }
 
   try {
     return window.localStorage
   } catch {
-    return null
+    throw new Error(FAVORITE_ROUTE_STOP_STORAGE_UNAVAILABLE_ERROR)
   }
 }
 
@@ -50,13 +51,8 @@ export function setFavoriteRouteStopsInStorage(
 }
 
 export function loadFavoriteRouteStopsFromCache() {
-  const storage = getFavoriteRouteStopStorage()
-
-  if (!storage) {
-    return [] as FavoriteRouteStop[]
-  }
-
   try {
+    const storage = getFavoriteRouteStopStorage()
     return getFavoriteRouteStopsFromStorage(storage)
   } catch (error) {
     console.warn('Failed to load favorite route stops from localStorage.', error)
@@ -65,13 +61,8 @@ export function loadFavoriteRouteStopsFromCache() {
 }
 
 export function cacheFavoriteRouteStops(routeStops: FavoriteRouteStop[]) {
-  const storage = getFavoriteRouteStopStorage()
-
-  if (!storage) {
-    return
-  }
-
   try {
+    const storage = getFavoriteRouteStopStorage()
     setFavoriteRouteStopsInStorage(storage, routeStops)
   } catch (error) {
     console.warn('Failed to persist favorite route stops to localStorage.', error)
