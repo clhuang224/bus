@@ -604,7 +604,7 @@ describe('Route', () => {
     })
   })
 
-  it('selects the matching stop in the list when clicking a vehicle marker on the map', async () => {
+  it('selects only the vehicle in the list when clicking a vehicle marker on the map', async () => {
     renderRoutePage()
 
     fireEvent.click(screen.getByRole('tab', { name: '返程' }))
@@ -629,7 +629,7 @@ describe('Route', () => {
         | undefined
       const latestRouteMapProps = updatedCall?.[0]
 
-      expect(latestRouteMapProps?.selectedStop).toBe('stop-c')
+      expect(latestRouteMapProps?.selectedStop).toBeNull()
       expect(latestRouteMapProps?.selectedVehicleId).toBe('ABC-123')
     })
   })
