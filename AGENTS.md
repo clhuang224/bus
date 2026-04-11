@@ -525,6 +525,13 @@ When making changes in this repository:
 
 Prefer naming that matches the actual runtime behavior. For client-side cache bootstrap flows such as reading IndexedDB or localStorage and populating app state on startup, avoid `hydrate` / `hydration` wording by default, since that can be confused with SSR or store rehydration. Prefer names such as `load...FromCache`, `restore...FromCache`, or `initialize...FromCache` unless the code is truly about SSR hydration or a formal rehydration mechanism.
 
+For client-side persistence key values, prefer the string format `bus-{scope}-{content}` so localStorage keys, IndexedDB keys, and similar client-side records stay recognizable and project-scoped.
+
+For client-side persistence constant names, match the runtime role of the data:
+
+- use `...CACHE_KEY` for cached data such as reusable API or asset snapshots
+- use `...STORAGE_KEY` for persisted user data or preferences that are not being treated as cache
+
 If a new pattern is introduced, it should make the surrounding code easier for the next person to navigate, not just shorter.
 
 Use file length as a readability signal. When a file approaches or exceeds roughly `300` lines, pause and evaluate whether a clearly named component, hook, or utility should be extracted.

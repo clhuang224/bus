@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import type { FavoriteRouteStop } from '../interfaces/FavoriteRouteStop'
 import type { AppDispatch } from '../store'
@@ -6,10 +5,6 @@ import favoriteSlice from '../slices/favoriteSlice'
 
 export function useFavoriteRouteStops() {
   const dispatch = useDispatch<AppDispatch>()
-
-  useEffect(() => {
-    dispatch(favoriteSlice.actions.loadLocalStorage())
-  }, [dispatch])
 
   const favoriteRouteStops = useSelector(favoriteSlice.selectors.getFavoriteRouteStops)
 

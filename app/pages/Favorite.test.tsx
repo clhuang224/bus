@@ -9,7 +9,8 @@ import { DirectionType } from '~/modules/enums/DirectionType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import i18n from '~/modules/i18n'
-import favoriteSlice from '~/modules/slices/favoriteSlice'
+import favoriteSlice, { initializeFavoriteRouteStopsFromCache } from '~/modules/slices/favoriteSlice'
+import { FAVORITE_ROUTE_STOPS_STORAGE_KEY } from '~/modules/utils/favorite/favoriteRouteStopStorage'
 import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
 import Favorite from './Favorite'
@@ -101,7 +102,7 @@ function renderFavoritePage(
   routeStops: FavoriteRouteStop[] = favoriteRouteStops,
   locale: AppLocaleType = AppLocaleType.ZH_TW
 ) {
-  localStorage.setItem('favoriteRouteStops', JSON.stringify(routeStops))
+  localStorage.setItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY, JSON.stringify(routeStops))
 
   const store = createTestStore<FavoriteTestState>({
     reducer: {
@@ -123,7 +124,7 @@ function renderFavoritePage(
 }
 
 function renderFavoritePageFromLocalStorage(storedRouteStops: unknown, locale: AppLocaleType = AppLocaleType.ZH_TW) {
-  localStorage.setItem('favoriteRouteStops', JSON.stringify(storedRouteStops))
+  localStorage.setItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY, JSON.stringify(storedRouteStops))
 
   const store = createTestStore<FavoriteTestState>({
     reducer: {
@@ -138,6 +139,8 @@ function renderFavoritePageFromLocalStorage(storedRouteStops: unknown, locale: A
       }
     }
   })
+
+  store.dispatch(initializeFavoriteRouteStopsFromCache() as never)
 
   return renderWithProvidersAndRouter(<Favorite />, {
     store
@@ -250,7 +253,7 @@ describe('Favorite', () => {
   })
 
   it('falls back to the empty state when localStorage contains invalid JSON', () => {
-    localStorage.setItem('favoriteRouteStops', '{invalid-json')
+    localStorage.setItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY, '{invalid-json')
 
     const store = createTestStore<FavoriteTestState>({
       reducer: {
@@ -266,11 +269,13 @@ describe('Favorite', () => {
       }
     })
 
+    store.dispatch(initializeFavoriteRouteStopsFromCache() as never)
+
     renderWithProvidersAndRouter(<Favorite />, {
       store
     })
 
     expect(screen.getByText(getFavoriteMessages(i18n.t).emptyFavoriteRouteStops.title)).toBeInTheDocument()
-    expect(localStorage.getItem('favoriteRouteStops')).toBeNull()
+    expect(localStorage.getItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY)).toBeNull()
   })
 })
