@@ -1,7 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import type { AppDispatch } from '../store'
 import type { FavoriteRouteStop } from '../interfaces/FavoriteRouteStop'
-import { loadFavoriteRouteStopsFromCache } from '../utils/favorite/favoriteRouteStopStorage'
 
 const favoriteSlice = createSlice({
   name: 'favorite',
@@ -32,9 +30,5 @@ const favoriteSlice = createSlice({
       state.routeStops.some((routeStop) => routeStop.favoriteId === favoriteId)
   }
 })
-
-export const initializeFavoriteRouteStopsFromCache = () => (dispatch: AppDispatch) => {
-  dispatch(favoriteSlice.actions.restoreFavoriteRouteStopsFromCache(loadFavoriteRouteStopsFromCache()))
-}
 
 export default favoriteSlice

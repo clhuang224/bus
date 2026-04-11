@@ -9,8 +9,8 @@ import { DirectionType } from '~/modules/enums/DirectionType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import i18n from '~/modules/i18n'
-import favoriteSlice, { initializeFavoriteRouteStopsFromCache } from '~/modules/slices/favoriteSlice'
-import { FAVORITE_ROUTE_STOPS_STORAGE_KEY } from '~/modules/utils/favorite/favoriteRouteStopStorage'
+import favoriteSlice from '~/modules/slices/favoriteSlice'
+import { FAVORITE_ROUTE_STOPS_STORAGE_KEY, loadFavoriteRouteStopsFromCache } from '~/modules/utils/favorite/favoriteRouteStopStorage'
 import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
 import Favorite from './Favorite'
@@ -140,7 +140,7 @@ function renderFavoritePageFromLocalStorage(storedRouteStops: unknown, locale: A
     }
   })
 
-  store.dispatch(initializeFavoriteRouteStopsFromCache() as never)
+  store.dispatch(favoriteSlice.actions.restoreFavoriteRouteStopsFromCache(loadFavoriteRouteStopsFromCache()))
 
   return renderWithProvidersAndRouter(<Favorite />, {
     store
@@ -269,7 +269,7 @@ describe('Favorite', () => {
       }
     })
 
-    store.dispatch(initializeFavoriteRouteStopsFromCache() as never)
+    store.dispatch(favoriteSlice.actions.restoreFavoriteRouteStopsFromCache(loadFavoriteRouteStopsFromCache()))
 
     renderWithProvidersAndRouter(<Favorite />, {
       store
