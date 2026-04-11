@@ -1,6 +1,6 @@
 import { ActionIcon, Alert, Box, Group, ScrollArea, Skeleton, Stack, Text, Timeline } from '@mantine/core'
 import { RiHeart2Fill, RiHeart2Line } from '@remixicon/react'
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getRouteRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
 import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
@@ -57,24 +57,29 @@ export const RouteStopList = ({
   const stopItemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
   const vehicleBadgeRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map())
   const routeRealtimeMessages = getRouteRealtimeMessages(t)
+  const stopIdsKey = useMemo(() => stops.map((stop) => stop.id).join('|'), [stops])
+  const vehicleIdsKey = useMemo(
+    () => stops.flatMap((stop) => stop.realtimeBuses.map((bus) => bus.id)).join('|'),
+    [stops]
+  )
 
   useScrollSelectedItem({
     itemElementRefs: stopItemRefs,
-    listItems: stops,
+    listItems: stopIdsKey,
     selectedItemId: highlightedStopId,
     verticalAlignment: 'center'
   })
 
   useScrollSelectedItem({
     itemElementRefs: stopItemRefs,
-    listItems: stops,
+    listItems: stopIdsKey,
     selectedItemId: selectedStopId,
     verticalAlignment: listScrollBehavior
   })
 
   useScrollSelectedItem({
     itemElementRefs: vehicleBadgeRefs,
-    listItems: stops,
+    listItems: vehicleIdsKey,
     selectedItemId: selectedVehicleId,
     verticalAlignment: listScrollBehavior
   })
