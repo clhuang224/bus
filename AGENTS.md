@@ -288,6 +288,15 @@ Do not regress the route page back to showing `Not departed yet` for a vehicle t
 
 For the `Route` page specifically, keep the stop list as a stop-based ETA view whose ETA labels come directly from `EstimatedTimeOfArrival`, matched to the stop by stable stop identifiers such as `StopUID` / `StopID` when available. If realtime vehicle information is shown in the list, limit it to location-style cues such as vehicle plate badges placed beside the stop row, and do not let those badges replace, derive, or redefine the stop's ETA text. `EstimatedTimeOfArrival` answers "when does this stop get service", `RealTimeNearStop` answers "which stop is a vehicle near right now", and `RealTimeByFrequency` answers "where is the vehicle GPS position right now", so keep those data flows separate in both code and UI.
 
+For the `Routes` page specifically, keep keyword search ranking deterministic and user-comprehensible:
+
+- prioritize exact route-name matches first
+- then route-name prefix matches
+- then route-name contains matches
+- then departure / destination contains matches
+- only use route search frequency as a fallback inside the same keyword-match tier
+- when the keyword is empty, do not show the normal route search result list; show frequent routes if available, otherwise show the search-start prompt
+
 Because the deployed TDX proxy key is shared by all visitors, design request timing with the TDX per-key second-level limit in mind. Avoid route-detail request bursts that stack multiple realtime calls into the same second as large base-data requests when a small delay or staged startup would preserve the user experience.
 
 For route realtime specifically:

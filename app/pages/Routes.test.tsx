@@ -108,6 +108,46 @@ const routesData = [
     CityCode: 'TPE',
     UpdateTime: '2026-03-17T10:00:00+08:00',
     VersionID: 1
+  },
+  {
+    RouteUID: 'route-3',
+    RouteID: '3',
+    HasSubRoutes: true,
+    Operators: [],
+    AuthorityID: '005',
+    ProviderID: 'provider-3',
+    SubRoutes: [],
+    BusRouteType: 0,
+    RouteName: { 'zh-TW': '市民小巴1', en: 'Citizen Shuttle 1' },
+    DepartureStopName: { 'zh-TW': '圓山', en: 'Yuanshan' },
+    DestinationStopName: { 'zh-TW': '劍潭', en: 'Jiantan' },
+    TicketPriceDescription: { 'zh-TW': '', en: '' },
+    FareBufferZoneDescription: { 'zh-TW': '', en: '' },
+    RouteMapImageUrl: '',
+    City: CityNameType.TAIPEI,
+    CityCode: 'TPE',
+    UpdateTime: '2026-03-17T10:00:00+08:00',
+    VersionID: 1
+  },
+  {
+    RouteUID: 'route-4',
+    RouteID: '4',
+    HasSubRoutes: true,
+    Operators: [],
+    AuthorityID: '005',
+    ProviderID: 'provider-4',
+    SubRoutes: [],
+    BusRouteType: 0,
+    RouteName: { 'zh-TW': '藍10', en: 'Blue 10' },
+    DepartureStopName: { 'zh-TW': '動物園', en: 'Zoo' },
+    DestinationStopName: { 'zh-TW': '象山', en: 'Xiangshan' },
+    TicketPriceDescription: { 'zh-TW': '', en: '' },
+    FareBufferZoneDescription: { 'zh-TW': '', en: '' },
+    RouteMapImageUrl: '',
+    City: CityNameType.TAIPEI,
+    CityCode: 'TPE',
+    UpdateTime: '2026-03-17T10:00:00+08:00',
+    VersionID: 1
   }
 ]
 
@@ -294,6 +334,44 @@ describe('Routes', () => {
 
     expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
       expect.stringContaining('紅25'),
+      expect.stringContaining('藍1')
+    ])
+  })
+
+  it('prioritizes route-name matches over departure or destination matches', () => {
+    renderRoutes({
+      keyword: '市'
+    })
+
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
+      expect.stringContaining('市民小巴1'),
+      expect.stringContaining('藍1')
+    ])
+  })
+
+  it('prioritizes exact route-name matches before route-name prefix matches', () => {
+    renderRoutes({
+      keyword: '藍1'
+    })
+
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
+      expect.stringContaining('藍1'),
+      expect.stringContaining('藍10')
+    ])
+  })
+
+  it('uses frequency as a fallback when routes share the same match priority', () => {
+    localStorage.setItem(ROUTE_SEARCH_FREQUENCY_STORAGE_KEY, JSON.stringify({
+      'route-4': 5,
+      'route-1': 1
+    }))
+
+    renderRoutes({
+      keyword: '藍'
+    })
+
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
+      expect.stringContaining('藍10'),
       expect.stringContaining('藍1')
     ])
   })

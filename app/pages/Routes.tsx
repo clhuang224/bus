@@ -34,13 +34,37 @@ function deduplicateRoutes(routes: BusRoute<Date | null>[]) {
 }
 
 function matchesRouteKeyword(route: BusRoute<Date | null>, keyword: string, locale: AppLocaleType) {
-  if (!keyword) return true
+  return getRouteKeywordMatchPriority(route, keyword, locale) != null
+}
 
-  return [
-    getLocalizedText(route.RouteName, locale),
-    getLocalizedText(route.DepartureStopName, locale),
-    getLocalizedText(route.DestinationStopName, locale)
-  ].some((value) => value.toLowerCase().includes(keyword))
+function getRouteKeywordMatchPriority(
+  route: BusRoute<Date | null>,
+  keyword: string,
+  locale: AppLocaleType
+) {
+  if (!keyword) return 0
+
+  const routeName = getLocalizedText(route.RouteName, locale).toLowerCase()
+  const departure = getLocalizedText(route.DepartureStopName, locale).toLowerCase()
+  const destination = getLocalizedText(route.DestinationStopName, locale).toLowerCase()
+
+  if (routeName === keyword) {
+    return 0
+  }
+
+  if (routeName.startsWith(keyword)) {
+    return 1
+  }
+
+  if (routeName.includes(keyword)) {
+    return 2
+  }
+
+  if (departure.includes(keyword) || destination.includes(keyword)) {
+    return 3
+  }
+
+  return null
 }
 
 export default function Routes() {
@@ -62,6 +86,22 @@ export default function Routes() {
     return deduplicateRoutes(routes)
       .filter((route) => matchesRouteKeyword(route, normalizedKeyword, locale))
       .sort((left, right) => {
+        const leftMatchPriority = getRouteKeywordMatchPriority(left, normalizedKeyword, locale)
+        const rightMatchPriority = getRouteKeywordMatchPriority(right, normalizedKeyword, locale)
+        const matchPriorityDiff = (leftMatchPriority ?? Number.POSITIVE_INFINITY) -
+          (rightMatchPriority ?? Number.POSITIVE_INFINITY)
+
+        if (matchPriorityDiff !== 0) {
+          return matchPriorityDiff
+        }
+
+        const frequencyDiff =
+          (routeSearchFrequency[right.RouteUID] ?? 0) - (routeSearchFrequency[left.RouteUID] ?? 0)
+
+        if (frequencyDiff !== 0) {
+          return frequencyDiff
+        }
+
         const routeNameCompare = routeNameCollator.compare(
           getLocalizedText(left.RouteName, locale),
           getLocalizedText(right.RouteName, locale)
@@ -73,7 +113,7 @@ export default function Routes() {
 
         return left.RouteUID.localeCompare(right.RouteUID)
       })
-  }, [locale, normalizedKeyword, routeNameCollator, routes])
+  }, [locale, normalizedKeyword, routeNameCollator, routeSearchFrequency, routes])
 
   const frequentRoutes = useMemo(() => {
     if (normalizedKeyword) {
