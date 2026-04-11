@@ -51,7 +51,7 @@ export function setFavoriteRouteStopsInStorage(
   storage.setItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY, JSON.stringify(routeStops))
 }
 
-export function loadFavoriteRouteStopsFromCache() {
+export function loadFavoriteRouteStopsFromStorage() {
   try {
     const storage = getFavoriteRouteStopStorage()
     return getFavoriteRouteStopsFromStorage(storage)
@@ -61,7 +61,7 @@ export function loadFavoriteRouteStopsFromCache() {
   }
 }
 
-export function cacheFavoriteRouteStops(routeStops: FavoriteRouteStop[]) {
+export function persistFavoriteRouteStops(routeStops: FavoriteRouteStop[]) {
   try {
     const storage = getFavoriteRouteStopStorage()
     setFavoriteRouteStopsInStorage(storage, routeStops)

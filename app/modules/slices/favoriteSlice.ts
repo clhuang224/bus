@@ -7,7 +7,7 @@ const favoriteSlice = createSlice({
     routeStops: [] as FavoriteRouteStop[]
   },
   reducers: {
-    restoreFavoriteRouteStopsFromCache: (state, action: PayloadAction<FavoriteRouteStop[]>) => {
+    restoreFavoriteRouteStopsFromStorage: (state, action: PayloadAction<FavoriteRouteStop[]>) => {
       state.routeStops = action.payload
     },
     setFavoriteRouteStops: (state, action: PayloadAction<FavoriteRouteStop[]>) => {

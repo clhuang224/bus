@@ -6,9 +6,9 @@ import { DirectionType } from '../../enums/DirectionType'
 import type { FavoriteRouteStop } from '../../interfaces/FavoriteRouteStop'
 import {
   FAVORITE_ROUTE_STOPS_STORAGE_KEY,
-  cacheFavoriteRouteStops,
+  persistFavoriteRouteStops,
   getFavoriteRouteStopsFromStorage,
-  loadFavoriteRouteStopsFromCache
+  loadFavoriteRouteStopsFromStorage
 } from './favoriteRouteStopStorage'
 
 const favoriteRouteStop: FavoriteRouteStop = {
@@ -59,7 +59,7 @@ describe('favoriteRouteStopStorage', () => {
   })
 
   it('writes favorite route stops into localStorage', () => {
-    cacheFavoriteRouteStops([favoriteRouteStop])
+    persistFavoriteRouteStops([favoriteRouteStop])
 
     expect(localStorage.getItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY)).toBe(JSON.stringify([favoriteRouteStop]))
   })
@@ -70,7 +70,7 @@ describe('favoriteRouteStopStorage', () => {
     })
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
-    expect(loadFavoriteRouteStopsFromCache()).toEqual([])
+    expect(loadFavoriteRouteStopsFromStorage()).toEqual([])
     expect(warnSpy).toHaveBeenCalledWith(
       'Failed to load favorite route stops from localStorage.',
       expect.any(Error)
@@ -85,7 +85,7 @@ describe('favoriteRouteStopStorage', () => {
     })
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
-    expect(() => cacheFavoriteRouteStops([favoriteRouteStop])).not.toThrow()
+    expect(() => persistFavoriteRouteStops([favoriteRouteStop])).not.toThrow()
     expect(warnSpy).toHaveBeenCalledWith(
       'Failed to persist favorite route stops to localStorage.',
       expect.any(Error)

@@ -7,7 +7,7 @@ import cityGeoSlice, { setGeoJSON } from './slices/cityGeoSlice'
 import globalModalSlice from './slices/globalModalSlice'
 import localeSlice from './slices/localeSlice'
 import routeSearchSlice from './slices/routeSearchSlice'
-import { cacheFavoriteRouteStops } from './utils/favorite/favoriteRouteStopStorage'
+import { persistFavoriteRouteStops } from './utils/favorite/favoriteRouteStopStorage'
 
 const favoritePersistenceListener = createListenerMiddleware()
 
@@ -54,7 +54,7 @@ startAppListening({
       return
     }
 
-    cacheFavoriteRouteStops(currentFavoriteRouteStops)
+    persistFavoriteRouteStops(currentFavoriteRouteStops)
   }
 })
 

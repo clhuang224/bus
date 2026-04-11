@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux'
 import { store } from '../../modules/store'
 import type { AppDispatch } from '../../modules/store'
 import favoriteSlice from '../../modules/slices/favoriteSlice'
-import { loadFavoriteRouteStopsFromCache } from '../../modules/utils/favorite/favoriteRouteStopStorage'
+import { loadFavoriteRouteStopsFromStorage } from '../../modules/utils/favorite/favoriteRouteStopStorage'
 
 interface PropType {
   children: React.ReactElement
@@ -14,7 +14,7 @@ function FavoriteInitializer() {
   const dispatch = useDispatch<AppDispatch>()
 
   useEffect(() => {
-    dispatch(favoriteSlice.actions.restoreFavoriteRouteStopsFromCache(loadFavoriteRouteStopsFromCache()))
+    dispatch(favoriteSlice.actions.restoreFavoriteRouteStopsFromStorage(loadFavoriteRouteStopsFromStorage()))
   }, [dispatch])
 
   return null
