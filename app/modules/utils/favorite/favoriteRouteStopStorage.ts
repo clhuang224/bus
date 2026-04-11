@@ -11,8 +11,8 @@ function getFavoriteRouteStopStorage() {
 
   try {
     return window.localStorage
-  } catch {
-    throw new Error(FAVORITE_ROUTE_STOP_STORAGE_UNAVAILABLE_ERROR)
+  } catch (error) {
+    throw new Error(FAVORITE_ROUTE_STOP_STORAGE_UNAVAILABLE_ERROR, { cause: error })
   }
 }
 
