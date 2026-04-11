@@ -10,6 +10,7 @@ import { DirectionType } from '~/modules/enums/DirectionType'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
 import { VehicleStateType } from '~/modules/enums/VehicleStateType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
+import { ROUTE_SEARCH_FREQUENCY_STORAGE_KEY } from '~/modules/utils/routeSearch/routeSearchFrequencyStorage'
 import { createTestStore } from '~/test/createTestStore'
 import { mockMatchMedia } from '~/test/mockMatchMedia'
 import { renderRoute } from '~/test/render'
@@ -367,10 +368,25 @@ function renderRoutePage(
 
 describe('Route', () => {
   beforeEach(() => {
+    localStorage.clear()
     mockMatchMedia()
 
     resetRouteMocks()
     mockDefaultRouteQueries()
+  })
+
+  it('increments route search frequency when the route detail page opens', async () => {
+    localStorage.setItem(ROUTE_SEARCH_FREQUENCY_STORAGE_KEY, JSON.stringify({
+      'route-1': 2
+    }))
+
+    renderRoutePage()
+
+    await waitFor(() => {
+      expect(JSON.parse(localStorage.getItem(ROUTE_SEARCH_FREQUENCY_STORAGE_KEY) ?? '{}')).toEqual({
+        'route-1': 3
+      })
+    })
   })
 
   it('highlights the saved favorite stop after opening the route page from favorites', async () => {

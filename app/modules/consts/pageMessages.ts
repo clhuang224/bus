@@ -13,6 +13,7 @@ interface FavoriteMessages {
 interface SearchMessages {
   loadRoutesError: AlertMessageConfig
   emptyRoutes: AlertMessageConfig
+  emptyRouteSearch: AlertMessageConfig
 }
 
 interface RouteMessages {
@@ -48,7 +49,8 @@ export function getFavoriteMessages(t: TFunction): FavoriteMessages {
 export function getSearchMessages(t: TFunction): SearchMessages {
   return {
     loadRoutesError: buildAlertMessage(t, 'error', 'messages.search.loadRoutesError'),
-    emptyRoutes: buildAlertMessage(t, 'warn', 'messages.search.emptyRoutes')
+    emptyRoutes: buildAlertMessage(t, 'warn', 'messages.search.emptyRoutes'),
+    emptyRouteSearch: buildAlertMessage(t, 'warn', 'messages.search.emptyRouteSearch')
   }
 }
 

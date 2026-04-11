@@ -19,6 +19,7 @@ import type { AppDispatch, RootState } from '~/modules/store'
 import { getAreaByCoords } from '~/modules/utils/geo/getAreaByCoords'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 import { normalizeBusRoutesWithDates } from '~/modules/utils/route/normalizeBusRoutesWithDates'
+import { loadRouteSearchFrequencyFromStorage } from '~/modules/utils/routeSearch/routeSearchFrequencyStorage'
 
 function deduplicateRoutes(routes: BusRoute<Date | null>[]) {
   return Array.from(
@@ -54,17 +55,54 @@ export default function Routes() {
   const { data: routeData = [], isLoading, error } = busApi.useGetRoutesByAreaQuery(area)
   const routes = useMemo(() => normalizeBusRoutesWithDates(routeData), [routeData])
   const routeNameCollator = useLocalizedTextCollator()
+  const routeSearchFrequency = useMemo(() => loadRouteSearchFrequencyFromStorage(), [])
+  const normalizedKeyword = keyword.trim().toLowerCase()
 
   const filteredRoutes = useMemo(() => {
-    const normalizedKeyword = keyword.trim().toLowerCase()
-
     return deduplicateRoutes(routes)
       .filter((route) => matchesRouteKeyword(route, normalizedKeyword, locale))
-      .sort((left, right) => routeNameCollator.compare(
-        getLocalizedText(left.RouteName, locale),
-        getLocalizedText(right.RouteName, locale)
-      ))
-  }, [keyword, locale, routeNameCollator, routes])
+      .sort((left, right) => {
+        const routeNameCompare = routeNameCollator.compare(
+          getLocalizedText(left.RouteName, locale),
+          getLocalizedText(right.RouteName, locale)
+        )
+
+        if (routeNameCompare !== 0) {
+          return routeNameCompare
+        }
+
+        return left.RouteUID.localeCompare(right.RouteUID)
+      })
+  }, [locale, normalizedKeyword, routeNameCollator, routes])
+
+  const frequentRoutes = useMemo(() => {
+    if (normalizedKeyword) {
+      return [] as BusRoute<Date | null>[]
+    }
+
+    return deduplicateRoutes(routes)
+      .filter((route) => (routeSearchFrequency[route.RouteUID] ?? 0) > 0)
+      .sort((left, right) => {
+        const frequencyDiff =
+          (routeSearchFrequency[right.RouteUID] ?? 0) - (routeSearchFrequency[left.RouteUID] ?? 0)
+
+        if (frequencyDiff !== 0) {
+          return frequencyDiff
+        }
+
+        const routeNameCompare = routeNameCollator.compare(
+          getLocalizedText(left.RouteName, locale),
+          getLocalizedText(right.RouteName, locale)
+        )
+
+        if (routeNameCompare !== 0) {
+          return routeNameCompare
+        }
+
+        return left.RouteUID.localeCompare(right.RouteUID)
+      })
+      .slice(0, 10)
+  }, [locale, normalizedKeyword, routeNameCollator, routeSearchFrequency, routes])
 
   const routeCardSkeletons = Array.from({ length: 6 }, (_, index) => (
     <Card key={index} withBorder radius="md" p="xs" shadow="xs" data-testid="routes-skeleton-card">
@@ -79,11 +117,15 @@ export default function Routes() {
   ))
 
   const message = useMemo(() => {
+    if (isLoading) return null
     if (error) return getSearchMessages(t).loadRoutesError
-    if (filteredRoutes.length === 0) return getSearchMessages(t).emptyRoutes
+    if (!normalizedKeyword && frequentRoutes.length === 0) return getSearchMessages(t).emptyRouteSearch
+    if (normalizedKeyword && filteredRoutes.length === 0) return getSearchMessages(t).emptyRoutes
 
     return null
-  }, [error, filteredRoutes.length, t])
+  }, [error, filteredRoutes.length, frequentRoutes.length, isLoading, normalizedKeyword, t])
+
+  const displayedRoutes = normalizedKeyword ? filteredRoutes : frequentRoutes
 
   return (
     <Flex justify="center" h="100%">
@@ -102,9 +144,12 @@ export default function Routes() {
           {message && <BaseAlert {...message} />}
           <ScrollArea style={{ flex: 1, minHeight: 0 }}>
             <Stack gap="sm">
+              {!message && !normalizedKeyword && frequentRoutes.length > 0 && (
+                <Title order={5}>{t('pages.routes.frequentRoutesTitle')}</Title>
+              )}
               {isLoading
                 ? routeCardSkeletons
-                : filteredRoutes.map((route) => (
+                : displayedRoutes.map((route) => (
                   <RouteInfoCard
                     key={route.RouteUID}
                     to={`/routes/${route.City}/${route.RouteUID}`}

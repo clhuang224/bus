@@ -16,6 +16,7 @@ import { AppBadge } from '~/components/common/AppBadge'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { getTerminalDisplay } from '~/modules/utils/i18n/getTerminalDisplay'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
+import { incrementRouteSearchFrequency } from '~/modules/utils/routeSearch/routeSearchFrequencyStorage'
 import { isCityName } from '~/modules/utils/shared/isCityName'
 
 export default function Route() {
@@ -89,6 +90,14 @@ export default function Route() {
       return
     }
   }, [isSm, openSidebar])
+
+  useEffect(() => {
+    if (!id) {
+      return
+    }
+
+    incrementRouteSearchFrequency(id)
+  }, [id])
 
   useEffect(() => {
     if (!routeTabs.length) {

@@ -8,6 +8,7 @@ import { AreaType } from '~/modules/enums/AreaType'
 import { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import routeSearchSlice from '~/modules/slices/routeSearchSlice'
+import { ROUTE_SEARCH_FREQUENCY_STORAGE_KEY } from '~/modules/utils/routeSearch/routeSearchFrequencyStorage'
 import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
 import Routes from './Routes'
@@ -166,6 +167,7 @@ const renderRoutes = (preloadedRouteSearchState?: {
 
 describe('Routes', () => {
   beforeEach(() => {
+    localStorage.clear()
     mockUseGetRoutesByAreaQuery.mockReset()
     mockUseGetRoutesByAreaQuery.mockReturnValue({
       data: routesData,
@@ -216,7 +218,9 @@ describe('Routes', () => {
   })
 
   it('deduplicates routes that share the same RouteUID', () => {
-    renderRoutes()
+    renderRoutes({
+      keyword: '藍1'
+    })
 
     expect(screen.getAllByText('藍1')).toHaveLength(1)
   })
@@ -232,7 +236,9 @@ describe('Routes', () => {
       error: null
     })
 
-    renderRoutes()
+    renderRoutes({
+      keyword: '市政府'
+    })
 
     expect(screen.getByText(routeInfoOriginLabel)).toBeInTheDocument()
     expect(screen.queryByText(`${i18n.t('components.routeInfoCard.terminalLabel')}: 市政府`)).not.toBeInTheDocument()
@@ -250,6 +256,46 @@ describe('Routes', () => {
       expect(screen.getAllByText('紅25').length).toBeGreaterThan(0)
       expect(screen.queryByText('藍1')).not.toBeInTheDocument()
     })
+  })
+
+  it('shows frequently opened routes when the keyword is empty', () => {
+    localStorage.setItem(ROUTE_SEARCH_FREQUENCY_STORAGE_KEY, JSON.stringify({
+      'route-2': 5,
+      'route-1': 1
+    }))
+
+    renderRoutes({
+      keyword: ''
+    })
+
+    expect(screen.getByText(i18n.t('pages.routes.frequentRoutesTitle'))).toBeInTheDocument()
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
+      expect.stringContaining('紅25'),
+      expect.stringContaining('藍1')
+    ])
+  })
+
+  it('shows the search prompt message when the keyword is empty and there is no frequency history', () => {
+    renderRoutes()
+
+    expect(screen.getByText('開始搜尋公車')).toBeInTheDocument()
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+  })
+
+  it('keeps the default name sort when the keyword is non-empty', () => {
+    localStorage.setItem(ROUTE_SEARCH_FREQUENCY_STORAGE_KEY, JSON.stringify({
+      'route-2': 5,
+      'route-1': 1
+    }))
+
+    renderRoutes({
+      keyword: '站'
+    })
+
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
+      expect.stringContaining('紅25'),
+      expect.stringContaining('藍1')
+    ])
   })
 
   it('shows the saved keyword from store state', async () => {
