@@ -31,6 +31,9 @@ const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_PROXY_API_BASE_URL
 })
 
+const DEFAULT_RETENTION_SECONDS = 60 * 5
+const AREA_ROUTES_RETENTION_SECONDS = 60 * 15
+
 export const busApi = createApi({
   reducerPath: 'busApi',
   baseQuery: async (args, api, extraOptions) => {
@@ -43,7 +46,7 @@ export const busApi = createApi({
 
     return result
   },
-  keepUnusedDataFor: 60 * 5,
+  keepUnusedDataFor: DEFAULT_RETENTION_SECONDS,
   endpoints: (build) => ({
     getEstimatedArrivalByRoute: build.query<EstimatedArrival[], { city: CityNameType, routeUID: string }>({
       query: ({ city, routeUID }) => `/EstimatedTimeOfArrival/City/${city}?%24filter=RouteUID%20eq%20'${routeUID}'&%24format=JSON`,
@@ -83,6 +86,7 @@ export const busApi = createApi({
       }
     }),
     getRoutesByArea: build.query<BusRoute<string>[], AreaType>({
+      keepUnusedDataFor: AREA_ROUTES_RETENTION_SECONDS,
       queryFn: async (area, _api, _extraOptions, baseQuery) => {
         const cityResults = await Promise.all(
           areaMapCity[area].map(async (city) => ({
