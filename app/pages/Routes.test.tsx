@@ -208,6 +208,7 @@ const renderRoutes = (preloadedRouteSearchState?: {
 describe('Routes', () => {
   beforeEach(() => {
     localStorage.clear()
+    vi.mocked(HTMLElement.prototype.scrollTo).mockClear()
     mockUseGetRoutesByAreaQuery.mockReset()
     mockUseGetRoutesByAreaQuery.mockReturnValue({
       data: routesData,
@@ -242,6 +243,8 @@ describe('Routes', () => {
       expect(store.getState().routeSearch.selectedArea).toBe(AreaType.TAICHUNG)
       expect(screen.getByLabelText('area-select')).toHaveValue(AreaType.TAICHUNG)
     })
+
+    expect(HTMLElement.prototype.scrollTo).toHaveBeenCalledWith({ top: 0 })
   })
 
   it('shows route skeleton cards while routes are loading', () => {
@@ -296,6 +299,8 @@ describe('Routes', () => {
       expect(screen.getAllByText('紅25').length).toBeGreaterThan(0)
       expect(screen.queryByText('藍1')).not.toBeInTheDocument()
     })
+
+    expect(HTMLElement.prototype.scrollTo).toHaveBeenCalledWith({ top: 0 })
   })
 
   it('shows frequently opened routes when the keyword is empty', () => {

@@ -1,5 +1,5 @@
 import { Card, Flex, ScrollArea, Skeleton, Stack, Title } from '@mantine/core'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { AreaSelect } from '~/components/AreaSelect'
@@ -81,6 +81,8 @@ export default function Routes() {
   const routeNameCollator = useLocalizedTextCollator()
   const routeSearchFrequency = useMemo(() => loadRouteSearchFrequencyFromStorage(), [])
   const normalizedKeyword = keyword.trim().toLowerCase()
+  const scrollViewportRef = useRef<HTMLDivElement | null>(null)
+  const previousSearchContextRef = useRef<{ area: AreaType, keyword: string } | null>(null)
 
   const filteredRoutes = useMemo(() => {
     return deduplicateRoutes(routes)
@@ -167,6 +169,28 @@ export default function Routes() {
 
   const displayedRoutes = normalizedKeyword ? filteredRoutes : frequentRoutes
 
+  useEffect(() => {
+    const previousSearchContext = previousSearchContextRef.current
+    previousSearchContextRef.current = {
+      area,
+      keyword: normalizedKeyword
+    }
+
+    if (
+      !previousSearchContext ||
+      (
+        previousSearchContext.area === area &&
+        previousSearchContext.keyword === normalizedKeyword
+      )
+    ) {
+      return
+    }
+
+    scrollViewportRef.current?.scrollTo({
+      top: 0
+    })
+  }, [area, normalizedKeyword])
+
   return (
     <Flex justify="center" h="100%">
       <Card p={APP_PAGE_PADDING} w="100%" maw={720} h="100%" withBorder={false}>
@@ -182,7 +206,7 @@ export default function Routes() {
             />
           </Flex>
           {message && <BaseAlert {...message} />}
-          <ScrollArea style={{ flex: 1, minHeight: 0 }}>
+          <ScrollArea viewportRef={scrollViewportRef} style={{ flex: 1, minHeight: 0 }}>
             <Stack gap="sm">
               {!message && !normalizedKeyword && frequentRoutes.length > 0 && (
                 <Title order={5}>{t('pages.routes.frequentRoutesTitle')}</Title>

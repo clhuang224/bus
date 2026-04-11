@@ -46,4 +46,10 @@ if (typeof HTMLElement !== 'undefined') {
     writable: true,
     value: vi.fn()
   })
+
+  Object.defineProperty(HTMLElement.prototype, 'scrollTo', {
+    configurable: true,
+    writable: true,
+    value: vi.fn()
+  })
 }
