@@ -1,20 +1,24 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { AreaType } from '../enums/AreaType'
 
-interface RouteSearchState {
+export interface RouteSearchState {
   keyword: string
   selectedArea: AreaType | null
 }
 
-const initialState: RouteSearchState = {
+export const initialRouteSearchState: RouteSearchState = {
   keyword: '',
   selectedArea: null
 }
 
 const routeSearchSlice = createSlice({
   name: 'routeSearch',
-  initialState,
+  initialState: initialRouteSearchState,
   reducers: {
+    restoreRouteSearchFromStorage: (state, action: PayloadAction<RouteSearchState>) => {
+      state.keyword = action.payload.keyword
+      state.selectedArea = action.payload.selectedArea
+    },
     setKeyword: (state, action: PayloadAction<string>) => {
       state.keyword = action.payload
     },
@@ -24,6 +28,6 @@ const routeSearchSlice = createSlice({
   }
 })
 
-export const { setKeyword, setSelectedArea } = routeSearchSlice.actions
+export const { restoreRouteSearchFromStorage, setKeyword, setSelectedArea } = routeSearchSlice.actions
 
 export default routeSearchSlice

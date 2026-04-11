@@ -8,6 +8,7 @@ import globalModalSlice from './slices/globalModalSlice'
 import localeSlice from './slices/localeSlice'
 import routeSearchSlice from './slices/routeSearchSlice'
 import { persistFavoriteRouteStops } from './utils/favorite/favoriteRouteStopStorage'
+import { persistRouteSearchToStorage } from './utils/routeSearch/routeSearchStorage'
 
 const favoritePersistenceListener = createListenerMiddleware()
 
@@ -55,6 +56,26 @@ startAppListening({
     }
 
     persistFavoriteRouteStops(currentFavoriteRouteStops)
+  }
+})
+
+startAppListening({
+  matcher: isAnyOf(
+    routeSearchSlice.actions.setKeyword,
+    routeSearchSlice.actions.setSelectedArea
+  ),
+  effect: (_, api) => {
+    const previousRouteSearch = api.getOriginalState().routeSearch
+    const currentRouteSearch = api.getState().routeSearch
+
+    if (
+      previousRouteSearch.keyword === currentRouteSearch.keyword &&
+      previousRouteSearch.selectedArea === currentRouteSearch.selectedArea
+    ) {
+      return
+    }
+
+    persistRouteSearchToStorage(currentRouteSearch)
   }
 })
 
