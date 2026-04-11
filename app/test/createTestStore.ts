@@ -1,4 +1,4 @@
-import { configureStore, type ConfigureStoreOptions, type EnhancedStore, type Reducer, type UnknownAction } from '@reduxjs/toolkit'
+import { configureStore, type ConfigureStoreOptions, type Reducer, type UnknownAction } from '@reduxjs/toolkit'
 import { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import localeSlice from '~/modules/slices/localeSlice'
 
@@ -33,7 +33,7 @@ export function createTestStore<TState extends Record<string, unknown> = Record<
     ...(middleware ? { middleware } : {})
   })
 
-  return store as EnhancedStore<LocaleTestState & TState, UnknownAction> & {
+  return store as typeof store & {
     getState: () => LocaleTestState & TState
   }
 }

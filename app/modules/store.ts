@@ -1,4 +1,4 @@
-import { configureStore } from '@reduxjs/toolkit'
+import { configureStore, createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { busApi } from './apis/bus'
 import favoriteSlice from './slices/favoriteSlice'
@@ -7,6 +7,9 @@ import cityGeoSlice, { setGeoJSON } from './slices/cityGeoSlice'
 import globalModalSlice from './slices/globalModalSlice'
 import localeSlice from './slices/localeSlice'
 import routeSearchSlice from './slices/routeSearchSlice'
+import { persistFavoriteRouteStops } from './utils/favorite/favoriteRouteStopStorage'
+
+const favoritePersistenceListener = createListenerMiddleware()
 
 export const store = configureStore({
   reducer: {
@@ -25,10 +28,34 @@ export const store = configureStore({
         ignoredActions: [setGeoJSON.type],
         ignoredPaths: ['cityGeo.geojson', busApi.reducerPath]
       }
-    }).concat(busApi.middleware)
+    }).prepend(favoritePersistenceListener.middleware).concat(busApi.middleware)
 })
-
-setupListeners(store.dispatch)
 
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
+const startAppListening =
+  favoritePersistenceListener.startListening.withTypes<RootState, AppDispatch>()
+
+startAppListening({
+  matcher: isAnyOf(
+    favoriteSlice.actions.setFavoriteRouteStops,
+    favoriteSlice.actions.addFavoriteRouteStop,
+    favoriteSlice.actions.removeFavoriteRouteStop
+  ),
+  effect: (_, api) => {
+    const previousFavoriteRouteStops = favoriteSlice.selectors.getFavoriteRouteStops(
+      api.getOriginalState()
+    )
+    const currentFavoriteRouteStops = favoriteSlice.selectors.getFavoriteRouteStops(
+      api.getState()
+    )
+
+    if (previousFavoriteRouteStops === currentFavoriteRouteStops) {
+      return
+    }
+
+    persistFavoriteRouteStops(currentFavoriteRouteStops)
+  }
+})
+
+setupListeners(store.dispatch)

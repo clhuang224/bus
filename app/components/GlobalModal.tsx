@@ -19,7 +19,7 @@ const handleGlobalModalConfirm = (
 }
 
 export const GlobalModal = () => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
   const globalModal = useSelector(globalModalSelectors.selectGlobalModal)
   const {
     opened,
