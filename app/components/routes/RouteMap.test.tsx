@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import { useEffect } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import geoSlice from '~/modules/slices/geoSlice'
@@ -178,5 +178,88 @@ describe('RouteMap', () => {
 
     expect(await screen.findByText('市政府')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /導航至\s*市政府/ })).toBeInTheDocument()
+  })
+
+  it('fits the initial bounds again when the route changes', async () => {
+    const store = createTestStore({
+      reducer: {
+        geolocation: geoSlice.reducer
+      },
+      preloadedState: {
+        geolocation: {
+          ...geoSlice.getInitialState(),
+          coords: [25.033, 121.5654],
+          error: null
+        }
+      }
+    })
+
+    const { rerender } = renderWithStore(
+      <RouteMap
+        onSelectStop={vi.fn()}
+        onSelectVehicle={vi.fn()}
+        selectedStop={null}
+        stops={[
+          {
+            id: 'stop-1',
+            name: '市政府',
+            position: [121.55, 25.03],
+            sequence: 1
+          }
+        ]}
+        vehicles={[]}
+      />,
+      { store }
+    )
+
+    await waitFor(() => {
+      expect(mockMap.fitBounds).toHaveBeenCalledTimes(1)
+    })
+
+    rerender(
+      <RouteMap
+        onSelectStop={vi.fn()}
+        onSelectVehicle={vi.fn()}
+        selectedStop={null}
+        routePath={[
+          [121.55, 25.03],
+          [121.56, 25.04]
+        ]}
+        stops={[
+          {
+            id: 'stop-1',
+            name: '市政府',
+            position: [121.55, 25.03],
+            sequence: 1
+          }
+        ]}
+        vehicles={[]}
+      />
+    )
+
+    await waitFor(() => {
+      expect(mockMap.fitBounds).toHaveBeenCalledTimes(1)
+    })
+
+    rerender(
+      <RouteMap
+        onSelectStop={vi.fn()}
+        onSelectVehicle={vi.fn()}
+        selectedStop={null}
+        stops={[
+          {
+            id: 'stop-2',
+            name: '市民廣場',
+            position: [121.57, 25.05],
+            sequence: 1
+          }
+        ]}
+        vehicles={[]}
+      />
+    )
+
+    await waitFor(() => {
+      expect(mockMap.fitBounds).toHaveBeenCalledTimes(2)
+    })
   })
 })
