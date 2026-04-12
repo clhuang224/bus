@@ -12,13 +12,14 @@ import { SkeletonList } from '../common/SkeletonList'
 import { RouteRealtimeBadge } from './RouteRealtimeBadge'
 import { RouteRealtimeGap } from './RouteRealtimeGap'
 import { NavigationButton } from '../common/NavigationButton'
+import type { LngLat } from '~/modules/types/CoordsType'
 
 export interface RouteStopListItem {
   estimatedArrivalLabel: string | null
   favoriteRouteStop: FavoriteRouteStop
   id: string
   name: string
-  position?: [number, number] | null
+  position?: LngLat | null
   realtimeBuses: RouteRealtimeBusStatus[]
   sequence: number
   isFavorite: boolean
