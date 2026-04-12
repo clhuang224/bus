@@ -54,6 +54,17 @@ function renderSettingsPage(initialLocale = AppLocaleType.ZH_TW) {
   }
 }
 
+const getSettingsT = (locale: AppLocaleType) => i18n.getFixedT(locale)
+
+const getLocaleRadio = (uiLocale: AppLocaleType, optionLocale: AppLocaleType) => {
+  const t = getSettingsT(uiLocale)
+  const key = optionLocale === AppLocaleType.ZH_TW
+    ? 'pages.settings.localeOptions.zhTW.label'
+    : 'pages.settings.localeOptions.en.label'
+
+  return screen.getByRole('radio', { name: t(key) })
+}
+
 describe('Settings', () => {
   beforeEach(() => {
     localStorage.clear()
@@ -102,10 +113,10 @@ describe('Settings', () => {
     const { store } = renderSettingsPage()
 
     await waitFor(() => {
-      expect(screen.getByRole('radio', { name: 'English' })).toBeChecked()
+      expect(getLocaleRadio(AppLocaleType.EN, AppLocaleType.EN)).toBeChecked()
     })
 
-    fireEvent.click(screen.getByRole('radio', { name: '繁體中文' }))
+    fireEvent.click(getLocaleRadio(AppLocaleType.EN, AppLocaleType.ZH_TW))
 
     await waitFor(() => {
       expect(store.getState().locale.value).toBe(AppLocaleType.ZH_TW)
