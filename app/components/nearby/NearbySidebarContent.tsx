@@ -1,4 +1,4 @@
-import { Accordion, AccordionControl, AccordionItem, AccordionPanel, ActionIcon, Flex, ScrollArea, Skeleton, Stack, Text, Title } from '@mantine/core'
+import { Accordion, AccordionControl, AccordionItem, AccordionPanel, ActionIcon, Flex, Group, ScrollArea, Skeleton, Stack, Text, Title } from '@mantine/core'
 import { RiArrowLeftSLine } from '@remixicon/react'
 import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -55,7 +55,7 @@ const NearbySidebarContentDetail = ({ detailState }: { detailState: NearbySideba
         >
           <RiArrowLeftSLine size={18} />
         </ActionIcon>
-        <Title order={4} style={{ flex: 1, minWidth: 0 }}>
+        <Title order={4} style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
           {getLocalizedText(detailState.stopGroup!.StopName, locale)}
         </Title>
         <NavigationButton
@@ -92,6 +92,7 @@ const NearbySidebarContentDetail = ({ detailState }: { detailState: NearbySideba
 
 const NearbySidebarContentList = ({ listState }: { listState: NearbySidebarListState }) => {
   const locale = useSelector(selectLocale)
+  const { t } = useTranslation()
 
   return (
     <ScrollArea
@@ -126,7 +127,17 @@ const NearbySidebarContentList = ({ listState }: { listState: NearbySidebarListS
             }}
           >
             <AccordionControl>
-              {getLocalizedText(stopGroup.StopName, locale)}
+              <Group align="center">
+                <Text style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
+                  {getLocalizedText(stopGroup.StopName, locale)}
+                </Text>
+                <NavigationButton
+                  ariaLabel={t('components.routeStopList.navigateAriaLabel', { stopName: getLocalizedText(stopGroup.StopName, locale) })}
+                  destination={stopGroup.position ? [stopGroup.position[1], stopGroup.position[0]] : null}
+                  mr="sm"
+                  style={listState.selectedStopId === stopGroup.StationID ? {} : { display: 'none' }}
+                />
+              </Group>
             </AccordionControl>
             <AccordionPanel>
               <NearbyStopDetail

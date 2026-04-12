@@ -361,7 +361,9 @@ export const RouteMap = ({
         : popupContainer && selectedMapStop
           ? createPortal(
             <Group justify="space-between" align="center" wrap="nowrap" gap="xs">
-              <Text size="sm" fw={500}>{selectedMapStop.name}</Text>
+              <Text size="sm" fw={500} style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
+                {selectedMapStop.name}
+              </Text>
               <NavigationButton
                 ariaLabel={t('components.routeStopList.navigateAriaLabel', {
                   stopName: selectedMapStop.name

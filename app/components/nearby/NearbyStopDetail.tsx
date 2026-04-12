@@ -33,7 +33,9 @@ export const NearbyStopDetail = ({
   if (displayMode === 'title') {
     return (
       <Group justify="space-between" align="center" wrap="nowrap" gap="xs">
-        <Text>{stopName}</Text>
+        <Text style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
+          {stopName}
+        </Text>
         <NavigationButton
           ariaLabel={t('components.routeStopList.navigateAriaLabel', { stopName })}
           destination={destination}
@@ -84,9 +86,11 @@ export const NearbyStopDetail = ({
 
   return (
     <Stack gap="xs">
-      {displayMode === 'full' && (
+      {(displayMode === 'full') && (
         <Group justify="space-between" align="center" wrap="nowrap" gap="xs">
-          <Text>{stopName}</Text>
+          <Text style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
+            {stopName}
+          </Text>
           <NavigationButton
             ariaLabel={t('components.routeStopList.navigateAriaLabel', { stopName })}
             destination={destination}
@@ -100,12 +104,6 @@ export const NearbyStopDetail = ({
         </Stack>
       ))}
       <Group justify="flex-end" gap="xs">
-        {displayMode !== 'full' && (
-          <NavigationButton
-            ariaLabel={t('components.routeStopList.navigateAriaLabel', { stopName })}
-            destination={destination}
-          />
-        )}
         <ActionIcon
           aria-label={t('components.nearbyStopDetail.viewRoutesAriaLabel', { stopName })}
           onClick={() => onViewRoutes(stopGroup.StationID)}
