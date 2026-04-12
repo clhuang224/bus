@@ -450,13 +450,13 @@ describe('Route', () => {
     )
   })
 
-  it('opens Google Maps navigation with origin and destination when user coordinates are available', () => {
+  it('opens Google Maps navigation with only the destination when user coordinates are available', () => {
     renderRoutePage(['/routes/Taipei/route-1'], [25.033, 121.5654])
 
     fireEvent.click(screen.getByRole('button', { name: /導航至\s*市政府/ }))
 
     expect(window.open).toHaveBeenCalledWith(
-      'https://www.google.com/maps/dir/?api=1&destination=25.03%2C121.55&origin=25.033%2C121.5654',
+      'https://www.google.com/maps/dir/?api=1&destination=25.03%2C121.55',
       '_blank',
       'noopener,noreferrer'
     )

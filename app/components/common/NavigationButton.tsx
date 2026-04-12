@@ -1,8 +1,6 @@
 import { ActionIcon, type ActionIconProps } from '@mantine/core'
 import { RiDirectionLine } from '@remixicon/react'
 import { useCallback } from 'react'
-import { useSelector } from 'react-redux'
-import type { RootState } from '~/modules/store'
 import type { LatLng } from '~/modules/types/CoordsType'
 import { getGoogleMapsDirectionsUrl } from '~/modules/utils/map/getGoogleMapsDirectionsUrl'
 
@@ -16,8 +14,6 @@ export const NavigationButton = ({
   destination,
   ...actionIconProps
 }: PropType) => {
-  const { coords } = useSelector((state: RootState) => state.geolocation)
-
   const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     if (!destination) {
       return
@@ -26,13 +22,12 @@ export const NavigationButton = ({
     event.stopPropagation()
     window.open(
       getGoogleMapsDirectionsUrl({
-        destination,
-        origin: coords
+        destination
       }),
       '_blank',
       'noopener,noreferrer'
     )
-  }, [coords, destination])
+  }, [destination])
 
   return (
     <ActionIcon
