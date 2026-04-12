@@ -39,20 +39,11 @@ export function setFavoriteRouteStopsInStorage(
 }
 
 export function loadFavoriteRouteStopsFromStorage() {
-  try {
-    const storage = getLocalStorage()
-    return getFavoriteRouteStopsFromStorage(storage)
-  } catch (error) {
-    console.warn('Failed to load favorite route stops from localStorage.', error)
-    return [] as FavoriteRouteStop[]
-  }
+  const storage = getLocalStorage()
+  return getFavoriteRouteStopsFromStorage(storage)
 }
 
 export function persistFavoriteRouteStops(routeStops: FavoriteRouteStop[]) {
-  try {
-    const storage = getLocalStorage()
-    setFavoriteRouteStopsInStorage(storage, routeStops)
-  } catch (error) {
-    console.warn('Failed to persist favorite route stops to localStorage.', error)
-  }
+  const storage = getLocalStorage()
+  setFavoriteRouteStopsInStorage(storage, routeStops)
 }

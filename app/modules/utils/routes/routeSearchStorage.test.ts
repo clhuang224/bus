@@ -64,35 +64,25 @@ describe('routeSearchStorage', () => {
     }))
   })
 
-  it('returns defaults and warns when storage is unavailable during load', () => {
+  it('throws when storage is unavailable during load', () => {
     const localStorageGetter = vi.spyOn(window, 'localStorage', 'get').mockImplementation(() => {
       throw new Error('blocked')
     })
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
-    expect(loadRouteSearchFromStorage()).toEqual(initialRouteSearchState)
-    expect(warnSpy).toHaveBeenCalledWith(
-      'Failed to load route search from localStorage.',
-      expect.any(Error)
-    )
+    expect(() => loadRouteSearchFromStorage()).toThrow()
 
     localStorageGetter.mockRestore()
   })
 
-  it('warns instead of throwing when storage writes fail', () => {
+  it('throws when storage writes fail', () => {
     const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('quota exceeded')
     })
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     expect(() => persistRouteSearchToStorage({
       keyword: '307',
       selectedArea: AreaType.TAIPEI
-    })).not.toThrow()
-    expect(warnSpy).toHaveBeenCalledWith(
-      'Failed to persist route search to localStorage.',
-      expect.any(Error)
-    )
+    })).toThrow()
 
     setItemSpy.mockRestore()
   })

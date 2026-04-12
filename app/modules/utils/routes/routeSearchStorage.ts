@@ -53,20 +53,11 @@ export function setRouteSearchInStorage(
 }
 
 export function loadRouteSearchFromStorage() {
-  try {
-    const storage = getLocalStorage()
-    return getRouteSearchFromStorage(storage)
-  } catch (error) {
-    console.warn('Failed to load route search from localStorage.', error)
-    return initialRouteSearchState
-  }
+  const storage = getLocalStorage()
+  return getRouteSearchFromStorage(storage)
 }
 
 export function persistRouteSearchToStorage(routeSearch: RouteSearchState) {
-  try {
-    const storage = getLocalStorage()
-    setRouteSearchInStorage(storage, routeSearch)
-  } catch (error) {
-    console.warn('Failed to persist route search to localStorage.', error)
-  }
+  const storage = getLocalStorage()
+  setRouteSearchInStorage(storage, routeSearch)
 }
