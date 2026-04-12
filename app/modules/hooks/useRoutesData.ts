@@ -97,12 +97,15 @@ function compareSearchableRoutesByRecentAndName(
   recentRouteIndexMap: Map<string, number>,
   compareRouteNames: (left: string, right: string) => number
 ) {
-  const recentIndexDiff =
-    (recentRouteIndexMap.get(left.route.RouteUID) ?? Number.POSITIVE_INFINITY) -
-    (recentRouteIndexMap.get(right.route.RouteUID) ?? Number.POSITIVE_INFINITY)
-
-  if (recentIndexDiff !== 0) {
-    return recentIndexDiff
+  const leftRecentIndex = recentRouteIndexMap.get(left.route.RouteUID)
+  const rightRecentIndex = recentRouteIndexMap.get(right.route.RouteUID)
+  if (leftRecentIndex != null || rightRecentIndex != null) {
+    const recentIndexDiff =
+      (leftRecentIndex ?? Number.POSITIVE_INFINITY) -
+      (rightRecentIndex ?? Number.POSITIVE_INFINITY)
+    if (recentIndexDiff !== 0) {
+      return recentIndexDiff
+    }
   }
 
   const routeNameCompare = compareRouteNames(left.routeName, right.routeName)
