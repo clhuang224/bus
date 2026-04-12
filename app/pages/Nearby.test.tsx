@@ -2,6 +2,7 @@
 
 import type { Reducer, UnknownAction } from '@reduxjs/toolkit'
 import { act, fireEvent, screen } from '@testing-library/react'
+import { useEffect } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import Nearby from './Nearby'
 import i18n from '~/modules/i18n'
@@ -23,12 +24,14 @@ const {
   mockUseGetRoutesByAreaQuery,
   mockUseGetStopsByNearbyAreaQuery,
   mockUseGetStopOfRoutesByAreaQuery,
-  mockNearbyStopMap
+  mockNearbyStopMap,
+  mockNearbyMapFlyTo
 } = vi.hoisted(() => ({
   mockUseGetRoutesByAreaQuery: vi.fn(),
   mockUseGetStopsByNearbyAreaQuery: vi.fn(),
   mockUseGetStopOfRoutesByAreaQuery: vi.fn(),
-  mockNearbyStopMap: vi.fn()
+  mockNearbyStopMap: vi.fn(),
+  mockNearbyMapFlyTo: vi.fn()
 }))
 
 vi.mock('~/modules/apis/bus', () => ({
@@ -45,11 +48,18 @@ vi.mock('~/modules/utils/geo/getCityByCoords', () => ({
 
 vi.mock('~/components/nearby/NearbyStopMap', () => ({
   NearbyStopMap: (props: {
+    onMapLoad?: (map: { flyTo: typeof mockNearbyMapFlyTo }) => void
     selectedStop: string | null
     onSelectStop: (id: string | null) => void
     markers: Array<{ id: string, label: string }>
     isSm?: boolean
   }) => {
+    useEffect(() => {
+      props.onMapLoad?.({
+        flyTo: mockNearbyMapFlyTo
+      })
+    }, [props.onMapLoad])
+
     mockNearbyStopMap(props)
     return <div data-testid="nearby-stop-map" />
   }
@@ -58,15 +68,18 @@ vi.mock('~/components/nearby/NearbyStopMap', () => ({
 vi.mock('~/components/common/MapSidebarLayout', () => ({
   MapSidebarLayout: ({
     isSidebarOpened,
+    mapControls,
     panel,
     children
   }: {
     isSidebarOpened: boolean
+    mapControls?: React.ReactNode
     panel: React.ReactNode
     children: React.ReactNode
   }) => (
     <div>
       <div data-testid="nearby-sidebar-state">{isSidebarOpened ? 'opened' : 'closed'}</div>
+      <div>{mapControls}</div>
       <div>{panel}</div>
       <div>{children}</div>
     </div>
@@ -255,6 +268,7 @@ function resetNearbyMocks() {
   mockUseGetStopsByNearbyAreaQuery.mockReset()
   mockUseGetStopOfRoutesByAreaQuery.mockReset()
   mockNearbyStopMap.mockReset()
+  mockNearbyMapFlyTo.mockReset()
 }
 
 function renderNearby({
@@ -443,6 +457,31 @@ describe('Nearby', () => {
       coords: [25.033, 121.5654]
     }, {
       skip: false
+    })
+  })
+
+  it('disables the focus-my-location control when user coordinates are unavailable', () => {
+    renderNearby()
+
+    expect(screen.getByRole('button', { name: '我的位置' })).toBeDisabled()
+  })
+
+  it('focuses the nearby map on the user location when the control is clicked', () => {
+    renderNearby({
+      coords: [25.033, 121.5654],
+      permission: GeoPermissionType.GRANTED,
+      queryState: {
+        data: nearbyStopsData,
+        isSuccess: true
+      }
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: '我的位置' }))
+
+    expect(mockNearbyMapFlyTo).toHaveBeenCalledWith({
+      center: [121.5654, 25.033],
+      zoom: 16,
+      duration: 800
     })
   })
 

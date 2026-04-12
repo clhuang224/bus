@@ -1,9 +1,11 @@
 import { Overlay, useMantineTheme } from '@mantine/core'
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
+import type { Map as MapLibreMap } from 'maplibre-gl'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { FocusUserLocationButton } from '~/components/common/FocusUserLocationButton'
 import { MapSidebarLayout } from '~/components/common/MapSidebarLayout'
 import { NearbySidebarContent } from '~/components/nearby/NearbySidebarContent'
-import { useEffect, useRef } from 'react'
 import { useNearbyData } from '~/modules/hooks/useNearbyData'
 import { useScrollSelectedItem } from '~/modules/hooks/useScrollSelectedItem'
 import { useNearbySearchParams } from '~/modules/hooks/useNearbySearchParams'
@@ -17,6 +19,7 @@ const Nearby = () => {
   const theme = useMantineTheme()
   const isSm = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`)
   const [isSidebarOpened, { open: openSidebar, close: closeSidebar }] = useDisclosure(false)
+  const [nearbyMapInstance, setNearbyMapInstance] = useState<MapLibreMap | null>(null)
   const {
     selectedStopId,
     selectedRouteStopId,
@@ -81,6 +84,7 @@ const Nearby = () => {
     <MapSidebarLayout
       isSm={isSm}
       isSidebarOpened={isSidebarOpened}
+      mapControls={<FocusUserLocationButton map={nearbyMapInstance} />}
       onCloseSidebar={closeSidebar}
       onOpenSidebar={openSidebar}
       openButtonLabel={t('components.mapSidebarLayout.openNearbyStops')}
@@ -118,6 +122,7 @@ const Nearby = () => {
         <NearbyStopMap
           center={coords}
           markers={markers}
+          onMapLoad={setNearbyMapInstance}
           selectedStop={selectedStopId}
           selectedStopPopupContent={selectedStopPopupContent}
           isSm={isSm}

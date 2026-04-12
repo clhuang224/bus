@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { BaseAlert } from '~/components/common/BaseAlert'
+import { FocusUserLocationButton } from '~/components/common/FocusUserLocationButton'
 import { MapSidebarLayout } from '~/components/common/MapSidebarLayout'
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { RouteMap } from '~/components/routes/RouteMap'
@@ -11,20 +12,18 @@ import { RouteStopList } from '~/components/routes/RouteStopList'
 import { useFavoriteRouteStops } from '~/modules/hooks/useFavoriteRouteStops'
 import { useRouteBaseData } from '~/modules/hooks/useRouteBaseData'
 import { useRouteRealtimeData } from '~/modules/hooks/useRouteRealtimeData'
-import { RiArrowLeftSLine, RiFocus3Line } from '@remixicon/react'
+import { RiArrowLeftSLine } from '@remixicon/react'
 import { AppBadge } from '~/components/common/AppBadge'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { getTerminalDisplay } from '~/modules/utils/i18n/getTerminalDisplay'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 import { saveRouteSearchRecent } from '~/modules/utils/routes/routeSearchRecentStorage'
 import { isCityName } from '~/modules/utils/shared/isCityName'
-import type { RootState } from '~/modules/store'
 import type { Map as MapLibreMap } from 'maplibre-gl'
 
 export default function Route() {
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
-  const { coords } = useSelector((state: RootState) => state.geolocation)
   const { city, id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
@@ -171,32 +170,11 @@ export default function Route() {
     navigate('/routes')
   }, [navigate])
 
-  const handleFocusUserLocation = useCallback(() => {
-    if (!routeMapInstance || !coords) {
-      return
-    }
-
-    routeMapInstance.flyTo({
-      center: [coords[1], coords[0]],
-      zoom: 16,
-      duration: 800
-    })
-  }, [coords, routeMapInstance])
-
   return (
     <MapSidebarLayout
       isSm={isSm}
       isSidebarOpened={isSidebarOpened}
-      mapControls={(
-        <ActionIcon
-          aria-label={t('components.routeMap.focusUserLocationAriaLabel')}
-          size="md"
-          onClick={handleFocusUserLocation}
-          disabled={!coords || !routeMapInstance}
-        >
-          <RiFocus3Line size={18} />
-        </ActionIcon>
-      )}
+      mapControls={<FocusUserLocationButton map={routeMapInstance} />}
       onCloseSidebar={closeSidebar}
       onOpenSidebar={openSidebar}
       openButtonLabel={t('components.mapSidebarLayout.openRouteList')}

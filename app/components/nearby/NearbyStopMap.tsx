@@ -18,12 +18,14 @@ interface PropType {
   selectedStop: string | null
   selectedStopPopupContent?: ReactNode
   isSm?: boolean
+  onMapLoad?: (map: mapLibre.Map) => void
   onSelectStop: (id: string | null) => void
 }
 
 export const NearbyStopMap = ({
   center,
   markers = [],
+  onMapLoad,
   selectedStop,
   selectedStopPopupContent,
   isSm = false,
@@ -139,6 +141,7 @@ export const NearbyStopMap = ({
         showUserLocation
         onLoad={(map) => {
           setMap(map)
+          onMapLoad?.(map)
         }}
       />
       {popupContainer && selectedStopPopupContent
