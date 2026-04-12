@@ -1,13 +1,17 @@
-import { Stack, Text } from '@mantine/core'
+import { ActionIcon, Box, Stack, Text } from '@mantine/core'
+import { RiFocus3Line } from '@remixicon/react'
 import type { Map as MapLibreMap, Marker, Popup } from 'maplibre-gl'
 import mapLibre from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
+import type { RootState } from '~/modules/store'
 import type { LngLat, LatLng } from '~/modules/types/CoordsType'
 import { addMapMarkerActivationListeners } from '~/modules/utils/map/addMapMarkerActivationListeners'
 import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
 import BaseMap from '../common/BaseMap'
+import { APP_FLOATING_ACTION_OFFSET } from '~/modules/consts/layout'
 
 export interface RouteMapStop {
   id: string
@@ -61,6 +65,7 @@ export const RouteMap = ({
   vehicles = []
 }: PropType) => {
   const { t } = useTranslation()
+  const { coords } = useSelector((state: RootState) => state.geolocation)
   const [map, setMap] = useState<MapLibreMap | null>(null)
   const [isMapReady, setIsMapReady] = useState(false)
   const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(null)
@@ -317,14 +322,38 @@ export const RouteMap = ({
     })
   }, [map, selectedStop, selectedVehicleId])
 
+  const handleFocusUserLocation = () => {
+    if (!map || !coords) {
+      return
+    }
+
+    map.flyTo({
+      center: [coords[1], coords[0]],
+      zoom: 16,
+      duration: 800
+    })
+  }
+
   return (
-    <>
+    <Box pos="relative" w="100%" h="100%">
       <BaseMap
         center={center}
         zoom={13}
         showUserLocation
         onLoad={setMap}
       />
+      <ActionIcon
+        aria-label={t('components.routeMap.focusUserLocationAriaLabel')}
+        size="md"
+        onClick={handleFocusUserLocation}
+        disabled={!coords}
+        pos="absolute"
+        right={APP_FLOATING_ACTION_OFFSET}
+        bottom="88px"
+        style={{ zIndex: 2 }}
+      >
+        <RiFocus3Line size={18} />
+      </ActionIcon>
       {popupContainer && selectedVehicle
         ? createPortal(
           <Stack gap="xs">
@@ -345,6 +374,6 @@ export const RouteMap = ({
           popupContainer
         )
         : null}
-    </>
+    </Box>
   )
 }

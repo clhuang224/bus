@@ -122,6 +122,7 @@ export const en = {
       routeMap: {
         stopMarkerAriaLabel: '{{stopName}}, stop {{sequence}}',
         vehicleMarkerAriaLabel: '{{plateNumb}}, recent stop {{stopName}}, estimated arrival {{estimateLabel}}',
+        focusUserLocationAriaLabel: 'My location',
         vehiclePopup: {
           recentStop: 'Recent stop',
           recentStopUnknown: 'Unknown',

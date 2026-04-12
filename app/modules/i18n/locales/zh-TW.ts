@@ -122,6 +122,7 @@ export const zhTW = {
       routeMap: {
         stopMarkerAriaLabel: '{{stopName}}，第 {{sequence}} 站',
         vehicleMarkerAriaLabel: '{{plateNumb}}，最近站牌 {{stopName}}，預估到站 {{estimateLabel}}',
+        focusUserLocationAriaLabel: '我的位置',
         vehiclePopup: {
           recentStop: '最近站牌',
           recentStopUnknown: '未知',
