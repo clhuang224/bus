@@ -15,10 +15,6 @@ const routeSearchSlice = createSlice({
   name: 'routeSearch',
   initialState: initialRouteSearchState,
   reducers: {
-    restoreRouteSearchFromStorage: (state, action: PayloadAction<RouteSearchState>) => {
-      state.keyword = action.payload.keyword
-      state.selectedArea = action.payload.selectedArea
-    },
     setKeyword: (state, action: PayloadAction<string>) => {
       state.keyword = action.payload
     },
@@ -28,6 +24,6 @@ const routeSearchSlice = createSlice({
   }
 })
 
-export const { restoreRouteSearchFromStorage, setKeyword, setSelectedArea } = routeSearchSlice.actions
+export const { setKeyword, setSelectedArea } = routeSearchSlice.actions
 
 export default routeSearchSlice

@@ -7,10 +7,12 @@ import cityGeoSlice, { setGeoJSON } from './slices/cityGeoSlice'
 import globalModalSlice from './slices/globalModalSlice'
 import localeSlice from './slices/localeSlice'
 import routeSearchSlice from './slices/routeSearchSlice'
-import { persistFavoriteRouteStops } from './utils/favorite/favoriteRouteStopStorage'
-import { persistRouteSearchToStorage } from './utils/routes/routeSearchStorage'
+import { loadFavoriteRouteStopsFromStorage, persistFavoriteRouteStops } from './utils/favorite/favoriteRouteStopStorage'
+import { loadRouteSearchFromStorage, persistRouteSearchToStorage } from './utils/routes/routeSearchStorage'
 
 const favoritePersistenceListener = createListenerMiddleware()
+const preloadedFavoriteRouteStops = loadFavoriteRouteStopsFromStorage()
+const preloadedRouteSearch = loadRouteSearchFromStorage()
 
 export const store = configureStore({
   reducer: {
@@ -21,6 +23,12 @@ export const store = configureStore({
     globalModal: globalModalSlice.reducer,
     locale: localeSlice.reducer,
     routeSearch: routeSearchSlice.reducer
+  },
+  preloadedState: {
+    favorite: {
+      routeStops: preloadedFavoriteRouteStops
+    },
+    routeSearch: preloadedRouteSearch
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
