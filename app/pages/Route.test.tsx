@@ -204,6 +204,12 @@ const stopOfRoutesData = [
 
 const stopsByCityData = [
   {
+    StopUID: 'stop-a',
+    StopID: 'stop-a',
+    StopName: { 'zh-TW': '市政府', en: 'City Hall' },
+    position: [121.55, 25.03] as [number, number]
+  },
+  {
     StopUID: 'stop-b',
     StopID: 'stop-b',
     StopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
@@ -394,9 +400,11 @@ function renderRoutePage(
 
 describe('Route', () => {
   beforeEach(() => {
+    vi.restoreAllMocks()
     localStorage.clear()
     mockMatchMedia()
     mockRouteMapFlyTo.mockReset()
+    vi.spyOn(window, 'open').mockImplementation(() => null)
 
     resetRouteMocks()
     mockDefaultRouteQueries()
@@ -428,6 +436,30 @@ describe('Route', () => {
       zoom: 16,
       duration: 800
     })
+  })
+
+  it('opens Google Maps navigation with only the destination when user coordinates are unavailable', () => {
+    renderRoutePage()
+
+    fireEvent.click(screen.getByRole('button', { name: /導航至\s*市政府/ }))
+
+    expect(window.open).toHaveBeenCalledWith(
+      'https://www.google.com/maps/dir/?api=1&destination=25.03%2C121.55',
+      '_blank',
+      'noopener,noreferrer'
+    )
+  })
+
+  it('opens Google Maps navigation with origin and destination when user coordinates are available', () => {
+    renderRoutePage(['/routes/Taipei/route-1'], [25.033, 121.5654])
+
+    fireEvent.click(screen.getByRole('button', { name: /導航至\s*市政府/ }))
+
+    expect(window.open).toHaveBeenCalledWith(
+      'https://www.google.com/maps/dir/?api=1&destination=25.03%2C121.55&origin=25.033%2C121.5654',
+      '_blank',
+      'noopener,noreferrer'
+    )
   })
 
   it('highlights the saved favorite stop after opening the route page from favorites', async () => {

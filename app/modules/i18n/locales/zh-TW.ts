@@ -116,6 +116,7 @@ export const zhTW = {
         terminal: '起訖站： {{departure}} → {{destination}}'
       },
       routeStopList: {
+        navigateAriaLabel: '導航至 {{stopName}}',
         addFavoriteAriaLabel: '收藏站牌路線',
         removeFavoriteAriaLabel: '取消收藏站牌路線'
       },

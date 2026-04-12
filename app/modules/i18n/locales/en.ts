@@ -116,6 +116,7 @@ export const en = {
         terminal: 'Terminals: {{departure}} → {{destination}}'
       },
       routeStopList: {
+        navigateAriaLabel: 'Navigate to {{stopName}}',
         addFavoriteAriaLabel: 'Save route stop',
         removeFavoriteAriaLabel: 'Remove saved route stop'
       },

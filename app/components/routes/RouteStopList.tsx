@@ -11,12 +11,14 @@ import { VehicleStateType } from '~/modules/enums/VehicleStateType'
 import { SkeletonList } from '../common/SkeletonList'
 import { RouteRealtimeBadge } from './RouteRealtimeBadge'
 import { RouteRealtimeGap } from './RouteRealtimeGap'
+import { NavigationButton } from '../common/NavigationButton'
 
 export interface RouteStopListItem {
   estimatedArrivalLabel: string | null
   favoriteRouteStop: FavoriteRouteStop
   id: string
   name: string
+  position?: [number, number] | null
   realtimeBuses: RouteRealtimeBusStatus[]
   sequence: number
   isFavorite: boolean
@@ -189,25 +191,36 @@ export const RouteStopList = ({
                       >
                         <Stack gap={4} pr="sm">
                           <Group justify="space-between" align="center" wrap="nowrap">
-                            <Text
-                              component="button"
-                              type="button"
-                              lineClamp={1}
-                              fw={isHighlighted || isSelected ? 700 : undefined}
-                              c={isHighlighted ? 'blue.8' : undefined}
-                              style={{
-                                flex: 1,
-                                minWidth: 0,
-                                cursor: 'pointer',
-                                background: 'none',
-                                border: 0,
-                                padding: 0,
-                                textAlign: 'left'
-                              }}
-                              onClick={() => onSelectStop(stop.id)}
-                            >
-                              {stop.name}
-                            </Text>
+                            <Group align="center" gap="xs">
+                              <Text
+                                component="button"
+                                type="button"
+                                lineClamp={1}
+                                fw={isHighlighted || isSelected ? 700 : undefined}
+                                c={isHighlighted ? 'blue.8' : undefined}
+                                style={{
+                                  flex: 1,
+                                  minWidth: 0,
+                                  cursor: 'pointer',
+                                  background: 'none',
+                                  border: 0,
+                                  padding: 0,
+                                  textAlign: 'left'
+                                }}
+                                onClick={() => onSelectStop(stop.id)}
+                              >
+                                {stop.name}
+                              </Text>
+                              <NavigationButton
+                                ariaLabel={t('components.routeStopList.navigateAriaLabel', {
+                                  stopName: stop.name
+                                })}
+                                destination={stop.position ? [stop.position[1], stop.position[0]] : null}
+                                variant="light"
+                                radius="50%"
+                                size="sm"
+                              />
+                            </Group>
                             <ActionIcon
                               variant="light"
                               color={stop.isFavorite ? 'pink' : 'gray'}
