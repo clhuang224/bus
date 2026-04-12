@@ -299,6 +299,14 @@ For desktop map popups on both `Route` and `Nearby`, keep stop popups lightweigh
 - default desktop stop popups should only identify the selected stop, typically by showing the stop name on a single line
 - richer detail such as distance, address, route badges, or navigation actions should live in the surrounding sidebar / detail panel unless there is a strong product reason to duplicate them in the popup
 
+For shared map behavior, keep `BaseMap` responsible for common map-level concerns such as:
+
+- rendering the user-location marker
+- showing the built-in focus-my-location control when `showUserLocation` is enabled
+- hosting additional shared map overlay controls via `extraControls`
+
+Do not re-implement those common controls separately in page components when the behavior belongs to the base map layer.
+
 For the `Routes` page specifically, keep keyword search ranking deterministic and user-comprehensible:
 
 - prioritize exact route-name matches first

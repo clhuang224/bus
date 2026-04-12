@@ -124,9 +124,6 @@ export const en = {
         meters: '{{count}} m',
         kilometers: '{{count}} km'
       },
-      focusUserLocationButton: {
-        ariaLabel: 'My location'
-      },
       routeMap: {
         stopMarkerAriaLabel: '{{stopName}}, stop {{sequence}}',
         vehicleMarkerAriaLabel: '{{plateNumb}}, recent stop {{stopName}}, estimated arrival {{estimateLabel}}',
@@ -137,7 +134,8 @@ export const en = {
         }
       },
       baseMap: {
-        userLocationMarkerAriaLabel: 'Current location'
+        userLocationMarkerAriaLabel: 'Current location',
+        focusUserLocationAriaLabel: 'My location'
       },
       mapSidebarLayout: {
         openNearbyStops: 'Open nearby stops list',

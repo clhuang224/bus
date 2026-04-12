@@ -1,9 +1,7 @@
-import { Overlay, useMantineTheme } from '@mantine/core'
+import { ActionIcon, Overlay, useMantineTheme } from '@mantine/core'
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
-import type { Map as MapLibreMap } from 'maplibre-gl'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FocusUserLocationButton } from '~/components/common/FocusUserLocationButton'
 import { MapSidebarLayout } from '~/components/common/MapSidebarLayout'
 import { NearbySidebarContent } from '~/components/nearby/NearbySidebarContent'
 import { useNearbyData } from '~/modules/hooks/useNearbyData'
@@ -11,6 +9,7 @@ import { useScrollSelectedItem } from '~/modules/hooks/useScrollSelectedItem'
 import { useNearbySearchParams } from '~/modules/hooks/useNearbySearchParams'
 import { NearbyStopDetail } from '~/components/nearby/NearbyStopDetail'
 import { NearbyStopMap } from '~/components/nearby/NearbyStopMap'
+import { RiMenuFill } from '@remixicon/react'
 
 const Nearby = () => {
   const { t } = useTranslation()
@@ -19,7 +18,6 @@ const Nearby = () => {
   const theme = useMantineTheme()
   const isSm = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`)
   const [isSidebarOpened, { open: openSidebar, close: closeSidebar }] = useDisclosure(false)
-  const [nearbyMapInstance, setNearbyMapInstance] = useState<MapLibreMap | null>(null)
   const {
     selectedStopId,
     selectedRouteStopId,
@@ -84,10 +82,7 @@ const Nearby = () => {
     <MapSidebarLayout
       isSm={isSm}
       isSidebarOpened={isSidebarOpened}
-      mapControls={<FocusUserLocationButton map={nearbyMapInstance} />}
       onCloseSidebar={closeSidebar}
-      onOpenSidebar={openSidebar}
-      openButtonLabel={t('components.mapSidebarLayout.openNearbyStops')}
       panel={(
         <NearbySidebarContent
           detailState={{
@@ -121,8 +116,17 @@ const Nearby = () => {
         )}
         <NearbyStopMap
           center={coords}
+          extraControls={isSm
+            ? (
+              <ActionIcon
+                onClick={openSidebar}
+                aria-label={t('components.mapSidebarLayout.openNearbyStops')}
+              >
+                <RiMenuFill size={18} />
+              </ActionIcon>
+              )
+            : null}
           markers={markers}
-          onMapLoad={setNearbyMapInstance}
           selectedStop={selectedStopId}
           selectedStopPopupContent={selectedStopPopupContent}
           isSm={isSm}

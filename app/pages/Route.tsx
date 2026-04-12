@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { BaseAlert } from '~/components/common/BaseAlert'
-import { FocusUserLocationButton } from '~/components/common/FocusUserLocationButton'
 import { MapSidebarLayout } from '~/components/common/MapSidebarLayout'
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { RouteMap } from '~/components/routes/RouteMap'
@@ -12,14 +11,13 @@ import { RouteStopList } from '~/components/routes/RouteStopList'
 import { useFavoriteRouteStops } from '~/modules/hooks/useFavoriteRouteStops'
 import { useRouteBaseData } from '~/modules/hooks/useRouteBaseData'
 import { useRouteRealtimeData } from '~/modules/hooks/useRouteRealtimeData'
-import { RiArrowLeftSLine } from '@remixicon/react'
+import { RiArrowLeftSLine, RiMenuFill } from '@remixicon/react'
 import { AppBadge } from '~/components/common/AppBadge'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { getTerminalDisplay } from '~/modules/utils/i18n/getTerminalDisplay'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 import { saveRouteSearchRecent } from '~/modules/utils/routes/routeSearchRecentStorage'
 import { isCityName } from '~/modules/utils/shared/isCityName'
-import type { Map as MapLibreMap } from 'maplibre-gl'
 
 export default function Route() {
   const { t } = useTranslation()
@@ -35,7 +33,6 @@ export default function Route() {
   const [activeTab, setActiveTab] = useState<string | null>(null)
   const [selectedStopId, setSelectedStopId] = useState<string | null>(null)
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null)
-  const [routeMapInstance, setRouteMapInstance] = useState<MapLibreMap | null>(null)
   const routeBaseOptions = city && isCityName(city) && id
     ? {
         activeTab,
@@ -174,10 +171,7 @@ export default function Route() {
     <MapSidebarLayout
       isSm={isSm}
       isSidebarOpened={isSidebarOpened}
-      mapControls={<FocusUserLocationButton map={routeMapInstance} />}
       onCloseSidebar={closeSidebar}
-      onOpenSidebar={openSidebar}
-      openButtonLabel={t('components.mapSidebarLayout.openRouteList')}
       panel={(
         <Stack h="100%" gap="md">
           <Stack gap={4}>
@@ -256,8 +250,17 @@ export default function Route() {
       )}
     >
       <RouteMap
+        extraControls={isSm
+          ? (
+            <ActionIcon
+              onClick={openSidebar}
+              aria-label={t('components.mapSidebarLayout.openRouteList')}
+            >
+              <RiMenuFill size={18} />
+            </ActionIcon>
+            )
+          : null}
         highlightedStopId={highlightedStopId}
-        onMapLoad={setRouteMapInstance}
         selectedStop={selectedStopId}
         selectedVehicleId={selectedVehicleId}
         onSelectStop={handleSelectStopFromMap}

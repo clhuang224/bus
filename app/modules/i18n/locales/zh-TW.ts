@@ -124,9 +124,6 @@ export const zhTW = {
         meters: '{{count}} 公尺',
         kilometers: '{{count}} 公里'
       },
-      focusUserLocationButton: {
-        ariaLabel: '我的位置'
-      },
       routeMap: {
         stopMarkerAriaLabel: '{{stopName}}，第 {{sequence}} 站',
         vehicleMarkerAriaLabel: '{{plateNumb}}，最近站牌 {{stopName}}，預估到站 {{estimateLabel}}',
@@ -137,7 +134,8 @@ export const zhTW = {
         }
       },
       baseMap: {
-        userLocationMarkerAriaLabel: '目前位置'
+        userLocationMarkerAriaLabel: '目前位置',
+        focusUserLocationAriaLabel: '我的位置'
       },
       mapSidebarLayout: {
         openNearbyStops: '開啟附近站牌列表',
