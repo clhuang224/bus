@@ -119,8 +119,8 @@ describe('RouteMap', () => {
       },
       preloadedState: {
         geolocation: {
+          ...geoSlice.getInitialState(),
           coords: [25.033, 121.5654],
-          isLocating: false,
           error: null
         }
       }
