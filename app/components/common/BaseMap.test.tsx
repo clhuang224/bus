@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 
 import { fireEvent, screen } from '@testing-library/react'
-import type { Reducer, UnknownAction } from '@reduxjs/toolkit'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import geoSlice from '~/modules/slices/geoSlice'
 import { createTestStore } from '~/test/createTestStore'
 import { renderWithStore } from '~/test/render'
 import BaseMap from './BaseMap'
@@ -62,9 +62,13 @@ describe('BaseMap', () => {
   it('disables the focus-my-location control when user coordinates are unavailable', () => {
     const store = createTestStore({
       reducer: {
-        geolocation: (() => ({
+        geolocation: geoSlice.reducer
+      },
+      preloadedState: {
+        geolocation: {
+          ...geoSlice.getInitialState(),
           coords: null
-        })) as unknown as Reducer<unknown, UnknownAction>
+        }
       }
     })
 
@@ -79,9 +83,13 @@ describe('BaseMap', () => {
   it('focuses the map on the user location when the control is clicked', () => {
     const store = createTestStore({
       reducer: {
-        geolocation: (() => ({
+        geolocation: geoSlice.reducer
+      },
+      preloadedState: {
+        geolocation: {
+          ...geoSlice.getInitialState(),
           coords: [25.033, 121.5654]
-        })) as unknown as Reducer<unknown, UnknownAction>
+        }
       }
     })
 

@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import type { Reducer, UnknownAction } from '@reduxjs/toolkit'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
 import { getRouteRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
@@ -379,10 +378,11 @@ function renderRoutePage(
 ) {
   const store = createTestStore({
     reducer: {
-      geolocation: geoSlice.reducer as unknown as Reducer<unknown, UnknownAction>
+      geolocation: geoSlice.reducer
     },
     preloadedState: {
       geolocation: {
+        ...geoSlice.getInitialState(),
         coords
       }
     }

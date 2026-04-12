@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 
 import { screen } from '@testing-library/react'
-import type { Reducer, UnknownAction } from '@reduxjs/toolkit'
 import { useEffect } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import geoSlice from '~/modules/slices/geoSlice'
@@ -115,7 +114,7 @@ describe('RouteMap', () => {
   it('renders only the stop name in the selected stop popup', async () => {
     const store = createTestStore({
       reducer: {
-        geolocation: geoSlice.reducer as unknown as Reducer<unknown, UnknownAction>
+        geolocation: geoSlice.reducer
       },
       preloadedState: {
         geolocation: {

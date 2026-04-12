@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 
-import type { Reducer, UnknownAction } from '@reduxjs/toolkit'
 import { act, fireEvent, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import Nearby from './Nearby'
@@ -242,20 +241,6 @@ const routesData = [
   }
 ]
 
-type NearbyTestState = {
-  geolocation: {
-    coords: [number, number] | null
-    error: GeoErrorType | null
-    permission: GeoPermissionType
-    watching: boolean
-  }
-  cityGeo: {
-    geojson: null
-    loading: boolean
-    error: null
-  }
-}
-
 function resetNearbyMocks() {
   mockUseGetRoutesByAreaQuery.mockReset()
   mockUseGetStopsByNearbyAreaQuery.mockReset()
@@ -291,19 +276,19 @@ function renderNearby({
     isLoading?: boolean
   }
 } = {}) {
-  const store = createTestStore<NearbyTestState>({
+  const store = createTestStore({
     reducer: {
-      geolocation: (() => ({
+      geolocation: (state = {
         coords,
         error: geolocationError,
         permission,
         watching: false
-      })) as unknown as Reducer<unknown, UnknownAction>,
-      cityGeo: (() => ({
+      }) => state,
+      cityGeo: (state = {
         geojson: null,
         loading: false,
         error: null
-      })) as unknown as Reducer<unknown, UnknownAction>
+      }) => state
     }
   })
 

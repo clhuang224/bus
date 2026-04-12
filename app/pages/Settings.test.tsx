@@ -35,7 +35,7 @@ vi.mock('react-router', async () => {
 })
 
 function renderSettingsPage(initialLocale = AppLocaleType.ZH_TW) {
-  const store = createTestStore<Record<never, never>>({
+  const store = createTestStore({
     preloadedState: {
       locale: {
         value: initialLocale

@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 
-import type { Reducer, UnknownAction } from '@reduxjs/toolkit'
 import { fireEvent, screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { CityNameType } from '~/modules/enums/CityNameType'
@@ -36,7 +35,7 @@ const stopGroup = {
 function renderNearbyStopDetail(displayMode: 'content' | 'full' | 'title' = 'content') {
   const store = createTestStore({
     reducer: {
-      geolocation: geoSlice.reducer as unknown as Reducer<unknown, UnknownAction>
+      geolocation: geoSlice.reducer
     },
     preloadedState: {
       geolocation: {

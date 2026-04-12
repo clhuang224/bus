@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 
 import { fireEvent, screen, within } from '@testing-library/react'
-import type { Reducer, UnknownAction } from '@reduxjs/toolkit'
 import type { ReactElement } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { DEFAULT_APP_LOCALE } from '~/modules/consts/i18n'
@@ -64,7 +63,7 @@ function renderRouteStopList(
 ) {
   const store = createTestStore({
     reducer: {
-      geolocation: geoSlice.reducer as unknown as Reducer<unknown, UnknownAction>
+      geolocation: geoSlice.reducer
     }
   })
 
