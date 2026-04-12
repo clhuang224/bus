@@ -201,7 +201,7 @@ function getRoutesMessage({
 function useResetRoutesScroll(
   scrollViewportRef: RefObject<HTMLDivElement | null>,
   area: AreaType,
-  normalizedKeyword: string
+  keyword: string
 ) {
   const previousSearchContextRef = useRef<{ area: AreaType, keyword: string } | null>(null)
 
@@ -209,14 +209,14 @@ function useResetRoutesScroll(
     const previousSearchContext = previousSearchContextRef.current
     previousSearchContextRef.current = {
       area,
-      keyword: normalizedKeyword
+      keyword
     }
 
     if (
       !previousSearchContext ||
       (
         previousSearchContext.area === area &&
-        previousSearchContext.keyword === normalizedKeyword
+        previousSearchContext.keyword === keyword
       )
     ) {
       return
@@ -225,7 +225,7 @@ function useResetRoutesScroll(
     scrollViewportRef.current?.scrollTo({
       top: 0
     })
-  }, [area, normalizedKeyword, scrollViewportRef])
+  }, [area, keyword, scrollViewportRef])
 }
 
 export function useRoutesData() {
@@ -288,7 +288,7 @@ export function useRoutesData() {
     return routesToDisplay.map((route) => toDisplayRoute(route, locale))
   }, [filteredRoutes, locale, normalizedKeyword, recentRoutes])
 
-  useResetRoutesScroll(scrollViewportRef, area, normalizedKeyword)
+  useResetRoutesScroll(scrollViewportRef, area, keyword)
 
   return {
     area,
