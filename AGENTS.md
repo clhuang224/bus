@@ -218,7 +218,7 @@ When adding or changing URL-like values, use relative paths by default so they w
 
 ### Store
 
-The Redux store is defined in `app/modules/store.ts`.
+The Redux store lives under `app/modules/store/`, with `index.ts` as the store entry and colocated setup helpers such as preload logic beside it.
 
 Use the store for:
 
@@ -287,6 +287,25 @@ For route realtime vehicle ETA matching, use `RealTimeNearStop.A2EventType` as t
 Do not regress the route page back to showing `Not departed yet` for a vehicle that the realtime feed already places on the road, and do not let a stale current-stop ETA override the `A2EventType`-based current-vs-next-stop choice.
 
 For the `Route` page specifically, keep the stop list as a stop-based ETA view whose ETA labels come directly from `EstimatedTimeOfArrival`, matched to the stop by stable stop identifiers such as `StopUID` / `StopID` when available. If realtime vehicle information is shown in the list, limit it to location-style cues such as vehicle plate badges placed beside the stop row, and do not let those badges replace, derive, or redefine the stop's ETA text. `EstimatedTimeOfArrival` answers "when does this stop get service", `RealTimeNearStop` answers "which stop is a vehicle near right now", and `RealTimeByFrequency` answers "where is the vehicle GPS position right now", so keep those data flows separate in both code and UI.
+
+For stop-focused location UX, keep page roles distinct:
+
+- on the `Nearby` page, distance-from-user is valid primary context and may be shown in stop detail views
+- on the `Route` page, do not add distance-from-user to the stop list by default; keep that page focused on route structure, ETA, realtime vehicle cues, and stop actions
+- external stop navigation should open Google Maps with the stop as the destination; do not rely on browser geolocation as an explicit origin in the outbound URL unless the product direction changes again
+
+For desktop map popups on both `Route` and `Nearby`, keep stop popups lightweight:
+
+- default desktop stop popups should only identify the selected stop, typically by showing the stop name on a single line
+- richer detail such as distance, address, route badges, or navigation actions should live in the surrounding sidebar / detail panel unless there is a strong product reason to duplicate them in the popup
+
+For shared map behavior, keep `BaseMap` responsible for common map-level concerns such as:
+
+- rendering the user-location marker
+- showing the built-in focus-my-location control when `showUserLocation` is enabled
+- hosting additional shared map overlay controls via `extraControls`
+
+Do not re-implement those common controls separately in page components when the behavior belongs to the base map layer.
 
 For the `Routes` page specifically, keep keyword search ranking deterministic and user-comprehensible:
 

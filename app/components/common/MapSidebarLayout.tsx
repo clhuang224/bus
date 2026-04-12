@@ -1,8 +1,6 @@
-import { ActionIcon, Box, Drawer, Flex } from '@mantine/core'
-import { RiMenuFill } from '@remixicon/react'
+import { Box, Drawer, Flex } from '@mantine/core'
 import type { ReactNode } from 'react'
 import {
-  APP_FLOATING_ACTION_OFFSET,
   APP_HEADER_HEIGHT,
   APP_PAGE_PADDING,
   MAP_SIDEBAR_WIDTH
@@ -13,8 +11,6 @@ interface PropType {
   isSm: boolean
   isSidebarOpened: boolean
   onCloseSidebar: () => void
-  onOpenSidebar: () => void
-  openButtonLabel: string
   panel: ReactNode
 }
 
@@ -23,8 +19,6 @@ export const MapSidebarLayout = ({
   isSm,
   isSidebarOpened,
   onCloseSidebar,
-  onOpenSidebar,
-  openButtonLabel,
   panel
 }: PropType) => (
   <Flex h="100%" pos="relative">
@@ -44,19 +38,6 @@ export const MapSidebarLayout = ({
     )}
 
     <Flex pos="relative" style={{ flex: 1, minWidth: 0 }}>
-      {isSm && (
-        <ActionIcon
-          pos="absolute"
-          right={APP_FLOATING_ACTION_OFFSET}
-          bottom="48px"
-          style={{ zIndex: 2 }}
-          onClick={onOpenSidebar}
-          aria-label={openButtonLabel}
-        >
-          <RiMenuFill size={18} />
-        </ActionIcon>
-      )}
-
       <Drawer
         opened={isSm && isSidebarOpened}
         onClose={onCloseSidebar}

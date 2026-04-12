@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 
-import type { Reducer, UnknownAction } from '@reduxjs/toolkit'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
@@ -151,32 +150,19 @@ const routesData = [
   }
 ]
 
-type RoutesTestState = {
-  geolocation: {
-    coords: [number, number]
-  }
-  cityGeo: {
-    geojson: null
-  }
-  routeSearch: {
-    keyword: string
-    selectedArea: AreaType | null
-  }
-}
-
 function createStore(preloadedRouteSearchState?: {
   keyword?: string
   selectedArea?: AreaType | null
 }) {
-  return createTestStore<RoutesTestState>({
+  return createTestStore({
     reducer: {
-      geolocation: (() => ({
+      geolocation: (state = {
         coords: [25.033, 121.5654] as [number, number]
-      })) as unknown as Reducer<unknown, UnknownAction>,
-      cityGeo: (() => ({
+      }) => state,
+      cityGeo: (state = {
         geojson: null
-      })) as unknown as Reducer<unknown, UnknownAction>,
-      routeSearch: routeSearchSlice.reducer as unknown as Reducer<unknown, UnknownAction>
+      }) => state,
+      routeSearch: routeSearchSlice.reducer
     },
     preloadedState: {
       locale: {

@@ -19,8 +19,8 @@
 可以依服務區域與關鍵字搜尋公車路線。
 
 - `Routes` 頁預設會帶入目前定位推得的區域。
-- 如果使用者手動切換區域，這個選擇會在同一次瀏覽期間保留。
-- 搜尋關鍵字也會在同一次瀏覽期間保留，方便回到頁面後繼續查。
+- 如果使用者手動切換區域，這個選擇會在之後回訪時保留。
+- 當搜尋框為空時，頁面會顯示最近查看的路線，方便快速回到常用路線。
 - 點進路線之後，會進入路線詳情頁，裡面有子路線分頁、站序列表和同步地圖。
 
 ### 路線詳情
@@ -29,6 +29,7 @@
 
 - 如果有官方路線 shape，地圖會優先使用它來呈現更準確的路線軌跡。
 - 站序列表和地圖會保持同步，從任一邊選擇站點，另一邊也會跟著高亮。
+- 站牌可直接開啟 Google Maps 導航，地圖也提供回到目前位置的操作。
 - 每一站的 ETA 直接以 `EstimatedTimeOfArrival` 為準。
 - 即時車牌只作為車輛位置提示，不會拿來覆蓋站點 ETA 的語意。
 - 有即時定位資料時，地圖上的公車位置會使用 `RealTimeByFrequency` 的 GPS 座標。
@@ -40,7 +41,8 @@
 
 - 使用者允許定位後，系統會自動推得目前所在的城市與服務區域。
 - **0.5 公里**內的站牌會同時顯示在列表和地圖上。
-- 選擇站牌後，可以查看站牌的詳細資訊，例如縣市、地址和經過路線。
+- 選擇站牌後，可以查看站牌的詳細資訊，例如距離、縣市、地址和經過路線。
+- 站牌詳細資訊可直接開啟 Google Maps 導航。
 - 展開該站的路線明細後，可以依方向查看完整的路線列表。
 
 如果使用者拒絕位置權限，附近站牌功能將無法使用。
@@ -89,6 +91,7 @@ app/
 │   ├── i18n/          # 語系設定與翻譯資源
 │   ├── interfaces/    # API 與領域模型
 │   ├── slices/        # Redux slices
+│   ├── store/         # Redux store entry 與 preload helpers
 │   ├── types/         # 共用型別工具
 │   ├── utils/         # 依領域分組的共用 helper
 │   │   ├── favorite/  # Favorite persistence normalization
@@ -96,8 +99,8 @@ app/
 │   │   ├── i18n/      # localized text 與 translation key helper
 │   │   ├── map/       # 地圖 marker DOM helper
 │   │   ├── route/     # 路線資料轉換、即時資訊與 shape helper
+│   │   ├── routes/    # 路線搜尋的 storage 與排序 helper
 │   │   └── shared/    # 小型跨領域工具
-│   └── store.ts       # Redux store
 ├── pages/             # Route pages，例如 Favorite、Routes、Nearby、Route、Settings
 ├── test/              # 共用 test setup 與 render helpers
 ├── root.tsx           # App root

@@ -15,6 +15,7 @@ interface PropType {
     position: LngLat
     label: string
   }>
+  extraControls?: ReactNode
   selectedStop: string | null
   selectedStopPopupContent?: ReactNode
   isSm?: boolean
@@ -24,6 +25,7 @@ interface PropType {
 export const NearbyStopMap = ({
   center,
   markers = [],
+  extraControls,
   selectedStop,
   selectedStopPopupContent,
   isSm = false,
@@ -137,19 +139,16 @@ export const NearbyStopMap = ({
         center={center}
         zoom={16}
         showUserLocation
-        onLoad={(map) => {
-          setMap(map)
-        }}
+        extraControls={extraControls}
+        onLoad={setMap}
       />
       {popupContainer && selectedStopPopupContent
         ? createPortal(
           <div
-            style={isSm
-              ? {
-                  maxHeight: '50dvh',
-                  overflowY: 'auto'
-                }
-              : undefined}
+            style={{
+              maxHeight: isSm ? '50dvh' : '40dvh',
+              overflowY: 'auto'
+            }}
           >
             {selectedStopPopupContent}
           </div>,

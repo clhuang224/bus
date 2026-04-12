@@ -1,13 +1,14 @@
-import { Stack, Text } from '@mantine/core'
+import { Group, Stack, Text } from '@mantine/core'
 import type { Map as MapLibreMap, Marker, Popup } from 'maplibre-gl'
 import mapLibre from 'maplibre-gl'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import type { LngLat, LatLng } from '~/modules/types/CoordsType'
 import { addMapMarkerActivationListeners } from '~/modules/utils/map/addMapMarkerActivationListeners'
 import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
 import BaseMap from '../common/BaseMap'
+import { NavigationButton } from '../common/NavigationButton'
 
 export interface RouteMapStop {
   id: string
@@ -25,7 +26,9 @@ export interface RouteMapVehicle {
 }
 
 interface PropType {
+  extraControls?: ReactNode
   highlightedStopId?: string | null
+  isSm?: boolean
   onSelectStop: (stopId: string | null) => void
   onSelectVehicle: (vehicleId: string) => void
   routePath?: LngLat[]
@@ -51,7 +54,9 @@ function removeRouteLine(map: MapLibreMap) {
 }
 
 export const RouteMap = ({
+  extraControls,
   highlightedStopId = null,
+  isSm = false,
   onSelectStop,
   onSelectVehicle,
   routePath = [],
@@ -76,7 +81,12 @@ export const RouteMap = ({
     () => new Map(vehicles.map((vehicle) => [vehicle.id, vehicle])),
     [vehicles]
   )
+  const stopsById = useMemo(
+    () => new Map(positionedStops.map((stop) => [stop.id, stop])),
+    [positionedStops]
+  )
   const selectedVehicle = selectedVehicleId ? vehiclesById.get(selectedVehicleId) ?? null : null
+  const selectedMapStop = selectedStop ? stopsById.get(selectedStop) ?? null : null
 
   const center = positionedStops[0]
     ? [positionedStops[0].position[1], positionedStops[0].position[0]] as LatLng
@@ -233,7 +243,7 @@ export const RouteMap = ({
   }, [highlightedStopId, isMapReady, map, onSelectStop, onSelectVehicle, positionedStops, routePath, selectedStop, selectedVehicleId, t, vehicles])
 
   useEffect(() => {
-    if (!map) return
+    if (!map || !isMapReady) return
 
     if (popupRef.current) {
       popupRef.current.remove()
@@ -271,23 +281,26 @@ export const RouteMap = ({
     const marker = markerMap.current.get(selectedStop)
     if (!marker) return
 
+    const container = document.createElement('div')
+
     const popup = new mapLibre.Popup({
       closeButton: false,
       offset: 25,
       closeOnClick: false
     })
       .setLngLat(marker.getLngLat())
-      .setText(marker.getElement().dataset.label || '')
+      .setDOMContent(container)
       .addTo(map)
 
     popupRef.current = popup
+    setPopupContainer(container)
 
     return () => {
       if (!popupRef.current) return
       popupRef.current.remove()
       popupRef.current = null
     }
-  }, [map, selectedStop, selectedVehicleId, vehiclesById])
+  }, [isMapReady, map, selectedStop, selectedVehicleId, vehiclesById])
 
   useEffect(() => {
     if (!map) return
@@ -322,6 +335,8 @@ export const RouteMap = ({
       <BaseMap
         center={center}
         zoom={13}
+        showUserLocation
+        extraControls={extraControls}
         onLoad={setMap}
       />
       {popupContainer && selectedVehicle
@@ -343,6 +358,29 @@ export const RouteMap = ({
           </Stack>,
           popupContainer
         )
+        : popupContainer && selectedMapStop
+          ? createPortal(
+            isSm
+              ? (
+                <Group align="center" wrap="nowrap" gap="xs" style={{ minWidth: 0, maxWidth: '100%' }}>
+                  <Text size="sm" fw={500} style={{ minWidth: 0, flex: '0 1 auto' }} lineClamp={1}>
+                    {selectedMapStop.name}
+                  </Text>
+                  <NavigationButton
+                    ariaLabel={t('components.routeStopList.navigateAriaLabel', {
+                      stopName: selectedMapStop.name
+                    })}
+                    destination={[selectedMapStop.position[1], selectedMapStop.position[0]]}
+                  />
+                </Group>
+                )
+              : (
+                <Text size="sm" fw={500} style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
+                  {selectedMapStop.name}
+                </Text>
+                ),
+            popupContainer
+          )
         : null}
     </>
   )

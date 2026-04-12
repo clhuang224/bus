@@ -11,7 +11,7 @@ import { RouteStopList } from '~/components/routes/RouteStopList'
 import { useFavoriteRouteStops } from '~/modules/hooks/useFavoriteRouteStops'
 import { useRouteBaseData } from '~/modules/hooks/useRouteBaseData'
 import { useRouteRealtimeData } from '~/modules/hooks/useRouteRealtimeData'
-import { RiArrowLeftSLine } from '@remixicon/react'
+import { RiArrowLeftSLine, RiMenuFill } from '@remixicon/react'
 import { AppBadge } from '~/components/common/AppBadge'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { getTerminalDisplay } from '~/modules/utils/i18n/getTerminalDisplay'
@@ -172,8 +172,6 @@ export default function Route() {
       isSm={isSm}
       isSidebarOpened={isSidebarOpened}
       onCloseSidebar={closeSidebar}
-      onOpenSidebar={openSidebar}
-      openButtonLabel={t('components.mapSidebarLayout.openRouteList')}
       panel={(
         <Stack h="100%" gap="md">
           <Stack gap={4}>
@@ -252,7 +250,18 @@ export default function Route() {
       )}
     >
       <RouteMap
+        extraControls={isSm
+          ? (
+            <ActionIcon
+              onClick={openSidebar}
+              aria-label={t('components.mapSidebarLayout.openRouteList')}
+            >
+              <RiMenuFill size={18} />
+            </ActionIcon>
+            )
+          : null}
         highlightedStopId={highlightedStopId}
+        isSm={isSm}
         selectedStop={selectedStopId}
         selectedVehicleId={selectedVehicleId}
         onSelectStop={handleSelectStopFromMap}

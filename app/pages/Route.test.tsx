@@ -10,6 +10,7 @@ import { DirectionType } from '~/modules/enums/DirectionType'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
 import { VehicleStateType } from '~/modules/enums/VehicleStateType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
+import geoSlice from '~/modules/slices/geoSlice'
 import { ROUTE_SEARCH_RECENT_STORAGE_KEY } from '~/modules/utils/routes/routeSearchRecentStorage'
 import { createTestStore } from '~/test/createTestStore'
 import { mockMatchMedia } from '~/test/mockMatchMedia'
@@ -18,6 +19,7 @@ import Route from './Route'
 
 const t = i18n.getFixedT(AppLocaleType.ZH_TW)
 const fourMinutesAwayLabel = t('routePage.realtime.minutesAway', { count: 4 })
+const navigateToCityHallLabel = t('components.routeStopList.navigateAriaLabel', { stopName: '市政府' })
 const noEstimateLabel = t('routePage.realtime.noEstimate')
 const routeRealtimeMessages = getRouteRealtimeMessages(t)
 
@@ -40,7 +42,18 @@ const {
   mockUseGetRoutesByCityQuery: vi.fn(),
   mockUseGetStopOfRoutesByCityQuery: vi.fn(),
   mockUseGetStopsByCityQuery: vi.fn(),
-  mockRouteMap: vi.fn(() => <div>route-map</div>)
+  mockRouteMap: vi.fn(({
+    extraControls
+  }: {
+    extraControls?: React.ReactNode
+  }) => {
+    return (
+      <div>
+        <div>{extraControls}</div>
+        <div>route-map</div>
+      </div>
+    )
+  })
 }))
 
 vi.mock('~/components/common/MapSidebarLayout', () => ({
@@ -187,6 +200,12 @@ const stopOfRoutesData = [
 ]
 
 const stopsByCityData = [
+  {
+    StopUID: 'stop-a',
+    StopID: 'stop-a',
+    StopName: { 'zh-TW': '市政府', en: 'City Hall' },
+    position: [121.55, 25.03] as [number, number]
+  },
   {
     StopUID: 'stop-b',
     StopID: 'stop-b',
@@ -355,9 +374,20 @@ function mockDefaultRouteQueries() {
 }
 
 function renderRoutePage(
-  initialEntries: Array<string | { pathname: string, state?: unknown }> = ['/routes/Taipei/route-1']
+  initialEntries: Array<string | { pathname: string, state?: unknown }> = ['/routes/Taipei/route-1'],
+  coords: [number, number] | null = null
 ) {
-  const store = createTestStore()
+  const store = createTestStore({
+    reducer: {
+      geolocation: geoSlice.reducer
+    },
+    preloadedState: {
+      geolocation: {
+        ...geoSlice.getInitialState(),
+        coords
+      }
+    }
+  })
 
   return renderRoute(<Route />, {
     path: '/routes/:city/:id',
@@ -368,8 +398,10 @@ function renderRoutePage(
 
 describe('Route', () => {
   beforeEach(() => {
+    vi.restoreAllMocks()
     localStorage.clear()
     mockMatchMedia()
+    vi.spyOn(window, 'open').mockImplementation(() => null)
 
     resetRouteMocks()
     mockDefaultRouteQueries()
@@ -383,6 +415,30 @@ describe('Route', () => {
     await waitFor(() => {
       expect(JSON.parse(localStorage.getItem(ROUTE_SEARCH_RECENT_STORAGE_KEY) ?? '[]')).toEqual(['route-1', 'route-2'])
     })
+  })
+
+  it('opens Google Maps navigation with only the destination when user coordinates are unavailable', () => {
+    renderRoutePage()
+
+    fireEvent.click(screen.getByRole('button', { name: navigateToCityHallLabel }))
+
+    expect(window.open).toHaveBeenCalledWith(
+      'https://www.google.com/maps/dir/?api=1&destination=25.03%2C121.55',
+      '_blank',
+      'noopener,noreferrer'
+    )
+  })
+
+  it('opens Google Maps navigation with the destination', () => {
+    renderRoutePage(['/routes/Taipei/route-1'], [25.033, 121.5654])
+
+    fireEvent.click(screen.getByRole('button', { name: navigateToCityHallLabel }))
+
+    expect(window.open).toHaveBeenCalledWith(
+      'https://www.google.com/maps/dir/?api=1&destination=25.03%2C121.55',
+      '_blank',
+      'noopener,noreferrer'
+    )
   })
 
   it('highlights the saved favorite stop after opening the route page from favorites', async () => {

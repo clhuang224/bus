@@ -1,14 +1,15 @@
-import { Overlay, useMantineTheme } from '@mantine/core'
+import { ActionIcon, Overlay, useMantineTheme } from '@mantine/core'
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
+import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MapSidebarLayout } from '~/components/common/MapSidebarLayout'
 import { NearbySidebarContent } from '~/components/nearby/NearbySidebarContent'
-import { useEffect, useRef } from 'react'
 import { useNearbyData } from '~/modules/hooks/useNearbyData'
 import { useScrollSelectedItem } from '~/modules/hooks/useScrollSelectedItem'
 import { useNearbySearchParams } from '~/modules/hooks/useNearbySearchParams'
 import { NearbyStopDetail } from '~/components/nearby/NearbyStopDetail'
 import { NearbyStopMap } from '~/components/nearby/NearbyStopMap'
+import { RiMenuFill } from '@remixicon/react'
 
 const Nearby = () => {
   const { t } = useTranslation()
@@ -82,8 +83,6 @@ const Nearby = () => {
       isSm={isSm}
       isSidebarOpened={isSidebarOpened}
       onCloseSidebar={closeSidebar}
-      onOpenSidebar={openSidebar}
-      openButtonLabel={t('components.mapSidebarLayout.openNearbyStops')}
       panel={(
         <NearbySidebarContent
           detailState={{
@@ -117,6 +116,16 @@ const Nearby = () => {
         )}
         <NearbyStopMap
           center={coords}
+          extraControls={isSm
+            ? (
+              <ActionIcon
+                onClick={openSidebar}
+                aria-label={t('components.mapSidebarLayout.openNearbyStops')}
+              >
+                <RiMenuFill size={18} />
+              </ActionIcon>
+              )
+            : null}
           markers={markers}
           selectedStop={selectedStopId}
           selectedStopPopupContent={selectedStopPopupContent}

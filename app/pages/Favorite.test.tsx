@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 
-import type { Reducer, UnknownAction } from '@reduxjs/toolkit'
 import { fireEvent, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { getFavoriteMessages } from '~/modules/consts/pageMessages'
@@ -92,21 +91,15 @@ const unsortedFavoriteRouteStops: FavoriteRouteStop[] = [
   }
 ]
 
-type FavoriteTestState = {
-  favorite: {
-    routeStops: FavoriteRouteStop[]
-  }
-}
-
 function renderFavoritePage(
   routeStops: FavoriteRouteStop[] = favoriteRouteStops,
   locale: AppLocaleType = AppLocaleType.ZH_TW
 ) {
   localStorage.setItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY, JSON.stringify(routeStops))
 
-  const store = createTestStore<FavoriteTestState>({
+  const store = createTestStore({
     reducer: {
-      favorite: favoriteSlice.reducer as unknown as Reducer<unknown, UnknownAction>
+      favorite: favoriteSlice.reducer
     },
     preloadedState: {
       favorite: {
@@ -127,9 +120,9 @@ function renderFavoritePageFromLocalStorage(storedRouteStops: unknown, locale: A
   localStorage.setItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY, JSON.stringify(storedRouteStops))
   const loadedRouteStops = loadFavoriteRouteStopsFromStorage()
 
-  const store = createTestStore<FavoriteTestState>({
+  const store = createTestStore({
     reducer: {
-      favorite: favoriteSlice.reducer as unknown as Reducer<unknown, UnknownAction>
+      favorite: favoriteSlice.reducer
     },
     preloadedState: {
       favorite: {
@@ -255,9 +248,9 @@ describe('Favorite', () => {
     localStorage.setItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY, '{invalid-json')
     const loadedRouteStops = loadFavoriteRouteStopsFromStorage()
 
-    const store = createTestStore<FavoriteTestState>({
+    const store = createTestStore({
       reducer: {
-        favorite: favoriteSlice.reducer as unknown as Reducer<unknown, UnknownAction>
+        favorite: favoriteSlice.reducer
       },
       preloadedState: {
         favorite: {

@@ -19,8 +19,8 @@ Visit [bus.lynns.me](https://bus.lynns.me) to start using the app.
 Search bus routes by service area and keyword.
 
 - The Routes page defaults to the area resolved from the user's current location.
-- If the user manually changes the area, that selection is preserved while they continue browsing.
-- Search keywords are also preserved when returning to the Routes page during the same session.
+- If the user manually changes the area, that selection is preserved across revisits.
+- When the search box is empty, the page shows recently viewed routes when available for quick access.
 - Matching routes open a route detail page with subroute tabs, stop lists, and a synchronized map.
 
 ### Route Detail
@@ -29,6 +29,7 @@ The Route page combines stop lists, map interaction, and real-time transit data.
 
 - Official route shape data is used for more accurate route lines on the map when available.
 - The stop list and map stay in sync: selecting a stop in one view updates the other.
+- Stops can open Google Maps navigation from the stop list, and the route map includes a control to focus back on the user's current location.
 - Each stop shows stop-level ETA based directly on `EstimatedTimeOfArrival` when upstream ETA data is available.
 - Real-time vehicle plates are shown as separate location cues in the stop list and do not define the stop ETA.
 - Route map vehicle markers use live GPS coordinates from `RealTimeByFrequency` when upstream realtime position data is available.
@@ -40,7 +41,8 @@ The Nearby Stops page uses the user's current GPS location.
 
 - If location permission is granted, the app resolves the current city and service area automatically.
 - Stops within **0.5 kilometers** are shown as both a list and map markers.
-- Selecting a stop reveals stop details, including its city, address, and serving route badges.
+- Selecting a stop reveals stop details, including its distance, city, address, and serving route badges.
+- Stop details can open Google Maps navigation directly.
 - Opening a stop's route detail view shows the full route list grouped by direction.
 
 If location permission is denied, the Nearby Stops feature becomes unavailable.
@@ -89,6 +91,7 @@ app/
 │   ├── i18n/          # Locale setup and translation resources
 │   ├── interfaces/    # Domain and API models
 │   ├── slices/        # Redux slices
+│   ├── store/         # Redux store entry and preload helpers
 │   ├── types/         # Shared type helpers
 │   ├── utils/         # Shared helpers grouped by domain
 │   │   ├── favorite/  # Favorite persistence normalization
@@ -96,8 +99,8 @@ app/
 │   │   ├── i18n/      # Localized text and label helpers
 │   │   ├── map/       # Map marker DOM helpers
 │   │   ├── route/     # Route data transforms, realtime, and shape helpers
+│   │   ├── routes/    # Route-search storage and ranking helpers
 │   │   └── shared/    # Small cross-domain utilities
-│   └── store.ts       # Redux store
 ├── pages/             # Route pages, including Favorite, Routes, Nearby, Route, and Settings
 ├── test/              # Shared test setup and render helpers
 ├── root.tsx           # App root

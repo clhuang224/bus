@@ -1,22 +1,25 @@
-import { Box } from '@mantine/core'
+import { ActionIcon, Box, Flex } from '@mantine/core'
 import { useId } from '@mantine/hooks'
 import mapLibre, { Map, Marker, LngLat as MapLngLat } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { RiFocus3Line } from '@remixicon/react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import type { LatLng } from '~/modules/types/CoordsType'
 import type { RootState } from '~/modules/store'
 import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
+import { APP_FLOATING_ACTION_OFFSET } from '~/modules/consts/layout'
 
 interface PropType {
   center: LatLng | null
   zoom?: number
   showUserLocation?: boolean
+  extraControls?: ReactNode
   onLoad?: (map: Map) => void
 }
 
-const BaseMap = ({ center, zoom = 16, showUserLocation = false, onLoad }: PropType) => {
+const BaseMap = ({ center, zoom = 16, showUserLocation = false, extraControls, onLoad }: PropType) => {
   const { t } = useTranslation()
   const id = useId()
   const [map, setMap] = useState<Map | null>(null)
@@ -90,7 +93,41 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, onLoad }: PropTy
     }
   }, [coords, map, showUserLocation, t])
 
-  return <Box id={id} style={{ width: '100%', height: '100%' }} />
+  return (
+    <Box pos="relative" style={{ width: '100%', height: '100%' }}>
+      <Box id={id} style={{ width: '100%', height: '100%' }} />
+      {(showUserLocation || extraControls) && (
+        <Flex
+          pos="absolute"
+          right={APP_FLOATING_ACTION_OFFSET}
+          bottom="48px"
+          direction="column"
+          gap="sm"
+          style={{ zIndex: 2 }}
+        >
+          {extraControls}
+          {showUserLocation && (
+            <ActionIcon
+              aria-label={t('components.baseMap.focusUserLocationAriaLabel')}
+              size="md"
+              onClick={() => {
+                if (!map || !coords) return
+
+                map.flyTo({
+                  center: [coords[1], coords[0]],
+                  zoom,
+                  duration: 800
+                })
+              }}
+              disabled={!coords || !map}
+            >
+              <RiFocus3Line size={18} />
+            </ActionIcon>
+          )}
+        </Flex>
+      )}
+    </Box>
+  )
 }
 
 export default BaseMap

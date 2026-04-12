@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { fireEvent, screen, within } from '@testing-library/react'
+import type { ReactElement } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { DEFAULT_APP_LOCALE } from '~/modules/consts/i18n'
 import { CityNameType } from '~/modules/enums/CityNameType'
@@ -8,7 +9,9 @@ import { DirectionType } from '~/modules/enums/DirectionType'
 import { VehicleStateType } from '~/modules/enums/VehicleStateType'
 import i18n from '~/modules/i18n'
 import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeBusStatus'
-import { renderWithMantine } from '~/test/render'
+import geoSlice from '~/modules/slices/geoSlice'
+import { createTestStore } from '~/test/createTestStore'
+import { renderWithStore } from '~/test/render'
 import { RouteStopList } from './RouteStopList'
 
 const t = i18n.getFixedT(DEFAULT_APP_LOCALE)
@@ -55,13 +58,25 @@ function getStopItemById(stopId: string): HTMLElement {
   return screen.getByTestId(`route-stop-${stopId}`)
 }
 
+function renderRouteStopList(
+  ui: ReactElement
+) {
+  const store = createTestStore({
+    reducer: {
+      geolocation: geoSlice.reducer
+    }
+  })
+
+  return renderWithStore(ui, { store })
+}
+
 describe('RouteStopList', () => {
   it('selects a stop when the stop row is clicked', () => {
     const handleSelectStop = vi.fn()
     const handleSelectVehicle = vi.fn()
     const handleToggleFavorite = vi.fn()
 
-    renderWithMantine(
+    renderRouteStopList(
       <RouteStopList
         stops={[{
           estimatedArrivalLabel: null,
@@ -90,7 +105,7 @@ describe('RouteStopList', () => {
     const handleSelectVehicle = vi.fn()
     const handleToggleFavorite = vi.fn()
 
-    renderWithMantine(
+    renderRouteStopList(
       <RouteStopList
         stops={[{
           estimatedArrivalLabel: null,
@@ -117,7 +132,7 @@ describe('RouteStopList', () => {
   it('renders estimated arrival text for a stop', () => {
     const estimateLabel = t('routePage.realtime.minutesAway', { count: 4 })
 
-    renderWithMantine(
+    renderRouteStopList(
       <RouteStopList
         stops={[{
           estimatedArrivalLabel: estimateLabel,
@@ -140,7 +155,7 @@ describe('RouteStopList', () => {
   it('renders realtime bus plate badges without replacing stop ETA text', () => {
     const estimateLabel = t('routePage.realtime.minutesAway', { count: 6 })
 
-    renderWithMantine(
+    renderRouteStopList(
       <RouteStopList
         stops={[
           {
@@ -177,7 +192,7 @@ describe('RouteStopList', () => {
     const handleSelectVehicle = vi.fn()
     const handleToggleFavorite = vi.fn()
 
-    renderWithMantine(
+    renderRouteStopList(
       <RouteStopList
         stops={[
           {
@@ -213,7 +228,7 @@ describe('RouteStopList', () => {
   })
 
   it('marks the selected vehicle badge as pressed', () => {
-    renderWithMantine(
+    renderRouteStopList(
       <RouteStopList
         stops={[
           {
@@ -246,7 +261,7 @@ describe('RouteStopList', () => {
   })
 
   it('renders departed and arriving vehicle badges together in the gap between stops', () => {
-    renderWithMantine(
+    renderRouteStopList(
       <RouteStopList
         stops={[
           {
@@ -292,7 +307,7 @@ describe('RouteStopList', () => {
   })
 
   it('keeps a fixed realtime gap between stops even when no vehicle badges are present', () => {
-    renderWithMantine(
+    renderRouteStopList(
       <RouteStopList
         stops={[
           {
@@ -330,7 +345,7 @@ describe('RouteStopList', () => {
   })
 
   it('keeps arriving endpoint vehicles on the first stop row', () => {
-    renderWithMantine(
+    renderRouteStopList(
       <RouteStopList
         stops={[
           {
@@ -366,7 +381,7 @@ describe('RouteStopList', () => {
   })
 
   it('keeps departed endpoint vehicles on the last stop row', () => {
-    renderWithMantine(
+    renderRouteStopList(
       <RouteStopList
         stops={[
           {

@@ -116,8 +116,13 @@ export const zhTW = {
         terminal: '起訖站： {{departure}} → {{destination}}'
       },
       routeStopList: {
+        navigateAriaLabel: '導航至 {{stopName}}',
         addFavoriteAriaLabel: '收藏站牌路線',
         removeFavoriteAriaLabel: '取消收藏站牌路線'
+      },
+      stopDistance: {
+        meters: '{{count}} 公尺',
+        kilometers: '{{count}} 公里'
       },
       routeMap: {
         stopMarkerAriaLabel: '{{stopName}}，第 {{sequence}} 站',
@@ -129,7 +134,8 @@ export const zhTW = {
         }
       },
       baseMap: {
-        userLocationMarkerAriaLabel: '目前位置'
+        userLocationMarkerAriaLabel: '目前位置',
+        focusUserLocationAriaLabel: '我的位置'
       },
       mapSidebarLayout: {
         openNearbyStops: '開啟附近站牌列表',
@@ -137,6 +143,7 @@ export const zhTW = {
       },
       nearbyStopDetail: {
         cityLabel: '縣市',
+        distanceLabel: '距離',
         addressLabel: '地址',
         routesLabel: '路線',
         notProvided: '未提供',

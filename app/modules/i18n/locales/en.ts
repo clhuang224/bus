@@ -116,8 +116,13 @@ export const en = {
         terminal: 'Terminals: {{departure}} → {{destination}}'
       },
       routeStopList: {
+        navigateAriaLabel: 'Navigate to {{stopName}}',
         addFavoriteAriaLabel: 'Save route stop',
         removeFavoriteAriaLabel: 'Remove saved route stop'
+      },
+      stopDistance: {
+        meters: '{{count}} m',
+        kilometers: '{{count}} km'
       },
       routeMap: {
         stopMarkerAriaLabel: '{{stopName}}, stop {{sequence}}',
@@ -129,7 +134,8 @@ export const en = {
         }
       },
       baseMap: {
-        userLocationMarkerAriaLabel: 'Current location'
+        userLocationMarkerAriaLabel: 'Current location',
+        focusUserLocationAriaLabel: 'My location'
       },
       mapSidebarLayout: {
         openNearbyStops: 'Open nearby stops list',
@@ -137,6 +143,7 @@ export const en = {
       },
       nearbyStopDetail: {
         cityLabel: 'City',
+        distanceLabel: 'Distance',
         addressLabel: 'Address',
         routesLabel: 'Routes',
         notProvided: 'Not provided',
