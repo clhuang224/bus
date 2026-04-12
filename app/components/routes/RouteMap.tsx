@@ -322,6 +322,7 @@ export const RouteMap = ({
       <BaseMap
         center={center}
         zoom={13}
+        showUserLocation
         onLoad={setMap}
       />
       {popupContainer && selectedVehicle
