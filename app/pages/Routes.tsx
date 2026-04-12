@@ -22,6 +22,14 @@ import { normalizeRouteSearchText } from '~/modules/utils/routes/normalizeRouteS
 import { loadRouteSearchRecentFromStorage } from '~/modules/utils/routes/routeSearchRecentStorage'
 import { normalizeBusRoutesWithDates } from '~/modules/utils/route/normalizeBusRoutesWithDates'
 
+type SearchableRoute = {
+  route: BusRoute<Date | null>
+  routeName: string
+  normalizedRouteName: string
+  normalizedDeparture: string
+  normalizedDestination: string
+}
+
 function deduplicateRoutes(routes: BusRoute<Date | null>[]) {
   return Array.from(
     routes.reduce<Map<string, BusRoute<Date | null>>>((result, route) => {
@@ -34,34 +42,44 @@ function deduplicateRoutes(routes: BusRoute<Date | null>[]) {
   )
 }
 
-function matchesRouteKeyword(route: BusRoute<Date | null>, keyword: string, locale: AppLocaleType) {
-  return getRouteKeywordMatchPriority(route, keyword, locale) != null
+function getSearchableRoutes(routes: BusRoute<Date | null>[], locale: AppLocaleType) {
+  return deduplicateRoutes(routes).map((route) => {
+    const routeName = getLocalizedText(route.RouteName, locale)
+
+    return {
+      route,
+      routeName,
+      normalizedRouteName: normalizeRouteSearchText(routeName),
+      normalizedDeparture: normalizeRouteSearchText(
+        getLocalizedText(route.DepartureStopName, locale)
+      ),
+      normalizedDestination: normalizeRouteSearchText(
+        getLocalizedText(route.DestinationStopName, locale)
+      )
+    }
+  })
 }
 
-function getRouteKeywordMatchPriority(
-  route: BusRoute<Date | null>,
-  keyword: string,
-  locale: AppLocaleType
-) {
+function matchesRouteKeyword(route: SearchableRoute, keyword: string) {
+  return getRouteKeywordMatchPriority(route, keyword) != null
+}
+
+function getRouteKeywordMatchPriority(route: SearchableRoute, keyword: string) {
   if (!keyword) return 0
 
-  const routeName = normalizeRouteSearchText(getLocalizedText(route.RouteName, locale))
-  const departure = normalizeRouteSearchText(getLocalizedText(route.DepartureStopName, locale))
-  const destination = normalizeRouteSearchText(getLocalizedText(route.DestinationStopName, locale))
-
-  if (routeName === keyword) {
+  if (route.normalizedRouteName === keyword) {
     return 0
   }
 
-  if (routeName.startsWith(keyword)) {
+  if (route.normalizedRouteName.startsWith(keyword)) {
     return 1
   }
 
-  if (routeName.includes(keyword)) {
+  if (route.normalizedRouteName.includes(keyword)) {
     return 2
   }
 
-  if (departure.includes(keyword) || destination.includes(keyword)) {
+  if (route.normalizedDeparture.includes(keyword) || route.normalizedDestination.includes(keyword)) {
     return 3
   }
 
@@ -88,13 +106,14 @@ export default function Routes() {
   const normalizedKeyword = normalizeRouteSearchText(keyword)
   const scrollViewportRef = useRef<HTMLDivElement | null>(null)
   const previousSearchContextRef = useRef<{ area: AreaType, keyword: string } | null>(null)
+  const searchableRoutes = useMemo(() => getSearchableRoutes(routes, locale), [locale, routes])
 
   const filteredRoutes = useMemo(() => {
-    return deduplicateRoutes(routes)
-      .filter((route) => matchesRouteKeyword(route, normalizedKeyword, locale))
+    return searchableRoutes
+      .filter((route) => matchesRouteKeyword(route, normalizedKeyword))
       .sort((left, right) => {
-        const leftMatchPriority = getRouteKeywordMatchPriority(left, normalizedKeyword, locale)
-        const rightMatchPriority = getRouteKeywordMatchPriority(right, normalizedKeyword, locale)
+        const leftMatchPriority = getRouteKeywordMatchPriority(left, normalizedKeyword)
+        const rightMatchPriority = getRouteKeywordMatchPriority(right, normalizedKeyword)
         const matchPriorityDiff = (leftMatchPriority ?? Number.POSITIVE_INFINITY) -
           (rightMatchPriority ?? Number.POSITIVE_INFINITY)
 
@@ -103,55 +122,51 @@ export default function Routes() {
         }
 
         const recentIndexDiff =
-          (recentRouteIndexMap.get(left.RouteUID) ?? Number.POSITIVE_INFINITY) -
-          (recentRouteIndexMap.get(right.RouteUID) ?? Number.POSITIVE_INFINITY)
+          (recentRouteIndexMap.get(left.route.RouteUID) ?? Number.POSITIVE_INFINITY) -
+          (recentRouteIndexMap.get(right.route.RouteUID) ?? Number.POSITIVE_INFINITY)
 
         if (recentIndexDiff !== 0) {
           return recentIndexDiff
         }
 
-        const routeNameCompare = routeNameCollator.compare(
-          getLocalizedText(left.RouteName, locale),
-          getLocalizedText(right.RouteName, locale)
-        )
+        const routeNameCompare = routeNameCollator.compare(left.routeName, right.routeName)
 
         if (routeNameCompare !== 0) {
           return routeNameCompare
         }
 
-        return left.RouteUID.localeCompare(right.RouteUID)
+        return left.route.RouteUID.localeCompare(right.route.RouteUID)
       })
-  }, [locale, normalizedKeyword, recentRouteIndexMap, routeNameCollator, routes])
+      .map(({ route }) => route)
+  }, [normalizedKeyword, recentRouteIndexMap, routeNameCollator, searchableRoutes])
 
   const recentRoutes = useMemo(() => {
     if (normalizedKeyword) {
       return [] as BusRoute<Date | null>[]
     }
 
-    return deduplicateRoutes(routes)
-      .filter((route) => recentRouteIndexMap.has(route.RouteUID))
+    return searchableRoutes
+      .filter((route) => recentRouteIndexMap.has(route.route.RouteUID))
       .sort((left, right) => {
         const recentIndexDiff =
-          (recentRouteIndexMap.get(left.RouteUID) ?? Number.POSITIVE_INFINITY) -
-          (recentRouteIndexMap.get(right.RouteUID) ?? Number.POSITIVE_INFINITY)
+          (recentRouteIndexMap.get(left.route.RouteUID) ?? Number.POSITIVE_INFINITY) -
+          (recentRouteIndexMap.get(right.route.RouteUID) ?? Number.POSITIVE_INFINITY)
 
         if (recentIndexDiff !== 0) {
           return recentIndexDiff
         }
 
-        const routeNameCompare = routeNameCollator.compare(
-          getLocalizedText(left.RouteName, locale),
-          getLocalizedText(right.RouteName, locale)
-        )
+        const routeNameCompare = routeNameCollator.compare(left.routeName, right.routeName)
 
         if (routeNameCompare !== 0) {
           return routeNameCompare
         }
 
-        return left.RouteUID.localeCompare(right.RouteUID)
+        return left.route.RouteUID.localeCompare(right.route.RouteUID)
       })
+      .map(({ route }) => route)
       .slice(0, 10)
-  }, [locale, normalizedKeyword, recentRouteIndexMap, routeNameCollator, routes])
+  }, [normalizedKeyword, recentRouteIndexMap, routeNameCollator, searchableRoutes])
 
   const routeCardSkeletons = Array.from({ length: 6 }, (_, index) => (
     <Card key={index} withBorder radius="md" p="xs" shadow="xs" data-testid="routes-skeleton-card">
