@@ -1,8 +1,9 @@
-import { ActionIcon, Flex, Skeleton, Stack, Text } from '@mantine/core'
+import { ActionIcon, Flex, Group, Skeleton, Stack, Text } from '@mantine/core'
 import { RiArrowRightSLine } from '@remixicon/react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { AppBadge } from '~/components/common/AppBadge'
+import { NavigationButton } from '~/components/common/NavigationButton'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
 import { selectLocale } from '~/modules/slices/localeSlice'
@@ -27,9 +28,18 @@ export const NearbyStopDetail = ({
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
   const stopName = getLocalizedText(stopGroup.StopName, locale)
+  const destination: [number, number] = [stopGroup.position[1], stopGroup.position[0]]
 
   if (displayMode === 'title') {
-    return <Text>{stopName}</Text>
+    return (
+      <Group justify="space-between" align="center" wrap="nowrap" gap="xs">
+        <Text>{stopName}</Text>
+        <NavigationButton
+          ariaLabel={t('components.routeStopList.navigateAriaLabel', { stopName })}
+          destination={destination}
+        />
+      </Group>
+    )
   }
 
   const detailSections = [
@@ -75,7 +85,13 @@ export const NearbyStopDetail = ({
   return (
     <Stack gap="xs">
       {displayMode === 'full' && (
+        <Group justify="space-between" align="center" wrap="nowrap" gap="xs">
           <Text>{stopName}</Text>
+          <NavigationButton
+            ariaLabel={t('components.routeStopList.navigateAriaLabel', { stopName })}
+            destination={destination}
+          />
+        </Group>
       )}
       {detailSections.map((section) => (
         <Stack key={section.label} gap={4}>
@@ -83,13 +99,20 @@ export const NearbyStopDetail = ({
           {section.content}
         </Stack>
       ))}
-      <ActionIcon
-        ml="auto"
-        aria-label={t('components.nearbyStopDetail.viewRoutesAriaLabel', { stopName })}
-        onClick={() => onViewRoutes(stopGroup.StationID)}
-      >
-        <RiArrowRightSLine size={18}/>
-      </ActionIcon>
+      <Group justify="flex-end" gap="xs">
+        {displayMode !== 'full' && (
+          <NavigationButton
+            ariaLabel={t('components.routeStopList.navigateAriaLabel', { stopName })}
+            destination={destination}
+          />
+        )}
+        <ActionIcon
+          aria-label={t('components.nearbyStopDetail.viewRoutesAriaLabel', { stopName })}
+          onClick={() => onViewRoutes(stopGroup.StationID)}
+        >
+          <RiArrowRightSLine size={18}/>
+        </ActionIcon>
+      </Group>
     </Stack>
   )
 }

@@ -367,9 +367,6 @@ export const RouteMap = ({
                   stopName: selectedMapStop.name
                 })}
                 destination={[selectedMapStop.position[1], selectedMapStop.position[0]]}
-                variant="light"
-                radius="50%"
-                size="sm"
               />
             </Group>,
             popupContainer

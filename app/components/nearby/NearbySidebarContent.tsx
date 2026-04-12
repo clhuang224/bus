@@ -4,6 +4,7 @@ import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { BaseAlert } from '~/components/common/BaseAlert'
+import { NavigationButton } from '~/components/common/NavigationButton'
 import { SkeletonList } from '~/components/common/SkeletonList'
 import type { AlertMessageConfig } from '~/modules/interfaces/AlertMessageConfig'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
@@ -54,7 +55,15 @@ const NearbySidebarContentDetail = ({ detailState }: { detailState: NearbySideba
         >
           <RiArrowLeftSLine size={18} />
         </ActionIcon>
-        <Title order={4}>{getLocalizedText(detailState.stopGroup!.StopName, locale)}</Title>
+        <Title order={4} style={{ flex: 1, minWidth: 0 }}>
+          {getLocalizedText(detailState.stopGroup!.StopName, locale)}
+        </Title>
+        <NavigationButton
+          ariaLabel={t('components.routeStopList.navigateAriaLabel', {
+            stopName: getLocalizedText(detailState.stopGroup!.StopName, locale)
+          })}
+          destination={[detailState.stopGroup!.position[1], detailState.stopGroup!.position[0]]}
+        />
       </Flex>
       <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
         <Stack gap={2}>

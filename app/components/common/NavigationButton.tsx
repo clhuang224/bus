@@ -39,6 +39,9 @@ export const NavigationButton = ({
       aria-label={ariaLabel}
       disabled={!destination}
       onClick={handleClick}
+      variant="light"
+      radius="50%"
+      size="sm"
       {...actionIconProps}
     >
       <RiDirectionLine />

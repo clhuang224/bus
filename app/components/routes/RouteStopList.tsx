@@ -216,9 +216,6 @@ export const RouteStopList = ({
                                   stopName: stop.name
                                 })}
                                 destination={stop.position ? [stop.position[1], stop.position[0]] : null}
-                                variant="light"
-                                radius="50%"
-                                size="sm"
                               />
                             </Group>
                             <ActionIcon

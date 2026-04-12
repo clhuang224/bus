@@ -327,6 +327,8 @@ function renderNearby({
 
 describe('Nearby', () => {
   beforeEach(() => {
+    vi.restoreAllMocks()
+    vi.spyOn(window, 'open').mockImplementation(() => null)
     mockMatchMedia()
 
     resetNearbyMocks()
@@ -526,6 +528,26 @@ describe('Nearby', () => {
 
     expect(screen.getByRole('tab', { name: '去程' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.getByRole('tab', { name: '返程' })).toHaveAttribute('aria-selected', 'false')
+  })
+
+  it('renders a navigation button in the selected nearby stop route detail and opens Google Maps directions', () => {
+    renderNearby({
+      initialEntry: '/nearby?stop=station-1&routeStop=station-1',
+      coords: [25.033, 121.5654],
+      permission: GeoPermissionType.GRANTED,
+      queryState: {
+        data: nearbyStopsData,
+        isSuccess: true
+      }
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /導航至\s*市政府/ }))
+
+    expect(window.open).toHaveBeenCalledWith(
+      'https://www.google.com/maps/dir/?api=1&destination=25.033%2C121.5654&origin=25.033%2C121.5654',
+      '_blank',
+      'noopener,noreferrer'
+    )
   })
 
   it('syncs selected stop from the map back to the list state', () => {
