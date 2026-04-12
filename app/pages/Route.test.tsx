@@ -19,6 +19,7 @@ import Route from './Route'
 
 const t = i18n.getFixedT(AppLocaleType.ZH_TW)
 const fourMinutesAwayLabel = t('routePage.realtime.minutesAway', { count: 4 })
+const navigateToCityHallLabel = t('components.routeStopList.navigateAriaLabel', { stopName: '市政府' })
 const noEstimateLabel = t('routePage.realtime.noEstimate')
 const routeRealtimeMessages = getRouteRealtimeMessages(t)
 
@@ -419,7 +420,7 @@ describe('Route', () => {
   it('opens Google Maps navigation with only the destination when user coordinates are unavailable', () => {
     renderRoutePage()
 
-    fireEvent.click(screen.getByRole('button', { name: /導航至\s*市政府/ }))
+    fireEvent.click(screen.getByRole('button', { name: navigateToCityHallLabel }))
 
     expect(window.open).toHaveBeenCalledWith(
       'https://www.google.com/maps/dir/?api=1&destination=25.03%2C121.55',
@@ -428,10 +429,10 @@ describe('Route', () => {
     )
   })
 
-  it('opens Google Maps navigation with only the destination when user coordinates are available', () => {
+  it('opens Google Maps navigation with the destination', () => {
     renderRoutePage(['/routes/Taipei/route-1'], [25.033, 121.5654])
 
-    fireEvent.click(screen.getByRole('button', { name: /導航至\s*市政府/ }))
+    fireEvent.click(screen.getByRole('button', { name: navigateToCityHallLabel }))
 
     expect(window.open).toHaveBeenCalledWith(
       'https://www.google.com/maps/dir/?api=1&destination=25.03%2C121.55',
