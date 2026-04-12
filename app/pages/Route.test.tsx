@@ -10,7 +10,7 @@ import { DirectionType } from '~/modules/enums/DirectionType'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
 import { VehicleStateType } from '~/modules/enums/VehicleStateType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
-import { ROUTE_SEARCH_FREQUENCY_STORAGE_KEY } from '~/modules/utils/routeSearch/routeSearchFrequencyStorage'
+import { ROUTE_SEARCH_RECENT_STORAGE_KEY } from '~/modules/utils/routeSearch/routeSearchRecentStorage'
 import { createTestStore } from '~/test/createTestStore'
 import { mockMatchMedia } from '~/test/mockMatchMedia'
 import { renderRoute } from '~/test/render'
@@ -375,17 +375,13 @@ describe('Route', () => {
     mockDefaultRouteQueries()
   })
 
-  it('increments route search frequency when the route detail page opens', async () => {
-    localStorage.setItem(ROUTE_SEARCH_FREQUENCY_STORAGE_KEY, JSON.stringify({
-      'route-1': 2
-    }))
+  it('moves the opened route to the front of recently viewed routes', async () => {
+    localStorage.setItem(ROUTE_SEARCH_RECENT_STORAGE_KEY, JSON.stringify(['route-2', 'route-1']))
 
     renderRoutePage()
 
     await waitFor(() => {
-      expect(JSON.parse(localStorage.getItem(ROUTE_SEARCH_FREQUENCY_STORAGE_KEY) ?? '{}')).toEqual({
-        'route-1': 3
-      })
+      expect(JSON.parse(localStorage.getItem(ROUTE_SEARCH_RECENT_STORAGE_KEY) ?? '[]')).toEqual(['route-1', 'route-2'])
     })
   })
 

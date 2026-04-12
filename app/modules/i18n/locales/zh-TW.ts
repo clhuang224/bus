@@ -77,7 +77,7 @@ export const zhTW = {
       },
       routes: {
         title: '搜尋公車',
-        frequentRoutesTitle: '經常搜尋路線'
+        recentViewedRoutesTitle: '最近查看路線'
       },
       settings: {
         title: '設定',
@@ -204,7 +204,7 @@ export const zhTW = {
         },
         emptyRoutes: {
           title: '找不到符合的路線',
-          description: '請試試其他關鍵字，或切換到不同區域。'
+          description: '請試試路線名稱、起點站或終點站等其他關鍵字。'
         },
         emptyRouteSearch: {
           title: '開始搜尋公車',

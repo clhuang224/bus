@@ -18,8 +18,9 @@ import { setKeyword, setSelectedArea } from '~/modules/slices/routeSearchSlice'
 import type { AppDispatch, RootState } from '~/modules/store'
 import { getAreaByCoords } from '~/modules/utils/geo/getAreaByCoords'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
+import { normalizeRouteSearchText } from '~/modules/utils/routeSearch/normalizeRouteSearchText'
+import { loadRouteSearchRecentFromStorage } from '~/modules/utils/routeSearch/routeSearchRecentStorage'
 import { normalizeBusRoutesWithDates } from '~/modules/utils/route/normalizeBusRoutesWithDates'
-import { loadRouteSearchFrequencyFromStorage } from '~/modules/utils/routeSearch/routeSearchFrequencyStorage'
 
 function deduplicateRoutes(routes: BusRoute<Date | null>[]) {
   return Array.from(
@@ -44,9 +45,9 @@ function getRouteKeywordMatchPriority(
 ) {
   if (!keyword) return 0
 
-  const routeName = getLocalizedText(route.RouteName, locale).toLowerCase()
-  const departure = getLocalizedText(route.DepartureStopName, locale).toLowerCase()
-  const destination = getLocalizedText(route.DestinationStopName, locale).toLowerCase()
+  const routeName = normalizeRouteSearchText(getLocalizedText(route.RouteName, locale))
+  const departure = normalizeRouteSearchText(getLocalizedText(route.DepartureStopName, locale))
+  const destination = normalizeRouteSearchText(getLocalizedText(route.DestinationStopName, locale))
 
   if (routeName === keyword) {
     return 0
@@ -79,8 +80,12 @@ export default function Routes() {
   const { data: routeData = [], isLoading, error } = busApi.useGetRoutesByAreaQuery(area)
   const routes = useMemo(() => normalizeBusRoutesWithDates(routeData), [routeData])
   const routeNameCollator = useLocalizedTextCollator()
-  const routeSearchFrequency = useMemo(() => loadRouteSearchFrequencyFromStorage(), [])
-  const normalizedKeyword = keyword.trim().toLowerCase()
+  const recentRouteUIDs = useMemo(() => loadRouteSearchRecentFromStorage(), [])
+  const recentRouteIndexMap = useMemo(
+    () => new Map(recentRouteUIDs.map((routeUID, index) => [routeUID, index])),
+    [recentRouteUIDs]
+  )
+  const normalizedKeyword = normalizeRouteSearchText(keyword)
   const scrollViewportRef = useRef<HTMLDivElement | null>(null)
   const previousSearchContextRef = useRef<{ area: AreaType, keyword: string } | null>(null)
 
@@ -97,11 +102,12 @@ export default function Routes() {
           return matchPriorityDiff
         }
 
-        const frequencyDiff =
-          (routeSearchFrequency[right.RouteUID] ?? 0) - (routeSearchFrequency[left.RouteUID] ?? 0)
+        const recentIndexDiff =
+          (recentRouteIndexMap.get(left.RouteUID) ?? Number.POSITIVE_INFINITY) -
+          (recentRouteIndexMap.get(right.RouteUID) ?? Number.POSITIVE_INFINITY)
 
-        if (frequencyDiff !== 0) {
-          return frequencyDiff
+        if (recentIndexDiff !== 0) {
+          return recentIndexDiff
         }
 
         const routeNameCompare = routeNameCollator.compare(
@@ -115,21 +121,22 @@ export default function Routes() {
 
         return left.RouteUID.localeCompare(right.RouteUID)
       })
-  }, [locale, normalizedKeyword, routeNameCollator, routeSearchFrequency, routes])
+  }, [locale, normalizedKeyword, recentRouteIndexMap, routeNameCollator, routes])
 
-  const frequentRoutes = useMemo(() => {
+  const recentRoutes = useMemo(() => {
     if (normalizedKeyword) {
       return [] as BusRoute<Date | null>[]
     }
 
     return deduplicateRoutes(routes)
-      .filter((route) => (routeSearchFrequency[route.RouteUID] ?? 0) > 0)
+      .filter((route) => recentRouteIndexMap.has(route.RouteUID))
       .sort((left, right) => {
-        const frequencyDiff =
-          (routeSearchFrequency[right.RouteUID] ?? 0) - (routeSearchFrequency[left.RouteUID] ?? 0)
+        const recentIndexDiff =
+          (recentRouteIndexMap.get(left.RouteUID) ?? Number.POSITIVE_INFINITY) -
+          (recentRouteIndexMap.get(right.RouteUID) ?? Number.POSITIVE_INFINITY)
 
-        if (frequencyDiff !== 0) {
-          return frequencyDiff
+        if (recentIndexDiff !== 0) {
+          return recentIndexDiff
         }
 
         const routeNameCompare = routeNameCollator.compare(
@@ -144,7 +151,7 @@ export default function Routes() {
         return left.RouteUID.localeCompare(right.RouteUID)
       })
       .slice(0, 10)
-  }, [locale, normalizedKeyword, routeNameCollator, routeSearchFrequency, routes])
+  }, [locale, normalizedKeyword, recentRouteIndexMap, routeNameCollator, routes])
 
   const routeCardSkeletons = Array.from({ length: 6 }, (_, index) => (
     <Card key={index} withBorder radius="md" p="xs" shadow="xs" data-testid="routes-skeleton-card">
@@ -161,13 +168,13 @@ export default function Routes() {
   const message = useMemo(() => {
     if (isLoading) return null
     if (error) return getSearchMessages(t).loadRoutesError
-    if (!normalizedKeyword && frequentRoutes.length === 0) return getSearchMessages(t).emptyRouteSearch
+    if (!normalizedKeyword && recentRoutes.length === 0) return getSearchMessages(t).emptyRouteSearch
     if (normalizedKeyword && filteredRoutes.length === 0) return getSearchMessages(t).emptyRoutes
 
     return null
-  }, [error, filteredRoutes.length, frequentRoutes.length, isLoading, normalizedKeyword, t])
+  }, [error, filteredRoutes.length, isLoading, normalizedKeyword, recentRoutes.length, t])
 
-  const displayedRoutes = normalizedKeyword ? filteredRoutes : frequentRoutes
+  const displayedRoutes = normalizedKeyword ? filteredRoutes : recentRoutes
 
   useEffect(() => {
     const previousSearchContext = previousSearchContextRef.current
@@ -208,8 +215,8 @@ export default function Routes() {
           {message && <BaseAlert {...message} />}
           <ScrollArea viewportRef={scrollViewportRef} style={{ flex: 1, minHeight: 0 }}>
             <Stack gap="sm">
-              {!message && !normalizedKeyword && frequentRoutes.length > 0 && (
-                <Title order={5}>{t('pages.routes.frequentRoutesTitle')}</Title>
+              {!message && !normalizedKeyword && recentRoutes.length > 0 && (
+                <Title order={5}>{t('pages.routes.recentRoutesTitle')}</Title>
               )}
               {isLoading
                 ? routeCardSkeletons

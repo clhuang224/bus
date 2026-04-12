@@ -16,7 +16,7 @@ import { AppBadge } from '~/components/common/AppBadge'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { getTerminalDisplay } from '~/modules/utils/i18n/getTerminalDisplay'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
-import { incrementRouteSearchFrequency } from '~/modules/utils/routeSearch/routeSearchFrequencyStorage'
+import { saveRouteSearchRecent } from '~/modules/utils/routeSearch/routeSearchRecentStorage'
 import { isCityName } from '~/modules/utils/shared/isCityName'
 
 export default function Route() {
@@ -96,7 +96,7 @@ export default function Route() {
       return
     }
 
-    incrementRouteSearchFrequency(id)
+    saveRouteSearchRecent(id)
   }, [id])
 
   useEffect(() => {

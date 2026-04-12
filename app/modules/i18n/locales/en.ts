@@ -77,7 +77,7 @@ export const en = {
       },
       routes: {
         title: 'Routes',
-        frequentRoutesTitle: 'Frequently searched routes'
+        recentViewedRoutesTitle: 'Recently viewed routes'
       },
       settings: {
         title: 'Settings',
@@ -204,7 +204,7 @@ export const en = {
         },
         emptyRoutes: {
           title: 'No matching routes',
-          description: 'Try another keyword or switch to a different area.'
+          description: 'Try another route name, origin stop, or destination stop keyword.'
         },
         emptyRouteSearch: {
           title: 'Start searching for a route',

@@ -8,7 +8,7 @@ import { AreaType } from '~/modules/enums/AreaType'
 import { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import routeSearchSlice from '~/modules/slices/routeSearchSlice'
-import { ROUTE_SEARCH_FREQUENCY_STORAGE_KEY } from '~/modules/utils/routeSearch/routeSearchFrequencyStorage'
+import { ROUTE_SEARCH_RECENT_STORAGE_KEY } from '~/modules/utils/routeSearch/routeSearchRecentStorage'
 import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
 import Routes from './Routes'
@@ -304,16 +304,13 @@ describe('Routes', () => {
   })
 
   it('shows frequently opened routes when the keyword is empty', () => {
-    localStorage.setItem(ROUTE_SEARCH_FREQUENCY_STORAGE_KEY, JSON.stringify({
-      'route-2': 5,
-      'route-1': 1
-    }))
+    localStorage.setItem(ROUTE_SEARCH_RECENT_STORAGE_KEY, JSON.stringify(['route-2', 'route-1']))
 
     renderRoutes({
       keyword: ''
     })
 
-    expect(screen.getByText(i18n.t('pages.routes.frequentRoutesTitle'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('pages.routes.recentViewedRoutesTitle'))).toBeInTheDocument()
     expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
       expect.stringContaining('紅25'),
       expect.stringContaining('藍1')
@@ -328,10 +325,7 @@ describe('Routes', () => {
   })
 
   it('keeps the default name sort when the keyword is non-empty', () => {
-    localStorage.setItem(ROUTE_SEARCH_FREQUENCY_STORAGE_KEY, JSON.stringify({
-      'route-2': 5,
-      'route-1': 1
-    }))
+    localStorage.setItem(ROUTE_SEARCH_RECENT_STORAGE_KEY, JSON.stringify(['route-2', 'route-1']))
 
     renderRoutes({
       keyword: '站'
@@ -366,10 +360,7 @@ describe('Routes', () => {
   })
 
   it('uses frequency as a fallback when routes share the same match priority', () => {
-    localStorage.setItem(ROUTE_SEARCH_FREQUENCY_STORAGE_KEY, JSON.stringify({
-      'route-4': 5,
-      'route-1': 1
-    }))
+    localStorage.setItem(ROUTE_SEARCH_RECENT_STORAGE_KEY, JSON.stringify(['route-4', 'route-1']))
 
     renderRoutes({
       keyword: '藍'
@@ -378,6 +369,16 @@ describe('Routes', () => {
     expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
       expect.stringContaining('藍10'),
       expect.stringContaining('藍1')
+    ])
+  })
+
+  it('normalizes full-width and hyphenated keywords before matching routes', () => {
+    renderRoutes({
+      keyword: '　藍－１０　'
+    })
+
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
+      expect.stringContaining('藍10')
     ])
   })
 
