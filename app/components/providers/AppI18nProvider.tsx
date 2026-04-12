@@ -1,9 +1,11 @@
-import { useEffect, type PropsWithChildren } from 'react'
+import { useEffect, useState, type PropsWithChildren } from 'react'
 import { useLocation } from 'react-router'
-import { useSelector } from 'react-redux'
-import { setLocaleInStorage } from '~/modules/i18n/locale'
-import { selectLocale } from '~/modules/slices/localeSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { getStoredAppLocale, persistLocaleInStorage } from '~/modules/i18n/locale'
+import { selectLocale, setLocale } from '~/modules/slices/localeSlice'
 import i18n from '~/modules/i18n'
+import type { AppDispatch } from '~/modules/store'
+import { isWindowUnavailableError } from '~/modules/utils/shared/getLocalStorage'
 
 function syncDocumentMetadata(locale: string) {
   const t = i18n.getFixedT(locale)
@@ -22,8 +24,31 @@ function syncDocumentMetadata(locale: string) {
 }
 
 export const AppI18nProvider = ({ children }: PropsWithChildren) => {
+  const dispatch = useDispatch<AppDispatch>()
   const locale = useSelector(selectLocale)
   const location = useLocation()
+  const [hasResolvedLocale, setHasResolvedLocale] = useState(false)
+
+  useEffect(() => {
+    let storedLocale: ReturnType<typeof getStoredAppLocale>
+
+    try {
+      storedLocale = getStoredAppLocale()
+    } catch (error) {
+      if (!isWindowUnavailableError(error)) {
+        console.warn('Failed to load app locale from localStorage.', error)
+      }
+
+      setHasResolvedLocale(true)
+      return
+    }
+
+    if (storedLocale && storedLocale !== locale) {
+      dispatch(setLocale(storedLocale))
+    }
+
+    setHasResolvedLocale(true)
+  }, [dispatch, locale])
 
   useEffect(() => {
     let cancelled = false
@@ -35,9 +60,17 @@ export const AppI18nProvider = ({ children }: PropsWithChildren) => {
         if (cancelled) return
         document.documentElement.lang = locale
 
+        if (!hasResolvedLocale) {
+          return
+        }
+
         try {
-          setLocaleInStorage(window.localStorage, locale)
+          persistLocaleInStorage(locale)
         } catch (error) {
+          if (isWindowUnavailableError(error)) {
+            return
+          }
+
           console.warn('Failed to persist app locale to localStorage.', error)
         }
       }
@@ -48,7 +81,7 @@ export const AppI18nProvider = ({ children }: PropsWithChildren) => {
     return () => {
       cancelled = true
     }
-  }, [locale])
+  }, [hasResolvedLocale, locale])
 
   useEffect(() => {
     document.documentElement.lang = locale

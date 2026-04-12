@@ -84,6 +84,28 @@ describe('Settings', () => {
     })
   })
 
+  it('restores the saved locale from localStorage after mount', async () => {
+    localStorage.setItem(APP_LOCALE_STORAGE_KEY, AppLocaleType.EN)
+
+    renderSettingsPage()
+
+    await waitFor(() => {
+      expect(document.documentElement.lang).toBe(AppLocaleType.EN)
+    })
+
+    expect(screen.getByRole('radio', { name: 'English' })).toBeChecked()
+  })
+
+  it('keeps the provided locale when localStorage has no saved value', async () => {
+    renderSettingsPage(AppLocaleType.EN)
+
+    await waitFor(() => {
+      expect(document.documentElement.lang).toBe(AppLocaleType.EN)
+    })
+
+    expect(screen.getByRole('radio', { name: 'English' })).toBeChecked()
+  })
+
   it('does not show the back button on desktop', () => {
     renderSettingsPage()
 

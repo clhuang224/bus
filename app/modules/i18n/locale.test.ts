@@ -3,7 +3,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { APP_LOCALE_STORAGE_KEY, DEFAULT_APP_LOCALE } from '../consts/i18n'
 import { AppLocaleType } from '../enums/AppLocaleType'
-import { getInitialAppLocale, getLocaleFromStorage, setLocaleInStorage } from './locale'
+import { getInitialAppLocale, getLocaleFromStorage, getStoredAppLocale, setLocaleInStorage } from './locale'
 
 describe('getLocaleFromStorage', () => {
   it('returns the stored locale when it is supported', () => {
@@ -34,9 +34,17 @@ describe('getLocaleFromStorage', () => {
 })
 
 describe('getInitialAppLocale', () => {
-  it('restores the saved locale from window localStorage on app load', () => {
+  it('uses the default locale for the initial app render', () => {
     localStorage.setItem(APP_LOCALE_STORAGE_KEY, AppLocaleType.EN)
 
-    expect(getInitialAppLocale()).toBe(AppLocaleType.EN)
+    expect(getInitialAppLocale()).toBe(DEFAULT_APP_LOCALE)
+  })
+})
+
+describe('getStoredAppLocale', () => {
+  it('restores the saved locale from window localStorage after mount', () => {
+    localStorage.setItem(APP_LOCALE_STORAGE_KEY, AppLocaleType.EN)
+
+    expect(getStoredAppLocale()).toBe(AppLocaleType.EN)
   })
 })

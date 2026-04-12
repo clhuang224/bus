@@ -1,29 +1,38 @@
 import { APP_LOCALE_STORAGE_KEY, DEFAULT_APP_LOCALE, isSupportedAppLocale } from '../consts/i18n'
 import type { AppLocaleType } from '../enums/AppLocaleType'
+import { getLocalStorage } from '../utils/shared/getLocalStorage'
+
+const STORED_LOCALE_UNAVAILABLE_ERROR = 'Stored locale is unavailable or invalid.'
 
 function readStoredLocale(storage: Pick<Storage, 'getItem'>) {
   const storedLocale = storage.getItem(APP_LOCALE_STORAGE_KEY)
   if (!storedLocale || !isSupportedAppLocale(storedLocale)) {
-    return DEFAULT_APP_LOCALE
+    throw new Error(STORED_LOCALE_UNAVAILABLE_ERROR)
   }
 
   return storedLocale
 }
 
 export function getInitialAppLocale(): AppLocaleType {
-  if (typeof window === 'undefined') {
-    return DEFAULT_APP_LOCALE
-  }
+  return DEFAULT_APP_LOCALE
+}
 
+export function getLocaleFromStorage(storage: Pick<Storage, 'getItem'>): AppLocaleType {
   try {
-    return readStoredLocale(window.localStorage)
+    return readStoredLocale(storage)
   } catch {
     return DEFAULT_APP_LOCALE
   }
 }
 
-export function getLocaleFromStorage(storage: Pick<Storage, 'getItem'>): AppLocaleType {
-  return readStoredLocale(storage)
+export function getStoredAppLocale(): AppLocaleType | null {
+  const storage = getLocalStorage()
+
+  try {
+    return readStoredLocale(storage)
+  } catch {
+    return null
+  }
 }
 
 export function setLocaleInStorage(
@@ -31,4 +40,9 @@ export function setLocaleInStorage(
   locale: AppLocaleType
 ) {
   storage.setItem(APP_LOCALE_STORAGE_KEY, locale)
+}
+
+export function persistLocaleInStorage(locale: AppLocaleType) {
+  const storage = getLocalStorage()
+  setLocaleInStorage(storage, locale)
 }
