@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 
 import { fireEvent, screen, waitFor } from '@testing-library/react'
+import type { Reducer, UnknownAction } from '@reduxjs/toolkit'
+import { useEffect } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
 import { getRouteRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
@@ -10,6 +12,7 @@ import { DirectionType } from '~/modules/enums/DirectionType'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
 import { VehicleStateType } from '~/modules/enums/VehicleStateType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
+import geoSlice from '~/modules/slices/geoSlice'
 import { ROUTE_SEARCH_RECENT_STORAGE_KEY } from '~/modules/utils/routes/routeSearchRecentStorage'
 import { createTestStore } from '~/test/createTestStore'
 import { mockMatchMedia } from '~/test/mockMatchMedia'
@@ -30,7 +33,8 @@ const {
   mockUseGetRoutesByCityQuery,
   mockUseGetStopOfRoutesByCityQuery,
   mockUseGetStopsByCityQuery,
-  mockRouteMap
+  mockRouteMap,
+  mockRouteMapFlyTo
 } = vi.hoisted(() => ({
   mockToggleFavoriteRouteStop: vi.fn(),
   mockUseGetEstimatedArrivalByRouteQuery: vi.fn(),
@@ -40,21 +44,33 @@ const {
   mockUseGetRoutesByCityQuery: vi.fn(),
   mockUseGetStopOfRoutesByCityQuery: vi.fn(),
   mockUseGetStopsByCityQuery: vi.fn(),
-  mockRouteMap: vi.fn(() => <div>route-map</div>)
+  mockRouteMapFlyTo: vi.fn(),
+  mockRouteMap: vi.fn(({ onMapLoad }: { onMapLoad?: (map: { flyTo: typeof mockRouteMapFlyTo }) => void }) => {
+    useEffect(() => {
+      onMapLoad?.({
+        flyTo: mockRouteMapFlyTo
+      })
+    }, [onMapLoad])
+
+    return <div>route-map</div>
+  })
 }))
 
 vi.mock('~/components/common/MapSidebarLayout', () => ({
   MapSidebarLayout: ({
     isSidebarOpened,
+    mapControls,
     panel,
     children
   }: {
     isSidebarOpened: boolean
+    mapControls?: React.ReactNode
     panel: React.ReactNode
     children: React.ReactNode
   }) => (
     <div>
       <div data-testid="route-sidebar-state">{isSidebarOpened ? 'opened' : 'closed'}</div>
+      <div>{mapControls}</div>
       <div>{panel}</div>
       <div>{children}</div>
     </div>
@@ -355,9 +371,19 @@ function mockDefaultRouteQueries() {
 }
 
 function renderRoutePage(
-  initialEntries: Array<string | { pathname: string, state?: unknown }> = ['/routes/Taipei/route-1']
+  initialEntries: Array<string | { pathname: string, state?: unknown }> = ['/routes/Taipei/route-1'],
+  coords: [number, number] | null = null
 ) {
-  const store = createTestStore()
+  const store = createTestStore({
+    reducer: {
+      geolocation: geoSlice.reducer as unknown as Reducer<unknown, UnknownAction>
+    },
+    preloadedState: {
+      geolocation: {
+        coords
+      }
+    }
+  })
 
   return renderRoute(<Route />, {
     path: '/routes/:city/:id',
@@ -370,6 +396,7 @@ describe('Route', () => {
   beforeEach(() => {
     localStorage.clear()
     mockMatchMedia()
+    mockRouteMapFlyTo.mockReset()
 
     resetRouteMocks()
     mockDefaultRouteQueries()
@@ -382,6 +409,24 @@ describe('Route', () => {
 
     await waitFor(() => {
       expect(JSON.parse(localStorage.getItem(ROUTE_SEARCH_RECENT_STORAGE_KEY) ?? '[]')).toEqual(['route-1', 'route-2'])
+    })
+  })
+
+  it('disables the focus-my-location control when user coordinates are unavailable', () => {
+    renderRoutePage()
+
+    expect(screen.getByRole('button', { name: '我的位置' })).toBeDisabled()
+  })
+
+  it('focuses the map on the user location when the control is clicked', () => {
+    renderRoutePage(['/routes/Taipei/route-1'], [25.033, 121.5654])
+
+    fireEvent.click(screen.getByRole('button', { name: '我的位置' }))
+
+    expect(mockRouteMapFlyTo).toHaveBeenCalledWith({
+      center: [121.5654, 25.033],
+      zoom: 16,
+      duration: 800
     })
   })
 

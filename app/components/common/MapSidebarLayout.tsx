@@ -12,6 +12,7 @@ interface PropType {
   children: ReactNode
   isSm: boolean
   isSidebarOpened: boolean
+  mapControls?: ReactNode
   onCloseSidebar: () => void
   onOpenSidebar: () => void
   openButtonLabel: string
@@ -22,6 +23,7 @@ export const MapSidebarLayout = ({
   children,
   isSm,
   isSidebarOpened,
+  mapControls,
   onCloseSidebar,
   onOpenSidebar,
   openButtonLabel,
@@ -44,17 +46,25 @@ export const MapSidebarLayout = ({
     )}
 
     <Flex pos="relative" style={{ flex: 1, minWidth: 0 }}>
-      {isSm && (
-        <ActionIcon
+      {(mapControls || isSm) && (
+        <Flex
           pos="absolute"
           right={APP_FLOATING_ACTION_OFFSET}
           bottom="48px"
+          direction="column"
+          gap="sm"
           style={{ zIndex: 2 }}
-          onClick={onOpenSidebar}
-          aria-label={openButtonLabel}
         >
-          <RiMenuFill size={18} />
-        </ActionIcon>
+          {mapControls}
+          {isSm && (
+            <ActionIcon
+              onClick={onOpenSidebar}
+              aria-label={openButtonLabel}
+            >
+              <RiMenuFill size={18} />
+            </ActionIcon>
+          )}
+        </Flex>
       )}
 
       <Drawer

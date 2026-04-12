@@ -11,17 +11,20 @@ import { RouteStopList } from '~/components/routes/RouteStopList'
 import { useFavoriteRouteStops } from '~/modules/hooks/useFavoriteRouteStops'
 import { useRouteBaseData } from '~/modules/hooks/useRouteBaseData'
 import { useRouteRealtimeData } from '~/modules/hooks/useRouteRealtimeData'
-import { RiArrowLeftSLine } from '@remixicon/react'
+import { RiArrowLeftSLine, RiFocus3Line } from '@remixicon/react'
 import { AppBadge } from '~/components/common/AppBadge'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { getTerminalDisplay } from '~/modules/utils/i18n/getTerminalDisplay'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 import { saveRouteSearchRecent } from '~/modules/utils/routes/routeSearchRecentStorage'
 import { isCityName } from '~/modules/utils/shared/isCityName'
+import type { RootState } from '~/modules/store'
+import type { Map as MapLibreMap } from 'maplibre-gl'
 
 export default function Route() {
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
+  const { coords } = useSelector((state: RootState) => state.geolocation)
   const { city, id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
@@ -33,6 +36,7 @@ export default function Route() {
   const [activeTab, setActiveTab] = useState<string | null>(null)
   const [selectedStopId, setSelectedStopId] = useState<string | null>(null)
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null)
+  const [routeMapInstance, setRouteMapInstance] = useState<MapLibreMap | null>(null)
   const routeBaseOptions = city && isCityName(city) && id
     ? {
         activeTab,
@@ -167,10 +171,32 @@ export default function Route() {
     navigate('/routes')
   }, [navigate])
 
+  const handleFocusUserLocation = useCallback(() => {
+    if (!routeMapInstance || !coords) {
+      return
+    }
+
+    routeMapInstance.flyTo({
+      center: [coords[1], coords[0]],
+      zoom: 16,
+      duration: 800
+    })
+  }, [coords, routeMapInstance])
+
   return (
     <MapSidebarLayout
       isSm={isSm}
       isSidebarOpened={isSidebarOpened}
+      mapControls={(
+        <ActionIcon
+          aria-label={t('components.routeMap.focusUserLocationAriaLabel')}
+          size="md"
+          onClick={handleFocusUserLocation}
+          disabled={!coords || !routeMapInstance}
+        >
+          <RiFocus3Line size={18} />
+        </ActionIcon>
+      )}
       onCloseSidebar={closeSidebar}
       onOpenSidebar={openSidebar}
       openButtonLabel={t('components.mapSidebarLayout.openRouteList')}
@@ -253,6 +279,7 @@ export default function Route() {
     >
       <RouteMap
         highlightedStopId={highlightedStopId}
+        onMapLoad={setRouteMapInstance}
         selectedStop={selectedStopId}
         selectedVehicleId={selectedVehicleId}
         onSelectStop={handleSelectStopFromMap}
