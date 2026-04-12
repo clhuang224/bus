@@ -96,6 +96,27 @@ describe('Settings', () => {
     expect(screen.getByRole('radio', { name: 'English' })).toBeChecked()
   })
 
+  it('allows switching away from the restored locale', async () => {
+    localStorage.setItem(APP_LOCALE_STORAGE_KEY, AppLocaleType.EN)
+
+    const { store } = renderSettingsPage()
+
+    await waitFor(() => {
+      expect(screen.getByRole('radio', { name: 'English' })).toBeChecked()
+    })
+
+    fireEvent.click(screen.getByRole('radio', { name: '繁體中文' }))
+
+    await waitFor(() => {
+      expect(store.getState().locale.value).toBe(AppLocaleType.ZH_TW)
+      expect(document.documentElement.lang).toBe(AppLocaleType.ZH_TW)
+    })
+
+    await waitFor(() => {
+      expect(localStorage.getItem(APP_LOCALE_STORAGE_KEY)).toBe(AppLocaleType.ZH_TW)
+    })
+  })
+
   it('keeps the provided locale when localStorage has no saved value', async () => {
     renderSettingsPage(AppLocaleType.EN)
 

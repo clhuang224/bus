@@ -48,7 +48,7 @@ export const AppI18nProvider = ({ children }: PropsWithChildren) => {
     }
 
     setHasResolvedLocale(true)
-  }, [dispatch, locale])
+  }, [dispatch])
 
   useEffect(() => {
     let cancelled = false
