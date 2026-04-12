@@ -251,6 +251,10 @@ export function useRoutesData() {
   const compareRouteNames = routeNameCollator.compare
 
   const filteredRoutes = useMemo(() => {
+    if (!normalizedKeyword) {
+      return [] as BusRoute<Date | null>[]
+    }
+
     return getFilteredRoutes(
       searchableRoutes,
       normalizedKeyword,
