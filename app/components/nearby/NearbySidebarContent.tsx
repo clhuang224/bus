@@ -132,14 +132,13 @@ const NearbySidebarContentList = ({ listState }: { listState: NearbySidebarListS
             }}
           >
             <AccordionControl>
-              <Group align="center">
-                <Text style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
+              <Group align="center" gap="xs" wrap="nowrap" style={{ minWidth: 0 }} pr="sm">
+                <Text style={{ flex: '0 1 auto', minWidth: 0 }} lineClamp={1}>
                   {getLocalizedText(stopGroup.StopName, locale)}
                 </Text>
                 <NavigationButton
                   ariaLabel={t('components.routeStopList.navigateAriaLabel', { stopName: getLocalizedText(stopGroup.StopName, locale) })}
                   destination={[stopGroup.position[1], stopGroup.position[0]]}
-                  mr="sm"
                   style={listState.selectedStopId === stopGroup.StationID ? {} : { display: 'none' }}
                 />
               </Group>
