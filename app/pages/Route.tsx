@@ -261,6 +261,7 @@ export default function Route() {
             )
           : null}
         highlightedStopId={highlightedStopId}
+        isSm={isSm}
         selectedStop={selectedStopId}
         selectedVehicleId={selectedVehicleId}
         onSelectStop={handleSelectStopFromMap}

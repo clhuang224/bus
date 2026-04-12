@@ -144,4 +144,39 @@ describe('RouteMap', () => {
     expect(await screen.findByText('市政府')).toBeInTheDocument()
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
+
+  it('shows the navigation button in the selected stop popup on small screens', async () => {
+    const store = createTestStore({
+      reducer: {
+        geolocation: geoSlice.reducer
+      },
+      preloadedState: {
+        geolocation: {
+          ...geoSlice.getInitialState(),
+          coords: [25.033, 121.5654],
+          error: null
+        }
+      }
+    })
+
+    renderWithStore(
+      <RouteMap
+        isSm
+        onSelectStop={vi.fn()}
+        onSelectVehicle={vi.fn()}
+        selectedStop="stop-1"
+        stops={[{
+          id: 'stop-1',
+          name: '市政府',
+          position: [121.55, 25.03],
+          sequence: 1
+        }]}
+        vehicles={[]}
+      />,
+      { store }
+    )
+
+    expect(await screen.findByText('市政府')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /導航至\s*市政府/ })).toBeInTheDocument()
+  })
 })
