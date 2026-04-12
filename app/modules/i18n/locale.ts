@@ -26,9 +26,8 @@ export function getLocaleFromStorage(storage: Pick<Storage, 'getItem'>): AppLoca
 }
 
 export function getStoredAppLocale(): AppLocaleType | null {
-  const storage = getLocalStorage()
-
   try {
+    const storage = getLocalStorage()
     return readStoredLocale(storage)
   } catch {
     return null
