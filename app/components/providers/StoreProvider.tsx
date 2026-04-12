@@ -6,7 +6,7 @@ import type { AppDispatch } from '../../modules/store'
 import favoriteSlice from '../../modules/slices/favoriteSlice'
 import routeSearchSlice from '../../modules/slices/routeSearchSlice'
 import { loadFavoriteRouteStopsFromStorage } from '../../modules/utils/favorite/favoriteRouteStopStorage'
-import { loadRouteSearchFromStorage } from '../../modules/utils/routeSearch/routeSearchStorage'
+import { loadRouteSearchFromStorage } from '../../modules/utils/routes/routeSearchStorage'
 
 interface PropType {
   children: React.ReactElement

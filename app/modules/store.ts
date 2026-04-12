@@ -8,7 +8,7 @@ import globalModalSlice from './slices/globalModalSlice'
 import localeSlice from './slices/localeSlice'
 import routeSearchSlice from './slices/routeSearchSlice'
 import { persistFavoriteRouteStops } from './utils/favorite/favoriteRouteStopStorage'
-import { persistRouteSearchToStorage } from './utils/routeSearch/routeSearchStorage'
+import { persistRouteSearchToStorage } from './utils/routes/routeSearchStorage'
 
 const favoritePersistenceListener = createListenerMiddleware()
 

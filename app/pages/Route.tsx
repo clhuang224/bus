@@ -16,7 +16,7 @@ import { AppBadge } from '~/components/common/AppBadge'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { getTerminalDisplay } from '~/modules/utils/i18n/getTerminalDisplay'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
-import { saveRouteSearchRecent } from '~/modules/utils/routeSearch/routeSearchRecentStorage'
+import { saveRouteSearchRecent } from '~/modules/utils/routes/routeSearchRecentStorage'
 import { isCityName } from '~/modules/utils/shared/isCityName'
 
 export default function Route() {

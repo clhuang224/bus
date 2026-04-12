@@ -18,8 +18,8 @@ import { setKeyword, setSelectedArea } from '~/modules/slices/routeSearchSlice'
 import type { AppDispatch, RootState } from '~/modules/store'
 import { getAreaByCoords } from '~/modules/utils/geo/getAreaByCoords'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
-import { normalizeRouteSearchText } from '~/modules/utils/routeSearch/normalizeRouteSearchText'
-import { loadRouteSearchRecentFromStorage } from '~/modules/utils/routeSearch/routeSearchRecentStorage'
+import { normalizeRouteSearchText } from '~/modules/utils/routes/normalizeRouteSearchText'
+import { loadRouteSearchRecentFromStorage } from '~/modules/utils/routes/routeSearchRecentStorage'
 import { normalizeBusRoutesWithDates } from '~/modules/utils/route/normalizeBusRoutesWithDates'
 
 function deduplicateRoutes(routes: BusRoute<Date | null>[]) {
@@ -216,7 +216,7 @@ export default function Routes() {
           <ScrollArea viewportRef={scrollViewportRef} style={{ flex: 1, minHeight: 0 }}>
             <Stack gap="sm">
               {!message && !normalizedKeyword && recentRoutes.length > 0 && (
-                <Title order={5}>{t('pages.routes.recentRoutesTitle')}</Title>
+                <Title order={5}>{t('pages.routes.recentViewedRoutesTitle')}</Title>
               )}
               {isLoading
                 ? routeCardSkeletons
