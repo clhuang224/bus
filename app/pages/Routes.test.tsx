@@ -303,7 +303,7 @@ describe('Routes', () => {
     expect(HTMLElement.prototype.scrollTo).toHaveBeenCalledWith({ top: 0 })
   })
 
-  it('shows frequently opened routes when the keyword is empty', () => {
+  it('shows recently viewed routes when the keyword is empty', () => {
     localStorage.setItem(ROUTE_SEARCH_RECENT_STORAGE_KEY, JSON.stringify(['route-2', 'route-1']))
 
     renderRoutes({
@@ -317,7 +317,7 @@ describe('Routes', () => {
     ])
   })
 
-  it('shows the search prompt message when the keyword is empty and there is no frequency history', () => {
+  it('shows the search prompt message when the keyword is empty and there is no recent-route history', () => {
     renderRoutes()
 
     expect(screen.getByText('開始搜尋公車')).toBeInTheDocument()
@@ -356,19 +356,6 @@ describe('Routes', () => {
     expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
       expect.stringContaining('藍1'),
       expect.stringContaining('藍10')
-    ])
-  })
-
-  it('uses frequency as a fallback when routes share the same match priority', () => {
-    localStorage.setItem(ROUTE_SEARCH_RECENT_STORAGE_KEY, JSON.stringify(['route-4', 'route-1']))
-
-    renderRoutes({
-      keyword: '藍'
-    })
-
-    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
-      expect.stringContaining('藍10'),
-      expect.stringContaining('藍1')
     ])
   })
 

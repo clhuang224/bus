@@ -294,8 +294,8 @@ For the `Routes` page specifically, keep keyword search ranking deterministic an
 - then route-name prefix matches
 - then route-name contains matches
 - then departure / destination contains matches
-- only use route search frequency as a fallback inside the same keyword-match tier
-- when the keyword is empty, do not show the normal route search result list; show frequent routes if available, otherwise show the search-start prompt
+- only use recently viewed routes as a fallback inside the same keyword-match tier, using recent-view order as the tie-breaker
+- when the keyword is empty, do not show the normal route search result list; show recently viewed routes if available, otherwise show the search-start prompt
 
 Because the deployed TDX proxy key is shared by all visitors, design request timing with the TDX per-key second-level limit in mind. Avoid route-detail request bursts that stack multiple realtime calls into the same second as large base-data requests when a small delay or staged startup would preserve the user experience.
 
