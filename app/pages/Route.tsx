@@ -92,12 +92,12 @@ export default function Route() {
   }, [isSm, openSidebar])
 
   useEffect(() => {
-    if (!id) {
+    if (!city || !isCityName(city) || !id) {
       return
     }
 
     saveRouteSearchRecent(id)
-  }, [id])
+  }, [city, id])
 
   useEffect(() => {
     if (!routeTabs.length) {
