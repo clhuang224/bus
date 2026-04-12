@@ -138,7 +138,7 @@ const NearbySidebarContentList = ({ listState }: { listState: NearbySidebarListS
                 </Text>
                 <NavigationButton
                   ariaLabel={t('components.routeStopList.navigateAriaLabel', { stopName: getLocalizedText(stopGroup.StopName, locale) })}
-                  destination={stopGroup.position ? [stopGroup.position[1], stopGroup.position[0]] : null}
+                  destination={[stopGroup.position[1], stopGroup.position[0]]}
                   mr="sm"
                   style={listState.selectedStopId === stopGroup.StationID ? {} : { display: 'none' }}
                 />
