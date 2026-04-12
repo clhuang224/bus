@@ -5,6 +5,10 @@ import { getLocalStorage } from '../shared/getLocalStorage'
 
 export const ROUTE_SEARCH_STORAGE_KEY = 'bus-route-search'
 
+interface RouteSearchStorage {
+  selectedArea: AreaType | null
+}
+
 function isAreaType(value: unknown): value is AreaType {
   return Object.values(AreaType).includes(value as AreaType)
 }
@@ -14,10 +18,10 @@ function normalizeStoredRouteSearch(value: unknown): RouteSearchState {
     return initialRouteSearchState
   }
 
-  const storedValue = value as Partial<RouteSearchState>
+  const storedValue = value as Partial<RouteSearchStorage>
 
   return {
-    keyword: typeof storedValue.keyword === 'string' ? storedValue.keyword : initialRouteSearchState.keyword,
+    keyword: initialRouteSearchState.keyword,
     selectedArea: storedValue.selectedArea == null || isAreaType(storedValue.selectedArea)
       ? (storedValue.selectedArea ?? null)
       : initialRouteSearchState.selectedArea
@@ -43,7 +47,9 @@ export function setRouteSearchInStorage(
   storage: Pick<Storage, 'setItem'>,
   routeSearch: RouteSearchState
 ) {
-  storage.setItem(ROUTE_SEARCH_STORAGE_KEY, JSON.stringify(routeSearch))
+  storage.setItem(ROUTE_SEARCH_STORAGE_KEY, JSON.stringify({
+    selectedArea: routeSearch.selectedArea
+  } satisfies RouteSearchStorage))
 }
 
 export function loadRouteSearchFromStorage() {

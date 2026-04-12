@@ -60,18 +60,12 @@ startAppListening({
 })
 
 startAppListening({
-  matcher: isAnyOf(
-    routeSearchSlice.actions.setKeyword,
-    routeSearchSlice.actions.setSelectedArea
-  ),
+  matcher: isAnyOf(routeSearchSlice.actions.setSelectedArea),
   effect: (_, api) => {
-    const previousRouteSearch = api.getOriginalState().routeSearch
+    const previousSelectedArea = api.getOriginalState().routeSearch.selectedArea
     const currentRouteSearch = api.getState().routeSearch
 
-    if (
-      previousRouteSearch.keyword === currentRouteSearch.keyword &&
-      previousRouteSearch.selectedArea === currentRouteSearch.selectedArea
-    ) {
+    if (previousSelectedArea === currentRouteSearch.selectedArea) {
       return
     }
 

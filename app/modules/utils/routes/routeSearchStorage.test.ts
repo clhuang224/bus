@@ -19,14 +19,13 @@ describe('routeSearchStorage', () => {
   it('loads route search state from storage', () => {
     const storage = {
       getItem: vi.fn(() => JSON.stringify({
-        keyword: '307',
         selectedArea: AreaType.TAIPEI
       })),
       removeItem: vi.fn()
     }
 
     expect(getRouteSearchFromStorage(storage)).toEqual({
-      keyword: '307',
+      keyword: '',
       selectedArea: AreaType.TAIPEI
     })
     expect(storage.removeItem).not.toHaveBeenCalled()
@@ -35,7 +34,6 @@ describe('routeSearchStorage', () => {
   it('falls back to defaults when stored fields are malformed', () => {
     const storage = {
       getItem: vi.fn(() => JSON.stringify({
-        keyword: 307,
         selectedArea: 'Mars'
       })),
       removeItem: vi.fn()
@@ -62,7 +60,6 @@ describe('routeSearchStorage', () => {
     })
 
     expect(localStorage.getItem(ROUTE_SEARCH_STORAGE_KEY)).toBe(JSON.stringify({
-      keyword: '紅25',
       selectedArea: AreaType.TAIPEI
     }))
   })
