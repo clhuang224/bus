@@ -42,7 +42,14 @@ export const NearbyStopDetail = ({
   const detailSections = [
     {
       label: t('components.nearbyStopDetail.distanceLabel'),
-      content: <StopDistanceText position={stopGroup.position} size="sm" />
+      content: 
+        <Group align="center" wrap="nowrap" gap="xs">
+          <StopDistanceText position={stopGroup.position} size="sm" />
+          <NavigationButton
+            ariaLabel={t('components.routeStopList.navigateAriaLabel', { stopName })}
+            destination={destination}
+          />
+        </Group>
     },
     {
       label: t('components.nearbyStopDetail.cityLabel'),
@@ -95,15 +102,9 @@ export const NearbyStopDetail = ({
             backgroundColor: 'var(--mantine-color-body)'
           }}
         >
-          <Group justify="space-between" align="center" wrap="nowrap" gap="xs">
-            <Text style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
-              {stopName}
-            </Text>
-            <NavigationButton
-              ariaLabel={t('components.routeStopList.navigateAriaLabel', { stopName })}
-              destination={destination}
-            />
-          </Group>
+          <Text style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
+            {stopName}
+          </Text>
         </Stack>
       )}
       {detailSections.map((section) => (
