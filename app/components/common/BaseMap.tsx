@@ -115,7 +115,7 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, extraControls, o
 
                 map.flyTo({
                   center: [coords[1], coords[0]],
-                  zoom: 16,
+                  zoom,
                   duration: 800
                 })
               }}
