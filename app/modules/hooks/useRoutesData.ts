@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { busApi } from '~/modules/apis/bus'
@@ -32,6 +32,8 @@ type DisplayRoute = {
   departure: string
   destination: string
 }
+
+type RoutesMessage = ReturnType<typeof getSearchMessages>['emptyRoutes'] | null
 
 function deduplicateRoutes(routes: BusRoute<Date | null>[]) {
   return Array.from(
@@ -89,6 +91,76 @@ function getRouteKeywordMatchPriority(route: SearchableRoute, keyword: string) {
   return null
 }
 
+function compareSearchableRoutesByRecentAndName(
+  left: SearchableRoute,
+  right: SearchableRoute,
+  recentRouteIndexMap: Map<string, number>,
+  compareRouteNames: (left: string, right: string) => number
+) {
+  const recentIndexDiff =
+    (recentRouteIndexMap.get(left.route.RouteUID) ?? Number.POSITIVE_INFINITY) -
+    (recentRouteIndexMap.get(right.route.RouteUID) ?? Number.POSITIVE_INFINITY)
+
+  if (recentIndexDiff !== 0) {
+    return recentIndexDiff
+  }
+
+  const routeNameCompare = compareRouteNames(left.routeName, right.routeName)
+
+  if (routeNameCompare !== 0) {
+    return routeNameCompare
+  }
+
+  return left.route.RouteUID.localeCompare(right.route.RouteUID)
+}
+
+function getFilteredRoutes(
+  routes: SearchableRoute[],
+  keyword: string,
+  recentRouteIndexMap: Map<string, number>,
+  compareRouteNames: (left: string, right: string) => number
+) {
+  return routes
+    .filter((route) => matchesRouteKeyword(route, keyword))
+    .sort((left, right) => {
+      const leftMatchPriority = getRouteKeywordMatchPriority(left, keyword)
+      const rightMatchPriority = getRouteKeywordMatchPriority(right, keyword)
+      const matchPriorityDiff = (leftMatchPriority ?? Number.POSITIVE_INFINITY) -
+        (rightMatchPriority ?? Number.POSITIVE_INFINITY)
+
+      if (matchPriorityDiff !== 0) {
+        return matchPriorityDiff
+      }
+
+      return compareSearchableRoutesByRecentAndName(
+        left,
+        right,
+        recentRouteIndexMap,
+        compareRouteNames
+      )
+    })
+    .map(({ route }) => route)
+}
+
+function getRecentRoutes(
+  routes: SearchableRoute[],
+  recentRouteIndexMap: Map<string, number>,
+  compareRouteNames: (left: string, right: string) => number
+) {
+  return routes
+    .filter((route) => recentRouteIndexMap.has(route.route.RouteUID))
+    .sort((left, right) => {
+      return compareSearchableRoutesByRecentAndName(
+        left,
+        right,
+        recentRouteIndexMap,
+        compareRouteNames
+      )
+    })
+    .map(({ route }) => route)
+    .slice(0, 10)
+}
+
 function toDisplayRoute(route: BusRoute<Date | null>, locale: AppLocaleType): DisplayRoute {
   return {
     routeUID: route.RouteUID,
@@ -100,102 +172,35 @@ function toDisplayRoute(route: BusRoute<Date | null>, locale: AppLocaleType): Di
   }
 }
 
-export function useRoutesData() {
-  const dispatch = useDispatch<AppDispatch>()
-  const { t } = useTranslation()
-  const locale = useSelector(selectLocale)
-  const { coords } = useSelector((state: RootState) => state.geolocation)
-  const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
-  const { keyword, selectedArea } = useSelector((state: RootState) => state.routeSearch)
-  const currentArea = getAreaByCoords(coords, geojson)
-  const area = selectedArea ?? currentArea ?? AreaType.TAIPEI
-  const { data: routeData = [], isLoading, error } = busApi.useGetRoutesByAreaQuery(area)
-  const routes = useMemo(() => normalizeBusRoutesWithDates(routeData), [routeData])
-  const routeNameCollator = useLocalizedTextCollator()
-  const recentRouteUIDs = useMemo(() => loadRouteSearchRecentFromStorage(), [])
-  const recentRouteIndexMap = useMemo(
-    () => new Map(recentRouteUIDs.map((routeUID, index) => [routeUID, index])),
-    [recentRouteUIDs]
-  )
-  const normalizedKeyword = normalizeRouteSearchText(keyword)
-  const scrollViewportRef = useRef<HTMLDivElement | null>(null)
+function getRoutesMessage({
+  error,
+  filteredRoutesLength,
+  isLoading,
+  normalizedKeyword,
+  recentRoutesLength,
+  t
+}: {
+  error: unknown
+  filteredRoutesLength: number
+  isLoading: boolean
+  normalizedKeyword: string
+  recentRoutesLength: number
+  t: ReturnType<typeof useTranslation>['t']
+}): RoutesMessage {
+  if (isLoading) return null
+  if (error) return getSearchMessages(t).loadRoutesError
+  if (!normalizedKeyword && recentRoutesLength === 0) return getSearchMessages(t).emptyRouteSearch
+  if (normalizedKeyword && filteredRoutesLength === 0) return getSearchMessages(t).emptyRoutes
+
+  return null
+}
+
+function useResetRoutesScroll(
+  scrollViewportRef: RefObject<HTMLDivElement | null>,
+  area: AreaType,
+  normalizedKeyword: string
+) {
   const previousSearchContextRef = useRef<{ area: AreaType, keyword: string } | null>(null)
-  const searchableRoutes = useMemo(() => getSearchableRoutes(routes, locale), [locale, routes])
-
-  const filteredRoutes = useMemo(() => {
-    return searchableRoutes
-      .filter((route) => matchesRouteKeyword(route, normalizedKeyword))
-      .sort((left, right) => {
-        const leftMatchPriority = getRouteKeywordMatchPriority(left, normalizedKeyword)
-        const rightMatchPriority = getRouteKeywordMatchPriority(right, normalizedKeyword)
-        const matchPriorityDiff = (leftMatchPriority ?? Number.POSITIVE_INFINITY) -
-          (rightMatchPriority ?? Number.POSITIVE_INFINITY)
-
-        if (matchPriorityDiff !== 0) {
-          return matchPriorityDiff
-        }
-
-        const recentIndexDiff =
-          (recentRouteIndexMap.get(left.route.RouteUID) ?? Number.POSITIVE_INFINITY) -
-          (recentRouteIndexMap.get(right.route.RouteUID) ?? Number.POSITIVE_INFINITY)
-
-        if (recentIndexDiff !== 0) {
-          return recentIndexDiff
-        }
-
-        const routeNameCompare = routeNameCollator.compare(left.routeName, right.routeName)
-
-        if (routeNameCompare !== 0) {
-          return routeNameCompare
-        }
-
-        return left.route.RouteUID.localeCompare(right.route.RouteUID)
-      })
-      .map(({ route }) => route)
-  }, [normalizedKeyword, recentRouteIndexMap, routeNameCollator, searchableRoutes])
-
-  const recentRoutes = useMemo(() => {
-    if (normalizedKeyword) {
-      return [] as BusRoute<Date | null>[]
-    }
-
-    return searchableRoutes
-      .filter((route) => recentRouteIndexMap.has(route.route.RouteUID))
-      .sort((left, right) => {
-        const recentIndexDiff =
-          (recentRouteIndexMap.get(left.route.RouteUID) ?? Number.POSITIVE_INFINITY) -
-          (recentRouteIndexMap.get(right.route.RouteUID) ?? Number.POSITIVE_INFINITY)
-
-        if (recentIndexDiff !== 0) {
-          return recentIndexDiff
-        }
-
-        const routeNameCompare = routeNameCollator.compare(left.routeName, right.routeName)
-
-        if (routeNameCompare !== 0) {
-          return routeNameCompare
-        }
-
-        return left.route.RouteUID.localeCompare(right.route.RouteUID)
-      })
-      .map(({ route }) => route)
-      .slice(0, 10)
-  }, [normalizedKeyword, recentRouteIndexMap, routeNameCollator, searchableRoutes])
-
-  const message = useMemo(() => {
-    if (isLoading) return null
-    if (error) return getSearchMessages(t).loadRoutesError
-    if (!normalizedKeyword && recentRoutes.length === 0) return getSearchMessages(t).emptyRouteSearch
-    if (normalizedKeyword && filteredRoutes.length === 0) return getSearchMessages(t).emptyRoutes
-
-    return null
-  }, [error, filteredRoutes.length, isLoading, normalizedKeyword, recentRoutes.length, t])
-
-  const displayedRoutes = useMemo(() => {
-    const routesToDisplay = normalizedKeyword ? filteredRoutes : recentRoutes
-
-    return routesToDisplay.map((route) => toDisplayRoute(route, locale))
-  }, [filteredRoutes, locale, normalizedKeyword, recentRoutes])
 
   useEffect(() => {
     const previousSearchContext = previousSearchContextRef.current
@@ -217,7 +222,66 @@ export function useRoutesData() {
     scrollViewportRef.current?.scrollTo({
       top: 0
     })
-  }, [area, normalizedKeyword])
+  }, [area, normalizedKeyword, scrollViewportRef])
+}
+
+export function useRoutesData() {
+  const dispatch = useDispatch<AppDispatch>()
+  const { t } = useTranslation()
+  const locale = useSelector(selectLocale)
+  const { coords } = useSelector((state: RootState) => state.geolocation)
+  const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
+  const { keyword, selectedArea } = useSelector((state: RootState) => state.routeSearch)
+  const currentArea = getAreaByCoords(coords, geojson)
+  const area = selectedArea ?? currentArea ?? AreaType.TAIPEI
+  const { data: routeData = [], isLoading, error } = busApi.useGetRoutesByAreaQuery(area)
+  const routes = useMemo(() => normalizeBusRoutesWithDates(routeData), [routeData])
+  const routeNameCollator = useLocalizedTextCollator()
+  const recentRouteUIDs = useMemo(() => loadRouteSearchRecentFromStorage(), [])
+  const recentRouteIndexMap = useMemo(
+    () => new Map(recentRouteUIDs.map((routeUID, index) => [routeUID, index])),
+    [recentRouteUIDs]
+  )
+  const normalizedKeyword = normalizeRouteSearchText(keyword)
+  const scrollViewportRef = useRef<HTMLDivElement | null>(null)
+  const searchableRoutes = useMemo(() => getSearchableRoutes(routes, locale), [locale, routes])
+  const compareRouteNames = routeNameCollator.compare
+
+  const filteredRoutes = useMemo(() => {
+    return getFilteredRoutes(
+      searchableRoutes,
+      normalizedKeyword,
+      recentRouteIndexMap,
+      compareRouteNames
+    )
+  }, [compareRouteNames, normalizedKeyword, recentRouteIndexMap, searchableRoutes])
+
+  const recentRoutes = useMemo(() => {
+    if (normalizedKeyword) {
+      return [] as BusRoute<Date | null>[]
+    }
+
+    return getRecentRoutes(searchableRoutes, recentRouteIndexMap, compareRouteNames)
+  }, [compareRouteNames, normalizedKeyword, recentRouteIndexMap, searchableRoutes])
+
+  const message = useMemo(() => {
+    return getRoutesMessage({
+      error,
+      filteredRoutesLength: filteredRoutes.length,
+      isLoading,
+      normalizedKeyword,
+      recentRoutesLength: recentRoutes.length,
+      t
+    })
+  }, [error, filteredRoutes.length, isLoading, normalizedKeyword, recentRoutes.length, t])
+
+  const displayedRoutes = useMemo(() => {
+    const routesToDisplay = normalizedKeyword ? filteredRoutes : recentRoutes
+
+    return routesToDisplay.map((route) => toDisplayRoute(route, locale))
+  }, [filteredRoutes, locale, normalizedKeyword, recentRoutes])
+
+  useResetRoutesScroll(scrollViewportRef, area, normalizedKeyword)
 
   return {
     area,
