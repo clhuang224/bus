@@ -12,7 +12,7 @@ import { selectLocale } from '~/modules/slices/localeSlice'
 import { getDirectionTranslationKey } from '~/modules/utils/i18n/getDirectionTranslationKey'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 import { normalizeBusRoutesWithDates } from '~/modules/utils/route/normalizeBusRoutesWithDates'
-import type { LatLng } from '~/modules/types/CoordsType'
+import type { LngLat } from '~/modules/types/CoordsType'
 
 export interface RouteTab {
   id: string
@@ -26,7 +26,7 @@ export interface RouteBaseTimelineStop {
   id: string
   isFavorite: boolean
   name: string
-  position: LatLng | null
+  position: LngLat | null
   sequence: number
   stopID: string
 }
