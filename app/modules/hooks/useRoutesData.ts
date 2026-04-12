@@ -65,10 +65,6 @@ function getSearchableRoutes(routes: BusRoute<Date | null>[], locale: AppLocaleT
   })
 }
 
-function matchesRouteKeyword(route: SearchableRoute, keyword: string) {
-  return getRouteKeywordMatchPriority(route, keyword) != null
-}
-
 function getRouteKeywordMatchPriority(route: SearchableRoute, keyword: string) {
   if (!keyword) return 0
 
@@ -124,12 +120,16 @@ function getFilteredRoutes(
   compareRouteNames: (left: string, right: string) => number
 ) {
   return routes
-    .filter((route) => matchesRouteKeyword(route, keyword))
+    .flatMap((route) => {
+      const matchPriority = getRouteKeywordMatchPriority(route, keyword)
+
+      return matchPriority == null ? [] : [{
+        ...route,
+        matchPriority
+      }]
+    })
     .sort((left, right) => {
-      const leftMatchPriority = getRouteKeywordMatchPriority(left, keyword)
-      const rightMatchPriority = getRouteKeywordMatchPriority(right, keyword)
-      const matchPriorityDiff = (leftMatchPriority ?? Number.POSITIVE_INFINITY) -
-        (rightMatchPriority ?? Number.POSITIVE_INFINITY)
+      const matchPriorityDiff = left.matchPriority - right.matchPriority
 
       if (matchPriorityDiff !== 0) {
         return matchPriorityDiff
