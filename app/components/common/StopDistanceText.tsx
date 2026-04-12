@@ -25,20 +25,15 @@ export const StopDistanceText = ({ position, ...textProps }: PropType) => {
     })
   }, [coords, position])
 
-  if (distanceKm == null) {
-    return null
-  }
-
-  const distanceLabel = useMemo(() => {
-    if (distanceKm === null) return '-'
-    return distanceKm < 1
+  const distanceLabel = distanceKm === null
+    ? '-'
+    : distanceKm < 1
       ? t('components.stopDistance.meters', {
           count: Math.round(distanceKm * 1000)
         })
       : t('components.stopDistance.kilometers', {
           count: distanceKm < 10 ? Number(distanceKm.toFixed(1)) : Math.round(distanceKm)
         })
-  }, [distanceKm, t])
 
   return <Text {...textProps}>{distanceLabel}</Text>
 }
