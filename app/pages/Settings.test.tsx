@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppI18nProvider } from '~/components/providers/AppI18nProvider'
 import { APP_LOCALE_STORAGE_KEY } from '~/modules/consts/i18n'
 import { AppLocaleType } from '~/modules/enums/AppLocaleType'
-import { getLocaleFromStorage } from '~/modules/i18n/locale'
+import { loadLocaleFromStorage } from '~/modules/i18n/locale'
 import i18n from '~/modules/i18n'
 import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
@@ -36,7 +36,7 @@ vi.mock('react-router', async () => {
 })
 
 function renderSettingsPage(initialLocale?: AppLocaleType) {
-  const locale = initialLocale ?? getLocaleFromStorage(localStorage)
+  const locale = initialLocale ?? loadLocaleFromStorage()
   const store = createTestStore({
     preloadedState: {
       locale: {
