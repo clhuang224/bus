@@ -1,4 +1,4 @@
-import { Group, Stack, Text } from '@mantine/core'
+import { Stack, Text } from '@mantine/core'
 import type { Map as MapLibreMap, Marker, Popup } from 'maplibre-gl'
 import mapLibre from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -8,7 +8,6 @@ import type { LngLat, LatLng } from '~/modules/types/CoordsType'
 import { addMapMarkerActivationListeners } from '~/modules/utils/map/addMapMarkerActivationListeners'
 import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
 import BaseMap from '../common/BaseMap'
-import { NavigationButton } from '../common/NavigationButton'
 
 export interface RouteMapStop {
   id: string
@@ -360,17 +359,9 @@ export const RouteMap = ({
         )
         : popupContainer && selectedMapStop
           ? createPortal(
-            <Group justify="space-between" align="center" wrap="nowrap" gap="xs">
-              <Text size="sm" fw={500} style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
-                {selectedMapStop.name}
-              </Text>
-              <NavigationButton
-                ariaLabel={t('components.routeStopList.navigateAriaLabel', {
-                  stopName: selectedMapStop.name
-                })}
-                destination={[selectedMapStop.position[1], selectedMapStop.position[0]]}
-              />
-            </Group>,
+            <Text size="sm" fw={500} style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
+              {selectedMapStop.name}
+            </Text>,
             popupContainer
           )
         : null}

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import type { Reducer, UnknownAction } from '@reduxjs/toolkit'
 import { useEffect } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -110,10 +110,9 @@ vi.mock('../common/BaseMap', () => ({
 describe('RouteMap', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
-    vi.spyOn(window, 'open').mockImplementation(() => null)
   })
 
-  it('renders a navigation button in the selected stop popup and opens Google Maps directions', async () => {
+  it('renders only the stop name in the selected stop popup', async () => {
     const store = createTestStore({
       reducer: {
         geolocation: geoSlice.reducer as unknown as Reducer<unknown, UnknownAction>
@@ -143,16 +142,7 @@ describe('RouteMap', () => {
       { store }
     )
 
-    const navigationButton = await screen.findByRole('button', { name: /導航至\s*市政府/ })
-
-    fireEvent.click(navigationButton)
-
-    await waitFor(() => {
-      expect(window.open).toHaveBeenCalledWith(
-        'https://www.google.com/maps/dir/?api=1&destination=25.03%2C121.55&origin=25.033%2C121.5654',
-        '_blank',
-        'noopener,noreferrer'
-      )
-    })
+    expect(await screen.findByText('市政府')).toBeInTheDocument()
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 })

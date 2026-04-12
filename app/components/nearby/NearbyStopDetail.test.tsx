@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import type { Reducer, UnknownAction } from '@reduxjs/toolkit'
-import { fireEvent, screen } from '@testing-library/react'
+import { fireEvent, screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
@@ -65,14 +65,24 @@ describe('NearbyStopDetail', () => {
     vi.spyOn(window, 'open').mockImplementation(() => null)
   })
 
-  it('renders a navigation button in title mode', () => {
+  it('renders only the stop name in title mode', () => {
     renderNearbyStopDetail('title')
 
-    expect(screen.getByRole('button', { name: /導航至\s*市政府/ })).toBeInTheDocument()
+    expect(screen.getByText('市政府')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /導航至\s*市政府/ })).not.toBeInTheDocument()
+  })
+
+  it('renders stop distance when user coordinates are available', () => {
+    renderNearbyStopDetail('content')
+
+    const distanceSection = screen.getByText('距離').closest('div')
+
+    expect(distanceSection).not.toBeNull()
+    expect(within(distanceSection!).getByText('3.8 公里')).toBeInTheDocument()
   })
 
   it('opens Google Maps directions from the navigation button', () => {
-    renderNearbyStopDetail()
+    renderNearbyStopDetail('full')
 
     fireEvent.click(screen.getByRole('button', { name: /導航至\s*市政府/ }))
 

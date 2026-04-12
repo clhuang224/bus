@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux'
 import { BaseAlert } from '~/components/common/BaseAlert'
 import { NavigationButton } from '~/components/common/NavigationButton'
 import { SkeletonList } from '~/components/common/SkeletonList'
+import { StopDistanceText } from '~/components/common/StopDistanceText'
 import type { AlertMessageConfig } from '~/modules/interfaces/AlertMessageConfig'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
@@ -66,6 +67,10 @@ const NearbySidebarContentDetail = ({ detailState }: { detailState: NearbySideba
         />
       </Flex>
       <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
+        <Stack gap={2}>
+          <Text size="sm" c="dimmed">{t('components.nearbyStopDetail.distanceLabel')}</Text>
+          <StopDistanceText position={detailState.stopGroup!.position} size="sm" />
+        </Stack>
         <Stack gap={2}>
           <Text size="sm" c="dimmed">{t('components.nearbyStopDetail.cityLabel')}</Text>
           <Text size="sm">

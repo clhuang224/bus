@@ -120,6 +120,10 @@ export const en = {
         addFavoriteAriaLabel: 'Save route stop',
         removeFavoriteAriaLabel: 'Remove saved route stop'
       },
+      stopDistance: {
+        meters: '{{count}} m',
+        kilometers: '{{count}} km'
+      },
       routeMap: {
         stopMarkerAriaLabel: '{{stopName}}, stop {{sequence}}',
         vehicleMarkerAriaLabel: '{{plateNumb}}, recent stop {{stopName}}, estimated arrival {{estimateLabel}}',
@@ -139,6 +143,7 @@ export const en = {
       },
       nearbyStopDetail: {
         cityLabel: 'City',
+        distanceLabel: 'Distance',
         addressLabel: 'Address',
         routesLabel: 'Routes',
         notProvided: 'Not provided',

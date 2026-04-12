@@ -144,12 +144,10 @@ export const NearbyStopMap = ({
       {popupContainer && selectedStopPopupContent
         ? createPortal(
           <div
-            style={isSm
-              ? {
-                  maxHeight: '50dvh',
-                  overflowY: 'auto'
-                }
-              : undefined}
+            style={{
+              maxHeight: isSm ? '50dvh' : '40dvh',
+              overflowY: 'auto'
+            }}
           >
             {selectedStopPopupContent}
           </div>,

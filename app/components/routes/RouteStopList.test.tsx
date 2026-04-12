@@ -59,7 +59,9 @@ function getStopItemById(stopId: string): HTMLElement {
   return screen.getByTestId(`route-stop-${stopId}`)
 }
 
-function renderRouteStopList(ui: ReactElement) {
+function renderRouteStopList(
+  ui: ReactElement
+) {
   const store = createTestStore({
     reducer: {
       geolocation: geoSlice.reducer as unknown as Reducer<unknown, UnknownAction>

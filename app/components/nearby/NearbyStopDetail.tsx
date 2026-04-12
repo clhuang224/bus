@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { AppBadge } from '~/components/common/AppBadge'
 import { NavigationButton } from '~/components/common/NavigationButton'
+import { StopDistanceText } from '~/components/common/StopDistanceText'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
 import { selectLocale } from '~/modules/slices/localeSlice'
@@ -32,19 +33,17 @@ export const NearbyStopDetail = ({
 
   if (displayMode === 'title') {
     return (
-      <Group justify="space-between" align="center" wrap="nowrap" gap="xs">
-        <Text style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
-          {stopName}
-        </Text>
-        <NavigationButton
-          ariaLabel={t('components.routeStopList.navigateAriaLabel', { stopName })}
-          destination={destination}
-        />
-      </Group>
+      <Text style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
+        {stopName}
+      </Text>
     )
   }
 
   const detailSections = [
+    {
+      label: t('components.nearbyStopDetail.distanceLabel'),
+      content: <StopDistanceText position={stopGroup.position} size="sm" />
+    },
     {
       label: t('components.nearbyStopDetail.cityLabel'),
       content: (
@@ -86,16 +85,26 @@ export const NearbyStopDetail = ({
 
   return (
     <Stack gap="xs">
-      {(displayMode === 'full') && (
-        <Group justify="space-between" align="center" wrap="nowrap" gap="xs">
-          <Text style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
-            {stopName}
-          </Text>
-          <NavigationButton
-            ariaLabel={t('components.routeStopList.navigateAriaLabel', { stopName })}
-            destination={destination}
-          />
-        </Group>
+      {displayMode === 'full' && (
+        <Stack
+          gap={4}
+          style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 1,
+            backgroundColor: 'var(--mantine-color-body)'
+          }}
+        >
+          <Group justify="space-between" align="center" wrap="nowrap" gap="xs">
+            <Text style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
+              {stopName}
+            </Text>
+            <NavigationButton
+              ariaLabel={t('components.routeStopList.navigateAriaLabel', { stopName })}
+              destination={destination}
+            />
+          </Group>
+        </Stack>
       )}
       {detailSections.map((section) => (
         <Stack key={section.label} gap={4}>

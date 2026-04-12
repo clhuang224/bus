@@ -120,6 +120,10 @@ export const zhTW = {
         addFavoriteAriaLabel: '收藏站牌路線',
         removeFavoriteAriaLabel: '取消收藏站牌路線'
       },
+      stopDistance: {
+        meters: '{{count}} 公尺',
+        kilometers: '{{count}} 公里'
+      },
       routeMap: {
         stopMarkerAriaLabel: '{{stopName}}，第 {{sequence}} 站',
         vehicleMarkerAriaLabel: '{{plateNumb}}，最近站牌 {{stopName}}，預估到站 {{estimateLabel}}',
@@ -139,6 +143,7 @@ export const zhTW = {
       },
       nearbyStopDetail: {
         cityLabel: '縣市',
+        distanceLabel: '距離',
         addressLabel: '地址',
         routesLabel: '路線',
         notProvided: '未提供',
