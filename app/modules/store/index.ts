@@ -1,13 +1,16 @@
 import { configureStore, createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query'
-import { busApi } from './apis/bus'
-import favoriteSlice from './slices/favoriteSlice'
-import geoSlice from './slices/geoSlice'
-import cityGeoSlice, { setGeoJSON } from './slices/cityGeoSlice'
-import globalModalSlice from './slices/globalModalSlice'
-import localeSlice from './slices/localeSlice'
-import routeSearchSlice from './slices/routeSearchSlice'
-import { persistFavoriteRouteStops } from './utils/favorite/favoriteRouteStopStorage'
+import { busApi } from '../apis/bus'
+import cityGeoSlice, { setGeoJSON } from '../slices/cityGeoSlice'
+import favoriteSlice from '../slices/favoriteSlice'
+import geoSlice from '../slices/geoSlice'
+import globalModalSlice from '../slices/globalModalSlice'
+import localeSlice from '../slices/localeSlice'
+import routeSearchSlice from '../slices/routeSearchSlice'
+import { persistFavoriteRouteStops } from '../utils/favorite/favoriteRouteStopStorage'
+import { persistRouteSearchToStorage } from '../utils/routes/routeSearchStorage'
+import { isWindowUnavailableError } from '../utils/shared/getLocalStorage'
+import { getPreloadedState } from './preload'
 
 const favoritePersistenceListener = createListenerMiddleware()
 
@@ -21,6 +24,7 @@ export const store = configureStore({
     locale: localeSlice.reducer,
     routeSearch: routeSearchSlice.reducer
   },
+  preloadedState: getPreloadedState(),
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
@@ -33,6 +37,7 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
+
 const startAppListening =
   favoritePersistenceListener.startListening.withTypes<RootState, AppDispatch>()
 
@@ -54,7 +59,37 @@ startAppListening({
       return
     }
 
-    persistFavoriteRouteStops(currentFavoriteRouteStops)
+    try {
+      persistFavoriteRouteStops(currentFavoriteRouteStops)
+    } catch (error) {
+      if (isWindowUnavailableError(error)) {
+        return
+      }
+
+      console.warn('Failed to persist favorite route stops to localStorage.', error)
+    }
+  }
+})
+
+startAppListening({
+  matcher: isAnyOf(routeSearchSlice.actions.setSelectedArea),
+  effect: (_, api) => {
+    const previousSelectedArea = api.getOriginalState().routeSearch.selectedArea
+    const currentRouteSearch = api.getState().routeSearch
+
+    if (previousSelectedArea === currentRouteSearch.selectedArea) {
+      return
+    }
+
+    try {
+      persistRouteSearchToStorage(currentRouteSearch)
+    } catch (error) {
+      if (isWindowUnavailableError(error)) {
+        return
+      }
+
+      console.warn('Failed to persist route search to localStorage.', error)
+    }
   }
 })
 

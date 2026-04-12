@@ -10,6 +10,7 @@ import { DirectionType } from '~/modules/enums/DirectionType'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
 import { VehicleStateType } from '~/modules/enums/VehicleStateType'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
+import { ROUTE_SEARCH_RECENT_STORAGE_KEY } from '~/modules/utils/routes/routeSearchRecentStorage'
 import { createTestStore } from '~/test/createTestStore'
 import { mockMatchMedia } from '~/test/mockMatchMedia'
 import { renderRoute } from '~/test/render'
@@ -367,10 +368,21 @@ function renderRoutePage(
 
 describe('Route', () => {
   beforeEach(() => {
+    localStorage.clear()
     mockMatchMedia()
 
     resetRouteMocks()
     mockDefaultRouteQueries()
+  })
+
+  it('moves the opened route to the front of recently viewed routes', async () => {
+    localStorage.setItem(ROUTE_SEARCH_RECENT_STORAGE_KEY, JSON.stringify(['route-2', 'route-1']))
+
+    renderRoutePage()
+
+    await waitFor(() => {
+      expect(JSON.parse(localStorage.getItem(ROUTE_SEARCH_RECENT_STORAGE_KEY) ?? '[]')).toEqual(['route-1', 'route-2'])
+    })
   })
 
   it('highlights the saved favorite stop after opening the route page from favorites', async () => {

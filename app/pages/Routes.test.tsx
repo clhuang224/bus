@@ -8,6 +8,7 @@ import { AreaType } from '~/modules/enums/AreaType'
 import { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import routeSearchSlice from '~/modules/slices/routeSearchSlice'
+import { ROUTE_SEARCH_RECENT_STORAGE_KEY } from '~/modules/utils/routes/routeSearchRecentStorage'
 import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
 import Routes from './Routes'
@@ -107,6 +108,46 @@ const routesData = [
     CityCode: 'TPE',
     UpdateTime: '2026-03-17T10:00:00+08:00',
     VersionID: 1
+  },
+  {
+    RouteUID: 'route-3',
+    RouteID: '3',
+    HasSubRoutes: true,
+    Operators: [],
+    AuthorityID: '005',
+    ProviderID: 'provider-3',
+    SubRoutes: [],
+    BusRouteType: 0,
+    RouteName: { 'zh-TW': '市民小巴1', en: 'Citizen Shuttle 1' },
+    DepartureStopName: { 'zh-TW': '圓山', en: 'Yuanshan' },
+    DestinationStopName: { 'zh-TW': '劍潭', en: 'Jiantan' },
+    TicketPriceDescription: { 'zh-TW': '', en: '' },
+    FareBufferZoneDescription: { 'zh-TW': '', en: '' },
+    RouteMapImageUrl: '',
+    City: CityNameType.TAIPEI,
+    CityCode: 'TPE',
+    UpdateTime: '2026-03-17T10:00:00+08:00',
+    VersionID: 1
+  },
+  {
+    RouteUID: 'route-4',
+    RouteID: '4',
+    HasSubRoutes: true,
+    Operators: [],
+    AuthorityID: '005',
+    ProviderID: 'provider-4',
+    SubRoutes: [],
+    BusRouteType: 0,
+    RouteName: { 'zh-TW': '藍10', en: 'Blue 10' },
+    DepartureStopName: { 'zh-TW': '動物園', en: 'Zoo' },
+    DestinationStopName: { 'zh-TW': '象山', en: 'Xiangshan' },
+    TicketPriceDescription: { 'zh-TW': '', en: '' },
+    FareBufferZoneDescription: { 'zh-TW': '', en: '' },
+    RouteMapImageUrl: '',
+    City: CityNameType.TAIPEI,
+    CityCode: 'TPE',
+    UpdateTime: '2026-03-17T10:00:00+08:00',
+    VersionID: 1
   }
 ]
 
@@ -166,6 +207,8 @@ const renderRoutes = (preloadedRouteSearchState?: {
 
 describe('Routes', () => {
   beforeEach(() => {
+    localStorage.clear()
+    vi.mocked(HTMLElement.prototype.scrollTo).mockClear()
     mockUseGetRoutesByAreaQuery.mockReset()
     mockUseGetRoutesByAreaQuery.mockReturnValue({
       data: routesData,
@@ -200,6 +243,8 @@ describe('Routes', () => {
       expect(store.getState().routeSearch.selectedArea).toBe(AreaType.TAICHUNG)
       expect(screen.getByLabelText('area-select')).toHaveValue(AreaType.TAICHUNG)
     })
+
+    expect(HTMLElement.prototype.scrollTo).toHaveBeenCalledWith({ top: 0 })
   })
 
   it('shows route skeleton cards while routes are loading', () => {
@@ -216,7 +261,9 @@ describe('Routes', () => {
   })
 
   it('deduplicates routes that share the same RouteUID', () => {
-    renderRoutes()
+    renderRoutes({
+      keyword: '藍1'
+    })
 
     expect(screen.getAllByText('藍1')).toHaveLength(1)
   })
@@ -232,7 +279,9 @@ describe('Routes', () => {
       error: null
     })
 
-    renderRoutes()
+    renderRoutes({
+      keyword: '市政府'
+    })
 
     expect(screen.getByText(routeInfoOriginLabel)).toBeInTheDocument()
     expect(screen.queryByText(`${i18n.t('components.routeInfoCard.terminalLabel')}: 市政府`)).not.toBeInTheDocument()
@@ -250,6 +299,74 @@ describe('Routes', () => {
       expect(screen.getAllByText('紅25').length).toBeGreaterThan(0)
       expect(screen.queryByText('藍1')).not.toBeInTheDocument()
     })
+
+    expect(HTMLElement.prototype.scrollTo).toHaveBeenCalledWith({ top: 0 })
+  })
+
+  it('shows recently viewed routes when the keyword is empty', () => {
+    localStorage.setItem(ROUTE_SEARCH_RECENT_STORAGE_KEY, JSON.stringify(['route-2', 'route-1']))
+
+    renderRoutes({
+      keyword: ''
+    })
+
+    expect(screen.getByText(i18n.t('pages.routes.recentViewedRoutesTitle'))).toBeInTheDocument()
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
+      expect.stringContaining('紅25'),
+      expect.stringContaining('藍1')
+    ])
+  })
+
+  it('shows the search prompt message when the keyword is empty and there is no recent-route history', () => {
+    renderRoutes()
+
+    expect(screen.getByText('開始搜尋公車')).toBeInTheDocument()
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+  })
+
+  it('keeps the default name sort when the keyword is non-empty', () => {
+    localStorage.setItem(ROUTE_SEARCH_RECENT_STORAGE_KEY, JSON.stringify(['route-2', 'route-1']))
+
+    renderRoutes({
+      keyword: '站'
+    })
+
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
+      expect.stringContaining('紅25'),
+      expect.stringContaining('藍1')
+    ])
+  })
+
+  it('prioritizes route-name matches over departure or destination matches', () => {
+    renderRoutes({
+      keyword: '市'
+    })
+
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
+      expect.stringContaining('市民小巴1'),
+      expect.stringContaining('藍1')
+    ])
+  })
+
+  it('prioritizes exact route-name matches before route-name prefix matches', () => {
+    renderRoutes({
+      keyword: '藍1'
+    })
+
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
+      expect.stringContaining('藍1'),
+      expect.stringContaining('藍10')
+    ])
+  })
+
+  it('normalizes full-width and hyphenated keywords before matching routes', () => {
+    renderRoutes({
+      keyword: '　藍－１０　'
+    })
+
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
+      expect.stringContaining('藍10')
+    ])
   })
 
   it('shows the saved keyword from store state', async () => {

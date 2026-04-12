@@ -64,32 +64,22 @@ describe('favoriteRouteStopStorage', () => {
     expect(localStorage.getItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY)).toBe(JSON.stringify([favoriteRouteStop]))
   })
 
-  it('returns an empty array and warns when storage is unavailable during cache load', () => {
+  it('throws when storage is unavailable during load', () => {
     const localStorageGetter = vi.spyOn(window, 'localStorage', 'get').mockImplementation(() => {
       throw new Error('blocked')
     })
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
-    expect(loadFavoriteRouteStopsFromStorage()).toEqual([])
-    expect(warnSpy).toHaveBeenCalledWith(
-      'Failed to load favorite route stops from localStorage.',
-      expect.any(Error)
-    )
+    expect(() => loadFavoriteRouteStopsFromStorage()).toThrow()
 
     localStorageGetter.mockRestore()
   })
 
-  it('warns instead of throwing when storage writes fail', () => {
+  it('throws when storage writes fail', () => {
     const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('quota exceeded')
     })
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
-    expect(() => persistFavoriteRouteStops([favoriteRouteStop])).not.toThrow()
-    expect(warnSpy).toHaveBeenCalledWith(
-      'Failed to persist favorite route stops to localStorage.',
-      expect.any(Error)
-    )
+    expect(() => persistFavoriteRouteStops([favoriteRouteStop])).toThrow()
 
     setItemSpy.mockRestore()
   })

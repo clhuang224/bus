@@ -125,6 +125,7 @@ function renderFavoritePage(
 
 function renderFavoritePageFromLocalStorage(storedRouteStops: unknown, locale: AppLocaleType = AppLocaleType.ZH_TW) {
   localStorage.setItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY, JSON.stringify(storedRouteStops))
+  const loadedRouteStops = loadFavoriteRouteStopsFromStorage()
 
   const store = createTestStore<FavoriteTestState>({
     reducer: {
@@ -132,15 +133,13 @@ function renderFavoritePageFromLocalStorage(storedRouteStops: unknown, locale: A
     },
     preloadedState: {
       favorite: {
-        routeStops: []
+        routeStops: loadedRouteStops
       },
       locale: {
         value: locale
       }
     }
   })
-
-  store.dispatch(favoriteSlice.actions.restoreFavoriteRouteStopsFromStorage(loadFavoriteRouteStopsFromStorage()))
 
   return renderWithProvidersAndRouter(<Favorite />, {
     store
@@ -254,6 +253,7 @@ describe('Favorite', () => {
 
   it('falls back to the empty state when localStorage contains invalid JSON', () => {
     localStorage.setItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY, '{invalid-json')
+    const loadedRouteStops = loadFavoriteRouteStopsFromStorage()
 
     const store = createTestStore<FavoriteTestState>({
       reducer: {
@@ -261,15 +261,13 @@ describe('Favorite', () => {
       },
       preloadedState: {
         favorite: {
-          routeStops: []
+          routeStops: loadedRouteStops
         },
         locale: {
           value: AppLocaleType.ZH_TW
         }
       }
     })
-
-    store.dispatch(favoriteSlice.actions.restoreFavoriteRouteStopsFromStorage(loadFavoriteRouteStopsFromStorage()))
 
     renderWithProvidersAndRouter(<Favorite />, {
       store

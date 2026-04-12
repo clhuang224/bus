@@ -76,7 +76,8 @@ export const en = {
         title: 'Favorites'
       },
       routes: {
-        title: 'Routes'
+        title: 'Routes',
+        recentViewedRoutesTitle: 'Recently viewed routes'
       },
       settings: {
         title: 'Settings',
@@ -203,7 +204,11 @@ export const en = {
         },
         emptyRoutes: {
           title: 'No matching routes',
-          description: 'Try another keyword or switch to a different area.'
+          description: 'Try another route name, origin stop, or destination stop keyword.'
+        },
+        emptyRouteSearch: {
+          title: 'Start searching for a route',
+          description: 'Enter a route number, origin stop, or destination stop to find the bus you need.'
         }
       },
       route: {
