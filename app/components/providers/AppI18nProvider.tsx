@@ -1,10 +1,9 @@
-import { useEffect, useState, type PropsWithChildren } from 'react'
+import { useEffect, type PropsWithChildren } from 'react'
 import { useLocation } from 'react-router'
-import { useDispatch, useSelector } from 'react-redux'
-import { getStoredAppLocale, persistLocaleInStorage } from '~/modules/i18n/locale'
-import { selectLocale, setLocale } from '~/modules/slices/localeSlice'
+import { useSelector } from 'react-redux'
+import { persistLocaleInStorage } from '~/modules/i18n/locale'
+import { selectLocale } from '~/modules/slices/localeSlice'
 import i18n from '~/modules/i18n'
-import type { AppDispatch } from '~/modules/store'
 import { isWindowUnavailableError } from '~/modules/utils/shared/getLocalStorage'
 
 function syncDocumentMetadata(locale: string) {
@@ -24,31 +23,8 @@ function syncDocumentMetadata(locale: string) {
 }
 
 export const AppI18nProvider = ({ children }: PropsWithChildren) => {
-  const dispatch = useDispatch<AppDispatch>()
   const locale = useSelector(selectLocale)
   const location = useLocation()
-  const [hasResolvedLocale, setHasResolvedLocale] = useState(false)
-
-  useEffect(() => {
-    let storedLocale: ReturnType<typeof getStoredAppLocale>
-
-    try {
-      storedLocale = getStoredAppLocale()
-    } catch (error) {
-      if (!isWindowUnavailableError(error)) {
-        console.warn('Failed to load app locale from localStorage.', error)
-      }
-
-      setHasResolvedLocale(true)
-      return
-    }
-
-    if (storedLocale && storedLocale !== locale) {
-      dispatch(setLocale(storedLocale))
-    }
-
-    setHasResolvedLocale(true)
-  }, [dispatch])
 
   useEffect(() => {
     let cancelled = false
@@ -59,10 +35,6 @@ export const AppI18nProvider = ({ children }: PropsWithChildren) => {
       } finally {
         if (cancelled) return
         document.documentElement.lang = locale
-
-        if (!hasResolvedLocale) {
-          return
-        }
 
         try {
           persistLocaleInStorage(locale)
@@ -81,7 +53,7 @@ export const AppI18nProvider = ({ children }: PropsWithChildren) => {
     return () => {
       cancelled = true
     }
-  }, [hasResolvedLocale, locale])
+  }, [locale])
 
   useEffect(() => {
     document.documentElement.lang = locale

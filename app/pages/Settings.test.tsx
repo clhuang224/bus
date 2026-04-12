@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppI18nProvider } from '~/components/providers/AppI18nProvider'
 import { APP_LOCALE_STORAGE_KEY } from '~/modules/consts/i18n'
 import { AppLocaleType } from '~/modules/enums/AppLocaleType'
+import { getLocaleFromStorage } from '~/modules/i18n/locale'
 import i18n from '~/modules/i18n'
 import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
@@ -34,11 +35,12 @@ vi.mock('react-router', async () => {
   }
 })
 
-function renderSettingsPage(initialLocale = AppLocaleType.ZH_TW) {
+function renderSettingsPage(initialLocale?: AppLocaleType) {
+  const locale = initialLocale ?? getLocaleFromStorage(localStorage)
   const store = createTestStore({
     preloadedState: {
       locale: {
-        value: initialLocale
+        value: locale
       }
     }
   })
@@ -105,6 +107,26 @@ describe('Settings', () => {
     })
 
     expect(screen.getByRole('radio', { name: 'English' })).toBeChecked()
+  })
+
+  it('does not overwrite the restored locale during startup reconciliation', async () => {
+    const setItemSpy = vi.spyOn(Storage.prototype, 'setItem')
+    try {
+      localStorage.setItem(APP_LOCALE_STORAGE_KEY, AppLocaleType.EN)
+
+      renderSettingsPage()
+
+      await waitFor(() => {
+        expect(screen.getByRole('radio', { name: 'English' })).toBeChecked()
+      })
+
+      expect(setItemSpy.mock.calls).not.toContainEqual([
+        APP_LOCALE_STORAGE_KEY,
+        AppLocaleType.ZH_TW
+      ])
+    } finally {
+      setItemSpy.mockRestore()
+    }
   })
 
   it('allows switching away from the restored locale', async () => {
