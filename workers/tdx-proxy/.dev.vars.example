@@ -1,3 +1,6 @@
 TDX_CLIENT_ID=your_client_id_here
 TDX_CLIENT_SECRET=your_client_secret_here
+
+# WARNING: `*` is only safe for local development/testing.
+# In production, set ALLOWED_ORIGINS to a comma-separated list of explicit trusted origins.
 ALLOWED_ORIGINS=*
