@@ -170,7 +170,7 @@ pnpm run dev
 
 這會同時啟動前端 dev server 和本地的 Cloudflare Worker proxy。
 
-如果要用手機或同網路的其他裝置測試，請改用你的電腦區網 IP 啟動：
+如果要用手機或同網路的其他裝置測試，請先啟動 `dev:mobile`，再用你電腦的區網 IP 從手機或其他裝置開啟：
 
 ```bash
 pnpm run dev:mobile

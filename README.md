@@ -172,7 +172,7 @@ pnpm run dev
 
 This starts both the frontend dev server and the local Cloudflare Worker proxy.
 
-To test from another device on the same network, start the mobile-friendly dev mode with your computer's LAN IP:
+To test from another device on the same network, start the mobile-friendly dev mode, then open the site using your computer's LAN IP:
 
 ```bash
 pnpm run dev:mobile
