@@ -1,6 +1,6 @@
 import type { LatLng, LngLat } from '~/modules/types/CoordsType'
 
-export const getLatLng = (position: LngLat | null): LatLng | null => {
+export const toLatLng = (position: LngLat | null): LatLng | null => {
   if (!position) {
     return null
   }
@@ -8,7 +8,7 @@ export const getLatLng = (position: LngLat | null): LatLng | null => {
   return [position[1], position[0]]
 }
 
-export const getLngLat = (position: LatLng | null): LngLat | null => {
+export const toLngLat = (position: LatLng | null): LngLat | null => {
   if (!position) {
     return null
   }

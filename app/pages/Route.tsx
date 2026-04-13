@@ -18,7 +18,6 @@ import { getTerminalDisplay } from '~/modules/utils/i18n/getTerminalDisplay'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 import { saveRouteSearchRecent } from '~/modules/utils/routes/routeSearchRecentStorage'
 import { isCityName } from '~/modules/utils/shared/isCityName'
-import { RoutePopupContent } from '~/components/route/RoutePopupContent'
 
 export default function Route() {
   const { t } = useTranslation()
@@ -80,8 +79,8 @@ export default function Route() {
       null,
     realtimeBuses: realtimeBusesByStopSequence.get(stop.sequence) ?? []
   })), [baseStops, estimatedArrivalLabelsByStopKey, realtimeBusesByStopSequence])
-  const selectedMapStop = useMemo(
-    () => stops.find((stop) => stop.id === selectedStopId) ?? null,
+  const selectedStopEstimatedArrivalLabel = useMemo(
+    () => stops.find((stop) => stop.id === selectedStopId)?.estimatedArrivalLabel ?? null,
     [selectedStopId, stops]
   )
   const routeName = busRoute ? getLocalizedText(busRoute.RouteName, locale) : null
@@ -273,14 +272,7 @@ export default function Route() {
         onSelectVehicle={handleSelectVehicleFromMap}
         routePath={activeRoutePath}
         stops={routeMapStops}
-        selectedStopPopupContent={selectedMapStop ? (
-          <RoutePopupContent
-            isSm={isSm}
-            stopName={selectedMapStop.name}
-            estimatedArrivalLabel={selectedMapStop.estimatedArrivalLabel}
-            position={selectedMapStop.position}
-          />
-        ) : null}
+        selectedStopEstimatedArrivalLabel={selectedStopEstimatedArrivalLabel}
         vehicles={realtimeMapVehicles}
       />
     </MapSidebarLayout>
