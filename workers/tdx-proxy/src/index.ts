@@ -38,7 +38,9 @@ function withCorsHeaders(headers: Headers, allowedOrigin: string) {
   headers.set('access-control-allow-methods', 'GET,OPTIONS')
   headers.set('access-control-allow-headers', 'content-type')
   headers.set('access-control-expose-headers', 'content-type')
-  headers.set('vary', 'origin')
+  if (allowedOrigin !== '*') {
+    headers.set('vary', 'origin')
+  }
 }
 
 function getAllowedOrigins(env: Env) {
