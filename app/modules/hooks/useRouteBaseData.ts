@@ -21,7 +21,7 @@ export interface RouteTab {
   direction: DirectionType
 }
 
-export interface RouteBaseTimelineStop {
+export interface RouteBaseStop {
   favoriteRouteStop: FavoriteRouteStop
   id: string
   isFavorite: boolean
@@ -147,7 +147,7 @@ export function useRouteBaseData(
     }, new Map())
   }, [stopsByCity])
 
-  const baseTimelineStops = useMemo<RouteBaseTimelineStop[]>(() => {
+  const baseStops = useMemo<RouteBaseStop[]>(() => {
     if (!activeStopOfRoute || !activeSubRoute || !busRoute) return []
 
     return activeStopOfRoute.Stops.map((stop) => {
@@ -225,7 +225,7 @@ export function useRouteBaseData(
 
   return {
     activeSubRoute,
-    baseTimelineStops,
+    baseStops,
     busRoute,
     highlightedStopId,
     isLoading,
