@@ -84,7 +84,7 @@ describe('Settings', () => {
   it('updates the locale and persists it when the user changes language', async () => {
     const { store } = renderSettingsPage()
 
-    fireEvent.click(screen.getByRole('radio', { name: 'English' }))
+    fireEvent.click(getLocaleRadio(AppLocaleType.EN, AppLocaleType.EN))
 
     expect(store.getState().locale.value).toBe(AppLocaleType.EN)
 
@@ -117,7 +117,7 @@ describe('Settings', () => {
       renderSettingsPage()
 
       await waitFor(() => {
-        expect(screen.getByRole('radio', { name: 'English' })).toBeChecked()
+        expect(getLocaleRadio(AppLocaleType.EN, AppLocaleType.EN)).toBeChecked()
       })
 
       expect(setItemSpy.mock.calls).not.toContainEqual([
