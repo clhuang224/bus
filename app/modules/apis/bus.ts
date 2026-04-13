@@ -33,6 +33,7 @@ const baseQuery = fetchBaseQuery({
 
 const DEFAULT_RETENTION_SECONDS = 60 * 5
 const AREA_ROUTES_RETENTION_SECONDS = 60 * 15
+const NEARBY_STOP_OF_ROUTE_BATCH_SIZE = 40
 
 export const busApi = createApi({
   reducerPath: 'busApi',
@@ -66,23 +67,52 @@ export const busApi = createApi({
     }),
     getStopOfRoutesByArea: build.query<StopOfRoute[], { area: AreaType, stopUIDs?: string[] }>({
       queryFn: async ({ area, stopUIDs = [] }, _api, _extraOptions, baseQuery) => {
-        const cityResults = await Promise.all(
-          areaMapCity[area].map(async (city) => ({
-            city,
-            result: await baseQuery(buildNearbyStopOfRouteQuery(city, stopUIDs))
-          }))
+        const stopUIDBatches = stopUIDs.length > 0
+          ? Array.from(
+            { length: Math.ceil(stopUIDs.length / NEARBY_STOP_OF_ROUTE_BATCH_SIZE) },
+            (_, index) => stopUIDs.slice(
+              index * NEARBY_STOP_OF_ROUTE_BATCH_SIZE,
+              (index + 1) * NEARBY_STOP_OF_ROUTE_BATCH_SIZE
+            )
+              )
+          : [[]]
+
+        const batchResults: Array<{
+          city: CityNameType
+          result: Awaited<ReturnType<typeof baseQuery>>
+        }> = []
+
+        for (const batch of stopUIDBatches) {
+          const cityResults = await Promise.all(
+            areaMapCity[area].map(async (city) => ({
+              city,
+              result: await baseQuery(buildNearbyStopOfRouteQuery(city, batch))
+            }))
+          )
+
+          const errorResult = cityResults.find(({ result }) => result.error != null)
+          if (errorResult?.result.error != null) {
+            return { error: errorResult.result.error }
+          }
+          batchResults.push(...cityResults)
+        }
+
+        const transformedStopOfRoutes = batchResults.flatMap(({ city, result }) =>
+          (result.data as TdxStopOfRoute[]).map((stopOfRoute) => transformStopOfRoute(stopOfRoute, city))
         )
 
-        const errorResult = cityResults.find(({ result }) => result.error != null)
-        if (errorResult?.result.error != null) {
-          return { error: errorResult.result.error }
-        }
+        const seenStopOfRouteKeys = new Set<string>()
+        const dedupedStopOfRoutes = transformedStopOfRoutes.filter((stopOfRoute) => {
+          const key = `${stopOfRoute.City}:${stopOfRoute.SubRouteUID}:${stopOfRoute.Direction}`
+          if (seenStopOfRouteKeys.has(key)) {
+            return false
+          }
 
-        return {
-          data: cityResults.flatMap(({ city, result }) =>
-            (result.data as TdxStopOfRoute[]).map((stopOfRoute) => transformStopOfRoute(stopOfRoute, city))
-          )
-        }
+          seenStopOfRouteKeys.add(key)
+          return true
+        })
+
+        return { data: dedupedStopOfRoutes }
       }
     }),
     getRoutesByArea: build.query<BusRoute<string>[], AreaType>({

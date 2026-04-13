@@ -39,7 +39,8 @@ const markerStyleMap: Record<MapMarkerType, Partial<CSSStyleDeclaration>> = {
     height: '20px',
     borderRadius: '50%',
     backgroundColor: '#4A90E2',
-    border: '3px solid white'
+    border: '3px solid white',
+    zIndex: '1'
   }
 }
 

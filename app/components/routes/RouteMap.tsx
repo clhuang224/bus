@@ -72,6 +72,7 @@ export const RouteMap = ({
   const markerMap = useRef<Map<string, Marker>>(new Map())
   const popupRef = useRef<Popup | null>(null)
   const vehicleMarkerMap = useRef<Map<string, Marker>>(new Map())
+  const initialBoundsFittedRef = useRef(false)
 
   const positionedStops = useMemo(
     () => stops.filter((stop): stop is RouteMapStop & { position: LngLat } => stop.position != null),
@@ -83,6 +84,13 @@ export const RouteMap = ({
   )
   const stopsById = useMemo(
     () => new Map(positionedStops.map((stop) => [stop.id, stop])),
+    [positionedStops]
+  )
+  const routeIdentity = useMemo(
+    () =>
+      positionedStops
+        .map((stop) => `${stop.id}:${stop.sequence}:${stop.position[0]},${stop.position[1]}`)
+        .join('|'),
     [positionedStops]
   )
   const selectedVehicle = selectedVehicleId ? vehiclesById.get(selectedVehicleId) ?? null : null
@@ -113,6 +121,10 @@ export const RouteMap = ({
       map.off('load', handleLoad)
     }
   }, [map])
+
+  useEffect(() => {
+    initialBoundsFittedRef.current = false
+  }, [routeIdentity])
 
   useEffect(() => {
     if (!map || !isMapReady) return
@@ -224,7 +236,12 @@ export const RouteMap = ({
       vehicleMarkerMap.current.set(vehicle.id, marker)
     })
 
-    if (positionedStops.length > 0 && !selectedStop && !selectedVehicleId) {
+    if (
+      positionedStops.length > 0 &&
+      !selectedStop &&
+      !selectedVehicleId &&
+      !initialBoundsFittedRef.current
+    ) {
       const bounds = positionedStops.reduce(
         (result, stop) => result.extend(stop.position),
         new mapLibre.LngLatBounds(positionedStops[0].position, positionedStops[0].position)
@@ -235,6 +252,7 @@ export const RouteMap = ({
         maxZoom: 15,
         duration: 800
       })
+      initialBoundsFittedRef.current = true
     }
 
     return () => {

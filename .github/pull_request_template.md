@@ -21,7 +21,6 @@ List the checks you ran for this PR. If something was intentionally not run, not
 - [ ] `pnpm run lint`
 - [ ] `pnpm run typecheck`
 - [ ] `pnpm run test`
-- [ ] Not run: [reason]
 
 ## Scope Notes
 

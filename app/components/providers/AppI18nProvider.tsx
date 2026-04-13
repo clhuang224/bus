@@ -1,9 +1,10 @@
 import { useEffect, type PropsWithChildren } from 'react'
 import { useLocation } from 'react-router'
 import { useSelector } from 'react-redux'
-import { setLocaleInStorage } from '~/modules/i18n/locale'
+import { persistLocaleInStorage } from '~/modules/i18n/locale'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import i18n from '~/modules/i18n'
+import { isWindowUnavailableError } from '~/modules/utils/shared/getLocalStorage'
 
 function syncDocumentMetadata(locale: string) {
   const t = i18n.getFixedT(locale)
@@ -36,8 +37,12 @@ export const AppI18nProvider = ({ children }: PropsWithChildren) => {
         document.documentElement.lang = locale
 
         try {
-          setLocaleInStorage(window.localStorage, locale)
+          persistLocaleInStorage(locale)
         } catch (error) {
+          if (isWindowUnavailableError(error)) {
+            return
+          }
+
           console.warn('Failed to persist app locale to localStorage.', error)
         }
       }

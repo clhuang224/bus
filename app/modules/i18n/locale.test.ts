@@ -1,27 +1,30 @@
 // @vitest-environment jsdom
 
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { APP_LOCALE_STORAGE_KEY, DEFAULT_APP_LOCALE } from '../consts/i18n'
 import { AppLocaleType } from '../enums/AppLocaleType'
-import { getInitialAppLocale, getLocaleFromStorage, setLocaleInStorage } from './locale'
+import { getInitialAppLocale, loadLocaleFromStorage, setLocaleInStorage } from './locale'
 
-describe('getLocaleFromStorage', () => {
+describe('loadLocaleFromStorage', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
   it('returns the stored locale when it is supported', () => {
-    expect(getLocaleFromStorage({
-      getItem: () => AppLocaleType.EN
-    })).toBe(AppLocaleType.EN)
+    localStorage.setItem(APP_LOCALE_STORAGE_KEY, AppLocaleType.EN)
+
+    expect(loadLocaleFromStorage()).toBe(AppLocaleType.EN)
   })
 
-  it('falls back to the default locale when the stored value is invalid', () => {
-    expect(getLocaleFromStorage({
-      getItem: () => 'ja'
-    })).toBe(DEFAULT_APP_LOCALE)
-  })
+  it.each([
+    ['the stored value is invalid', 'invalid-locale'],
+    ['storage is empty', null]
+  ])('falls back to the default locale when %s', (_, storedValue) => {
+    if (storedValue != null) {
+      localStorage.setItem(APP_LOCALE_STORAGE_KEY, storedValue)
+    }
 
-  it('falls back to the default locale when storage is empty', () => {
-    expect(getLocaleFromStorage({
-      getItem: () => null
-    })).toBe(DEFAULT_APP_LOCALE)
+    expect(loadLocaleFromStorage()).toBe(DEFAULT_APP_LOCALE)
   })
 
   it('persists the selected locale to storage', () => {
@@ -34,9 +37,7 @@ describe('getLocaleFromStorage', () => {
 })
 
 describe('getInitialAppLocale', () => {
-  it('restores the saved locale from window localStorage on app load', () => {
-    localStorage.setItem(APP_LOCALE_STORAGE_KEY, AppLocaleType.EN)
-
-    expect(getInitialAppLocale()).toBe(AppLocaleType.EN)
+  it('uses the default locale for the initial app render', () => {
+    expect(getInitialAppLocale()).toBe(DEFAULT_APP_LOCALE)
   })
 })

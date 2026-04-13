@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppI18nProvider } from '~/components/providers/AppI18nProvider'
 import { APP_LOCALE_STORAGE_KEY } from '~/modules/consts/i18n'
 import { AppLocaleType } from '~/modules/enums/AppLocaleType'
+import { loadLocaleFromStorage } from '~/modules/i18n/locale'
 import i18n from '~/modules/i18n'
 import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
@@ -34,11 +35,12 @@ vi.mock('react-router', async () => {
   }
 })
 
-function renderSettingsPage(initialLocale = AppLocaleType.ZH_TW) {
+function renderSettingsPage(initialLocale?: AppLocaleType) {
+  const locale = initialLocale ?? loadLocaleFromStorage()
   const store = createTestStore({
     preloadedState: {
       locale: {
-        value: initialLocale
+        value: locale
       }
     }
   })
@@ -52,6 +54,17 @@ function renderSettingsPage(initialLocale = AppLocaleType.ZH_TW) {
       { store }
     )
   }
+}
+
+const getSettingsT = (locale: AppLocaleType) => i18n.getFixedT(locale)
+
+const getLocaleRadio = (uiLocale: AppLocaleType, optionLocale: AppLocaleType) => {
+  const t = getSettingsT(uiLocale)
+  const key = optionLocale === AppLocaleType.ZH_TW
+    ? 'pages.settings.localeOptions.zhTW.label'
+    : 'pages.settings.localeOptions.en.label'
+
+  return screen.getByRole('radio', { name: t(key) })
 }
 
 describe('Settings', () => {
@@ -71,7 +84,7 @@ describe('Settings', () => {
   it('updates the locale and persists it when the user changes language', async () => {
     const { store } = renderSettingsPage()
 
-    fireEvent.click(screen.getByRole('radio', { name: 'English' }))
+    fireEvent.click(getLocaleRadio(AppLocaleType.EN, AppLocaleType.EN))
 
     expect(store.getState().locale.value).toBe(AppLocaleType.EN)
 
@@ -82,6 +95,69 @@ describe('Settings', () => {
     await waitFor(() => {
       expect(localStorage.getItem(APP_LOCALE_STORAGE_KEY)).toBe(AppLocaleType.EN)
     })
+  })
+
+  it('restores the saved locale from localStorage after mount', async () => {
+    localStorage.setItem(APP_LOCALE_STORAGE_KEY, AppLocaleType.EN)
+
+    renderSettingsPage()
+
+    await waitFor(() => {
+      expect(document.documentElement.lang).toBe(AppLocaleType.EN)
+    })
+
+    expect(getLocaleRadio(AppLocaleType.EN, AppLocaleType.EN)).toBeChecked()
+  })
+
+  it('does not overwrite the restored locale during startup reconciliation', async () => {
+    const setItemSpy = vi.spyOn(Storage.prototype, 'setItem')
+    try {
+      localStorage.setItem(APP_LOCALE_STORAGE_KEY, AppLocaleType.EN)
+
+      renderSettingsPage()
+
+      await waitFor(() => {
+        expect(getLocaleRadio(AppLocaleType.EN, AppLocaleType.EN)).toBeChecked()
+      })
+
+      expect(setItemSpy.mock.calls).not.toContainEqual([
+        APP_LOCALE_STORAGE_KEY,
+        AppLocaleType.ZH_TW
+      ])
+    } finally {
+      setItemSpy.mockRestore()
+    }
+  })
+
+  it('allows switching away from the restored locale', async () => {
+    localStorage.setItem(APP_LOCALE_STORAGE_KEY, AppLocaleType.EN)
+
+    const { store } = renderSettingsPage()
+
+    await waitFor(() => {
+      expect(getLocaleRadio(AppLocaleType.EN, AppLocaleType.EN)).toBeChecked()
+    })
+
+    fireEvent.click(getLocaleRadio(AppLocaleType.EN, AppLocaleType.ZH_TW))
+
+    await waitFor(() => {
+      expect(store.getState().locale.value).toBe(AppLocaleType.ZH_TW)
+      expect(document.documentElement.lang).toBe(AppLocaleType.ZH_TW)
+    })
+
+    await waitFor(() => {
+      expect(localStorage.getItem(APP_LOCALE_STORAGE_KEY)).toBe(AppLocaleType.ZH_TW)
+    })
+  })
+
+  it('keeps the provided locale when localStorage has no saved value', async () => {
+    renderSettingsPage(AppLocaleType.EN)
+
+    await waitFor(() => {
+      expect(document.documentElement.lang).toBe(AppLocaleType.EN)
+    })
+
+    expect(getLocaleRadio(AppLocaleType.EN, AppLocaleType.EN)).toBeChecked()
   })
 
   it('does not show the back button on desktop', () => {
