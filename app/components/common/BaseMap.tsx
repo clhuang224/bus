@@ -11,6 +11,8 @@ import type { RootState } from '~/modules/store'
 import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
 import { APP_FLOATING_ACTION_OFFSET } from '~/modules/consts/layout'
 
+const FOCUS_ZOOM = 16
+
 interface PropType {
   center: LatLng | null
   zoom?: number
@@ -115,7 +117,7 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, extraControls, o
 
                 map.flyTo({
                   center: [coords[1], coords[0]],
-                  zoom: 16,
+                  zoom: FOCUS_ZOOM,
                   duration: 800
                 })
               }}
