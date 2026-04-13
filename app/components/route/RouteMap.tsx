@@ -4,7 +4,8 @@ import mapLibre from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import type { LngLat, LatLng } from '~/modules/types/CoordsType'
+import type { LngLat } from '~/modules/types/CoordsType'
+import { toLatLng } from '~/modules/utils/geo/convertCoordinates'
 import { addMapMarkerActivationListeners } from '~/modules/utils/map/addMapMarkerActivationListeners'
 import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
 import BaseMap from '../common/BaseMap'
@@ -98,9 +99,7 @@ export const RouteMap = ({
   const selectedVehicle = selectedVehicleId ? vehiclesById.get(selectedVehicleId) ?? null : null
   const selectedMapStop = selectedStop ? stopsById.get(selectedStop) ?? null : null
 
-  const center = positionedStops[0]
-    ? [positionedStops[0].position[1], positionedStops[0].position[0]] as LatLng
-    : null
+  const center = positionedStops[0] ? toLatLng(positionedStops[0].position) : null
 
   useEffect(() => {
     if (!map) {

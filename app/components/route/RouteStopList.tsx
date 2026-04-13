@@ -8,6 +8,7 @@ import { useScrollSelectedItem } from '~/modules/hooks/useScrollSelectedItem'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeBusStatus'
 import { VehicleStateType } from '~/modules/enums/VehicleStateType'
+import { toLatLng } from '~/modules/utils/geo/convertCoordinates'
 import { SkeletonList } from '../common/SkeletonList'
 import { RouteRealtimeBadge } from './RouteRealtimeBadge'
 import { RouteRealtimeGap } from './RouteRealtimeGap'
@@ -216,7 +217,7 @@ export const RouteStopList = ({
                                 ariaLabel={t('components.routeStopList.navigateAriaLabel', {
                                   stopName: stop.name
                                 })}
-                                destination={stop.position ? [stop.position[1], stop.position[0]] : null}
+                                destination={toLatLng(stop.position ?? null)}
                               />
                             </Group>
                             <ActionIcon

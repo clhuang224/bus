@@ -22,6 +22,7 @@ import { useLocalizedTextCollator } from '~/modules/hooks/useLocalizedTextCollat
 import { selectLocale } from '~/modules/slices/localeSlice'
 import type { RootState } from '~/modules/store'
 import { getCityByCoords } from '~/modules/utils/geo/getCityByCoords'
+import { toLngLat } from '~/modules/utils/geo/convertCoordinates'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 import { normalizeBusRoutesWithDates } from '~/modules/utils/route/normalizeBusRoutesWithDates'
 
@@ -38,7 +39,7 @@ function groupNearbyStops(
 ): NearbyStopGroup[] {
   if (!coords || !isSuccess || !allStops) return []
 
-  const currentPoint = point([coords[1], coords[0]])
+  const currentPoint = point(toLngLat(coords)!)
   const groupedStops = new Map<string, NearbyStopGroup>()
 
   allStops.forEach((stop) => {

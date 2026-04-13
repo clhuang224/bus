@@ -11,6 +11,7 @@ import type { AlertMessageConfig } from '~/modules/interfaces/AlertMessageConfig
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
 import { selectLocale } from '~/modules/slices/localeSlice'
+import { toLatLng } from '~/modules/utils/geo/convertCoordinates'
 import { getCityTranslationKey } from '~/modules/utils/i18n/getCityTranslationKey'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 import { NearbyStopDetail } from './NearbyStopDetail'
@@ -69,7 +70,7 @@ const NearbySidebarContentDetail = ({ detailState }: { detailState: NearbySideba
               ariaLabel={t('components.routeStopList.navigateAriaLabel', {
                 stopName: getLocalizedText(detailState.stopGroup!.StopName, locale)
               })}
-              destination={[detailState.stopGroup!.position[1], detailState.stopGroup!.position[0]]}
+              destination={toLatLng(detailState.stopGroup!.position)}
             />
           </Group>
         </Stack>

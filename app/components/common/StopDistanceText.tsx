@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import type { RootState } from '~/modules/store'
 import type { LngLat } from '~/modules/types/CoordsType'
+import { toLngLat } from '~/modules/utils/geo/convertCoordinates'
 
 interface PropType extends Omit<TextProps, 'children'> {
   position: LngLat | null
@@ -20,7 +21,7 @@ export const StopDistanceText = ({ position, ...textProps }: PropType) => {
       return null
     }
 
-    return distance(point([coords[1], coords[0]]), point(position), {
+    return distance(point(toLngLat(coords)!), point(position), {
       units: 'kilometers'
     })
   }, [coords, position])

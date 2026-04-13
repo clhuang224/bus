@@ -8,6 +8,7 @@ import { StopDistanceText } from '~/components/common/StopDistanceText'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
 import { selectLocale } from '~/modules/slices/localeSlice'
+import { toLatLng } from '~/modules/utils/geo/convertCoordinates'
 import { getCityTranslationKey } from '~/modules/utils/i18n/getCityTranslationKey'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 
@@ -29,7 +30,7 @@ export const NearbyStopDetail = ({
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
   const stopName = getLocalizedText(stopGroup.StopName, locale)
-  const destination: [number, number] = [stopGroup.position[1], stopGroup.position[0]]
+  const destination = toLatLng(stopGroup.position)!
 
   if (displayMode === 'title') {
     return (
