@@ -1,4 +1,4 @@
-import { Accordion, AccordionControl, AccordionItem, AccordionPanel, ActionIcon, Flex, ScrollArea, Skeleton, Stack, Text, Title } from '@mantine/core'
+import { Accordion, AccordionControl, AccordionItem, AccordionPanel, ActionIcon, Flex, Group, ScrollArea, Skeleton, Stack, Text, Title } from '@mantine/core'
 import { RiArrowLeftSLine } from '@remixicon/react'
 import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -63,13 +63,15 @@ const NearbySidebarContentDetail = ({ detailState }: { detailState: NearbySideba
       <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
         <Stack gap={2}>
           <Text size="sm" c="dimmed">{t('components.nearbyStopDetail.distanceLabel')}</Text>
-          <StopDistanceText position={detailState.stopGroup!.position} size="sm" />
-          <NavigationButton
-            ariaLabel={t('components.routeStopList.navigateAriaLabel', {
-              stopName: getLocalizedText(detailState.stopGroup!.StopName, locale)
-            })}
-            destination={[detailState.stopGroup!.position[1], detailState.stopGroup!.position[0]]}
-          />
+          <Group align="center" wrap="nowrap" gap="xs">
+            <StopDistanceText position={detailState.stopGroup!.position} size="sm" />
+            <NavigationButton
+              ariaLabel={t('components.routeStopList.navigateAriaLabel', {
+                stopName: getLocalizedText(detailState.stopGroup!.StopName, locale)
+              })}
+              destination={[detailState.stopGroup!.position[1], detailState.stopGroup!.position[0]]}
+            />
+          </Group>
         </Stack>
         <Stack gap={2}>
           <Text size="sm" c="dimmed">{t('components.nearbyStopDetail.cityLabel')}</Text>
