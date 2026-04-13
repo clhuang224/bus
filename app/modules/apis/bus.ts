@@ -23,12 +23,14 @@ import {
   transformStopOfRoute
 } from '../utils/route/transformTdxBusData'
 
-if (!import.meta.env.VITE_PROXY_API_BASE_URL) {
+const busApiBaseUrl = import.meta.env.VITE_PROXY_API_BASE_URL || '/api/tdx'
+
+if (import.meta.env.PROD && !import.meta.env.VITE_PROXY_API_BASE_URL) {
   throw new Error('VITE_PROXY_API_BASE_URL is required. Follow the proxy setup in README.md.')
 }
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: import.meta.env.VITE_PROXY_API_BASE_URL
+  baseUrl: busApiBaseUrl
 })
 
 const DEFAULT_RETENTION_SECONDS = 60 * 5

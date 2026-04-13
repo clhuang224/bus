@@ -5,7 +5,7 @@ const TOKEN_REFRESH_BUFFER_MS = 60 * 1000
 interface Env {
   TDX_CLIENT_ID?: string
   TDX_CLIENT_SECRET?: string
-  TDX_ALLOWED_ORIGINS?: string
+  ALLOWED_ORIGINS?: string
 }
 
 interface TdxTokenResponse {
@@ -33,16 +33,35 @@ function clearCachedToken() {
   cachedTokenExpiresAt = 0
 }
 
+function appendVaryHeader(headers: Headers, value: string) {
+  const currentVary = headers.get('vary')
+
+  if (!currentVary) {
+    headers.set('vary', value)
+    return
+  }
+
+  const varyValues = currentVary
+    .split(',')
+    .map((item) => item.trim().toLowerCase())
+
+  if (!varyValues.includes(value.toLowerCase())) {
+    headers.set('vary', `${currentVary}, ${value}`)
+  }
+}
+
 function withCorsHeaders(headers: Headers, allowedOrigin: string) {
   headers.set('access-control-allow-origin', allowedOrigin)
   headers.set('access-control-allow-methods', 'GET,OPTIONS')
   headers.set('access-control-allow-headers', 'content-type')
   headers.set('access-control-expose-headers', 'content-type')
-  headers.set('vary', 'origin')
+  if (allowedOrigin !== '*') {
+    appendVaryHeader(headers, 'Origin')
+  }
 }
 
 function getAllowedOrigins(env: Env) {
-  const configuredOrigins = env.TDX_ALLOWED_ORIGINS
+  const configuredOrigins = env.ALLOWED_ORIGINS
 
   if (!configuredOrigins) {
     return []
@@ -59,6 +78,10 @@ function getCorsOrigin(request: Request, env: Env) {
 
   if (allowedOrigins.length === 0) {
     return null
+  }
+
+  if (allowedOrigins.includes('*')) {
+    return '*'
   }
 
   const requestOrigin = request.headers.get('origin')
