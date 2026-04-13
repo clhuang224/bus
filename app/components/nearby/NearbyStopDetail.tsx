@@ -42,7 +42,7 @@ export const NearbyStopDetail = ({
   const detailSections = [
     {
       label: t('components.nearbyStopDetail.distanceLabel'),
-      content: 
+      content: (
         <Group align="center" wrap="nowrap" gap="xs">
           <StopDistanceText position={stopGroup.position} size="sm" />
           <NavigationButton
@@ -50,6 +50,7 @@ export const NearbyStopDetail = ({
             destination={destination}
           />
         </Group>
+      )
     },
     {
       label: t('components.nearbyStopDetail.cityLabel'),
