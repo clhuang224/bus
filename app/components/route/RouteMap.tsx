@@ -33,6 +33,7 @@ interface PropType {
   onSelectVehicle: (vehicleId: string) => void
   routePath?: LngLat[]
   selectedStop: string | null
+  selectedStopPopupContent?: ReactNode
   selectedVehicleId?: string | null
   stops: RouteMapStop[]
   vehicles?: RouteMapVehicle[]
@@ -61,6 +62,7 @@ export const RouteMap = ({
   onSelectVehicle,
   routePath = [],
   selectedStop,
+  selectedStopPopupContent,
   selectedVehicleId = null,
   stops,
   vehicles = []
@@ -378,7 +380,9 @@ export const RouteMap = ({
         )
         : popupContainer && selectedMapStop
           ? createPortal(
-            isSm
+            selectedStopPopupContent
+              ? selectedStopPopupContent
+              : isSm
               ? (
                 <Group align="center" wrap="nowrap" gap="xs" style={{ minWidth: 0, maxWidth: '100%' }}>
                   <Text size="sm" fw={500} style={{ minWidth: 0, flex: '0 1 auto' }} lineClamp={1}>

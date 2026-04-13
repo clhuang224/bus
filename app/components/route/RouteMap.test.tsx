@@ -180,6 +180,42 @@ describe('RouteMap', () => {
     expect(screen.getByRole('button', { name: /導航至\s*市政府/ })).toBeInTheDocument()
   })
 
+  it('renders custom selected stop popup content when provided', async () => {
+    const store = createTestStore({
+      reducer: {
+        geolocation: geoSlice.reducer
+      },
+      preloadedState: {
+        geolocation: {
+          ...geoSlice.getInitialState(),
+          coords: [25.033, 121.5654],
+          error: null
+        }
+      }
+    })
+
+    renderWithStore(
+      <RouteMap
+        isSm
+        onSelectStop={vi.fn()}
+        onSelectVehicle={vi.fn()}
+        selectedStop="stop-1"
+        selectedStopPopupContent={<div>3 分鐘</div>}
+        stops={[{
+          id: 'stop-1',
+          name: '市政府',
+          position: [121.55, 25.03],
+          sequence: 1
+        }]}
+        vehicles={[]}
+      />,
+      { store }
+    )
+
+    expect(await screen.findByText('3 分鐘')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /導航至\s*市政府/ })).not.toBeInTheDocument()
+  })
+
   it('fits the initial bounds again when the route changes', async () => {
     const store = createTestStore({
       reducer: {
