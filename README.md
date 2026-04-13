@@ -160,12 +160,7 @@ pnpm install
 ### Set environment variables
 
 1. Copy `workers/tdx-proxy/.dev.vars.example` to `workers/tdx-proxy/.dev.vars`.
-2. Fill in `TDX_CLIENT_ID`, `TDX_CLIENT_SECRET`, and `TDX_ALLOWED_ORIGINS`.
-3. The frontend is already pointed at the local Worker in `.env.development`:
-
-```env
-VITE_PROXY_API_BASE_URL=http://127.0.0.1:3000/api/tdx
-```
+2. Fill in `TDX_CLIENT_ID` and `TDX_CLIENT_SECRET`.
 
 ### Run locally
 
@@ -176,6 +171,14 @@ pnpm run dev
 ```
 
 This starts both the frontend dev server and the local Cloudflare Worker proxy.
+
+To test from another device on the same network, start the mobile-friendly dev mode with your computer's LAN IP:
+
+```bash
+pnpm run dev:mobile
+```
+
+This exposes both the frontend and the local Worker proxy on your LAN. In development, the frontend uses the relative path `/api/tdx`, and the Vite dev server proxies that path to the local Worker on port `3000`. Open `http://<your-lan-ip>:5173` on your phone after replacing the IP with your own.
 
 ### Test
 
@@ -189,7 +192,7 @@ pnpm test
 
 The frontend is deployed as a static app, while TDX authentication is handled by a separate Cloudflare Worker proxy.
 
-1. Store `TDX_CLIENT_ID`, `TDX_CLIENT_SECRET`, and `TDX_ALLOWED_ORIGINS` in Cloudflare Worker environment bindings.
+1. Store `TDX_CLIENT_ID`, `TDX_CLIENT_SECRET`, and `ALLOWED_ORIGINS` in Cloudflare Worker environment bindings.
 2. Deploy the Worker with `pnpm run deploy:proxy`.
 3. Store `VITE_PROXY_API_BASE_URL` as a GitHub Actions repository variable.
 4. Let the GitHub Pages build inject that value during `pnpm run build`.

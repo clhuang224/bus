@@ -160,12 +160,7 @@ pnpm install
 ### 設定環境變數
 
 1. 將 `workers/tdx-proxy/.dev.vars.example` 複製為 `workers/tdx-proxy/.dev.vars`。
-2. 填入 `TDX_CLIENT_ID`、`TDX_CLIENT_SECRET` 與 `TDX_ALLOWED_ORIGINS`。
-3. 前端在 `.env.development` 中已經預設指向本地 Worker：
-
-```env
-VITE_PROXY_API_BASE_URL=http://127.0.0.1:3000/api/tdx
-```
+2. 填入 `TDX_CLIENT_ID` 與 `TDX_CLIENT_SECRET`。
 
 ### 本地執行
 
@@ -174,6 +169,14 @@ pnpm run dev
 ```
 
 這會同時啟動前端 dev server 和本地的 Cloudflare Worker proxy。
+
+如果要用手機或同網路的其他裝置測試，請改用你的電腦區網 IP 啟動：
+
+```bash
+pnpm run dev:mobile
+```
+
+這會把前端與本機 Worker proxy 一起開到區網。在 development 模式下，前端會使用相對路徑 `/api/tdx`，再由 Vite dev server 代理到本機 `3000` port 的 Worker。請把下列網址中的 IP 換成你自己的，再從手機開啟 `http://<your-lan-ip>:5173`。
 
 ### 測試
 
@@ -187,7 +190,7 @@ pnpm test
 
 前端會以靜態網站部署，TDX 驗證則交由獨立的 Cloudflare Worker proxy 處理。
 
-1. 在 Cloudflare Worker environment bindings 中設定 `TDX_CLIENT_ID`、`TDX_CLIENT_SECRET` 與 `TDX_ALLOWED_ORIGINS`。
+1. 在 Cloudflare Worker environment bindings 中設定 `TDX_CLIENT_ID`、`TDX_CLIENT_SECRET` 與 `ALLOWED_ORIGINS`。
 2. 使用 `pnpm run deploy:proxy` 部署 Worker。
 3. 在 GitHub Actions repository variable 中設定 `VITE_PROXY_API_BASE_URL`。
 4. 讓 GitHub Pages build 在 `pnpm run build` 時注入該值。

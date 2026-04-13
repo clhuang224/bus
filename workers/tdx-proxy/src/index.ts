@@ -5,7 +5,7 @@ const TOKEN_REFRESH_BUFFER_MS = 60 * 1000
 interface Env {
   TDX_CLIENT_ID?: string
   TDX_CLIENT_SECRET?: string
-  TDX_ALLOWED_ORIGINS?: string
+  ALLOWED_ORIGINS?: string
 }
 
 interface TdxTokenResponse {
@@ -42,7 +42,7 @@ function withCorsHeaders(headers: Headers, allowedOrigin: string) {
 }
 
 function getAllowedOrigins(env: Env) {
-  const configuredOrigins = env.TDX_ALLOWED_ORIGINS
+  const configuredOrigins = env.ALLOWED_ORIGINS
 
   if (!configuredOrigins) {
     return []
@@ -59,6 +59,10 @@ function getCorsOrigin(request: Request, env: Env) {
 
   if (allowedOrigins.length === 0) {
     return null
+  }
+
+  if (allowedOrigins.includes('*')) {
+    return '*'
   }
 
   const requestOrigin = request.headers.get('origin')
