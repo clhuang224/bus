@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { AreaSelect } from '~/components/AreaSelect'
 import { SearchInput } from '~/components/SearchInput'
 import { BaseAlert } from '~/components/common/BaseAlert'
-import { RouteInfoCard } from '~/components/routes/RouteInfoCard'
+import { RouteInfoCard } from '~/components/route/RouteInfoCard'
 import { APP_PAGE_PADDING } from '~/modules/consts/layout'
 import { useRoutesData } from '~/modules/hooks/useRoutesData'
 

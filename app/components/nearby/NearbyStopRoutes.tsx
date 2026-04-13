@@ -7,7 +7,7 @@ import { DirectionType } from '~/modules/enums/DirectionType'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
 import { getDirectionTranslationKey } from '~/modules/utils/i18n/getDirectionTranslationKey'
 import { getEnumValues } from '~/modules/utils/shared/getEnumValues'
-import { RouteInfoCard } from '../routes/RouteInfoCard'
+import { RouteInfoCard } from '../route/RouteInfoCard'
 
 interface PropType {
   routes: StationRoute[]
