@@ -74,28 +74,46 @@ export const busApi = createApi({
               index * NEARBY_STOP_OF_ROUTE_BATCH_SIZE,
               (index + 1) * NEARBY_STOP_OF_ROUTE_BATCH_SIZE
             )
-          )
+              )
           : [[]]
 
-        const batchResults = await Promise.all(
-          stopUIDBatches.flatMap((batch) =>
+        const batchResults: Array<{
+          city: CityNameType
+          result: Awaited<ReturnType<typeof baseQuery>>
+        }> = []
+
+        for (const batch of stopUIDBatches) {
+          const cityResults = await Promise.all(
             areaMapCity[area].map(async (city) => ({
               city,
               result: await baseQuery(buildNearbyStopOfRouteQuery(city, batch))
             }))
           )
-        )
+
+          batchResults.push(...cityResults)
+        }
 
         const errorResult = batchResults.find(({ result }) => result.error != null)
         if (errorResult?.result.error != null) {
           return { error: errorResult.result.error }
         }
 
-        return {
-          data: batchResults.flatMap(({ city, result }) =>
-            (result.data as TdxStopOfRoute[]).map((stopOfRoute) => transformStopOfRoute(stopOfRoute, city))
-          )
-        }
+        const transformedStopOfRoutes = batchResults.flatMap(({ city, result }) =>
+          (result.data as TdxStopOfRoute[]).map((stopOfRoute) => transformStopOfRoute(stopOfRoute, city))
+        )
+
+        const seenStopOfRouteKeys = new Set<string>()
+        const dedupedStopOfRoutes = transformedStopOfRoutes.filter((stopOfRoute) => {
+          const key = `${stopOfRoute.City}:${stopOfRoute.SubRouteUID}:${stopOfRoute.Direction}`
+          if (seenStopOfRouteKeys.has(key)) {
+            return false
+          }
+
+          seenStopOfRouteKeys.add(key)
+          return true
+        })
+
+        return { data: dedupedStopOfRoutes }
       }
     }),
     getRoutesByArea: build.query<BusRoute<string>[], AreaType>({
