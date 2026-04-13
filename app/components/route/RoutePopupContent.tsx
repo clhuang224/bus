@@ -12,25 +12,26 @@ export const RoutePopupContent: React.FC<{
 }> = ({ stopName, estimatedArrivalLabel, position, isSm }) => {
   const { t } = useTranslation()
   return (
-    <Group align="center" gap="xs" wrap="nowrap" style={{ minWidth: 0, maxWidth: '100%' }}>
-      <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
-        <Text size="sm" fw={500} lineClamp={1}>
+    <Stack gap={2}>
+      <Group align="center" gap="xs" wrap="nowrap">
+        <Text size="sm" fw={500} lineClamp={1} style={{ minWidth: 0, maxWidth: '100%' }}>
           {stopName}
         </Text>
-        {isSm && estimatedArrivalLabel && (
-          <Text size="xs" c="dimmed" lineClamp={1}>
-            {estimatedArrivalLabel}
-          </Text>
+        {isSm && (
+          <NavigationButton
+            ariaLabel={t('components.routeStopList.navigateAriaLabel', {
+              stopName
+            })}
+            destination={toLatLng(position)}
+            size="xs"
+          />
         )}
-      </Stack>
-      {isSm && (
-        <NavigationButton
-          ariaLabel={t('components.routeStopList.navigateAriaLabel', {
-            stopName
-          })}
-          destination={toLatLng(position)}
-        />
+      </Group>
+      {isSm && estimatedArrivalLabel && (
+        <Text size="xs" c="dimmed" lineClamp={1}>
+          {estimatedArrivalLabel}
+        </Text>
       )}
-    </Group>
+    </Stack>
   )
 }
