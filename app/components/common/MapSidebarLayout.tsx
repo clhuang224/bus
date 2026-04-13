@@ -2,7 +2,6 @@ import { Box, Drawer, Flex } from '@mantine/core'
 import type { ReactNode } from 'react'
 import {
   APP_PAGE_PADDING,
-  DRAWER_PADDING_BOTTOM,
   DRAWER_TOP,
   MAP_SIDEBAR_WIDTH
 } from '~/modules/consts/layout'
@@ -48,19 +47,19 @@ export const MapSidebarLayout = ({
         styles={{
           content: {
             top: DRAWER_TOP,
-            height: `calc(100vh - ${DRAWER_TOP}px)`,
+            height: `calc(100dvh - ${DRAWER_TOP}px)`,
             position: 'absolute',
             width: '100%',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            paddingBottom: 'env(safe-area-inset-bottom)'
           },
           body: {
             flex: 1,
             minHeight: 0,
             overflow: 'hidden',
             display: 'flex',
-            flexDirection: 'column',
-            paddingBottom: `${DRAWER_PADDING_BOTTOM}px`
+            flexDirection: 'column'
           }
         }}
       >
