@@ -33,13 +33,30 @@ function clearCachedToken() {
   cachedTokenExpiresAt = 0
 }
 
+function appendVaryHeader(headers: Headers, value: string) {
+  const currentVary = headers.get('vary')
+
+  if (!currentVary) {
+    headers.set('vary', value)
+    return
+  }
+
+  const varyValues = currentVary
+    .split(',')
+    .map((item) => item.trim().toLowerCase())
+
+  if (!varyValues.includes(value.toLowerCase())) {
+    headers.set('vary', `${currentVary}, ${value}`)
+  }
+}
+
 function withCorsHeaders(headers: Headers, allowedOrigin: string) {
   headers.set('access-control-allow-origin', allowedOrigin)
   headers.set('access-control-allow-methods', 'GET,OPTIONS')
   headers.set('access-control-allow-headers', 'content-type')
   headers.set('access-control-expose-headers', 'content-type')
   if (allowedOrigin !== '*') {
-    headers.set('vary', 'origin')
+    appendVaryHeader(headers, 'Origin')
   }
 }
 
