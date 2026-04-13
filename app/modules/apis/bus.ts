@@ -90,12 +90,11 @@ export const busApi = createApi({
             }))
           )
 
+          const errorResult = cityResults.find(({ result }) => result.error != null)
+          if (errorResult?.result.error != null) {
+            return { error: errorResult.result.error }
+          }
           batchResults.push(...cityResults)
-        }
-
-        const errorResult = batchResults.find(({ result }) => result.error != null)
-        if (errorResult?.result.error != null) {
-          return { error: errorResult.result.error }
         }
 
         const transformedStopOfRoutes = batchResults.flatMap(({ city, result }) =>
