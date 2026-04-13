@@ -86,7 +86,7 @@ vi.mock('~/modules/apis/bus', () => ({
   }
 }))
 
-vi.mock('~/components/routes/RouteMap', () => ({
+vi.mock('~/components/route/RouteMap', () => ({
   RouteMap: mockRouteMap
 }))
 
