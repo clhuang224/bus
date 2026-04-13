@@ -1,8 +1,9 @@
 import { Box, Drawer, Flex } from '@mantine/core'
 import type { ReactNode } from 'react'
 import {
-  APP_HEADER_HEIGHT,
   APP_PAGE_PADDING,
+  DRAWER_PADDING_BOTTOM,
+  DRAWER_TOP,
   MAP_SIDEBAR_WIDTH
 } from '~/modules/consts/layout'
 
@@ -46,8 +47,10 @@ export const MapSidebarLayout = ({
         hiddenFrom="sm"
         styles={{
           content: {
-            top: APP_HEADER_HEIGHT,
-            position: 'relative',
+            top: DRAWER_TOP,
+            height: `calc(100vh - ${DRAWER_TOP}px)`,
+            position: 'absolute',
+            width: '100%',
             display: 'flex',
             flexDirection: 'column'
           },
@@ -56,7 +59,8 @@ export const MapSidebarLayout = ({
             minHeight: 0,
             overflow: 'hidden',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            paddingBottom: `${DRAWER_PADDING_BOTTOM}px`
           }
         }}
       >
