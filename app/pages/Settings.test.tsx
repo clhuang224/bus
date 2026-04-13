@@ -106,7 +106,7 @@ describe('Settings', () => {
       expect(document.documentElement.lang).toBe(AppLocaleType.EN)
     })
 
-    expect(screen.getByRole('radio', { name: 'English' })).toBeChecked()
+    expect(getLocaleRadio(AppLocaleType.EN, AppLocaleType.EN)).toBeChecked()
   })
 
   it('does not overwrite the restored locale during startup reconciliation', async () => {
