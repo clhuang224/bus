@@ -1,14 +1,15 @@
-import { Group, Stack, Text } from '@mantine/core'
+import { Stack, Text } from '@mantine/core'
 import type { Map as MapLibreMap, Marker, Popup } from 'maplibre-gl'
 import mapLibre from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import type { LngLat, LatLng } from '~/modules/types/CoordsType'
+import type { LngLat } from '~/modules/types/CoordsType'
+import { toLatLng } from '~/modules/utils/geo/convertCoordinates'
 import { addMapMarkerActivationListeners } from '~/modules/utils/map/addMapMarkerActivationListeners'
 import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
 import BaseMap from '../common/BaseMap'
-import { NavigationButton } from '../common/NavigationButton'
+import { RoutePopupContent } from './RoutePopupContent'
 
 export interface RouteMapStop {
   id: string
@@ -33,6 +34,7 @@ interface PropType {
   onSelectVehicle: (vehicleId: string) => void
   routePath?: LngLat[]
   selectedStop: string | null
+  selectedStopEstimatedArrivalLabel?: string | null
   selectedVehicleId?: string | null
   stops: RouteMapStop[]
   vehicles?: RouteMapVehicle[]
@@ -61,6 +63,7 @@ export const RouteMap = ({
   onSelectVehicle,
   routePath = [],
   selectedStop,
+  selectedStopEstimatedArrivalLabel = null,
   selectedVehicleId = null,
   stops,
   vehicles = []
@@ -96,9 +99,7 @@ export const RouteMap = ({
   const selectedVehicle = selectedVehicleId ? vehiclesById.get(selectedVehicleId) ?? null : null
   const selectedMapStop = selectedStop ? stopsById.get(selectedStop) ?? null : null
 
-  const center = positionedStops[0]
-    ? [positionedStops[0].position[1], positionedStops[0].position[0]] as LatLng
-    : null
+  const center = positionedStops[0] ? toLatLng(positionedStops[0].position) : null
 
   useEffect(() => {
     if (!map) {
@@ -378,25 +379,12 @@ export const RouteMap = ({
         )
         : popupContainer && selectedMapStop
           ? createPortal(
-            isSm
-              ? (
-                <Group align="center" wrap="nowrap" gap="xs" style={{ minWidth: 0, maxWidth: '100%' }}>
-                  <Text size="sm" fw={500} style={{ minWidth: 0, flex: '0 1 auto' }} lineClamp={1}>
-                    {selectedMapStop.name}
-                  </Text>
-                  <NavigationButton
-                    ariaLabel={t('components.routeStopList.navigateAriaLabel', {
-                      stopName: selectedMapStop.name
-                    })}
-                    destination={[selectedMapStop.position[1], selectedMapStop.position[0]]}
-                  />
-                </Group>
-                )
-              : (
-                <Text size="sm" fw={500} style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
-                  {selectedMapStop.name}
-                </Text>
-                ),
+            <RoutePopupContent
+              isSm={isSm}
+              stopName={selectedMapStop.name}
+              estimatedArrivalLabel={selectedStopEstimatedArrivalLabel}
+              position={selectedMapStop.position}
+            />,
             popupContainer
           )
         : null}

@@ -165,6 +165,7 @@ describe('RouteMap', () => {
         onSelectStop={vi.fn()}
         onSelectVehicle={vi.fn()}
         selectedStop="stop-1"
+        selectedStopEstimatedArrivalLabel="3 分鐘"
         stops={[{
           id: 'stop-1',
           name: '市政府',
@@ -177,6 +178,7 @@ describe('RouteMap', () => {
     )
 
     expect(await screen.findByText('市政府')).toBeInTheDocument()
+    expect(screen.getByText('3 分鐘')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /導航至\s*市政府/ })).toBeInTheDocument()
   })
 

@@ -44,7 +44,7 @@ export default function Route() {
     : null
   const {
     activeSubRoute,
-    baseTimelineStops,
+    baseStops,
     busRoute,
     highlightedStopId,
     isLoading,
@@ -72,13 +72,17 @@ export default function Route() {
     realtimeBusesByStopSequence,
     realtimeInfoState
   } = useRouteRealtimeData(routeRealtimeOptions)
-  const timelineStops = useMemo(() => baseTimelineStops.map((stop) => ({
+  const stops = useMemo(() => baseStops.map((stop) => ({
     ...stop,
     estimatedArrivalLabel: estimatedArrivalLabelsByStopKey.get(stop.id) ??
       estimatedArrivalLabelsByStopKey.get(stop.stopID) ??
       null,
     realtimeBuses: realtimeBusesByStopSequence.get(stop.sequence) ?? []
-  })), [baseTimelineStops, estimatedArrivalLabelsByStopKey, realtimeBusesByStopSequence])
+  })), [baseStops, estimatedArrivalLabelsByStopKey, realtimeBusesByStopSequence])
+  const selectedStopEstimatedArrivalLabel = useMemo(
+    () => stops.find((stop) => stop.id === selectedStopId)?.estimatedArrivalLabel ?? null,
+    [selectedStopId, stops]
+  )
   const routeName = busRoute ? getLocalizedText(busRoute.RouteName, locale) : null
   const routeDeparture = busRoute ? getLocalizedText(busRoute.DepartureStopName, locale) : null
   const routeDestination = busRoute ? getLocalizedText(busRoute.DestinationStopName, locale) : null
@@ -115,17 +119,17 @@ export default function Route() {
 
   useEffect(() => {
     if (!selectedStopId) return
-    if (timelineStops.some((stop) => stop.id === selectedStopId)) return
+    if (stops.some((stop) => stop.id === selectedStopId)) return
 
     setSelectedStopId(null)
-  }, [selectedStopId, timelineStops])
+  }, [selectedStopId, stops])
 
   useEffect(() => {
     if (!selectedVehicleId) return
-    if (timelineStops.some((stop) => stop.realtimeBuses.some((bus) => bus.id === selectedVehicleId))) return
+    if (stops.some((stop) => stop.realtimeBuses.some((bus) => bus.id === selectedVehicleId))) return
 
     setSelectedVehicleId(null)
-  }, [selectedVehicleId, timelineStops])
+  }, [selectedVehicleId, stops])
 
   const handleSelectStopFromList = useCallback((stopId: string) => {
     setListScrollBehavior('nearest')
@@ -232,7 +236,7 @@ export default function Route() {
                     onSelectStop={handleSelectStopFromList}
                     onSelectVehicle={handleSelectVehicleFromList}
                     realtimeInfoState={realtimeInfoState}
-                    stops={timelineStops}
+                    stops={stops}
                     onToggleFavorite={toggleFavoriteRouteStop}
                     selectedStopId={selectedStopId}
                     selectedVehicleId={selectedVehicleId}
@@ -268,6 +272,7 @@ export default function Route() {
         onSelectVehicle={handleSelectVehicleFromMap}
         routePath={activeRoutePath}
         stops={routeMapStops}
+        selectedStopEstimatedArrivalLabel={selectedStopEstimatedArrivalLabel}
         vehicles={realtimeMapVehicles}
       />
     </MapSidebarLayout>

@@ -3,11 +3,12 @@ import { useId } from '@mantine/hooks'
 import mapLibre, { Map, Marker, LngLat as MapLngLat } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { RiFocus3Line } from '@remixicon/react'
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import type { LatLng } from '~/modules/types/CoordsType'
 import type { RootState } from '~/modules/store'
+import { toLngLat } from '~/modules/utils/geo/convertCoordinates'
 import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
 import { APP_FLOATING_ACTION_OFFSET } from '~/modules/consts/layout'
 
@@ -30,6 +31,8 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, extraControls, o
   const onLoadRef = useRef(onLoad)
 
   const { coords } = useSelector((state: RootState) => state.geolocation)
+  const mapCenter = useMemo(() => (center ? toLngLat(center) : null), [center])
+  const userLngLat = useMemo(() => (coords ? toLngLat(coords) : null), [coords])
 
   useEffect(() => {
     onLoadRef.current = onLoad
@@ -39,7 +42,7 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, extraControls, o
     const mapInstance = new mapLibre.Map({
       container: id,
       style: 'https://tiles.openfreemap.org/styles/positron',
-      center: center ? [center[1], center[0]] : [121.53969560512759, 25.059928238479156],
+      center: mapCenter ?? [121.53969560512759, 25.059928238479156],
       zoom
     })
     setMap(mapInstance)
@@ -64,15 +67,15 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, extraControls, o
     if (!map || !center || initialCenterRef.current) return
 
     map.flyTo({
-      center: new MapLngLat(center[1], center[0]),
+      center: new MapLngLat(mapCenter![0], mapCenter![1]),
       zoom,
       duration: 800
     })
     initialCenterRef.current = true
-  }, [center, map, zoom])
+  }, [center, map, mapCenter, zoom])
 
   useEffect(() => {
-    if (!map || !coords || !showUserLocation) return
+    if (!map || !userLngLat || !showUserLocation) return
 
     if (userMarkerRef.current) {
       userMarkerRef.current.remove()
@@ -86,14 +89,14 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, extraControls, o
     })
 
     userMarkerRef.current = new Marker({ element: el })
-      .setLngLat(new MapLngLat(coords![1], coords![0]))
+      .setLngLat(new MapLngLat(userLngLat[0], userLngLat[1]))
       .addTo(map!)
 
     return () => {
       userMarkerRef.current?.remove()
       userMarkerRef.current = null
     }
-  }, [coords, map, showUserLocation, t])
+  }, [map, showUserLocation, t, userLngLat])
 
   return (
     <Box pos="relative" style={{ width: '100%', height: '100%' }}>
@@ -113,15 +116,15 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, extraControls, o
               aria-label={t('components.baseMap.focusUserLocationAriaLabel')}
               size="md"
               onClick={() => {
-                if (!map || !coords) return
+                if (!map || !userLngLat) return
 
                 map.flyTo({
-                  center: [coords[1], coords[0]],
+                  center: userLngLat,
                   zoom: FOCUS_ZOOM,
                   duration: 800
                 })
               }}
-              disabled={!coords || !map}
+              disabled={!userLngLat || !map}
             >
               <RiFocus3Line size={18} />
             </ActionIcon>
