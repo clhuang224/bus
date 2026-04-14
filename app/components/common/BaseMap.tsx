@@ -3,7 +3,7 @@ import { useId } from '@mantine/hooks'
 import mapLibre, { Map, Marker, LngLat as MapLngLat } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { RiFocus3Line } from '@remixicon/react'
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import type { LatLng } from '~/modules/types/CoordsType'
@@ -31,8 +31,8 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, extraControls, o
   const onLoadRef = useRef(onLoad)
 
   const { coords } = useSelector((state: RootState) => state.geolocation)
-  const mapCenter = center ? toLngLat(center) : null
-  const userLngLat = coords ? toLngLat(coords) : null
+  const mapCenter = useMemo(() => (center ? toLngLat(center) : null), [center])
+  const userLngLat = useMemo(() => (coords ? toLngLat(coords) : null), [coords])
 
   useEffect(() => {
     onLoadRef.current = onLoad
