@@ -27,9 +27,13 @@ const Nearby = () => {
   } = useNearbySearchParams()
   const {
     coords,
+    hasStationRouteBadgesError,
+    hasStationRoutesError,
     isNearbyDisabled,
     isStationRouteBadgesLoading,
+    isStationRouteBadgesRateLimited,
     isStationRoutesLoading,
+    isStationRoutesRateLimited,
     isStopsLoading,
     markers,
     message,
@@ -65,8 +69,10 @@ const Nearby = () => {
     ? (
         <NearbyStopDetail
           stopGroup={selectedMapStopGroup}
+          hasRoutesError={hasStationRouteBadgesError}
           routes={stationRouteBadgesMap.get(selectedMapStopGroup.StationID) ?? []}
           isRoutesLoading={isStationRouteBadgesLoading}
+          isRoutesRateLimited={isStationRouteBadgesRateLimited}
           displayMode={isSm ? 'full' : 'title'}
           onViewRoutes={(stationID) => {
             viewStopRoutes(stationID)
@@ -86,13 +92,17 @@ const Nearby = () => {
       panel={(
         <NearbySidebarContent
           detailState={{
+            hasStationRoutesError,
             isStationRoutesLoading,
+            isStationRoutesRateLimited,
             onBack: backToNearbyStops,
             stopGroup: selectedStopGroup,
             stationRoutes: selectedStationRoutes
           }}
           listState={{
+            hasStationRouteBadgesError,
             isStopsLoading,
+            isStationRouteBadgesRateLimited,
             isStationRoutesLoading: isStationRouteBadgesLoading,
             nearbyStopGroups,
             onSelectStop: selectStop,

@@ -151,7 +151,9 @@ export const zhTW = {
       },
       nearbyStopRoutes: {
         title: '此站路線',
-        empty: '目前沒有可顯示的路線資訊'
+        empty: '目前沒有可顯示的路線資訊',
+        error: '目前無法載入路線資訊，請稍後再試',
+        rateLimited: '目前查詢路線的人太多，請稍後再試'
       },
       nearbyStopMap: {
         stopMarkerAriaLabel: '附近站牌 {{stopName}}'

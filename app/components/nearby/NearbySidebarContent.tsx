@@ -20,8 +20,10 @@ import { NearbyStopRoutes } from './NearbyStopRoutes'
 type StopItemRefs = RefObject<Map<string, HTMLDivElement | null>>
 
 interface NearbySidebarListState {
+  hasStationRouteBadgesError: boolean
   isStopsLoading: boolean
   isStationRoutesLoading: boolean
+  isStationRouteBadgesRateLimited: boolean
   nearbyStopGroups: NearbyStopGroup[]
   onSelectStop: (value: string | null) => void
   onViewRoutes: (stationID: string) => void
@@ -32,7 +34,9 @@ interface NearbySidebarListState {
 }
 
 interface NearbySidebarDetailState {
+  hasStationRoutesError: boolean
   isStationRoutesLoading: boolean
+  isStationRoutesRateLimited: boolean
   onBack: () => void
   stopGroup: NearbyStopGroup | null
   stationRoutes: StationRoute[]
@@ -90,8 +94,10 @@ const NearbySidebarContentDetail = ({ detailState }: { detailState: NearbySideba
           </Text>
         </Stack>
         <NearbyStopRoutes
+          hasError={detailState.hasStationRoutesError}
           routes={detailState.stationRoutes}
           isLoading={detailState.isStationRoutesLoading}
+          isRateLimited={detailState.isStationRoutesRateLimited}
         />
       </Stack>
     </Stack>
@@ -141,8 +147,10 @@ const NearbySidebarContentList = ({ listState }: { listState: NearbySidebarListS
             <AccordionPanel>
               <NearbyStopDetail
                 stopGroup={stopGroup}
+                hasRoutesError={listState.hasStationRouteBadgesError}
                 routes={listState.stationRouteBadgesMap.get(stopGroup.StationID) ?? []}
                 isRoutesLoading={listState.isStationRoutesLoading && listState.selectedStopId === stopGroup.StationID}
+                isRoutesRateLimited={listState.isStationRouteBadgesRateLimited}
                 onViewRoutes={listState.onViewRoutes}
               />
             </AccordionPanel>

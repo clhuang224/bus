@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { busApi } from '~/modules/apis/bus'
+import { isTdxRateLimitError } from '~/modules/apis/errors/busError'
 import { cityMapArea } from '~/modules/consts/area'
 import {
   getGeoErrorMessages,
@@ -196,7 +197,9 @@ export function useNearbyData({
 
   const {
     data: stopOfRoutes = [],
-    isLoading: isStopOfRoutesLoading
+    error: stopOfRoutesError,
+    isLoading: isStopOfRoutesLoading,
+    isError: isStopOfRoutesError
   } = busApi.useGetStopOfRoutesByAreaQuery(
     { area: currentArea!, stopUIDs: nearbyStopUIDs },
     {
@@ -204,10 +207,19 @@ export function useNearbyData({
     }
   )
 
-  const { data: routeData = [], isLoading: isRoutesLoading } = busApi.useGetRoutesByAreaQuery(currentArea!, {
+  const {
+    data: routeData = [],
+    error: routesError,
+    isLoading: isRoutesLoading,
+    isError: isRoutesError
+  } = busApi.useGetRoutesByAreaQuery(currentArea!, {
     skip: !coords || !currentArea || !selectedRouteStopId
   })
   const routes = useMemo(() => normalizeBusRoutesWithDates(routeData), [routeData])
+  const isStationRouteBadgesRateLimited = isTdxRateLimitError(stopOfRoutesError)
+  const hasStationRouteBadgesError = isStopOfRoutesError && !isStationRouteBadgesRateLimited
+  const isStationRoutesRateLimited = isStationRouteBadgesRateLimited || isTdxRateLimitError(routesError)
+  const hasStationRoutesError = (isStopOfRoutesError || isRoutesError) && !isStationRoutesRateLimited
 
   const markers = useMemo(() => nearbyStopGroups.map((stopGroup) => ({
     id: stopGroup.StationID,
@@ -248,9 +260,13 @@ export function useNearbyData({
 
   return {
     coords,
+    hasStationRouteBadgesError,
+    hasStationRoutesError,
     isNearbyDisabled,
     isStationRouteBadgesLoading: isStopOfRoutesLoading,
+    isStationRouteBadgesRateLimited,
     isStationRoutesLoading: isStopOfRoutesLoading || isRoutesLoading,
+    isStationRoutesRateLimited,
     isStopsLoading: !coords || isStopsLoading,
     markers,
     message,

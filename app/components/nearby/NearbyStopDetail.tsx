@@ -15,7 +15,9 @@ import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 interface PropType {
   stopGroup: NearbyStopGroup
   routes: Array<Pick<StationRoute, 'routeUID' | 'name'>>
+  hasRoutesError?: boolean
   isRoutesLoading?: boolean
+  isRoutesRateLimited?: boolean
   onViewRoutes: (stationID: string) => void
   displayMode?: 'content' | 'full' | 'title'
 }
@@ -23,7 +25,9 @@ interface PropType {
 export const NearbyStopDetail = ({
   stopGroup,
   routes,
+  hasRoutesError = false,
   isRoutesLoading = false,
+  isRoutesRateLimited = false,
   onViewRoutes,
   displayMode = 'content'
 }: PropType) => {
@@ -80,6 +84,18 @@ export const NearbyStopDetail = ({
             <Skeleton h={26} w={52} radius="xl" />
           </Flex>
           )
+        : isRoutesRateLimited
+          ? (
+            <Text size="sm">
+              {t('components.nearbyStopRoutes.rateLimited')}
+            </Text>
+            )
+          : hasRoutesError
+            ? (
+              <Text size="sm">
+                {t('components.nearbyStopRoutes.error')}
+              </Text>
+              )
         : (
           <Flex gap="xs" wrap="wrap">
             {routes.map((route) => (

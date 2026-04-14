@@ -151,7 +151,9 @@ export const en = {
       },
       nearbyStopRoutes: {
         title: 'Routes at this stop',
-        empty: 'No route information is currently available for this stop'
+        empty: 'No route information is currently available for this stop',
+        error: 'Unable to load route information right now. Please try again later.',
+        rateLimited: 'Too many people are querying routes right now. Please try again later.'
       },
       nearbyStopMap: {
         stopMarkerAriaLabel: 'Nearby stop {{stopName}}'

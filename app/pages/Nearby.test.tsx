@@ -269,10 +269,14 @@ function renderNearby({
   }
   routesQueryState?: {
     data?: unknown[]
+    error?: unknown
+    isError?: boolean
     isLoading?: boolean
   }
   stopOfRoutesQueryState?: {
     data?: unknown[]
+    error?: unknown
+    isError?: boolean
     isLoading?: boolean
   }
 } = {}) {
@@ -301,11 +305,15 @@ function renderNearby({
   })
   mockUseGetRoutesByAreaQuery.mockReturnValue({
     data: routesData,
+    error: null,
+    isError: false,
     isLoading: false,
     ...routesQueryState
   })
   mockUseGetStopOfRoutesByAreaQuery.mockReturnValue({
     data: stopOfRoutesData,
+    error: null,
+    isError: false,
     isLoading: false,
     ...stopOfRoutesQueryState
   })
@@ -504,6 +512,31 @@ describe('Nearby', () => {
     })
 
     expect(screen.getByTestId('nearby-stop-routes-skeleton')).toBeInTheDocument()
+  })
+
+  it('shows a nearby route rate-limit message instead of the empty state for 429 responses', () => {
+    renderNearby({
+      initialEntry: '/nearby?stop=station-1&routeStop=station-1',
+      coords: [25.033, 121.5654],
+      permission: GeoPermissionType.GRANTED,
+      queryState: {
+        data: nearbyStopsData,
+        isSuccess: true
+      },
+      stopOfRoutesQueryState: {
+        data: [],
+        error: { status: 429 },
+        isError: true
+      },
+      routesQueryState: {
+        data: [],
+        error: { status: 429 },
+        isError: true
+      }
+    })
+
+    expect(screen.getByText('目前查詢路線的人太多，請稍後再試')).toBeInTheDocument()
+    expect(screen.queryByText('目前沒有可顯示的路線資訊')).not.toBeInTheDocument()
   })
 
   it('sets the first available nearby route tab as active once route data is ready', () => {

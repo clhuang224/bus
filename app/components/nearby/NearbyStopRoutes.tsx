@@ -10,15 +10,22 @@ import { getEnumValues } from '~/modules/utils/shared/getEnumValues'
 import { RouteInfoCard } from '../route/RouteInfoCard'
 
 interface PropType {
+  hasError?: boolean
   routes: StationRoute[]
   isLoading?: boolean
+  isRateLimited?: boolean
 }
 
 function getDefaultRouteDirection(directions: DirectionType[]) {
   return directions[0] != null ? String(directions[0]) : null
 }
 
-export const NearbyStopRoutes = ({ routes, isLoading = false }: PropType) => {
+export const NearbyStopRoutes = ({
+  routes,
+  hasError = false,
+  isLoading = false,
+  isRateLimited = false
+}: PropType) => {
   const { t } = useTranslation()
   const routeNameCollator = useLocalizedTextCollator()
   const routeSections = useMemo(() => getEnumValues(DirectionType)
@@ -76,7 +83,13 @@ export const NearbyStopRoutes = ({ routes, isLoading = false }: PropType) => {
     return (
       <Stack gap={4}>
         <Text size="sm" c="dimmed">{t('components.nearbyStopRoutes.title')}</Text>
-        <Text size="sm">{t('components.nearbyStopRoutes.empty')}</Text>
+        <Text size="sm">
+          {isRateLimited
+            ? t('components.nearbyStopRoutes.rateLimited')
+            : hasError
+              ? t('components.nearbyStopRoutes.error')
+              : t('components.nearbyStopRoutes.empty')}
+        </Text>
       </Stack>
     )
   }
