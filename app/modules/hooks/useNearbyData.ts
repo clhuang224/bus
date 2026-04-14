@@ -171,6 +171,7 @@ export function useNearbyData({
   const currentCity = getCityByCoords(coords, geojson)
   const currentArea = currentCity ? cityMapArea[currentCity] : null
   const isNearbyDisabled = disabledNearbyPermissions.includes(permission) || geolocationError !== null
+  const isAwaitingUsableLocation = !coords && !isNearbyDisabled
   const routeNameCollator = useLocalizedTextCollator()
 
   const {
@@ -267,7 +268,7 @@ export function useNearbyData({
     isStationRouteBadgesRateLimited,
     isStationRoutesLoading: isStopOfRoutesLoading || isRoutesLoading,
     isStationRoutesRateLimited,
-    isStopsLoading: !coords || isStopsLoading,
+    isStopsLoading: isAwaitingUsableLocation || isStopsLoading,
     markers,
     message,
     nearbyStopGroups,

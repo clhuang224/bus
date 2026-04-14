@@ -384,6 +384,7 @@ describe('Nearby', () => {
         getGeoErrorMessages(i18n.t)[GeoErrorType.POSITION_UNAVAILABLE].description
       )
     ).toBeInTheDocument()
+    expect(screen.queryByTestId('nearby-stops-skeleton')).not.toBeInTheDocument()
   })
 
   it('shows stop skeletons after coordinates are available and nearby stops are loading', () => {
