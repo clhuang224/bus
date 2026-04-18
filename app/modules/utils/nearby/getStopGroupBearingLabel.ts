@@ -1,6 +1,12 @@
 import { BearingType } from '~/modules/enums/BearingType'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import { getBearingTranslationKey } from '~/modules/utils/i18n/getBearingTranslationKey'
+import { getEnumValues } from '~/modules/utils/shared/getEnumValues'
+
+const bearingSortOrder = getEnumValues(BearingType).reduce<Record<BearingType, number>>((result, bearing, index) => {
+  result[bearing] = index
+  return result
+}, {} as Record<BearingType, number>)
 
 export function getStopGroupBearingLabel(
   t: (key: string) => string,
@@ -10,7 +16,7 @@ export function getStopGroupBearingLabel(
     stopGroup.stops
       .map((stop) => stop.Bearing)
       .filter((bearing): bearing is BearingType => bearing != null)
-  ))
+  )).sort((left, right) => bearingSortOrder[left] - bearingSortOrder[right])
 
   if (bearings.length === 0) {
     return null
