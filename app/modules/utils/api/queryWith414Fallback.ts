@@ -1,5 +1,6 @@
 interface QueryErrorLike {
   status?: unknown
+  originalStatus?: unknown
 }
 
 interface QueryResultLike<TData, TError extends QueryErrorLike> {
@@ -17,8 +18,12 @@ function isUriTooLongStatus(status: unknown): boolean {
   return status === 414
 }
 
+function isParsingErrorWithUriTooLongStatus(error: QueryErrorLike): boolean {
+  return error.status === 'PARSING_ERROR' && error.originalStatus === 414
+}
+
 function defaultShouldFallback<TError extends QueryErrorLike>(error: TError): boolean {
-  return isUriTooLongStatus(error.status)
+  return isUriTooLongStatus(error.status) || isParsingErrorWithUriTooLongStatus(error)
 }
 
 export async function queryArrayWith414Fallback<TItem, TData, TError extends QueryErrorLike>(

@@ -98,6 +98,17 @@ describe('getBusErrorModal', () => {
     ).toBeNull()
   })
 
+  it('does not open a modal when a 414 is wrapped as a parsing error', () => {
+    expect(
+      getBusErrorModal({
+        status: 'PARSING_ERROR',
+        originalStatus: 414,
+        data: 'URI Too Long',
+        error: 'SyntaxError: Unexpected token U in JSON at position 0'
+      })
+    ).toBeNull()
+  })
+
   it('returns the system modal for 5xx errors', () => {
     expect(
       getBusErrorModal({

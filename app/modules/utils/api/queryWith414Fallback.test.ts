@@ -37,6 +37,30 @@ describe('queryArrayWith414Fallback', () => {
     expect(result).toEqual({ data: [1, 2, 3, 4] })
   })
 
+  it('splits recursively when 414 is wrapped as a parsing error', async () => {
+    const queryBatch = vi.fn(async (batchItems: number[]) => {
+      if (batchItems.length > 2) {
+        return {
+          error: {
+            status: 'PARSING_ERROR' as const,
+            originalStatus: 414 as const,
+            data: 'URI Too Long',
+            error: 'SyntaxError'
+          }
+        }
+      }
+
+      return { data: batchItems }
+    })
+
+    const result = await queryArrayWith414Fallback({
+      items: [1, 2, 3, 4],
+      queryBatch
+    })
+
+    expect(result).toEqual({ data: [1, 2, 3, 4] })
+  })
+
   it('does not split when error is not a URI-too-long error', async () => {
     const queryBatch = vi.fn(async () => ({
       error: { status: 500 as const }
