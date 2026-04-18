@@ -13,6 +13,7 @@ import { openGlobalModal } from '../slices/globalModalSlice'
 import { areaMapCity } from '../consts/area'
 import type { LatLng } from '../types/CoordsType'
 import { buildNearbyStopOfRouteQuery, buildNearbyStopQuery, buildStopsByCityAndIdsQuery } from '../utils/api/tdxQuery'
+import { queryArrayWith414Fallback } from '../utils/api/queryWith414Fallback'
 import {
   transformBusRoute,
   transformEstimatedArrival,
@@ -35,8 +36,6 @@ const baseQuery = fetchBaseQuery({
 
 const DEFAULT_RETENTION_SECONDS = 60 * 5
 const AREA_ROUTES_RETENTION_SECONDS = 60 * 15
-const NEARBY_STOP_OF_ROUTE_BATCH_SIZE = 40
-const STOPS_BY_IDS_BATCH_SIZE = 40
 
 export const busApi = createApi({
   reducerPath: 'busApi',
@@ -70,37 +69,29 @@ export const busApi = createApi({
     }),
     getStopOfRoutesByArea: build.query<StopOfRoute[], { area: AreaType, stopUIDs?: string[] }>({
       queryFn: async ({ area, stopUIDs = [] }, _api, _extraOptions, baseQuery) => {
-        const stopUIDBatches = stopUIDs.length > 0
-          ? Array.from(
-            { length: Math.ceil(stopUIDs.length / NEARBY_STOP_OF_ROUTE_BATCH_SIZE) },
-            (_, index) => stopUIDs.slice(
-              index * NEARBY_STOP_OF_ROUTE_BATCH_SIZE,
-              (index + 1) * NEARBY_STOP_OF_ROUTE_BATCH_SIZE
-            )
-              )
-          : [[]]
+        const cityResults = await Promise.all(
+          areaMapCity[area].map(async (city) => ({
+            city,
+            result: await queryArrayWith414Fallback({
+              items: stopUIDs,
+              queryBatch: async (stopUIDBatch) => {
+                const batchResult = await baseQuery(buildNearbyStopOfRouteQuery(city, stopUIDBatch))
 
-        const batchResults: Array<{
-          city: CityNameType
-          result: Awaited<ReturnType<typeof baseQuery>>
-        }> = []
+                return {
+                  data: (batchResult.data as TdxStopOfRoute[]) ?? [],
+                  error: batchResult.error
+                }
+              }
+            })
+          }))
+        )
 
-        for (const batch of stopUIDBatches) {
-          const cityResults = await Promise.all(
-            areaMapCity[area].map(async (city) => ({
-              city,
-              result: await baseQuery(buildNearbyStopOfRouteQuery(city, batch))
-            }))
-          )
-
-          const errorResult = cityResults.find(({ result }) => result.error != null)
-          if (errorResult?.result.error != null) {
-            return { error: errorResult.result.error }
-          }
-          batchResults.push(...cityResults)
+        const errorResult = cityResults.find(({ result }) => result.error != null)
+        if (errorResult?.result.error != null) {
+          return { error: errorResult.result.error }
         }
 
-        const transformedStopOfRoutes = batchResults.flatMap(({ city, result }) =>
+        const transformedStopOfRoutes = cityResults.flatMap(({ city, result }) =>
           (result.data as TdxStopOfRoute[]).map((stopOfRoute) => transformStopOfRoute(stopOfRoute, city))
         )
 
@@ -150,29 +141,24 @@ export const busApi = createApi({
           return { data: [] }
         }
 
-        const dedupedStopIds = Array.from(new Set(stopIds))
-        const stopIdBatches = Array.from(
-          { length: Math.ceil(dedupedStopIds.length / STOPS_BY_IDS_BATCH_SIZE) },
-          (_, index) => dedupedStopIds.slice(
-            index * STOPS_BY_IDS_BATCH_SIZE,
-            (index + 1) * STOPS_BY_IDS_BATCH_SIZE
-          )
-        )
+        const deduplicatedStopIds = Array.from(new Set(stopIds))
+        const queryResult = await queryArrayWith414Fallback({
+          items: deduplicatedStopIds,
+          queryBatch: async (stopIdBatch) => {
+            const batchResult = await baseQuery(buildStopsByCityAndIdsQuery(city, stopIdBatch))
 
-        const batchResults = await Promise.all(
-          stopIdBatches.map((stopIdBatch) =>
-            baseQuery(buildStopsByCityAndIdsQuery(city, stopIdBatch))
-          )
-        )
+            return {
+              data: (batchResult.data as TdxStop[]) ?? [],
+              error: batchResult.error
+            }
+          }
+        })
 
-        const errorResult = batchResults.find((result) => result.error != null)
-        if (errorResult?.error != null) {
-          return { error: errorResult.error }
+        if (queryResult.error) {
+          return { error: queryResult.error }
         }
 
-        const transformedStops = batchResults.flatMap((result) =>
-          transformStops(result.data as TdxStop[])
-        )
+        const transformedStops = transformStops(queryResult.data ?? [])
 
         const dedupedStopsById = transformedStops.reduce<Map<string, Stop>>((result, stop) => {
           result.set(stop.StopUID, stop)
