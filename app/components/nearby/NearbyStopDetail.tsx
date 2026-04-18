@@ -11,6 +11,7 @@ import { selectLocale } from '~/modules/slices/localeSlice'
 import { toLatLng } from '~/modules/utils/geo/convertCoordinates'
 import { getCityTranslationKey } from '~/modules/utils/i18n/getCityTranslationKey'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
+import { getStopGroupBearingLabel } from '~/modules/utils/nearby/getStopGroupBearingLabel'
 
 interface PropType {
   stopGroup: NearbyStopGroup
@@ -35,12 +36,18 @@ export const NearbyStopDetail = ({
   const locale = useSelector(selectLocale)
   const stopName = getLocalizedText(stopGroup.StopName, locale)
   const destination = toLatLng(stopGroup.position)!
+  const bearingLabel = getStopGroupBearingLabel(t, stopGroup)
 
   if (displayMode === 'title') {
     return (
-      <Text style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
-        {stopName}
-      </Text>
+      <Flex gap="xs" align="center" wrap="nowrap">
+        <Text style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
+          {stopName}
+        </Text>
+        <Text size="sm" c="dimmed" mr="xs">
+          {bearingLabel}
+        </Text>
+      </Flex>
     )
   }
 
@@ -113,6 +120,7 @@ export const NearbyStopDetail = ({
       {displayMode === 'full' && (
         <Stack
           gap={4}
+          pb="xs"
           style={{
             position: 'sticky',
             top: 0,
@@ -120,9 +128,14 @@ export const NearbyStopDetail = ({
             backgroundColor: 'var(--mantine-color-body)'
           }}
         >
-          <Text style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
-            {stopName}
-          </Text>
+          <Flex gap="xs" align="center" wrap="nowrap">
+            <Text style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
+              {stopName}
+            </Text>
+            <Text size="sm" c="dimmed" mr="xs">
+              {bearingLabel}
+            </Text>
+          </Flex>
         </Stack>
       )}
       {detailSections.map((section) => (

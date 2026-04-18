@@ -466,7 +466,7 @@ describe('Nearby', () => {
       skip: true
     })
 
-    fireEvent.click(screen.getByRole('button', { name: '市政府' }))
+    fireEvent.click(screen.getByRole('button', { name: /^市政府/ }))
 
     expect(mockUseGetRoutesByAreaQuery).toHaveBeenLastCalledWith(expect.anything(), {
       skip: true
@@ -606,7 +606,7 @@ describe('Nearby', () => {
       }
     })
 
-    fireEvent.click(screen.getByRole('button', { name: '市政府' }))
+    fireEvent.click(screen.getByRole('button', { name: /^市政府/ }))
 
     const updatedProps = mockNearbyStopMap.mock.calls.at(-1)?.[0]
     expect(updatedProps?.selectedStop).toBe('station-1')
@@ -628,7 +628,7 @@ describe('Nearby', () => {
       firstRenderProps?.onSelectStop('station-1')
     })
 
-    expect(screen.getByRole('button', { name: '市政府' })).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByRole('button', { name: /^市政府/ })).toHaveAttribute('aria-expanded', 'true')
   })
 })
 
