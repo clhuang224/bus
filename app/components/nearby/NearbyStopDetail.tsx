@@ -44,9 +44,11 @@ export const NearbyStopDetail = ({
         <Text style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
           {stopName}
         </Text>
-        <Text size="sm" c="dimmed" mr="xs">
-          {bearingLabel}
-        </Text>
+        {Boolean(bearingLabel) && (
+          <Text size="sm" c="dimmed" mr="xs">
+            {bearingLabel}
+          </Text>
+        )}
       </Flex>
     )
   }
