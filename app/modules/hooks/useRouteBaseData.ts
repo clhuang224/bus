@@ -127,9 +127,13 @@ export function useRouteBaseData(
     )?.id ?? routeTabs[0].id
   }, [routeTabs, targetFavoriteRouteStop])
 
-  const activeStopOfRoute = useMemo(() => {
+  const activeRouteTab = useMemo(() => {
     if (!activeTab) return null
-    const activeRouteTab = routeTabs.find((tab) => tab.id === activeTab)
+
+    return routeTabs.find((tab) => tab.id === activeTab) ?? null
+  }, [activeTab, routeTabs])
+
+  const activeStopOfRoute = useMemo(() => {
     if (!activeRouteTab) return null
 
     return stopOfRoutes.find((stopOfRoute) =>
@@ -137,19 +141,17 @@ export function useRouteBaseData(
       stopOfRoute.SubRouteUID === activeRouteTab.subRouteUID &&
       stopOfRoute.Direction === activeRouteTab.direction
     ) ?? null
-  }, [activeTab, id, routeTabs, stopOfRoutes])
+  }, [activeRouteTab, id, stopOfRoutes])
 
   const subRoute = useMemo<BusSubRoute<Date | null> | null>(() => {
-    if (!busRoute || !activeTab) return null
-
-    const activeRouteTab = routeTabs.find((tab) => tab.id === activeTab)
+    if (!busRoute) return null
     if (!activeRouteTab) return null
 
     return busRoute.SubRoutes.find((subRoute) =>
       subRoute.SubRouteUID === activeRouteTab.subRouteUID &&
       subRoute.Direction === activeRouteTab.direction
     ) ?? null
-  }, [activeTab, busRoute, routeTabs])
+  }, [activeRouteTab, busRoute])
 
   const stopPositionMap = useMemo(() => {
     return routeStops.reduce<Map<string, (typeof routeStops)[number]['position']>>((result, stop) => {
