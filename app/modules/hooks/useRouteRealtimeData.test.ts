@@ -14,21 +14,18 @@ import { useRouteRealtimeData } from './useRouteRealtimeData'
 const {
   mockUseGetEstimatedArrivalByRouteQuery,
   mockUseGetRealtimeByFrequencyByRouteQuery,
-  mockUseGetRealtimeNearStopsByRouteQuery,
-  mockUseGetRouteShapesByRouteQuery
+  mockUseGetRealtimeNearStopsByRouteQuery
 } = vi.hoisted(() => ({
   mockUseGetEstimatedArrivalByRouteQuery: vi.fn(),
   mockUseGetRealtimeByFrequencyByRouteQuery: vi.fn(),
-  mockUseGetRealtimeNearStopsByRouteQuery: vi.fn(),
-  mockUseGetRouteShapesByRouteQuery: vi.fn()
+  mockUseGetRealtimeNearStopsByRouteQuery: vi.fn()
 }))
 
 vi.mock('~/modules/apis/bus', () => ({
   busApi: {
     useGetEstimatedArrivalByRouteQuery: mockUseGetEstimatedArrivalByRouteQuery,
     useGetRealtimeByFrequencyByRouteQuery: mockUseGetRealtimeByFrequencyByRouteQuery,
-    useGetRealtimeNearStopsByRouteQuery: mockUseGetRealtimeNearStopsByRouteQuery,
-    useGetRouteShapesByRouteQuery: mockUseGetRouteShapesByRouteQuery
+    useGetRealtimeNearStopsByRouteQuery: mockUseGetRealtimeNearStopsByRouteQuery
   }
 }))
 
@@ -53,7 +50,7 @@ const busRoute: BusRoute<Date | null> = {
   VersionID: 0
 }
 
-const activeSubRoute = {
+const subRoute = {
   SubRouteUID: 'subroute-1',
   SubRouteID: 'subroute-1',
   OperatorIDs: [],
@@ -78,14 +75,10 @@ describe('useRouteRealtimeData', () => {
     mockUseGetEstimatedArrivalByRouteQuery.mockReset()
     mockUseGetRealtimeByFrequencyByRouteQuery.mockReset()
     mockUseGetRealtimeNearStopsByRouteQuery.mockReset()
-    mockUseGetRouteShapesByRouteQuery.mockReset()
 
     mockUseGetRealtimeByFrequencyByRouteQuery.mockReturnValue({
       data: [],
       error: null
-    })
-    mockUseGetRouteShapesByRouteQuery.mockReturnValue({
-      data: []
     })
   })
 
@@ -127,7 +120,7 @@ describe('useRouteRealtimeData', () => {
     }))
 
     const { rerender } = renderHook(() => useRouteRealtimeData({
-      activeSubRoute,
+      subRoute,
       busRoute,
       city: CityNameType.TAIPEI,
       id: 'route-1'

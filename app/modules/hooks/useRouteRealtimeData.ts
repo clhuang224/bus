@@ -27,7 +27,7 @@ type RealtimeQueryState =
   | { status: RealtimeQueryStatus.READY }
 
 interface UseRouteRealtimeDataOptions {
-  activeSubRoute: BusSubRoute<Date | null>
+  subRoute: BusSubRoute<Date | null>
   busRoute: BusRoute<Date | null>
   city: CityNameType
   id: string
@@ -36,7 +36,7 @@ interface UseRouteRealtimeDataOptions {
 export function useRouteRealtimeData(options: UseRouteRealtimeDataOptions | null) {
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
-  const activeSubRoute = options?.activeSubRoute ?? null
+  const subRoute = options?.subRoute ?? null
   const busRoute = options?.busRoute ?? null
 
   // Keep RTK Query args well-typed; skip prevents requests until realtime options are ready.
@@ -58,7 +58,7 @@ export function useRouteRealtimeData(options: UseRouteRealtimeDataOptions | null
       status: RealtimeQueryStatus.WAITING,
       waitMs: REALTIME_INITIAL_DELAY_MS
     })
-  }, [activeSubRoute?.Direction, activeSubRoute?.SubRouteUID, busRoute?.RouteUID, options?.id, options?.city])
+  }, [subRoute?.Direction, subRoute?.SubRouteUID, busRoute?.RouteUID, options?.id, options?.city])
 
   useEffect(() => {
     if (realtimeQueryState.status !== RealtimeQueryStatus.WAITING) {
@@ -115,11 +115,6 @@ export function useRouteRealtimeData(options: UseRouteRealtimeDataOptions | null
       refetchOnReconnect: true
     }
   )
-  const { data: routeShapes = [] } = busApi.useGetRouteShapesByRouteQuery(
-    realtimeQueryArgs,
-    { skip: skipRealtime }
-  )
-
   const isRealtimeRateLimited = isTdxRateLimitError(estimatedArrivalsError) ||
     isTdxRateLimitError(realtimeNearStopsError)
 
@@ -141,18 +136,18 @@ export function useRouteRealtimeData(options: UseRouteRealtimeDataOptions | null
   }, [isRealtimeRateLimited])
 
   const directionMatchedEstimatedArrivals = useMemo(() => {
-    if (!activeSubRoute || !busRoute) return []
+    if (!subRoute || !busRoute) return []
 
     return estimatedArrivals.filter((estimatedArrival) =>
-      estimatedArrival.Direction === activeSubRoute.Direction
+      estimatedArrival.Direction === subRoute.Direction
     )
-  }, [activeSubRoute, busRoute, estimatedArrivals])
+  }, [subRoute, busRoute, estimatedArrivals])
 
   const activeEstimatedArrivals = useMemo(() => {
-    if (!activeSubRoute || !busRoute) return []
+    if (!subRoute || !busRoute) return []
 
     const subRouteMatchedEstimatedArrivals = directionMatchedEstimatedArrivals.filter((estimatedArrival) =>
-      estimatedArrival.SubRouteUID === activeSubRoute.SubRouteUID
+      estimatedArrival.SubRouteUID === subRoute.SubRouteUID
     )
 
     if (subRouteMatchedEstimatedArrivals.length > 0) {
@@ -167,17 +162,17 @@ export function useRouteRealtimeData(options: UseRouteRealtimeDataOptions | null
     return routeLevelEstimatedArrivals.length > 0
       ? routeLevelEstimatedArrivals
       : directionMatchedEstimatedArrivals
-  }, [activeSubRoute, busRoute, directionMatchedEstimatedArrivals])
+  }, [subRoute, busRoute, directionMatchedEstimatedArrivals])
 
   const activeRealtimeNearStops = useMemo(() => realtimeNearStops.filter((realtimeNearStop) =>
-    realtimeNearStop.SubRouteUID === activeSubRoute?.SubRouteUID &&
-    realtimeNearStop.Direction === activeSubRoute?.Direction
-  ), [activeSubRoute, realtimeNearStops])
+    realtimeNearStop.SubRouteUID === subRoute?.SubRouteUID &&
+    realtimeNearStop.Direction === subRoute?.Direction
+  ), [subRoute, realtimeNearStops])
   const activeRealtimeByFrequency = useMemo(() => realtimeByFrequency.filter((realtimeVehicle) =>
-    realtimeVehicle.SubRouteUID === activeSubRoute?.SubRouteUID &&
-    realtimeVehicle.Direction === activeSubRoute?.Direction &&
+    realtimeVehicle.SubRouteUID === subRoute?.SubRouteUID &&
+    realtimeVehicle.Direction === subRoute?.Direction &&
     realtimeVehicle.position != null
-  ) as Array<(typeof realtimeByFrequency)[number] & { position: NonNullable<(typeof realtimeByFrequency)[number]['position']> }>, [activeSubRoute, realtimeByFrequency])
+  ) as Array<(typeof realtimeByFrequency)[number] & { position: NonNullable<(typeof realtimeByFrequency)[number]['position']> }>, [subRoute, realtimeByFrequency])
 
   const realtimeBusStatuses = useMemo(() => getRouteRealtimeBusStatuses(
     t,
@@ -292,17 +287,7 @@ export function useRouteRealtimeData(options: UseRouteRealtimeDataOptions | null
     realtimeBusStatuses.length
   ])
 
-  const activeRoutePath = useMemo(() => {
-    if (!activeSubRoute) return []
-
-    return routeShapes.find((routeShape) =>
-      routeShape.SubRouteUID === activeSubRoute.SubRouteUID &&
-      routeShape.Direction === activeSubRoute.Direction
-    )?.path ?? []
-  }, [activeSubRoute, routeShapes])
-
   return {
-    activeRoutePath,
     estimatedArrivalLabelsByStopKey,
     hasRealtimeError,
     isRealtimeLoading: isEstimatedArrivalsLoading || isRealtimeNearStopsLoading,

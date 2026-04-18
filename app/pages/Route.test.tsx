@@ -31,7 +31,7 @@ const {
   mockUseGetRouteShapesByRouteQuery,
   mockUseGetRoutesByCityQuery,
   mockUseGetStopOfRoutesByCityQuery,
-  mockUseGetStopsByCityQuery,
+  mockUseGetStopsByCityAndIdsQuery,
   mockRouteMap
 } = vi.hoisted(() => ({
   mockToggleFavoriteRouteStop: vi.fn(),
@@ -41,7 +41,7 @@ const {
   mockUseGetRouteShapesByRouteQuery: vi.fn(),
   mockUseGetRoutesByCityQuery: vi.fn(),
   mockUseGetStopOfRoutesByCityQuery: vi.fn(),
-  mockUseGetStopsByCityQuery: vi.fn(),
+  mockUseGetStopsByCityAndIdsQuery: vi.fn(),
   mockRouteMap: vi.fn(({
     extraControls
   }: {
@@ -82,7 +82,7 @@ vi.mock('~/modules/apis/bus', () => ({
     useGetRouteShapesByRouteQuery: mockUseGetRouteShapesByRouteQuery,
     useGetRoutesByCityQuery: mockUseGetRoutesByCityQuery,
     useGetStopOfRoutesByCityQuery: mockUseGetStopOfRoutesByCityQuery,
-    useGetStopsByCityQuery: mockUseGetStopsByCityQuery
+    useGetStopsByCityAndIdsQuery: mockUseGetStopsByCityAndIdsQuery
   }
 }))
 
@@ -322,7 +322,7 @@ function resetRouteMocks() {
   mockUseGetRouteShapesByRouteQuery.mockReset()
   mockUseGetRoutesByCityQuery.mockReset()
   mockUseGetStopOfRoutesByCityQuery.mockReset()
-  mockUseGetStopsByCityQuery.mockReset()
+  mockUseGetStopsByCityAndIdsQuery.mockReset()
   mockRouteMap.mockClear()
 }
 
@@ -339,7 +339,7 @@ function mockDefaultRouteQueries() {
     error: null
   })
 
-  mockUseGetStopsByCityQuery.mockReturnValue({
+  mockUseGetStopsByCityAndIdsQuery.mockReturnValue({
     data: stopsByCityData,
     isLoading: false,
     error: null
@@ -464,7 +464,7 @@ describe('Route', () => {
       isLoading: true,
       error: null
     })
-    mockUseGetStopsByCityQuery.mockReturnValue({
+    mockUseGetStopsByCityAndIdsQuery.mockReturnValue({
       data: [],
       isLoading: true,
       error: null

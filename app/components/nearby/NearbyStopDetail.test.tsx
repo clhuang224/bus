@@ -2,12 +2,17 @@
 
 import { fireEvent, screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import i18n from '~/modules/i18n'
+import { AppLocaleType } from '~/modules/enums/AppLocaleType'
+import { BearingType } from '~/modules/enums/BearingType'
 import { CityNameType } from '~/modules/enums/CityNameType'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
 import geoSlice from '~/modules/slices/geoSlice'
 import { createTestStore } from '~/test/createTestStore'
 import { renderWithStore } from '~/test/render'
 import { NearbyStopDetail } from './NearbyStopDetail'
+
+const t = i18n.getFixedT(AppLocaleType.ZH_TW)
 
 const stopGroup = {
   StationID: 'station-1',
@@ -24,15 +29,24 @@ const stopGroup = {
     GeoHash: null,
     StopName: { 'zh-TW': '市政府', en: 'City Hall' },
     StopAddress: 'Address 1',
-    Bearing: null,
+    Bearing: null as BearingType | null,
     StopDescription: null,
     City: CityNameType.TAIPEI,
     UpdateTime: '2026-04-12T10:00:00+08:00',
     VersionID: 1
   }]
 }
+const stopNameZhTW = stopGroup.StopName['zh-TW']
+const navigateToStopLabel = t('components.routeStopList.navigateAriaLabel', { stopName: stopNameZhTW })
 
 function renderNearbyStopDetail(displayMode: 'content' | 'full' | 'title' = 'content') {
+  return renderNearbyStopDetailWithStopGroup(stopGroup, displayMode)
+}
+
+function renderNearbyStopDetailWithStopGroup(
+  targetStopGroup: typeof stopGroup,
+  displayMode: 'content' | 'full' | 'title' = 'content'
+) {
   const store = createTestStore({
     reducer: {
       geolocation: geoSlice.reducer
@@ -49,7 +63,7 @@ function renderNearbyStopDetail(displayMode: 'content' | 'full' | 'title' = 'con
 
   return renderWithStore(
     <NearbyStopDetail
-      stopGroup={stopGroup}
+      stopGroup={targetStopGroup}
       routes={[]}
       onViewRoutes={vi.fn()}
       displayMode={displayMode}
@@ -67,8 +81,35 @@ describe('NearbyStopDetail', () => {
   it('renders only the stop name in title mode', () => {
     renderNearbyStopDetail('title')
 
-    expect(screen.getByText('市政府')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /導航至\s*市政府/ })).not.toBeInTheDocument()
+    expect(screen.getByText(stopNameZhTW)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: navigateToStopLabel })).not.toBeInTheDocument()
+  })
+
+  it('renders stop name with bearing label in title mode when bearing is available', () => {
+    renderNearbyStopDetailWithStopGroup({
+      ...stopGroup,
+      stops: [
+        {
+          ...stopGroup.stops[0],
+          Bearing: BearingType.NORTH
+        },
+        {
+          ...stopGroup.stops[0],
+          StopUID: 'stop-2',
+          StopID: 'stop-2',
+          Bearing: BearingType.SOUTH
+        }
+      ]
+    }, 'title')
+
+    expect(screen.getByText(stopNameZhTW)).toBeInTheDocument()
+    const northBearingLabel = t('common.bearing.north')
+    const southBearingLabel = t('common.bearing.south')
+    const bearingText = screen.getByText((content) =>
+      content === `${southBearingLabel} / ${northBearingLabel}` ||
+      content === `${northBearingLabel} / ${southBearingLabel}`
+    )
+    expect(bearingText).toBeInTheDocument()
   })
 
   it('renders stop distance when user coordinates are available', () => {
@@ -83,7 +124,7 @@ describe('NearbyStopDetail', () => {
   it('opens Google Maps directions from the navigation button', () => {
     renderNearbyStopDetail('full')
 
-    fireEvent.click(screen.getByRole('button', { name: /導航至\s*市政府/ }))
+    fireEvent.click(screen.getByRole('button', { name: navigateToStopLabel }))
 
     expect(window.open).toHaveBeenCalledWith(
       'https://www.google.com/maps/dir/?api=1&destination=25.033%2C121.5654',

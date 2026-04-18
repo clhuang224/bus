@@ -5,6 +5,7 @@ import type { OpenGlobalModalPayload } from '../../slices/globalModalSlice'
 
 export enum TdxHttpErrorStatus {
   UNAUTHORIZED = 401,
+  URI_TOO_LONG = 414,
   RATE_LIMIT = 429
 }
 
@@ -77,6 +78,10 @@ export const getBusErrorModal = (error: FetchBaseQueryError) => {
   }
 
   if (tdxHttpStatus === TdxHttpErrorStatus.RATE_LIMIT) {
+    return null
+  }
+
+  if (tdxHttpStatus === TdxHttpErrorStatus.URI_TOO_LONG) {
     return null
   }
 

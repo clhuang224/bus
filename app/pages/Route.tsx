@@ -1,5 +1,5 @@
 import { ActionIcon, Flex, Stack, Tabs, Text, useMantineTheme } from '@mantine/core'
-import { useDisclosure, useMediaQuery } from '@mantine/hooks'
+import { useMediaQuery } from '@mantine/hooks'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
@@ -11,6 +11,7 @@ import { RouteStopList } from '~/components/route/RouteStopList'
 import { useFavoriteRouteStops } from '~/modules/hooks/useFavoriteRouteStops'
 import { useRouteBaseData } from '~/modules/hooks/useRouteBaseData'
 import { useRouteRealtimeData } from '~/modules/hooks/useRouteRealtimeData'
+import { useRouteSelectionState } from '~/modules/hooks/useRouteSelectionState'
 import { RiArrowLeftSLine, RiMenuFill } from '@remixicon/react'
 import { AppBadge } from '~/components/common/AppBadge'
 import { selectLocale } from '~/modules/slices/localeSlice'
@@ -27,12 +28,8 @@ export default function Route() {
   const navigate = useNavigate()
   const theme = useMantineTheme()
   const isSm = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`)
-  const [isSidebarOpened, { open: openSidebar, close: closeSidebar }] = useDisclosure(false)
-  const [listScrollBehavior, setListScrollBehavior] = useState<ScrollLogicalPosition>('nearest')
   const { isFavoriteRouteStop, toggleFavoriteRouteStop } = useFavoriteRouteStops()
   const [activeTab, setActiveTab] = useState<string | null>(null)
-  const [selectedStopId, setSelectedStopId] = useState<string | null>(null)
-  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null)
   const routeBaseOptions = city && isCityName(city) && id
     ? {
         activeTab,
@@ -43,7 +40,8 @@ export default function Route() {
       }
     : null
   const {
-    activeSubRoute,
+    subRoute,
+    routePath,
     baseStops,
     busRoute,
     highlightedStopId,
@@ -54,16 +52,15 @@ export default function Route() {
     routeMapStops,
     routeTabs
   } = useRouteBaseData(routeBaseOptions)
-  const routeRealtimeOptions = city && isCityName(city) && id && busRoute && activeSubRoute
+  const routeRealtimeOptions = city && isCityName(city) && id && busRoute && subRoute
     ? {
-        activeSubRoute,
+        subRoute,
         busRoute,
         city,
         id
       }
     : null
   const {
-    activeRoutePath,
     estimatedArrivalLabelsByStopKey,
     hasRealtimeError,
     isRealtimeLoading,
@@ -79,6 +76,24 @@ export default function Route() {
       null,
     realtimeBuses: realtimeBusesByStopSequence.get(stop.sequence) ?? []
   })), [baseStops, estimatedArrivalLabelsByStopKey, realtimeBusesByStopSequence])
+  const {
+    closeSidebar,
+    handleSelectStopFromList,
+    handleSelectStopFromMap,
+    handleSelectVehicleFromList,
+    handleSelectVehicleFromMap,
+    isSidebarOpened,
+    listScrollBehavior,
+    openSidebar,
+    selectedStopId,
+    selectedVehicleId
+  } = useRouteSelectionState({
+    defaultActiveTabId,
+    isSm,
+    routeTabs,
+    setActiveTab,
+    stops
+  })
   const selectedStopEstimatedArrivalLabel = useMemo(
     () => stops.find((stop) => stop.id === selectedStopId)?.estimatedArrivalLabel ?? null,
     [selectedStopId, stops]
@@ -89,78 +104,12 @@ export default function Route() {
   const routeTerminalDisplay = getTerminalDisplay(routeDeparture, routeDestination, ' - ')
 
   useEffect(() => {
-    if (isSm) {
-      openSidebar()
-      return
-    }
-  }, [isSm, openSidebar])
-
-  useEffect(() => {
     if (!city || !isCityName(city) || !id) {
       return
     }
 
     saveRouteSearchRecent(id)
   }, [city, id])
-
-  useEffect(() => {
-    if (!routeTabs.length) {
-      setActiveTab(null)
-      return
-    }
-
-    setActiveTab((currentTab) => {
-      if (currentTab && routeTabs.some((tab) => tab.id === currentTab)) {
-        return currentTab
-      }
-      return defaultActiveTabId
-    })
-  }, [defaultActiveTabId, routeTabs])
-
-  useEffect(() => {
-    if (!selectedStopId) return
-    if (stops.some((stop) => stop.id === selectedStopId)) return
-
-    setSelectedStopId(null)
-  }, [selectedStopId, stops])
-
-  useEffect(() => {
-    if (!selectedVehicleId) return
-    if (stops.some((stop) => stop.realtimeBuses.some((bus) => bus.id === selectedVehicleId))) return
-
-    setSelectedVehicleId(null)
-  }, [selectedVehicleId, stops])
-
-  const handleSelectStopFromList = useCallback((stopId: string) => {
-    setListScrollBehavior('nearest')
-    setSelectedStopId(stopId)
-    setSelectedVehicleId(null)
-
-    if (isSm) {
-      closeSidebar()
-    }
-  }, [closeSidebar, isSm])
-
-  const handleSelectVehicleFromList = useCallback((vehicleId: string) => {
-    setSelectedVehicleId(vehicleId)
-    setSelectedStopId(null)
-
-    if (isSm) {
-      closeSidebar()
-    }
-  }, [closeSidebar, isSm])
-
-  const handleSelectVehicleFromMap = useCallback((vehicleId: string) => {
-    setListScrollBehavior('start')
-    setSelectedVehicleId(vehicleId)
-    setSelectedStopId(null)
-  }, [])
-
-  const handleSelectStopFromMap = useCallback((stopId: string | null) => {
-    setListScrollBehavior('start')
-    setSelectedStopId(stopId)
-    setSelectedVehicleId(null)
-  }, [])
 
   const handleBack = useCallback(() => {
     if ((window.history.state?.idx ?? 0) > 0) {
@@ -195,7 +144,7 @@ export default function Route() {
           </Stack>
           {routeTabs.length > 0
             ? (
-            <Tabs
+              <Tabs
               value={activeTab}
               onChange={setActiveTab}
               keepMounted={false}
@@ -270,7 +219,7 @@ export default function Route() {
         selectedVehicleId={selectedVehicleId}
         onSelectStop={handleSelectStopFromMap}
         onSelectVehicle={handleSelectVehicleFromMap}
-        routePath={activeRoutePath}
+        routePath={routePath}
         stops={routeMapStops}
         selectedStopEstimatedArrivalLabel={selectedStopEstimatedArrivalLabel}
         vehicles={realtimeMapVehicles}

@@ -14,6 +14,7 @@ import { selectLocale } from '~/modules/slices/localeSlice'
 import { toLatLng } from '~/modules/utils/geo/convertCoordinates'
 import { getCityTranslationKey } from '~/modules/utils/i18n/getCityTranslationKey'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
+import { getStopGroupBearingLabel } from '~/modules/utils/nearby/getStopGroupBearingLabel'
 import { NearbyStopDetail } from './NearbyStopDetail'
 import { NearbyStopRoutes } from './NearbyStopRoutes'
 
@@ -51,6 +52,7 @@ interface PropType {
 const NearbySidebarContentDetail = ({ detailState }: { detailState: NearbySidebarDetailState }) => {
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
+  const stopBearingLabel = getStopGroupBearingLabel(t, detailState.stopGroup!)
 
   return (
     <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
@@ -64,6 +66,9 @@ const NearbySidebarContentDetail = ({ detailState }: { detailState: NearbySideba
         <Title order={4} style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
           {getLocalizedText(detailState.stopGroup!.StopName, locale)}
         </Title>
+        {stopBearingLabel && (
+          <Text size="sm" c="dimmed">{stopBearingLabel}</Text>
+        )}
       </Flex>
       <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
         <Stack gap={2}>
@@ -105,6 +110,7 @@ const NearbySidebarContentDetail = ({ detailState }: { detailState: NearbySideba
 }
 
 const NearbySidebarContentList = ({ listState }: { listState: NearbySidebarListState }) => {
+  const { t } = useTranslation()
   const locale = useSelector(selectLocale)
 
   return (
@@ -127,7 +133,10 @@ const NearbySidebarContentList = ({ listState }: { listState: NearbySidebarListS
         value={listState.selectedStopId}
         onChange={listState.onSelectStop}
       >
-        {listState.nearbyStopGroups.map((stopGroup) => (
+        {listState.nearbyStopGroups.map((stopGroup) => {
+          const stopBearingLabel = getStopGroupBearingLabel(t, stopGroup)
+
+          return (
           <AccordionItem
             value={stopGroup.StationID}
             key={stopGroup.StationID}
@@ -140,9 +149,16 @@ const NearbySidebarContentList = ({ listState }: { listState: NearbySidebarListS
             }}
           >
             <AccordionControl>
-              <Text style={{ flex: '0 1 auto', minWidth: 0 }} lineClamp={1}>
-                {getLocalizedText(stopGroup.StopName, locale)}
-              </Text>
+              <Flex justify="space-between" align="center" gap="xs" w="100%">
+                <Text style={{ flex: '1 1 auto', minWidth: 0 }} lineClamp={1}>
+                  {getLocalizedText(stopGroup.StopName, locale)}
+                </Text>
+                {stopBearingLabel && (
+                  <Text size="sm" c="dimmed" mr="xs">
+                    {stopBearingLabel}
+                  </Text>
+                )}
+              </Flex>
             </AccordionControl>
             <AccordionPanel>
               <NearbyStopDetail
@@ -155,7 +171,8 @@ const NearbySidebarContentList = ({ listState }: { listState: NearbySidebarListS
               />
             </AccordionPanel>
           </AccordionItem>
-        ))}
+          )
+        })}
       </Accordion>
       )}
     </ScrollArea>

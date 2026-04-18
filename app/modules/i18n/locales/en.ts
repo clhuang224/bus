@@ -61,6 +61,16 @@ export const en = {
         loop: 'Loop',
         shuttle: 'Shuttle',
         unknown: 'Unknown'
+      },
+      bearing: {
+        east: 'Eastbound',
+        west: 'Westbound',
+        south: 'Southbound',
+        north: 'Northbound',
+        southeast: 'Southeastbound',
+        northeast: 'Northeastbound',
+        southwest: 'Southwestbound',
+        northwest: 'Northwestbound'
       }
     },
     layout: {

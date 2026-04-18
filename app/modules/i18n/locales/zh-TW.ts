@@ -61,6 +61,16 @@ export const zhTW = {
         loop: '迴圈',
         shuttle: '循環',
         unknown: '未知'
+      },
+      bearing: {
+        east: '往東',
+        west: '往西',
+        south: '往南',
+        north: '往北',
+        southeast: '往東南',
+        northeast: '往東北',
+        southwest: '往西南',
+        northwest: '往西北'
       }
     },
     layout: {
