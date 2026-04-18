@@ -72,9 +72,11 @@ export function useRouteBaseData(
   const routeStopIds = useMemo(() => {
     if (!id) return []
 
-    return stopOfRoutes
+    const stopIds = stopOfRoutes
       .filter((stopOfRoute) => stopOfRoute.RouteUID === id)
       .flatMap((stopOfRoute) => stopOfRoute.Stops.flatMap((stop) => [stop.StopUID, stop.StopID]))
+
+    return Array.from(new Set(stopIds)).sort()
   }, [id, stopOfRoutes])
   const { data: routeStops = [], isLoading: isStopsLoading, error: stopsError } =
     busApi.useGetStopsByCityAndIdsQuery(
