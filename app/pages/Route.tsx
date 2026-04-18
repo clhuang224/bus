@@ -43,7 +43,8 @@ export default function Route() {
       }
     : null
   const {
-    activeSubRoute,
+    subRoute,
+    routePath,
     baseStops,
     busRoute,
     highlightedStopId,
@@ -54,16 +55,15 @@ export default function Route() {
     routeMapStops,
     routeTabs
   } = useRouteBaseData(routeBaseOptions)
-  const routeRealtimeOptions = city && isCityName(city) && id && busRoute && activeSubRoute
+  const routeRealtimeOptions = city && isCityName(city) && id && busRoute && subRoute
     ? {
-        activeSubRoute,
+        subRoute,
         busRoute,
         city,
         id
       }
     : null
   const {
-    activeRoutePath,
     estimatedArrivalLabelsByStopKey,
     hasRealtimeError,
     isRealtimeLoading,
@@ -270,7 +270,7 @@ export default function Route() {
         selectedVehicleId={selectedVehicleId}
         onSelectStop={handleSelectStopFromMap}
         onSelectVehicle={handleSelectVehicleFromMap}
-        routePath={activeRoutePath}
+        routePath={routePath}
         stops={routeMapStops}
         selectedStopEstimatedArrivalLabel={selectedStopEstimatedArrivalLabel}
         vehicles={realtimeMapVehicles}

@@ -67,6 +67,10 @@ export function useRouteBaseData(
     )
   const { data: stopsByCity = [], isLoading: isStopsLoading, error: stopsError } =
     busApi.useGetStopsByCityQuery(routeQueryCity, { skip: !options })
+  const { data: routeShapes = [] } = busApi.useGetRouteShapesByRouteQuery(
+    { city: routeQueryCity, routeUID: id ?? '' },
+    { skip: !options || !id }
+  )
 
   const targetFavoriteRouteStop = useMemo(() => {
     if (!options) return null
@@ -125,7 +129,7 @@ export function useRouteBaseData(
     ) ?? null
   }, [activeTab, id, routeTabs, stopOfRoutes])
 
-  const activeSubRoute = useMemo<BusSubRoute<Date | null> | null>(() => {
+  const subRoute = useMemo<BusSubRoute<Date | null> | null>(() => {
     if (!busRoute || !activeTab) return null
 
     const activeRouteTab = routeTabs.find((tab) => tab.id === activeTab)
@@ -148,26 +152,26 @@ export function useRouteBaseData(
   }, [stopsByCity])
 
   const baseStops = useMemo<RouteBaseStop[]>(() => {
-    if (!activeStopOfRoute || !activeSubRoute || !busRoute) return []
+    if (!activeStopOfRoute || !subRoute || !busRoute) return []
 
     return activeStopOfRoute.Stops.map((stop) => {
       const stationKey = stop.StationID ?? stop.StopUID
       const favoriteRouteStop: FavoriteRouteStop = {
-        favoriteId: `${busRoute.RouteUID}-${activeSubRoute.SubRouteUID}-${activeSubRoute.Direction}-${stationKey}`,
+        favoriteId: `${busRoute.RouteUID}-${subRoute.SubRouteUID}-${subRoute.Direction}-${stationKey}`,
         city: busRoute.City,
         routeUID: busRoute.RouteUID,
         routeName: busRoute.RouteName,
-        subRouteUID: activeSubRoute.SubRouteUID,
-        subRouteName: activeSubRoute.SubRouteName,
-        direction: activeSubRoute.Direction,
+        subRouteUID: subRoute.SubRouteUID,
+        subRouteName: subRoute.SubRouteName,
+        direction: subRoute.Direction,
         stopUID: stop.StopUID,
         stopID: stop.StopID,
         stationID: stop.StationID ?? null,
         stationKey,
         stopName: stop.StopName,
         stopSequence: stop.StopSequence,
-        departure: activeSubRoute.DepartureStopName ?? busRoute.DepartureStopName,
-        destination: activeSubRoute.DestinationStopName ?? busRoute.DestinationStopName
+        departure: subRoute.DepartureStopName ?? busRoute.DepartureStopName,
+        destination: subRoute.DestinationStopName ?? busRoute.DestinationStopName
       }
 
       return {
@@ -180,7 +184,7 @@ export function useRouteBaseData(
         isFavorite: isFavoriteRouteStop(favoriteRouteStop.favoriteId)
       }
     })
-  }, [activeStopOfRoute, activeSubRoute, busRoute, isFavoriteRouteStop, locale])
+  }, [activeStopOfRoute, subRoute, busRoute, isFavoriteRouteStop, locale])
 
   const routeMapStops = useMemo(() => {
     return (activeStopOfRoute?.Stops ?? []).map((stop: StopOfRouteStop) => ({
@@ -191,12 +195,21 @@ export function useRouteBaseData(
     }))
   }, [activeStopOfRoute, locale, stopPositionMap])
 
+  const routePath = useMemo(() => {
+    if (!subRoute) return []
+
+    return routeShapes.find((routeShape) =>
+      routeShape.SubRouteUID === subRoute.SubRouteUID &&
+      routeShape.Direction === subRoute.Direction
+    )?.path ?? []
+  }, [subRoute, routeShapes])
+
   const highlightedStopId = useMemo(() => {
-    if (!targetFavoriteRouteStop || !activeSubRoute || !activeStopOfRoute || !busRoute) return null
+    if (!targetFavoriteRouteStop || !subRoute || !activeStopOfRoute || !busRoute) return null
     if (
       targetFavoriteRouteStop.routeUID !== busRoute.RouteUID ||
-      targetFavoriteRouteStop.subRouteUID !== activeSubRoute.SubRouteUID ||
-      targetFavoriteRouteStop.direction !== activeSubRoute.Direction
+      targetFavoriteRouteStop.subRouteUID !== subRoute.SubRouteUID ||
+      targetFavoriteRouteStop.direction !== subRoute.Direction
     ) {
       return null
     }
@@ -210,7 +223,7 @@ export function useRouteBaseData(
     })
 
     return matchedStop?.StopUID ?? null
-  }, [activeStopOfRoute, activeSubRoute, busRoute, targetFavoriteRouteStop])
+  }, [activeStopOfRoute, subRoute, busRoute, targetFavoriteRouteStop])
 
   const isLoading = isRoutesLoading || isStopOfRoutesLoading || isStopsLoading
   const isStopListLoading = Boolean(busRoute) && routeTabs.length > 0 && (isStopOfRoutesLoading || isStopsLoading)
@@ -224,7 +237,8 @@ export function useRouteBaseData(
   }, [busRoute, error, routeTabs.length, t])
 
   return {
-    activeSubRoute,
+    subRoute,
+    routePath,
     baseStops,
     busRoute,
     highlightedStopId,
