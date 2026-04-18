@@ -3,10 +3,11 @@ import { CityNameType } from '../../enums/CityNameType'
 import {
   buildNearbyStopOfRouteQuery,
   buildNearbyStopQuery,
+  buildStopsByCityAndIdsQuery,
   getNearbyStopBounds
-} from './buildNearbyStopQuery'
+} from './tdxQuery'
 
-describe('buildNearbyStopQuery', () => {
+describe('tdxQuery', () => {
   it('builds bounded coordinates around the current position', () => {
     expect(getNearbyStopBounds([25.033, 121.5654])).toEqual({
       latitudeMin: expect.any(Number),
@@ -16,7 +17,7 @@ describe('buildNearbyStopQuery', () => {
     })
   })
 
-  it('builds a stop query with select, filter, and format parameters', () => {
+  it('builds a nearby stop query with select, filter, and format parameters', () => {
     const query = buildNearbyStopQuery(CityNameType.NEW_TAIPEI, [25.033, 121.5654])
 
     expect(query).toContain('/Stop/City/NewTaipei?')
@@ -33,6 +34,17 @@ describe('buildNearbyStopQuery', () => {
     expect(query).toContain('Stops%2Fany')
     expect(query).toContain('d%2FStopUID+eq+%27stop-1%27')
     expect(query).toContain('d%2FStopUID+eq+%27stop-2%27')
+    expect(query).toContain('%24format=JSON')
+  })
+
+  it('builds a stop query that filters by stop uid or stop id', () => {
+    const query = buildStopsByCityAndIdsQuery(CityNameType.TAIPEI, ['stop-1', "stop'2"])
+
+    expect(query).toContain('/Stop/City/Taipei?')
+    expect(query).toContain('%24filter=')
+    expect(query).toContain("StopUID%20eq%20'stop-1'")
+    expect(query).toContain("StopID%20eq%20'stop-1'")
+    expect(query).toContain("stop''2")
     expect(query).toContain('%24format=JSON')
   })
 })

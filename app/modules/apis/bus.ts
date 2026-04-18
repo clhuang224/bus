@@ -12,7 +12,7 @@ import { getBusErrorModal } from './errors/busError'
 import { openGlobalModal } from '../slices/globalModalSlice'
 import { areaMapCity } from '../consts/area'
 import type { LatLng } from '../types/CoordsType'
-import { buildNearbyStopOfRouteQuery, buildNearbyStopQuery } from '../utils/geo/buildNearbyStopQuery'
+import { buildNearbyStopOfRouteQuery, buildNearbyStopQuery, buildStopsByCityAndIdsQuery } from '../utils/api/tdxQuery'
 import {
   transformBusRoute,
   transformEstimatedArrival,
@@ -36,6 +36,7 @@ const baseQuery = fetchBaseQuery({
 const DEFAULT_RETENTION_SECONDS = 60 * 5
 const AREA_ROUTES_RETENTION_SECONDS = 60 * 15
 const NEARBY_STOP_OF_ROUTE_BATCH_SIZE = 40
+const STOPS_BY_IDS_BATCH_SIZE = 40
 
 export const busApi = createApi({
   reducerPath: 'busApi',
@@ -143,6 +144,44 @@ export const busApi = createApi({
       query: (cityName) => `/Stop/City/${cityName}?%24format=JSON`,
       transformResponse: (res: TdxStop[]) => transformStops(res)
     }),
+    getStopsByCityAndIds: build.query<Stop[], { city: CityNameType, stopIds: string[] }>({
+      queryFn: async ({ city, stopIds }, _api, _extraOptions, baseQuery) => {
+        if (stopIds.length === 0) {
+          return { data: [] }
+        }
+
+        const dedupedStopIds = Array.from(new Set(stopIds))
+        const stopIdBatches = Array.from(
+          { length: Math.ceil(dedupedStopIds.length / STOPS_BY_IDS_BATCH_SIZE) },
+          (_, index) => dedupedStopIds.slice(
+            index * STOPS_BY_IDS_BATCH_SIZE,
+            (index + 1) * STOPS_BY_IDS_BATCH_SIZE
+          )
+        )
+
+        const batchResults = await Promise.all(
+          stopIdBatches.map((stopIdBatch) =>
+            baseQuery(buildStopsByCityAndIdsQuery(city, stopIdBatch))
+          )
+        )
+
+        const errorResult = batchResults.find((result) => result.error != null)
+        if (errorResult?.error != null) {
+          return { error: errorResult.error }
+        }
+
+        const transformedStops = batchResults.flatMap((result) =>
+          transformStops(result.data as TdxStop[])
+        )
+
+        const dedupedStopsById = transformedStops.reduce<Map<string, Stop>>((result, stop) => {
+          result.set(stop.StopUID, stop)
+          return result
+        }, new Map())
+
+        return { data: Array.from(dedupedStopsById.values()) }
+      }
+    }),
     getStopsByArea: build.query<Stop[], AreaType>({
       queryFn: async (area, _api, _extraOptions, baseQuery) => {
         const cityResults = await Promise.all(
@@ -204,6 +243,7 @@ export const {
   useGetRealtimeByFrequencyByRouteQuery,
   useGetRealtimeNearStopsByRouteQuery,
   useGetRouteShapesByRouteQuery,
+  useGetStopsByCityAndIdsQuery,
   useGetRoutesByCityQuery,
   useGetStopOfRoutesByCityQuery,
   useGetStopsByCityQuery,

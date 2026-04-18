@@ -65,12 +65,22 @@ export function useRouteBaseData(
       { city: routeQueryCity, routeUID: id },
       { skip: !options }
     )
-  const { data: stopsByCity = [], isLoading: isStopsLoading, error: stopsError } =
-    busApi.useGetStopsByCityQuery(routeQueryCity, { skip: !options })
   const { data: routeShapes = [] } = busApi.useGetRouteShapesByRouteQuery(
     { city: routeQueryCity, routeUID: id ?? '' },
     { skip: !options || !id }
   )
+  const routeStopIds = useMemo(() => {
+    if (!id) return []
+
+    return stopOfRoutes
+      .filter((stopOfRoute) => stopOfRoute.RouteUID === id)
+      .flatMap((stopOfRoute) => stopOfRoute.Stops.flatMap((stop) => [stop.StopUID, stop.StopID]))
+  }, [id, stopOfRoutes])
+  const { data: routeStops = [], isLoading: isStopsLoading, error: stopsError } =
+    busApi.useGetStopsByCityAndIdsQuery(
+      { city: routeQueryCity, stopIds: routeStopIds },
+      { skip: !options || routeStopIds.length === 0 }
+    )
 
   const targetFavoriteRouteStop = useMemo(() => {
     if (!options) return null
@@ -142,14 +152,14 @@ export function useRouteBaseData(
   }, [activeTab, busRoute, routeTabs])
 
   const stopPositionMap = useMemo(() => {
-    return stopsByCity.reduce<Map<string, (typeof stopsByCity)[number]['position']>>((result, stop) => {
+    return routeStops.reduce<Map<string, (typeof routeStops)[number]['position']>>((result, stop) => {
       if (stop.position) {
         result.set(stop.StopUID, stop.position)
         result.set(stop.StopID, stop.position)
       }
       return result
     }, new Map())
-  }, [stopsByCity])
+  }, [routeStops])
 
   const baseStops = useMemo<RouteBaseStop[]>(() => {
     if (!activeStopOfRoute || !subRoute || !busRoute) return []

@@ -1,7 +1,7 @@
-import type { CityNameType } from '../../enums/CityNameType'
 import { NEARBY_DISTANCE_KM } from '../../consts/nearby'
+import type { CityNameType } from '../../enums/CityNameType'
 import type { LatLng } from '../../types/CoordsType'
-import { getLatitudeKilometersPerDegree, getLongitudeKilometersPerDegree } from './getGeoKilometersPerDegree'
+import { getLatitudeKilometersPerDegree, getLongitudeKilometersPerDegree } from '../geo/getGeoKilometersPerDegree'
 
 const STOP_SELECT_FIELDS = [
   'StopUID',
@@ -24,6 +24,10 @@ interface NearbyStopBounds {
   latitudeMax: number
   longitudeMin: number
   longitudeMax: number
+}
+
+function quoteODataString(value: string): string {
+  return value.replace(/'/g, "''")
 }
 
 export function getNearbyStopBounds(
@@ -67,9 +71,20 @@ export function buildNearbyStopOfRouteQuery(city: CityNameType, stopUIDs: string
   if (stopUIDs.length > 0) {
     searchParams.set(
       '$filter',
-      `Stops/any(d:(${stopUIDs.map((stopUID) => `d/StopUID eq '${stopUID}'`).join(' or ')}))`
+      `Stops/any(d:(${stopUIDs.map((stopUID) => `d/StopUID eq '${quoteODataString(stopUID)}'`).join(' or ')}))`
     )
   }
 
   return `/StopOfRoute/City/${city}?${searchParams.toString()}`
+}
+
+export function buildStopsByCityAndIdsQuery(city: CityNameType, stopIds: string[]): string {
+  const filter = stopIds
+    .map((stopId) => {
+      const quotedStopId = quoteODataString(stopId)
+      return `(StopUID eq '${quotedStopId}' or StopID eq '${quotedStopId}')`
+    })
+    .join(' or ')
+
+  return `/Stop/City/${city}?%24filter=${encodeURIComponent(filter)}&%24format=JSON`
 }
