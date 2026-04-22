@@ -6,6 +6,7 @@ interface ViteTypeOptions {
 
 interface ImportMetaEnv {
   readonly VITE_PROXY_API_BASE_URL?: string
+  readonly VITE_GA_ID?: string
 }
 
 interface ImportMeta {
