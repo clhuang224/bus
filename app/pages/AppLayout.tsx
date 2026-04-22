@@ -21,6 +21,7 @@ import {
   APP_HEADER_HEIGHT
 } from '~/modules/consts/layout'
 import { useWatchGeo } from '~/modules/hooks/useWatchGeo'
+import { useGoogleAnalytics } from '~/modules/hooks/useGoogleAnalytics'
 import { fetchCityGeoJSON } from '~/modules/slices/cityGeoSlice'
 import type { AppDispatch, RootState } from '~/modules/store'
 
@@ -65,6 +66,7 @@ export default function AppLayout () {
   const isSettingsPage = location.pathname === settingNav.path
 
   useWatchGeo()
+  useGoogleAnalytics()
 
   useEffect(() => {
     if (geojson) return

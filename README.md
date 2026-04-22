@@ -195,4 +195,5 @@ The frontend is deployed as a static app, while TDX authentication is handled by
 1. Store `TDX_CLIENT_ID`, `TDX_CLIENT_SECRET`, and `ALLOWED_ORIGINS` in Cloudflare Worker environment bindings.
 2. Deploy the Worker with `pnpm run deploy:proxy`.
 3. Store `VITE_PROXY_API_BASE_URL` as a GitHub Actions repository variable.
-4. Let the GitHub Pages build inject that value during `pnpm run build`.
+4. Optional: store `VITE_GA_ID` as a GitHub Actions repository variable to enable GA4 pageview tracking.
+5. Let the GitHub Pages build inject those values during `pnpm run build`.
