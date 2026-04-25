@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   initializeGoogleAnalytics,
   resetGoogleAnalyticsForTest,
+  setGoogleAnalyticsEnabled,
   trackGoogleAnalytics,
   trackGoogleAnalyticsEvent
 } from './googleAnalytics'
@@ -41,7 +42,7 @@ describe('googleAnalytics', () => {
     expect(script).not.toBeNull()
 
     expect(window.gtag).toBeDefined()
-    expect(window.dataLayer?.length).toBe(2)
+    expect(window.dataLayer?.length).toBe(3)
   })
 
   it('tracks page view with path and title', () => {
@@ -49,9 +50,9 @@ describe('googleAnalytics', () => {
 
     trackGoogleAnalytics('/routes?city=Taipei#detail')
 
-    expect(window.dataLayer?.length).toBe(3)
+    expect(window.dataLayer?.length).toBe(4)
 
-    const pageViewEvent = window.dataLayer?.[2] as [string, string, Record<string, unknown>]
+    const pageViewEvent = window.dataLayer?.[3] as [string, string, Record<string, unknown>]
 
     expect(pageViewEvent[0]).toBe('event')
     expect(pageViewEvent[1]).toBe('page_view')
@@ -70,9 +71,9 @@ describe('googleAnalytics', () => {
       route_name: '藍1'
     })
 
-    expect(window.dataLayer?.length).toBe(3)
+    expect(window.dataLayer?.length).toBe(4)
 
-    const customEvent = window.dataLayer?.[2] as [string, string, Record<string, unknown>]
+    const customEvent = window.dataLayer?.[3] as [string, string, Record<string, unknown>]
 
     expect(customEvent[0]).toBe('event')
     expect(customEvent[1]).toBe('select_route')
@@ -97,5 +98,37 @@ describe('googleAnalytics', () => {
 
     expect(document.getElementById('google-analytics-gtag-script')).toBeNull()
     expect(window.dataLayer).toBeUndefined()
+  })
+
+  it('does not initialize or track events when analytics is disabled', () => {
+    setGoogleAnalyticsEnabled(false)
+
+    const initialized = initializeGoogleAnalytics()
+
+    expect(initialized).toBe(false)
+
+    trackGoogleAnalytics('/routes')
+    trackGoogleAnalyticsEvent('select_route', {
+      route_uid: 'route-1'
+    })
+
+    expect(document.getElementById('google-analytics-gtag-script')).toBeNull()
+    expect(window.dataLayer).toBeUndefined()
+  })
+
+  it('updates GA consent when analytics is disabled after initialization', () => {
+    initializeGoogleAnalytics()
+
+    setGoogleAnalyticsEnabled(false)
+
+    const consentEvent = Array.from(window.dataLayer?.[3] as IArguments)
+
+    expect(consentEvent).toEqual([
+      'consent',
+      'update',
+      {
+        analytics_storage: 'denied'
+      }
+    ])
   })
 })

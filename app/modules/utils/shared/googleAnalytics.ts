@@ -3,6 +3,7 @@ const GA_DEBUG_QUERY_KEY = 'ga_debug'
 const GA_DEBUG_ENABLED_VALUE = '1'
 
 let isInitialized = false
+let isGoogleAnalyticsEnabled = true
 
 function isBrowserEnvironment () {
   return typeof window !== 'undefined' && typeof document !== 'undefined'
@@ -26,6 +27,7 @@ function logGaDebug (...args: unknown[]) {
 
 declare global {
   interface Window {
+    [key: `ga-disable-${string}`]: boolean | undefined
     dataLayer?: unknown[]
     gtag?: (...args: unknown[]) => void
   }
@@ -33,7 +35,7 @@ declare global {
 
 export function initializeGoogleAnalytics () {
   const gaId = getGaMeasurementId()
-  if (!gaId || !isBrowserEnvironment()) return false
+  if (!gaId || !isBrowserEnvironment() || !isGoogleAnalyticsEnabled) return false
 
   if (isInitialized && window.gtag) return true
 
@@ -56,6 +58,7 @@ export function initializeGoogleAnalytics () {
   }
 
   window.gtag = window.gtag || gtag
+  setGoogleAnalyticsEnabled(true)
 
   logGaDebug('initialize', {
     measurementId: gaId,
@@ -74,7 +77,7 @@ export function initializeGoogleAnalytics () {
 
 export function trackGoogleAnalytics (pagePath: string) {
   const gaId = getGaMeasurementId()
-  if (!gaId || !isBrowserEnvironment() || !window.gtag) {
+  if (!gaId || !isGoogleAnalyticsEnabled || !isBrowserEnvironment() || !window.gtag) {
     return
   }
 
@@ -98,7 +101,7 @@ export function trackGoogleAnalyticsEvent (
   parameters: Record<string, unknown> = {}
 ) {
   const gaId = getGaMeasurementId()
-  if (!gaId || !isBrowserEnvironment() || !window.gtag) {
+  if (!gaId || !isGoogleAnalyticsEnabled || !isBrowserEnvironment() || !window.gtag) {
     return
   }
 
@@ -113,6 +116,22 @@ export function trackGoogleAnalyticsEvent (
   })
 }
 
+export function setGoogleAnalyticsEnabled(isEnabled: boolean) {
+  isGoogleAnalyticsEnabled = isEnabled
+
+  const gaId = getGaMeasurementId()
+  if (!gaId || !isBrowserEnvironment()) return
+
+  window[`ga-disable-${gaId}`] = !isEnabled
+
+  if (!window.gtag) return
+
+  window.gtag('consent', 'update', {
+    analytics_storage: isEnabled ? 'granted' : 'denied'
+  })
+}
+
 export function resetGoogleAnalyticsForTest () {
   isInitialized = false
+  isGoogleAnalyticsEnabled = true
 }

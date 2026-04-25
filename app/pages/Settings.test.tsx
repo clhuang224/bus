@@ -89,6 +89,19 @@ describe('Settings', () => {
     expect(screen.getByText(i18n.t('pages.settings.analyticsDataNotice'))).toBeInTheDocument()
   })
 
+  it('allows disabling analytics', () => {
+    const { store } = renderSettingsPage()
+    const analyticsToggle = screen.getByRole('switch', {
+      name: i18n.t('pages.settings.analyticsToggleLabel')
+    })
+
+    expect(analyticsToggle).toBeChecked()
+
+    fireEvent.click(analyticsToggle)
+
+    expect(store.getState().analytics.isEnabled).toBe(false)
+  })
+
   it('updates the locale and persists it when the user changes language', async () => {
     const { store } = renderSettingsPage()
 

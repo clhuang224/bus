@@ -10,6 +10,7 @@ const {
   mockDispatch,
   mockUseSelector,
   mockFetchCityGeoJSON,
+  mockUseGoogleAnalytics,
   mockUseWatchGeo,
   mockNavigate,
   mockUseMediaQuery
@@ -17,6 +18,7 @@ const {
   mockDispatch: vi.fn(),
   mockUseSelector: vi.fn(),
   mockFetchCityGeoJSON: vi.fn(),
+  mockUseGoogleAnalytics: vi.fn(),
   mockUseWatchGeo: vi.fn(),
   mockNavigate: vi.fn(),
   mockUseMediaQuery: vi.fn()
@@ -58,6 +60,10 @@ vi.mock('~/modules/hooks/app/useWatchGeo', () => ({
   useWatchGeo: mockUseWatchGeo
 }))
 
+vi.mock('~/modules/hooks/app/useGoogleAnalytics', () => ({
+  useGoogleAnalytics: mockUseGoogleAnalytics
+}))
+
 vi.mock('~/modules/slices/cityGeoSlice', () => ({
   fetchCityGeoJSON: mockFetchCityGeoJSON
 }))
@@ -74,6 +80,7 @@ describe('AppLayout', () => {
     mockDispatch.mockReset()
     mockUseSelector.mockReset()
     mockFetchCityGeoJSON.mockReset()
+    mockUseGoogleAnalytics.mockReset()
     mockUseWatchGeo.mockReset()
     mockNavigate.mockReset()
     mockUseMediaQuery.mockReset()
