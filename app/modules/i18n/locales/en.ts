@@ -95,8 +95,8 @@ export const en = {
         languageSectionTitle: 'Language',
         analyticsSectionTitle: 'Privacy and analytics',
         analyticsDescription: 'This site uses Google Analytics to collect anonymous usage data so we can understand which features are used and which routes are searched.',
-        analyticsDataNotice: 'We do not send your current location, name, or contact information. Search keywords and opened bus routes may be recorded.',
-        analyticsToggleLabel: 'Allow usage analytics',
+        analyticsDataNotice: 'We do not collect your current location, name, or contact information. Search keywords and opened bus routes may be collected. You can turn analytics off with the switch below.',
+        analyticsToggleLabel: 'Share anonymous usage data',
         localeOptions: {
           zhTW: {
             label: 'Traditional Chinese'
