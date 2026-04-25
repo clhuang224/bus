@@ -38,7 +38,12 @@ export function useRouteSearchAnalytics({
   const previousTrackedSearchRef = useRef<string | null>(null)
 
   useEffect(() => {
-    if (!normalizedKeyword || isLoading) return
+    if (!normalizedKeyword) {
+      previousTrackedSearchRef.current = null
+      return
+    }
+
+    if (isLoading) return
 
     const trackingKey = `${area}:${normalizedKeyword}:${resultCount}:${locale}`
     if (previousTrackedSearchRef.current === trackingKey) return

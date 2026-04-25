@@ -78,6 +78,24 @@ describe('useRouteSearchAnalytics', () => {
     expect(mockTrackGoogleAnalyticsEvent).toHaveBeenCalledTimes(1)
   })
 
+  it('tracks the same completed search again after the keyword is cleared', () => {
+    const { rerender } = renderHook(
+      (options: typeof defaultOptions) => useRouteSearchAnalytics(options),
+      {
+        initialProps: defaultOptions
+      }
+    )
+
+    rerender({
+      ...defaultOptions,
+      keyword: '',
+      normalizedKeyword: ''
+    })
+    rerender(defaultOptions)
+
+    expect(mockTrackGoogleAnalyticsEvent).toHaveBeenCalledTimes(2)
+  })
+
   it('tracks the selected route with route metadata', () => {
     const { result } = renderHook(() => useRouteSearchAnalytics({
       ...defaultOptions,
