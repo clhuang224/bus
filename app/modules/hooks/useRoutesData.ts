@@ -7,6 +7,11 @@ import { AreaType } from '~/modules/enums/AreaType'
 import type { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import type { BusRoute } from '~/modules/interfaces/BusRoute'
 import { useLocalizedTextCollator } from '~/modules/hooks/useLocalizedTextCollator'
+import {
+  RouteSearchAnalyticsSource,
+  useRouteSearchAnalytics,
+  type RouteSearchAnalyticsRoute
+} from '~/modules/hooks/useRouteSearchAnalytics'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { setKeyword, setSelectedArea } from '~/modules/slices/routeSearchSlice'
 import type { AppDispatch, RootState } from '~/modules/store'
@@ -15,7 +20,6 @@ import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 import { normalizeBusRoutesWithDates } from '~/modules/utils/route/normalizeBusRoutesWithDates'
 import { normalizeRouteSearchText } from '~/modules/utils/routes/normalizeRouteSearchText'
 import { loadRouteSearchRecentFromStorage } from '~/modules/utils/routes/routeSearchRecentStorage'
-import { trackGoogleAnalyticsEvent } from '~/modules/utils/shared/googleAnalytics'
 
 type SearchableRoute = {
   route: BusRoute<Date | null>
@@ -26,19 +30,8 @@ type SearchableRoute = {
 }
 
 type DisplayRoute = {
-  routeUID: string
-  city: BusRoute<Date | null>['City']
   to: string
-  name: string
-  departure: string
-  destination: string
-  analyticsSource: RouteSearchAnalyticsSource
-}
-
-enum RouteSearchAnalyticsSource {
-  RECENT_ROUTE = 'recent_route',
-  SEARCH_RESULT = 'search_result'
-}
+} & RouteSearchAnalyticsRoute
 
 type RoutesMessage = ReturnType<typeof getSearchMessages>['emptyRoutes'] | null
 
@@ -259,7 +252,6 @@ export function useRoutesData() {
   )
   const normalizedKeyword = normalizeRouteSearchText(keyword)
   const scrollViewportRef = useRef<HTMLDivElement | null>(null)
-  const previousTrackedSearchRef = useRef<string | null>(null)
   const searchableRoutes = useMemo(() => getSearchableRoutes(routes, locale), [locale, routes])
   const compareRouteNames = routeNameCollator.compare
 
@@ -304,37 +296,16 @@ export function useRoutesData() {
     return routesToDisplay.map((route) => toDisplayRoute(route, locale, analyticsSource))
   }, [filteredRoutes, locale, normalizedKeyword, recentRoutes])
 
-  useEffect(() => {
-    if (!normalizedKeyword || isLoading) return
-
-    const trackingKey = `${area}:${normalizedKeyword}:${filteredRoutes.length}:${locale}`
-    if (previousTrackedSearchRef.current === trackingKey) return
-    previousTrackedSearchRef.current = trackingKey
-
-    trackGoogleAnalyticsEvent('route_search', {
-      area,
-      locale,
-      normalized_search_term: normalizedKeyword,
-      result_count: filteredRoutes.length,
-      search_term: keyword
-    })
-  }, [area, filteredRoutes.length, isLoading, keyword, locale, normalizedKeyword])
+  const { trackRouteSelected } = useRouteSearchAnalytics({
+    area,
+    isLoading,
+    keyword,
+    locale,
+    normalizedKeyword,
+    resultCount: filteredRoutes.length
+  })
 
   useResetRoutesScroll(scrollViewportRef, area, keyword)
-
-  const trackRouteSelected = (route: DisplayRoute) => {
-    trackGoogleAnalyticsEvent('select_route', {
-      area,
-      city: route.city,
-      departure: route.departure,
-      destination: route.destination,
-      locale,
-      route_name: route.name,
-      route_uid: route.routeUID,
-      search_term: keyword,
-      source: route.analyticsSource
-    })
-  }
 
   return {
     area,
