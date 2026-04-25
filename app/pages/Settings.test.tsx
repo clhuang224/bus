@@ -81,6 +81,14 @@ describe('Settings', () => {
     expect(screen.getByRole('radio', { name: '繁體中文' })).toBeChecked()
   })
 
+  it('explains analytics data collection', () => {
+    renderSettingsPage()
+
+    expect(screen.getByText(i18n.t('pages.settings.analyticsSectionTitle'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('pages.settings.analyticsDescription'))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('pages.settings.analyticsDataNotice'))).toBeInTheDocument()
+  })
+
   it('updates the locale and persists it when the user changes language', async () => {
     const { store } = renderSettingsPage()
 

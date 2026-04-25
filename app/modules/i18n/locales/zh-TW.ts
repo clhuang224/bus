@@ -93,6 +93,9 @@ export const zhTW = {
         title: '設定',
         backAriaLabel: '返回上一頁',
         languageSectionTitle: '語言',
+        analyticsSectionTitle: '隱私與分析',
+        analyticsDescription: '這個網站會使用 Google Analytics 收集匿名使用資料，協助了解哪些功能常被使用、哪些路線被搜尋，以改善服務。',
+        analyticsDataNotice: '我們不會傳送你的目前位置、姓名或聯絡資訊；搜尋關鍵字與開啟的公車路線可能會被記錄。',
         localeOptions: {
           zhTW: {
             label: '繁體中文'
