@@ -4,7 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   initializeGoogleAnalytics,
   resetGoogleAnalyticsForTest,
-  trackGoogleAnalytics
+  trackGoogleAnalytics,
+  trackGoogleAnalyticsEvent
 } from './googleAnalytics'
 
 const GA_ID = 'G-TEST123456'
@@ -61,6 +62,27 @@ describe('googleAnalytics', () => {
     })
   })
 
+  it('tracks custom events with parameters', () => {
+    initializeGoogleAnalytics()
+
+    trackGoogleAnalyticsEvent('select_route', {
+      route_uid: 'route-1',
+      route_name: '藍1'
+    })
+
+    expect(window.dataLayer?.length).toBe(3)
+
+    const customEvent = window.dataLayer?.[2] as [string, string, Record<string, unknown>]
+
+    expect(customEvent[0]).toBe('event')
+    expect(customEvent[1]).toBe('select_route')
+    expect(customEvent[2]).toMatchObject({
+      route_uid: 'route-1',
+      route_name: '藍1',
+      send_to: GA_ID
+    })
+  })
+
   it('does nothing when measurement id is missing', () => {
     vi.stubEnv('VITE_GA_ID', '')
 
@@ -69,6 +91,9 @@ describe('googleAnalytics', () => {
     expect(initialized).toBe(false)
 
     trackGoogleAnalytics('/routes')
+    trackGoogleAnalyticsEvent('select_route', {
+      route_uid: 'route-1'
+    })
 
     expect(document.getElementById('google-analytics-gtag-script')).toBeNull()
     expect(window.dataLayer).toBeUndefined()

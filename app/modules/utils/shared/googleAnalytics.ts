@@ -93,6 +93,26 @@ export function trackGoogleAnalytics (pagePath: string) {
   })
 }
 
+export function trackGoogleAnalyticsEvent (
+  eventName: string,
+  parameters: Record<string, unknown> = {}
+) {
+  const gaId = getGaMeasurementId()
+  if (!gaId || !isBrowserEnvironment() || !window.gtag) {
+    return
+  }
+
+  logGaDebug(eventName, {
+    ...parameters,
+    measurementId: gaId
+  })
+
+  window.gtag('event', eventName, {
+    ...parameters,
+    send_to: gaId
+  })
+}
+
 export function resetGoogleAnalyticsForTest () {
   isInitialized = false
 }

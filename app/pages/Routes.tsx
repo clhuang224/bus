@@ -18,7 +18,8 @@ export default function Routes() {
     scrollViewportRef,
     setArea,
     setKeyword,
-    showRecentRoutesTitle
+    showRecentRoutesTitle,
+    trackRouteSelected
   } = useRoutesData()
 
   const routeCardSkeletons = Array.from({ length: 6 }, (_, index) => (
@@ -60,6 +61,7 @@ export default function Routes() {
                     city={route.city}
                     departure={route.departure}
                     destination={route.destination}
+                    onClick={() => trackRouteSelected(route)}
                   />
                 ))}
             </Stack>

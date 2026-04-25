@@ -15,7 +15,8 @@ import Routes from './Routes'
 const t = i18n.getFixedT(AppLocaleType.ZH_TW)
 const routeInfoOriginLabel = `${t('components.routeInfoCard.departureLabel')}: 市政府`
 
-const { mockUseGetRoutesByAreaQuery } = vi.hoisted(() => ({
+const { mockTrackGoogleAnalyticsEvent, mockUseGetRoutesByAreaQuery } = vi.hoisted(() => ({
+  mockTrackGoogleAnalyticsEvent: vi.fn(),
   mockUseGetRoutesByAreaQuery: vi.fn()
 }))
 
@@ -23,6 +24,10 @@ vi.mock('~/modules/apis/bus', () => ({
   busApi: {
     useGetRoutesByAreaQuery: mockUseGetRoutesByAreaQuery
   }
+}))
+
+vi.mock('~/modules/utils/shared/googleAnalytics', () => ({
+  trackGoogleAnalyticsEvent: mockTrackGoogleAnalyticsEvent
 }))
 
 vi.mock('~/components/AreaSelect', () => ({
@@ -194,6 +199,7 @@ const renderRoutes = (preloadedRouteSearchState?: {
 describe('Routes', () => {
   beforeEach(() => {
     localStorage.clear()
+    mockTrackGoogleAnalyticsEvent.mockReset()
     vi.mocked(HTMLElement.prototype.scrollTo).mockClear()
     mockUseGetRoutesByAreaQuery.mockReset()
     mockUseGetRoutesByAreaQuery.mockReturnValue({
@@ -287,6 +293,52 @@ describe('Routes', () => {
     })
 
     expect(HTMLElement.prototype.scrollTo).toHaveBeenCalledWith({ top: 0 })
+  })
+
+  it('tracks route searches with the search term and result count', async () => {
+    renderRoutes({
+      keyword: '　藍－１０　'
+    })
+
+    await waitFor(() => {
+      expect(mockTrackGoogleAnalyticsEvent).toHaveBeenCalledWith('route_search', {
+        area: AreaType.TAIPEI,
+        locale: AppLocaleType.ZH_TW,
+        normalized_search_term: '藍10',
+        result_count: 1,
+        search_term: '　藍－１０　'
+      })
+    })
+  })
+
+  it('tracks the selected route from search results', async () => {
+    renderRoutes({
+      keyword: '紅25'
+    })
+
+    await waitFor(() => {
+      expect(mockTrackGoogleAnalyticsEvent).toHaveBeenCalledWith(
+        'route_search',
+        expect.objectContaining({
+          normalized_search_term: '紅25'
+        })
+      )
+    })
+    mockTrackGoogleAnalyticsEvent.mockClear()
+
+    fireEvent.click(screen.getByRole('link', { name: /紅25/ }))
+
+    expect(mockTrackGoogleAnalyticsEvent).toHaveBeenCalledWith('select_route', {
+      area: AreaType.TAIPEI,
+      city: CityNameType.TAIPEI,
+      departure: '台北車站',
+      destination: '北門',
+      locale: AppLocaleType.ZH_TW,
+      route_name: '紅25',
+      route_uid: 'route-2',
+      search_term: '紅25',
+      source: 'search_result'
+    })
   })
 
   it('shows recently viewed routes when the keyword is empty', () => {
