@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router'
-import { updateSearchParam } from '../utils/shared/updateSearchParam'
+import { updateSearchParam } from '~/modules/utils/shared/updateSearchParam'
 
 interface NearbySearchParamUpdates {
   selectedStopId?: string | null

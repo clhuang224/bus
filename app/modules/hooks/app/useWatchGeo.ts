@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { useDispatch } from 'react-redux'
-import { GeoActionType } from '../enums/geo/GeoActionType'
-import { GeoPermissionType } from '../enums/geo/GeoPermissionType'
-import geoSlice from '../slices/geoSlice'
+import { GeoActionType } from '~/modules/enums/geo/GeoActionType'
+import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
+import geoSlice from '~/modules/slices/geoSlice'
 
 export const useWatchGeo = () => {
   const { transitionState } = geoSlice.actions

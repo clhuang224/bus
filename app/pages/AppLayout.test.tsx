@@ -54,7 +54,7 @@ vi.mock('~/components/AppNavLink', () => ({
   )
 }))
 
-vi.mock('~/modules/hooks/useWatchGeo', () => ({
+vi.mock('~/modules/hooks/app/useWatchGeo', () => ({
   useWatchGeo: mockUseWatchGeo
 }))
 

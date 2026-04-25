@@ -94,7 +94,7 @@ vi.mock('~/components/common/AppBadge', () => ({
   AppBadge: ({ children }: { children: React.ReactNode }) => <span>{children}</span>
 }))
 
-vi.mock('~/modules/hooks/useFavoriteRouteStops', () => ({
+vi.mock('~/modules/hooks/favorite/useFavoriteRouteStops', () => ({
   useFavoriteRouteStops: () => ({
     isFavoriteRouteStop: () => false,
     toggleFavoriteRouteStop: mockToggleFavoriteRouteStop

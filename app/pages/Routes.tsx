@@ -5,7 +5,7 @@ import { SearchInput } from '~/components/SearchInput'
 import { BaseAlert } from '~/components/common/BaseAlert'
 import { RouteInfoCard } from '~/components/route/RouteInfoCard'
 import { APP_PAGE_PADDING } from '~/modules/consts/layout'
-import { useRoutesData } from '~/modules/hooks/useRoutesData'
+import { useRoutesData } from '~/modules/hooks/routes/useRoutesData'
 
 export default function Routes() {
   const { t } = useTranslation()

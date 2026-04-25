@@ -6,12 +6,12 @@ import { getSearchMessages } from '~/modules/consts/pageMessages'
 import { AreaType } from '~/modules/enums/AreaType'
 import type { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import type { BusRoute } from '~/modules/interfaces/BusRoute'
-import { useLocalizedTextCollator } from '~/modules/hooks/useLocalizedTextCollator'
+import { useLocalizedTextCollator } from '~/modules/hooks/shared/useLocalizedTextCollator'
 import {
   RouteSearchAnalyticsSource,
   useRouteSearchAnalytics,
   type RouteSearchAnalyticsRoute
-} from '~/modules/hooks/useRouteSearchAnalytics'
+} from './useRouteSearchAnalytics'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { setKeyword, setSelectedArea } from '~/modules/slices/routeSearchSlice'
 import type { AppDispatch, RootState } from '~/modules/store'

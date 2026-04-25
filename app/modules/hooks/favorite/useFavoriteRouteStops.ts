@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux'
-import type { FavoriteRouteStop } from '../interfaces/FavoriteRouteStop'
-import type { AppDispatch } from '../store'
-import favoriteSlice from '../slices/favoriteSlice'
+import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
+import type { AppDispatch } from '~/modules/store'
+import favoriteSlice from '~/modules/slices/favoriteSlice'
 
 export function useFavoriteRouteStops() {
   const dispatch = useDispatch<AppDispatch>()
