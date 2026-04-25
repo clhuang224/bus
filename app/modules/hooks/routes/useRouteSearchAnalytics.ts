@@ -45,7 +45,7 @@ export function useRouteSearchAnalytics({
 
     if (isLoading) return
 
-    const trackingKey = `${area}:${normalizedKeyword}:${resultCount}:${locale}`
+    const trackingKey = `${area}:${keyword}:${normalizedKeyword}:${resultCount}:${locale}`
     if (previousTrackedSearchRef.current === trackingKey) return
     previousTrackedSearchRef.current = trackingKey
 

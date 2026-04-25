@@ -96,6 +96,34 @@ describe('useRouteSearchAnalytics', () => {
     expect(mockTrackGoogleAnalyticsEvent).toHaveBeenCalledTimes(2)
   })
 
+  it('tracks searches again when raw keywords differ but normalize to the same term', () => {
+    const { rerender } = renderHook(
+      (options: typeof defaultOptions) => useRouteSearchAnalytics(options),
+      {
+        initialProps: {
+          ...defaultOptions,
+          keyword: '藍10',
+          normalizedKeyword: '藍10'
+        }
+      }
+    )
+
+    rerender({
+      ...defaultOptions,
+      keyword: '　藍－１０　',
+      normalizedKeyword: '藍10'
+    })
+
+    expect(mockTrackGoogleAnalyticsEvent).toHaveBeenCalledTimes(2)
+    expect(mockTrackGoogleAnalyticsEvent).toHaveBeenLastCalledWith('route_search', {
+      area: AreaType.TAIPEI,
+      locale: AppLocaleType.ZH_TW,
+      normalized_search_term: '藍10',
+      result_count: 1,
+      search_term: '　藍－１０　'
+    })
+  })
+
   it('tracks the selected route with route metadata', () => {
     const { result } = renderHook(() => useRouteSearchAnalytics({
       ...defaultOptions,
