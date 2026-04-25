@@ -9,16 +9,20 @@ import { isWindowUnavailableError } from '../utils/shared/getLocalStorage'
 import type { AppDispatch, RootState } from '.'
 
 const favoritePersistenceListener = createListenerMiddleware()
+const routeSearchPersistenceListener = createListenerMiddleware()
 const analyticsPersistenceListener = createListenerMiddleware()
 
 export const storeListenerMiddlewares = [
   favoritePersistenceListener.middleware,
+  routeSearchPersistenceListener.middleware,
   analyticsPersistenceListener.middleware
 ] as const
 
 export function startStoreListeners() {
   const startFavoriteListening =
     favoritePersistenceListener.startListening.withTypes<RootState, AppDispatch>()
+  const startRouteSearchListening =
+    routeSearchPersistenceListener.startListening.withTypes<RootState, AppDispatch>()
   const startAnalyticsListening =
     analyticsPersistenceListener.startListening.withTypes<RootState, AppDispatch>()
 
@@ -67,7 +71,7 @@ export function startStoreListeners() {
     }
   })
 
-  startFavoriteListening({
+  startRouteSearchListening({
     matcher: isAnyOf(routeSearchSlice.actions.setSelectedArea),
     effect: (_, api) => {
       const previousSelectedArea = api.getOriginalState().routeSearch.selectedArea
