@@ -24,7 +24,7 @@ const {
   mockUseMediaQuery: vi.fn()
 }))
 
-vi.mock('react-redux', async () => {
+vi.mock('react-redux', async() => {
   const actual = await vi.importActual<typeof import('react-redux')>('react-redux')
   return {
     ...actual,
@@ -33,7 +33,7 @@ vi.mock('react-redux', async () => {
   }
 })
 
-vi.mock('react-router', async () => {
+vi.mock('react-router', async() => {
   const actual = await vi.importActual<typeof import('react-router')>('react-router')
   return {
     ...actual,
@@ -42,7 +42,7 @@ vi.mock('react-router', async () => {
   }
 })
 
-vi.mock('@mantine/hooks', async () => {
+vi.mock('@mantine/hooks', async() => {
   const actual = await vi.importActual<typeof import('@mantine/hooks')>('@mantine/hooks')
   return {
     ...actual,

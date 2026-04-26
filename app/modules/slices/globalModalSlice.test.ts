@@ -11,7 +11,7 @@ import globalModalSlice, {
 import { DEFAULT_APP_LOCALE } from '../consts/i18n'
 
 describe('globalModalSlice', () => {
-  afterEach(async () => {
+  afterEach(async() => {
     await i18n.changeLanguage(DEFAULT_APP_LOCALE)
   })
 
@@ -50,7 +50,7 @@ describe('globalModalSlice', () => {
     })
   })
 
-  it('keeps default modal button labels out of reducer state', async () => {
+  it('keeps default modal button labels out of reducer state', async() => {
     await i18n.changeLanguage('en')
 
     const state = globalModalSlice.reducer(undefined, openGlobalModal({

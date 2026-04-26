@@ -3,16 +3,16 @@ const GA_SCRIPT_ID = 'google-analytics-gtag-script'
 let isInitialized = false
 let isEnabled = true
 
-function canUseDom () {
+function canUseDom() {
   return typeof window !== 'undefined' && typeof document !== 'undefined'
 }
 
-function getGaId () {
+function getGaId() {
   const gaId = import.meta.env.VITE_GA_ID
   return gaId || undefined
 }
 
-function getGa () {
+function getGa() {
   const gaId = getGaId()
   if (!gaId || !isEnabled || !canUseDom()) {
     return null
@@ -38,7 +38,7 @@ declare global {
   }
 }
 
-export function initializeGoogleAnalytics () {
+export function initializeGoogleAnalytics() {
   const gaId = getGaId()
   if (!gaId || !canUseDom() || !isEnabled) return false
 
@@ -57,7 +57,7 @@ export function initializeGoogleAnalytics () {
   const dataLayer = window.dataLayer ?? []
   window.dataLayer = dataLayer
 
-  function gtag () {
+  function gtag() {
     // eslint-disable-next-line prefer-rest-params
     dataLayer.push(arguments)
   }
@@ -75,7 +75,7 @@ export function initializeGoogleAnalytics () {
   return true
 }
 
-export function trackGoogleAnalytics (pagePath: string) {
+export function trackGoogleAnalytics(pagePath: string) {
   const ga = getGa()
   if (!ga) return
   const { gaId, gtag } = ga
@@ -88,7 +88,7 @@ export function trackGoogleAnalytics (pagePath: string) {
   })
 }
 
-export function trackGoogleAnalyticsEvent (
+export function trackGoogleAnalyticsEvent(
   eventName: string,
   parameters: Record<string, unknown> = {}
 ) {
@@ -120,7 +120,7 @@ export function setGoogleAnalyticsEnabled(nextIsEnabled: boolean) {
   })
 }
 
-export function resetGoogleAnalyticsForTest () {
+export function resetGoogleAnalyticsForTest() {
   isInitialized = false
   isEnabled = true
 

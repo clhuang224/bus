@@ -224,7 +224,7 @@ describe('Routes', () => {
     expect(screen.getByLabelText('area-select')).toHaveValue(AreaType.TAIPEI)
   })
 
-  it('updates the selected area from the picker', async () => {
+  it('updates the selected area from the picker', async() => {
     const { store } = renderRoutes()
 
     fireEvent.change(screen.getByLabelText('area-select'), {
@@ -279,7 +279,7 @@ describe('Routes', () => {
     expect(screen.queryByText(`${i18n.t('components.routeInfoCard.terminalLabel')}: 市政府`)).not.toBeInTheDocument()
   })
 
-  it('filters routes by the entered keyword', async () => {
+  it('filters routes by the entered keyword', async() => {
     const { store } = renderRoutes()
 
     fireEvent.change(screen.getByLabelText(i18n.t('components.searchInput.ariaLabel')), {
@@ -295,7 +295,7 @@ describe('Routes', () => {
     expect(HTMLElement.prototype.scrollTo).toHaveBeenCalledWith({ top: 0 })
   })
 
-  it('tracks route searches with the search term and result count', async () => {
+  it('tracks route searches with the search term and result count', async() => {
     renderRoutes({
       keyword: '　藍－１０　'
     })
@@ -311,7 +311,7 @@ describe('Routes', () => {
     })
   })
 
-  it('tracks the selected route from search results', async () => {
+  it('tracks the selected route from search results', async() => {
     renderRoutes({
       keyword: '紅25'
     })
@@ -407,7 +407,7 @@ describe('Routes', () => {
     ])
   })
 
-  it('shows the saved keyword from store state', async () => {
+  it('shows the saved keyword from store state', async() => {
     renderRoutes({
       keyword: '紅25'
     })

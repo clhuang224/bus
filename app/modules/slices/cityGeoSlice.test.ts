@@ -51,11 +51,11 @@ describe('cityGeoSlice', () => {
     vi.restoreAllMocks()
   })
 
-  it('writes fetched city geo data into IndexedDB cache with metadata', async () => {
+  it('writes fetched city geo data into IndexedDB cache with metadata', async() => {
     const dispatch = vi.fn()
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,
-      json: async () => mockTopoJson
+      json: async() => mockTopoJson
     } as Response)
 
     mockFeature.mockReturnValue(mockGeoJson)
@@ -74,7 +74,7 @@ describe('cityGeoSlice', () => {
     })
   })
 
-  it('skips asset refresh when IndexedDB cache matches the current asset version', async () => {
+  it('skips asset refresh when IndexedDB cache matches the current asset version', async() => {
     const dispatch = vi.fn()
     const fetchMock = vi.spyOn(globalThis, 'fetch')
 
@@ -94,11 +94,11 @@ describe('cityGeoSlice', () => {
     expect(dispatch).toHaveBeenNthCalledWith(1, setGeoJSON(mockGeoJson))
   })
 
-  it('refreshes from the asset when IndexedDB cache is from an older asset version', async () => {
+  it('refreshes from the asset when IndexedDB cache is from an older asset version', async() => {
     const dispatch = vi.fn()
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,
-      json: async () => mockTopoJson
+      json: async() => mockTopoJson
     } as Response)
 
     mockReadCityBoundaryCache.mockResolvedValue({
@@ -118,7 +118,7 @@ describe('cityGeoSlice', () => {
     expect(dispatch).toHaveBeenNthCalledWith(2, setGeoJSON(mockGeoJson))
   })
 
-  it('keeps cached city geo data in state when background fetch fails', async () => {
+  it('keeps cached city geo data in state when background fetch fails', async() => {
     const dispatch = vi.fn()
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('network down'))
 
@@ -139,11 +139,11 @@ describe('cityGeoSlice', () => {
     expect(dispatch).toHaveBeenNthCalledWith(1, setGeoJSON(mockGeoJson))
   })
 
-  it('sets loading before fetch when no local cache exists', async () => {
+  it('sets loading before fetch when no local cache exists', async() => {
     const dispatch = vi.fn()
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,
-      json: async () => mockTopoJson
+      json: async() => mockTopoJson
     } as Response)
 
     mockReadCityBoundaryCache.mockResolvedValue(null)
@@ -156,7 +156,7 @@ describe('cityGeoSlice', () => {
     expect(dispatch).toHaveBeenNthCalledWith(2, setGeoJSON(mockGeoJson))
   })
 
-  it('sets an error when cache is unavailable and asset refresh fails', async () => {
+  it('sets an error when cache is unavailable and asset refresh fails', async() => {
     const dispatch = vi.fn()
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('network down'))
 

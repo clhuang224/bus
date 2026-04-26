@@ -19,7 +19,7 @@ const {
   mockUseMediaQuery: vi.fn()
 }))
 
-vi.mock('@mantine/hooks', async () => {
+vi.mock('@mantine/hooks', async() => {
   const actual = await vi.importActual<typeof import('@mantine/hooks')>('@mantine/hooks')
   return {
     ...actual,
@@ -27,7 +27,7 @@ vi.mock('@mantine/hooks', async () => {
   }
 })
 
-vi.mock('react-router', async () => {
+vi.mock('react-router', async() => {
   const actual = await vi.importActual<typeof import('react-router')>('react-router')
   return {
     ...actual,
@@ -102,7 +102,7 @@ describe('Settings', () => {
     expect(store.getState().analytics.isEnabled).toBe(false)
   })
 
-  it('updates the locale and persists it when the user changes language', async () => {
+  it('updates the locale and persists it when the user changes language', async() => {
     const { store } = renderSettingsPage()
 
     fireEvent.click(getLocaleRadio(AppLocaleType.EN, AppLocaleType.EN))
@@ -118,7 +118,7 @@ describe('Settings', () => {
     })
   })
 
-  it('restores the saved locale from localStorage after mount', async () => {
+  it('restores the saved locale from localStorage after mount', async() => {
     localStorage.setItem(APP_LOCALE_STORAGE_KEY, AppLocaleType.EN)
 
     renderSettingsPage()
@@ -130,7 +130,7 @@ describe('Settings', () => {
     expect(getLocaleRadio(AppLocaleType.EN, AppLocaleType.EN)).toBeChecked()
   })
 
-  it('does not overwrite the restored locale during startup reconciliation', async () => {
+  it('does not overwrite the restored locale during startup reconciliation', async() => {
     const setItemSpy = vi.spyOn(Storage.prototype, 'setItem')
     try {
       localStorage.setItem(APP_LOCALE_STORAGE_KEY, AppLocaleType.EN)
@@ -150,7 +150,7 @@ describe('Settings', () => {
     }
   })
 
-  it('allows switching away from the restored locale', async () => {
+  it('allows switching away from the restored locale', async() => {
     localStorage.setItem(APP_LOCALE_STORAGE_KEY, AppLocaleType.EN)
 
     const { store } = renderSettingsPage()
@@ -171,7 +171,7 @@ describe('Settings', () => {
     })
   })
 
-  it('keeps the provided locale when localStorage has no saved value', async () => {
+  it('keeps the provided locale when localStorage has no saved value', async() => {
     renderSettingsPage(AppLocaleType.EN)
 
     await waitFor(() => {

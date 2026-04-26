@@ -62,6 +62,7 @@ export default defineConfig([
     rules: {
       semi: ['warn', 'never'],
       'comma-dangle': ['warn', 'never'],
+      'space-before-function-paren': ['error', 'never'],
       quotes: ['warn', 'single', { avoidEscape: true }]
     }
   }

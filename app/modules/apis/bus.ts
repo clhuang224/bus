@@ -39,7 +39,7 @@ const AREA_ROUTES_RETENTION_SECONDS = 60 * 15
 
 export const busApi = createApi({
   reducerPath: 'busApi',
-  baseQuery: async (args, api, extraOptions) => {
+  baseQuery: async(args, api, extraOptions) => {
     const result = await baseQuery(args, api, extraOptions)
     const errorModal = result.error ? getBusErrorModal(result.error) : null
 
@@ -68,13 +68,13 @@ export const busApi = createApi({
         res.map((stopOfRoute) => transformStopOfRoute(stopOfRoute, city))
     }),
     getStopOfRoutesByArea: build.query<StopOfRoute[], { area: AreaType, stopUIDs?: string[] }>({
-      queryFn: async ({ area, stopUIDs = [] }, _api, _extraOptions, baseQuery) => {
+      queryFn: async({ area, stopUIDs = [] }, _api, _extraOptions, baseQuery) => {
         const cityResults = await Promise.all(
-          areaMapCity[area].map(async (city) => ({
+          areaMapCity[area].map(async(city) => ({
             city,
             result: await queryArrayWith414Fallback({
               items: stopUIDs,
-              queryBatch: async (stopUIDBatch) => {
+              queryBatch: async(stopUIDBatch) => {
                 const batchResult = await baseQuery(buildNearbyStopOfRouteQuery(city, stopUIDBatch))
 
                 return {
@@ -111,9 +111,9 @@ export const busApi = createApi({
     }),
     getRoutesByArea: build.query<BusRoute<string>[], AreaType>({
       keepUnusedDataFor: AREA_ROUTES_RETENTION_SECONDS,
-      queryFn: async (area, _api, _extraOptions, baseQuery) => {
+      queryFn: async(area, _api, _extraOptions, baseQuery) => {
         const cityResults = await Promise.all(
-          areaMapCity[area].map(async (city) => ({
+          areaMapCity[area].map(async(city) => ({
             city,
             result: await baseQuery(`/Route/City/${city}?%24format=JSON`)
           }))
@@ -136,7 +136,7 @@ export const busApi = createApi({
       transformResponse: (res: TdxStop[]) => transformStops(res)
     }),
     getStopsByCityAndIds: build.query<Stop[], { city: CityNameType, stopIds: string[] }>({
-      queryFn: async ({ city, stopIds }, _api, _extraOptions, baseQuery) => {
+      queryFn: async({ city, stopIds }, _api, _extraOptions, baseQuery) => {
         if (stopIds.length === 0) {
           return { data: [] }
         }
@@ -144,7 +144,7 @@ export const busApi = createApi({
         const deduplicatedStopIds = Array.from(new Set(stopIds))
         const queryResult = await queryArrayWith414Fallback({
           items: deduplicatedStopIds,
-          queryBatch: async (stopIdBatch) => {
+          queryBatch: async(stopIdBatch) => {
             const batchResult = await baseQuery(buildStopsByCityAndIdsQuery(city, stopIdBatch))
 
             return {
@@ -169,9 +169,9 @@ export const busApi = createApi({
       }
     }),
     getStopsByArea: build.query<Stop[], AreaType>({
-      queryFn: async (area, _api, _extraOptions, baseQuery) => {
+      queryFn: async(area, _api, _extraOptions, baseQuery) => {
         const cityResults = await Promise.all(
-          areaMapCity[area].map(async (city) => ({
+          areaMapCity[area].map(async(city) => ({
             city,
             result: await baseQuery(`/Stop/City/${city}?%24format=JSON`)
           }))
@@ -188,9 +188,9 @@ export const busApi = createApi({
       }
     }),
     getStopsByNearbyArea: build.query<Stop[], { area: AreaType, coords: LatLng }>({
-      queryFn: async ({ area, coords }, _api, _extraOptions, baseQuery) => {
+      queryFn: async({ area, coords }, _api, _extraOptions, baseQuery) => {
         const cityResults = await Promise.all(
-          areaMapCity[area].map(async (city) => ({
+          areaMapCity[area].map(async(city) => ({
             result: await baseQuery(buildNearbyStopQuery(city, coords))
           }))
         )

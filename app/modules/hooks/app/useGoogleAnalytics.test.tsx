@@ -26,7 +26,7 @@ const mockLocation = vi.hoisted(() => ({
   }
 }))
 
-vi.mock('react-router', async () => {
+vi.mock('react-router', async() => {
   const actual = await vi.importActual<typeof import('react-router')>('react-router')
 
   return {
@@ -54,7 +54,7 @@ describe('useGoogleAnalytics', () => {
     }
   })
 
-  it('syncs the analytics preference separately from route page views', async () => {
+  it('syncs the analytics preference separately from route page views', async() => {
     const store = createTestStore()
     const wrapper = ({ children }: PropsWithChildren) => (
       <Provider store={store}>{children}</Provider>

@@ -106,7 +106,7 @@ function isCurrentCityBoundaryCache(assetUrl: string | undefined) {
   return assetUrl === cityBoundaryAssetUrl
 }
 
-export const fetchCityGeoJSON = () => async (dispatch: AppDispatch) => {
+export const fetchCityGeoJSON = () => async(dispatch: AppDispatch) => {
   try {
     const cachedCityBoundary = await loadCityBoundaryFromCache()
 

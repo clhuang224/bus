@@ -25,7 +25,7 @@ import { useGoogleAnalytics } from '~/modules/hooks/app/useGoogleAnalytics'
 import { fetchCityGeoJSON } from '~/modules/slices/cityGeoSlice'
 import type { AppDispatch, RootState } from '~/modules/store'
 
-export default function AppLayout () {
+export default function AppLayout() {
   const dispatch = useDispatch<AppDispatch>()
   const location = useLocation()
   const navigate = useNavigate()

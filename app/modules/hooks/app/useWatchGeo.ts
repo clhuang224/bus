@@ -18,7 +18,7 @@ export const useWatchGeo = () => {
 
     let permissionStatus: PermissionStatus | null = null;
 
-    (async () => {
+    (async() => {
       const permissions = navigator.permissions
       const queryPermission = permissions?.query?.bind(permissions)
       if (!queryPermission) return

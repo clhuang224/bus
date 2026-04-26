@@ -29,7 +29,7 @@ export const AppI18nProvider = ({ children }: PropsWithChildren) => {
   useEffect(() => {
     let cancelled = false
 
-    const applyLocale = async () => {
+    const applyLocale = async() => {
       try {
         await i18n.changeLanguage(locale)
       } finally {

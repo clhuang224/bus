@@ -407,7 +407,7 @@ describe('Route', () => {
     mockDefaultRouteQueries()
   })
 
-  it('moves the opened route to the front of recently viewed routes', async () => {
+  it('moves the opened route to the front of recently viewed routes', async() => {
     localStorage.setItem(ROUTE_SEARCH_RECENT_STORAGE_KEY, JSON.stringify(['route-2', 'route-1']))
 
     renderRoutePage()
@@ -441,7 +441,7 @@ describe('Route', () => {
     )
   })
 
-  it('highlights the saved favorite stop after opening the route page from favorites', async () => {
+  it('highlights the saved favorite stop after opening the route page from favorites', async() => {
     renderRoutePage([{
       pathname: '/routes/Taipei/route-1',
       state: { favoriteRouteStop: targetFavoriteRouteStop }
@@ -496,7 +496,7 @@ describe('Route', () => {
     expect(screen.queryByText('市政府 -')).not.toBeInTheDocument()
   })
 
-  it('shows an inline warning when realtime queries are rate limited', async () => {
+  it('shows an inline warning when realtime queries are rate limited', async() => {
     mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
       data: [],
       isError: true,
@@ -524,7 +524,7 @@ describe('Route', () => {
     })
   })
 
-  it('shows an ambiguous realtime notice when ETA data succeeds but realtime vehicle data is unavailable', async () => {
+  it('shows an ambiguous realtime notice when ETA data succeeds but realtime vehicle data is unavailable', async() => {
     mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
       data: estimatedArrivalsData,
       isError: false,
@@ -550,7 +550,7 @@ describe('Route', () => {
     })
   })
 
-  it('keeps stop ETA rendering available even when bus positions are unavailable', async () => {
+  it('keeps stop ETA rendering available even when bus positions are unavailable', async() => {
     mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
       data: estimatedArrivalsData,
       isError: false,
@@ -578,7 +578,7 @@ describe('Route', () => {
     })
   })
 
-  it('uses realtime by frequency positions for route map vehicles instead of near-stop positions', async () => {
+  it('uses realtime by frequency positions for route map vehicles instead of near-stop positions', async() => {
     mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
       data: [{
         ...realtimeNearStopsData[0],
@@ -615,7 +615,7 @@ describe('Route', () => {
     })
   })
 
-  it('selects only the stop when choosing a stop title from the list', async () => {
+  it('selects only the stop when choosing a stop title from the list', async() => {
     renderRoutePage()
 
     fireEvent.click(screen.getByRole('tab', { name: '返程' }))
@@ -637,7 +637,7 @@ describe('Route', () => {
     })
   })
 
-  it('selects only the vehicle when clicking a realtime plate badge in the list', async () => {
+  it('selects only the vehicle when clicking a realtime plate badge in the list', async() => {
     mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
       data: [{
         ...realtimeNearStopsData[0],
@@ -672,7 +672,7 @@ describe('Route', () => {
     })
   })
 
-  it('selects only the vehicle in the list when clicking a vehicle marker on the map', async () => {
+  it('selects only the vehicle in the list when clicking a vehicle marker on the map', async() => {
     renderRoutePage()
 
     fireEvent.click(screen.getByRole('tab', { name: '返程' }))
@@ -702,7 +702,7 @@ describe('Route', () => {
     })
   })
 
-  it('uses route-level ETA data when subroute fields are omitted by upstream', async () => {
+  it('uses route-level ETA data when subroute fields are omitted by upstream', async() => {
     mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
       data: [{
         ...estimatedArrivalsData[0],
@@ -733,7 +733,7 @@ describe('Route', () => {
     })
   })
 
-  it('shows a non-operating notice when there are no active buses but the route is outside service hours', async () => {
+  it('shows a non-operating notice when there are no active buses but the route is outside service hours', async() => {
     mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
       data: [{
         ...estimatedArrivalsData[0],
@@ -769,7 +769,7 @@ describe('Route', () => {
     })
   })
 
-  it('opens the drawer by default on small screens', async () => {
+  it('opens the drawer by default on small screens', async() => {
     mockMatchMedia({
       matches: (query) => query.includes(themeBreakpointsSmMaxWidth())
     })
