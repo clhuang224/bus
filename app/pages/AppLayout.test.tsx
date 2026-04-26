@@ -10,6 +10,7 @@ const {
   mockDispatch,
   mockUseSelector,
   mockFetchCityGeoJSON,
+  mockUseGoogleAnalytics,
   mockUseWatchGeo,
   mockNavigate,
   mockUseMediaQuery
@@ -17,12 +18,13 @@ const {
   mockDispatch: vi.fn(),
   mockUseSelector: vi.fn(),
   mockFetchCityGeoJSON: vi.fn(),
+  mockUseGoogleAnalytics: vi.fn(),
   mockUseWatchGeo: vi.fn(),
   mockNavigate: vi.fn(),
   mockUseMediaQuery: vi.fn()
 }))
 
-vi.mock('react-redux', async () => {
+vi.mock('react-redux', async() => {
   const actual = await vi.importActual<typeof import('react-redux')>('react-redux')
   return {
     ...actual,
@@ -31,7 +33,7 @@ vi.mock('react-redux', async () => {
   }
 })
 
-vi.mock('react-router', async () => {
+vi.mock('react-router', async() => {
   const actual = await vi.importActual<typeof import('react-router')>('react-router')
   return {
     ...actual,
@@ -40,7 +42,7 @@ vi.mock('react-router', async () => {
   }
 })
 
-vi.mock('@mantine/hooks', async () => {
+vi.mock('@mantine/hooks', async() => {
   const actual = await vi.importActual<typeof import('@mantine/hooks')>('@mantine/hooks')
   return {
     ...actual,
@@ -54,8 +56,12 @@ vi.mock('~/components/AppNavLink', () => ({
   )
 }))
 
-vi.mock('~/modules/hooks/useWatchGeo', () => ({
+vi.mock('~/modules/hooks/app/useWatchGeo', () => ({
   useWatchGeo: mockUseWatchGeo
+}))
+
+vi.mock('~/modules/hooks/app/useGoogleAnalytics', () => ({
+  useGoogleAnalytics: mockUseGoogleAnalytics
 }))
 
 vi.mock('~/modules/slices/cityGeoSlice', () => ({
@@ -74,6 +80,7 @@ describe('AppLayout', () => {
     mockDispatch.mockReset()
     mockUseSelector.mockReset()
     mockFetchCityGeoJSON.mockReset()
+    mockUseGoogleAnalytics.mockReset()
     mockUseWatchGeo.mockReset()
     mockNavigate.mockReset()
     mockUseMediaQuery.mockReset()

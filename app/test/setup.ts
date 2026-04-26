@@ -4,7 +4,7 @@ import { afterEach, vi } from 'vitest'
 import { DEFAULT_APP_LOCALE } from '~/modules/consts/i18n'
 import i18n from '~/modules/i18n'
 
-afterEach(async () => {
+afterEach(async() => {
   cleanup()
   if (typeof document !== 'undefined') {
     document.documentElement.lang = DEFAULT_APP_LOCALE

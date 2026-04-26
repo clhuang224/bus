@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
-import { selectLocale } from '../slices/localeSlice'
+import { selectLocale } from '~/modules/slices/localeSlice'
 
 export function useLocalizedTextCollator() {
   const locale = useSelector(selectLocale)

@@ -6,9 +6,13 @@ import {
   type UnknownAction
 } from '@reduxjs/toolkit'
 import { AppLocaleType } from '~/modules/enums/AppLocaleType'
+import analyticsSlice from '~/modules/slices/analyticsSlice'
 import localeSlice from '~/modules/slices/localeSlice'
 
 type LocaleTestState = {
+  analytics: {
+    isEnabled: boolean
+  }
   locale: {
     value: AppLocaleType
   }
@@ -35,10 +39,14 @@ export function createTestStore<TReducerMap extends ReducersMapObject = Reducers
 
   const store = configureStore({
     reducer: {
+      analytics: analyticsSlice.reducer,
       locale: localeSlice.reducer,
       ...extraReducers
     },
     preloadedState: {
+      analytics: {
+        isEnabled: true
+      },
       locale: {
         value: AppLocaleType.ZH_TW
       },

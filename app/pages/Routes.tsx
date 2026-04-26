@@ -5,7 +5,7 @@ import { SearchInput } from '~/components/SearchInput'
 import { BaseAlert } from '~/components/common/BaseAlert'
 import { RouteInfoCard } from '~/components/route/RouteInfoCard'
 import { APP_PAGE_PADDING } from '~/modules/consts/layout'
-import { useRoutesData } from '~/modules/hooks/useRoutesData'
+import { useRoutesData } from '~/modules/hooks/routes/useRoutesData'
 
 export default function Routes() {
   const { t } = useTranslation()
@@ -18,7 +18,8 @@ export default function Routes() {
     scrollViewportRef,
     setArea,
     setKeyword,
-    showRecentRoutesTitle
+    showRecentRoutesTitle,
+    trackRouteSelected
   } = useRoutesData()
 
   const routeCardSkeletons = Array.from({ length: 6 }, (_, index) => (
@@ -60,6 +61,7 @@ export default function Routes() {
                     city={route.city}
                     departure={route.departure}
                     destination={route.destination}
+                    onClick={() => trackRouteSelected(route)}
                   />
                 ))}
             </Stack>

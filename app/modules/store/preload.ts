@@ -2,6 +2,7 @@ import { DEFAULT_APP_LOCALE } from '../consts/i18n'
 import { loadLocaleFromStorage } from '../i18n/locale'
 import type { AppLocaleType } from '../enums/AppLocaleType'
 import routeSearchSlice from '../slices/routeSearchSlice'
+import { loadAnalyticsEnabledFromStorage } from '../utils/analytics/analyticsPreferenceStorage'
 import { loadFavoriteRouteStopsFromStorage } from '../utils/favorite/favoriteRouteStopStorage'
 import { loadRouteSearchFromStorage } from '../utils/routes/routeSearchStorage'
 import { isWindowUnavailableError } from '../utils/shared/getLocalStorage'
@@ -42,8 +43,23 @@ function getPreloadedLocale(): AppLocaleType {
   }
 }
 
+function getPreloadedAnalyticsEnabled() {
+  try {
+    return loadAnalyticsEnabledFromStorage()
+  } catch (error) {
+    if (!isWindowUnavailableError(error)) {
+      console.warn('Failed to load analytics preference from localStorage.', error)
+    }
+
+    return true
+  }
+}
+
 export function getPreloadedState() {
   return {
+    analytics: {
+      isEnabled: getPreloadedAnalyticsEnabled()
+    },
     favorite: {
       routeStops: getPreloadedFavoriteRouteStops()
     },

@@ -111,7 +111,7 @@ describe('RouteMap', () => {
     vi.restoreAllMocks()
   })
 
-  it('renders only the stop name in the selected stop popup', async () => {
+  it('renders only the stop name in the selected stop popup', async() => {
     const store = createTestStore({
       reducer: {
         geolocation: geoSlice.reducer
@@ -145,7 +145,7 @@ describe('RouteMap', () => {
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 
-  it('shows the navigation button in the selected stop popup on small screens', async () => {
+  it('shows the navigation button in the selected stop popup on small screens', async() => {
     const store = createTestStore({
       reducer: {
         geolocation: geoSlice.reducer
@@ -182,7 +182,7 @@ describe('RouteMap', () => {
     expect(screen.getByRole('button', { name: /導航至\s*市政府/ })).toBeInTheDocument()
   })
 
-  it('fits the initial bounds again when the route changes', async () => {
+  it('fits the initial bounds again when the route changes', async() => {
     const store = createTestStore({
       reducer: {
         geolocation: geoSlice.reducer

@@ -6,7 +6,12 @@ import { getSearchMessages } from '~/modules/consts/pageMessages'
 import { AreaType } from '~/modules/enums/AreaType'
 import type { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import type { BusRoute } from '~/modules/interfaces/BusRoute'
-import { useLocalizedTextCollator } from '~/modules/hooks/useLocalizedTextCollator'
+import { useLocalizedTextCollator } from '~/modules/hooks/shared/useLocalizedTextCollator'
+import {
+  RouteSearchAnalyticsSource,
+  useRouteSearchAnalytics,
+  type RouteSearchAnalyticsRoute
+} from './useRouteSearchAnalytics'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { setKeyword, setSelectedArea } from '~/modules/slices/routeSearchSlice'
 import type { AppDispatch, RootState } from '~/modules/store'
@@ -25,13 +30,8 @@ type SearchableRoute = {
 }
 
 type DisplayRoute = {
-  routeUID: string
-  city: BusRoute<Date | null>['City']
   to: string
-  name: string
-  departure: string
-  destination: string
-}
+} & RouteSearchAnalyticsRoute
 
 type RoutesMessage = ReturnType<typeof getSearchMessages>['emptyRoutes'] | null
 
@@ -164,14 +164,19 @@ function getRecentRoutes(
     .slice(0, 10)
 }
 
-function toDisplayRoute(route: BusRoute<Date | null>, locale: AppLocaleType): DisplayRoute {
+function toDisplayRoute(
+  route: BusRoute<Date | null>,
+  locale: AppLocaleType,
+  analyticsSource: RouteSearchAnalyticsSource
+): DisplayRoute {
   return {
     routeUID: route.RouteUID,
     city: route.City,
     to: `/routes/${route.City}/${route.RouteUID}`,
     name: getLocalizedText(route.RouteName, locale),
     departure: getLocalizedText(route.DepartureStopName, locale),
-    destination: getLocalizedText(route.DestinationStopName, locale)
+    destination: getLocalizedText(route.DestinationStopName, locale),
+    analyticsSource
   }
 }
 
@@ -284,9 +289,21 @@ export function useRoutesData() {
 
   const displayedRoutes = useMemo(() => {
     const routesToDisplay = normalizedKeyword ? filteredRoutes : recentRoutes
+    const analyticsSource = normalizedKeyword
+      ? RouteSearchAnalyticsSource.SEARCH_RESULT
+      : RouteSearchAnalyticsSource.RECENT_ROUTE
 
-    return routesToDisplay.map((route) => toDisplayRoute(route, locale))
+    return routesToDisplay.map((route) => toDisplayRoute(route, locale, analyticsSource))
   }, [filteredRoutes, locale, normalizedKeyword, recentRoutes])
+
+  const { trackRouteSelected } = useRouteSearchAnalytics({
+    area,
+    isLoading,
+    keyword,
+    locale,
+    normalizedKeyword,
+    resultCount: filteredRoutes.length
+  })
 
   useResetRoutesScroll(scrollViewportRef, area, keyword)
 
@@ -299,6 +316,7 @@ export function useRoutesData() {
     scrollViewportRef,
     showRecentRoutesTitle: !message && !normalizedKeyword && recentRoutes.length > 0,
     setArea: (nextArea: AreaType) => dispatch(setSelectedArea(nextArea)),
-    setKeyword: (nextKeyword: string) => dispatch(setKeyword(nextKeyword))
+    setKeyword: (nextKeyword: string) => dispatch(setKeyword(nextKeyword)),
+    trackRouteSelected
   }
 }

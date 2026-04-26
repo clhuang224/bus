@@ -12,6 +12,7 @@ interface PropType {
   city: CityNameType
   departure: string
   destination: string
+  onClick?: () => void
 }
 
 export const RouteInfoCard = ({
@@ -19,7 +20,8 @@ export const RouteInfoCard = ({
   name,
   city,
   departure,
-  destination
+  destination,
+  onClick
 }: PropType) => {
   const { t } = useTranslation()
   const terminalDisplay = getTerminalDisplay(departure, destination)
@@ -34,6 +36,7 @@ export const RouteInfoCard = ({
       <NavLink
         component={Link}
         to={to}
+        onClick={onClick}
         variant="light"
         color="blue"
         px="xs"

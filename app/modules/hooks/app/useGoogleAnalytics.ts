@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
+import { useSelector } from 'react-redux'
 import { useLocation } from 'react-router'
+import { selectAnalyticsEnabled } from '~/modules/slices/analyticsSlice'
 import {
   initializeGoogleAnalytics,
   trackGoogleAnalytics
@@ -7,16 +9,20 @@ import {
 
 export function useGoogleAnalytics() {
   const location = useLocation()
+  const isAnalyticsEnabled = useSelector(selectAnalyticsEnabled)
+  const pagePath = `${location.pathname}${location.search}${location.hash}`
 
   useEffect(() => {
+    if (!isAnalyticsEnabled) {
+      return
+    }
+
     const isGoogleAnalyticsReady = initializeGoogleAnalytics()
 
     if (!isGoogleAnalyticsReady) {
       return
     }
 
-    const pagePath = `${location.pathname}${location.search}${location.hash}`
-
     trackGoogleAnalytics(pagePath)
-  }, [location.pathname, location.search, location.hash])
+  }, [isAnalyticsEnabled, pagePath])
 }
