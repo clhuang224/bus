@@ -129,4 +129,17 @@ describe('googleAnalytics', () => {
       }
     ])
   })
+
+  it('does not update GA consent when the enabled state is unchanged', () => {
+    initializeGoogleAnalytics()
+
+    setGoogleAnalyticsEnabled(true)
+
+    expect(window.dataLayer?.length).toBe(3)
+
+    setGoogleAnalyticsEnabled(false)
+    setGoogleAnalyticsEnabled(false)
+
+    expect(window.dataLayer?.length).toBe(4)
+  })
 })

@@ -11,10 +11,13 @@ import {
 export function useGoogleAnalytics() {
   const location = useLocation()
   const isAnalyticsEnabled = useSelector(selectAnalyticsEnabled)
+  const pagePath = `${location.pathname}${location.search}${location.hash}`
 
   useEffect(() => {
     setGoogleAnalyticsEnabled(isAnalyticsEnabled)
+  }, [isAnalyticsEnabled])
 
+  useEffect(() => {
     if (!isAnalyticsEnabled) {
       return
     }
@@ -25,8 +28,6 @@ export function useGoogleAnalytics() {
       return
     }
 
-    const pagePath = `${location.pathname}${location.search}${location.hash}`
-
     trackGoogleAnalytics(pagePath)
-  }, [isAnalyticsEnabled, location.pathname, location.search, location.hash])
+  }, [isAnalyticsEnabled, pagePath])
 }

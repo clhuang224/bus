@@ -138,9 +138,12 @@ export function setGoogleAnalyticsEnabled(nextIsEnabled: boolean) {
   const gaId = getGaId()
   if (!gaId || !canUseDom()) return
 
-  window[`ga-disable-${gaId}`] = !nextIsEnabled
+  const gaDisableKey = `ga-disable-${gaId}` as const
+  const nextGaDisabled = !nextIsEnabled
+  const shouldUpdateConsent = window[gaDisableKey] !== nextGaDisabled
+  window[gaDisableKey] = nextGaDisabled
 
-  if (!window.gtag) return
+  if (!window.gtag || !shouldUpdateConsent) return
 
   window.gtag('consent', 'update', {
     analytics_storage: nextIsEnabled ? 'granted' : 'denied'
@@ -150,4 +153,9 @@ export function setGoogleAnalyticsEnabled(nextIsEnabled: boolean) {
 export function resetGoogleAnalyticsForTest () {
   isInitialized = false
   isEnabled = true
+
+  const gaId = getGaId()
+  if (gaId && canUseDom()) {
+    delete window[`ga-disable-${gaId}`]
+  }
 }
