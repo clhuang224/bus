@@ -46,10 +46,9 @@ describe('googleAnalytics', () => {
   })
 
   it('tracks page view with path and title', () => {
-    initializeGoogleAnalytics()
-
     trackGoogleAnalytics('/routes?city=Taipei#detail')
 
+    expect(document.getElementById('google-analytics-gtag-script')).not.toBeNull()
     expect(window.dataLayer?.length).toBe(4)
 
     const pageViewEvent = window.dataLayer?.[3] as [string, string, Record<string, unknown>]
@@ -64,13 +63,12 @@ describe('googleAnalytics', () => {
   })
 
   it('tracks custom events with parameters', () => {
-    initializeGoogleAnalytics()
-
     trackGoogleAnalyticsEvent('select_route', {
       route_uid: 'route-1',
       route_name: '藍1'
     })
 
+    expect(document.getElementById('google-analytics-gtag-script')).not.toBeNull()
     expect(window.dataLayer?.length).toBe(4)
 
     const customEvent = window.dataLayer?.[3] as [string, string, Record<string, unknown>]

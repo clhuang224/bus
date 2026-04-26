@@ -3,26 +3,44 @@ const GA_DEBUG_QUERY_KEY = 'ga_debug'
 const GA_DEBUG_ENABLED_VALUE = '1'
 
 let isInitialized = false
-let isGoogleAnalyticsEnabled = true
+let isEnabled = true
 
-function isBrowserEnvironment () {
+function canUseDom () {
   return typeof window !== 'undefined' && typeof document !== 'undefined'
 }
 
-function getGaMeasurementId () {
+function getGaId () {
   const gaId = import.meta.env.VITE_GA_ID
   return gaId || undefined
 }
 
-function isGaDebugEnabled () {
-  if (!isBrowserEnvironment()) return false
+function isDebug () {
+  if (!canUseDom()) return false
   const debugValue = new URLSearchParams(window.location.search).get(GA_DEBUG_QUERY_KEY)
   return debugValue === GA_DEBUG_ENABLED_VALUE
 }
 
-function logGaDebug (...args: unknown[]) {
-  if (!isGaDebugEnabled()) return
+function debug (...args: unknown[]) {
+  if (!isDebug()) return
   console.info('[ga-debug]', ...args)
+}
+
+function getGa () {
+  const gaId = getGaId()
+  if (!gaId || !isEnabled || !canUseDom()) {
+    return null
+  }
+
+  if (!window.gtag && !initializeGoogleAnalytics()) {
+    return null
+  }
+
+  if (!window.gtag) return null
+
+  return {
+    gaId,
+    gtag: window.gtag
+  }
 }
 
 declare global {
@@ -34,8 +52,8 @@ declare global {
 }
 
 export function initializeGoogleAnalytics () {
-  const gaId = getGaMeasurementId()
-  if (!gaId || !isBrowserEnvironment() || !isGoogleAnalyticsEnabled) return false
+  const gaId = getGaId()
+  if (!gaId || !canUseDom() || !isEnabled) return false
 
   if (isInitialized && window.gtag) return true
 
@@ -60,7 +78,7 @@ export function initializeGoogleAnalytics () {
   window.gtag = window.gtag || gtag
   setGoogleAnalyticsEnabled(true)
 
-  logGaDebug('initialize', {
+  debug('initialize', {
     measurementId: gaId,
     hasExistingScript: Boolean(existingScript)
   })
@@ -76,19 +94,18 @@ export function initializeGoogleAnalytics () {
 }
 
 export function trackGoogleAnalytics (pagePath: string) {
-  const gaId = getGaMeasurementId()
-  if (!gaId || !isGoogleAnalyticsEnabled || !isBrowserEnvironment() || !window.gtag) {
-    return
-  }
+  const ga = getGa()
+  if (!ga) return
+  const { gaId, gtag } = ga
 
-  logGaDebug('page_view', {
+  debug('page_view', {
     pageTitle: document.title,
     pageLocation: window.location.href,
     pagePath,
     measurementId: gaId
   })
 
-  window.gtag('event', 'page_view', {
+  gtag('event', 'page_view', {
     page_title: document.title,
     page_location: window.location.href,
     page_path: pagePath,
@@ -100,38 +117,37 @@ export function trackGoogleAnalyticsEvent (
   eventName: string,
   parameters: Record<string, unknown> = {}
 ) {
-  const gaId = getGaMeasurementId()
-  if (!gaId || !isGoogleAnalyticsEnabled || !isBrowserEnvironment() || !window.gtag) {
-    return
-  }
+  const ga = getGa()
+  if (!ga) return
+  const { gaId, gtag } = ga
 
-  logGaDebug(eventName, {
+  debug(eventName, {
     ...parameters,
     measurementId: gaId
   })
 
-  window.gtag('event', eventName, {
+  gtag('event', eventName, {
     ...parameters,
     send_to: gaId
   })
 }
 
-export function setGoogleAnalyticsEnabled(isEnabled: boolean) {
-  isGoogleAnalyticsEnabled = isEnabled
+export function setGoogleAnalyticsEnabled(nextIsEnabled: boolean) {
+  isEnabled = nextIsEnabled
 
-  const gaId = getGaMeasurementId()
-  if (!gaId || !isBrowserEnvironment()) return
+  const gaId = getGaId()
+  if (!gaId || !canUseDom()) return
 
-  window[`ga-disable-${gaId}`] = !isEnabled
+  window[`ga-disable-${gaId}`] = !nextIsEnabled
 
   if (!window.gtag) return
 
   window.gtag('consent', 'update', {
-    analytics_storage: isEnabled ? 'granted' : 'denied'
+    analytics_storage: nextIsEnabled ? 'granted' : 'denied'
   })
 }
 
 export function resetGoogleAnalyticsForTest () {
   isInitialized = false
-  isGoogleAnalyticsEnabled = true
+  isEnabled = true
 }
