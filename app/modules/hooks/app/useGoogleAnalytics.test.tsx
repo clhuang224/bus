@@ -10,11 +10,9 @@ import { useGoogleAnalytics } from './useGoogleAnalytics'
 
 const {
   mockInitializeGoogleAnalytics,
-  mockSetGoogleAnalyticsEnabled,
   mockTrackGoogleAnalytics
 } = vi.hoisted(() => ({
   mockInitializeGoogleAnalytics: vi.fn(),
-  mockSetGoogleAnalyticsEnabled: vi.fn(),
   mockTrackGoogleAnalytics: vi.fn()
 }))
 
@@ -37,7 +35,6 @@ vi.mock('react-router', async() => {
 
 vi.mock('~/modules/utils/shared/googleAnalytics', () => ({
   initializeGoogleAnalytics: mockInitializeGoogleAnalytics,
-  setGoogleAnalyticsEnabled: mockSetGoogleAnalyticsEnabled,
   trackGoogleAnalytics: mockTrackGoogleAnalytics
 }))
 
@@ -45,7 +42,6 @@ describe('useGoogleAnalytics', () => {
   beforeEach(() => {
     mockInitializeGoogleAnalytics.mockReset()
     mockInitializeGoogleAnalytics.mockReturnValue(true)
-    mockSetGoogleAnalyticsEnabled.mockReset()
     mockTrackGoogleAnalytics.mockReset()
     mockLocation.current = {
       hash: '',
@@ -54,7 +50,7 @@ describe('useGoogleAnalytics', () => {
     }
   })
 
-  it('syncs the analytics preference separately from route page views', async() => {
+  it('tracks route page views when analytics is enabled', async() => {
     const store = createTestStore()
     const wrapper = ({ children }: PropsWithChildren) => (
       <Provider store={store}>{children}</Provider>
@@ -62,11 +58,9 @@ describe('useGoogleAnalytics', () => {
     const { rerender } = renderHook(() => useGoogleAnalytics(), { wrapper })
 
     await waitFor(() => {
-      expect(mockSetGoogleAnalyticsEnabled).toHaveBeenCalledWith(true)
       expect(mockTrackGoogleAnalytics).toHaveBeenCalledWith('/routes')
     })
 
-    mockSetGoogleAnalyticsEnabled.mockClear()
     mockTrackGoogleAnalytics.mockClear()
     mockLocation.current = {
       hash: '#detail',
@@ -79,14 +73,28 @@ describe('useGoogleAnalytics', () => {
     await waitFor(() => {
       expect(mockTrackGoogleAnalytics).toHaveBeenCalledWith('/nearby?stop=station-1#detail')
     })
-    expect(mockSetGoogleAnalyticsEnabled).not.toHaveBeenCalled()
 
     mockTrackGoogleAnalytics.mockClear()
     store.dispatch(setAnalyticsEnabled(false))
 
-    await waitFor(() => {
-      expect(mockSetGoogleAnalyticsEnabled).toHaveBeenCalledWith(false)
+    expect(mockTrackGoogleAnalytics).not.toHaveBeenCalled()
+  })
+
+  it('skips page views when analytics is disabled', () => {
+    const store = createTestStore({
+      preloadedState: {
+        analytics: {
+          isEnabled: false
+        }
+      }
     })
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <Provider store={store}>{children}</Provider>
+    )
+
+    renderHook(() => useGoogleAnalytics(), { wrapper })
+
+    expect(mockInitializeGoogleAnalytics).not.toHaveBeenCalled()
     expect(mockTrackGoogleAnalytics).not.toHaveBeenCalled()
   })
 })

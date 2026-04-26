@@ -8,6 +8,7 @@ import geoSlice from '../slices/geoSlice'
 import globalModalSlice from '../slices/globalModalSlice'
 import localeSlice from '../slices/localeSlice'
 import routeSearchSlice from '../slices/routeSearchSlice'
+import { applyAnalyticsPreference } from '../utils/analytics/applyAnalyticsPreference'
 import {
   startStoreListeners,
   storeListenerMiddlewares
@@ -39,5 +40,6 @@ export const store = configureStore({
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
 
+applyAnalyticsPreference(store.getState().analytics.isEnabled)
 startStoreListeners()
 setupListeners(store.dispatch)

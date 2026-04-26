@@ -4,7 +4,6 @@ import { useLocation } from 'react-router'
 import { selectAnalyticsEnabled } from '~/modules/slices/analyticsSlice'
 import {
   initializeGoogleAnalytics,
-  setGoogleAnalyticsEnabled,
   trackGoogleAnalytics
 } from '~/modules/utils/shared/googleAnalytics'
 
@@ -12,10 +11,6 @@ export function useGoogleAnalytics() {
   const location = useLocation()
   const isAnalyticsEnabled = useSelector(selectAnalyticsEnabled)
   const pagePath = `${location.pathname}${location.search}${location.hash}`
-
-  useEffect(() => {
-    setGoogleAnalyticsEnabled(isAnalyticsEnabled)
-  }, [isAnalyticsEnabled])
 
   useEffect(() => {
     if (!isAnalyticsEnabled) {

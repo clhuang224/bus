@@ -2,6 +2,7 @@ import { createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit'
 import analyticsSlice from '../slices/analyticsSlice'
 import favoriteSlice from '../slices/favoriteSlice'
 import routeSearchSlice from '../slices/routeSearchSlice'
+import { applyAnalyticsPreference } from '../utils/analytics/applyAnalyticsPreference'
 import { persistAnalyticsEnabledToStorage } from '../utils/analytics/analyticsPreferenceStorage'
 import { persistFavoriteRouteStops } from '../utils/favorite/favoriteRouteStopStorage'
 import { persistRouteSearchToStorage } from '../utils/routes/routeSearchStorage'
@@ -35,6 +36,8 @@ export function startStoreListeners() {
       if (previousAnalyticsEnabled === currentAnalyticsEnabled) {
         return
       }
+
+      applyAnalyticsPreference(currentAnalyticsEnabled)
 
       try {
         persistAnalyticsEnabledToStorage(currentAnalyticsEnabled)
