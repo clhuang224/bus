@@ -28,9 +28,16 @@ export function startStoreListeners() {
 
   startAnalyticsListening({
     actionCreator: analyticsSlice.actions.setAnalyticsEnabled,
-    effect: (action) => {
+    effect: (_, api) => {
+      const previousAnalyticsEnabled = api.getOriginalState().analytics.isEnabled
+      const currentAnalyticsEnabled = api.getState().analytics.isEnabled
+
+      if (previousAnalyticsEnabled === currentAnalyticsEnabled) {
+        return
+      }
+
       try {
-        persistAnalyticsEnabledToStorage(action.payload)
+        persistAnalyticsEnabledToStorage(currentAnalyticsEnabled)
       } catch (error) {
         if (isWindowUnavailableError(error)) {
           return
