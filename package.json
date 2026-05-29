@@ -5,20 +5,15 @@
   "packageManager": "pnpm@11.4.0",
   "scripts": {
     "prepare": "husky",
-    "build": "pnpm --filter @bus/web build",
-    "dev": "concurrently -k -n proxy,web \"pnpm run dev:proxy\" \"pnpm --filter @bus/web dev\"",
-    "dev:mobile": "concurrently -k -n proxy,web \"pnpm run dev:proxy:mobile\" \"pnpm --filter @bus/web dev:mobile\"",
-    "dev:proxy": "wrangler dev --config workers/tdx-proxy/wrangler.jsonc --port 3000",
-    "dev:proxy:mobile": "wrangler dev --config workers/tdx-proxy/wrangler.jsonc --port 3000 --ip 0.0.0.0",
-    "deploy:proxy": "wrangler deploy --config workers/tdx-proxy/wrangler.jsonc",
-    "start": "pnpm --filter @bus/web start",
-    "test": "pnpm --filter @bus/web test",
-    "typecheck": "pnpm --filter @bus/web typecheck",
-    "lint": "pnpm --filter @bus/web lint"
+    "build": "pnpm -r --if-present build",
+    "dev": "concurrently -k -n proxy,web \"pnpm --filter @bus/tdx-proxy dev\" \"pnpm --filter @bus/web dev\"",
+    "dev:mobile": "concurrently -k -n proxy,web \"pnpm --filter @bus/tdx-proxy dev:mobile\" \"pnpm --filter @bus/web dev:mobile\"",
+    "test": "pnpm -r --if-present test",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "lint": "pnpm -r --if-present lint"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
-    "husky": "^9.1.7",
-    "wrangler": "^4.75.0"
+    "husky": "^9.1.7"
   }
 }

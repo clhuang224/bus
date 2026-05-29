@@ -4,23 +4,20 @@ on:
   pull_request:
 
 jobs:
-  lint:
+  workspace-checks:
+    name: ${{ matrix.workspace }} / ${{ matrix.command }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - workspace: '@bus/web'
+            command: lint
+          - workspace: '@bus/web'
+            command: typecheck
+          - workspace: '@bus/web'
+            command: test
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-pnpm
-      - run: pnpm run lint
-
-  typecheck:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-pnpm
-      - run: pnpm run typecheck
-
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-pnpm
-      - run: pnpm run test
+      - run: pnpm --filter "${{ matrix.workspace }}" run ${{ matrix.command }}

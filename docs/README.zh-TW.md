@@ -91,13 +91,11 @@ apps/
 │   │   ├── root.tsx           # App root
 │   │   └── routes.ts          # Route definitions
 │   └── public/                # Static assets
+├── tdx-proxy/                 # Cloudflare Worker proxy for local/web deployment
 └── api/                       # Planned NestJS backend
 
 packages/
 └── shared/                    # Planned shared API contracts 與 domain types
-
-workers/
-└── tdx-proxy/         # Cloudflare Worker proxy
 ```
 
 ## 開放資料來源
@@ -149,7 +147,7 @@ pnpm install
 
 ### 設定環境變數
 
-1. 將 `workers/tdx-proxy/.dev.vars.example` 複製為 `workers/tdx-proxy/.dev.vars`。
+1. 將 `apps/tdx-proxy/.dev.vars.example` 複製為 `apps/tdx-proxy/.dev.vars`。
 2. 填入 `TDX_CLIENT_ID` 與 `TDX_CLIENT_SECRET`。
 
 ### 本地執行
@@ -181,6 +179,6 @@ pnpm test
 前端會以靜態網站部署，TDX 驗證則交由獨立的 Cloudflare Worker proxy 處理。
 
 1. 在 Cloudflare Worker environment bindings 中設定 `TDX_CLIENT_ID`、`TDX_CLIENT_SECRET` 與 `ALLOWED_ORIGINS`。
-2. 使用 `pnpm run deploy:proxy` 部署 Worker。
+2. 使用 `pnpm --filter @bus/tdx-proxy deploy` 部署 Worker。
 3. 在 GitHub Actions repository variable 中設定 `VITE_PROXY_API_BASE_URL`。
-4. 讓 GitHub Pages build 在 `pnpm run build` 時注入該值。
+4. 讓 GitHub Pages workflow 在 `pnpm --filter @bus/web build` 時注入該值。

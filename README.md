@@ -91,13 +91,11 @@ apps/
 │   │   ├── root.tsx           # App root
 │   │   └── routes.ts          # Route definitions
 │   └── public/                # Static assets
+├── tdx-proxy/                 # Cloudflare Worker proxy for local/web deployment
 └── api/                       # Planned NestJS backend
 
 packages/
 └── shared/                    # Planned shared API contracts and domain types
-
-workers/
-└── tdx-proxy/         # Cloudflare Worker proxy
 ```
 
 ## Open Data
@@ -149,7 +147,7 @@ pnpm install
 
 ### Set environment variables
 
-1. Copy `workers/tdx-proxy/.dev.vars.example` to `workers/tdx-proxy/.dev.vars`.
+1. Copy `apps/tdx-proxy/.dev.vars.example` to `apps/tdx-proxy/.dev.vars`.
 2. Fill in `TDX_CLIENT_ID` and `TDX_CLIENT_SECRET`.
 
 ### Run locally
@@ -183,7 +181,7 @@ pnpm test
 The frontend is deployed as a static app, while TDX authentication is handled by a separate Cloudflare Worker proxy.
 
 1. Store `TDX_CLIENT_ID`, `TDX_CLIENT_SECRET`, and `ALLOWED_ORIGINS` in Cloudflare Worker environment bindings.
-2. Deploy the Worker with `pnpm run deploy:proxy`.
+2. Deploy the Worker with `pnpm --filter @bus/tdx-proxy deploy`.
 3. Store `VITE_PROXY_API_BASE_URL` as a GitHub Actions repository variable.
 4. Optional: store `VITE_GA_ID` as a GitHub Actions repository variable to enable GA4 pageview tracking.
-5. Let the GitHub Pages build inject those values during `pnpm run build`.
+5. Let the GitHub Pages workflow inject those values during `pnpm --filter @bus/web build`.

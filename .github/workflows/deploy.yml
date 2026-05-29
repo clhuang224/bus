@@ -6,29 +6,20 @@ on:
       - main
 
 jobs:
-  lint:
+  web-checks:
+    name: ${{ matrix.command }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        command: [lint, typecheck, test]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-pnpm
-      - run: pnpm run lint
+      - run: pnpm --filter @bus/web run ${{ matrix.command }}
 
-  typecheck:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-pnpm
-      - run: pnpm run typecheck
-
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-pnpm
-      - run: pnpm run test
-
-  build:
-    needs: [lint, typecheck, test]
+  build-web:
+    needs: web-checks
     runs-on: ubuntu-latest
     env:
       VITE_PROXY_API_BASE_URL: ${{ vars.VITE_PROXY_API_BASE_URL }}
@@ -37,14 +28,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-pnpm
       - uses: actions/configure-pages@v5
-      - run: pnpm run build
+      - run: pnpm --filter @bus/web build
       - run: cp apps/web/build/client/index.html apps/web/build/client/404.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: apps/web/build/client
 
   deploy:
-    needs: build
+    needs: build-web
     runs-on: ubuntu-latest
     permissions:
       contents: read
