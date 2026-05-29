@@ -2,186 +2,95 @@
 
 [English](./README.md) | [繁體中文](./docs/README.zh-TW.md)
 
-A bus-focused single-page application for route lookup, nearby stops, and real-time transit information in Taiwan.
+A Taiwan bus app organized as a pnpm monorepo. It started as a frontend-only project and is gradually growing into a clearer frontend/backend architecture.
 
-## How To Use
+The current production app is the React Router frontend for route lookup, nearby stops, favorites, language settings, and realtime transit information. Backend, database sync, and shared API contracts will be introduced step by step.
 
-Visit [bus.lynns.me](https://bus.lynns.me) to start using the app.
-
-## Screenshot
-
-![demo](./docs/assets/demo.png)
-
-## Features
-
-### Route Search
-
-Search bus routes by service area and keyword.
-
-- The Routes page defaults to the area resolved from the user's current location.
-- If the user manually changes the area, that selection is preserved across revisits.
-- When the search box is empty, the page shows recently viewed routes when available for quick access.
-- Matching routes open a route detail page with subroute tabs, stop lists, and a synchronized map.
-
-### Route Detail
-
-The Route page combines stop lists, map interaction, and real-time transit data.
-
-- Official route shape data is used for more accurate route lines on the map when available.
-- The stop list and map stay in sync: selecting a stop in one view updates the other.
-- Stops can open Google Maps navigation from the stop list, and the route map includes a control to focus back on the user's current location.
-- Each stop shows stop-level ETA based directly on `EstimatedTimeOfArrival` when upstream ETA data is available.
-- Real-time vehicle plates are shown as separate location cues in the stop list and do not define the stop ETA.
-- Route map vehicle markers use live GPS coordinates from `RealTimeByFrequency` when upstream realtime position data is available.
-- The app shows real-time status messaging such as temporary data issues or non-operating service periods.
-
-### Nearby Stops
-
-The Nearby Stops page uses the user's current GPS location.
-
-- If location permission is granted, the app resolves the current city and service area automatically.
-- Stops within **0.5 kilometers** are shown as both a list and map markers.
-- Selecting a stop reveals stop details, including its distance, city, address, and serving route badges.
-- Stop details can open Google Maps navigation directly.
-- Opening a stop's route detail view shows the full route list grouped by direction.
-
-If location permission is denied, the Nearby Stops feature becomes unavailable.
-
-### Favorites
-
-The Favorites page stores route-stop combinations for quick access.
-
-- Each favorite keeps the route, subroute, direction, and a specific stop.
-- Opening a favorite jumps back into the matching Route page and highlights the saved stop.
-
-### Language Settings
-
-The app currently supports both `zh-TW` and `en`.
-
-- Users can switch the interface language from the Settings page.
-- The selected language is saved in local storage and restored on the next visit.
-- Static UI copy comes from shared translation resources.
-- API-backed route, subroute, stop, departure, and destination text follows the active locale, preferring English when available and falling back to `zh-TW` when English data is missing.
-
-## Tech Stack
-
-- **Framework:** React SPA with React Router v7
-- **Language:** TypeScript
-- **UI:** Mantine
-- **State and Data:** Redux Toolkit and RTK Query
-- **Maps:** MapLibre GL JS with OpenFreeMap tiles
-- **API Proxy:** Cloudflare Workers
-- **Worker Tooling:** Wrangler
-- **Geospatial Utilities:** Turf.js
-- **Testing:** Vitest and React Testing Library
-- **Tooling:** Vite, ESLint, pnpm workspaces
-
-## Project Structure
-
-The repository is organized as a pnpm monorepo. The current production app lives in `apps/web`, with backend and shared-package work planned alongside it.
+## Workspaces
 
 ```text
 apps/
-├── web/
-│   ├── app/
-│   │   ├── components/        # Shared and feature UI
-│   │   ├── modules/           # APIs, store, hooks, models, i18n, and utilities
-│   │   ├── pages/             # Favorite, Routes, Nearby, Route, and Settings pages
-│   │   ├── test/              # Shared test setup and render helpers
-│   │   ├── root.tsx           # App root
-│   │   └── routes.ts          # Route definitions
-│   └── public/                # Static assets
-├── tdx-proxy/                 # Cloudflare Worker proxy for local/web deployment
-└── api/                       # Planned NestJS backend
+├── web/          # React Router frontend
+├── tdx-proxy/    # Cloudflare Worker proxy for TDX authentication
+└── api/          # Planned NestJS backend
 
 packages/
-└── shared/                    # Planned shared API contracts and domain types
+└── shared/       # Planned shared API contracts and domain types
 ```
 
-## Open Data
+## Workspace Docs
 
-The project relies on two external open data sources.
+| Workspace | Purpose | Docs |
+| --- | --- | --- |
+| `apps/web` | User-facing React Router app | [apps/web/README.md](./apps/web/README.md) |
+| `apps/tdx-proxy` | Cloudflare Worker proxy for TDX auth | [apps/tdx-proxy/README.md](./apps/tdx-proxy/README.md) |
+| `apps/api` | Planned NestJS backend | [apps/api/README.md](./apps/api/README.md) |
+| `packages/shared` | Planned shared API contracts and domain types | [packages/shared/README.md](./packages/shared/README.md) |
 
-### TDX Bus API
+For the backend and database direction, start with [docs/plan.md](./docs/plan.md).
 
-`https://tdx.transportdata.tw/api/basic/v2/Bus`
+## How To Use
 
-TDX, short for Transport Data eXchange, provides the route, stop, realtime, and shape data used by this app. Frontend requests go through a Cloudflare Worker proxy that handles TDX authentication.
+Visit [bus.lynns.me](https://bus.lynns.me) to use the current frontend version.
 
-The app uses TDX data for:
+![demo](./docs/assets/demo.png)
 
-- route search and route detail lookups
-- stop and station discovery for nearby views
-- stop-level ETA, near-stop vehicle cues, and live map vehicle positions
-- official route shape rendering on maps
+## Setup
 
-Current endpoint usage:
-
-| Endpoint | Used For |
-| --- | --- |
-| `/Route/City/:city` | route search and route detail |
-| `/StopOfRoute/City/:city` | route stop lists and nearby route relationships |
-| `/Stop/City/:city` | nearby stop discovery and map stop positions |
-| `/EstimatedTimeOfArrival/City/:city` | stop-level ETA |
-| `/RealTimeNearStop/City/:city` | stop-list vehicle cues and near-stop status |
-| `/RealTimeByFrequency/City/:city` | route map vehicle GPS positions |
-| `/Shape/City/:city` | route map path rendering |
-
-Realtime data is best-effort and may be temporarily unavailable when the shared proxy-backed key hits upstream rate limits.
-
-### Taiwan County Boundaries
-
-Boundary data comes from the counties dataset in [dkaoster/taiwan-atlas](https://github.com/dkaoster/taiwan-atlas):
-
-`https://cdn.jsdelivr.net/npm/taiwan-atlas/counties-10t.json`
-
-The project vendors that TopoJSON dataset as a local static asset and converts it into GeoJSON at runtime to determine the user's city and area for nearby-stop and route-search flows.
-
-## Development
-
-### Install dependencies
+Install dependencies:
 
 ```bash
 pnpm install
 ```
 
-### Set environment variables
+Set up the local TDX proxy. This keeps local development behind the Worker proxy instead of putting TDX credentials in the frontend:
 
-1. Copy `apps/tdx-proxy/.dev.vars.example` to `apps/tdx-proxy/.dev.vars`.
-2. Fill in `TDX_CLIENT_ID` and `TDX_CLIENT_SECRET`.
+```bash
+cp apps/tdx-proxy/.dev.vars.example apps/tdx-proxy/.dev.vars
+```
 
-### Run locally
+Then fill in `TDX_CLIENT_ID` and `TDX_CLIENT_SECRET` in `.dev.vars`.
 
-Start local development with:
+## Development
+
+For day-to-day development, start both the frontend dev server and local Worker proxy from the root:
 
 ```bash
 pnpm run dev
 ```
 
-This starts both the frontend dev server and the local Cloudflare Worker proxy.
-
-To test from another device on the same network, start the mobile-friendly dev mode, then open the site using your computer's LAN IP:
+For mobile testing on the same local network:
 
 ```bash
 pnpm run dev:mobile
 ```
 
-This exposes both the frontend and the local Worker proxy on your LAN. In development, the frontend uses the relative path `/api/tdx`, and the Vite dev server proxies that path to the local Worker on port `3000`. Open `http://<your-lan-ip>:5173` on your phone after replacing the IP with your own.
+## Checks
 
-### Test
+To check the whole workspace:
 
 ```bash
 pnpm run lint
 pnpm run typecheck
-pnpm test
+pnpm run test
 ```
 
-## Deployment Notes
+If the change only touches the frontend, run the web workspace checks:
 
-The frontend is deployed as a static app, while TDX authentication is handled by a separate Cloudflare Worker proxy.
+```bash
+pnpm --filter @bus/web lint
+pnpm --filter @bus/web typecheck
+pnpm --filter @bus/web test
+```
 
-1. Store `TDX_CLIENT_ID`, `TDX_CLIENT_SECRET`, and `ALLOWED_ORIGINS` in Cloudflare Worker environment bindings.
-2. Deploy the Worker with `pnpm --filter @bus/tdx-proxy deploy`.
-3. Store `VITE_PROXY_API_BASE_URL` as a GitHub Actions repository variable.
-4. Optional: store `VITE_GA_ID` as a GitHub Actions repository variable to enable GA4 pageview tracking.
-5. Let the GitHub Pages workflow inject those values during `pnpm --filter @bus/web build`.
+## Deployment
+
+The GitHub Actions workflow currently builds and deploys only `@bus/web` to GitHub Pages.
+
+The TDX proxy is still deployed manually so frontend deploys do not automatically roll the Worker:
+
+```bash
+pnpm --filter @bus/tdx-proxy deploy
+```
+
+The planned NestJS backend is not deployed yet.

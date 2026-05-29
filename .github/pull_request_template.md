@@ -17,6 +17,7 @@ Describe the user-facing goal or engineering purpose of this PR.
 ## Validation
 
 List the checks you ran for this PR. If something was intentionally not run, note that here with a short reason.
+Use workspace-specific checks when the PR only touches one workspace. Current CI checks the web workspace.
 
 - [ ] `pnpm --filter @bus/web lint`
 - [ ] `pnpm --filter @bus/web typecheck`
