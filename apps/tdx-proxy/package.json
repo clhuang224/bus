@@ -1,0 +1,13 @@
+{
+  "name": "@bus/tdx-proxy",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --config wrangler.jsonc --port 3000",
+    "dev:mobile": "wrangler dev --config wrangler.jsonc --port 3000 --ip 0.0.0.0",
+    "deploy": "wrangler deploy --config wrangler.jsonc"
+  },
+  "devDependencies": {
+    "wrangler": "4.75.0"
+  }
+}

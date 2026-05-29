@@ -1,8 +1,70 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
-import { afterEach, vi } from 'vitest'
+import { afterEach, beforeEach, vi } from 'vitest'
 import { DEFAULT_APP_LOCALE } from '~/modules/consts/i18n'
 import i18n from '~/modules/i18n'
+
+class TestStorage implements Storage {
+  private readonly values = new Map<string, string>()
+
+  get length() {
+    return this.values.size
+  }
+
+  clear() {
+    this.values.clear()
+  }
+
+  getItem(key: string) {
+    return this.values.get(key) ?? null
+  }
+
+  key(index: number) {
+    return Array.from(this.values.keys())[index] ?? null
+  }
+
+  removeItem(key: string) {
+    this.values.delete(key)
+  }
+
+  setItem(key: string, value: string) {
+    this.values.set(key, value)
+  }
+}
+
+function installTestStorage() {
+  const storage = new TestStorage()
+
+  Object.defineProperty(globalThis, 'Storage', {
+    configurable: true,
+    value: TestStorage
+  })
+
+  Object.defineProperty(globalThis, 'localStorage', {
+    configurable: true,
+    value: storage
+  })
+
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  Object.defineProperty(window, 'Storage', {
+    configurable: true,
+    value: TestStorage
+  })
+
+  Object.defineProperty(window, 'localStorage', {
+    configurable: true,
+    get: () => storage
+  })
+}
+
+installTestStorage()
+
+beforeEach(() => {
+  installTestStorage()
+})
 
 afterEach(async() => {
   cleanup()

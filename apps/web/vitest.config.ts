@@ -11,7 +11,12 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.VITE_PROXY_API_BASE_URL': JSON.stringify(env.VITE_PROXY_API_BASE_URL)
     },
     test: {
-      environment: 'node',
+      environment: 'jsdom',
+      environmentOptions: {
+        jsdom: {
+          url: 'http://localhost/'
+        }
+      },
       include: ['app/**/*.test.ts', 'app/**/*.test.tsx'],
       setupFiles: ['app/test/setup.ts']
     }

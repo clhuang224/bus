@@ -21,12 +21,14 @@ Move the project to a pnpm workspace:
 ```txt
 apps/
   web/
+  tdx-proxy/
   api/
 packages/
   shared/
 ```
 
 - `apps/web`: existing React Router frontend
+- `apps/tdx-proxy`: existing Cloudflare Worker proxy for TDX authentication
 - `apps/api`: new NestJS backend
 - `packages/shared`: shared API contracts and domain types
 

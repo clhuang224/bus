@@ -2,195 +2,95 @@
 
 [English](../README.md) | [繁體中文](./README.zh-TW.md)
 
-這是一個以台灣公車查詢為主的單頁應用，提供路線搜尋、附近站牌，以及即時公車資訊。
+這是一個查詢台灣公車路線的應用。一開始是單純的前端專案，現在正在慢慢長成前後端分工更清楚的 monorepo。
+
+目前正式上線的是 React Router 前端，提供路線搜尋、附近站牌、收藏、語言設定與即時公車資訊。接下來會逐步加入後端、資料庫同步，以及前後端共用的 API contract。
+
+## Workspaces
+
+```text
+apps/
+├── web/          # React Router 前端
+├── tdx-proxy/    # TDX 驗證用的 Cloudflare Worker proxy
+└── api/          # 待開發 NestJS 後端
+
+packages/
+└── shared/       # 待開發共用 API contract 與型別
+```
+
+## Workspace 文件
+
+| Workspace | 用途 | 文件 |
+| --- | --- | --- |
+| `apps/web` | 使用者介面的 React Router app | [apps/web/README.md](../apps/web/README.md) |
+| `apps/tdx-proxy` | TDX 驗證用 Cloudflare Worker proxy | [apps/tdx-proxy/README.md](../apps/tdx-proxy/README.md) |
+| `apps/api` | 預計導入的 NestJS 後端 | [apps/api/README.md](../apps/api/README.md) |
+| `packages/shared` | 預計放共用 API contract 與 domain types | [packages/shared/README.md](../packages/shared/README.md) |
+
+如果想了解後端與資料庫的規劃，可以先看 [docs/plan.md](./plan.md)。
 
 ## 如何使用
 
-直接前往 [bus.lynns.me](https://bus.lynns.me) 即可開始使用。
-
-## 畫面預覽
+直接前往 [bus.lynns.me](https://bus.lynns.me) 即可開始使用目前的前端版本。
 
 ![demo](./assets/demo.zh-TW.png)
 
-## 功能特色
+## 設定
 
-### 搜尋公車
-
-可以依服務區域與關鍵字搜尋公車路線。
-
-- `Routes` 頁預設會帶入目前定位推得的區域。
-- 如果使用者手動切換區域，這個選擇會在之後回訪時保留。
-- 當搜尋框為空時，頁面會顯示最近查看的路線，方便快速回到常用路線。
-- 點進路線之後，會進入路線詳情頁，裡面有子路線分頁、站序列表和同步地圖。
-
-### 路線詳情
-
-`Route` 頁整合了站序列表、地圖互動，以及即時公車資料。
-
-- 如果有官方路線 shape，地圖會優先使用它來呈現更準確的路線軌跡。
-- 站序列表和地圖會保持同步，從任一邊選擇站點，另一邊也會跟著高亮。
-- 站牌可直接開啟 Google Maps 導航，地圖也提供回到目前位置的操作。
-- 每一站的 ETA 直接以 `EstimatedTimeOfArrival` 為準。
-- 即時車牌只作為車輛位置提示，不會拿來覆蓋站點 ETA 的語意。
-- 有即時定位資料時，地圖上的公車位置會使用 `RealTimeByFrequency` 的 GPS 座標。
-- 畫面也會顯示即時資料異常、收班或暫停營運等狀態訊息。
-
-### 附近站牌
-
-`Nearby` 頁會使用使用者目前的 GPS 位置。
-
-- 使用者允許定位後，系統會自動推得目前所在的城市與服務區域。
-- **0.5 公里**內的站牌會同時顯示在列表和地圖上。
-- 選擇站牌後，可以查看站牌的詳細資訊，例如距離、縣市、地址和經過路線。
-- 站牌詳細資訊可直接開啟 Google Maps 導航。
-- 展開該站的路線明細後，可以依方向查看完整的路線列表。
-
-如果使用者拒絕位置權限，附近站牌功能將無法使用。
-
-### 我的最愛
-
-`Favorite` 頁會儲存「路線 + 子路線 + 特定站牌」這種組合，方便快速回到常用站點。
-
-- 每筆收藏都會記住路線、子路線、方向和對應站牌。
-- 從收藏開啟時，會回到對應的 `Route` 頁，並自動高亮已儲存的站點。
-
-### 語言設定
-
-目前支援 `zh-TW` 與 `en` 兩種語系。
-
-- 使用者可以在 `Settings` 頁切換介面語言。
-- 選定的語言會存進 local storage，重新開啟後會自動還原。
-- 靜態 UI 文案來自共用翻譯資源。
-- TDX API 回傳的 route、subroute、stop、departure、destination 文字也會跟著目前語系顯示；在英文模式下會優先使用 `en`，如果英文資料缺值，則回退到 `zh-TW`。
-
-## 技術棧
-
-- **Framework:** React SPA with React Router v7
-- **Language:** TypeScript
-- **UI:** Mantine
-- **State and Data:** Redux Toolkit 與 RTK Query
-- **Maps:** MapLibre GL JS 搭配 OpenFreeMap 圖磚
-- **API Proxy:** Cloudflare Workers
-- **Worker Tooling:** Wrangler
-- **Geospatial Utilities:** Turf.js
-- **Testing:** Vitest 與 React Testing Library
-- **Tooling:** Vite、ESLint、pnpm
-
-## 專案結構
-
-這個專案主要是用頁面、功能元件和共用模組來組織。
-
-```text
-app/
-├── components/        # 共用與功能型 UI 元件
-├── modules/
-│   ├── apis/          # RTK Query API 定義
-│   ├── consts/        # 共用常數與 UI 文案
-│   ├── enums/         # 領域列舉
-│   ├── hooks/         # 可重用 hooks
-│   ├── i18n/          # 語系設定與翻譯資源
-│   ├── interfaces/    # API 與領域模型
-│   ├── slices/        # Redux slices
-│   ├── store/         # Redux store entry 與 preload helpers
-│   ├── types/         # 共用型別工具
-│   ├── utils/         # 依領域分組的共用 helper
-│   │   ├── favorite/  # Favorite persistence normalization
-│   │   ├── geo/       # 座標、區域、城市與 nearby query helper
-│   │   ├── i18n/      # localized text 與 translation key helper
-│   │   ├── map/       # 地圖 marker DOM helper
-│   │   ├── route/     # 路線資料轉換、即時資訊與 shape helper
-│   │   ├── routes/    # 路線搜尋的 storage 與排序 helper
-│   │   └── shared/    # 小型跨領域工具
-├── pages/             # Route pages，例如 Favorite、Routes、Nearby、Route、Settings
-├── test/              # 共用 test setup 與 render helpers
-├── root.tsx           # App root
-└── routes.ts          # 路由定義
-
-workers/
-└── tdx-proxy/         # Cloudflare Worker proxy
-```
-
-## 開放資料來源
-
-這個專案主要依賴兩個外部的開放資料來源。
-
-### TDX Bus API
-
-`https://tdx.transportdata.tw/api/basic/v2/Bus`
-
-TDX（運輸資料流通服務）提供本專案所需的路線、站牌、即時資料和路線 shape。前端不直接向 TDX 做驗證，而是透過 Cloudflare Worker proxy 轉發請求。
-
-目前專案中使用 TDX 資料的情境包括：
-
-- 路線搜尋與路線詳情查詢
-- 附近站牌與站點關聯路線查詢
-- 站點 ETA、近站車輛提示與地圖上的即時車輛位置
-- 官方路線 shape 在地圖上的呈現
-
-目前使用的 endpoint：
-
-| Endpoint | 用途 |
-| --- | --- |
-| `/Route/City/:city` | 路線搜尋與路線詳情 |
-| `/StopOfRoute/City/:city` | 站序列表與 nearby route 關聯 |
-| `/Stop/City/:city` | 附近站牌與地圖站點位置 |
-| `/EstimatedTimeOfArrival/City/:city` | 站點 ETA |
-| `/RealTimeNearStop/City/:city` | 站序列表上的車輛提示與近站狀態 |
-| `/RealTimeByFrequency/City/:city` | 路線地圖上的車輛 GPS 位置 |
-| `/Shape/City/:city` | 路線地圖軌跡 |
-
-即時資料屬於 best-effort；當多人共用的 proxy key 遇到上游 rate limit 時，資料可能會暫時不可用。
-
-### 台灣縣市邊界資料
-
-邊界資料來自 [dkaoster/taiwan-atlas](https://github.com/dkaoster/taiwan-atlas) 的 counties dataset：
-
-`https://cdn.jsdelivr.net/npm/taiwan-atlas/counties-10t.json`
-
-本專案會將這份 TopoJSON 以本地靜態資產的形式納入專案，並在執行時轉成 GeoJSON，用來推得使用者目前所在的城市與區域，以支援 nearby 和 route search flow。
-
-## 開發
-
-### 安裝依賴
+安裝依賴：
 
 ```bash
 pnpm install
 ```
 
-### 設定環境變數
+設定本地 TDX proxy。這一步是為了讓本機開發時也能透過 Worker proxy 取得 TDX 資料，而不是把 TDX credentials 放進前端：
 
-1. 將 `workers/tdx-proxy/.dev.vars.example` 複製為 `workers/tdx-proxy/.dev.vars`。
-2. 填入 `TDX_CLIENT_ID` 與 `TDX_CLIENT_SECRET`。
+```bash
+cp apps/tdx-proxy/.dev.vars.example apps/tdx-proxy/.dev.vars
+```
 
-### 本地執行
+接著在 `.dev.vars` 裡填入 `TDX_CLIENT_ID` 與 `TDX_CLIENT_SECRET`。
+
+## 開發
+
+一般開發可以從 root 啟動，這會同時跑前端 dev server 與本地 Worker proxy：
 
 ```bash
 pnpm run dev
 ```
 
-這會同時啟動前端 dev server 和本地的 Cloudflare Worker proxy。
-
-如果要用手機或同網路的其他裝置測試，請先啟動 `dev:mobile`，再用你電腦的區網 IP 從手機或其他裝置開啟：
+如果要用同一個區域網路裡的手機測試：
 
 ```bash
 pnpm run dev:mobile
 ```
 
-這會把前端與本機 Worker proxy 一起開到區網。在 development 模式下，前端會使用相對路徑 `/api/tdx`，再由 Vite dev server 代理到本機 `3000` port 的 Worker。請把下列網址中的 IP 換成你自己的，再從手機開啟 `http://<your-lan-ip>:5173`。
+## 檢查
 
-### 測試
+如果想確認整個 workspace 目前狀態，可以跑：
 
 ```bash
 pnpm run lint
 pnpm run typecheck
-pnpm test
+pnpm run test
 ```
 
-## 部署說明
+如果這次只改到前端，可以只跑 web workspace：
 
-前端會以靜態網站部署，TDX 驗證則交由獨立的 Cloudflare Worker proxy 處理。
+```bash
+pnpm --filter @bus/web lint
+pnpm --filter @bus/web typecheck
+pnpm --filter @bus/web test
+```
 
-1. 在 Cloudflare Worker environment bindings 中設定 `TDX_CLIENT_ID`、`TDX_CLIENT_SECRET` 與 `ALLOWED_ORIGINS`。
-2. 使用 `pnpm run deploy:proxy` 部署 Worker。
-3. 在 GitHub Actions repository variable 中設定 `VITE_PROXY_API_BASE_URL`。
-4. 讓 GitHub Pages build 在 `pnpm run build` 時注入該值。
+## 部署
+
+GitHub Actions workflow 目前只會 build 並部署 `@bus/web` 到 GitHub Pages。
+
+TDX proxy 目前仍維持手動部署，避免每次前端部署都連動 Worker：
+
+```bash
+pnpm --filter @bus/tdx-proxy deploy
+```
+
+NestJS 後端尚未開始部署。
