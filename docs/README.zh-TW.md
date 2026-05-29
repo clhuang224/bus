@@ -74,37 +74,27 @@
 - **Worker Tooling:** Wrangler
 - **Geospatial Utilities:** Turf.js
 - **Testing:** Vitest 與 React Testing Library
-- **Tooling:** Vite、ESLint、pnpm
+- **Tooling:** Vite、ESLint、pnpm workspaces
 
 ## 專案結構
 
-這個專案主要是用頁面、功能元件和共用模組來組織。
+這個專案現在以 pnpm monorepo 組織。目前正式 app 位於 `apps/web`，後續 backend 與 shared package 會放在同一個 workspace 中。
 
 ```text
-app/
-├── components/        # 共用與功能型 UI 元件
-├── modules/
-│   ├── apis/          # RTK Query API 定義
-│   ├── consts/        # 共用常數與 UI 文案
-│   ├── enums/         # 領域列舉
-│   ├── hooks/         # 可重用 hooks
-│   ├── i18n/          # 語系設定與翻譯資源
-│   ├── interfaces/    # API 與領域模型
-│   ├── slices/        # Redux slices
-│   ├── store/         # Redux store entry 與 preload helpers
-│   ├── types/         # 共用型別工具
-│   ├── utils/         # 依領域分組的共用 helper
-│   │   ├── favorite/  # Favorite persistence normalization
-│   │   ├── geo/       # 座標、區域、城市與 nearby query helper
-│   │   ├── i18n/      # localized text 與 translation key helper
-│   │   ├── map/       # 地圖 marker DOM helper
-│   │   ├── route/     # 路線資料轉換、即時資訊與 shape helper
-│   │   ├── routes/    # 路線搜尋的 storage 與排序 helper
-│   │   └── shared/    # 小型跨領域工具
-├── pages/             # Route pages，例如 Favorite、Routes、Nearby、Route、Settings
-├── test/              # 共用 test setup 與 render helpers
-├── root.tsx           # App root
-└── routes.ts          # 路由定義
+apps/
+├── web/
+│   ├── app/
+│   │   ├── components/        # 共用與 feature UI
+│   │   ├── modules/           # APIs、store、hooks、models、i18n、utilities
+│   │   ├── pages/             # Favorite、Routes、Nearby、Route、Settings pages
+│   │   ├── test/              # 共用 test setup 與 render helpers
+│   │   ├── root.tsx           # App root
+│   │   └── routes.ts          # Route definitions
+│   └── public/                # Static assets
+└── api/                       # Planned NestJS backend
+
+packages/
+└── shared/                    # Planned shared API contracts 與 domain types
 
 workers/
 └── tdx-proxy/         # Cloudflare Worker proxy

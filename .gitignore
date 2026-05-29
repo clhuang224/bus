@@ -1,9 +1,10 @@
 .DS_Store
-/node_modules/
+node_modules/
+/.pnpm-store/
 
 # React Router
-/.react-router/
-/build/
+.react-router/
+build/
 
 .env.local
 workers/tdx-proxy/.dev.vars

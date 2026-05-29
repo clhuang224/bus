@@ -1,0 +1,10 @@
+{
+  "name": "@bus/api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "echo \"@bus/api lint is not configured yet\"",
+    "test": "echo \"@bus/api tests are not configured yet\"",
+    "typecheck": "echo \"@bus/api typecheck is not configured yet\""
+  }
+}

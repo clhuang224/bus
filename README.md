@@ -74,37 +74,27 @@ The app currently supports both `zh-TW` and `en`.
 - **Worker Tooling:** Wrangler
 - **Geospatial Utilities:** Turf.js
 - **Testing:** Vitest and React Testing Library
-- **Tooling:** Vite, ESLint, pnpm
+- **Tooling:** Vite, ESLint, pnpm workspaces
 
 ## Project Structure
 
-The app is organized around route-level pages, feature components, and shared domain modules.
+The repository is organized as a pnpm monorepo. The current production app lives in `apps/web`, with backend and shared-package work planned alongside it.
 
 ```text
-app/
-├── components/        # Shared and feature UI
-├── modules/
-│   ├── apis/          # RTK Query APIs
-│   ├── consts/        # Shared constants and UI copy
-│   ├── enums/         # Domain enums
-│   ├── hooks/         # Reusable hooks
-│   ├── i18n/          # Locale setup and translation resources
-│   ├── interfaces/    # Domain and API models
-│   ├── slices/        # Redux slices
-│   ├── store/         # Redux store entry and preload helpers
-│   ├── types/         # Shared type helpers
-│   ├── utils/         # Shared helpers grouped by domain
-│   │   ├── favorite/  # Favorite persistence normalization
-│   │   ├── geo/       # Coordinate, area, city, and nearby query helpers
-│   │   ├── i18n/      # Localized text and label helpers
-│   │   ├── map/       # Map marker DOM helpers
-│   │   ├── route/     # Route data transforms, realtime, and shape helpers
-│   │   ├── routes/    # Route-search storage and ranking helpers
-│   │   └── shared/    # Small cross-domain utilities
-├── pages/             # Route pages, including Favorite, Routes, Nearby, Route, and Settings
-├── test/              # Shared test setup and render helpers
-├── root.tsx           # App root
-└── routes.ts          # Route definitions
+apps/
+├── web/
+│   ├── app/
+│   │   ├── components/        # Shared and feature UI
+│   │   ├── modules/           # APIs, store, hooks, models, i18n, and utilities
+│   │   ├── pages/             # Favorite, Routes, Nearby, Route, and Settings pages
+│   │   ├── test/              # Shared test setup and render helpers
+│   │   ├── root.tsx           # App root
+│   │   └── routes.ts          # Route definitions
+│   └── public/                # Static assets
+└── api/                       # Planned NestJS backend
+
+packages/
+└── shared/                    # Planned shared API contracts and domain types
 
 workers/
 └── tdx-proxy/         # Cloudflare Worker proxy
