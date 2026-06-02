@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { BearingType } from '@bus/shared/enums/BearingType';
-import { CityNameType } from '@bus/shared/enums/CityNameType';
+import { BearingType, CityNameType } from '@bus/shared';
 
 export class NearbyStopNameDto {
   @ApiProperty({
