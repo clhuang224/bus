@@ -5,6 +5,7 @@ import { AppModule } from './app.module.js'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
+  app.setGlobalPrefix('api')
 
   const config = new DocumentBuilder()
     .setTitle('Finding the Bus API')

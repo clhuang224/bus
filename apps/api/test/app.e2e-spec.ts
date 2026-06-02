@@ -16,9 +16,9 @@ describe('AppController (e2e)', () => {
     await app.init()
   })
 
-  it('/health (GET)', () => {
+  it('/api/health (GET)', () => {
     return request(app.getHttpServer())
-      .get('/health')
+      .get('/api/health')
       .expect(200)
       .expect(({ body }: { body: { status: string; timestamp: string } }) => {
         expect(body.status).toBe('ok')
