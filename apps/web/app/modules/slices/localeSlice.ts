@@ -8,7 +8,7 @@ interface LocaleState {
 }
 
 const initialState: LocaleState = {
-  value: getInitialAppLocale()
+  value: getInitialAppLocale(),
 }
 
 const localeSlice = createSlice({
@@ -17,8 +17,8 @@ const localeSlice = createSlice({
   reducers: {
     setLocale: (state, action: PayloadAction<AppLocaleType>) => {
       state.value = action.payload
-    }
-  }
+    },
+  },
 })
 
 export const { setLocale } = localeSlice.actions

@@ -6,6 +6,7 @@
     "build": "react-router build",
     "dev": "react-router dev",
     "dev:mobile": "react-router dev --host 0.0.0.0",
+    "format": "prettier --write \"app/**/*.{ts,tsx}\" \"*.{ts,js}\"",
     "start": "react-router-serve ./build/server/index.js",
     "test": "vitest run --config vitest.config.ts",
     "typecheck": "react-router typegen && tsc",

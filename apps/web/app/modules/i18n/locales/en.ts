@@ -2,13 +2,13 @@ export const en = {
   translation: {
     app: {
       name: 'Finding the Bus',
-      description: 'Find the bus you need, faster.'
+      description: 'Find the bus you need, faster.',
     },
     common: {
       modal: {
         confirm: 'Confirm',
         cancel: 'Cancel',
-        refresh: 'Refresh page'
+        refresh: 'Refresh page',
       },
       area: {
         Taipei: 'Taipei Area',
@@ -29,7 +29,7 @@ export const en = {
         Taitung: 'Taitung',
         Kinmen: 'Kinmen',
         Penghu: 'Penghu',
-        Lienchiang: 'Lienchiang'
+        Lienchiang: 'Lienchiang',
       },
       city: {
         Taipei: 'Taipei City',
@@ -53,14 +53,14 @@ export const en = {
         TaitungCounty: 'Taitung County',
         KinmenCounty: 'Kinmen County',
         PenghuCounty: 'Penghu County',
-        LienchiangCounty: 'Lienchiang County'
+        LienchiangCounty: 'Lienchiang County',
       },
       direction: {
         go: 'Outbound',
         return: 'Inbound',
         loop: 'Loop',
         shuttle: 'Shuttle',
-        unknown: 'Unknown'
+        unknown: 'Unknown',
       },
       bearing: {
         east: 'Eastbound',
@@ -70,90 +70,93 @@ export const en = {
         southeast: 'Southeastbound',
         northeast: 'Northeastbound',
         southwest: 'Southwestbound',
-        northwest: 'Northwestbound'
-      }
+        northwest: 'Northwestbound',
+      },
     },
     layout: {
       nav: {
         favorite: 'Favorites',
         nearby: 'Nearby',
         routes: 'Routes',
-        settings: 'Settings'
-      }
+        settings: 'Settings',
+      },
     },
     pages: {
       favorite: {
-        title: 'Favorites'
+        title: 'Favorites',
       },
       routes: {
         title: 'Routes',
-        recentViewedRoutesTitle: 'Recently viewed routes'
+        recentViewedRoutesTitle: 'Recently viewed routes',
       },
       settings: {
         title: 'Settings',
         backAriaLabel: 'Back',
         languageSectionTitle: 'Language',
         analyticsSectionTitle: 'Privacy and analytics',
-        analyticsDescription: 'This site uses Google Analytics to collect anonymous usage data so we can understand which features are used and which routes are searched.',
-        analyticsDataNotice: 'We do not collect your current location, name, or contact information. Search keywords and opened bus routes may be collected. You can turn analytics off with the switch below.',
+        analyticsDescription:
+          'This site uses Google Analytics to collect anonymous usage data so we can understand which features are used and which routes are searched.',
+        analyticsDataNotice:
+          'We do not collect your current location, name, or contact information. Search keywords and opened bus routes may be collected. You can turn analytics off with the switch below.',
         analyticsToggleLabel: 'Share anonymous usage data',
         localeOptions: {
           zhTW: {
-            label: 'Traditional Chinese'
+            label: 'Traditional Chinese',
           },
           en: {
-            label: 'English'
-          }
-        }
-      }
+            label: 'English',
+          },
+        },
+      },
     },
     components: {
       searchInput: {
         ariaLabel: 'Search bus routes',
         placeholder: 'Search routes or stops',
-        clearAriaLabel: 'Clear search keyword'
+        clearAriaLabel: 'Clear search keyword',
       },
       areaSelect: {
-        ariaLabel: 'Choose area'
+        ariaLabel: 'Choose area',
       },
       favoriteRouteStopCard: {
         removeAriaLabel: 'Remove favorite route stop',
         terminalLabel: 'Terminals',
         departureLabel: 'Origin',
         destinationLabel: 'Destination',
-        terminal: '{{departure}} → {{destination}}'
+        terminal: '{{departure}} → {{destination}}',
       },
       routeInfoCard: {
         terminalLabel: 'Terminals',
         departureLabel: 'Origin',
         destinationLabel: 'Destination',
-        terminal: 'Terminals: {{departure}} → {{destination}}'
+        terminal: 'Terminals: {{departure}} → {{destination}}',
       },
       routeStopList: {
         navigateAriaLabel: 'Navigate to {{stopName}}',
         addFavoriteAriaLabel: 'Save route stop',
-        removeFavoriteAriaLabel: 'Remove saved route stop'
+        removeFavoriteAriaLabel: 'Remove saved route stop',
       },
       stopDistance: {
         meters: '{{count}} m',
-        kilometers: '{{count}} km'
+        kilometers: '{{count}} km',
       },
       routeMap: {
         stopMarkerAriaLabel: '{{stopName}}, stop {{sequence}}',
-        vehicleMarkerAriaLabel: '{{plateNumb}}, recent stop {{stopName}}, estimated arrival {{estimateLabel}}',
+        vehicleMarkerAriaLabel:
+          '{{plateNumb}}, recent stop {{stopName}}, estimated arrival {{estimateLabel}}',
         vehiclePopup: {
           recentStop: 'Recent stop',
           recentStopUnknown: 'Unknown',
-          estimate: 'Estimated arrival'
-        }
+          estimate: 'Estimated arrival',
+        },
       },
       baseMap: {
         userLocationMarkerAriaLabel: 'Current location',
-        focusUserLocationAriaLabel: 'My location'
+        focusUserLocationAriaLabel: 'My location',
       },
       mapSidebarLayout: {
         openNearbyStops: 'Open nearby stops list',
-        openRouteList: 'Open route list'
+        openRouteList: 'Open route list',
       },
       nearbyStopDetail: {
         cityLabel: 'City',
@@ -161,20 +164,22 @@ export const en = {
         addressLabel: 'Address',
         routesLabel: 'Routes',
         notProvided: 'Not provided',
-        viewRoutesAriaLabel: 'View routes for {{stopName}}'
+        viewRoutesAriaLabel: 'View routes for {{stopName}}',
       },
       nearbyStopRoutes: {
         title: 'Routes at this stop',
         empty: 'No route information is currently available for this stop',
-        error: 'Unable to load route information right now. Please try again later.',
-        rateLimited: 'Too many people are querying routes right now. Please try again later.'
+        error:
+          'Unable to load route information right now. Please try again later.',
+        rateLimited:
+          'Too many people are querying routes right now. Please try again later.',
       },
       nearbyStopMap: {
-        stopMarkerAriaLabel: 'Nearby stop {{stopName}}'
+        stopMarkerAriaLabel: 'Nearby stop {{stopName}}',
       },
       nearbySidebarContent: {
-        backAriaLabel: 'Back to nearby stops list'
-      }
+        backAriaLabel: 'Back to nearby stops list',
+      },
     },
     routePage: {
       backToRoutes: 'Back to routes',
@@ -190,122 +195,139 @@ export const en = {
           noStopDueToTrafficControl: 'Skipping stop due to traffic control',
           lastBusPassed: 'Last bus has passed',
           notInServiceToday: 'Not in service today',
-          unknown: 'Unknown status'
-        }
-      }
+          unknown: 'Unknown status',
+        },
+      },
     },
     errorBoundary: {
       default: {
-        title: 'Error'
+        title: 'Error',
       },
       notFound: {
         title: '404',
-        description: 'The requested page could not be found.'
-      }
+        description: 'The requested page could not be found.',
+      },
     },
     messages: {
       nearby: {
         loadStopsError: {
           title: 'Unable to load stops',
-          description: 'Please try again later or check your internet connection.'
+          description:
+            'Please try again later or check your internet connection.',
         },
         emptyStops: {
           title: 'No nearby stops',
-          description: 'There are no bus stops near your current location right now.'
-        }
+          description:
+            'There are no bus stops near your current location right now.',
+        },
       },
       favorite: {
         emptyFavoriteRouteStops: {
           title: 'No favorite route stops yet',
-          description: 'Use the heart button in a route stop list to save a stop from a subroute to your favorites.'
-        }
+          description:
+            'Use the heart button in a route stop list to save a stop from a subroute to your favorites.',
+        },
       },
       search: {
         loadRoutesError: {
           title: 'Unable to load routes',
-          description: 'Please try again later or check your internet connection.'
+          description:
+            'Please try again later or check your internet connection.',
         },
         emptyRoutes: {
           title: 'No matching routes',
-          description: 'Try another route name, origin stop, or destination stop keyword.'
+          description:
+            'Try another route name, origin stop, or destination stop keyword.',
         },
         emptyRouteSearch: {
           title: 'Start searching for a route',
-          description: 'Enter a route number, origin stop, or destination stop to find the bus you need.'
-        }
+          description:
+            'Enter a route number, origin stop, or destination stop to find the bus you need.',
+        },
       },
       route: {
         loadRouteError: {
           title: 'Unable to load route',
-          description: 'Please try again later or check your internet connection.'
+          description:
+            'Please try again later or check your internet connection.',
         },
         emptyRoute: {
           title: 'Route not found',
-          description: 'We could not find data for this bus route.'
-        }
+          description: 'We could not find data for this bus route.',
+        },
       },
       routeRealtime: {
         loading: {
           title: 'Updating',
-          description: 'Refreshing realtime bus data...'
+          description: 'Refreshing realtime bus data...',
         },
         error: {
           title: 'Realtime bus',
-          description: 'Realtime bus data is temporarily incomplete.'
+          description: 'Realtime bus data is temporarily incomplete.',
         },
         rateLimited: {
           title: 'Realtime bus',
-          description: 'Too many people are querying right now. Realtime bus data will retry shortly.'
+          description:
+            'Too many people are querying right now. Realtime bus data will retry shortly.',
         },
         noService: {
           title: 'Service status',
-          description: 'There are no active services right now'
+          description: 'There are no active services right now',
         },
         noRealtimeData: {
           title: 'Realtime bus',
-          description: 'No realtime bus information is available right now. Service may have ended or upstream data may be temporarily incomplete.'
-        }
+          description:
+            'No realtime bus information is available right now. Service may have ended or upstream data may be temporarily incomplete.',
+        },
       },
       busService: {
         unauthorized: {
           title: 'Bus data service authentication failed',
-          description: 'The app could not authenticate with the bus data service right now. Please try again later.'
+          description:
+            'The app could not authenticate with the bus data service right now. Please try again later.',
         },
         rateLimited: {
           title: 'Too many queries right now',
-          description: 'The system cannot fetch bus data at the moment. Please wait a bit and try again.'
+          description:
+            'The system cannot fetch bus data at the moment. Please wait a bit and try again.',
         },
         systemError: {
           title: 'The system is temporarily unavailable',
-          description: 'Bus data is temporarily unavailable. Please try again later.'
-        }
+          description:
+            'Bus data is temporarily unavailable. Please try again later.',
+        },
       },
       geo: {
         permission: {
           unsupported: {
             title: 'Nearby stops unavailable',
-            description: 'Your browser does not support geolocation, so nearby stops cannot be used.'
+            description:
+              'Your browser does not support geolocation, so nearby stops cannot be used.',
           },
           denied: {
             title: 'Nearby stops unavailable',
-            description: 'Nearby stops need location access. Please allow this site to use your location in browser settings.'
-          }
+            description:
+              'Nearby stops need location access. Please allow this site to use your location in browser settings.',
+          },
         },
         error: {
           permissionDenied: {
             title: 'Unable to get location',
-            description: 'Please allow this site to use your location in browser settings.'
+            description:
+              'Please allow this site to use your location in browser settings.',
           },
           positionUnavailable: {
             title: 'Location failed',
-            description: 'We could not get your location right now, so nearby stops are temporarily unavailable. Please try again later and check your device location service and network connection.'
+            description:
+              'We could not get your location right now, so nearby stops are temporarily unavailable. Please try again later and check your device location service and network connection.',
           },
           timeout: {
             title: 'Location timed out',
-            description: 'Getting your location timed out, so nearby stops are temporarily unavailable. Please try again later and check your device location service and network connection.'
-          }
-        }
-      }
-    }
-  }
+            description:
+              'Getting your location timed out, so nearby stops are temporarily unavailable. Please try again later and check your device location service and network connection.',
+          },
+        },
+      },
+    },
+  },
 } as const

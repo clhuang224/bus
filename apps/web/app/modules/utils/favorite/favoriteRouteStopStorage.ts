@@ -4,7 +4,9 @@ import { normalizeStoredFavoriteRouteStop } from './normalizeStoredFavoriteRoute
 
 export const FAVORITE_ROUTE_STOPS_STORAGE_KEY = 'bus-favorite-route-stops'
 
-export function getFavoriteRouteStopsFromStorage(storage: Pick<Storage, 'getItem' | 'removeItem'>) {
+export function getFavoriteRouteStopsFromStorage(
+  storage: Pick<Storage, 'getItem' | 'removeItem'>,
+) {
   const storedValue = storage.getItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY)
 
   if (!storedValue) {
@@ -33,7 +35,7 @@ export function getFavoriteRouteStopsFromStorage(storage: Pick<Storage, 'getItem
 
 export function setFavoriteRouteStopsInStorage(
   storage: Pick<Storage, 'setItem'>,
-  routeStops: FavoriteRouteStop[]
+  routeStops: FavoriteRouteStop[],
 ) {
   storage.setItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY, JSON.stringify(routeStops))
 }

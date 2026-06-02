@@ -13,20 +13,24 @@ function toDateOrNull(value: string): Date | null {
   return Number.isNaN(parsedDate.getTime()) ? null : parsedDate
 }
 
-function normalizeBusSubRouteWithDates(busSubRoute: BusSubRoute<string>): BusSubRoute<Date | null> {
+function normalizeBusSubRouteWithDates(
+  busSubRoute: BusSubRoute<string>,
+): BusSubRoute<Date | null> {
   return {
     ...busSubRoute,
     FirstBusTime: toDateOrNull(busSubRoute.FirstBusTime),
     LastBusTime: toDateOrNull(busSubRoute.LastBusTime),
     HolidayFirstBusTime: toDateOrNull(busSubRoute.HolidayFirstBusTime),
-    HolidayLastBusTime: toDateOrNull(busSubRoute.HolidayLastBusTime)
+    HolidayLastBusTime: toDateOrNull(busSubRoute.HolidayLastBusTime),
   }
 }
 
-export function normalizeBusRoutesWithDates(routes: BusRoute<string>[]): BusRoute<Date | null>[] {
+export function normalizeBusRoutesWithDates(
+  routes: BusRoute<string>[],
+): BusRoute<Date | null>[] {
   return routes.map((route) => ({
     ...route,
     SubRoutes: route.SubRoutes.map(normalizeBusSubRouteWithDates),
-    UpdateTime: toDateOrNull(route.UpdateTime)
+    UpdateTime: toDateOrNull(route.UpdateTime),
   }))
 }

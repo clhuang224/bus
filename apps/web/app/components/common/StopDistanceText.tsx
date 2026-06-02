@@ -22,19 +22,23 @@ export const StopDistanceText = ({ position, ...textProps }: PropType) => {
     }
 
     return distance(point(toLngLat(coords)!), point(position), {
-      units: 'kilometers'
+      units: 'kilometers',
     })
   }, [coords, position])
 
-  const distanceLabel = distanceKm === null
-    ? '-'
-    : distanceKm < 1
-      ? t('components.stopDistance.meters', {
-          count: Math.round(distanceKm * 1000)
-        })
-      : t('components.stopDistance.kilometers', {
-          count: distanceKm < 10 ? Number(distanceKm.toFixed(1)) : Math.round(distanceKm)
-        })
+  const distanceLabel =
+    distanceKm === null
+      ? '-'
+      : distanceKm < 1
+        ? t('components.stopDistance.meters', {
+            count: Math.round(distanceKm * 1000),
+          })
+        : t('components.stopDistance.kilometers', {
+            count:
+              distanceKm < 10
+                ? Number(distanceKm.toFixed(1))
+                : Math.round(distanceKm),
+          })
 
   return <Text {...textProps}>{distanceLabel}</Text>
 }

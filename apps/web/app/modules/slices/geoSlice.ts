@@ -7,47 +7,44 @@ import type { LatLng } from '../types/CoordsType'
 
 type GeoTransitionPayload =
   | {
-    type: GeoActionType.UNSUPPORTED
-  }
+      type: GeoActionType.UNSUPPORTED
+    }
   | {
-    type: GeoActionType.PERMISSION_CHANGED
-    permission: GeoPermissionType
-  }
+      type: GeoActionType.PERMISSION_CHANGED
+      permission: GeoPermissionType
+    }
   | {
-    type: GeoActionType.WATCH_STARTED
-  }
+      type: GeoActionType.WATCH_STARTED
+    }
   | {
-    type: GeoActionType.WATCH_STOPPED
-  }
+      type: GeoActionType.WATCH_STOPPED
+    }
   | {
-    type: GeoActionType.POSITION_UPDATED
-    coords: LatLng
-  }
+      type: GeoActionType.POSITION_UPDATED
+      coords: LatLng
+    }
   | {
-    type: GeoActionType.POSITION_DENIED
-  }
+      type: GeoActionType.POSITION_DENIED
+    }
   | {
-    type: GeoActionType.POSITION_UNAVAILABLE
-  }
+      type: GeoActionType.POSITION_UNAVAILABLE
+    }
   | {
-    type: GeoActionType.POSITION_TIMEOUT
-  }
+      type: GeoActionType.POSITION_TIMEOUT
+    }
 
 const initialState: GeoState = {
   coords: null,
   permission: GeoPermissionType.PROMPT,
   watching: false,
-  error: null
+  error: null,
 }
 
 const geoSlice = createSlice({
   name: 'geolocation',
   initialState,
   reducers: {
-    transitionState: (
-      state,
-      action: PayloadAction<GeoTransitionPayload>
-    ) => {
+    transitionState: (state, action: PayloadAction<GeoTransitionPayload>) => {
       switch (action.payload.type) {
         case GeoActionType.UNSUPPORTED:
           state.permission = GeoPermissionType.UNSUPPORTED
@@ -86,8 +83,8 @@ const geoSlice = createSlice({
           state.watching = false
           return
       }
-    }
-  }
+    },
+  },
 })
 
 export default geoSlice

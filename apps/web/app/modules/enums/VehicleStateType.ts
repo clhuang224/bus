@@ -6,11 +6,11 @@ export enum TdxA2EventType {
   /**
    * 進站
    */
-  ARRIVING = 1
+  ARRIVING = 1,
 }
 
 export enum VehicleStateType {
   ARRIVING = 'arriving',
   DEPARTED = 'departed',
-  AT_STOP = 'at_stop'
+  AT_STOP = 'at_stop',
 }

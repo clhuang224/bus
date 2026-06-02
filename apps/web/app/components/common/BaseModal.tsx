@@ -22,7 +22,7 @@ const BaseModal = ({
   children,
   variant = 'alert',
   confirmText,
-  cancelText
+  cancelText,
 }: PropType) => {
   const isConfirm = variant === 'confirm'
   const { t } = useTranslation()
@@ -44,7 +44,9 @@ const BaseModal = ({
             {cancelText ?? t('common.modal.cancel')}
           </Button>
         )}
-        <Button onClick={onConfirm}>{confirmText ?? t('common.modal.confirm')}</Button>
+        <Button onClick={onConfirm}>
+          {confirmText ?? t('common.modal.confirm')}
+        </Button>
       </Flex>
     </Modal>
   )

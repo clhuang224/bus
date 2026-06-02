@@ -3,12 +3,12 @@ import { getEnumValues } from './getEnumValues'
 
 enum StringEnum {
   TAIPEI = 'Taipei',
-  TAICHUNG = 'Taichung'
+  TAICHUNG = 'Taichung',
 }
 
 enum NumericEnum {
   ZERO,
-  ONE
+  ONE,
 }
 
 describe('getEnumValues', () => {

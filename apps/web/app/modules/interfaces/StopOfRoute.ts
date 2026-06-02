@@ -10,7 +10,10 @@ export interface TdxStopOfRouteStop<L = TdxLocalizedText> {
   StationID?: string | null
 }
 
-export interface TdxStopOfRoute<L = TdxLocalizedText, S = TdxStopOfRouteStop<L>> {
+export interface TdxStopOfRoute<
+  L = TdxLocalizedText,
+  S = TdxStopOfRouteStop<L>,
+> {
   RouteUID: string
   RouteID: string
   RouteName: L
@@ -23,6 +26,9 @@ export interface TdxStopOfRoute<L = TdxLocalizedText, S = TdxStopOfRouteStop<L>>
 
 export type StopOfRouteStop = TdxStopOfRouteStop<LocalizedText>
 
-export interface StopOfRoute extends TdxStopOfRoute<LocalizedText, StopOfRouteStop> {
+export interface StopOfRoute extends TdxStopOfRoute<
+  LocalizedText,
+  StopOfRouteStop
+> {
   City: CityNameType
 }

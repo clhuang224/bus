@@ -8,7 +8,7 @@ import {
   RiSearchFill,
   RiSearchLine,
   RiSettings3Fill,
-  RiSettings3Line
+  RiSettings3Line,
 } from '@remixicon/react'
 import { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -18,7 +18,7 @@ import { AppNavLink } from '~/components/AppNavLink'
 import {
   APP_FLOATING_ACTION_OFFSET,
   APP_FOOTER_HEIGHT,
-  APP_HEADER_HEIGHT
+  APP_HEADER_HEIGHT,
 } from '~/modules/consts/layout'
 import { useWatchGeo } from '~/modules/hooks/app/useWatchGeo'
 import { useGoogleAnalytics } from '~/modules/hooks/app/useGoogleAnalytics'
@@ -36,33 +36,39 @@ export default function AppLayout() {
 
   const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
 
-  const options = useMemo(() => ([
-    {
-      name: t('layout.nav.favorite'),
-      path: '/',
-      icon: (<RiHeart3Line />),
-      iconActive: (<RiHeart3Fill />)
-    },
-    {
-      name: t('layout.nav.nearby'),
-      path: '/nearby',
-      icon: (<RiMapPin3Line />),
-      iconActive: (<RiMapPin3Fill />)
-    },
-    {
-      name: t('layout.nav.routes'),
-      path: '/routes',
-      icon: (<RiSearchLine />),
-      iconActive: (<RiSearchFill />)
-    }
-  ]), [t])
+  const options = useMemo(
+    () => [
+      {
+        name: t('layout.nav.favorite'),
+        path: '/',
+        icon: <RiHeart3Line />,
+        iconActive: <RiHeart3Fill />,
+      },
+      {
+        name: t('layout.nav.nearby'),
+        path: '/nearby',
+        icon: <RiMapPin3Line />,
+        iconActive: <RiMapPin3Fill />,
+      },
+      {
+        name: t('layout.nav.routes'),
+        path: '/routes',
+        icon: <RiSearchLine />,
+        iconActive: <RiSearchFill />,
+      },
+    ],
+    [t],
+  )
 
-  const settingNav = useMemo(() => ({
-    name: t('layout.nav.settings'),
-    path: '/settings',
-    icon: (<RiSettings3Line />),
-    iconActive: (<RiSettings3Fill />)
-  }), [t])
+  const settingNav = useMemo(
+    () => ({
+      name: t('layout.nav.settings'),
+      path: '/settings',
+      icon: <RiSettings3Line />,
+      iconActive: <RiSettings3Fill />,
+    }),
+    [t],
+  )
   const isSettingsPage = location.pathname === settingNav.path
 
   useWatchGeo()
@@ -99,7 +105,13 @@ export default function AppLayout() {
           </Flex>
         </Flex>
       </AppShell.Header>
-      <AppShell.Main h={isSm ? `calc(100vh - ${APP_FOOTER_HEIGHT}px)` : `calc(100vh - ${APP_HEADER_HEIGHT}px)`}>
+      <AppShell.Main
+        h={
+          isSm
+            ? `calc(100vh - ${APP_FOOTER_HEIGHT}px)`
+            : `calc(100vh - ${APP_HEADER_HEIGHT}px)`
+        }
+      >
         <Outlet />
         {isSm && !isSettingsPage && (
           <ActionIcon
@@ -120,7 +132,12 @@ export default function AppLayout() {
       <AppShell.Footer p="sm" hiddenFrom="sm">
         <Flex justify="space-around" align="center" gap="md">
           {options.map((option) => (
-            <Flex key={option.path} align="center" justify="center" direction="column">
+            <Flex
+              key={option.path}
+              align="center"
+              justify="center"
+              direction="column"
+            >
               <AppNavLink
                 label={option.name}
                 to={option.path}

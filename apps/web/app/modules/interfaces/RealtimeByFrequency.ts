@@ -36,8 +36,8 @@ export interface TdxRealtimeByFrequency<L = TdxLocalizedText, D = string> {
 }
 
 export interface RealtimeByFrequency<D = string> extends Omit<
-TdxRealtimeByFrequency<LocalizedText, D>,
-'RouteName' | 'SubRouteName' | 'BusPosition'
+  TdxRealtimeByFrequency<LocalizedText, D>,
+  'RouteName' | 'SubRouteName' | 'BusPosition'
 > {
   City: CityNameType
   RouteName: LocalizedText

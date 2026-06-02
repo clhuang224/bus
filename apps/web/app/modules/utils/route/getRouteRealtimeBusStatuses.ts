@@ -14,20 +14,29 @@ function getStopStatusLabel(t: TFunction, stopStatus: StopStatusType) {
 }
 
 function getRealtimeFallbackLabel(t: TFunction, stopStatus: StopStatusType) {
-  if ([StopStatusType.NOT_YET_DEPARTED, StopStatusType.UNKNOWN].includes(stopStatus)) {
+  if (
+    [StopStatusType.NOT_YET_DEPARTED, StopStatusType.UNKNOWN].includes(
+      stopStatus,
+    )
+  ) {
     return t('routePage.realtime.inService')
   }
 
   return getStopStatusLabel(t, stopStatus)
 }
 
-export function formatEstimatedArrivalLabel(t: TFunction, estimateTime: number | null, stopStatus: StopStatusType) {
+export function formatEstimatedArrivalLabel(
+  t: TFunction,
+  estimateTime: number | null,
+  stopStatus: StopStatusType,
+) {
   if (estimateTime != null) {
     if (estimateTime <= 60) return t('routePage.realtime.comingSoon')
     const minutes = Math.ceil(estimateTime / 60)
     return t('routePage.realtime.minutesAway', { count: minutes })
   }
-  if (stopStatus === StopStatusType.NORMAL) return t('routePage.realtime.noEstimate')
+  if (stopStatus === StopStatusType.NORMAL)
+    return t('routePage.realtime.noEstimate')
   return getStopStatusLabel(t, stopStatus)
 }
 
@@ -35,7 +44,7 @@ export function getRouteRealtimeBusStatuses(
   t: TFunction,
   locale: AppLocaleType,
   realtimeBuses: RealtimeNearStop[],
-  estimatedArrivals: EstimatedArrival[]
+  estimatedArrivals: EstimatedArrival[],
 ): RouteRealtimeBusStatus[] {
   return realtimeBuses
     .map((realtimeBus) => {
@@ -46,7 +55,9 @@ export function getRouteRealtimeBusStatuses(
           return false
         }
 
-        const estimatedArrivalPlateNumb = normalizePlateNumb(estimatedArrival.PlateNumb)
+        const estimatedArrivalPlateNumb = normalizePlateNumb(
+          estimatedArrival.PlateNumb,
+        )
 
         if (
           estimatedArrivalPlateNumb &&
@@ -74,14 +85,17 @@ export function getRouteRealtimeBusStatuses(
           return true
         }
 
-        return estimatedArrival.StopSequence != null &&
+        return (
+          estimatedArrival.StopSequence != null &&
           realtimeBus.StopSequence === estimatedArrival.StopSequence
+        )
       })
       const nextEstimatedArrival = estimatedArrivals
-        .filter((estimatedArrival) =>
-          estimatedArrival.StopSequence != null &&
-          estimatedArrival.StopSequence > realtimeBus.StopSequence &&
-          estimatedArrival.EstimateTime != null
+        .filter(
+          (estimatedArrival) =>
+            estimatedArrival.StopSequence != null &&
+            estimatedArrival.StopSequence > realtimeBus.StopSequence &&
+            estimatedArrival.EstimateTime != null,
         )
         .sort((left, right) => {
           if (left.StopSequence == null || right.StopSequence == null) {
@@ -90,31 +104,39 @@ export function getRouteRealtimeBusStatuses(
 
           return left.StopSequence - right.StopSequence
         })[0]
-      const matchedArrival = vehicleState === VehicleStateType.DEPARTED
-        ? nextEstimatedArrival ?? plateMatchedArrival ?? stopMatchedArrival
-        : stopMatchedArrival ?? plateMatchedArrival ?? nextEstimatedArrival
+      const matchedArrival =
+        vehicleState === VehicleStateType.DEPARTED
+          ? (nextEstimatedArrival ?? plateMatchedArrival ?? stopMatchedArrival)
+          : (stopMatchedArrival ?? plateMatchedArrival ?? nextEstimatedArrival)
       const estimateLabel = matchedArrival
-        ? formatEstimatedArrivalLabel(t, matchedArrival.EstimateTime, matchedArrival.StopStatus)
+        ? formatEstimatedArrivalLabel(
+            t,
+            matchedArrival.EstimateTime,
+            matchedArrival.StopStatus,
+          )
         : getRealtimeFallbackLabel(t, StopStatusType.UNKNOWN)
       const shouldUseRealtimeFallbackLabel =
         matchedArrival != null &&
         matchedArrival.EstimateTime == null &&
-        [StopStatusType.NOT_YET_DEPARTED, StopStatusType.UNKNOWN].includes(matchedArrival.StopStatus)
+        [StopStatusType.NOT_YET_DEPARTED, StopStatusType.UNKNOWN].includes(
+          matchedArrival.StopStatus,
+        )
 
       return {
         direction: realtimeBus.Direction,
         estimateLabel: shouldUseRealtimeFallbackLabel
           ? getRealtimeFallbackLabel(t, matchedArrival.StopStatus)
           : estimateLabel,
-        estimateMinutes: matchedArrival?.EstimateTime != null
-          ? Math.ceil(matchedArrival.EstimateTime / 60)
-          : null,
+        estimateMinutes:
+          matchedArrival?.EstimateTime != null
+            ? Math.ceil(matchedArrival.EstimateTime / 60)
+            : null,
         id: realtimePlateNumb,
         plateNumb: realtimeBus.PlateNumb,
         stopName: getLocalizedText(realtimeBus.StopName, locale),
         stopSequence: realtimeBus.StopSequence,
         subRouteUID: realtimeBus.SubRouteUID ?? '',
-        vehicleState
+        vehicleState,
       }
     })
     .sort((left, right) => {

@@ -24,39 +24,59 @@ interface RouteMessages {
 function buildAlertMessage(
   t: TFunction,
   type: AlertMessageConfig['type'],
-  key: string
+  key: string,
 ): AlertMessageConfig {
   return {
     type,
     title: t(`${key}.title`),
-    description: t(`${key}.description`)
+    description: t(`${key}.description`),
   }
 }
 
 export function getNearbyMessages(t: TFunction): NearbyMessages {
   return {
-    loadStopsError: buildAlertMessage(t, 'error', 'messages.nearby.loadStopsError'),
-    emptyStops: buildAlertMessage(t, 'warn', 'messages.nearby.emptyStops')
+    loadStopsError: buildAlertMessage(
+      t,
+      'error',
+      'messages.nearby.loadStopsError',
+    ),
+    emptyStops: buildAlertMessage(t, 'warn', 'messages.nearby.emptyStops'),
   }
 }
 
 export function getFavoriteMessages(t: TFunction): FavoriteMessages {
   return {
-    emptyFavoriteRouteStops: buildAlertMessage(t, 'warn', 'messages.favorite.emptyFavoriteRouteStops')
+    emptyFavoriteRouteStops: buildAlertMessage(
+      t,
+      'warn',
+      'messages.favorite.emptyFavoriteRouteStops',
+    ),
   }
 }
 
 export function getSearchMessages(t: TFunction): SearchMessages {
   return {
-    loadRoutesError: buildAlertMessage(t, 'error', 'messages.search.loadRoutesError'),
+    loadRoutesError: buildAlertMessage(
+      t,
+      'error',
+      'messages.search.loadRoutesError',
+    ),
     emptyRoutes: buildAlertMessage(t, 'warn', 'messages.search.emptyRoutes'),
-    emptyRouteSearch: buildAlertMessage(t, 'warn', 'messages.search.emptyRouteSearch')
+    emptyRouteSearch: buildAlertMessage(
+      t,
+      'warn',
+      'messages.search.emptyRouteSearch',
+    ),
   }
 }
 
 export function getRouteMessages(t: TFunction): RouteMessages {
   return {
-    loadRouteError: buildAlertMessage(t, 'error', 'messages.route.loadRouteError'),
-    emptyRoute: buildAlertMessage(t, 'warn', 'messages.route.emptyRoute')
+    loadRouteError: buildAlertMessage(
+      t,
+      'error',
+      'messages.route.loadRouteError',
+    ),
+    emptyRoute: buildAlertMessage(t, 'warn', 'messages.route.emptyRoute'),
   }
 }

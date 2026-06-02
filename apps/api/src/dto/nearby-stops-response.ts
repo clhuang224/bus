@@ -1,26 +1,26 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { BearingType, CityNameType } from '@bus/shared';
+import { ApiProperty } from '@nestjs/swagger'
+import { BearingType, CityNameType } from '@bus/shared'
 
 export class NearbyStopNameDto {
   @ApiProperty({
     description: 'Traditional Chinese stop name',
     example: '民權建國路口',
   })
-  zh_tw!: string;
+  zh_tw!: string
 
   @ApiProperty({
     description: 'English stop name',
     example: 'Minquan & Jianguo Intersection',
   })
-  en!: string;
+  en!: string
 }
 
 export class NearbyStopPositionDto {
   @ApiProperty({ description: 'Latitude', example: 25.06236889 })
-  lat!: number;
+  lat!: number
 
   @ApiProperty({ description: 'Longitude', example: 121.5364984 })
-  lon!: number;
+  lon!: number
 }
 
 export class NearbyStopDto {
@@ -29,41 +29,41 @@ export class NearbyStopDto {
     enum: BearingType,
     example: BearingType.EAST,
   })
-  bearing!: BearingType;
+  bearing!: BearingType
 
   @ApiProperty({
     description: 'City where the nearby stop is located',
     enum: CityNameType,
     example: CityNameType.NEW_TAIPEI,
   })
-  city!: CityNameType;
+  city!: CityNameType
 
   @ApiProperty({ description: 'Station ID', example: '1242' })
-  station_id!: string;
+  station_id!: string
 
   @ApiProperty({ description: 'Stop UID', example: 'NWT139342' })
-  uid!: string;
+  uid!: string
 
   @ApiProperty({
     description: 'Stop address',
     example: '民權東路二段上近建國北路二段同向(向東)',
   })
-  address!: string;
+  address!: string
 
   @ApiProperty({ description: 'Localized stop name', type: NearbyStopNameDto })
-  name!: NearbyStopNameDto;
+  name!: NearbyStopNameDto
 
   @ApiProperty({
     description: 'Geographic position',
     type: NearbyStopPositionDto,
   })
-  position!: NearbyStopPositionDto;
+  position!: NearbyStopPositionDto
 
   @ApiProperty({
     description: 'Last update timestamp',
     example: '2026-06-02T17:25:33+08:00',
   })
-  updated_at!: string;
+  updated_at!: string
 }
 
 export class NearbyStopsResponseDto {
@@ -89,5 +89,5 @@ export class NearbyStopsResponseDto {
       },
     ],
   })
-  stops!: NearbyStopDto[];
+  stops!: NearbyStopDto[]
 }

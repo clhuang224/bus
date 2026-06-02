@@ -1,4 +1,14 @@
-import { ActionIcon, Card, Flex, Radio, Stack, Switch, Text, Title, useMantineTheme } from '@mantine/core'
+import {
+  ActionIcon,
+  Card,
+  Flex,
+  Radio,
+  Stack,
+  Switch,
+  Text,
+  Title,
+  useMantineTheme,
+} from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { RiArrowLeftSLine } from '@remixicon/react'
 import { useTranslation } from 'react-i18next'
@@ -7,7 +17,10 @@ import { useNavigate } from 'react-router'
 import { isSupportedAppLocale } from '~/modules/consts/i18n'
 import { APP_PAGE_PADDING } from '~/modules/consts/layout'
 import { AppLocaleType } from '~/modules/enums/AppLocaleType'
-import { selectAnalyticsEnabled, setAnalyticsEnabled } from '~/modules/slices/analyticsSlice'
+import {
+  selectAnalyticsEnabled,
+  setAnalyticsEnabled,
+} from '~/modules/slices/analyticsSlice'
 import { selectLocale, setLocale } from '~/modules/slices/localeSlice'
 import type { AppDispatch } from '~/modules/store'
 
@@ -23,12 +36,12 @@ export default function Settings() {
   const localeOptions = [
     {
       value: AppLocaleType.ZH_TW,
-      label: t('pages.settings.localeOptions.zhTW.label')
+      label: t('pages.settings.localeOptions.zhTW.label'),
     },
     {
       value: AppLocaleType.EN,
-      label: t('pages.settings.localeOptions.en.label')
-    }
+      label: t('pages.settings.localeOptions.en.label'),
+    },
   ]
 
   return (
@@ -52,7 +65,9 @@ export default function Settings() {
           </Flex>
           <Card withBorder radius="md" p="md">
             <Stack gap="xs">
-              <Title order={5}>{t('pages.settings.languageSectionTitle')}</Title>
+              <Title order={5}>
+                {t('pages.settings.languageSectionTitle')}
+              </Title>
               <Radio.Group
                 name="app-language"
                 value={locale}
@@ -77,7 +92,9 @@ export default function Settings() {
           </Card>
           <Card withBorder radius="md" p="md">
             <Stack gap="xs">
-              <Title order={5}>{t('pages.settings.analyticsSectionTitle')}</Title>
+              <Title order={5}>
+                {t('pages.settings.analyticsSectionTitle')}
+              </Title>
               <Text size="sm" c="dimmed">
                 {t('pages.settings.analyticsDescription')}
               </Text>

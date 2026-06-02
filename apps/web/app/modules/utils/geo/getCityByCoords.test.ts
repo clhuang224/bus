@@ -11,71 +11,79 @@ const mockGeojson: FeatureCollection = {
       type: 'Feature',
       properties: {
         name: CityNameType.NEW_TAIPEI,
-        nameTw: '新北市'
+        nameTw: '新北市',
       },
       geometry: {
         type: 'Polygon',
-        coordinates: [[
-          [121.3, 24.9],
-          [121.7, 24.9],
-          [121.7, 25.2],
-          [121.3, 25.2],
-          [121.3, 24.9]
-        ]]
-      }
+        coordinates: [
+          [
+            [121.3, 24.9],
+            [121.7, 24.9],
+            [121.7, 25.2],
+            [121.3, 25.2],
+            [121.3, 24.9],
+          ],
+        ],
+      },
     },
     {
       type: 'Feature',
       properties: {
         name: CityNameType.TAIPEI,
-        nameTw: '台北市'
+        nameTw: '台北市',
       },
       geometry: {
         type: 'Polygon',
-        coordinates: [[
-          [121.4, 25.0],
-          [121.7, 25.0],
-          [121.7, 25.2],
-          [121.4, 25.2],
-          [121.4, 25.0]
-        ]]
-      }
+        coordinates: [
+          [
+            [121.4, 25.0],
+            [121.7, 25.0],
+            [121.7, 25.2],
+            [121.4, 25.2],
+            [121.4, 25.0],
+          ],
+        ],
+      },
     },
     {
       type: 'Feature',
       properties: {
         name: CityNameType.YILAN_COUNTY,
-        nameTw: '宜蘭縣'
+        nameTw: '宜蘭縣',
       },
       geometry: {
         type: 'Polygon',
-        coordinates: [[
-          [121.6, 24.5],
-          [121.9, 24.5],
-          [121.9, 24.8],
-          [121.6, 24.8],
-          [121.6, 24.5]
-        ]]
-      }
+        coordinates: [
+          [
+            [121.6, 24.5],
+            [121.9, 24.5],
+            [121.9, 24.8],
+            [121.6, 24.8],
+            [121.6, 24.5],
+          ],
+        ],
+      },
     },
     {
       type: 'Feature',
       properties: {
         name: 'UnknownCity',
-        nameTw: '未知縣市'
+        nameTw: '未知縣市',
       },
       geometry: {
         type: 'Polygon',
-        coordinates: [[
-          [121.9, 24.9],
-          [122.1, 24.9],
-          [122.1, 25.1],
-          [121.9, 25.1],
-          [121.9, 24.9]
-        ]]
-      }
-    }
-  ]
+        coordinates: [
+          [
+            [121.9, 24.9],
+            [122.1, 24.9],
+            [122.1, 25.1],
+            [121.9, 25.1],
+            [121.9, 24.9],
+          ],
+        ],
+      },
+    },
+  ],
 }
 
 describe('getCityByCoords', () => {
@@ -85,7 +93,9 @@ describe('getCityByCoords', () => {
   })
 
   it('returns the first matching known city when polygons overlap', () => {
-    expect(getCityByCoords([25.05, 121.55], mockGeojson)).toBe(CityNameType.NEW_TAIPEI)
+    expect(getCityByCoords([25.05, 121.55], mockGeojson)).toBe(
+      CityNameType.NEW_TAIPEI,
+    )
   })
 
   it('supports taiwan-atlas county property names', () => {
@@ -97,27 +107,35 @@ describe('getCityByCoords', () => {
           properties: {
             COUNTYID: CountyIdType.TAICHUNG,
             COUNTYENG: 'Taichung City',
-            COUNTYNAME: '台中市'
+            COUNTYNAME: '台中市',
           },
           geometry: {
             type: 'MultiPolygon',
-            coordinates: [[[
-              [120.4, 24.0],
-              [120.9, 24.0],
-              [120.9, 24.4],
-              [120.4, 24.4],
-              [120.4, 24.0]
-            ]]]
-          }
-        }
-      ]
+            coordinates: [
+              [
+                [
+                  [120.4, 24.0],
+                  [120.9, 24.0],
+                  [120.9, 24.4],
+                  [120.4, 24.4],
+                  [120.4, 24.0],
+                ],
+              ],
+            ],
+          },
+        },
+      ],
     }
 
-    expect(getCityByCoords([24.1369, 120.6847], atlasGeojson)).toBe(CityNameType.TAICHUNG)
+    expect(getCityByCoords([24.1369, 120.6847], atlasGeojson)).toBe(
+      CityNameType.TAICHUNG,
+    )
   })
 
   it('treats a point on the polygon boundary as inside the city', () => {
-    expect(getCityByCoords([24.5, 121.75], mockGeojson)).toBe(CityNameType.YILAN_COUNTY)
+    expect(getCityByCoords([24.5, 121.75], mockGeojson)).toBe(
+      CityNameType.YILAN_COUNTY,
+    )
   })
 
   it('ignores unknown city names in geojson', () => {
@@ -130,11 +148,15 @@ describe('getCityByCoords', () => {
   })
 
   it('still resolves a known city when unknown city names exist in geojson', () => {
-    expect(getCityByCoords([25.05, 121.55], mockGeojson)).toBe(CityNameType.NEW_TAIPEI)
+    expect(getCityByCoords([25.05, 121.55], mockGeojson)).toBe(
+      CityNameType.NEW_TAIPEI,
+    )
   })
 
   it('resolves a known city even when it is not one of the previously prioritized cities', () => {
-    expect(getCityByCoords([24.65, 121.75], mockGeojson)).toBe(CityNameType.YILAN_COUNTY)
+    expect(getCityByCoords([24.65, 121.75], mockGeojson)).toBe(
+      CityNameType.YILAN_COUNTY,
+    )
   })
 
   it('ignores unknown city names and falls back when no known polygon matches', () => {

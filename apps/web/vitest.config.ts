@@ -8,17 +8,19 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [tsconfigPaths()],
     define: {
-      'import.meta.env.VITE_PROXY_API_BASE_URL': JSON.stringify(env.VITE_PROXY_API_BASE_URL)
+      'import.meta.env.VITE_PROXY_API_BASE_URL': JSON.stringify(
+        env.VITE_PROXY_API_BASE_URL,
+      ),
     },
     test: {
       environment: 'jsdom',
       environmentOptions: {
         jsdom: {
-          url: 'http://localhost/'
-        }
+          url: 'http://localhost/',
+        },
       },
       include: ['app/**/*.test.ts', 'app/**/*.test.tsx'],
-      setupFiles: ['app/test/setup.ts']
-    }
+      setupFiles: ['app/test/setup.ts'],
+    },
   }
 })

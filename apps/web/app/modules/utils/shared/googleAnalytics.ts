@@ -26,7 +26,7 @@ function getGa() {
 
   return {
     gaId,
-    gtag: window.gtag
+    gtag: window.gtag,
   }
 }
 
@@ -67,7 +67,7 @@ export function initializeGoogleAnalytics() {
 
   window.gtag('js', new Date())
   window.gtag('config', gaId, {
-    send_page_view: false
+    send_page_view: false,
   })
 
   isInitialized = true
@@ -84,13 +84,13 @@ export function trackGoogleAnalytics(pagePath: string) {
     page_title: document.title,
     page_location: window.location.href,
     page_path: pagePath,
-    send_to: gaId
+    send_to: gaId,
   })
 }
 
 export function trackGoogleAnalyticsEvent(
   eventName: string,
-  parameters: Record<string, unknown> = {}
+  parameters: Record<string, unknown> = {},
 ) {
   const ga = getGa()
   if (!ga) return
@@ -98,7 +98,7 @@ export function trackGoogleAnalyticsEvent(
 
   gtag('event', eventName, {
     ...parameters,
-    send_to: gaId
+    send_to: gaId,
   })
 }
 
@@ -116,7 +116,7 @@ export function setGoogleAnalyticsEnabled(nextIsEnabled: boolean) {
   if (!window.gtag || !shouldUpdateConsent) return
 
   window.gtag('consent', 'update', {
-    analytics_storage: nextIsEnabled ? 'granted' : 'denied'
+    analytics_storage: nextIsEnabled ? 'granted' : 'denied',
   })
 }
 

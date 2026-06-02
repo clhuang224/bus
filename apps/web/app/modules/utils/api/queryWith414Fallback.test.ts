@@ -2,22 +2,22 @@ import { describe, expect, it, vi } from 'vitest'
 import { queryArrayWith414Fallback } from './queryWith414Fallback'
 
 describe('queryArrayWith414Fallback', () => {
-  it('returns data directly when the first request succeeds', async() => {
-    const queryBatch = vi.fn(async(batchItems: number[]) => ({
-      data: batchItems
+  it('returns data directly when the first request succeeds', async () => {
+    const queryBatch = vi.fn(async (batchItems: number[]) => ({
+      data: batchItems,
     }))
 
     const result = await queryArrayWith414Fallback({
       items: [1, 2, 3],
-      queryBatch
+      queryBatch,
     })
 
     expect(result).toEqual({ data: [1, 2, 3] })
     expect(queryBatch).toHaveBeenCalledTimes(1)
   })
 
-  it('splits recursively for 414 and merges successful branches', async() => {
-    const queryBatch = vi.fn(async(batchItems: number[]) => {
+  it('splits recursively for 414 and merges successful branches', async () => {
+    const queryBatch = vi.fn(async (batchItems: number[]) => {
       if (batchItems.length > 2) {
         return { error: { status: 414 as const } }
       }
@@ -31,22 +31,22 @@ describe('queryArrayWith414Fallback', () => {
 
     const result = await queryArrayWith414Fallback({
       items: [1, 2, 3, 4],
-      queryBatch
+      queryBatch,
     })
 
     expect(result).toEqual({ data: [1, 2, 3, 4] })
   })
 
-  it('splits recursively when 414 is wrapped as a parsing error', async() => {
-    const queryBatch = vi.fn(async(batchItems: number[]) => {
+  it('splits recursively when 414 is wrapped as a parsing error', async () => {
+    const queryBatch = vi.fn(async (batchItems: number[]) => {
       if (batchItems.length > 2) {
         return {
           error: {
             status: 'PARSING_ERROR' as const,
             originalStatus: 414 as const,
             data: 'URI Too Long',
-            error: 'SyntaxError'
-          }
+            error: 'SyntaxError',
+          },
         }
       }
 
@@ -55,34 +55,34 @@ describe('queryArrayWith414Fallback', () => {
 
     const result = await queryArrayWith414Fallback({
       items: [1, 2, 3, 4],
-      queryBatch
+      queryBatch,
     })
 
     expect(result).toEqual({ data: [1, 2, 3, 4] })
   })
 
-  it('does not split when error is not a URI-too-long error', async() => {
-    const queryBatch = vi.fn(async() => ({
-      error: { status: 500 as const }
+  it('does not split when error is not a URI-too-long error', async () => {
+    const queryBatch = vi.fn(async () => ({
+      error: { status: 500 as const },
     }))
 
     const result = await queryArrayWith414Fallback({
       items: [1, 2, 3],
-      queryBatch
+      queryBatch,
     })
 
     expect(result).toEqual({ error: { status: 500 } })
     expect(queryBatch).toHaveBeenCalledTimes(1)
   })
 
-  it('returns error when one-item batch still fails with 414', async() => {
-    const queryBatch = vi.fn(async() => ({
-      error: { status: 414 as const }
+  it('returns error when one-item batch still fails with 414', async () => {
+    const queryBatch = vi.fn(async () => ({
+      error: { status: 414 as const },
     }))
 
     const result = await queryArrayWith414Fallback({
       items: [1],
-      queryBatch
+      queryBatch,
     })
 
     expect(result).toEqual({ error: { status: 414 } })

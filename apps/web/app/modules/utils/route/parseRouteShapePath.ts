@@ -39,15 +39,15 @@ function decodeEncodedPolyline(encodedPolyline: string): LngLat[] {
 }
 
 function parseGeometryLineString(geometry: string): LngLat[] {
-  return Array.from(geometry.matchAll(/(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)/g), (match) => [
-    Number(match[1]),
-    Number(match[2])
-  ] as LngLat)
+  return Array.from(
+    geometry.matchAll(/(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)/g),
+    (match) => [Number(match[1]), Number(match[2])] as LngLat,
+  )
 }
 
 export function parseRouteShapePath({
   encodedPolyline,
-  geometry
+  geometry,
 }: {
   encodedPolyline?: string | null
   geometry?: string | null

@@ -2,7 +2,8 @@ import { CityNameType } from '@bus/shared'
 import { CountyIdType } from '../enums/CountyIdType'
 
 type ZhTWLocale = typeof import('../i18n/locales/zh-TW').zhTW
-type CityTranslationKey = `common.city.${keyof ZhTWLocale['translation']['common']['city']}`
+type CityTranslationKey =
+  `common.city.${keyof ZhTWLocale['translation']['common']['city']}`
 
 export const cityMapName: Record<CityNameType, string> = {
   [CityNameType.TAIPEI]: '台北市',
@@ -26,7 +27,7 @@ export const cityMapName: Record<CityNameType, string> = {
   [CityNameType.TAITUNG_COUNTY]: '台東縣',
   [CityNameType.KINMEN_COUNTY]: '金門縣',
   [CityNameType.PENGHU_COUNTY]: '澎湖縣',
-  [CityNameType.LIENCHIANG_COUNTY]: '連江縣'
+  [CityNameType.LIENCHIANG_COUNTY]: '連江縣',
 }
 
 export const cityTranslationKeyMap: Record<CityNameType, CityTranslationKey> = {
@@ -51,11 +52,14 @@ export const cityTranslationKeyMap: Record<CityNameType, CityTranslationKey> = {
   [CityNameType.TAITUNG_COUNTY]: 'common.city.TaitungCounty',
   [CityNameType.KINMEN_COUNTY]: 'common.city.KinmenCounty',
   [CityNameType.PENGHU_COUNTY]: 'common.city.PenghuCounty',
-  [CityNameType.LIENCHIANG_COUNTY]: 'common.city.LienchiangCounty'
+  [CityNameType.LIENCHIANG_COUNTY]: 'common.city.LienchiangCounty',
 }
 
 export const cityMapNameToCity = Object.fromEntries(
-  Object.entries(cityMapName).map(([city, cityNameTw]) => [cityNameTw, city as CityNameType])
+  Object.entries(cityMapName).map(([city, cityNameTw]) => [
+    cityNameTw,
+    city as CityNameType,
+  ]),
 ) as Record<string, CityNameType>
 
 export const countyIdMapCity: Record<CountyIdType, CityNameType> = {
@@ -80,5 +84,5 @@ export const countyIdMapCity: Record<CountyIdType, CityNameType> = {
   [CountyIdType.TAITUNG_COUNTY]: CityNameType.TAITUNG_COUNTY,
   [CountyIdType.KINMEN_COUNTY]: CityNameType.KINMEN_COUNTY,
   [CountyIdType.PENGHU_COUNTY]: CityNameType.PENGHU_COUNTY,
-  [CountyIdType.LIENCHIANG_COUNTY]: CityNameType.LIENCHIANG_COUNTY
+  [CountyIdType.LIENCHIANG_COUNTY]: CityNameType.LIENCHIANG_COUNTY,
 }

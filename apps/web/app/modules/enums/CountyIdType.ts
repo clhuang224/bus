@@ -20,5 +20,5 @@ export enum CountyIdType {
   TAITUNG_COUNTY = 'V',
   KINMEN_COUNTY = 'W',
   PENGHU_COUNTY = 'X',
-  LIENCHIANG_COUNTY = 'Z'
+  LIENCHIANG_COUNTY = 'Z',
 }

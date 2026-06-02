@@ -4,56 +4,68 @@ import {
   getBusErrorModal,
   getTdxSystemErrorModal,
   getTdxUnauthorizedModal,
-  isTdxRateLimitError
+  isTdxRateLimitError,
 } from './busError'
 
 describe('getTdxHttpErrorStatus', () => {
   it('returns the numeric status for direct HTTP errors', () => {
-    expect(getTdxHttpErrorStatus({
-      status: 429,
-      data: {}
-    })).toBe(429)
+    expect(
+      getTdxHttpErrorStatus({
+        status: 429,
+        data: {},
+      }),
+    ).toBe(429)
   })
 
   it('returns the original status for parsing errors', () => {
-    expect(getTdxHttpErrorStatus({
-      status: 'PARSING_ERROR',
-      originalStatus: 429,
-      data: 'Too Many Requests',
-      error: 'SyntaxError'
-    })).toBe(429)
+    expect(
+      getTdxHttpErrorStatus({
+        status: 'PARSING_ERROR',
+        originalStatus: 429,
+        data: 'Too Many Requests',
+        error: 'SyntaxError',
+      }),
+    ).toBe(429)
   })
 
   it('returns null for non-http base query errors', () => {
-    expect(getTdxHttpErrorStatus({
-      status: 'FETCH_ERROR',
-      error: 'Failed to fetch'
-    })).toBeNull()
+    expect(
+      getTdxHttpErrorStatus({
+        status: 'FETCH_ERROR',
+        error: 'Failed to fetch',
+      }),
+    ).toBeNull()
   })
 })
 
 describe('isTdxRateLimitError', () => {
   it('returns true for direct 429 errors', () => {
-    expect(isTdxRateLimitError({
-      status: 429,
-      data: {}
-    })).toBe(true)
+    expect(
+      isTdxRateLimitError({
+        status: 429,
+        data: {},
+      }),
+    ).toBe(true)
   })
 
   it('returns true for parsing errors wrapped around a 429 response', () => {
-    expect(isTdxRateLimitError({
-      status: 'PARSING_ERROR',
-      originalStatus: 429,
-      data: 'Too Many Requests',
-      error: 'SyntaxError'
-    })).toBe(true)
+    expect(
+      isTdxRateLimitError({
+        status: 'PARSING_ERROR',
+        originalStatus: 429,
+        data: 'Too Many Requests',
+        error: 'SyntaxError',
+      }),
+    ).toBe(true)
   })
 
   it('returns false for non-rate-limit errors', () => {
-    expect(isTdxRateLimitError({
-      status: 500,
-      data: {}
-    })).toBe(false)
+    expect(
+      isTdxRateLimitError({
+        status: 500,
+        data: {},
+      }),
+    ).toBe(false)
   })
 })
 
@@ -62,8 +74,8 @@ describe('getBusErrorModal', () => {
     expect(
       getBusErrorModal({
         status: 401,
-        data: {}
-      })
+        data: {},
+      }),
     ).toEqual(getTdxUnauthorizedModal())
   })
 
@@ -73,8 +85,8 @@ describe('getBusErrorModal', () => {
         status: 'PARSING_ERROR',
         originalStatus: 401,
         data: 'Unauthorized',
-        error: 'SyntaxError: Unexpected token U in JSON at position 0'
-      })
+        error: 'SyntaxError: Unexpected token U in JSON at position 0',
+      }),
     ).toEqual(getTdxUnauthorizedModal())
   })
 
@@ -82,8 +94,8 @@ describe('getBusErrorModal', () => {
     expect(
       getBusErrorModal({
         status: 429,
-        data: {}
-      })
+        data: {},
+      }),
     ).toBeNull()
   })
 
@@ -93,8 +105,8 @@ describe('getBusErrorModal', () => {
         status: 'PARSING_ERROR',
         originalStatus: 429,
         data: 'Too Many Requests',
-        error: 'SyntaxError: Unexpected token T in JSON at position 0'
-      })
+        error: 'SyntaxError: Unexpected token T in JSON at position 0',
+      }),
     ).toBeNull()
   })
 
@@ -104,8 +116,8 @@ describe('getBusErrorModal', () => {
         status: 'PARSING_ERROR',
         originalStatus: 414,
         data: 'URI Too Long',
-        error: 'SyntaxError: Unexpected token U in JSON at position 0'
-      })
+        error: 'SyntaxError: Unexpected token U in JSON at position 0',
+      }),
     ).toBeNull()
   })
 
@@ -113,8 +125,8 @@ describe('getBusErrorModal', () => {
     expect(
       getBusErrorModal({
         status: 503,
-        data: {}
-      })
+        data: {},
+      }),
     ).toEqual(getTdxSystemErrorModal())
   })
 
@@ -124,8 +136,8 @@ describe('getBusErrorModal', () => {
         status: 'PARSING_ERROR',
         originalStatus: 500,
         data: '<html>server error</html>',
-        error: 'SyntaxError: Unexpected token < in JSON at position 0'
-      })
+        error: 'SyntaxError: Unexpected token < in JSON at position 0',
+      }),
     ).toEqual(getTdxSystemErrorModal())
   })
 
@@ -133,8 +145,8 @@ describe('getBusErrorModal', () => {
     expect(
       getBusErrorModal({
         status: 'FETCH_ERROR',
-        error: 'Failed to fetch'
-      })
+        error: 'Failed to fetch',
+      }),
     ).toBeNull()
   })
 
@@ -142,8 +154,8 @@ describe('getBusErrorModal', () => {
     expect(
       getBusErrorModal({
         status: 'TIMEOUT_ERROR',
-        error: 'Timed out'
-      })
+        error: 'Timed out',
+      }),
     ).toBeNull()
   })
 
@@ -152,8 +164,8 @@ describe('getBusErrorModal', () => {
       getBusErrorModal({
         status: 'CUSTOM_ERROR',
         error: 'Custom error',
-        data: {}
-      })
+        data: {},
+      }),
     ).toBeNull()
   })
 
@@ -161,8 +173,8 @@ describe('getBusErrorModal', () => {
     expect(
       getBusErrorModal({
         status: 404,
-        data: {}
-      })
+        data: {},
+      }),
     ).toBeNull()
   })
 })

@@ -17,13 +17,14 @@ const Nearby = () => {
   const stopItemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
   const theme = useMantineTheme()
   const isSm = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`)
-  const [isSidebarOpened, { open: openSidebar, close: closeSidebar }] = useDisclosure(false)
+  const [isSidebarOpened, { open: openSidebar, close: closeSidebar }] =
+    useDisclosure(false)
   const {
     selectedStopId,
     selectedRouteStopId,
     selectStop,
     viewStopRoutes,
-    backToNearbyStops
+    backToNearbyStops,
   } = useNearbySearchParams()
   const {
     coords,
@@ -41,16 +42,16 @@ const Nearby = () => {
     selectedMapStopGroup,
     selectedStationRoutes,
     selectedStopGroup,
-    stationRouteBadgesMap
+    stationRouteBadgesMap,
   } = useNearbyData({
     selectedStopId,
-    selectedRouteStopId
+    selectedRouteStopId,
   })
 
   useScrollSelectedItem({
     itemElementRefs: stopItemRefs,
     listItems: nearbyStopGroups,
-    selectedItemId: selectedStopId
+    selectedItemId: selectedStopId,
   })
 
   useEffect(() => {
@@ -65,31 +66,29 @@ const Nearby = () => {
     openSidebar()
   }, [isSm, selectedRouteStopId, openSidebar])
 
-  const selectedStopPopupContent = selectedMapStopGroup
-    ? (
-        <NearbyStopDetail
-          stopGroup={selectedMapStopGroup}
-          hasRoutesError={hasStationRouteBadgesError}
-          routes={stationRouteBadgesMap.get(selectedMapStopGroup.StationID) ?? []}
-          isRoutesLoading={isStationRouteBadgesLoading}
-          isRoutesRateLimited={isStationRouteBadgesRateLimited}
-          displayMode={isSm ? 'full' : 'title'}
-          onViewRoutes={(stationID) => {
-            viewStopRoutes(stationID)
-          if (isSm) {
-            openSidebar()
-          }
-        }}
-      />
-    )
-    : null
+  const selectedStopPopupContent = selectedMapStopGroup ? (
+    <NearbyStopDetail
+      stopGroup={selectedMapStopGroup}
+      hasRoutesError={hasStationRouteBadgesError}
+      routes={stationRouteBadgesMap.get(selectedMapStopGroup.StationID) ?? []}
+      isRoutesLoading={isStationRouteBadgesLoading}
+      isRoutesRateLimited={isStationRouteBadgesRateLimited}
+      displayMode={isSm ? 'full' : 'title'}
+      onViewRoutes={(stationID) => {
+        viewStopRoutes(stationID)
+        if (isSm) {
+          openSidebar()
+        }
+      }}
+    />
+  ) : null
 
   return (
     <MapSidebarLayout
       isSm={isSm}
       isSidebarOpened={isSidebarOpened}
       onCloseSidebar={closeSidebar}
-      panel={(
+      panel={
         <NearbySidebarContent
           detailState={{
             hasStationRoutesError,
@@ -97,7 +96,7 @@ const Nearby = () => {
             isStationRoutesRateLimited,
             onBack: backToNearbyStops,
             stopGroup: selectedStopGroup,
-            stationRoutes: selectedStationRoutes
+            stationRoutes: selectedStationRoutes,
           }}
           listState={{
             hasStationRouteBadgesError,
@@ -110,38 +109,38 @@ const Nearby = () => {
             scrollViewportRef,
             selectedStopId,
             stationRouteBadgesMap,
-            stopItemRefs
+            stopItemRefs,
           }}
           message={message}
         />
-      )}
+      }
     >
-        {isNearbyDisabled && (
-          <Overlay
-            color="#fff"
-            backgroundOpacity={0.55}
-            zIndex={1}
-            style={{ cursor: 'not-allowed' }}
-          />
-        )}
-        <NearbyStopMap
-          center={coords}
-          extraControls={isSm
-            ? (
-              <ActionIcon
-                onClick={openSidebar}
-                aria-label={t('components.mapSidebarLayout.openNearbyStops')}
-              >
-                <RiMenuFill size={18} />
-              </ActionIcon>
-              )
-            : null}
-          markers={markers}
-          selectedStop={selectedStopId}
-          selectedStopPopupContent={selectedStopPopupContent}
-          isSm={isSm}
-          onSelectStop={selectStop}
+      {isNearbyDisabled && (
+        <Overlay
+          color="#fff"
+          backgroundOpacity={0.55}
+          zIndex={1}
+          style={{ cursor: 'not-allowed' }}
         />
+      )}
+      <NearbyStopMap
+        center={coords}
+        extraControls={
+          isSm ? (
+            <ActionIcon
+              onClick={openSidebar}
+              aria-label={t('components.mapSidebarLayout.openNearbyStops')}
+            >
+              <RiMenuFill size={18} />
+            </ActionIcon>
+          ) : null
+        }
+        markers={markers}
+        selectedStop={selectedStopId}
+        selectedStopPopupContent={selectedStopPopupContent}
+        isSm={isSm}
+        onSelectStop={selectStop}
+      />
     </MapSidebarLayout>
   )
 }

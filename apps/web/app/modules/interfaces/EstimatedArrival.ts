@@ -25,7 +25,10 @@ export interface TdxEstimatedArrival<L = TdxLocalizedText> {
   UpdateTime: string
 }
 
-export interface EstimatedArrival extends Omit<TdxEstimatedArrival<LocalizedText>, 'StopName' | 'RouteName' | 'SubRouteName'> {
+export interface EstimatedArrival extends Omit<
+  TdxEstimatedArrival<LocalizedText>,
+  'StopName' | 'RouteName' | 'SubRouteName'
+> {
   City: CityNameType
   StopName: LocalizedText
   RouteName: LocalizedText

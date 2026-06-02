@@ -1,4 +1,11 @@
-import { ActionIcon, Flex, Stack, Tabs, Text, useMantineTheme } from '@mantine/core'
+import {
+  ActionIcon,
+  Flex,
+  Stack,
+  Tabs,
+  Text,
+  useMantineTheme,
+} from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -28,17 +35,19 @@ export default function Route() {
   const navigate = useNavigate()
   const theme = useMantineTheme()
   const isSm = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`)
-  const { isFavoriteRouteStop, toggleFavoriteRouteStop } = useFavoriteRouteStops()
+  const { isFavoriteRouteStop, toggleFavoriteRouteStop } =
+    useFavoriteRouteStops()
   const [activeTab, setActiveTab] = useState<string | null>(null)
-  const routeBaseOptions = city && isCityName(city) && id
-    ? {
-        activeTab,
-        city,
-        id,
-        isFavoriteRouteStop,
-        locationState: location.state
-      }
-    : null
+  const routeBaseOptions =
+    city && isCityName(city) && id
+      ? {
+          activeTab,
+          city,
+          id,
+          isFavoriteRouteStop,
+          locationState: location.state,
+        }
+      : null
   const {
     subRoute,
     routePath,
@@ -50,16 +59,17 @@ export default function Route() {
     message,
     defaultActiveTabId,
     routeMapStops,
-    routeTabs
+    routeTabs,
   } = useRouteBaseData(routeBaseOptions)
-  const routeRealtimeOptions = city && isCityName(city) && id && busRoute && subRoute
-    ? {
-        subRoute,
-        busRoute,
-        city,
-        id
-      }
-    : null
+  const routeRealtimeOptions =
+    city && isCityName(city) && id && busRoute && subRoute
+      ? {
+          subRoute,
+          busRoute,
+          city,
+          id,
+        }
+      : null
   const {
     estimatedArrivalLabelsByStopKey,
     hasRealtimeError,
@@ -67,15 +77,20 @@ export default function Route() {
     isRealtimeRateLimited,
     realtimeMapVehicles,
     realtimeBusesByStopSequence,
-    realtimeInfoState
+    realtimeInfoState,
   } = useRouteRealtimeData(routeRealtimeOptions)
-  const stops = useMemo(() => baseStops.map((stop) => ({
-    ...stop,
-    estimatedArrivalLabel: estimatedArrivalLabelsByStopKey.get(stop.id) ??
-      estimatedArrivalLabelsByStopKey.get(stop.stopID) ??
-      null,
-    realtimeBuses: realtimeBusesByStopSequence.get(stop.sequence) ?? []
-  })), [baseStops, estimatedArrivalLabelsByStopKey, realtimeBusesByStopSequence])
+  const stops = useMemo(
+    () =>
+      baseStops.map((stop) => ({
+        ...stop,
+        estimatedArrivalLabel:
+          estimatedArrivalLabelsByStopKey.get(stop.id) ??
+          estimatedArrivalLabelsByStopKey.get(stop.stopID) ??
+          null,
+        realtimeBuses: realtimeBusesByStopSequence.get(stop.sequence) ?? [],
+      })),
+    [baseStops, estimatedArrivalLabelsByStopKey, realtimeBusesByStopSequence],
+  )
   const {
     closeSidebar,
     handleSelectStopFromList,
@@ -86,22 +101,34 @@ export default function Route() {
     listScrollBehavior,
     openSidebar,
     selectedStopId,
-    selectedVehicleId
+    selectedVehicleId,
   } = useRouteSelectionState({
     defaultActiveTabId,
     isSm,
     routeTabs,
     setActiveTab,
-    stops
+    stops,
   })
   const selectedStopEstimatedArrivalLabel = useMemo(
-    () => stops.find((stop) => stop.id === selectedStopId)?.estimatedArrivalLabel ?? null,
-    [selectedStopId, stops]
+    () =>
+      stops.find((stop) => stop.id === selectedStopId)?.estimatedArrivalLabel ??
+      null,
+    [selectedStopId, stops],
   )
-  const routeName = busRoute ? getLocalizedText(busRoute.RouteName, locale) : null
-  const routeDeparture = busRoute ? getLocalizedText(busRoute.DepartureStopName, locale) : null
-  const routeDestination = busRoute ? getLocalizedText(busRoute.DestinationStopName, locale) : null
-  const routeTerminalDisplay = getTerminalDisplay(routeDeparture, routeDestination, ' - ')
+  const routeName = busRoute
+    ? getLocalizedText(busRoute.RouteName, locale)
+    : null
+  const routeDeparture = busRoute
+    ? getLocalizedText(busRoute.DepartureStopName, locale)
+    : null
+  const routeDestination = busRoute
+    ? getLocalizedText(busRoute.DestinationStopName, locale)
+    : null
+  const routeTerminalDisplay = getTerminalDisplay(
+    routeDeparture,
+    routeDestination,
+    ' - ',
+  )
 
   useEffect(() => {
     if (!city || !isCityName(city) || !id) {
@@ -125,15 +152,20 @@ export default function Route() {
       isSm={isSm}
       isSidebarOpened={isSidebarOpened}
       onCloseSidebar={closeSidebar}
-      panel={(
+      panel={
         <Stack h="100%" gap="md">
           <Stack gap={4}>
             <Flex gap="xs" align="center">
-              <ActionIcon aria-label={t('routePage.backToRoutes')} onClick={handleBack}>
+              <ActionIcon
+                aria-label={t('routePage.backToRoutes')}
+                onClick={handleBack}
+              >
                 <RiArrowLeftSLine size={18} />
               </ActionIcon>
               {routeName && (
-                <AppBadge type="route" size="xl">{routeName}</AppBadge>
+                <AppBadge type="route" size="xl">
+                  {routeName}
+                </AppBadge>
               )}
             </Flex>
             {routeTerminalDisplay && (
@@ -142,19 +174,23 @@ export default function Route() {
               </Text>
             )}
           </Stack>
-          {routeTabs.length > 0
-            ? (
-              <Tabs
+          {routeTabs.length > 0 ? (
+            <Tabs
               value={activeTab}
               onChange={setActiveTab}
               keepMounted={false}
-              style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                flex: 1,
+                minHeight: 0,
+              }}
             >
               <Tabs.List
                 style={{
                   flexWrap: 'nowrap',
                   overflowX: 'auto',
-                  overflowY: 'hidden'
+                  overflowY: 'hidden',
                 }}
               >
                 {routeTabs.map((tab) => (
@@ -193,26 +229,23 @@ export default function Route() {
                 </Tabs.Panel>
               ))}
             </Tabs>
-              )
-            : (
-                !isLoading && message
-                  ? <BaseAlert {...message} />
-                  : null
-              )}
+          ) : !isLoading && message ? (
+            <BaseAlert {...message} />
+          ) : null}
         </Stack>
-      )}
+      }
     >
       <RouteMap
-        extraControls={isSm
-          ? (
+        extraControls={
+          isSm ? (
             <ActionIcon
               onClick={openSidebar}
               aria-label={t('components.mapSidebarLayout.openRouteList')}
             >
               <RiMenuFill size={18} />
             </ActionIcon>
-            )
-          : null}
+          ) : null
+        }
         highlightedStopId={highlightedStopId}
         isSm={isSm}
         selectedStop={selectedStopId}

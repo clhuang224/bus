@@ -4,7 +4,7 @@ import {
   Meta,
   Outlet,
   Scripts,
-  ScrollRestoration
+  ScrollRestoration,
 } from 'react-router'
 
 import type { Route } from './+types/root'
@@ -25,12 +25,12 @@ export const links: Route.LinksFunction = () => [
   {
     rel: 'preconnect',
     href: 'https://fonts.gstatic.com',
-    crossOrigin: 'anonymous'
+    crossOrigin: 'anonymous',
   },
   {
     rel: 'stylesheet',
-    href: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap'
-  }
+    href: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap',
+  },
 ]
 
 export function meta() {
@@ -38,7 +38,7 @@ export function meta() {
 
   return [
     { title: t('app.name') },
-    { name: 'description', content: t('app.description') }
+    { name: 'description', content: t('app.description') },
   ]
 }
 
@@ -81,9 +81,10 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let stack: string | undefined
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404
-      ? i18n.t('errorBoundary.notFound.title')
-      : i18n.t('errorBoundary.default.title')
+    message =
+      error.status === 404
+        ? i18n.t('errorBoundary.notFound.title')
+        : i18n.t('errorBoundary.default.title')
     details =
       error.status === 404
         ? i18n.t('errorBoundary.notFound.description')

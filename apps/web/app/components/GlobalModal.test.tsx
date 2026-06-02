@@ -7,7 +7,7 @@ import { busApi } from '~/modules/apis/bus'
 import { getTdxRateLimitModal } from '~/modules/apis/errors/busError'
 import globalModalSlice, {
   closeGlobalModal,
-  openGlobalModal
+  openGlobalModal,
 } from '~/modules/slices/globalModalSlice'
 import { renderWithStore } from '~/test/render'
 import { GlobalModal } from './GlobalModal'
@@ -16,10 +16,10 @@ function createTestStore() {
   return configureStore({
     reducer: {
       [busApi.reducerPath]: busApi.reducer,
-      globalModal: globalModalSlice.reducer
+      globalModal: globalModalSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(busApi.middleware)
+      getDefaultMiddleware().concat(busApi.middleware),
   })
 }
 
@@ -35,13 +35,15 @@ describe('GlobalModal', () => {
 
     expect(screen.getByText(tdxRateLimitModal.title)).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: tdxRateLimitModal.confirmText! }))
+    fireEvent.click(
+      screen.getByRole('button', { name: tdxRateLimitModal.confirmText! }),
+    )
 
     expect(dispatchSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ type: closeGlobalModal.type })
+      expect.objectContaining({ type: closeGlobalModal.type }),
     )
     expect(dispatchSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ type: `${busApi.reducerPath}/resetApiState` })
+      expect.objectContaining({ type: `${busApi.reducerPath}/resetApiState` }),
     )
   })
 })

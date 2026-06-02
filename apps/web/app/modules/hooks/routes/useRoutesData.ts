@@ -10,7 +10,7 @@ import { useLocalizedTextCollator } from '~/modules/hooks/shared/useLocalizedTex
 import {
   RouteSearchAnalyticsSource,
   useRouteSearchAnalytics,
-  type RouteSearchAnalyticsRoute
+  type RouteSearchAnalyticsRoute,
 } from './useRouteSearchAnalytics'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { setKeyword, setSelectedArea } from '~/modules/slices/routeSearchSlice'
@@ -37,17 +37,22 @@ type RoutesMessage = ReturnType<typeof getSearchMessages>['emptyRoutes'] | null
 
 function deduplicateRoutes(routes: BusRoute<Date | null>[]) {
   return Array.from(
-    routes.reduce<Map<string, BusRoute<Date | null>>>((result, route) => {
-      if (!result.has(route.RouteUID)) {
-        result.set(route.RouteUID, route)
-      }
+    routes
+      .reduce<Map<string, BusRoute<Date | null>>>((result, route) => {
+        if (!result.has(route.RouteUID)) {
+          result.set(route.RouteUID, route)
+        }
 
-      return result
-    }, new Map()).values()
+        return result
+      }, new Map())
+      .values(),
   )
 }
 
-function getSearchableRoutes(routes: BusRoute<Date | null>[], locale: AppLocaleType) {
+function getSearchableRoutes(
+  routes: BusRoute<Date | null>[],
+  locale: AppLocaleType,
+) {
   return deduplicateRoutes(routes).map((route) => {
     const routeName = getLocalizedText(route.RouteName, locale)
 
@@ -56,11 +61,11 @@ function getSearchableRoutes(routes: BusRoute<Date | null>[], locale: AppLocaleT
       routeName,
       normalizedRouteName: normalizeRouteSearchText(routeName),
       normalizedDeparture: normalizeRouteSearchText(
-        getLocalizedText(route.DepartureStopName, locale)
+        getLocalizedText(route.DepartureStopName, locale),
       ),
       normalizedDestination: normalizeRouteSearchText(
-        getLocalizedText(route.DestinationStopName, locale)
-      )
+        getLocalizedText(route.DestinationStopName, locale),
+      ),
     }
   })
 }
@@ -80,7 +85,10 @@ function getRouteKeywordMatchPriority(route: SearchableRoute, keyword: string) {
     return 2
   }
 
-  if (route.normalizedDeparture.includes(keyword) || route.normalizedDestination.includes(keyword)) {
+  if (
+    route.normalizedDeparture.includes(keyword) ||
+    route.normalizedDestination.includes(keyword)
+  ) {
     return 3
   }
 
@@ -91,7 +99,7 @@ function compareSearchableRoutesByRecentAndName(
   left: SearchableRoute,
   right: SearchableRoute,
   recentRouteIndexMap: Map<string, number>,
-  compareRouteNames: (left: string, right: string) => number
+  compareRouteNames: (left: string, right: string) => number,
 ) {
   const leftRecentIndex = recentRouteIndexMap.get(left.route.RouteUID)
   const rightRecentIndex = recentRouteIndexMap.get(right.route.RouteUID)
@@ -117,16 +125,20 @@ function getFilteredRoutes(
   routes: SearchableRoute[],
   keyword: string,
   recentRouteIndexMap: Map<string, number>,
-  compareRouteNames: (left: string, right: string) => number
+  compareRouteNames: (left: string, right: string) => number,
 ) {
   return routes
     .flatMap((route) => {
       const matchPriority = getRouteKeywordMatchPriority(route, keyword)
 
-      return matchPriority == null ? [] : [{
-        ...route,
-        matchPriority
-      }]
+      return matchPriority == null
+        ? []
+        : [
+            {
+              ...route,
+              matchPriority,
+            },
+          ]
     })
     .sort((left, right) => {
       const matchPriorityDiff = left.matchPriority - right.matchPriority
@@ -139,7 +151,7 @@ function getFilteredRoutes(
         left,
         right,
         recentRouteIndexMap,
-        compareRouteNames
+        compareRouteNames,
       )
     })
     .map(({ route }) => route)
@@ -148,7 +160,7 @@ function getFilteredRoutes(
 function getRecentRoutes(
   routes: SearchableRoute[],
   recentRouteIndexMap: Map<string, number>,
-  compareRouteNames: (left: string, right: string) => number
+  compareRouteNames: (left: string, right: string) => number,
 ) {
   return routes
     .filter((route) => recentRouteIndexMap.has(route.route.RouteUID))
@@ -157,7 +169,7 @@ function getRecentRoutes(
         left,
         right,
         recentRouteIndexMap,
-        compareRouteNames
+        compareRouteNames,
       )
     })
     .map(({ route }) => route)
@@ -167,7 +179,7 @@ function getRecentRoutes(
 function toDisplayRoute(
   route: BusRoute<Date | null>,
   locale: AppLocaleType,
-  analyticsSource: RouteSearchAnalyticsSource
+  analyticsSource: RouteSearchAnalyticsSource,
 ): DisplayRoute {
   return {
     routeUID: route.RouteUID,
@@ -176,7 +188,7 @@ function toDisplayRoute(
     name: getLocalizedText(route.RouteName, locale),
     departure: getLocalizedText(route.DepartureStopName, locale),
     destination: getLocalizedText(route.DestinationStopName, locale),
-    analyticsSource
+    analyticsSource,
   }
 }
 
@@ -186,7 +198,7 @@ function getRoutesMessage({
   isLoading,
   normalizedKeyword,
   recentRoutesLength,
-  t
+  t,
 }: {
   error: unknown
   filteredRoutesLength: number
@@ -197,8 +209,10 @@ function getRoutesMessage({
 }): RoutesMessage {
   if (isLoading) return null
   if (error) return getSearchMessages(t).loadRoutesError
-  if (!normalizedKeyword && recentRoutesLength === 0) return getSearchMessages(t).emptyRouteSearch
-  if (normalizedKeyword && filteredRoutesLength === 0) return getSearchMessages(t).emptyRoutes
+  if (!normalizedKeyword && recentRoutesLength === 0)
+    return getSearchMessages(t).emptyRouteSearch
+  if (normalizedKeyword && filteredRoutesLength === 0)
+    return getSearchMessages(t).emptyRoutes
 
   return null
 }
@@ -206,29 +220,30 @@ function getRoutesMessage({
 function useResetRoutesScroll(
   scrollViewportRef: RefObject<HTMLDivElement | null>,
   area: AreaType,
-  keyword: string
+  keyword: string,
 ) {
-  const previousSearchContextRef = useRef<{ area: AreaType, keyword: string } | null>(null)
+  const previousSearchContextRef = useRef<{
+    area: AreaType
+    keyword: string
+  } | null>(null)
 
   useEffect(() => {
     const previousSearchContext = previousSearchContextRef.current
     previousSearchContextRef.current = {
       area,
-      keyword
+      keyword,
     }
 
     if (
       !previousSearchContext ||
-      (
-        previousSearchContext.area === area &&
-        previousSearchContext.keyword === keyword
-      )
+      (previousSearchContext.area === area &&
+        previousSearchContext.keyword === keyword)
     ) {
       return
     }
 
     scrollViewportRef.current?.scrollTo({
-      top: 0
+      top: 0,
     })
   }, [area, keyword, scrollViewportRef])
 }
@@ -239,20 +254,32 @@ export function useRoutesData() {
   const locale = useSelector(selectLocale)
   const { coords } = useSelector((state: RootState) => state.geolocation)
   const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
-  const { keyword, selectedArea } = useSelector((state: RootState) => state.routeSearch)
+  const { keyword, selectedArea } = useSelector(
+    (state: RootState) => state.routeSearch,
+  )
   const currentArea = getAreaByCoords(coords, geojson)
   const area = selectedArea ?? currentArea ?? AreaType.TAIPEI
-  const { data: routeData = [], isLoading, error } = busApi.useGetRoutesByAreaQuery(area)
-  const routes = useMemo(() => normalizeBusRoutesWithDates(routeData), [routeData])
+  const {
+    data: routeData = [],
+    isLoading,
+    error,
+  } = busApi.useGetRoutesByAreaQuery(area)
+  const routes = useMemo(
+    () => normalizeBusRoutesWithDates(routeData),
+    [routeData],
+  )
   const routeNameCollator = useLocalizedTextCollator()
   const recentRouteUIDs = useMemo(() => loadRouteSearchRecentFromStorage(), [])
   const recentRouteIndexMap = useMemo(
     () => new Map(recentRouteUIDs.map((routeUID, index) => [routeUID, index])),
-    [recentRouteUIDs]
+    [recentRouteUIDs],
   )
   const normalizedKeyword = normalizeRouteSearchText(keyword)
   const scrollViewportRef = useRef<HTMLDivElement | null>(null)
-  const searchableRoutes = useMemo(() => getSearchableRoutes(routes, locale), [locale, routes])
+  const searchableRoutes = useMemo(
+    () => getSearchableRoutes(routes, locale),
+    [locale, routes],
+  )
   const compareRouteNames = routeNameCollator.compare
 
   const filteredRoutes = useMemo(() => {
@@ -264,17 +291,31 @@ export function useRoutesData() {
       searchableRoutes,
       normalizedKeyword,
       recentRouteIndexMap,
-      compareRouteNames
+      compareRouteNames,
     )
-  }, [compareRouteNames, normalizedKeyword, recentRouteIndexMap, searchableRoutes])
+  }, [
+    compareRouteNames,
+    normalizedKeyword,
+    recentRouteIndexMap,
+    searchableRoutes,
+  ])
 
   const recentRoutes = useMemo(() => {
     if (normalizedKeyword) {
       return [] as BusRoute<Date | null>[]
     }
 
-    return getRecentRoutes(searchableRoutes, recentRouteIndexMap, compareRouteNames)
-  }, [compareRouteNames, normalizedKeyword, recentRouteIndexMap, searchableRoutes])
+    return getRecentRoutes(
+      searchableRoutes,
+      recentRouteIndexMap,
+      compareRouteNames,
+    )
+  }, [
+    compareRouteNames,
+    normalizedKeyword,
+    recentRouteIndexMap,
+    searchableRoutes,
+  ])
 
   const message = useMemo(() => {
     return getRoutesMessage({
@@ -283,9 +324,16 @@ export function useRoutesData() {
       isLoading,
       normalizedKeyword,
       recentRoutesLength: recentRoutes.length,
-      t
+      t,
     })
-  }, [error, filteredRoutes.length, isLoading, normalizedKeyword, recentRoutes.length, t])
+  }, [
+    error,
+    filteredRoutes.length,
+    isLoading,
+    normalizedKeyword,
+    recentRoutes.length,
+    t,
+  ])
 
   const displayedRoutes = useMemo(() => {
     const routesToDisplay = normalizedKeyword ? filteredRoutes : recentRoutes
@@ -293,7 +341,9 @@ export function useRoutesData() {
       ? RouteSearchAnalyticsSource.SEARCH_RESULT
       : RouteSearchAnalyticsSource.RECENT_ROUTE
 
-    return routesToDisplay.map((route) => toDisplayRoute(route, locale, analyticsSource))
+    return routesToDisplay.map((route) =>
+      toDisplayRoute(route, locale, analyticsSource),
+    )
   }, [filteredRoutes, locale, normalizedKeyword, recentRoutes])
 
   const { trackRouteSelected } = useRouteSearchAnalytics({
@@ -302,7 +352,7 @@ export function useRoutesData() {
     keyword,
     locale,
     normalizedKeyword,
-    resultCount: filteredRoutes.length
+    resultCount: filteredRoutes.length,
   })
 
   useResetRoutesScroll(scrollViewportRef, area, keyword)
@@ -314,9 +364,10 @@ export function useRoutesData() {
     keyword,
     message,
     scrollViewportRef,
-    showRecentRoutesTitle: !message && !normalizedKeyword && recentRoutes.length > 0,
+    showRecentRoutesTitle:
+      !message && !normalizedKeyword && recentRoutes.length > 0,
     setArea: (nextArea: AreaType) => dispatch(setSelectedArea(nextArea)),
     setKeyword: (nextKeyword: string) => dispatch(setKeyword(nextKeyword)),
-    trackRouteSelected
+    trackRouteSelected,
   }
 }

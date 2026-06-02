@@ -1,7 +1,7 @@
 export const updateSearchParam = (
   searchParams: URLSearchParams,
   key: string,
-  value: string | null | undefined
+  value: string | null | undefined,
 ) => {
   if (value === undefined) return
 

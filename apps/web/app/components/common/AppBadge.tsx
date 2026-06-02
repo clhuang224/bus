@@ -13,16 +13,16 @@ export const AppBadge = ({
   withIcon = true,
   type,
   children,
-  size = 'lg'
+  size = 'lg',
 }: PropType) => {
   const icon = {
     route: <RiRouteFill size="1em" />,
-    city: <RiBuildingFill size="1em" />
+    city: <RiBuildingFill size="1em" />,
   }[type]
 
   const color = {
     route: 'blue',
-    city: 'gray'
+    city: 'gray',
   }[type]
 
   return (

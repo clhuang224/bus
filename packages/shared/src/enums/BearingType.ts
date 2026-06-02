@@ -6,5 +6,5 @@ export enum BearingType {
   SOUTHEAST = 'SE',
   NORTHEAST = 'NE',
   SOUTHWEST = 'SW',
-  NORTHWEST = 'NW'
+  NORTHWEST = 'NW',
 }

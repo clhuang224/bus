@@ -3,7 +3,14 @@ import { useId } from '@mantine/hooks'
 import mapLibre, { Map, Marker, LngLat as MapLngLat } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { RiFocus3Line } from '@remixicon/react'
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import type { LatLng } from '~/modules/types/CoordsType'
@@ -22,7 +29,13 @@ interface PropType {
   onLoad?: (map: Map) => void
 }
 
-const BaseMap = ({ center, zoom = 16, showUserLocation = false, extraControls, onLoad }: PropType) => {
+const BaseMap = ({
+  center,
+  zoom = 16,
+  showUserLocation = false,
+  extraControls,
+  onLoad,
+}: PropType) => {
   const { t } = useTranslation()
   const id = useId()
   const [map, setMap] = useState<Map | null>(null)
@@ -43,7 +56,7 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, extraControls, o
       container: id,
       style: 'https://tiles.openfreemap.org/styles/positron',
       center: mapCenter ?? [121.53969560512759, 25.059928238479156],
-      zoom
+      zoom,
     })
     setMap(mapInstance)
 
@@ -69,7 +82,7 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, extraControls, o
     map.flyTo({
       center: new MapLngLat(mapCenter![0], mapCenter![1]),
       zoom,
-      duration: 800
+      duration: 800,
     })
     initialCenterRef.current = true
   }, [center, map, mapCenter, zoom])
@@ -85,7 +98,7 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, extraControls, o
     const el = createMapMarkerElement({
       ariaLabel: t('components.baseMap.userLocationMarkerAriaLabel'),
       boxShadow: '0 0 10px rgba(0,0,0,0.3)',
-      type: 'user'
+      type: 'user',
     })
 
     userMarkerRef.current = new Marker({ element: el })
@@ -121,7 +134,7 @@ const BaseMap = ({ center, zoom = 16, showUserLocation = false, extraControls, o
                 map.flyTo({
                   center: userLngLat,
                   zoom: FOCUS_ZOOM,
-                  duration: 800
+                  duration: 800,
                 })
               }}
               disabled={!userLngLat || !map}

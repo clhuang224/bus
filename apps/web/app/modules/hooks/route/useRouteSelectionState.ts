@@ -18,10 +18,14 @@ interface UseRouteSelectionStateOptions {
 
 export function useRouteSelectionState(options: UseRouteSelectionStateOptions) {
   const { defaultActiveTabId, isSm, routeTabs, setActiveTab, stops } = options
-  const [isSidebarOpened, { open: openSidebar, close: closeSidebar }] = useDisclosure(false)
-  const [listScrollBehavior, setListScrollBehavior] = useState<ScrollLogicalPosition>('nearest')
+  const [isSidebarOpened, { open: openSidebar, close: closeSidebar }] =
+    useDisclosure(false)
+  const [listScrollBehavior, setListScrollBehavior] =
+    useState<ScrollLogicalPosition>('nearest')
   const [selectedStopId, setSelectedStopId] = useState<string | null>(null)
-  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null)
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(
+    null,
+  )
 
   useEffect(() => {
     if (isSm) {
@@ -53,29 +57,40 @@ export function useRouteSelectionState(options: UseRouteSelectionStateOptions) {
 
   useEffect(() => {
     if (!selectedVehicleId) return
-    if (stops.some((stop) => stop.realtimeBuses.some((bus) => bus.id === selectedVehicleId))) return
+    if (
+      stops.some((stop) =>
+        stop.realtimeBuses.some((bus) => bus.id === selectedVehicleId),
+      )
+    )
+      return
 
     setSelectedVehicleId(null)
   }, [selectedVehicleId, stops])
 
-  const handleSelectStopFromList = useCallback((stopId: string) => {
-    setListScrollBehavior('nearest')
-    setSelectedStopId(stopId)
-    setSelectedVehicleId(null)
+  const handleSelectStopFromList = useCallback(
+    (stopId: string) => {
+      setListScrollBehavior('nearest')
+      setSelectedStopId(stopId)
+      setSelectedVehicleId(null)
 
-    if (isSm) {
-      closeSidebar()
-    }
-  }, [closeSidebar, isSm])
+      if (isSm) {
+        closeSidebar()
+      }
+    },
+    [closeSidebar, isSm],
+  )
 
-  const handleSelectVehicleFromList = useCallback((vehicleId: string) => {
-    setSelectedVehicleId(vehicleId)
-    setSelectedStopId(null)
+  const handleSelectVehicleFromList = useCallback(
+    (vehicleId: string) => {
+      setSelectedVehicleId(vehicleId)
+      setSelectedStopId(null)
 
-    if (isSm) {
-      closeSidebar()
-    }
-  }, [closeSidebar, isSm])
+      if (isSm) {
+        closeSidebar()
+      }
+    },
+    [closeSidebar, isSm],
+  )
 
   const handleSelectVehicleFromMap = useCallback((vehicleId: string) => {
     setListScrollBehavior('start')
@@ -99,6 +114,6 @@ export function useRouteSelectionState(options: UseRouteSelectionStateOptions) {
     listScrollBehavior,
     openSidebar,
     selectedStopId,
-    selectedVehicleId
+    selectedVehicleId,
   }
 }

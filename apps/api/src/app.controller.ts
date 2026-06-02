@@ -1,7 +1,7 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AppService } from './app.service';
-import { HealthResponseDto } from './dto/health-response.dto';
+import { Controller, Get } from '@nestjs/common'
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
+import { AppService } from './app.service'
+import { HealthResponseDto } from './dto/health-response.dto'
 
 @ApiTags('system')
 @Controller()
@@ -15,6 +15,6 @@ export class AppController {
   })
   @Get('health')
   getHealth(): HealthResponseDto {
-    return this.appService.getHealth();
+    return this.appService.getHealth()
   }
 }

@@ -1,9 +1,13 @@
 import { BearingType } from '@bus/shared'
 
 type ZhTWLocale = typeof import('../i18n/locales/zh-TW').zhTW
-type BearingTranslationKey = `common.bearing.${keyof ZhTWLocale['translation']['common']['bearing']}`
+type BearingTranslationKey =
+  `common.bearing.${keyof ZhTWLocale['translation']['common']['bearing']}`
 
-export const bearingTranslationKeyMap: Record<BearingType, BearingTranslationKey> = {
+export const bearingTranslationKeyMap: Record<
+  BearingType,
+  BearingTranslationKey
+> = {
   [BearingType.EAST]: 'common.bearing.east',
   [BearingType.WEST]: 'common.bearing.west',
   [BearingType.SOUTH]: 'common.bearing.south',
@@ -11,5 +15,5 @@ export const bearingTranslationKeyMap: Record<BearingType, BearingTranslationKey
   [BearingType.SOUTHEAST]: 'common.bearing.southeast',
   [BearingType.NORTHEAST]: 'common.bearing.northeast',
   [BearingType.SOUTHWEST]: 'common.bearing.southwest',
-  [BearingType.NORTHWEST]: 'common.bearing.northwest'
+  [BearingType.NORTHWEST]: 'common.bearing.northwest',
 }

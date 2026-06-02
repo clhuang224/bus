@@ -1,7 +1,10 @@
 import { NEARBY_DISTANCE_KM } from '../../consts/nearby'
 import type { CityNameType } from '@bus/shared'
 import type { LatLng } from '../../types/CoordsType'
-import { getLatitudeKilometersPerDegree, getLongitudeKilometersPerDegree } from '../geo/getGeoKilometersPerDegree'
+import {
+  getLatitudeKilometersPerDegree,
+  getLongitudeKilometersPerDegree,
+} from '../geo/getGeoKilometersPerDegree'
 
 const STOP_SELECT_FIELDS = [
   'StopUID',
@@ -16,7 +19,7 @@ const STOP_SELECT_FIELDS = [
   'StopDescription',
   'City',
   'UpdateTime',
-  'VersionID'
+  'VersionID',
 ].join(',')
 
 interface NearbyStopBounds {
@@ -32,7 +35,7 @@ function quoteODataString(value: string): string {
 
 export function getNearbyStopBounds(
   coords: LatLng,
-  distanceKm = NEARBY_DISTANCE_KM
+  distanceKm = NEARBY_DISTANCE_KM,
 ): NearbyStopBounds {
   const [latitude, longitude] = coords
   const latitudeDelta = distanceKm / getLatitudeKilometersPerDegree()
@@ -42,11 +45,14 @@ export function getNearbyStopBounds(
     latitudeMin: latitude - latitudeDelta,
     latitudeMax: latitude + latitudeDelta,
     longitudeMin: longitude - longitudeDelta,
-    longitudeMax: longitude + longitudeDelta
+    longitudeMax: longitude + longitudeDelta,
   }
 }
 
-export function buildNearbyStopQuery(city: CityNameType, coords: LatLng): string {
+export function buildNearbyStopQuery(
+  city: CityNameType,
+  coords: LatLng,
+): string {
   const bounds = getNearbyStopBounds(coords)
 
   const searchParams = new URLSearchParams({
@@ -55,30 +61,36 @@ export function buildNearbyStopQuery(city: CityNameType, coords: LatLng): string
       `StopPosition/PositionLat ge ${bounds.latitudeMin.toFixed(6)}`,
       `StopPosition/PositionLat le ${bounds.latitudeMax.toFixed(6)}`,
       `StopPosition/PositionLon ge ${bounds.longitudeMin.toFixed(6)}`,
-      `StopPosition/PositionLon le ${bounds.longitudeMax.toFixed(6)}`
+      `StopPosition/PositionLon le ${bounds.longitudeMax.toFixed(6)}`,
     ].join(' and '),
-    $format: 'JSON'
+    $format: 'JSON',
   })
 
   return `/Stop/City/${city}?${searchParams.toString()}`
 }
 
-export function buildNearbyStopOfRouteQuery(city: CityNameType, stopUIDs: string[]): string {
+export function buildNearbyStopOfRouteQuery(
+  city: CityNameType,
+  stopUIDs: string[],
+): string {
   const searchParams = new URLSearchParams({
-    $format: 'JSON'
+    $format: 'JSON',
   })
 
   if (stopUIDs.length > 0) {
     searchParams.set(
       '$filter',
-      `Stops/any(d:(${stopUIDs.map((stopUID) => `d/StopUID eq '${quoteODataString(stopUID)}'`).join(' or ')}))`
+      `Stops/any(d:(${stopUIDs.map((stopUID) => `d/StopUID eq '${quoteODataString(stopUID)}'`).join(' or ')}))`,
     )
   }
 
   return `/StopOfRoute/City/${city}?${searchParams.toString()}`
 }
 
-export function buildStopsByCityAndIdsQuery(city: CityNameType, stopIds: string[]): string {
+export function buildStopsByCityAndIdsQuery(
+  city: CityNameType,
+  stopIds: string[],
+): string {
   const filter = stopIds
     .map((stopId) => {
       const quotedStopId = quoteODataString(stopId)

@@ -5,6 +5,8 @@ interface PropType {
   children: React.ReactElement
 }
 
-export const StoreProvider = ({ children }: PropType): React.ReactElement<PropType> => {
+export const StoreProvider = ({
+  children,
+}: PropType): React.ReactElement<PropType> => {
   return <Provider store={store}>{children}</Provider>
 }

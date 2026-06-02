@@ -12,7 +12,10 @@ function getPreloadedFavoriteRouteStops() {
     return loadFavoriteRouteStopsFromStorage()
   } catch (error) {
     if (!isWindowUnavailableError(error)) {
-      console.warn('Failed to load favorite route stops from localStorage.', error)
+      console.warn(
+        'Failed to load favorite route stops from localStorage.',
+        error,
+      )
     }
 
     return []
@@ -48,7 +51,10 @@ function getPreloadedAnalyticsEnabled() {
     return loadAnalyticsEnabledFromStorage()
   } catch (error) {
     if (!isWindowUnavailableError(error)) {
-      console.warn('Failed to load analytics preference from localStorage.', error)
+      console.warn(
+        'Failed to load analytics preference from localStorage.',
+        error,
+      )
     }
 
     return true
@@ -58,14 +64,14 @@ function getPreloadedAnalyticsEnabled() {
 export function getPreloadedState() {
   return {
     analytics: {
-      isEnabled: getPreloadedAnalyticsEnabled()
+      isEnabled: getPreloadedAnalyticsEnabled(),
     },
     favorite: {
-      routeStops: getPreloadedFavoriteRouteStops()
+      routeStops: getPreloadedFavoriteRouteStops(),
     },
     routeSearch: getPreloadedRouteSearch(),
     locale: {
-      value: getPreloadedLocale()
-    }
+      value: getPreloadedLocale(),
+    },
   }
 }

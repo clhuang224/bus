@@ -21,18 +21,13 @@ export const RouteInfoCard = ({
   city,
   departure,
   destination,
-  onClick
+  onClick,
 }: PropType) => {
   const { t } = useTranslation()
   const terminalDisplay = getTerminalDisplay(departure, destination)
 
   return (
-    <Card
-      withBorder
-      radius="md"
-      p="xs"
-      shadow="xs"
-    >
+    <Card withBorder radius="md" p="xs" shadow="xs">
       <NavLink
         component={Link}
         to={to}
@@ -42,23 +37,20 @@ export const RouteInfoCard = ({
         px="xs"
         py={6}
         bdrs="sm"
-        label={(
+        label={
           <Stack gap={8}>
             <Flex justify="space-between" align="center">
-              <AppBadge type="route">
-                {name}
-              </AppBadge>
-              <AppBadge type="city">
-                {t(getCityTranslationKey(city))}
-              </AppBadge>
+              <AppBadge type="route">{name}</AppBadge>
+              <AppBadge type="city">{t(getCityTranslationKey(city))}</AppBadge>
             </Flex>
             {terminalDisplay && (
               <Text size="xs" c="dimmed">
-                {t(`components.routeInfoCard.${terminalDisplay.labelKey}`)}: {terminalDisplay.text}
+                {t(`components.routeInfoCard.${terminalDisplay.labelKey}`)}:{' '}
+                {terminalDisplay.text}
               </Text>
             )}
           </Stack>
-        )}
+        }
       />
     </Card>
   )

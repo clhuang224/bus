@@ -16,7 +16,10 @@ interface PropType {
   onRemove: (routeStop: FavoriteRouteStop) => void
 }
 
-export const FavoriteRouteStopCard = ({ favoriteRouteStop, onRemove }: PropType) => {
+export const FavoriteRouteStopCard = ({
+  favoriteRouteStop,
+  onRemove,
+}: PropType) => {
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
   const routeName = getLocalizedText(favoriteRouteStop.routeName, locale)
@@ -27,12 +30,7 @@ export const FavoriteRouteStopCard = ({ favoriteRouteStop, onRemove }: PropType)
   const terminalDisplay = getTerminalDisplay(departure, destination)
 
   return (
-    <Card
-      withBorder
-      radius="md"
-      p="md"
-      shadow="xs"
-    >
+    <Card withBorder radius="md" p="md" shadow="xs">
       <Stack gap="sm">
         <Flex justify="space-between" align="flex-start" gap="sm">
           <Box
@@ -43,7 +41,7 @@ export const FavoriteRouteStopCard = ({ favoriteRouteStop, onRemove }: PropType)
               color: 'inherit',
               flex: 1,
               minWidth: 0,
-              textDecoration: 'none'
+              textDecoration: 'none',
             }}
           >
             <Stack gap="xs">
@@ -52,8 +50,10 @@ export const FavoriteRouteStopCard = ({ favoriteRouteStop, onRemove }: PropType)
                   {[
                     routeName,
                     subRouteName === routeName ? null : subRouteName,
-                    t(getDirectionTranslationKey(favoriteRouteStop.direction))
-                  ].filter(Boolean).join(' ')}
+                    t(getDirectionTranslationKey(favoriteRouteStop.direction)),
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
                 </AppBadge>
                 <AppBadge type="city">
                   {t(getCityTranslationKey(favoriteRouteStop.city))}
@@ -64,7 +64,10 @@ export const FavoriteRouteStopCard = ({ favoriteRouteStop, onRemove }: PropType)
               </Text>
               {terminalDisplay && (
                 <Text size="xs" c="dimmed">
-                  {t(`components.favoriteRouteStopCard.${terminalDisplay.labelKey}`)}: {terminalDisplay.text}
+                  {t(
+                    `components.favoriteRouteStopCard.${terminalDisplay.labelKey}`,
+                  )}
+                  : {terminalDisplay.text}
                 </Text>
               )}
             </Stack>

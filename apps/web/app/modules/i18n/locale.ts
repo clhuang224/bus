@@ -1,4 +1,8 @@
-import { APP_LOCALE_STORAGE_KEY, DEFAULT_APP_LOCALE, isSupportedAppLocale } from '../consts/i18n'
+import {
+  APP_LOCALE_STORAGE_KEY,
+  DEFAULT_APP_LOCALE,
+  isSupportedAppLocale,
+} from '../consts/i18n'
 import type { AppLocaleType } from '../enums/AppLocaleType'
 import { getLocalStorage } from '../utils/shared/getLocalStorage'
 
@@ -6,7 +10,9 @@ export function getInitialAppLocale(): AppLocaleType {
   return DEFAULT_APP_LOCALE
 }
 
-function getLocaleFromStorage(storage: Pick<Storage, 'getItem'>): AppLocaleType {
+function getLocaleFromStorage(
+  storage: Pick<Storage, 'getItem'>,
+): AppLocaleType {
   const storedLocale = storage.getItem(APP_LOCALE_STORAGE_KEY)
 
   if (!storedLocale || !isSupportedAppLocale(storedLocale)) {
@@ -23,7 +29,7 @@ export function loadLocaleFromStorage(): AppLocaleType {
 
 export function setLocaleInStorage(
   storage: Pick<Storage, 'setItem'>,
-  locale: AppLocaleType
+  locale: AppLocaleType,
 ) {
   storage.setItem(APP_LOCALE_STORAGE_KEY, locale)
 }

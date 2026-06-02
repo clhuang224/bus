@@ -21,7 +21,7 @@ export const AreaSelect = (props: AreaSelectPropType): ReactElement => {
 
   const options = getEnumValues(AreaType).map((area) => ({
     label: t(getAreaTranslationKey(area)),
-    value: area
+    value: area,
   }))
 
   return (

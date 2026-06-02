@@ -37,12 +37,12 @@ function installTestStorage() {
 
   Object.defineProperty(globalThis, 'Storage', {
     configurable: true,
-    value: TestStorage
+    value: TestStorage,
   })
 
   Object.defineProperty(globalThis, 'localStorage', {
     configurable: true,
-    value: storage
+    value: storage,
   })
 
   if (typeof window === 'undefined') {
@@ -51,12 +51,12 @@ function installTestStorage() {
 
   Object.defineProperty(window, 'Storage', {
     configurable: true,
-    value: TestStorage
+    value: TestStorage,
   })
 
   Object.defineProperty(window, 'localStorage', {
     configurable: true,
-    get: () => storage
+    get: () => storage,
   })
 }
 
@@ -66,7 +66,7 @@ beforeEach(() => {
   installTestStorage()
 })
 
-afterEach(async() => {
+afterEach(async () => {
   cleanup()
   if (typeof document !== 'undefined') {
     document.documentElement.lang = DEFAULT_APP_LOCALE
@@ -87,8 +87,8 @@ if (typeof window !== 'undefined') {
       removeListener: vi.fn(),
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn()
-    }))
+      dispatchEvent: vi.fn(),
+    })),
   })
 }
 
@@ -106,12 +106,12 @@ if (typeof HTMLElement !== 'undefined') {
   Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
     configurable: true,
     writable: true,
-    value: vi.fn()
+    value: vi.fn(),
   })
 
   Object.defineProperty(HTMLElement.prototype, 'scrollTo', {
     configurable: true,
     writable: true,
-    value: vi.fn()
+    value: vi.fn(),
   })
 }

@@ -17,7 +17,10 @@ export interface TdxRouteShape {
   VersionID: number
 }
 
-export interface RouteShape extends Omit<TdxRouteShape, 'RouteName' | 'SubRouteName' | 'Geometry' | 'EncodedPolyline'> {
+export interface RouteShape extends Omit<
+  TdxRouteShape,
+  'RouteName' | 'SubRouteName' | 'Geometry' | 'EncodedPolyline'
+> {
   City: CityNameType
   RouteName: LocalizedText
   SubRouteName: LocalizedText | null

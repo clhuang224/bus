@@ -9,7 +9,7 @@ type LegacyLocalizedTextLike = {
 
 export function getLocalizedText(
   text: LocalizedTextLike | LegacyLocalizedTextLike | null | undefined,
-  locale: AppLocaleType
+  locale: AppLocaleType,
 ) {
   if (!text) return ''
 

@@ -24,26 +24,32 @@ export const NearbyStopRoutes = ({
   routes,
   hasError = false,
   isLoading = false,
-  isRateLimited = false
+  isRateLimited = false,
 }: PropType) => {
   const { t } = useTranslation()
   const routeNameCollator = useLocalizedTextCollator()
-  const routeSections = useMemo(() => getEnumValues(DirectionType)
-    .map((direction) => ({
-      direction,
-      label: t(getDirectionTranslationKey(direction)),
-      routes: routes
-        .filter((route) => route.direction === direction)
-        .sort((left, right) => routeNameCollator.compare(left.name, right.name))
-    }))
-    .filter((section) => section.routes.length > 0), [routeNameCollator, routes, t])
+  const routeSections = useMemo(
+    () =>
+      getEnumValues(DirectionType)
+        .map((direction) => ({
+          direction,
+          label: t(getDirectionTranslationKey(direction)),
+          routes: routes
+            .filter((route) => route.direction === direction)
+            .sort((left, right) =>
+              routeNameCollator.compare(left.name, right.name),
+            ),
+        }))
+        .filter((section) => section.routes.length > 0),
+    [routeNameCollator, routes, t],
+  )
   const [selectedDirection, setSelectedDirection] = useState<string | null>(
-    getDefaultRouteDirection(routeSections.map((section) => section.direction))
+    getDefaultRouteDirection(routeSections.map((section) => section.direction)),
   )
 
   useEffect(() => {
     const defaultDirection = getDefaultRouteDirection(
-      routeSections.map((section) => section.direction)
+      routeSections.map((section) => section.direction),
     )
 
     if (!defaultDirection) {
@@ -52,7 +58,7 @@ export const NearbyStopRoutes = ({
     }
 
     const hasSelectedDirection = routeSections.some(
-      (section) => String(section.direction) === selectedDirection
+      (section) => String(section.direction) === selectedDirection,
     )
 
     if (!hasSelectedDirection) {
@@ -63,14 +69,21 @@ export const NearbyStopRoutes = ({
   if (isLoading) {
     return (
       <Stack gap="sm" style={{ flex: 1, minHeight: 0 }}>
-        <Text size="sm" c="dimmed">{t('components.nearbyStopRoutes.title')}</Text>
+        <Text size="sm" c="dimmed">
+          {t('components.nearbyStopRoutes.title')}
+        </Text>
         <Tabs value={null}>
           <Tabs.List>
             <Tabs.Tab value="loading-go">{t('common.direction.go')}</Tabs.Tab>
-            <Tabs.Tab value="loading-return">{t('common.direction.return')}</Tabs.Tab>
+            <Tabs.Tab value="loading-return">
+              {t('common.direction.return')}
+            </Tabs.Tab>
           </Tabs.List>
         </Tabs>
-        <ScrollArea style={{ flex: 1, minHeight: 0 }} data-testid="nearby-stop-routes-skeleton">
+        <ScrollArea
+          style={{ flex: 1, minHeight: 0 }}
+          data-testid="nearby-stop-routes-skeleton"
+        >
           <SkeletonList count={3} gap="xs" pt="sm">
             <Skeleton h={84} radius="md" />
           </SkeletonList>
@@ -82,7 +95,9 @@ export const NearbyStopRoutes = ({
   if (routeSections.length === 0) {
     return (
       <Stack gap={4}>
-        <Text size="sm" c="dimmed">{t('components.nearbyStopRoutes.title')}</Text>
+        <Text size="sm" c="dimmed">
+          {t('components.nearbyStopRoutes.title')}
+        </Text>
         <Text size="sm">
           {isRateLimited
             ? t('components.nearbyStopRoutes.rateLimited')
@@ -96,11 +111,10 @@ export const NearbyStopRoutes = ({
 
   return (
     <Stack gap="sm" style={{ flex: 1, minHeight: 0 }}>
-      <Text size="sm" c="dimmed">{t('components.nearbyStopRoutes.title')}</Text>
-      <Tabs
-        value={selectedDirection}
-        onChange={setSelectedDirection}
-      >
+      <Text size="sm" c="dimmed">
+        {t('components.nearbyStopRoutes.title')}
+      </Text>
+      <Tabs value={selectedDirection} onChange={setSelectedDirection}>
         <Tabs.List>
           {routeSections.map((section) => (
             <Tabs.Tab key={section.direction} value={String(section.direction)}>

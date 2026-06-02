@@ -20,7 +20,7 @@ const { mockMap, MockLngLatBounds, MockMarker, MockPopup } = vi.hoisted(() => {
     removeLayer: vi.fn(),
     removeSource: vi.fn(),
     fitBounds: vi.fn(),
-    flyTo: vi.fn()
+    flyTo: vi.fn(),
   }
 
   class MockMarker {
@@ -84,7 +84,7 @@ const { mockMap, MockLngLatBounds, MockMarker, MockPopup } = vi.hoisted(() => {
     mockMap,
     MockMarker,
     MockPopup,
-    MockLngLatBounds
+    MockLngLatBounds,
   }
 })
 
@@ -92,8 +92,8 @@ vi.mock('maplibre-gl', () => ({
   default: {
     Marker: MockMarker,
     Popup: MockPopup,
-    LngLatBounds: MockLngLatBounds
-  }
+    LngLatBounds: MockLngLatBounds,
+  },
 }))
 
 vi.mock('../common/BaseMap', () => ({
@@ -103,7 +103,7 @@ vi.mock('../common/BaseMap', () => ({
     }, [onLoad])
 
     return <div>base-map</div>
-  }
+  },
 }))
 
 describe('RouteMap', () => {
@@ -111,18 +111,18 @@ describe('RouteMap', () => {
     vi.restoreAllMocks()
   })
 
-  it('renders only the stop name in the selected stop popup', async() => {
+  it('renders only the stop name in the selected stop popup', async () => {
     const store = createTestStore({
       reducer: {
-        geolocation: geoSlice.reducer
+        geolocation: geoSlice.reducer,
       },
       preloadedState: {
         geolocation: {
           ...geoSlice.getInitialState(),
           coords: [25.033, 121.5654],
-          error: null
-        }
-      }
+          error: null,
+        },
+      },
     })
 
     renderWithStore(
@@ -130,33 +130,35 @@ describe('RouteMap', () => {
         onSelectStop={vi.fn()}
         onSelectVehicle={vi.fn()}
         selectedStop="stop-1"
-        stops={[{
-          id: 'stop-1',
-          name: '市政府',
-          position: [121.55, 25.03],
-          sequence: 1
-        }]}
+        stops={[
+          {
+            id: 'stop-1',
+            name: '市政府',
+            position: [121.55, 25.03],
+            sequence: 1,
+          },
+        ]}
         vehicles={[]}
       />,
-      { store }
+      { store },
     )
 
     expect(await screen.findByText('市政府')).toBeInTheDocument()
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 
-  it('shows the navigation button in the selected stop popup on small screens', async() => {
+  it('shows the navigation button in the selected stop popup on small screens', async () => {
     const store = createTestStore({
       reducer: {
-        geolocation: geoSlice.reducer
+        geolocation: geoSlice.reducer,
       },
       preloadedState: {
         geolocation: {
           ...geoSlice.getInitialState(),
           coords: [25.033, 121.5654],
-          error: null
-        }
-      }
+          error: null,
+        },
+      },
     })
 
     renderWithStore(
@@ -166,34 +168,38 @@ describe('RouteMap', () => {
         onSelectVehicle={vi.fn()}
         selectedStop="stop-1"
         selectedStopEstimatedArrivalLabel="3 分鐘"
-        stops={[{
-          id: 'stop-1',
-          name: '市政府',
-          position: [121.55, 25.03],
-          sequence: 1
-        }]}
+        stops={[
+          {
+            id: 'stop-1',
+            name: '市政府',
+            position: [121.55, 25.03],
+            sequence: 1,
+          },
+        ]}
         vehicles={[]}
       />,
-      { store }
+      { store },
     )
 
     expect(await screen.findByText('市政府')).toBeInTheDocument()
     expect(screen.getByText('3 分鐘')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /導航至\s*市政府/ })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /導航至\s*市政府/ }),
+    ).toBeInTheDocument()
   })
 
-  it('fits the initial bounds again when the route changes', async() => {
+  it('fits the initial bounds again when the route changes', async () => {
     const store = createTestStore({
       reducer: {
-        geolocation: geoSlice.reducer
+        geolocation: geoSlice.reducer,
       },
       preloadedState: {
         geolocation: {
           ...geoSlice.getInitialState(),
           coords: [25.033, 121.5654],
-          error: null
-        }
-      }
+          error: null,
+        },
+      },
     })
 
     const { rerender } = renderWithStore(
@@ -206,12 +212,12 @@ describe('RouteMap', () => {
             id: 'stop-1',
             name: '市政府',
             position: [121.55, 25.03],
-            sequence: 1
-          }
+            sequence: 1,
+          },
         ]}
         vehicles={[]}
       />,
-      { store }
+      { store },
     )
 
     await waitFor(() => {
@@ -225,18 +231,18 @@ describe('RouteMap', () => {
         selectedStop={null}
         routePath={[
           [121.55, 25.03],
-          [121.56, 25.04]
+          [121.56, 25.04],
         ]}
         stops={[
           {
             id: 'stop-1',
             name: '市政府',
             position: [121.55, 25.03],
-            sequence: 1
-          }
+            sequence: 1,
+          },
         ]}
         vehicles={[]}
-      />
+      />,
     )
 
     await waitFor(() => {
@@ -253,11 +259,11 @@ describe('RouteMap', () => {
             id: 'stop-2',
             name: '市民廣場',
             position: [121.57, 25.05],
-            sequence: 1
-          }
+            sequence: 1,
+          },
         ]}
         vehicles={[]}
-      />
+      />,
     )
 
     await waitFor(() => {

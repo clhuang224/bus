@@ -3,7 +3,7 @@ import {
   type ConfigureStoreOptions,
   type ReducersMapObject,
   type StateFromReducersMapObject,
-  type UnknownAction
+  type UnknownAction,
 } from '@reduxjs/toolkit'
 import { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import analyticsSlice from '~/modules/slices/analyticsSlice'
@@ -19,21 +19,22 @@ type LocaleTestState = {
 }
 
 interface CreateTestStoreOptions<TState extends Record<string, unknown>> {
-  middleware?: ConfigureStoreOptions<LocaleTestState & TState, UnknownAction>['middleware']
+  middleware?: ConfigureStoreOptions<
+    LocaleTestState & TState,
+    UnknownAction
+  >['middleware']
   preloadedState?: Partial<LocaleTestState & TState>
   reducer?: ReducersMapObject<TState, UnknownAction>
 }
 
-export function createTestStore<TReducerMap extends ReducersMapObject = ReducersMapObject>(
+export function createTestStore<
+  TReducerMap extends ReducersMapObject = ReducersMapObject,
+>(
   options: CreateTestStoreOptions<StateFromReducersMapObject<TReducerMap>> & {
     reducer?: TReducerMap
-  } = {}
+  } = {},
 ) {
-  const {
-    middleware,
-    preloadedState,
-    reducer
-  } = options
+  const { middleware, preloadedState, reducer } = options
   type TestState = LocaleTestState & StateFromReducersMapObject<TReducerMap>
   const extraReducers = (reducer ?? {}) as TReducerMap
 
@@ -41,18 +42,18 @@ export function createTestStore<TReducerMap extends ReducersMapObject = Reducers
     reducer: {
       analytics: analyticsSlice.reducer,
       locale: localeSlice.reducer,
-      ...extraReducers
+      ...extraReducers,
     },
     preloadedState: {
       analytics: {
-        isEnabled: true
+        isEnabled: true,
       },
       locale: {
-        value: AppLocaleType.ZH_TW
+        value: AppLocaleType.ZH_TW,
       },
-      ...preloadedState
+      ...preloadedState,
     } as Partial<TestState>,
-    ...(middleware ? { middleware } : {})
+    ...(middleware ? { middleware } : {}),
   })
 
   return store as typeof store & {

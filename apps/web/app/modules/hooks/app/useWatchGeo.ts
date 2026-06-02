@@ -16,24 +16,28 @@ export const useWatchGeo = () => {
       return
     }
 
-    let permissionStatus: PermissionStatus | null = null;
+    let permissionStatus: PermissionStatus | null = null
 
-    (async() => {
+    ;(async () => {
       const permissions = navigator.permissions
       const queryPermission = permissions?.query?.bind(permissions)
       if (!queryPermission) return
       try {
         const result = await queryPermission({ name: 'geolocation' })
         permissionStatus = result
-        dispatch(transitionState({
-          type: GeoActionType.PERMISSION_CHANGED,
-          permission: result.state as GeoPermissionType
-        }))
-        result.onchange = () => {
-          dispatch(transitionState({
+        dispatch(
+          transitionState({
             type: GeoActionType.PERMISSION_CHANGED,
-            permission: result.state as GeoPermissionType
-          }))
+            permission: result.state as GeoPermissionType,
+          }),
+        )
+        result.onchange = () => {
+          dispatch(
+            transitionState({
+              type: GeoActionType.PERMISSION_CHANGED,
+              permission: result.state as GeoPermissionType,
+            }),
+          )
         }
       } catch (err) {
         console.warn('Permission query failed:', err)
@@ -43,10 +47,12 @@ export const useWatchGeo = () => {
     dispatch(transitionState({ type: GeoActionType.WATCH_STARTED }))
     const id = navigator.geolocation.watchPosition(
       (pos) => {
-        dispatch(transitionState({
-          type: GeoActionType.POSITION_UPDATED,
-          coords: [pos.coords.latitude, pos.coords.longitude]
-        }))
+        dispatch(
+          transitionState({
+            type: GeoActionType.POSITION_UPDATED,
+            coords: [pos.coords.latitude, pos.coords.longitude],
+          }),
+        )
       },
       (err) => {
         console.error(err)
@@ -56,7 +62,9 @@ export const useWatchGeo = () => {
         }
 
         if (err.code === err.POSITION_UNAVAILABLE) {
-          dispatch(transitionState({ type: GeoActionType.POSITION_UNAVAILABLE }))
+          dispatch(
+            transitionState({ type: GeoActionType.POSITION_UNAVAILABLE }),
+          )
           return
         }
 
@@ -70,8 +78,8 @@ export const useWatchGeo = () => {
       {
         enableHighAccuracy: false,
         maximumAge: 30000,
-        timeout: 10000
-      }
+        timeout: 10000,
+      },
     )
 
     watchIdRef.current = id

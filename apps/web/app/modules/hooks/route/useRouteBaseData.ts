@@ -43,9 +43,7 @@ interface RouteLocationState {
   favoriteRouteStop?: FavoriteRouteStop
 }
 
-export function useRouteBaseData(
-  options: UseRouteBaseDataOptions | null
-) {
+export function useRouteBaseData(options: UseRouteBaseDataOptions | null) {
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
   const activeTab = options?.activeTab ?? null
@@ -56,49 +54,66 @@ export function useRouteBaseData(
   // Keep RTK Query args well-typed; skip prevents requests until route options are ready.
   const routeQueryCity = options?.city ?? CityNameType.TAIPEI
 
-  const { data: routeData = [], isLoading: isRoutesLoading, error: routesError } = busApi.useGetRoutesByCityQuery(
-    routeQueryCity,
-    { skip: !options }
+  const {
+    data: routeData = [],
+    isLoading: isRoutesLoading,
+    error: routesError,
+  } = busApi.useGetRoutesByCityQuery(routeQueryCity, { skip: !options })
+  const {
+    data: stopOfRoutes = [],
+    isLoading: isStopOfRoutesLoading,
+    error: stopOfRoutesError,
+  } = busApi.useGetStopOfRoutesByCityQuery(
+    { city: routeQueryCity, routeUID: id },
+    { skip: !options },
   )
-  const { data: stopOfRoutes = [], isLoading: isStopOfRoutesLoading, error: stopOfRoutesError } =
-    busApi.useGetStopOfRoutesByCityQuery(
-      { city: routeQueryCity, routeUID: id },
-      { skip: !options }
-    )
   const { data: routeShapes = [] } = busApi.useGetRouteShapesByRouteQuery(
     { city: routeQueryCity, routeUID: id ?? '' },
-    { skip: !options || !id }
+    { skip: !options || !id },
   )
   const routeStopIds = useMemo(() => {
     if (!id) return []
 
     const stopIds = stopOfRoutes
       .filter((stopOfRoute) => stopOfRoute.RouteUID === id)
-      .flatMap((stopOfRoute) => stopOfRoute.Stops.flatMap((stop) => [stop.StopUID, stop.StopID]))
+      .flatMap((stopOfRoute) =>
+        stopOfRoute.Stops.flatMap((stop) => [stop.StopUID, stop.StopID]),
+      )
 
     return Array.from(new Set(stopIds)).sort()
   }, [id, stopOfRoutes])
-  const { data: routeStops = [], isLoading: isStopsLoading, error: stopsError } =
-    busApi.useGetStopsByCityAndIdsQuery(
-      { city: routeQueryCity, stopIds: routeStopIds },
-      { skip: !options || routeStopIds.length === 0 }
-    )
+  const {
+    data: routeStops = [],
+    isLoading: isStopsLoading,
+    error: stopsError,
+  } = busApi.useGetStopsByCityAndIdsQuery(
+    { city: routeQueryCity, stopIds: routeStopIds },
+    { skip: !options || routeStopIds.length === 0 },
+  )
 
   const targetFavoriteRouteStop = useMemo(() => {
     if (!options) return null
 
-    const favoriteRouteStop = (locationState as RouteLocationState | null)?.favoriteRouteStop
+    const favoriteRouteStop = (locationState as RouteLocationState | null)
+      ?.favoriteRouteStop
     if (!favoriteRouteStop) return null
-    if (favoriteRouteStop.city !== options.city || favoriteRouteStop.routeUID !== id) return null
+    if (
+      favoriteRouteStop.city !== options.city ||
+      favoriteRouteStop.routeUID !== id
+    )
+      return null
 
     return favoriteRouteStop
   }, [id, locationState, options])
 
-  const routes = useMemo(() => normalizeBusRoutesWithDates(routeData), [routeData])
+  const routes = useMemo(
+    () => normalizeBusRoutesWithDates(routeData),
+    [routeData],
+  )
 
   const busRoute = useMemo(
     () => routes.find((route) => route.RouteUID === id),
-    [routes, id]
+    [routes, id],
   )
 
   const routeTabs = useMemo<RouteTab[]>(() => {
@@ -112,10 +127,12 @@ export function useRouteBaseData(
         getLocalizedText(subRoute.SubRouteName, locale).trim() === routeName
           ? null
           : getLocalizedText(subRoute.SubRouteName, locale).trim(),
-        t(getDirectionTranslationKey(subRoute.Direction))
-      ].filter(Boolean).join(' '),
+        t(getDirectionTranslationKey(subRoute.Direction)),
+      ]
+        .filter(Boolean)
+        .join(' '),
       subRouteUID: subRoute.SubRouteUID,
-      direction: subRoute.Direction
+      direction: subRoute.Direction,
     }))
   }, [busRoute, locale, t])
 
@@ -123,10 +140,13 @@ export function useRouteBaseData(
     if (!routeTabs.length) return null
     if (!targetFavoriteRouteStop) return routeTabs[0].id
 
-    return routeTabs.find((tab) =>
-      tab.subRouteUID === targetFavoriteRouteStop.subRouteUID &&
-      tab.direction === targetFavoriteRouteStop.direction
-    )?.id ?? routeTabs[0].id
+    return (
+      routeTabs.find(
+        (tab) =>
+          tab.subRouteUID === targetFavoriteRouteStop.subRouteUID &&
+          tab.direction === targetFavoriteRouteStop.direction,
+      )?.id ?? routeTabs[0].id
+    )
   }, [routeTabs, targetFavoriteRouteStop])
 
   const activeRouteTab = useMemo(() => {
@@ -138,25 +158,33 @@ export function useRouteBaseData(
   const activeStopOfRoute = useMemo(() => {
     if (!activeRouteTab) return null
 
-    return stopOfRoutes.find((stopOfRoute) =>
-      stopOfRoute.RouteUID === id &&
-      stopOfRoute.SubRouteUID === activeRouteTab.subRouteUID &&
-      stopOfRoute.Direction === activeRouteTab.direction
-    ) ?? null
+    return (
+      stopOfRoutes.find(
+        (stopOfRoute) =>
+          stopOfRoute.RouteUID === id &&
+          stopOfRoute.SubRouteUID === activeRouteTab.subRouteUID &&
+          stopOfRoute.Direction === activeRouteTab.direction,
+      ) ?? null
+    )
   }, [activeRouteTab, id, stopOfRoutes])
 
   const subRoute = useMemo<BusSubRoute<Date | null> | null>(() => {
     if (!busRoute) return null
     if (!activeRouteTab) return null
 
-    return busRoute.SubRoutes.find((subRoute) =>
-      subRoute.SubRouteUID === activeRouteTab.subRouteUID &&
-      subRoute.Direction === activeRouteTab.direction
-    ) ?? null
+    return (
+      busRoute.SubRoutes.find(
+        (subRoute) =>
+          subRoute.SubRouteUID === activeRouteTab.subRouteUID &&
+          subRoute.Direction === activeRouteTab.direction,
+      ) ?? null
+    )
   }, [activeRouteTab, busRoute])
 
   const stopPositionMap = useMemo(() => {
-    return routeStops.reduce<Map<string, (typeof routeStops)[number]['position']>>((result, stop) => {
+    return routeStops.reduce<
+      Map<string, (typeof routeStops)[number]['position']>
+    >((result, stop) => {
       if (stop.position) {
         result.set(stop.StopUID, stop.position)
         result.set(stop.StopID, stop.position)
@@ -185,17 +213,21 @@ export function useRouteBaseData(
         stopName: stop.StopName,
         stopSequence: stop.StopSequence,
         departure: subRoute.DepartureStopName ?? busRoute.DepartureStopName,
-        destination: subRoute.DestinationStopName ?? busRoute.DestinationStopName
+        destination:
+          subRoute.DestinationStopName ?? busRoute.DestinationStopName,
       }
 
       return {
         id: stop.StopUID,
         favoriteRouteStop,
         name: getLocalizedText(stop.StopName, locale),
-        position: stopPositionMap.get(stop.StopUID) ?? stopPositionMap.get(stop.StopID) ?? null,
+        position:
+          stopPositionMap.get(stop.StopUID) ??
+          stopPositionMap.get(stop.StopID) ??
+          null,
         sequence: stop.StopSequence,
         stopID: stop.StopID,
-        isFavorite: isFavoriteRouteStop(favoriteRouteStop.favoriteId)
+        isFavorite: isFavoriteRouteStop(favoriteRouteStop.favoriteId),
       }
     })
   }, [activeStopOfRoute, subRoute, busRoute, isFavoriteRouteStop, locale])
@@ -205,21 +237,33 @@ export function useRouteBaseData(
       id: stop.StopUID,
       name: getLocalizedText(stop.StopName, locale),
       sequence: stop.StopSequence,
-      position: stopPositionMap.get(stop.StopUID) ?? stopPositionMap.get(stop.StopID) ?? null
+      position:
+        stopPositionMap.get(stop.StopUID) ??
+        stopPositionMap.get(stop.StopID) ??
+        null,
     }))
   }, [activeStopOfRoute, locale, stopPositionMap])
 
   const routePath = useMemo(() => {
     if (!subRoute) return []
 
-    return routeShapes.find((routeShape) =>
-      routeShape.SubRouteUID === subRoute.SubRouteUID &&
-      routeShape.Direction === subRoute.Direction
-    )?.path ?? []
+    return (
+      routeShapes.find(
+        (routeShape) =>
+          routeShape.SubRouteUID === subRoute.SubRouteUID &&
+          routeShape.Direction === subRoute.Direction,
+      )?.path ?? []
+    )
   }, [subRoute, routeShapes])
 
   const highlightedStopId = useMemo(() => {
-    if (!targetFavoriteRouteStop || !subRoute || !activeStopOfRoute || !busRoute) return null
+    if (
+      !targetFavoriteRouteStop ||
+      !subRoute ||
+      !activeStopOfRoute ||
+      !busRoute
+    )
+      return null
     if (
       targetFavoriteRouteStop.routeUID !== busRoute.RouteUID ||
       targetFavoriteRouteStop.subRouteUID !== subRoute.SubRouteUID ||
@@ -231,21 +275,27 @@ export function useRouteBaseData(
     const matchedStop = activeStopOfRoute.Stops.find((stop) => {
       const stationKey = stop.StationID ?? stop.StopUID
 
-      return stationKey === targetFavoriteRouteStop.stationKey ||
+      return (
+        stationKey === targetFavoriteRouteStop.stationKey ||
         stop.StopUID === targetFavoriteRouteStop.stopUID ||
         stop.StopID === targetFavoriteRouteStop.stopID
+      )
     })
 
     return matchedStop?.StopUID ?? null
   }, [activeStopOfRoute, subRoute, busRoute, targetFavoriteRouteStop])
 
   const isLoading = isRoutesLoading || isStopOfRoutesLoading || isStopsLoading
-  const isStopListLoading = Boolean(busRoute) && routeTabs.length > 0 && (isStopOfRoutesLoading || isStopsLoading)
+  const isStopListLoading =
+    Boolean(busRoute) &&
+    routeTabs.length > 0 &&
+    (isStopOfRoutesLoading || isStopsLoading)
   const error = routesError || stopOfRoutesError || stopsError
 
   const message = useMemo(() => {
     if (error) return getRouteMessages(t).loadRouteError
-    if (!busRoute || routeTabs.length === 0) return getRouteMessages(t).emptyRoute
+    if (!busRoute || routeTabs.length === 0)
+      return getRouteMessages(t).emptyRoute
 
     return null
   }, [busRoute, error, routeTabs.length, t])
@@ -261,6 +311,6 @@ export function useRouteBaseData(
     message,
     defaultActiveTabId,
     routeMapStops,
-    routeTabs
+    routeTabs,
   }
 }

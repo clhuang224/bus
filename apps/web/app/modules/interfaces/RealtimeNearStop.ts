@@ -1,4 +1,7 @@
-import type { TdxA2EventType, VehicleStateType } from '../enums/VehicleStateType'
+import type {
+  TdxA2EventType,
+  VehicleStateType,
+} from '../enums/VehicleStateType'
 import type { BusStatusType } from '../enums/BusStatusType'
 import type { CityNameType } from '@bus/shared'
 import type { DirectionType } from '../enums/DirectionType'
@@ -36,7 +39,10 @@ export interface TdxRealtimeNearStop<L = TdxLocalizedText, D = string> {
   UpdateTime: D
 }
 
-export interface RealtimeNearStop<D = string> extends Omit<TdxRealtimeNearStop<LocalizedText, D>, 'RouteName' | 'SubRouteName' | 'StopName' | 'A2EventType'> {
+export interface RealtimeNearStop<D = string> extends Omit<
+  TdxRealtimeNearStop<LocalizedText, D>,
+  'RouteName' | 'SubRouteName' | 'StopName' | 'A2EventType'
+> {
   City: CityNameType
   RouteName: LocalizedText
   SubRouteName: LocalizedText

@@ -6,7 +6,9 @@ import favoriteSlice from '~/modules/slices/favoriteSlice'
 export function useFavoriteRouteStops() {
   const dispatch = useDispatch<AppDispatch>()
 
-  const favoriteRouteStops = useSelector(favoriteSlice.selectors.getFavoriteRouteStops)
+  const favoriteRouteStops = useSelector(
+    favoriteSlice.selectors.getFavoriteRouteStops,
+  )
 
   const addFavoriteRouteStop = (routeStop: FavoriteRouteStop) => {
     dispatch(favoriteSlice.actions.addFavoriteRouteStop(routeStop))
@@ -33,6 +35,6 @@ export function useFavoriteRouteStops() {
     favoriteRouteStops,
     isFavoriteRouteStop,
     removeFavoriteRouteStop,
-    toggleFavoriteRouteStop
+    toggleFavoriteRouteStop,
   }
 }

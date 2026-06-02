@@ -8,12 +8,14 @@
     "build": "pnpm -r --if-present build",
     "dev": "concurrently -k -n proxy,web \"pnpm --filter @bus/tdx-proxy dev\" \"pnpm --filter @bus/web dev\"",
     "dev:mobile": "concurrently -k -n proxy,web \"pnpm --filter @bus/tdx-proxy dev:mobile\" \"pnpm --filter @bus/web dev:mobile\"",
+    "format": "pnpm -r --if-present format",
     "test": "pnpm -r --if-present test",
     "typecheck": "pnpm -r --if-present typecheck",
     "lint": "pnpm -r --if-present lint"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "prettier": "^3.4.2"
   }
 }

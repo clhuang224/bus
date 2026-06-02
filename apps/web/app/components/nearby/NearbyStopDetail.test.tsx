@@ -19,46 +19,52 @@ const stopGroup = {
   StopName: { 'zh-TW': '市政府', en: 'City Hall' },
   City: CityNameType.TAIPEI,
   position: [121.5654, 25.033] as [number, number],
-  stops: [{
-    StopUID: 'stop-1',
-    StopID: 'stop-1',
-    AuthorityID: '005',
-    StationID: 'station-1',
-    StationGroupID: 'group-1',
-    position: [121.5654, 25.033] as [number, number],
-    GeoHash: null,
-    StopName: { 'zh-TW': '市政府', en: 'City Hall' },
-    StopAddress: 'Address 1',
-    Bearing: null as BearingType | null,
-    StopDescription: null,
-    City: CityNameType.TAIPEI,
-    UpdateTime: '2026-04-12T10:00:00+08:00',
-    VersionID: 1
-  }]
+  stops: [
+    {
+      StopUID: 'stop-1',
+      StopID: 'stop-1',
+      AuthorityID: '005',
+      StationID: 'station-1',
+      StationGroupID: 'group-1',
+      position: [121.5654, 25.033] as [number, number],
+      GeoHash: null,
+      StopName: { 'zh-TW': '市政府', en: 'City Hall' },
+      StopAddress: 'Address 1',
+      Bearing: null as BearingType | null,
+      StopDescription: null,
+      City: CityNameType.TAIPEI,
+      UpdateTime: '2026-04-12T10:00:00+08:00',
+      VersionID: 1,
+    },
+  ],
 }
 const stopNameZhTW = stopGroup.StopName['zh-TW']
-const navigateToStopLabel = t('components.routeStopList.navigateAriaLabel', { stopName: stopNameZhTW })
+const navigateToStopLabel = t('components.routeStopList.navigateAriaLabel', {
+  stopName: stopNameZhTW,
+})
 
-function renderNearbyStopDetail(displayMode: 'content' | 'full' | 'title' = 'content') {
+function renderNearbyStopDetail(
+  displayMode: 'content' | 'full' | 'title' = 'content',
+) {
   return renderNearbyStopDetailWithStopGroup(stopGroup, displayMode)
 }
 
 function renderNearbyStopDetailWithStopGroup(
   targetStopGroup: typeof stopGroup,
-  displayMode: 'content' | 'full' | 'title' = 'content'
+  displayMode: 'content' | 'full' | 'title' = 'content',
 ) {
   const store = createTestStore({
     reducer: {
-      geolocation: geoSlice.reducer
+      geolocation: geoSlice.reducer,
     },
     preloadedState: {
       geolocation: {
         coords: [25.0478, 121.5319],
         error: null,
         permission: GeoPermissionType.GRANTED,
-        watching: false
-      }
-    }
+        watching: false,
+      },
+    },
   })
 
   return renderWithStore(
@@ -68,7 +74,7 @@ function renderNearbyStopDetailWithStopGroup(
       onViewRoutes={vi.fn()}
       displayMode={displayMode}
     />,
-    { store }
+    { store },
   )
 }
 
@@ -82,32 +88,38 @@ describe('NearbyStopDetail', () => {
     renderNearbyStopDetail('title')
 
     expect(screen.getByText(stopNameZhTW)).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: navigateToStopLabel })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: navigateToStopLabel }),
+    ).not.toBeInTheDocument()
   })
 
   it('renders stop name with bearing label in title mode when bearing is available', () => {
-    renderNearbyStopDetailWithStopGroup({
-      ...stopGroup,
-      stops: [
-        {
-          ...stopGroup.stops[0],
-          Bearing: BearingType.NORTH
-        },
-        {
-          ...stopGroup.stops[0],
-          StopUID: 'stop-2',
-          StopID: 'stop-2',
-          Bearing: BearingType.SOUTH
-        }
-      ]
-    }, 'title')
+    renderNearbyStopDetailWithStopGroup(
+      {
+        ...stopGroup,
+        stops: [
+          {
+            ...stopGroup.stops[0],
+            Bearing: BearingType.NORTH,
+          },
+          {
+            ...stopGroup.stops[0],
+            StopUID: 'stop-2',
+            StopID: 'stop-2',
+            Bearing: BearingType.SOUTH,
+          },
+        ],
+      },
+      'title',
+    )
 
     expect(screen.getByText(stopNameZhTW)).toBeInTheDocument()
     const northBearingLabel = t('common.bearing.north')
     const southBearingLabel = t('common.bearing.south')
-    const bearingText = screen.getByText((content) =>
-      content === `${southBearingLabel} / ${northBearingLabel}` ||
-      content === `${northBearingLabel} / ${southBearingLabel}`
+    const bearingText = screen.getByText(
+      (content) =>
+        content === `${southBearingLabel} / ${northBearingLabel}` ||
+        content === `${northBearingLabel} / ${southBearingLabel}`,
     )
     expect(bearingText).toBeInTheDocument()
   })
@@ -129,7 +141,7 @@ describe('NearbyStopDetail', () => {
     expect(window.open).toHaveBeenCalledWith(
       'https://www.google.com/maps/dir/?api=1&destination=25.033%2C121.5654',
       '_blank',
-      'noopener,noreferrer'
+      'noopener,noreferrer',
     )
   })
 })
