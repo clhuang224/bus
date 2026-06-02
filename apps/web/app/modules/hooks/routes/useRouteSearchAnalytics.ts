@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 import type { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import type { AreaType } from '~/modules/enums/AreaType'
-import type { CityNameType } from '~/modules/enums/CityNameType'
+import type { CityNameType } from '@bus/shared'
 import { trackGoogleAnalyticsEvent } from '~/modules/utils/shared/googleAnalytics'
 
 export enum RouteSearchAnalyticsSource {

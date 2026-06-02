@@ -1,4 +1,4 @@
-import { CityNameType } from '../enums/CityNameType'
+import { CityNameType } from '@bus/shared'
 import { CountyIdType } from '../enums/CountyIdType'
 
 type ZhTWLocale = typeof import('../i18n/locales/zh-TW').zhTW

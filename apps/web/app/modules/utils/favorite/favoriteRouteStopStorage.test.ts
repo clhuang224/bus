@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { CityNameType } from '../../enums/CityNameType'
+import { CityNameType } from '@bus/shared'
 import { DirectionType } from '../../enums/DirectionType'
 import type { FavoriteRouteStop } from '../../interfaces/FavoriteRouteStop'
 import {

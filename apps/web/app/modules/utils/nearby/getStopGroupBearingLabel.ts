@@ -1,4 +1,4 @@
-import { BearingType } from '~/modules/enums/BearingType'
+import { BearingType } from '@bus/shared'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import { getBearingTranslationKey } from '~/modules/utils/i18n/getBearingTranslationKey'
 import { getEnumValues } from '~/modules/utils/shared/getEnumValues'

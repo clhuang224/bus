@@ -1,6 +1,6 @@
 import type { TdxA2EventType, VehicleStateType } from '../enums/VehicleStateType'
 import type { BusStatusType } from '../enums/BusStatusType'
-import type { CityNameType } from '../enums/CityNameType'
+import type { CityNameType } from '@bus/shared'
 import type { DirectionType } from '../enums/DirectionType'
 import type { DutyStatusType } from '../enums/DutyStatusType'
 import type { MessageType } from '../enums/MessageType'

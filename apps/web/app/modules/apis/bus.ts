@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { BusRoute, TdxBusRoute } from '../interfaces/BusRoute'
 import type { AreaType } from '../enums/AreaType'
-import type { CityNameType } from '../enums/CityNameType'
+import type { CityNameType } from '@bus/shared'
 import type { EstimatedArrival, TdxEstimatedArrival } from '../interfaces/EstimatedArrival'
 import type { RealtimeByFrequency, TdxRealtimeByFrequency } from '../interfaces/RealtimeByFrequency'
 import type { RealtimeNearStop, TdxRealtimeNearStop } from '../interfaces/RealtimeNearStop'

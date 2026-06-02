@@ -1,5 +1,5 @@
-import type { BearingType } from '../enums/BearingType'
-import type { CityNameType } from '../enums/CityNameType'
+import type { BearingType } from '@bus/shared'
+import type { CityNameType } from '@bus/shared'
 import type { LngLat } from '../types/CoordsType'
 import type { LocalizedText, TdxLocalizedText } from '../types/LocalizedText'
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { BusStatusType } from '../../enums/BusStatusType'
-import { CityNameType } from '../../enums/CityNameType'
+import { CityNameType } from '@bus/shared'
 import { DirectionType } from '../../enums/DirectionType'
 import { DutyStatusType } from '../../enums/DutyStatusType'
 import { AppLocaleType } from '../../enums/AppLocaleType'

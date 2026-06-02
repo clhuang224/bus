@@ -2,7 +2,7 @@ import { Card, Flex, NavLink, Stack, Text } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { AppBadge } from '~/components/common/AppBadge'
-import type { CityNameType } from '~/modules/enums/CityNameType'
+import type { CityNameType } from '@bus/shared'
 import { getCityTranslationKey } from '~/modules/utils/i18n/getCityTranslationKey'
 import { getTerminalDisplay } from '~/modules/utils/i18n/getTerminalDisplay'
 

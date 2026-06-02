@@ -1,5 +1,5 @@
 import { NEARBY_DISTANCE_KM } from '../../consts/nearby'
-import type { CityNameType } from '../../enums/CityNameType'
+import type { CityNameType } from '@bus/shared'
 import type { LatLng } from '../../types/CoordsType'
 import { getLatitudeKilometersPerDegree, getLongitudeKilometersPerDegree } from '../geo/getGeoKilometersPerDegree'
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CityNameType } from '../../enums/CityNameType'
+import { CityNameType } from '@bus/shared'
 import { DirectionType } from '../../enums/DirectionType'
 import { normalizeStoredFavoriteRouteStop } from './normalizeStoredFavoriteRouteStop'
 

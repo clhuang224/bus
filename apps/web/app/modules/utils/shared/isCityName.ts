@@ -1,4 +1,4 @@
-import { CityNameType } from '../../enums/CityNameType'
+import { CityNameType } from '@bus/shared'
 import { getEnumValues } from './getEnumValues'
 
 const cityNameValues = getEnumValues(CityNameType)

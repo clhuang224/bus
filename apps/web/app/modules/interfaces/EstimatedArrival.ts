@@ -1,4 +1,4 @@
-import type { CityNameType } from '../enums/CityNameType'
+import type { CityNameType } from '@bus/shared'
 import type { DirectionType } from '../enums/DirectionType'
 import type { MessageType } from '../enums/MessageType'
 import type { StopStatusType } from '../enums/StopStatusType'

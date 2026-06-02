@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { areaMapCity, areaTranslationKeyMap, cityMapArea } from './area'
 import { AreaType } from '../enums/AreaType'
-import { CityNameType } from '../enums/CityNameType'
+import { CityNameType } from '@bus/shared'
 import { getEnumValues } from '../utils/shared/getEnumValues'
 
 describe('area mappings', () => {

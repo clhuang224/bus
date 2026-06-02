@@ -1,4 +1,4 @@
-import { BearingType } from '../enums/BearingType'
+import { BearingType } from '@bus/shared'
 
 type ZhTWLocale = typeof import('../i18n/locales/zh-TW').zhTW
 type BearingTranslationKey = `common.bearing.${keyof ZhTWLocale['translation']['common']['bearing']}`

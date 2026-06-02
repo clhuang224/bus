@@ -1,4 +1,4 @@
-import type { CityNameType } from '../../enums/CityNameType'
+import type { CityNameType } from '@bus/shared'
 import type { BusRoute, TdxBusRoute } from '../../interfaces/BusRoute'
 import type { EstimatedArrival, TdxEstimatedArrival } from '../../interfaces/EstimatedArrival'
 import type { RealtimeByFrequency, TdxRealtimeByFrequency } from '../../interfaces/RealtimeByFrequency'

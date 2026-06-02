@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { FeatureCollection } from 'geojson'
-import { CityNameType } from '../../enums/CityNameType'
+import { CityNameType } from '@bus/shared'
 import { CountyIdType } from '../../enums/CountyIdType'
 import { DEFAULT_CITY, getCityByCoords } from './getCityByCoords'
 

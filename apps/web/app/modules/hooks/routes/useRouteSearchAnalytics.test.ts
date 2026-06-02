@@ -4,7 +4,7 @@ import { act, renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import { AreaType } from '~/modules/enums/AreaType'
-import { CityNameType } from '~/modules/enums/CityNameType'
+import { CityNameType } from '@bus/shared'
 import {
   RouteSearchAnalyticsSource,
   useRouteSearchAnalytics
