@@ -18,6 +18,7 @@ async function bootstrap() {
   app.use(
     '/reference',
     apiReference({
+      theme: 'bluePlanet',
       url: '/openapi-json',
     }),
   );
