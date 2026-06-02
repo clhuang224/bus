@@ -6,14 +6,14 @@ import type { OpenGlobalModalPayload } from '../../slices/globalModalSlice'
 export enum TdxHttpErrorStatus {
   UNAUTHORIZED = 401,
   URI_TOO_LONG = 414,
-  RATE_LIMIT = 429
+  RATE_LIMIT = 429,
 }
 
 export enum BaseQueryErrorStatus {
   FETCH_ERROR = 'FETCH_ERROR',
   PARSING_ERROR = 'PARSING_ERROR',
   TIMEOUT_ERROR = 'TIMEOUT_ERROR',
-  CUSTOM_ERROR = 'CUSTOM_ERROR'
+  CUSTOM_ERROR = 'CUSTOM_ERROR',
 }
 
 function buildBusErrorModal(key: string): OpenGlobalModalPayload {
@@ -22,7 +22,7 @@ function buildBusErrorModal(key: string): OpenGlobalModalPayload {
     message: i18n.t(`${key}.description`),
     variant: 'alert',
     confirmText: i18n.t('common.modal.refresh'),
-    confirmAction: 'refresh'
+    confirmAction: 'refresh',
   }
 }
 
@@ -38,11 +38,15 @@ export function getTdxSystemErrorModal(): OpenGlobalModalPayload {
   return buildBusErrorModal('messages.busService.systemError')
 }
 
-function isFetchBaseQueryError(error: FetchBaseQueryError | SerializedError): error is FetchBaseQueryError {
+function isFetchBaseQueryError(
+  error: FetchBaseQueryError | SerializedError,
+): error is FetchBaseQueryError {
   return 'status' in error
 }
 
-export function getTdxHttpErrorStatus(error: FetchBaseQueryError | SerializedError | null | undefined) {
+export function getTdxHttpErrorStatus(
+  error: FetchBaseQueryError | SerializedError | null | undefined,
+) {
   if (!error) {
     return null
   }
@@ -55,14 +59,19 @@ export function getTdxHttpErrorStatus(error: FetchBaseQueryError | SerializedErr
     return error.status
   }
 
-  if (error.status === BaseQueryErrorStatus.PARSING_ERROR && typeof error.originalStatus === 'number') {
+  if (
+    error.status === BaseQueryErrorStatus.PARSING_ERROR &&
+    typeof error.originalStatus === 'number'
+  ) {
     return error.originalStatus
   }
 
   return null
 }
 
-export function isTdxRateLimitError(error: FetchBaseQueryError | SerializedError | null | undefined) {
+export function isTdxRateLimitError(
+  error: FetchBaseQueryError | SerializedError | null | undefined,
+) {
   return getTdxHttpErrorStatus(error) === TdxHttpErrorStatus.RATE_LIMIT
 }
 

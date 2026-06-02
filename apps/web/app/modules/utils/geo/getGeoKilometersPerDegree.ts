@@ -5,6 +5,6 @@ export function getLatitudeKilometersPerDegree(): number {
 }
 
 export function getLongitudeKilometersPerDegree(latitude: number): number {
-  const latitudeRadians = latitude * Math.PI / 180
+  const latitudeRadians = (latitude * Math.PI) / 180
   return LATITUDE_KILOMETERS_PER_DEGREE * Math.cos(latitudeRadians)
 }

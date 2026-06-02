@@ -4,7 +4,10 @@ import { useCallback } from 'react'
 import type { LatLng } from '~/modules/types/CoordsType'
 import { getGoogleMapsDirectionsUrl } from '~/modules/utils/map/getGoogleMapsDirectionsUrl'
 
-interface PropType extends Omit<ActionIconProps, 'children' | 'aria-label' | 'onClick'> {
+interface PropType extends Omit<
+  ActionIconProps,
+  'children' | 'aria-label' | 'onClick'
+> {
   ariaLabel: string
   destination: LatLng | null
 }
@@ -14,20 +17,23 @@ export const NavigationButton = ({
   destination,
   ...actionIconProps
 }: PropType) => {
-  const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-    if (!destination) {
-      return
-    }
+  const handleClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      if (!destination) {
+        return
+      }
 
-    event.stopPropagation()
-    window.open(
-      getGoogleMapsDirectionsUrl({
-        destination
-      }),
-      '_blank',
-      'noopener,noreferrer'
-    )
-  }, [destination])
+      event.stopPropagation()
+      window.open(
+        getGoogleMapsDirectionsUrl({
+          destination,
+        }),
+        '_blank',
+        'noopener,noreferrer',
+      )
+    },
+    [destination],
+  )
 
   return (
     <ActionIcon

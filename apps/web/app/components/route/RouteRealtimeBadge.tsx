@@ -13,12 +13,12 @@ export function RouteRealtimeBadge({
   buttonRef,
   isSelected,
   onClick,
-  plateNumb
+  plateNumb,
 }: PropType) {
   return (
     <Box
       style={{
-        display: 'inline-flex'
+        display: 'inline-flex',
       }}
     >
       <Badge
@@ -36,7 +36,7 @@ export function RouteRealtimeBadge({
             ? '0 0 0 1px rgba(245, 124, 0, 0.25), 0 2px 6px rgba(245, 124, 0, 0.18)'
             : undefined,
           cursor: 'pointer',
-          fontWeight: isSelected ? 700 : undefined
+          fontWeight: isSelected ? 700 : undefined,
         }}
         onClick={onClick}
       >

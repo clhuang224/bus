@@ -10,5 +10,5 @@ export enum MessageType {
   /**
    * 非定期
    */
-  UNSCHEDULED = 2
+  UNSCHEDULED = 2,
 }

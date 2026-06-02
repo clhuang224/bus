@@ -13,7 +13,7 @@ export function useScrollSelectedItem<T extends HTMLElement>({
   verticalAlignment = 'nearest',
   itemElementRefs,
   listItems,
-  selectedItemId = null
+  selectedItemId = null,
 }: UseScrollSelectedItemOptions<T>) {
   useEffect(() => {
     if (!selectedItemId) return
@@ -23,7 +23,7 @@ export function useScrollSelectedItem<T extends HTMLElement>({
 
     selectedItem.scrollIntoView({
       behavior,
-      block: verticalAlignment
+      block: verticalAlignment,
     })
   }, [behavior, itemElementRefs, listItems, selectedItemId, verticalAlignment])
 }

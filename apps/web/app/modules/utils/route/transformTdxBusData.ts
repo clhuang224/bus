@@ -1,8 +1,17 @@
-import type { CityNameType } from '../../enums/CityNameType'
+import type { CityNameType } from '@bus/shared'
 import type { BusRoute, TdxBusRoute } from '../../interfaces/BusRoute'
-import type { EstimatedArrival, TdxEstimatedArrival } from '../../interfaces/EstimatedArrival'
-import type { RealtimeByFrequency, TdxRealtimeByFrequency } from '../../interfaces/RealtimeByFrequency'
-import type { RealtimeNearStop, TdxRealtimeNearStop } from '../../interfaces/RealtimeNearStop'
+import type {
+  EstimatedArrival,
+  TdxEstimatedArrival,
+} from '../../interfaces/EstimatedArrival'
+import type {
+  RealtimeByFrequency,
+  TdxRealtimeByFrequency,
+} from '../../interfaces/RealtimeByFrequency'
+import type {
+  RealtimeNearStop,
+  TdxRealtimeNearStop,
+} from '../../interfaces/RealtimeNearStop'
 import type { RouteShape, TdxRouteShape } from '../../interfaces/RouteShape'
 import type { StopOfRoute, TdxStopOfRoute } from '../../interfaces/StopOfRoute'
 import type { Stop, TdxStop } from '../../interfaces/Stop'
@@ -12,7 +21,7 @@ import { transformTdxVehicleState } from './transformTdxVehicleState'
 
 export function transformEstimatedArrival(
   estimatedArrival: TdxEstimatedArrival,
-  city: CityNameType
+  city: CityNameType,
 ): EstimatedArrival {
   const routeUID = estimatedArrival.RouteUID ?? ''
 
@@ -26,62 +35,81 @@ export function transformEstimatedArrival(
     StopStatus: estimatedArrival.StopStatus ?? 255,
     SubRouteUID: estimatedArrival.SubRouteUID ?? routeUID,
     SubRouteID: estimatedArrival.SubRouteID ?? estimatedArrival.RouteID ?? null,
-    SubRouteName: toLocalizedText(estimatedArrival.SubRouteName, estimatedArrival.RouteName)
+    SubRouteName: toLocalizedText(
+      estimatedArrival.SubRouteName,
+      estimatedArrival.RouteName,
+    ),
   }
 }
 
-export function transformBusRoute(busRoute: TdxBusRoute<string>): BusRoute<string> {
+export function transformBusRoute(
+  busRoute: TdxBusRoute<string>,
+): BusRoute<string> {
   return {
     ...busRoute,
     Operators: busRoute.Operators.map((operator) => ({
       ...operator,
-      OperatorName: toLocalizedText(operator.OperatorName)
+      OperatorName: toLocalizedText(operator.OperatorName),
     })),
     RouteName: toLocalizedText(busRoute.RouteName),
     DepartureStopName: {
       'zh-TW': busRoute.DepartureStopNameZh ?? '',
-      en: busRoute.DepartureStopNameEn ?? ''
+      en: busRoute.DepartureStopNameEn ?? '',
     },
     DestinationStopName: {
       'zh-TW': busRoute.DestinationStopNameZh ?? '',
-      en: busRoute.DestinationStopNameEn ?? ''
+      en: busRoute.DestinationStopNameEn ?? '',
     },
     TicketPriceDescription: {
       'zh-TW': busRoute.TicketPriceDescriptionZh ?? '',
-      en: busRoute.TicketPriceDescriptionEn ?? ''
+      en: busRoute.TicketPriceDescriptionEn ?? '',
     },
     FareBufferZoneDescription: {
       'zh-TW': busRoute.FareBufferZoneDescriptionZh ?? '',
-      en: busRoute.FareBufferZoneDescriptionEn ?? ''
+      en: busRoute.FareBufferZoneDescriptionEn ?? '',
     },
     SubRoutes: (busRoute.SubRoutes ?? []).map((busSubRoute) => ({
       ...busSubRoute,
       DepartureStopName: {
-        'zh-TW': busSubRoute.DepartureStopNameZh ?? busRoute.DepartureStopNameZh ?? '',
-        en: busSubRoute.DepartureStopNameEn ?? busRoute.DepartureStopNameEn ?? ''
+        'zh-TW':
+          busSubRoute.DepartureStopNameZh ?? busRoute.DepartureStopNameZh ?? '',
+        en:
+          busSubRoute.DepartureStopNameEn ?? busRoute.DepartureStopNameEn ?? '',
       },
       DestinationStopName: {
-        'zh-TW': busSubRoute.DestinationStopNameZh ?? busRoute.DestinationStopNameZh ?? '',
-        en: busSubRoute.DestinationStopNameEn ?? busRoute.DestinationStopNameEn ?? ''
+        'zh-TW':
+          busSubRoute.DestinationStopNameZh ??
+          busRoute.DestinationStopNameZh ??
+          '',
+        en:
+          busSubRoute.DestinationStopNameEn ??
+          busRoute.DestinationStopNameEn ??
+          '',
       },
-      SubRouteName: toLocalizedText(busSubRoute.SubRouteName, busRoute.RouteName)
-    }))
+      SubRouteName: toLocalizedText(
+        busSubRoute.SubRouteName,
+        busRoute.RouteName,
+      ),
+    })),
   }
 }
 
 export function transformStopOfRoute(
   stopOfRoute: TdxStopOfRoute,
-  city: CityNameType
+  city: CityNameType,
 ): StopOfRoute {
   return {
     ...stopOfRoute,
     City: city,
     RouteName: toLocalizedText(stopOfRoute.RouteName),
-    SubRouteName: toLocalizedText(stopOfRoute.SubRouteName, stopOfRoute.RouteName),
+    SubRouteName: toLocalizedText(
+      stopOfRoute.SubRouteName,
+      stopOfRoute.RouteName,
+    ),
     Stops: stopOfRoute.Stops.map((stop) => ({
       ...stop,
-      StopName: toLocalizedText(stop.StopName)
-    }))
+      StopName: toLocalizedText(stop.StopName),
+    })),
   }
 }
 
@@ -96,7 +124,7 @@ export function transformStop(stop: TdxStop): Stop | null {
     StopName: toLocalizedText(stop.StopName),
     GeoHash: stop.StopPosition.GeoHash ?? null,
     City: stop.City || null,
-    position
+    position,
   }
 }
 
@@ -109,7 +137,7 @@ export function transformStops(stops: TdxStop[]): Stop[] {
 
 export function transformRealtimeNearStop(
   realtimeNearStop: TdxRealtimeNearStop,
-  city: CityNameType
+  city: CityNameType,
 ): RealtimeNearStop {
   const { A2EventType, ...restRealtimeNearStop } = realtimeNearStop
 
@@ -118,25 +146,34 @@ export function transformRealtimeNearStop(
     City: city,
     RouteName: toLocalizedText(realtimeNearStop.RouteName),
     StopName: toLocalizedText(realtimeNearStop.StopName),
-    SubRouteName: toLocalizedText(realtimeNearStop.SubRouteName, realtimeNearStop.RouteName),
-    vehicleState: transformTdxVehicleState(A2EventType)
+    SubRouteName: toLocalizedText(
+      realtimeNearStop.SubRouteName,
+      realtimeNearStop.RouteName,
+    ),
+    vehicleState: transformTdxVehicleState(A2EventType),
   }
 }
 
 export function transformRealtimeByFrequency(
   realtimeByFrequency: TdxRealtimeByFrequency,
-  city: CityNameType
+  city: CityNameType,
 ): RealtimeByFrequency {
   return {
     ...realtimeByFrequency,
     City: city,
     RouteName: toLocalizedText(realtimeByFrequency.RouteName),
-    SubRouteName: toLocalizedText(realtimeByFrequency.SubRouteName, realtimeByFrequency.RouteName),
-    position: toLngLat(realtimeByFrequency.BusPosition)
+    SubRouteName: toLocalizedText(
+      realtimeByFrequency.SubRouteName,
+      realtimeByFrequency.RouteName,
+    ),
+    position: toLngLat(realtimeByFrequency.BusPosition),
   }
 }
 
-export function transformRouteShape(routeShape: TdxRouteShape, city: CityNameType): RouteShape {
+export function transformRouteShape(
+  routeShape: TdxRouteShape,
+  city: CityNameType,
+): RouteShape {
   return {
     ...routeShape,
     City: city,
@@ -146,7 +183,7 @@ export function transformRouteShape(routeShape: TdxRouteShape, city: CityNameTyp
       : null,
     path: parseRouteShapePath({
       encodedPolyline: routeShape.EncodedPolyline,
-      geometry: routeShape.Geometry
-    })
+      geometry: routeShape.Geometry,
+    }),
   }
 }

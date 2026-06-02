@@ -14,13 +14,18 @@ export const RoutePopupContent: React.FC<{
   return (
     <Stack gap={2}>
       <Group align="center" gap="xs" wrap="nowrap">
-        <Text size="sm" fw={500} lineClamp={1} style={{ minWidth: 0, maxWidth: '100%' }}>
+        <Text
+          size="sm"
+          fw={500}
+          lineClamp={1}
+          style={{ minWidth: 0, maxWidth: '100%' }}
+        >
           {stopName}
         </Text>
         {isSm && (
           <NavigationButton
             ariaLabel={t('components.routeStopList.navigateAriaLabel', {
-              stopName
+              stopName,
             })}
             destination={toLatLng(position)}
             size="xs"

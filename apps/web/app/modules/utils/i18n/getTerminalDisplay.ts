@@ -16,26 +16,26 @@ export type TerminalDisplay =
 export function getTerminalDisplay(
   departure: string | null | undefined,
   destination: string | null | undefined,
-  separator = ' → '
+  separator = ' → ',
 ): TerminalDisplay {
   if (departure && destination) {
     return {
       labelKey: 'terminalLabel',
-      text: `${departure}${separator}${destination}`
+      text: `${departure}${separator}${destination}`,
     }
   }
 
   if (departure) {
     return {
       labelKey: 'departureLabel',
-      text: departure
+      text: departure,
     }
   }
 
   if (destination) {
     return {
       labelKey: 'destinationLabel',
-      text: destination
+      text: destination,
     }
   }
 

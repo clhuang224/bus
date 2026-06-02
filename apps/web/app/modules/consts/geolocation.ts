@@ -1,4 +1,4 @@
-import { CityNameType } from '../enums/CityNameType'
+import { CityNameType } from '@bus/shared'
 import { getEnumValues } from '../utils/shared/getEnumValues'
 
 export const defaultCoords = null

@@ -10,5 +10,5 @@ export enum TripStartTimeType {
   /**
    * 無法推估發車時間
    */
-  NOT_AVAILABLE = 2
+  NOT_AVAILABLE = 2,
 }

@@ -26,23 +26,27 @@ function toStoredLocalizedText(value: unknown): LocalizedText | null {
   if (typeof value === 'string') {
     return {
       'zh-TW': value,
-      en: ''
+      en: '',
     }
   }
 
   const localizedValue = value as Record<string, unknown> | null
-  if (typeof value === 'object' && value !== null && typeof localizedValue?.en === 'string') {
+  if (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof localizedValue?.en === 'string'
+  ) {
     if (typeof localizedValue['zh-TW'] === 'string') {
       return {
         'zh-TW': localizedValue['zh-TW'],
-        en: localizedValue.en
+        en: localizedValue.en,
       }
     }
 
     if (typeof localizedValue.zh_TW === 'string') {
       return {
         'zh-TW': localizedValue.zh_TW,
-        en: localizedValue.en
+        en: localizedValue.en,
       }
     }
   }
@@ -50,7 +54,9 @@ function toStoredLocalizedText(value: unknown): LocalizedText | null {
   return null
 }
 
-export function normalizeStoredFavoriteRouteStop(item: unknown): FavoriteRouteStop | null {
+export function normalizeStoredFavoriteRouteStop(
+  item: unknown,
+): FavoriteRouteStop | null {
   const favoriteRouteStop = item as Record<string, unknown> | null
   if (
     typeof item !== 'object' ||
@@ -80,7 +86,7 @@ export function normalizeStoredFavoriteRouteStop(item: unknown): FavoriteRouteSt
     stopID,
     stationID,
     stationKey,
-    stopSequence
+    stopSequence,
   } = favoriteRouteStop
 
   if (
@@ -112,6 +118,6 @@ export function normalizeStoredFavoriteRouteStop(item: unknown): FavoriteRouteSt
     stopName,
     stopSequence,
     departure,
-    destination
+    destination,
   }
 }

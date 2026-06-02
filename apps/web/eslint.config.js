@@ -7,26 +7,26 @@ import { defineConfig } from 'eslint/config'
 
 export default defineConfig([
   {
-    ignores: ['./build/**', './node_modules/**', './.react-router/**']
+    ignores: ['./build/**', './node_modules/**', './.react-router/**'],
   },
   {
     files: ['**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     plugins: {
       js,
-      react: pluginReact
+      react: pluginReact,
     },
     languageOptions: {
       globals: {
         ...globals.browser,
-        ...globals.node
+        ...globals.node,
       },
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
         ecmaFeatures: {
-          jsx: true
-        }
-      }
+          jsx: true,
+        },
+      },
     },
     rules: {
       'react/display-name': 'off',
@@ -43,27 +43,27 @@ export default defineConfig([
       'react/no-unescaped-entities': 'warn',
       'react/no-unknown-property': 'warn',
       'react/react-in-jsx-scope': 'off',
-      'react/prop-types': 'off'
+      'react/prop-types': 'off',
     },
     settings: {
       react: {
-        version: 'detect'
-      }
-    }
+        version: 'detect',
+      },
+    },
   },
   tseslint.configs.recommended,
   {
     files: ['**/*.json'],
     plugins: { json },
     language: 'json/json',
-    extends: ['json/recommended']
+    extends: ['json/recommended'],
   },
   {
     rules: {
-      semi: ['warn', 'never'],
-      'comma-dangle': ['warn', 'never'],
-      'space-before-function-paren': ['error', 'never'],
-      quotes: ['warn', 'single', { avoidEscape: true }]
-    }
-  }
+      semi: 'off',
+      'comma-dangle': 'off',
+      'space-before-function-paren': 'off',
+      quotes: 'off',
+    },
+  },
 ])

@@ -8,20 +8,18 @@ import { zhTW } from './locales/zh-TW'
 
 const resources = {
   [AppLocaleType.ZH_TW]: zhTW,
-  [AppLocaleType.EN]: en
+  [AppLocaleType.EN]: en,
 } as const
 
-void i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: getInitialAppLocale(),
-    fallbackLng: DEFAULT_APP_LOCALE,
-    supportedLngs: [...SUPPORTED_APP_LOCALES],
-    interpolation: {
-      escapeValue: false
-    },
-    returnNull: false
-  })
+void i18n.use(initReactI18next).init({
+  resources,
+  lng: getInitialAppLocale(),
+  fallbackLng: DEFAULT_APP_LOCALE,
+  supportedLngs: [...SUPPORTED_APP_LOCALES],
+  interpolation: {
+    escapeValue: false,
+  },
+  returnNull: false,
+})
 
 export default i18n

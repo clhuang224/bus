@@ -10,7 +10,9 @@ function syncDocumentMetadata(locale: string) {
   const t = i18n.getFixedT(locale)
   document.title = t('app.name')
 
-  const existingMetaDescription = document.querySelector('meta[name="description"]')
+  const existingMetaDescription = document.querySelector(
+    'meta[name="description"]',
+  )
   if (existingMetaDescription) {
     existingMetaDescription.setAttribute('content', t('app.description'))
     return
@@ -29,7 +31,7 @@ export const AppI18nProvider = ({ children }: PropsWithChildren) => {
   useEffect(() => {
     let cancelled = false
 
-    const applyLocale = async() => {
+    const applyLocale = async () => {
       try {
         await i18n.changeLanguage(locale)
       } finally {

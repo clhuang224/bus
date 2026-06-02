@@ -20,14 +20,23 @@ function openCityBoundaryDatabase() {
       return
     }
 
-    const request = indexedDB.open(CITY_BOUNDARY_DB_NAME, CITY_BOUNDARY_DB_VERSION)
+    const request = indexedDB.open(
+      CITY_BOUNDARY_DB_NAME,
+      CITY_BOUNDARY_DB_VERSION,
+    )
 
     request.onerror = () => {
-      reject(request.error ?? new Error('Failed to open city boundary IndexedDB.'))
+      reject(
+        request.error ?? new Error('Failed to open city boundary IndexedDB.'),
+      )
     }
 
     request.onblocked = () => {
-      reject(new Error('City boundary IndexedDB open was blocked by another open connection.'))
+      reject(
+        new Error(
+          'City boundary IndexedDB open was blocked by another open connection.',
+        ),
+      )
     }
 
     request.onupgradeneeded = () => {
@@ -52,7 +61,10 @@ export async function readCityBoundaryCache() {
   const database = await openCityBoundaryDatabase()
 
   return new Promise<CityBoundaryCacheRecord | null>((resolve, reject) => {
-    const transaction = database.transaction(CITY_BOUNDARY_STORE_NAME, 'readonly')
+    const transaction = database.transaction(
+      CITY_BOUNDARY_STORE_NAME,
+      'readonly',
+    )
     const store = transaction.objectStore(CITY_BOUNDARY_STORE_NAME)
     const request = store.get(CITY_BOUNDARY_CACHE_KEY)
     let result: CityBoundaryCacheRecord | null = null
@@ -63,7 +75,10 @@ export async function readCityBoundaryCache() {
 
     request.onerror = () => {
       closeDatabase()
-      reject(request.error ?? new Error('Failed to read city boundary cache from IndexedDB.'))
+      reject(
+        request.error ??
+          new Error('Failed to read city boundary cache from IndexedDB.'),
+      )
     }
 
     request.onsuccess = () => {
@@ -77,12 +92,18 @@ export async function readCityBoundaryCache() {
 
     transaction.onerror = () => {
       closeDatabase()
-      reject(transaction.error ?? new Error('Failed to complete city boundary read transaction.'))
+      reject(
+        transaction.error ??
+          new Error('Failed to complete city boundary read transaction.'),
+      )
     }
 
     transaction.onabort = () => {
       closeDatabase()
-      reject(transaction.error ?? new Error('City boundary read transaction was aborted.'))
+      reject(
+        transaction.error ??
+          new Error('City boundary read transaction was aborted.'),
+      )
     }
   })
 }
@@ -91,7 +112,10 @@ export async function writeCityBoundaryCache(record: CityBoundaryCacheRecord) {
   const database = await openCityBoundaryDatabase()
 
   return new Promise<void>((resolve, reject) => {
-    const transaction = database.transaction(CITY_BOUNDARY_STORE_NAME, 'readwrite')
+    const transaction = database.transaction(
+      CITY_BOUNDARY_STORE_NAME,
+      'readwrite',
+    )
     const store = transaction.objectStore(CITY_BOUNDARY_STORE_NAME)
     const closeDatabase = () => {
       database.close()
@@ -106,12 +130,18 @@ export async function writeCityBoundaryCache(record: CityBoundaryCacheRecord) {
 
     transaction.onerror = () => {
       closeDatabase()
-      reject(transaction.error ?? new Error('Failed to write city boundary cache to IndexedDB.'))
+      reject(
+        transaction.error ??
+          new Error('Failed to write city boundary cache to IndexedDB.'),
+      )
     }
 
     transaction.onabort = () => {
       closeDatabase()
-      reject(transaction.error ?? new Error('City boundary write transaction was aborted.'))
+      reject(
+        transaction.error ??
+          new Error('City boundary write transaction was aborted.'),
+      )
     }
   })
 }

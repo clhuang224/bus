@@ -16,14 +16,16 @@ export const SearchInput = (props: SearchInputPropType): ReactElement => {
       aria-label={t('components.searchInput.ariaLabel')}
       placeholder={t('components.searchInput.placeholder')}
       leftSection={<RiSearchLine />}
-      rightSection={props.value && (
+      rightSection={
+        props.value && (
           <CloseButton
             aria-label={t('components.searchInput.clearAriaLabel')}
             onClick={() => {
               props.onChange('')
             }}
           />
-      )}
+        )
+      }
       style={{ '--input-right-section-pointer-events': 'auto' }}
       value={props.value}
       onChange={(e) => {

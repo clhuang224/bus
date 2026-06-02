@@ -5,7 +5,10 @@ import { RouteRealtimeBadge } from './RouteRealtimeBadge'
 interface PropType {
   realtimeBuses: RouteRealtimeBusStatus[]
   onSelectVehicle: (vehicleId: string) => void
-  setVehicleBadgeRef?: (vehicleId: string, node: HTMLButtonElement | null) => void
+  setVehicleBadgeRef?: (
+    vehicleId: string,
+    node: HTMLButtonElement | null,
+  ) => void
   selectedVehicleId?: string | null
 }
 
@@ -13,7 +16,7 @@ export function RouteRealtimeGap({
   realtimeBuses,
   onSelectVehicle,
   setVehicleBadgeRef,
-  selectedVehicleId = null
+  selectedVehicleId = null,
 }: PropType) {
   return (
     <Box mih={28} pr="sm">

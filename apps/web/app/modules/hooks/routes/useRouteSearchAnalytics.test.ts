@@ -4,18 +4,18 @@ import { act, renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import { AreaType } from '~/modules/enums/AreaType'
-import { CityNameType } from '~/modules/enums/CityNameType'
+import { CityNameType } from '@bus/shared'
 import {
   RouteSearchAnalyticsSource,
-  useRouteSearchAnalytics
+  useRouteSearchAnalytics,
 } from './useRouteSearchAnalytics'
 
 const { mockTrackGoogleAnalyticsEvent } = vi.hoisted(() => ({
-  mockTrackGoogleAnalyticsEvent: vi.fn()
+  mockTrackGoogleAnalyticsEvent: vi.fn(),
 }))
 
 vi.mock('~/modules/utils/shared/googleAnalytics', () => ({
-  trackGoogleAnalyticsEvent: mockTrackGoogleAnalyticsEvent
+  trackGoogleAnalyticsEvent: mockTrackGoogleAnalyticsEvent,
 }))
 
 const defaultOptions = {
@@ -24,7 +24,7 @@ const defaultOptions = {
   keyword: '　藍－１０　',
   locale: AppLocaleType.ZH_TW,
   normalizedKeyword: '藍10',
-  resultCount: 1
+  resultCount: 1,
 }
 
 describe('useRouteSearchAnalytics', () => {
@@ -40,7 +40,7 @@ describe('useRouteSearchAnalytics', () => {
       locale: AppLocaleType.ZH_TW,
       normalized_search_term: '藍10',
       result_count: 1,
-      search_term: '　藍－１０　'
+      search_term: '　藍－１０　',
     })
   })
 
@@ -50,16 +50,16 @@ describe('useRouteSearchAnalytics', () => {
       {
         initialProps: {
           ...defaultOptions,
-          normalizedKeyword: ''
-        }
-      }
+          normalizedKeyword: '',
+        },
+      },
     )
 
     expect(mockTrackGoogleAnalyticsEvent).not.toHaveBeenCalled()
 
     rerender({
       ...defaultOptions,
-      isLoading: true
+      isLoading: true,
     })
 
     expect(mockTrackGoogleAnalyticsEvent).not.toHaveBeenCalled()
@@ -69,8 +69,8 @@ describe('useRouteSearchAnalytics', () => {
     const { rerender } = renderHook(
       (options: typeof defaultOptions) => useRouteSearchAnalytics(options),
       {
-        initialProps: defaultOptions
-      }
+        initialProps: defaultOptions,
+      },
     )
 
     rerender(defaultOptions)
@@ -82,14 +82,14 @@ describe('useRouteSearchAnalytics', () => {
     const { rerender } = renderHook(
       (options: typeof defaultOptions) => useRouteSearchAnalytics(options),
       {
-        initialProps: defaultOptions
-      }
+        initialProps: defaultOptions,
+      },
     )
 
     rerender({
       ...defaultOptions,
       keyword: '',
-      normalizedKeyword: ''
+      normalizedKeyword: '',
     })
     rerender(defaultOptions)
 
@@ -103,33 +103,38 @@ describe('useRouteSearchAnalytics', () => {
         initialProps: {
           ...defaultOptions,
           keyword: '藍10',
-          normalizedKeyword: '藍10'
-        }
-      }
+          normalizedKeyword: '藍10',
+        },
+      },
     )
 
     rerender({
       ...defaultOptions,
       keyword: '　藍－１０　',
-      normalizedKeyword: '藍10'
+      normalizedKeyword: '藍10',
     })
 
     expect(mockTrackGoogleAnalyticsEvent).toHaveBeenCalledTimes(2)
-    expect(mockTrackGoogleAnalyticsEvent).toHaveBeenLastCalledWith('route_search', {
-      area: AreaType.TAIPEI,
-      locale: AppLocaleType.ZH_TW,
-      normalized_search_term: '藍10',
-      result_count: 1,
-      search_term: '　藍－１０　'
-    })
+    expect(mockTrackGoogleAnalyticsEvent).toHaveBeenLastCalledWith(
+      'route_search',
+      {
+        area: AreaType.TAIPEI,
+        locale: AppLocaleType.ZH_TW,
+        normalized_search_term: '藍10',
+        result_count: 1,
+        search_term: '　藍－１０　',
+      },
+    )
   })
 
   it('tracks the selected route with route metadata', () => {
-    const { result } = renderHook(() => useRouteSearchAnalytics({
-      ...defaultOptions,
-      keyword: '紅25',
-      normalizedKeyword: '紅25'
-    }))
+    const { result } = renderHook(() =>
+      useRouteSearchAnalytics({
+        ...defaultOptions,
+        keyword: '紅25',
+        normalizedKeyword: '紅25',
+      }),
+    )
     mockTrackGoogleAnalyticsEvent.mockClear()
 
     act(() => {
@@ -139,7 +144,7 @@ describe('useRouteSearchAnalytics', () => {
         departure: '台北車站',
         destination: '北門',
         name: '紅25',
-        routeUID: 'route-2'
+        routeUID: 'route-2',
       })
     })
 
@@ -152,7 +157,7 @@ describe('useRouteSearchAnalytics', () => {
       route_name: '紅25',
       route_uid: 'route-2',
       search_term: '紅25',
-      source: 'search_result'
+      source: 'search_result',
     })
   })
 })

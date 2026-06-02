@@ -30,7 +30,7 @@ export const NearbyStopDetail = ({
   isRoutesLoading = false,
   isRoutesRateLimited = false,
   onViewRoutes,
-  displayMode = 'content'
+  displayMode = 'content',
 }: PropType) => {
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
@@ -60,61 +60,58 @@ export const NearbyStopDetail = ({
         <Group align="center" wrap="nowrap" gap="xs">
           <StopDistanceText position={stopGroup.position} size="sm" />
           <NavigationButton
-            ariaLabel={t('components.routeStopList.navigateAriaLabel', { stopName })}
+            ariaLabel={t('components.routeStopList.navigateAriaLabel', {
+              stopName,
+            })}
             destination={destination}
           />
         </Group>
-      )
+      ),
     },
     {
       label: t('components.nearbyStopDetail.cityLabel'),
       content: (
         <Text size="sm">
-          {stopGroup.City ? t(getCityTranslationKey(stopGroup.City)) : t('components.nearbyStopDetail.notProvided')}
+          {stopGroup.City
+            ? t(getCityTranslationKey(stopGroup.City))
+            : t('components.nearbyStopDetail.notProvided')}
         </Text>
-      )
+      ),
     },
     {
       label: t('components.nearbyStopDetail.addressLabel'),
       content: (
         <Text size="sm">
-          {Array.from(new Set(stopGroup.stops.map((stop) => stop.StopAddress).filter(Boolean))).join('、') ||
-            t('components.nearbyStopDetail.notProvided')}
+          {Array.from(
+            new Set(
+              stopGroup.stops.map((stop) => stop.StopAddress).filter(Boolean),
+            ),
+          ).join('、') || t('components.nearbyStopDetail.notProvided')}
         </Text>
-      )
+      ),
     },
     {
       label: t('components.nearbyStopDetail.routesLabel'),
-      content: isRoutesLoading
-        ? (
-          <Flex gap="xs" wrap="wrap" data-testid="nearby-stop-routes-skeleton">
-            <Skeleton h={26} w={56} radius="xl" />
-            <Skeleton h={26} w={64} radius="xl" />
-            <Skeleton h={26} w={52} radius="xl" />
-          </Flex>
-          )
-        : isRoutesRateLimited
-          ? (
-            <Text size="sm">
-              {t('components.nearbyStopRoutes.rateLimited')}
-            </Text>
-            )
-          : hasRoutesError
-            ? (
-              <Text size="sm">
-                {t('components.nearbyStopRoutes.error')}
-              </Text>
-              )
-        : (
-          <Flex gap="xs" wrap="wrap">
-            {routes.map((route) => (
-              <AppBadge key={route.routeUID} type="route">
-                {route.name}
-              </AppBadge>
-            ))}
-          </Flex>
-          )
-    }
+      content: isRoutesLoading ? (
+        <Flex gap="xs" wrap="wrap" data-testid="nearby-stop-routes-skeleton">
+          <Skeleton h={26} w={56} radius="xl" />
+          <Skeleton h={26} w={64} radius="xl" />
+          <Skeleton h={26} w={52} radius="xl" />
+        </Flex>
+      ) : isRoutesRateLimited ? (
+        <Text size="sm">{t('components.nearbyStopRoutes.rateLimited')}</Text>
+      ) : hasRoutesError ? (
+        <Text size="sm">{t('components.nearbyStopRoutes.error')}</Text>
+      ) : (
+        <Flex gap="xs" wrap="wrap">
+          {routes.map((route) => (
+            <AppBadge key={route.routeUID} type="route">
+              {route.name}
+            </AppBadge>
+          ))}
+        </Flex>
+      ),
+    },
   ]
 
   return (
@@ -127,7 +124,7 @@ export const NearbyStopDetail = ({
             position: 'sticky',
             top: 0,
             zIndex: 1,
-            backgroundColor: 'var(--mantine-color-body)'
+            backgroundColor: 'var(--mantine-color-body)',
           }}
         >
           <Flex gap="xs" align="center" wrap="nowrap">
@@ -144,16 +141,20 @@ export const NearbyStopDetail = ({
       )}
       {detailSections.map((section) => (
         <Stack key={section.label} gap={4}>
-          <Text size="sm" c="dimmed">{section.label}</Text>
+          <Text size="sm" c="dimmed">
+            {section.label}
+          </Text>
           {section.content}
         </Stack>
       ))}
       <Group justify="flex-end" gap="xs">
         <ActionIcon
-          aria-label={t('components.nearbyStopDetail.viewRoutesAriaLabel', { stopName })}
+          aria-label={t('components.nearbyStopDetail.viewRoutesAriaLabel', {
+            stopName,
+          })}
           onClick={() => onViewRoutes(stopGroup.StationID)}
         >
-          <RiArrowRightSLine size={18}/>
+          <RiArrowRightSLine size={18} />
         </ActionIcon>
       </Group>
     </Stack>

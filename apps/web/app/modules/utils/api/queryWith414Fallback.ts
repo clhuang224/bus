@@ -8,7 +8,11 @@ interface QueryResultLike<TData, TError extends QueryErrorLike> {
   error?: TError
 }
 
-interface QueryArrayWith414FallbackOptions<TItem, TData, TError extends QueryErrorLike> {
+interface QueryArrayWith414FallbackOptions<
+  TItem,
+  TData,
+  TError extends QueryErrorLike,
+> {
   items: TItem[]
   queryBatch: (batchItems: TItem[]) => Promise<QueryResultLike<TData[], TError>>
   shouldFallback?: (error: TError) => boolean
@@ -22,19 +26,28 @@ function isParsingErrorWithUriTooLongStatus(error: QueryErrorLike): boolean {
   return error.status === 'PARSING_ERROR' && error.originalStatus === 414
 }
 
-function defaultShouldFallback<TError extends QueryErrorLike>(error: TError): boolean {
-  return isUriTooLongStatus(error.status) || isParsingErrorWithUriTooLongStatus(error)
+function defaultShouldFallback<TError extends QueryErrorLike>(
+  error: TError,
+): boolean {
+  return (
+    isUriTooLongStatus(error.status) ||
+    isParsingErrorWithUriTooLongStatus(error)
+  )
 }
 
-export async function queryArrayWith414Fallback<TItem, TData, TError extends QueryErrorLike>(
-  options: QueryArrayWith414FallbackOptions<TItem, TData, TError>
+export async function queryArrayWith414Fallback<
+  TItem,
+  TData,
+  TError extends QueryErrorLike,
+>(
+  options: QueryArrayWith414FallbackOptions<TItem, TData, TError>,
 ): Promise<QueryResultLike<TData[], TError>> {
   const { items, queryBatch, shouldFallback = defaultShouldFallback } = options
   const result = await queryBatch(items)
 
   if (!result.error) {
     return {
-      data: result.data ?? []
+      data: result.data ?? [],
     }
   }
 
@@ -49,7 +62,7 @@ export async function queryArrayWith414Fallback<TItem, TData, TError extends Que
   const leftResult = await queryArrayWith414Fallback({
     items: leftItems,
     queryBatch,
-    shouldFallback
+    shouldFallback,
   })
   if (leftResult.error) {
     return { error: leftResult.error }
@@ -58,13 +71,13 @@ export async function queryArrayWith414Fallback<TItem, TData, TError extends Que
   const rightResult = await queryArrayWith414Fallback({
     items: rightItems,
     queryBatch,
-    shouldFallback
+    shouldFallback,
   })
   if (rightResult.error) {
     return { error: rightResult.error }
   }
 
   return {
-    data: [...(leftResult.data ?? []), ...(rightResult.data ?? [])]
+    data: [...(leftResult.data ?? []), ...(rightResult.data ?? [])],
   }
 }

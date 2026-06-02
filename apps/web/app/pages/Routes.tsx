@@ -19,11 +19,18 @@ export default function Routes() {
     setArea,
     setKeyword,
     showRecentRoutesTitle,
-    trackRouteSelected
+    trackRouteSelected,
   } = useRoutesData()
 
   const routeCardSkeletons = Array.from({ length: 6 }, (_, index) => (
-    <Card key={index} withBorder radius="md" p="xs" shadow="xs" data-testid="routes-skeleton-card">
+    <Card
+      key={index}
+      withBorder
+      radius="md"
+      p="xs"
+      shadow="xs"
+      data-testid="routes-skeleton-card"
+    >
       <Stack gap={8}>
         <Flex justify="space-between" align="center">
           <Skeleton h={26} w={64} radius="xl" />
@@ -46,24 +53,29 @@ export default function Routes() {
             <SearchInput value={keyword} onChange={setKeyword} />
           </Flex>
           {message && <BaseAlert {...message} />}
-          <ScrollArea viewportRef={scrollViewportRef} style={{ flex: 1, minHeight: 0 }}>
+          <ScrollArea
+            viewportRef={scrollViewportRef}
+            style={{ flex: 1, minHeight: 0 }}
+          >
             <Stack gap="sm">
               {showRecentRoutesTitle && (
-                <Title order={5}>{t('pages.routes.recentViewedRoutesTitle')}</Title>
+                <Title order={5}>
+                  {t('pages.routes.recentViewedRoutesTitle')}
+                </Title>
               )}
               {isLoading
                 ? routeCardSkeletons
                 : displayedRoutes.map((route) => (
-                  <RouteInfoCard
-                    key={route.routeUID}
-                    to={route.to}
-                    name={route.name}
-                    city={route.city}
-                    departure={route.departure}
-                    destination={route.destination}
-                    onClick={() => trackRouteSelected(route)}
-                  />
-                ))}
+                    <RouteInfoCard
+                      key={route.routeUID}
+                      to={route.to}
+                      name={route.name}
+                      city={route.city}
+                      departure={route.departure}
+                      destination={route.destination}
+                      onClick={() => trackRouteSelected(route)}
+                    />
+                  ))}
             </Stack>
           </ScrollArea>
         </Stack>

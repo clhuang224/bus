@@ -66,40 +66,55 @@ export const RouteMap = ({
   selectedStopEstimatedArrivalLabel = null,
   selectedVehicleId = null,
   stops,
-  vehicles = []
+  vehicles = [],
 }: PropType) => {
   const { t } = useTranslation()
   const [map, setMap] = useState<MapLibreMap | null>(null)
   const [isMapReady, setIsMapReady] = useState(false)
-  const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(null)
+  const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(
+    null,
+  )
   const markerMap = useRef<Map<string, Marker>>(new Map())
   const popupRef = useRef<Popup | null>(null)
   const vehicleMarkerMap = useRef<Map<string, Marker>>(new Map())
   const initialBoundsFittedRef = useRef(false)
 
   const positionedStops = useMemo(
-    () => stops.filter((stop): stop is RouteMapStop & { position: LngLat } => stop.position != null),
-    [stops]
+    () =>
+      stops.filter(
+        (stop): stop is RouteMapStop & { position: LngLat } =>
+          stop.position != null,
+      ),
+    [stops],
   )
   const vehiclesById = useMemo(
     () => new Map(vehicles.map((vehicle) => [vehicle.id, vehicle])),
-    [vehicles]
+    [vehicles],
   )
   const stopsById = useMemo(
     () => new Map(positionedStops.map((stop) => [stop.id, stop])),
-    [positionedStops]
+    [positionedStops],
   )
   const routeIdentity = useMemo(
     () =>
       positionedStops
-        .map((stop) => `${stop.id}:${stop.sequence}:${stop.position[0]},${stop.position[1]}`)
+        .map(
+          (stop) =>
+            `${stop.id}:${stop.sequence}:${stop.position[0]},${stop.position[1]}`,
+        )
         .join('|'),
-    [positionedStops]
+    [positionedStops],
   )
-  const selectedVehicle = selectedVehicleId ? vehiclesById.get(selectedVehicleId) ?? null : null
-  const selectedMapStop = selectedStop ? stopsById.get(selectedStop) ?? null : null
+  const selectedVehicle = selectedVehicleId
+    ? (vehiclesById.get(selectedVehicleId) ?? null)
+    : null
+  const selectedMapStop = selectedStop
+    ? (stopsById.get(selectedStop) ?? null)
+    : null
 
-  const center = positionedStops[0] ? toLatLng(positionedStops[0].position) : null
+  const center = positionedStops[0]
+    ? toLatLng(positionedStops[0].position)
+    : null
 
   useEffect(() => {
     if (!map) {
@@ -138,11 +153,12 @@ export const RouteMap = ({
 
     removeRouteLine(map)
 
-    const lineCoordinates = routePath.length > 1
-      ? routePath
-      : positionedStops.length > 1
-        ? positionedStops.map((stop) => stop.position)
-        : []
+    const lineCoordinates =
+      routePath.length > 1
+        ? routePath
+        : positionedStops.length > 1
+          ? positionedStops.map((stop) => stop.position)
+          : []
 
     if (lineCoordinates.length > 1) {
       map.addSource(ROUTE_LINE_SOURCE_ID, {
@@ -152,9 +168,9 @@ export const RouteMap = ({
           properties: {},
           geometry: {
             type: 'LineString',
-            coordinates: lineCoordinates
-          }
-        }
+            coordinates: lineCoordinates,
+          },
+        },
       })
 
       map.addLayer({
@@ -163,13 +179,13 @@ export const RouteMap = ({
         source: ROUTE_LINE_SOURCE_ID,
         layout: {
           'line-cap': 'round',
-          'line-join': 'round'
+          'line-join': 'round',
         },
         paint: {
           'line-color': ROUTE_COLOR,
           'line-width': 4,
-          'line-opacity': 0.85
-        }
+          'line-opacity': 0.85,
+        },
       })
     }
 
@@ -178,14 +194,14 @@ export const RouteMap = ({
       const el = createMapMarkerElement({
         ariaLabel: t('components.routeMap.stopMarkerAriaLabel', {
           stopName: stop.name,
-          sequence: stop.sequence
+          sequence: stop.sequence,
         }),
         backgroundColor: isHighlighted ? HIGHLIGHTED_STOP_COLOR : ROUTE_COLOR,
         datasetLabel: stop.name,
         interactive: true,
         textContent: String(stop.sequence),
         title: stop.name,
-        type: 'stop'
+        type: 'stop',
       })
 
       const handleSelectStop = (event: MouseEvent | KeyboardEvent) => {
@@ -194,7 +210,9 @@ export const RouteMap = ({
         onSelectStop(stop.id)
       }
 
-      markerCleanupFns.push(addMapMarkerActivationListeners(el, handleSelectStop))
+      markerCleanupFns.push(
+        addMapMarkerActivationListeners(el, handleSelectStop),
+      )
 
       const marker = new mapLibre.Marker({ element: el })
         .setLngLat(stop.position)
@@ -207,13 +225,13 @@ export const RouteMap = ({
       const vehicleLabel = t('components.routeMap.vehicleMarkerAriaLabel', {
         plateNumb: vehicle.plateNumb,
         stopName: vehicle.stopName,
-        estimateLabel: vehicle.estimateLabel
+        estimateLabel: vehicle.estimateLabel,
       })
       const el = createMapMarkerElement({
         ariaLabel: vehicleLabel,
         interactive: true,
         textContent: '🚌',
-        type: 'vehicle'
+        type: 'vehicle',
       })
 
       const handleOpenVehiclePopup = (event: MouseEvent | KeyboardEvent) => {
@@ -224,11 +242,13 @@ export const RouteMap = ({
         map.flyTo({
           center: vehicle.position,
           zoom: 16,
-          duration: 800
+          duration: 800,
         })
       }
 
-      markerCleanupFns.push(addMapMarkerActivationListeners(el, handleOpenVehiclePopup))
+      markerCleanupFns.push(
+        addMapMarkerActivationListeners(el, handleOpenVehiclePopup),
+      )
 
       const marker = new mapLibre.Marker({ element: el })
         .setLngLat(vehicle.position)
@@ -245,13 +265,16 @@ export const RouteMap = ({
     ) {
       const bounds = positionedStops.reduce(
         (result, stop) => result.extend(stop.position),
-        new mapLibre.LngLatBounds(positionedStops[0].position, positionedStops[0].position)
+        new mapLibre.LngLatBounds(
+          positionedStops[0].position,
+          positionedStops[0].position,
+        ),
       )
 
       map.fitBounds(bounds, {
         padding: 48,
         maxZoom: 15,
-        duration: 800
+        duration: 800,
       })
       initialBoundsFittedRef.current = true
     }
@@ -259,7 +282,19 @@ export const RouteMap = ({
     return () => {
       markerCleanupFns.forEach((cleanup) => cleanup())
     }
-  }, [highlightedStopId, isMapReady, map, onSelectStop, onSelectVehicle, positionedStops, routePath, selectedStop, selectedVehicleId, t, vehicles])
+  }, [
+    highlightedStopId,
+    isMapReady,
+    map,
+    onSelectStop,
+    onSelectVehicle,
+    positionedStops,
+    routePath,
+    selectedStop,
+    selectedVehicleId,
+    t,
+    vehicles,
+  ])
 
   useEffect(() => {
     if (!map || !isMapReady) return
@@ -279,7 +314,7 @@ export const RouteMap = ({
       const popup = new mapLibre.Popup({
         closeButton: false,
         offset: 20,
-        closeOnClick: false
+        closeOnClick: false,
       })
         .setLngLat(selectedVehicle.position)
         .setDOMContent(container)
@@ -305,7 +340,7 @@ export const RouteMap = ({
     const popup = new mapLibre.Popup({
       closeButton: false,
       offset: 25,
-      closeOnClick: false
+      closeOnClick: false,
     })
       .setLngLat(marker.getLngLat())
       .setDOMContent(container)
@@ -325,13 +360,14 @@ export const RouteMap = ({
     if (!map) return
 
     if (selectedVehicleId) {
-      const selectedVehicleMarker = vehicleMarkerMap.current.get(selectedVehicleId)
+      const selectedVehicleMarker =
+        vehicleMarkerMap.current.get(selectedVehicleId)
       if (!selectedVehicleMarker) return
 
       map.flyTo({
         center: selectedVehicleMarker.getLngLat(),
         zoom: 16,
-        duration: 800
+        duration: 800,
       })
 
       return
@@ -345,7 +381,7 @@ export const RouteMap = ({
     map.flyTo({
       center: marker.getLngLat(),
       zoom: 16,
-      duration: 800
+      duration: 800,
     })
   }, [map, selectedStop, selectedVehicleId])
 
@@ -360,34 +396,34 @@ export const RouteMap = ({
       />
       {popupContainer && selectedVehicle
         ? createPortal(
-          <Stack gap="xs">
-            <Text>{selectedVehicle.plateNumb}</Text>
-            <Stack gap={4}>
-              <Text size="sm" c="dimmed">
-                {t('components.routeMap.vehiclePopup.recentStop')}
-              </Text>
-              <Text size="sm">{selectedVehicle.stopName}</Text>
-            </Stack>
-            <Stack gap={4}>
-              <Text size="sm" c="dimmed">
-                {t('components.routeMap.vehiclePopup.estimate')}
-              </Text>
-              <Text size="sm">{selectedVehicle.estimateLabel}</Text>
-            </Stack>
-          </Stack>,
-          popupContainer
-        )
+            <Stack gap="xs">
+              <Text>{selectedVehicle.plateNumb}</Text>
+              <Stack gap={4}>
+                <Text size="sm" c="dimmed">
+                  {t('components.routeMap.vehiclePopup.recentStop')}
+                </Text>
+                <Text size="sm">{selectedVehicle.stopName}</Text>
+              </Stack>
+              <Stack gap={4}>
+                <Text size="sm" c="dimmed">
+                  {t('components.routeMap.vehiclePopup.estimate')}
+                </Text>
+                <Text size="sm">{selectedVehicle.estimateLabel}</Text>
+              </Stack>
+            </Stack>,
+            popupContainer,
+          )
         : popupContainer && selectedMapStop
           ? createPortal(
-            <RoutePopupContent
-              isSm={isSm}
-              stopName={selectedMapStop.name}
-              estimatedArrivalLabel={selectedStopEstimatedArrivalLabel}
-              position={selectedMapStop.position}
-            />,
-            popupContainer
-          )
-        : null}
+              <RoutePopupContent
+                isSm={isSm}
+                stopName={selectedMapStop.name}
+                estimatedArrivalLabel={selectedStopEstimatedArrivalLabel}
+                position={selectedMapStop.position}
+              />,
+              popupContainer,
+            )
+          : null}
     </>
   )
 }

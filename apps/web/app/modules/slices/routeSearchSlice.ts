@@ -8,7 +8,7 @@ export interface RouteSearchState {
 
 export const initialRouteSearchState: RouteSearchState = {
   keyword: '',
-  selectedArea: null
+  selectedArea: null,
 }
 
 const routeSearchSlice = createSlice({
@@ -20,8 +20,8 @@ const routeSearchSlice = createSlice({
     },
     setSelectedArea: (state, action: PayloadAction<AreaType>) => {
       state.selectedArea = action.payload
-    }
-  }
+    },
+  },
 })
 
 export const { setKeyword, setSelectedArea } = routeSearchSlice.actions

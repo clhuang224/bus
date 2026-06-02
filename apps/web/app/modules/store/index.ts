@@ -9,10 +9,7 @@ import globalModalSlice from '../slices/globalModalSlice'
 import localeSlice from '../slices/localeSlice'
 import routeSearchSlice from '../slices/routeSearchSlice'
 import { applyAnalyticsPreference } from '../utils/analytics/applyAnalyticsPreference'
-import {
-  startStoreListeners,
-  storeListenerMiddlewares
-} from './listener'
+import { startStoreListeners, storeListenerMiddlewares } from './listener'
 import { getPreloadedState } from './preload'
 
 export const store = configureStore({
@@ -24,7 +21,7 @@ export const store = configureStore({
     cityGeo: cityGeoSlice.reducer,
     globalModal: globalModalSlice.reducer,
     locale: localeSlice.reducer,
-    routeSearch: routeSearchSlice.reducer
+    routeSearch: routeSearchSlice.reducer,
   },
   preloadedState: getPreloadedState(),
   middleware: (getDefaultMiddleware) =>
@@ -32,9 +29,11 @@ export const store = configureStore({
       serializableCheck: {
         warnAfter: 64,
         ignoredActions: [setGeoJSON.type],
-        ignoredPaths: ['cityGeo.geojson', busApi.reducerPath]
-      }
-    }).prepend(...storeListenerMiddlewares).concat(busApi.middleware)
+        ignoredPaths: ['cityGeo.geojson', busApi.reducerPath],
+      },
+    })
+      .prepend(...storeListenerMiddlewares)
+      .concat(busApi.middleware),
 })
 
 export type RootState = ReturnType<typeof store.getState>

@@ -6,7 +6,7 @@ import { Provider } from 'react-redux'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { BusRoute, BusSubRoute } from '~/modules/interfaces/BusRoute'
 import { AppLocaleType } from '~/modules/enums/AppLocaleType'
-import { CityNameType } from '~/modules/enums/CityNameType'
+import { CityNameType } from '@bus/shared'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import { createTestStore } from '~/test/createTestStore'
 import { useRouteRealtimeData } from './useRouteRealtimeData'
@@ -14,19 +14,21 @@ import { useRouteRealtimeData } from './useRouteRealtimeData'
 const {
   mockUseGetEstimatedArrivalByRouteQuery,
   mockUseGetRealtimeByFrequencyByRouteQuery,
-  mockUseGetRealtimeNearStopsByRouteQuery
+  mockUseGetRealtimeNearStopsByRouteQuery,
 } = vi.hoisted(() => ({
   mockUseGetEstimatedArrivalByRouteQuery: vi.fn(),
   mockUseGetRealtimeByFrequencyByRouteQuery: vi.fn(),
-  mockUseGetRealtimeNearStopsByRouteQuery: vi.fn()
+  mockUseGetRealtimeNearStopsByRouteQuery: vi.fn(),
 }))
 
 vi.mock('~/modules/apis/bus', () => ({
   busApi: {
     useGetEstimatedArrivalByRouteQuery: mockUseGetEstimatedArrivalByRouteQuery,
-    useGetRealtimeByFrequencyByRouteQuery: mockUseGetRealtimeByFrequencyByRouteQuery,
-    useGetRealtimeNearStopsByRouteQuery: mockUseGetRealtimeNearStopsByRouteQuery
-  }
+    useGetRealtimeByFrequencyByRouteQuery:
+      mockUseGetRealtimeByFrequencyByRouteQuery,
+    useGetRealtimeNearStopsByRouteQuery:
+      mockUseGetRealtimeNearStopsByRouteQuery,
+  },
 }))
 
 const busRoute: BusRoute<Date | null> = {
@@ -47,7 +49,7 @@ const busRoute: BusRoute<Date | null> = {
   City: CityNameType.TAIPEI,
   CityCode: 'TPE',
   UpdateTime: null,
-  VersionID: 0
+  VersionID: 0,
 }
 
 const subRoute = {
@@ -61,7 +63,7 @@ const subRoute = {
   HolidayFirstBusTime: null,
   HolidayLastBusTime: null,
   DepartureStopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
-  DestinationStopName: { 'zh-TW': '市政府', en: 'City Hall' }
+  DestinationStopName: { 'zh-TW': '市政府', en: 'City Hall' },
 } satisfies BusSubRoute<Date | null>
 
 interface RealtimeQueryOptions {
@@ -78,7 +80,7 @@ describe('useRouteRealtimeData', () => {
 
     mockUseGetRealtimeByFrequencyByRouteQuery.mockReturnValue({
       data: [],
-      error: null
+      error: null,
     })
   })
 
@@ -91,44 +93,55 @@ describe('useRouteRealtimeData', () => {
     const store = createTestStore({
       preloadedState: {
         locale: {
-          value: AppLocaleType.ZH_TW
-        }
-      }
+          value: AppLocaleType.ZH_TW,
+        },
+      },
     })
-    const wrapper = ({ children }: PropsWithChildren) => createElement(Provider as never, { store }, children)
+    const wrapper = ({ children }: PropsWithChildren) =>
+      createElement(Provider as never, { store }, children)
 
-    let estimatedError: { status: number, data: Record<string, never> } | null = null
-    let realtimeError: { status: number, data: Record<string, never> } | null = null
+    let estimatedError: { status: number; data: Record<string, never> } | null =
+      null
+    let realtimeError: { status: number; data: Record<string, never> } | null =
+      null
 
-    mockUseGetEstimatedArrivalByRouteQuery.mockImplementation((_args, options: RealtimeQueryOptions) => ({
-      data: [],
-      error: estimatedError,
-      isError: options.skip ? false : estimatedError != null,
-      isLoading: false
-    }))
+    mockUseGetEstimatedArrivalByRouteQuery.mockImplementation(
+      (_args, options: RealtimeQueryOptions) => ({
+        data: [],
+        error: estimatedError,
+        isError: options.skip ? false : estimatedError != null,
+        isLoading: false,
+      }),
+    )
     mockUseGetRealtimeByFrequencyByRouteQuery.mockImplementation(() => ({
       data: [],
       error: null,
       isError: false,
-      isLoading: false
+      isLoading: false,
     }))
-    mockUseGetRealtimeNearStopsByRouteQuery.mockImplementation((_args, options: RealtimeQueryOptions) => ({
-      data: [],
-      error: realtimeError,
-      isError: options.skip ? false : realtimeError != null,
-      isLoading: false
-    }))
+    mockUseGetRealtimeNearStopsByRouteQuery.mockImplementation(
+      (_args, options: RealtimeQueryOptions) => ({
+        data: [],
+        error: realtimeError,
+        isError: options.skip ? false : realtimeError != null,
+        isLoading: false,
+      }),
+    )
 
-    const { rerender } = renderHook(() => useRouteRealtimeData({
-      subRoute,
-      busRoute,
-      city: CityNameType.TAIPEI,
-      id: 'route-1'
-    }), { wrapper })
+    const { rerender } = renderHook(
+      () =>
+        useRouteRealtimeData({
+          subRoute,
+          busRoute,
+          city: CityNameType.TAIPEI,
+          id: 'route-1',
+        }),
+      { wrapper },
+    )
 
     expect(mockUseGetEstimatedArrivalByRouteQuery).toHaveBeenLastCalledWith(
       { city: CityNameType.TAIPEI, routeUID: 'route-1' },
-      expect.objectContaining({ skip: true })
+      expect.objectContaining({ skip: true }),
     )
 
     act(() => {
@@ -137,7 +150,7 @@ describe('useRouteRealtimeData', () => {
 
     expect(mockUseGetEstimatedArrivalByRouteQuery).toHaveBeenLastCalledWith(
       { city: CityNameType.TAIPEI, routeUID: 'route-1' },
-      expect.objectContaining({ skip: false })
+      expect.objectContaining({ skip: false }),
     )
 
     estimatedError = { status: 429, data: {} }
@@ -149,7 +162,7 @@ describe('useRouteRealtimeData', () => {
 
     expect(mockUseGetEstimatedArrivalByRouteQuery).toHaveBeenLastCalledWith(
       { city: CityNameType.TAIPEI, routeUID: 'route-1' },
-      expect.objectContaining({ skip: true })
+      expect.objectContaining({ skip: true }),
     )
 
     act(() => {
@@ -158,7 +171,7 @@ describe('useRouteRealtimeData', () => {
 
     expect(mockUseGetEstimatedArrivalByRouteQuery).toHaveBeenLastCalledWith(
       { city: CityNameType.TAIPEI, routeUID: 'route-1' },
-      expect.objectContaining({ skip: false })
+      expect.objectContaining({ skip: false }),
     )
 
     estimatedError = null
@@ -170,7 +183,7 @@ describe('useRouteRealtimeData', () => {
 
     expect(mockUseGetEstimatedArrivalByRouteQuery).toHaveBeenLastCalledWith(
       { city: CityNameType.TAIPEI, routeUID: 'route-1' },
-      expect.objectContaining({ skip: false })
+      expect.objectContaining({ skip: false }),
     )
 
     estimatedError = { status: 429, data: {} }
@@ -182,7 +195,7 @@ describe('useRouteRealtimeData', () => {
 
     expect(mockUseGetEstimatedArrivalByRouteQuery).toHaveBeenLastCalledWith(
       { city: CityNameType.TAIPEI, routeUID: 'route-1' },
-      expect.objectContaining({ skip: true })
+      expect.objectContaining({ skip: true }),
     )
   })
 })

@@ -1,4 +1,4 @@
-import type { CityNameType } from '../enums/CityNameType'
+import type { CityNameType } from '@bus/shared'
 import type { DirectionType } from '../enums/DirectionType'
 import type { LocalizedText, TdxLocalizedText } from '../types/LocalizedText'
 import type { LngLat } from '../types/CoordsType'
@@ -17,7 +17,10 @@ export interface TdxRouteShape {
   VersionID: number
 }
 
-export interface RouteShape extends Omit<TdxRouteShape, 'RouteName' | 'SubRouteName' | 'Geometry' | 'EncodedPolyline'> {
+export interface RouteShape extends Omit<
+  TdxRouteShape,
+  'RouteName' | 'SubRouteName' | 'Geometry' | 'EncodedPolyline'
+> {
   City: CityNameType
   RouteName: LocalizedText
   SubRouteName: LocalizedText | null

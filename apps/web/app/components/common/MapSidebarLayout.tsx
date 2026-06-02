@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import {
   APP_PAGE_PADDING,
   DRAWER_TOP,
-  MAP_SIDEBAR_WIDTH
+  MAP_SIDEBAR_WIDTH,
 } from '~/modules/consts/layout'
 
 interface PropType {
@@ -19,7 +19,7 @@ export const MapSidebarLayout = ({
   isSm,
   isSidebarOpened,
   onCloseSidebar,
-  panel
+  panel,
 }: PropType) => (
   <Flex h="100%" pos="relative">
     {!isSm && (
@@ -30,7 +30,7 @@ export const MapSidebarLayout = ({
         bg="white"
         style={{
           flex: `0 0 ${MAP_SIDEBAR_WIDTH}px`,
-          borderRight: '1px solid var(--mantine-color-gray-3)'
+          borderRight: '1px solid var(--mantine-color-gray-3)',
         }}
       >
         {panel}
@@ -52,15 +52,15 @@ export const MapSidebarLayout = ({
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
-            paddingBottom: 'env(safe-area-inset-bottom)'
+            paddingBottom: 'env(safe-area-inset-bottom)',
           },
           body: {
             flex: 1,
             minHeight: 0,
             overflow: 'hidden',
             display: 'flex',
-            flexDirection: 'column'
-          }
+            flexDirection: 'column',
+          },
         }}
       >
         {panel}

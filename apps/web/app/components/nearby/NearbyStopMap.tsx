@@ -29,11 +29,13 @@ export const NearbyStopMap = ({
   selectedStop,
   selectedStopPopupContent,
   isSm = false,
-  onSelectStop
+  onSelectStop,
 }: PropType) => {
   const { t } = useTranslation()
   const [map, setMap] = useState<mapLibre.Map | null>(null)
-  const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(null)
+  const [popupContainer, setPopupContainer] = useState<HTMLDivElement | null>(
+    null,
+  )
   const markerMap = useRef<Map<string, Marker>>(new Map<string, Marker>())
   const popupRef = useRef<Popup | null>(null)
 
@@ -44,16 +46,18 @@ export const NearbyStopMap = ({
     markerMap.current.forEach((marker) => marker.remove())
     markerMap.current.clear()
 
-    markers.forEach(data => {
+    markers.forEach((data) => {
       const el = createMapMarkerElement({
-        ariaLabel: t('components.nearbyStopMap.stopMarkerAriaLabel', { stopName: data.label }),
+        ariaLabel: t('components.nearbyStopMap.stopMarkerAriaLabel', {
+          stopName: data.label,
+        }),
         backgroundColor: 'var(--mantine-primary-color-filled)',
         datasetLabel: data.label,
         fontSize: '16px',
         fontWeight: 'bold',
         interactive: true,
         textContent: '🚏',
-        type: 'stop'
+        type: 'stop',
       })
 
       const handleSelectStop = (event: MouseEvent | KeyboardEvent) => {
@@ -62,7 +66,9 @@ export const NearbyStopMap = ({
         onSelectStop(data.id)
       }
 
-      markerCleanupFns.push(addMapMarkerActivationListeners(el, handleSelectStop))
+      markerCleanupFns.push(
+        addMapMarkerActivationListeners(el, handleSelectStop),
+      )
 
       const marker = new Marker({ element: el })
         .setLngLat(data.position)
@@ -97,7 +103,7 @@ export const NearbyStopMap = ({
     const popup = new Popup({
       closeButton: false,
       offset: 25,
-      closeOnClick: false
+      closeOnClick: false,
     }).setLngLat(marker.getLngLat())
 
     if (selectedStopPopupContent) {
@@ -129,7 +135,7 @@ export const NearbyStopMap = ({
     map.flyTo({
       center: marker.getLngLat(),
       zoom: 16,
-      duration: 800
+      duration: 800,
     })
   }, [map, markers, selectedStop])
 
@@ -144,16 +150,16 @@ export const NearbyStopMap = ({
       />
       {popupContainer && selectedStopPopupContent
         ? createPortal(
-          <div
-            style={{
-              maxHeight: isSm ? '50dvh' : '40dvh',
-              overflowY: 'auto'
-            }}
-          >
-            {selectedStopPopupContent}
-          </div>,
-          popupContainer
-        )
+            <div
+              style={{
+                maxHeight: isSm ? '50dvh' : '40dvh',
+                overflowY: 'auto',
+              }}
+            >
+              {selectedStopPopupContent}
+            </div>,
+            popupContainer,
+          )
         : null}
     </>
   )

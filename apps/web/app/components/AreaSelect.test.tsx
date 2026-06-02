@@ -11,11 +11,11 @@ vi.mock('@mantine/core', () => ({
     'aria-label': ariaLabel,
     value,
     data,
-    onChange
+    onChange,
   }: {
     'aria-label'?: string
     value: string
-    data: Array<{ label: string, value: string }>
+    data: Array<{ label: string; value: string }>
     onChange: (value: string | null) => void
   }) => (
     <select
@@ -29,23 +29,21 @@ vi.mock('@mantine/core', () => ({
         </option>
       ))}
     </select>
-  )
+  ),
 }))
 
 describe('AreaSelect', () => {
   it('calls onChange with the selected area', () => {
     const handleChange = vi.fn()
 
-    render(
-      <AreaSelect
-        value={AreaType.TAIPEI}
-        onChange={handleChange}
-      />
-    )
+    render(<AreaSelect value={AreaType.TAIPEI} onChange={handleChange} />)
 
-    fireEvent.change(screen.getByLabelText(i18n.t('components.areaSelect.ariaLabel')), {
-      target: { value: AreaType.TAICHUNG }
-    })
+    fireEvent.change(
+      screen.getByLabelText(i18n.t('components.areaSelect.ariaLabel')),
+      {
+        target: { value: AreaType.TAICHUNG },
+      },
+    )
 
     expect(handleChange).toHaveBeenCalledWith(AreaType.TAICHUNG)
   })
@@ -53,25 +51,32 @@ describe('AreaSelect', () => {
   it('syncs the displayed value when the controlled prop changes', () => {
     const handleChange = vi.fn()
     const { rerender, container } = render(
-      <AreaSelect
-        value={AreaType.TAIPEI}
-        onChange={handleChange}
-      />
+      <AreaSelect value={AreaType.TAIPEI} onChange={handleChange} />,
     )
 
-    const areaSelect = () => within(container).getByLabelText(i18n.t('components.areaSelect.ariaLabel'))
+    const areaSelect = () =>
+      within(container).getByLabelText(
+        i18n.t('components.areaSelect.ariaLabel'),
+      )
 
     expect(areaSelect()).toHaveValue(AreaType.TAIPEI)
-    expect((within(areaSelect()).getByRole('option', { name: i18n.t('common.area.Taipei') }) as HTMLOptionElement).selected).toBe(true)
+    expect(
+      (
+        within(areaSelect()).getByRole('option', {
+          name: i18n.t('common.area.Taipei'),
+        }) as HTMLOptionElement
+      ).selected,
+    ).toBe(true)
 
-    rerender(
-      <AreaSelect
-        value={AreaType.TAICHUNG}
-        onChange={handleChange}
-      />
-    )
+    rerender(<AreaSelect value={AreaType.TAICHUNG} onChange={handleChange} />)
 
     expect(areaSelect()).toHaveValue(AreaType.TAICHUNG)
-    expect((within(areaSelect()).getByRole('option', { name: i18n.t('common.area.Taichung') }) as HTMLOptionElement).selected).toBe(true)
+    expect(
+      (
+        within(areaSelect()).getByRole('option', {
+          name: i18n.t('common.area.Taichung'),
+        }) as HTMLOptionElement
+      ).selected,
+    ).toBe(true)
   })
 })

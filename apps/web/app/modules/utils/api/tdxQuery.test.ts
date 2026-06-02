@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { CityNameType } from '../../enums/CityNameType'
+import { CityNameType } from '@bus/shared'
 import {
   buildNearbyStopOfRouteQuery,
   buildNearbyStopQuery,
   buildStopsByCityAndIdsQuery,
-  getNearbyStopBounds
+  getNearbyStopBounds,
 } from './tdxQuery'
 
 describe('tdxQuery', () => {
@@ -13,12 +13,15 @@ describe('tdxQuery', () => {
       latitudeMin: expect.any(Number),
       latitudeMax: expect.any(Number),
       longitudeMin: expect.any(Number),
-      longitudeMax: expect.any(Number)
+      longitudeMax: expect.any(Number),
     })
   })
 
   it('builds a nearby stop query with select, filter, and format parameters', () => {
-    const query = buildNearbyStopQuery(CityNameType.NEW_TAIPEI, [25.033, 121.5654])
+    const query = buildNearbyStopQuery(
+      CityNameType.NEW_TAIPEI,
+      [25.033, 121.5654],
+    )
 
     expect(query).toContain('/Stop/City/NewTaipei?')
     expect(query).toContain('%24select=')
@@ -28,7 +31,10 @@ describe('tdxQuery', () => {
   })
 
   it('builds a stop-of-route query filtered by nearby stop uids', () => {
-    const query = buildNearbyStopOfRouteQuery(CityNameType.TAIPEI, ['stop-1', 'stop-2'])
+    const query = buildNearbyStopOfRouteQuery(CityNameType.TAIPEI, [
+      'stop-1',
+      'stop-2',
+    ])
 
     expect(query).toContain('/StopOfRoute/City/Taipei?')
     expect(query).toContain('Stops%2Fany')
@@ -38,7 +44,10 @@ describe('tdxQuery', () => {
   })
 
   it('builds a stop query that filters by stop uid or stop id', () => {
-    const query = buildStopsByCityAndIdsQuery(CityNameType.TAIPEI, ['stop-1', "stop'2"])
+    const query = buildStopsByCityAndIdsQuery(CityNameType.TAIPEI, [
+      'stop-1',
+      "stop'2",
+    ])
 
     expect(query).toContain('/Stop/City/Taipei?')
     expect(query).toContain('%24filter=')

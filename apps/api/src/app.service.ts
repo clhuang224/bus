@@ -1,0 +1,12 @@
+import { Injectable } from '@nestjs/common'
+import { HealthResponseDto } from './dto/health-response.dto.js'
+
+@Injectable()
+export class AppService {
+  getHealth(): HealthResponseDto {
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+    }
+  }
+}

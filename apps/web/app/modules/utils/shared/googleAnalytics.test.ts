@@ -6,7 +6,7 @@ import {
   resetGoogleAnalyticsForTest,
   setGoogleAnalyticsEnabled,
   trackGoogleAnalytics,
-  trackGoogleAnalyticsEvent
+  trackGoogleAnalyticsEvent,
 } from './googleAnalytics'
 
 const GA_ID = 'G-TEST123456'
@@ -48,37 +48,49 @@ describe('googleAnalytics', () => {
   it('tracks page view with path and title', () => {
     trackGoogleAnalytics('/routes?city=Taipei#detail')
 
-    expect(document.getElementById('google-analytics-gtag-script')).not.toBeNull()
+    expect(
+      document.getElementById('google-analytics-gtag-script'),
+    ).not.toBeNull()
     expect(window.dataLayer?.length).toBe(4)
 
-    const pageViewEvent = window.dataLayer?.[3] as [string, string, Record<string, unknown>]
+    const pageViewEvent = window.dataLayer?.[3] as [
+      string,
+      string,
+      Record<string, unknown>,
+    ]
 
     expect(pageViewEvent[0]).toBe('event')
     expect(pageViewEvent[1]).toBe('page_view')
     expect(pageViewEvent[2]).toMatchObject({
       page_title: 'Test Page',
       page_path: '/routes?city=Taipei#detail',
-      send_to: GA_ID
+      send_to: GA_ID,
     })
   })
 
   it('tracks custom events with parameters', () => {
     trackGoogleAnalyticsEvent('select_route', {
       route_uid: 'route-1',
-      route_name: '藍1'
+      route_name: '藍1',
     })
 
-    expect(document.getElementById('google-analytics-gtag-script')).not.toBeNull()
+    expect(
+      document.getElementById('google-analytics-gtag-script'),
+    ).not.toBeNull()
     expect(window.dataLayer?.length).toBe(4)
 
-    const customEvent = window.dataLayer?.[3] as [string, string, Record<string, unknown>]
+    const customEvent = window.dataLayer?.[3] as [
+      string,
+      string,
+      Record<string, unknown>,
+    ]
 
     expect(customEvent[0]).toBe('event')
     expect(customEvent[1]).toBe('select_route')
     expect(customEvent[2]).toMatchObject({
       route_uid: 'route-1',
       route_name: '藍1',
-      send_to: GA_ID
+      send_to: GA_ID,
     })
   })
 
@@ -91,7 +103,7 @@ describe('googleAnalytics', () => {
 
     trackGoogleAnalytics('/routes')
     trackGoogleAnalyticsEvent('select_route', {
-      route_uid: 'route-1'
+      route_uid: 'route-1',
     })
 
     expect(document.getElementById('google-analytics-gtag-script')).toBeNull()
@@ -107,7 +119,7 @@ describe('googleAnalytics', () => {
 
     trackGoogleAnalytics('/routes')
     trackGoogleAnalyticsEvent('select_route', {
-      route_uid: 'route-1'
+      route_uid: 'route-1',
     })
 
     expect(document.getElementById('google-analytics-gtag-script')).toBeNull()
@@ -125,8 +137,8 @@ describe('googleAnalytics', () => {
       'consent',
       'update',
       {
-        analytics_storage: 'denied'
-      }
+        analytics_storage: 'denied',
+      },
     ])
   })
 

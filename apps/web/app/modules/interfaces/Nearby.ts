@@ -1,4 +1,4 @@
-import type { CityNameType } from '../enums/CityNameType'
+import type { CityNameType } from '@bus/shared'
 import type { LngLat } from '../types/CoordsType'
 import type { LocalizedText } from '../types/LocalizedText'
 import type { Stop } from './Stop'

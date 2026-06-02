@@ -1,17 +1,17 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import {
   getTdxRateLimitModal,
-  getTdxSystemErrorModal
+  getTdxSystemErrorModal,
 } from '../apis/errors/busError'
 import i18n from '../i18n'
 import globalModalSlice, {
   closeGlobalModal,
-  openGlobalModal
+  openGlobalModal,
 } from './globalModalSlice'
 import { DEFAULT_APP_LOCALE } from '../consts/i18n'
 
 describe('globalModalSlice', () => {
-  afterEach(async() => {
+  afterEach(async () => {
     await i18n.changeLanguage(DEFAULT_APP_LOCALE)
   })
 
@@ -19,14 +19,14 @@ describe('globalModalSlice', () => {
     const tdxRateLimitModal = getTdxRateLimitModal()
     const state = globalModalSlice.reducer(
       undefined,
-      openGlobalModal(tdxRateLimitModal)
+      openGlobalModal(tdxRateLimitModal),
     )
 
     expect(state).toMatchObject({
       opened: true,
       ...tdxRateLimitModal,
       cancelText: null,
-      confirmAction: 'refresh'
+      confirmAction: 'refresh',
     })
   })
 
@@ -34,10 +34,13 @@ describe('globalModalSlice', () => {
     const tdxSystemErrorModal = getTdxSystemErrorModal()
     const openedState = globalModalSlice.reducer(
       undefined,
-      openGlobalModal(tdxSystemErrorModal)
+      openGlobalModal(tdxSystemErrorModal),
     )
 
-    const closedState = globalModalSlice.reducer(openedState, closeGlobalModal())
+    const closedState = globalModalSlice.reducer(
+      openedState,
+      closeGlobalModal(),
+    )
 
     expect(closedState).toEqual({
       opened: false,
@@ -46,18 +49,21 @@ describe('globalModalSlice', () => {
       variant: 'alert',
       confirmText: null,
       cancelText: null,
-      confirmAction: 'close'
+      confirmAction: 'close',
     })
   })
 
-  it('keeps default modal button labels out of reducer state', async() => {
+  it('keeps default modal button labels out of reducer state', async () => {
     await i18n.changeLanguage('en')
 
-    const state = globalModalSlice.reducer(undefined, openGlobalModal({
-      title: 'title',
-      message: 'message',
-      variant: 'alert'
-    }))
+    const state = globalModalSlice.reducer(
+      undefined,
+      openGlobalModal({
+        title: 'title',
+        message: 'message',
+        variant: 'alert',
+      }),
+    )
 
     expect(state.confirmText).toBeNull()
     expect(state.cancelText).toBeNull()

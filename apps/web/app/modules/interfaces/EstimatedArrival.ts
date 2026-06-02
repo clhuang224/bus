@@ -1,4 +1,4 @@
-import type { CityNameType } from '../enums/CityNameType'
+import type { CityNameType } from '@bus/shared'
 import type { DirectionType } from '../enums/DirectionType'
 import type { MessageType } from '../enums/MessageType'
 import type { StopStatusType } from '../enums/StopStatusType'
@@ -25,7 +25,10 @@ export interface TdxEstimatedArrival<L = TdxLocalizedText> {
   UpdateTime: string
 }
 
-export interface EstimatedArrival extends Omit<TdxEstimatedArrival<LocalizedText>, 'StopName' | 'RouteName' | 'SubRouteName'> {
+export interface EstimatedArrival extends Omit<
+  TdxEstimatedArrival<LocalizedText>,
+  'StopName' | 'RouteName' | 'SubRouteName'
+> {
   City: CityNameType
   StopName: LocalizedText
   RouteName: LocalizedText

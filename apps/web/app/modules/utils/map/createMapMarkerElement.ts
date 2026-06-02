@@ -22,7 +22,7 @@ const markerStyleMap: Record<MapMarkerType, Partial<CSSStyleDeclaration>> = {
     border: '2px solid #ffffff',
     color: '#ffffff',
     fontSize: '12px',
-    fontWeight: '700'
+    fontWeight: '700',
   },
   vehicle: {
     width: '24px',
@@ -32,7 +32,7 @@ const markerStyleMap: Record<MapMarkerType, Partial<CSSStyleDeclaration>> = {
     border: '2px solid #ffffff',
     color: '#ffffff',
     fontSize: '12px',
-    fontWeight: '700'
+    fontWeight: '700',
   },
   user: {
     width: '20px',
@@ -40,8 +40,8 @@ const markerStyleMap: Record<MapMarkerType, Partial<CSSStyleDeclaration>> = {
     borderRadius: '50%',
     backgroundColor: '#4A90E2',
     border: '3px solid white',
-    zIndex: '1'
-  }
+    zIndex: '1',
+  },
 }
 
 export const createMapMarkerElement = ({
@@ -54,7 +54,7 @@ export const createMapMarkerElement = ({
   interactive = false,
   textContent,
   title,
-  type
+  type,
 }: CreateMapMarkerElementOptions) => {
   const element = document.createElement('div')
 
@@ -67,7 +67,7 @@ export const createMapMarkerElement = ({
     boxShadow,
     cursor: interactive ? 'pointer' : 'default',
     fontSize: fontSize ?? markerStyleMap[type].fontSize,
-    fontWeight: fontWeight ?? markerStyleMap[type].fontWeight
+    fontWeight: fontWeight ?? markerStyleMap[type].fontWeight,
   } satisfies Partial<CSSStyleDeclaration>)
 
   if (datasetLabel) {

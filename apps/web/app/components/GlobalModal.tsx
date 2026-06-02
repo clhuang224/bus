@@ -3,13 +3,13 @@ import BaseModal from './common/BaseModal'
 import { busApi } from '~/modules/apis/bus'
 import {
   closeGlobalModal,
-  globalModalSelectors
+  globalModalSelectors,
 } from '~/modules/slices/globalModalSlice'
 import type { AppDispatch } from '~/modules/store'
 
 const handleGlobalModalConfirm = (
   dispatch: AppDispatch,
-  confirmAction: 'close' | 'refresh'
+  confirmAction: 'close' | 'refresh',
 ) => {
   dispatch(closeGlobalModal())
 
@@ -28,7 +28,7 @@ export const GlobalModal = () => {
     variant,
     confirmText,
     cancelText,
-    confirmAction
+    confirmAction,
   } = globalModal
 
   return (

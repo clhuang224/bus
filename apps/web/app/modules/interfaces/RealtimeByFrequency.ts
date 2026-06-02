@@ -1,5 +1,5 @@
 import type { BusStatusType } from '../enums/BusStatusType'
-import type { CityNameType } from '../enums/CityNameType'
+import type { CityNameType } from '@bus/shared'
 import type { DirectionType } from '../enums/DirectionType'
 import type { DutyStatusType } from '../enums/DutyStatusType'
 import type { MessageType } from '../enums/MessageType'
@@ -36,8 +36,8 @@ export interface TdxRealtimeByFrequency<L = TdxLocalizedText, D = string> {
 }
 
 export interface RealtimeByFrequency<D = string> extends Omit<
-TdxRealtimeByFrequency<LocalizedText, D>,
-'RouteName' | 'SubRouteName' | 'BusPosition'
+  TdxRealtimeByFrequency<LocalizedText, D>,
+  'RouteName' | 'SubRouteName' | 'BusPosition'
 > {
   City: CityNameType
   RouteName: LocalizedText

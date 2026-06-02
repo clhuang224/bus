@@ -5,11 +5,14 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { getFavoriteMessages } from '~/modules/consts/pageMessages'
 import { AppLocaleType } from '~/modules/enums/AppLocaleType'
 import { DirectionType } from '~/modules/enums/DirectionType'
-import { CityNameType } from '~/modules/enums/CityNameType'
+import { CityNameType } from '@bus/shared'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import i18n from '~/modules/i18n'
 import favoriteSlice from '~/modules/slices/favoriteSlice'
-import { FAVORITE_ROUTE_STOPS_STORAGE_KEY, loadFavoriteRouteStopsFromStorage } from '~/modules/utils/favorite/favoriteRouteStopStorage'
+import {
+  FAVORITE_ROUTE_STOPS_STORAGE_KEY,
+  loadFavoriteRouteStopsFromStorage,
+} from '~/modules/utils/favorite/favoriteRouteStopStorage'
 import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
 import Favorite from './Favorite'
@@ -33,8 +36,8 @@ const favoriteRouteStops: FavoriteRouteStop[] = [
     stopName: { 'zh-TW': '市政府', en: 'City Hall' },
     stopSequence: 1,
     departure: { 'zh-TW': '市政府', en: 'City Hall' },
-    destination: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' }
-  }
+    destination: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+  },
 ]
 
 const unsortedFavoriteRouteStops: FavoriteRouteStop[] = [
@@ -53,7 +56,7 @@ const unsortedFavoriteRouteStops: FavoriteRouteStop[] = [
     stopName: { 'zh-TW': '忠孝敦化', en: 'Zhongxiao Dunhua' },
     stopSequence: 2,
     departure: { 'zh-TW': '忠孝敦化', en: 'Zhongxiao Dunhua' },
-    destination: { 'zh-TW': '市府轉運站', en: 'City Hall Bus Station' }
+    destination: { 'zh-TW': '市府轉運站', en: 'City Hall Bus Station' },
   },
   {
     favoriteId: 'route-1-subroute-2-0-station-3',
@@ -70,7 +73,7 @@ const unsortedFavoriteRouteStops: FavoriteRouteStop[] = [
     stopName: { 'zh-TW': '國父紀念館', en: 'Sun Yat-Sen Memorial Hall' },
     stopSequence: 2,
     departure: { 'zh-TW': '市政府', en: 'City Hall' },
-    destination: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' }
+    destination: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
   },
   {
     favoriteId: 'route-1-subroute-1-0-station-1',
@@ -87,55 +90,64 @@ const unsortedFavoriteRouteStops: FavoriteRouteStop[] = [
     stopName: { 'zh-TW': '市政府', en: 'City Hall' },
     stopSequence: 1,
     departure: { 'zh-TW': '市政府', en: 'City Hall' },
-    destination: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' }
-  }
+    destination: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+  },
 ]
 
 function renderFavoritePage(
   routeStops: FavoriteRouteStop[] = favoriteRouteStops,
-  locale: AppLocaleType = AppLocaleType.ZH_TW
+  locale: AppLocaleType = AppLocaleType.ZH_TW,
 ) {
-  localStorage.setItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY, JSON.stringify(routeStops))
+  localStorage.setItem(
+    FAVORITE_ROUTE_STOPS_STORAGE_KEY,
+    JSON.stringify(routeStops),
+  )
 
   const store = createTestStore({
     reducer: {
-      favorite: favoriteSlice.reducer
+      favorite: favoriteSlice.reducer,
     },
     preloadedState: {
       favorite: {
-        routeStops
+        routeStops,
       },
       locale: {
-        value: locale
-      }
-    }
+        value: locale,
+      },
+    },
   })
 
   return renderWithProvidersAndRouter(<Favorite />, {
-    store
+    store,
   })
 }
 
-function renderFavoritePageFromLocalStorage(storedRouteStops: unknown, locale: AppLocaleType = AppLocaleType.ZH_TW) {
-  localStorage.setItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY, JSON.stringify(storedRouteStops))
+function renderFavoritePageFromLocalStorage(
+  storedRouteStops: unknown,
+  locale: AppLocaleType = AppLocaleType.ZH_TW,
+) {
+  localStorage.setItem(
+    FAVORITE_ROUTE_STOPS_STORAGE_KEY,
+    JSON.stringify(storedRouteStops),
+  )
   const loadedRouteStops = loadFavoriteRouteStopsFromStorage()
 
   const store = createTestStore({
     reducer: {
-      favorite: favoriteSlice.reducer
+      favorite: favoriteSlice.reducer,
     },
     preloadedState: {
       favorite: {
-        routeStops: loadedRouteStops
+        routeStops: loadedRouteStops,
       },
       locale: {
-        value: locale
-      }
-    }
+        value: locale,
+      },
+    },
   })
 
   return renderWithProvidersAndRouter(<Favorite />, {
-    store
+    store,
   })
 }
 
@@ -147,7 +159,11 @@ describe('Favorite', () => {
   it('shows the empty state when there are no favorite route stops', () => {
     renderFavoritePage([])
 
-    expect(screen.getByText(getFavoriteMessages(i18n.t).emptyFavoriteRouteStops.title)).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        getFavoriteMessages(i18n.t).emptyFavoriteRouteStops.title,
+      ),
+    ).toBeInTheDocument()
   })
 
   it('renders favorite route stops and links back to the route page', () => {
@@ -155,7 +171,10 @@ describe('Favorite', () => {
 
     expect(screen.getByText(/藍1/)).toBeInTheDocument()
     expect(screen.getByText('1. 市政府')).toBeInTheDocument()
-    expect(screen.getByRole('link')).toHaveAttribute('href', '/routes/Taipei/route-1')
+    expect(screen.getByRole('link')).toHaveAttribute(
+      'href',
+      '/routes/Taipei/route-1',
+    )
   })
 
   it('renders localized favorite route text in English mode', () => {
@@ -163,33 +182,42 @@ describe('Favorite', () => {
 
     expect(screen.getByText(/Blue 1/)).toBeInTheDocument()
     expect(screen.getByText('1. City Hall')).toBeInTheDocument()
-    expect(screen.getByText(/City Hall.*MRT Kunyang Station/)).toBeInTheDocument()
+    expect(
+      screen.getByText(/City Hall.*MRT Kunyang Station/),
+    ).toBeInTheDocument()
   })
 
   it('renders available terminal text when only one terminal value is present', () => {
-    renderFavoritePage([{
-      ...favoriteRouteStops[0],
-      departure: { 'zh-TW': '市政府', en: 'City Hall' },
-      destination: { 'zh-TW': '', en: '' }
-    }])
+    renderFavoritePage([
+      {
+        ...favoriteRouteStops[0],
+        departure: { 'zh-TW': '市政府', en: 'City Hall' },
+        destination: { 'zh-TW': '', en: '' },
+      },
+    ])
 
     expect(screen.getByText(favoriteTerminalOriginLabel)).toBeInTheDocument()
     expect(
-      screen.queryByText(`${i18n.t('components.favoriteRouteStopCard.terminalLabel')}: 市政府`)
+      screen.queryByText(
+        `${i18n.t('components.favoriteRouteStopCard.terminalLabel')}: 市政府`,
+      ),
     ).not.toBeInTheDocument()
   })
 
   it('sorts favorite route stops by route name and stop sequence', () => {
     renderFavoritePage(unsortedFavoriteRouteStops)
 
-    const stopNames = screen.getAllByText((_, element) => (
-      element?.tagName === 'P' && element.textContent != null && /^\d+\.\s/.test(element.textContent)
-    ))
+    const stopNames = screen.getAllByText(
+      (_, element) =>
+        element?.tagName === 'P' &&
+        element.textContent != null &&
+        /^\d+\.\s/.test(element.textContent),
+    )
 
     expect(stopNames.map((element) => element.textContent)).toEqual([
       '1. 市政府',
       '2. 國父紀念館',
-      '2. 忠孝敦化'
+      '2. 忠孝敦化',
     ])
   })
 
@@ -197,10 +225,16 @@ describe('Favorite', () => {
     renderFavoritePage()
 
     fireEvent.click(
-      screen.getByRole('button', { name: i18n.t('components.favoriteRouteStopCard.removeAriaLabel') })
+      screen.getByRole('button', {
+        name: i18n.t('components.favoriteRouteStopCard.removeAriaLabel'),
+      }),
     )
 
-    expect(screen.getByText(getFavoriteMessages(i18n.t).emptyFavoriteRouteStops.title)).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        getFavoriteMessages(i18n.t).emptyFavoriteRouteStops.title,
+      ),
+    ).toBeInTheDocument()
   })
 
   it('ignores malformed favorite route stops from localStorage', () => {
@@ -211,11 +245,15 @@ describe('Favorite', () => {
         subRouteName: { 'zh-TW': '往捷運昆陽站', en: 'To MRT Kunyang Station' },
         stopName: { 'zh-TW': '市政府', en: 'City Hall' },
         departure: { 'zh-TW': '市政府', en: 'City Hall' },
-        destination: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' }
-      }
+        destination: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+      },
     ])
 
-    expect(screen.getByText(getFavoriteMessages(i18n.t).emptyFavoriteRouteStops.title)).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        getFavoriteMessages(i18n.t).emptyFavoriteRouteStops.title,
+      ),
+    ).toBeInTheDocument()
   })
 
   it('loads legacy favorite route stops that still use zh_TW localized text keys', () => {
@@ -235,8 +273,8 @@ describe('Favorite', () => {
         stopName: { zh_TW: '市政府', en: 'City Hall' },
         stopSequence: 1,
         departure: { zh_TW: '市政府', en: 'City Hall' },
-        destination: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' }
-      }
+        destination: { zh_TW: '捷運昆陽站', en: 'MRT Kunyang Station' },
+      },
     ])
 
     expect(screen.getByText(/藍1/)).toBeInTheDocument()
@@ -250,23 +288,27 @@ describe('Favorite', () => {
 
     const store = createTestStore({
       reducer: {
-        favorite: favoriteSlice.reducer
+        favorite: favoriteSlice.reducer,
       },
       preloadedState: {
         favorite: {
-          routeStops: loadedRouteStops
+          routeStops: loadedRouteStops,
         },
         locale: {
-          value: AppLocaleType.ZH_TW
-        }
-      }
+          value: AppLocaleType.ZH_TW,
+        },
+      },
     })
 
     renderWithProvidersAndRouter(<Favorite />, {
-      store
+      store,
     })
 
-    expect(screen.getByText(getFavoriteMessages(i18n.t).emptyFavoriteRouteStops.title)).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        getFavoriteMessages(i18n.t).emptyFavoriteRouteStops.title,
+      ),
+    ).toBeInTheDocument()
     expect(localStorage.getItem(FAVORITE_ROUTE_STOPS_STORAGE_KEY)).toBeNull()
   })
 })

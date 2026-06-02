@@ -9,11 +9,18 @@ function normalizeRecentRouteUIDs(value: unknown) {
   }
 
   return Array.from(
-    new Set(value.filter((routeUID): routeUID is string => typeof routeUID === 'string' && routeUID.length > 0))
+    new Set(
+      value.filter(
+        (routeUID): routeUID is string =>
+          typeof routeUID === 'string' && routeUID.length > 0,
+      ),
+    ),
   ).slice(0, MAX_ROUTE_SEARCH_RECENT_ROUTES)
 }
 
-export function getRouteSearchRecentFromStorage(storage: Pick<Storage, 'getItem' | 'removeItem'>) {
+export function getRouteSearchRecentFromStorage(
+  storage: Pick<Storage, 'getItem' | 'removeItem'>,
+) {
   const storedValue = storage.getItem(ROUTE_SEARCH_RECENT_STORAGE_KEY)
 
   if (!storedValue) {
@@ -30,11 +37,11 @@ export function getRouteSearchRecentFromStorage(storage: Pick<Storage, 'getItem'
 
 export function setRouteSearchRecentInStorage(
   storage: Pick<Storage, 'setItem'>,
-  recentRouteUIDs: string[]
+  recentRouteUIDs: string[],
 ) {
   storage.setItem(
     ROUTE_SEARCH_RECENT_STORAGE_KEY,
-    JSON.stringify(normalizeRecentRouteUIDs(recentRouteUIDs))
+    JSON.stringify(normalizeRecentRouteUIDs(recentRouteUIDs)),
   )
 }
 
@@ -43,7 +50,10 @@ export function loadRouteSearchRecentFromStorage() {
     const storage = getLocalStorage()
     return getRouteSearchRecentFromStorage(storage)
   } catch (error) {
-    console.warn('Failed to load recently viewed routes from localStorage.', error)
+    console.warn(
+      'Failed to load recently viewed routes from localStorage.',
+      error,
+    )
     return [] as string[]
   }
 }
@@ -59,9 +69,14 @@ export function saveRouteSearchRecent(routeUID: string) {
 
     setRouteSearchRecentInStorage(storage, [
       routeUID,
-      ...recentRouteUIDs.filter((storedRouteUID) => storedRouteUID !== routeUID)
+      ...recentRouteUIDs.filter(
+        (storedRouteUID) => storedRouteUID !== routeUID,
+      ),
     ])
   } catch (error) {
-    console.warn('Failed to persist recently viewed routes to localStorage.', error)
+    console.warn(
+      'Failed to persist recently viewed routes to localStorage.',
+      error,
+    )
   }
 }

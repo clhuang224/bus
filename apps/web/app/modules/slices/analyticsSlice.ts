@@ -6,7 +6,7 @@ interface AnalyticsState {
 }
 
 const initialState: AnalyticsState = {
-  isEnabled: true
+  isEnabled: true,
 }
 
 const analyticsSlice = createSlice({
@@ -15,11 +15,12 @@ const analyticsSlice = createSlice({
   reducers: {
     setAnalyticsEnabled: (state, action: PayloadAction<boolean>) => {
       state.isEnabled = action.payload
-    }
-  }
+    },
+  },
 })
 
 export const { setAnalyticsEnabled } = analyticsSlice.actions
-export const selectAnalyticsEnabled = (state: RootState) => state.analytics.isEnabled
+export const selectAnalyticsEnabled = (state: RootState) =>
+  state.analytics.isEnabled
 
 export default analyticsSlice

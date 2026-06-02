@@ -30,5 +30,5 @@ export enum GeoActionType {
   /**
    * The geolocation request timed out
    */
-  POSITION_TIMEOUT = 'position_timeout'
+  POSITION_TIMEOUT = 'position_timeout',
 }

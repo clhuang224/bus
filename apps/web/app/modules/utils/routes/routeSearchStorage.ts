@@ -22,13 +22,16 @@ function normalizeStoredRouteSearch(value: unknown): RouteSearchState {
 
   return {
     keyword: initialRouteSearchState.keyword,
-    selectedArea: storedValue.selectedArea == null || isAreaType(storedValue.selectedArea)
-      ? (storedValue.selectedArea ?? null)
-      : initialRouteSearchState.selectedArea
+    selectedArea:
+      storedValue.selectedArea == null || isAreaType(storedValue.selectedArea)
+        ? (storedValue.selectedArea ?? null)
+        : initialRouteSearchState.selectedArea,
   }
 }
 
-export function getRouteSearchFromStorage(storage: Pick<Storage, 'getItem' | 'removeItem'>) {
+export function getRouteSearchFromStorage(
+  storage: Pick<Storage, 'getItem' | 'removeItem'>,
+) {
   const storedValue = storage.getItem(ROUTE_SEARCH_STORAGE_KEY)
 
   if (!storedValue) {
@@ -45,11 +48,14 @@ export function getRouteSearchFromStorage(storage: Pick<Storage, 'getItem' | 're
 
 export function setRouteSearchInStorage(
   storage: Pick<Storage, 'setItem'>,
-  routeSearch: RouteSearchState
+  routeSearch: RouteSearchState,
 ) {
-  storage.setItem(ROUTE_SEARCH_STORAGE_KEY, JSON.stringify({
-    selectedArea: routeSearch.selectedArea
-  } satisfies RouteSearchStorage))
+  storage.setItem(
+    ROUTE_SEARCH_STORAGE_KEY,
+    JSON.stringify({
+      selectedArea: routeSearch.selectedArea,
+    } satisfies RouteSearchStorage),
+  )
 }
 
 export function loadRouteSearchFromStorage() {

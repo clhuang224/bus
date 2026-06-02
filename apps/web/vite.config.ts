@@ -9,8 +9,8 @@ export default defineConfig(() => ({
     proxy: {
       '/api/tdx': {
         target: 'http://127.0.0.1:3000',
-        changeOrigin: true
-      }
-    }
-  }
+        changeOrigin: true,
+      },
+    },
+  },
 }))

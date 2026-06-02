@@ -15,14 +15,15 @@ export default function Favorite() {
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
   const favoriteRouteStopCollator = useLocalizedTextCollator()
-  const { favoriteRouteStops, removeFavoriteRouteStop } = useFavoriteRouteStops()
+  const { favoriteRouteStops, removeFavoriteRouteStop } =
+    useFavoriteRouteStops()
   const favoriteMessages = getFavoriteMessages(t)
 
   const sortedFavoriteRouteStops = useMemo(() => {
     return [...favoriteRouteStops].sort((left, right) => {
       const routeResult = favoriteRouteStopCollator.compare(
         getLocalizedText(left.routeName, locale),
-        getLocalizedText(right.routeName, locale)
+        getLocalizedText(right.routeName, locale),
       )
       if (routeResult !== 0) return routeResult
 
@@ -34,23 +35,21 @@ export default function Favorite() {
     <Flex justify="center" h="100%">
       <Stack p={APP_PAGE_PADDING} w="100%" maw={720} h="100%" gap="md">
         <Title order={3}>{t('pages.favorite.title')}</Title>
-        {sortedFavoriteRouteStops.length === 0
-          ? (
-            <BaseAlert {...favoriteMessages.emptyFavoriteRouteStops} />
-          )
-          : (
-            <ScrollArea style={{ flex: 1, minHeight: 0 }}>
-              <Stack gap="sm">
-                {sortedFavoriteRouteStops.map((favoriteRouteStop) => (
-                  <FavoriteRouteStopCard
-                    key={favoriteRouteStop.favoriteId}
-                    favoriteRouteStop={favoriteRouteStop}
-                    onRemove={removeFavoriteRouteStop}
-                  />
-                ))}
-              </Stack>
-            </ScrollArea>
-          )}
+        {sortedFavoriteRouteStops.length === 0 ? (
+          <BaseAlert {...favoriteMessages.emptyFavoriteRouteStops} />
+        ) : (
+          <ScrollArea style={{ flex: 1, minHeight: 0 }}>
+            <Stack gap="sm">
+              {sortedFavoriteRouteStops.map((favoriteRouteStop) => (
+                <FavoriteRouteStopCard
+                  key={favoriteRouteStop.favoriteId}
+                  favoriteRouteStop={favoriteRouteStop}
+                  onRemove={removeFavoriteRouteStop}
+                />
+              ))}
+            </Stack>
+          </ScrollArea>
+        )}
       </Stack>
     </Flex>
   )

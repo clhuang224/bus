@@ -4,7 +4,7 @@ import { useLocation } from 'react-router'
 import { selectAnalyticsEnabled } from '~/modules/slices/analyticsSlice'
 import {
   initializeGoogleAnalytics,
-  trackGoogleAnalytics
+  trackGoogleAnalytics,
 } from '~/modules/utils/shared/googleAnalytics'
 
 export function useGoogleAnalytics() {

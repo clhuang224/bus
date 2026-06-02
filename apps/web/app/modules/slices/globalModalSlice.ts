@@ -14,8 +14,13 @@ interface GlobalModalState {
   confirmAction: GlobalModalConfirmAction
 }
 
-export type OpenGlobalModalPayload = Pick<GlobalModalState, 'title' | 'message' | 'variant'> &
-  Partial<Pick<GlobalModalState, 'confirmText' | 'cancelText' | 'confirmAction'>>
+export type OpenGlobalModalPayload = Pick<
+  GlobalModalState,
+  'title' | 'message' | 'variant'
+> &
+  Partial<
+    Pick<GlobalModalState, 'confirmText' | 'cancelText' | 'confirmAction'>
+  >
 
 const initialState: GlobalModalState = {
   opened: false,
@@ -24,24 +29,22 @@ const initialState: GlobalModalState = {
   variant: 'alert',
   confirmText: null,
   cancelText: null,
-  confirmAction: 'close'
+  confirmAction: 'close',
 }
 
 const globalModalSlice = createSlice({
   name: 'globalModal',
   initialState,
   reducers: {
-    openGlobalModal: (
-      state,
-      action: PayloadAction<OpenGlobalModalPayload>
-    ) => {
+    openGlobalModal: (state, action: PayloadAction<OpenGlobalModalPayload>) => {
       state.opened = true
       state.title = action.payload.title
       state.message = action.payload.message
       state.variant = action.payload.variant
       state.confirmText = action.payload.confirmText ?? null
       state.cancelText = action.payload.cancelText ?? null
-      state.confirmAction = action.payload.confirmAction ?? initialState.confirmAction
+      state.confirmAction =
+        action.payload.confirmAction ?? initialState.confirmAction
     },
     closeGlobalModal: (state) => {
       state.opened = false
@@ -51,14 +54,14 @@ const globalModalSlice = createSlice({
       state.confirmText = initialState.confirmText
       state.cancelText = initialState.cancelText
       state.confirmAction = initialState.confirmAction
-    }
-  }
+    },
+  },
 })
 
 export const { openGlobalModal, closeGlobalModal } = globalModalSlice.actions
 
 export const globalModalSelectors = {
-  selectGlobalModal: (state: RootState) => state.globalModal
+  selectGlobalModal: (state: RootState) => state.globalModal,
 }
 
 export default globalModalSlice

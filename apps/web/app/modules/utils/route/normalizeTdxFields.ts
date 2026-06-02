@@ -3,18 +3,20 @@ import type { LocalizedText, TdxLocalizedText } from '../../types/LocalizedText'
 
 export function toLocalizedText(
   text?: TdxLocalizedText | null,
-  defaultText?: TdxLocalizedText | null
+  defaultText?: TdxLocalizedText | null,
 ): LocalizedText {
   return {
     'zh-TW': text?.Zh_tw ?? defaultText?.Zh_tw ?? '',
-    en: text?.En ?? defaultText?.En ?? ''
+    en: text?.En ?? defaultText?.En ?? '',
   }
 }
 
-export function toLngLat(position?: {
-  PositionLon?: number | null
-  PositionLat?: number | null
-} | null): LngLat | null {
+export function toLngLat(
+  position?: {
+    PositionLon?: number | null
+    PositionLat?: number | null
+  } | null,
+): LngLat | null {
   const longitude = position?.PositionLon
   const latitude = position?.PositionLat
 

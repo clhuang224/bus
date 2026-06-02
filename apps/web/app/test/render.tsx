@@ -2,7 +2,11 @@ import { MantineProvider } from '@mantine/core'
 import { render, type RenderOptions } from '@testing-library/react'
 import type { PropsWithChildren, ReactElement } from 'react'
 import { Provider } from 'react-redux'
-import { MemoryRouter, Route as RouterRoute, Routes as RouterRoutes } from 'react-router'
+import {
+  MemoryRouter,
+  Route as RouterRoute,
+  Routes as RouterRoutes,
+} from 'react-router'
 import type { EnhancedStore } from '@reduxjs/toolkit'
 
 interface RenderWithStoreOptions extends Omit<RenderOptions, 'wrapper'> {
@@ -10,11 +14,11 @@ interface RenderWithStoreOptions extends Omit<RenderOptions, 'wrapper'> {
 }
 
 interface RenderWithProvidersAndRouterOptions extends RenderWithStoreOptions {
-  initialEntries?: Array<string | { pathname: string, state?: unknown }>
+  initialEntries?: Array<string | { pathname: string; state?: unknown }>
 }
 
 interface RenderRouteOptions extends Omit<RenderOptions, 'wrapper'> {
-  initialEntries?: Array<string | { pathname: string, state?: unknown }>
+  initialEntries?: Array<string | { pathname: string; state?: unknown }>
   path: string
   store?: EnhancedStore
 }
@@ -23,21 +27,27 @@ function MantineWrapper({ children }: PropsWithChildren) {
   return <MantineProvider>{children}</MantineProvider>
 }
 
-export function renderWithMantine(ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>) {
+export function renderWithMantine(
+  ui: ReactElement,
+  options?: Omit<RenderOptions, 'wrapper'>,
+) {
   return render(ui, {
     wrapper: MantineWrapper,
-    ...options
+    ...options,
   })
 }
 
-export function renderWithStore(ui: ReactElement, { store, ...options }: RenderWithStoreOptions) {
+export function renderWithStore(
+  ui: ReactElement,
+  { store, ...options }: RenderWithStoreOptions,
+) {
   return render(ui, {
     wrapper: ({ children }: PropsWithChildren) => (
       <Provider store={store}>
         <MantineProvider>{children}</MantineProvider>
       </Provider>
     ),
-    ...options
+    ...options,
   })
 }
 
@@ -47,28 +57,25 @@ export function renderWithProvidersAndRouter(
     initialEntries = ['/'],
     store,
     ...options
-  }: RenderWithProvidersAndRouterOptions
+  }: RenderWithProvidersAndRouterOptions,
 ) {
   return render(ui, {
     wrapper: ({ children }: PropsWithChildren) => (
       <Provider store={store}>
         <MantineProvider>
-          <MemoryRouter initialEntries={initialEntries}>{children}</MemoryRouter>
+          <MemoryRouter initialEntries={initialEntries}>
+            {children}
+          </MemoryRouter>
         </MantineProvider>
       </Provider>
     ),
-    ...options
+    ...options,
   })
 }
 
 export function renderRoute(
   ui: ReactElement,
-  {
-    initialEntries = ['/'],
-    path,
-    store,
-    ...options
-  }: RenderRouteOptions
+  { initialEntries = ['/'], path, store, ...options }: RenderRouteOptions,
 ) {
   return render(ui, {
     wrapper: ({ children }: PropsWithChildren) => {
@@ -82,8 +89,12 @@ export function renderRoute(
         </MantineProvider>
       )
 
-      return store ? <Provider store={store}>{routedContent}</Provider> : routedContent
+      return store ? (
+        <Provider store={store}>{routedContent}</Provider>
+      ) : (
+        routedContent
+      )
     },
-    ...options
+    ...options,
   })
 }

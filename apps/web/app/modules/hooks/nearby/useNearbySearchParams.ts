@@ -13,7 +13,7 @@ export const useNearbySearchParams = () => {
 
   const setNearbySearchParams = ({
     selectedStopId,
-    selectedRouteStopId
+    selectedRouteStopId,
   }: NearbySearchParamUpdates) => {
     setSearchParams((currentSearchParams) => {
       const nextSearchParams = new URLSearchParams(currentSearchParams)
@@ -27,17 +27,20 @@ export const useNearbySearchParams = () => {
   return {
     selectedStopId,
     selectedRouteStopId,
-    selectStop: (stopId: string | null) => setNearbySearchParams({
-      selectedStopId: stopId,
-      selectedRouteStopId: null
-    }),
-    viewStopRoutes: (stationID: string) => setNearbySearchParams({
-      selectedStopId: stationID,
-      selectedRouteStopId: stationID
-    }),
-    backToNearbyStops: () => setNearbySearchParams({
-      selectedStopId: selectedRouteStopId,
-      selectedRouteStopId: null
-    })
+    selectStop: (stopId: string | null) =>
+      setNearbySearchParams({
+        selectedStopId: stopId,
+        selectedRouteStopId: null,
+      }),
+    viewStopRoutes: (stationID: string) =>
+      setNearbySearchParams({
+        selectedStopId: stationID,
+        selectedRouteStopId: stationID,
+      }),
+    backToNearbyStops: () =>
+      setNearbySearchParams({
+        selectedStopId: selectedRouteStopId,
+        selectedRouteStopId: null,
+      }),
   }
 }

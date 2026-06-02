@@ -18,19 +18,23 @@ export type AppNavLinkPropType = AppNavLinkBaseProps & AppNavLinkAccessibleName
 
 export const AppNavLink = (props: AppNavLinkPropType) => {
   const resolvedPath = useResolvedPath(props.to)
-  const isActive = useMatch({ path: resolvedPath.pathname, end: resolvedPath.pathname === '/' }) !== null
+  const isActive =
+    useMatch({
+      path: resolvedPath.pathname,
+      end: resolvedPath.pathname === '/',
+    }) !== null
 
   return (
     <NavLink
       component={Link}
       to={props.to}
       aria-label={props.ariaLabel ?? props.label}
-      label={(
+      label={
         <Flex align="center" justify="center" direction="column">
           {props.label}
           {isActive ? (props.iconActive ?? props.icon) : props.icon}
         </Flex>
-      )}
+      }
       active={isActive}
       style={{ pointerEvents: isActive ? 'none' : 'auto' }}
       w="auto"

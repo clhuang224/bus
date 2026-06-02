@@ -13,7 +13,7 @@ const { mockMap, MockMap, MockMarker, MockLngLat } = vi.hoisted(() => {
     once: vi.fn(),
     off: vi.fn(),
     remove: vi.fn(),
-    flyTo: vi.fn()
+    flyTo: vi.fn(),
   }
 
   class MockMap {
@@ -37,7 +37,7 @@ const { mockMap, MockMap, MockMarker, MockLngLat } = vi.hoisted(() => {
   class MockLngLat {
     constructor(
       public lng: number,
-      public lat: number
+      public lat: number,
     ) {}
   }
 
@@ -46,11 +46,11 @@ const { mockMap, MockMap, MockMarker, MockLngLat } = vi.hoisted(() => {
 
 vi.mock('maplibre-gl', () => ({
   default: {
-    Map: MockMap
+    Map: MockMap,
   },
   Map: MockMap,
   Marker: MockMarker,
-  LngLat: MockLngLat
+  LngLat: MockLngLat,
 }))
 
 describe('BaseMap', () => {
@@ -62,20 +62,19 @@ describe('BaseMap', () => {
   it('disables the focus-my-location control when user coordinates are unavailable', () => {
     const store = createTestStore({
       reducer: {
-        geolocation: geoSlice.reducer
+        geolocation: geoSlice.reducer,
       },
       preloadedState: {
         geolocation: {
           ...geoSlice.getInitialState(),
-          coords: null
-        }
-      }
+          coords: null,
+        },
+      },
     })
 
-    renderWithStore(
-      <BaseMap center={[25.033, 121.5654]} showUserLocation />,
-      { store }
-    )
+    renderWithStore(<BaseMap center={[25.033, 121.5654]} showUserLocation />, {
+      store,
+    })
 
     expect(screen.getByRole('button', { name: '我的位置' })).toBeDisabled()
   })
@@ -83,27 +82,26 @@ describe('BaseMap', () => {
   it('focuses the map on the user location when the control is clicked', () => {
     const store = createTestStore({
       reducer: {
-        geolocation: geoSlice.reducer
+        geolocation: geoSlice.reducer,
       },
       preloadedState: {
         geolocation: {
           ...geoSlice.getInitialState(),
-          coords: [25.033, 121.5654]
-        }
-      }
+          coords: [25.033, 121.5654],
+        },
+      },
     })
 
-    renderWithStore(
-      <BaseMap center={[25.033, 121.5654]} showUserLocation />,
-      { store }
-    )
+    renderWithStore(<BaseMap center={[25.033, 121.5654]} showUserLocation />, {
+      store,
+    })
 
     fireEvent.click(screen.getByRole('button', { name: '我的位置' }))
 
     expect(mockMap.flyTo).toHaveBeenCalledWith({
       center: [121.5654, 25.033],
       zoom: 16,
-      duration: 800
+      duration: 800,
     })
   })
 })

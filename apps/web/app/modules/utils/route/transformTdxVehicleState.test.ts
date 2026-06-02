@@ -4,11 +4,15 @@ import { transformTdxVehicleState } from './transformTdxVehicleState'
 
 describe('transformTdxVehicleState', () => {
   it('maps departed events to departed vehicle state', () => {
-    expect(transformTdxVehicleState(TdxA2EventType.DEPARTED)).toBe(VehicleStateType.DEPARTED)
+    expect(transformTdxVehicleState(TdxA2EventType.DEPARTED)).toBe(
+      VehicleStateType.DEPARTED,
+    )
   })
 
   it('maps arriving events to arriving vehicle state', () => {
-    expect(transformTdxVehicleState(TdxA2EventType.ARRIVING)).toBe(VehicleStateType.ARRIVING)
+    expect(transformTdxVehicleState(TdxA2EventType.ARRIVING)).toBe(
+      VehicleStateType.ARRIVING,
+    )
   })
 
   it('returns at-stop vehicle state when the event type is missing', () => {

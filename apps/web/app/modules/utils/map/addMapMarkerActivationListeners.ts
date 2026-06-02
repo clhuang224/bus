@@ -8,7 +8,7 @@ function isSpaceKey(event: KeyboardEvent) {
 
 export function addMapMarkerActivationListeners(
   element: HTMLElement,
-  onActivate: (event: MouseEvent | KeyboardEvent) => void
+  onActivate: (event: MouseEvent | KeyboardEvent) => void,
 ) {
   const handleKeyDown = (event: KeyboardEvent) => {
     if (event.repeat) return

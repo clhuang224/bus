@@ -2,7 +2,7 @@ import booleanPointInPolygon from '@turf/boolean-point-in-polygon'
 import { point } from '@turf/helpers'
 import type { Feature, FeatureCollection, MultiPolygon, Polygon } from 'geojson'
 import { cityMapNameToCity, countyIdMapCity } from '../../consts/city'
-import { CityNameType } from '../../enums/CityNameType'
+import { CityNameType } from '@bus/shared'
 import { CountyIdType } from '../../enums/CountyIdType'
 import type { LatLng } from '../../types/CoordsType'
 
@@ -60,7 +60,10 @@ function getCityFromFeature(feature: CityFeature): CityNameType | null {
   return null
 }
 
-function findCityByPoint(testPoint: ReturnType<typeof point>, features: CityFeature[]): CityNameType | null {
+function findCityByPoint(
+  testPoint: ReturnType<typeof point>,
+  features: CityFeature[],
+): CityNameType | null {
   for (const feature of features) {
     const city = getCityFromFeature(feature)
     if (!city) continue
@@ -71,7 +74,10 @@ function findCityByPoint(testPoint: ReturnType<typeof point>, features: CityFeat
   return null
 }
 
-export function getCityByCoords(coords: LatLng | null, geojson: FeatureCollection | null): CityNameType {
+export function getCityByCoords(
+  coords: LatLng | null,
+  geojson: FeatureCollection | null,
+): CityNameType {
   if (!coords || !geojson) return DEFAULT_CITY
 
   const [lat, lng] = coords
@@ -81,6 +87,8 @@ export function getCityByCoords(coords: LatLng | null, geojson: FeatureCollectio
   const city = findCityByPoint(testPoint, cityFeatures)
   if (city) return city
 
-  console.warn(`Unable to determine the city for coordinates [${lat}, ${lng}]. Falling back to Taipei.`)
+  console.warn(
+    `Unable to determine the city for coordinates [${lat}, ${lng}]. Falling back to Taipei.`,
+  )
   return DEFAULT_CITY
 }

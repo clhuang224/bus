@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { FeatureCollection } from 'geojson'
 import { AreaType } from '../../enums/AreaType'
-import { CityNameType } from '../../enums/CityNameType'
+import { CityNameType } from '@bus/shared'
 import { getAreaByCoords } from './getAreaByCoords'
 
 const mockGeojson: FeatureCollection = {
@@ -11,54 +11,60 @@ const mockGeojson: FeatureCollection = {
       type: 'Feature',
       properties: {
         name: CityNameType.NEW_TAIPEI,
-        nameTw: '新北市'
+        nameTw: '新北市',
       },
       geometry: {
         type: 'Polygon',
-        coordinates: [[
-          [121.3, 24.9],
-          [121.7, 24.9],
-          [121.7, 25.2],
-          [121.3, 25.2],
-          [121.3, 24.9]
-        ]]
-      }
+        coordinates: [
+          [
+            [121.3, 24.9],
+            [121.7, 24.9],
+            [121.7, 25.2],
+            [121.3, 25.2],
+            [121.3, 24.9],
+          ],
+        ],
+      },
     },
     {
       type: 'Feature',
       properties: {
         name: CityNameType.CHIAYI_COUNTY,
-        nameTw: '嘉義縣'
+        nameTw: '嘉義縣',
       },
       geometry: {
         type: 'Polygon',
-        coordinates: [[
-          [120.2, 23.3],
-          [120.8, 23.3],
-          [120.8, 23.7],
-          [120.2, 23.7],
-          [120.2, 23.3]
-        ]]
-      }
+        coordinates: [
+          [
+            [120.2, 23.3],
+            [120.8, 23.3],
+            [120.8, 23.7],
+            [120.2, 23.7],
+            [120.2, 23.3],
+          ],
+        ],
+      },
     },
     {
       type: 'Feature',
       properties: {
         name: CityNameType.CHIAYI,
-        nameTw: '嘉義市'
+        nameTw: '嘉義市',
       },
       geometry: {
         type: 'Polygon',
-        coordinates: [[
-          [120.4, 23.45],
-          [120.6, 23.45],
-          [120.6, 23.55],
-          [120.4, 23.55],
-          [120.4, 23.45]
-        ]]
-      }
-    }
-  ]
+        coordinates: [
+          [
+            [120.4, 23.45],
+            [120.6, 23.45],
+            [120.6, 23.55],
+            [120.4, 23.55],
+            [120.4, 23.45],
+          ],
+        ],
+      },
+    },
+  ],
 }
 
 describe('getAreaByCoords', () => {

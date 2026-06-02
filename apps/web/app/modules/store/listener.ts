@@ -16,21 +16,31 @@ const analyticsPersistenceListener = createListenerMiddleware()
 export const storeListenerMiddlewares = [
   favoritePersistenceListener.middleware,
   routeSearchPersistenceListener.middleware,
-  analyticsPersistenceListener.middleware
+  analyticsPersistenceListener.middleware,
 ] as const
 
 export function startStoreListeners() {
   const startFavoriteListening =
-    favoritePersistenceListener.startListening.withTypes<RootState, AppDispatch>()
+    favoritePersistenceListener.startListening.withTypes<
+      RootState,
+      AppDispatch
+    >()
   const startRouteSearchListening =
-    routeSearchPersistenceListener.startListening.withTypes<RootState, AppDispatch>()
+    routeSearchPersistenceListener.startListening.withTypes<
+      RootState,
+      AppDispatch
+    >()
   const startAnalyticsListening =
-    analyticsPersistenceListener.startListening.withTypes<RootState, AppDispatch>()
+    analyticsPersistenceListener.startListening.withTypes<
+      RootState,
+      AppDispatch
+    >()
 
   startAnalyticsListening({
     actionCreator: analyticsSlice.actions.setAnalyticsEnabled,
     effect: (_, api) => {
-      const previousAnalyticsEnabled = api.getOriginalState().analytics.isEnabled
+      const previousAnalyticsEnabled =
+        api.getOriginalState().analytics.isEnabled
       const currentAnalyticsEnabled = api.getState().analytics.isEnabled
 
       if (previousAnalyticsEnabled === currentAnalyticsEnabled) {
@@ -46,24 +56,25 @@ export function startStoreListeners() {
           return
         }
 
-        console.warn('Failed to persist analytics preference to localStorage.', error)
+        console.warn(
+          'Failed to persist analytics preference to localStorage.',
+          error,
+        )
       }
-    }
+    },
   })
 
   startFavoriteListening({
     matcher: isAnyOf(
       favoriteSlice.actions.setFavoriteRouteStops,
       favoriteSlice.actions.addFavoriteRouteStop,
-      favoriteSlice.actions.removeFavoriteRouteStop
+      favoriteSlice.actions.removeFavoriteRouteStop,
     ),
     effect: (_, api) => {
-      const previousFavoriteRouteStops = favoriteSlice.selectors.getFavoriteRouteStops(
-        api.getOriginalState()
-      )
-      const currentFavoriteRouteStops = favoriteSlice.selectors.getFavoriteRouteStops(
-        api.getState()
-      )
+      const previousFavoriteRouteStops =
+        favoriteSlice.selectors.getFavoriteRouteStops(api.getOriginalState())
+      const currentFavoriteRouteStops =
+        favoriteSlice.selectors.getFavoriteRouteStops(api.getState())
 
       if (previousFavoriteRouteStops === currentFavoriteRouteStops) {
         return
@@ -76,15 +87,19 @@ export function startStoreListeners() {
           return
         }
 
-        console.warn('Failed to persist favorite route stops to localStorage.', error)
+        console.warn(
+          'Failed to persist favorite route stops to localStorage.',
+          error,
+        )
       }
-    }
+    },
   })
 
   startRouteSearchListening({
     matcher: isAnyOf(routeSearchSlice.actions.setSelectedArea),
     effect: (_, api) => {
-      const previousSelectedArea = api.getOriginalState().routeSearch.selectedArea
+      const previousSelectedArea =
+        api.getOriginalState().routeSearch.selectedArea
       const currentRouteSearch = api.getState().routeSearch
 
       if (previousSelectedArea === currentRouteSearch.selectedArea) {
@@ -100,6 +115,6 @@ export function startStoreListeners() {
 
         console.warn('Failed to persist route search to localStorage.', error)
       }
-    }
+    },
   })
 }

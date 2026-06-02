@@ -11,27 +11,26 @@ import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
 import Settings from './Settings'
 
-const {
-  mockNavigate,
-  mockUseMediaQuery
-} = vi.hoisted(() => ({
+const { mockNavigate, mockUseMediaQuery } = vi.hoisted(() => ({
   mockNavigate: vi.fn(),
-  mockUseMediaQuery: vi.fn()
+  mockUseMediaQuery: vi.fn(),
 }))
 
-vi.mock('@mantine/hooks', async() => {
-  const actual = await vi.importActual<typeof import('@mantine/hooks')>('@mantine/hooks')
+vi.mock('@mantine/hooks', async () => {
+  const actual =
+    await vi.importActual<typeof import('@mantine/hooks')>('@mantine/hooks')
   return {
     ...actual,
-    useMediaQuery: mockUseMediaQuery
+    useMediaQuery: mockUseMediaQuery,
   }
 })
 
-vi.mock('react-router', async() => {
-  const actual = await vi.importActual<typeof import('react-router')>('react-router')
+vi.mock('react-router', async () => {
+  const actual =
+    await vi.importActual<typeof import('react-router')>('react-router')
   return {
     ...actual,
-    useNavigate: () => mockNavigate
+    useNavigate: () => mockNavigate,
   }
 })
 
@@ -40,9 +39,9 @@ function renderSettingsPage(initialLocale?: AppLocaleType) {
   const store = createTestStore({
     preloadedState: {
       locale: {
-        value: locale
-      }
-    }
+        value: locale,
+      },
+    },
   })
 
   return {
@@ -51,18 +50,22 @@ function renderSettingsPage(initialLocale?: AppLocaleType) {
       <AppI18nProvider>
         <Settings />
       </AppI18nProvider>,
-      { store }
-    )
+      { store },
+    ),
   }
 }
 
 const getSettingsT = (locale: AppLocaleType) => i18n.getFixedT(locale)
 
-const getLocaleRadio = (uiLocale: AppLocaleType, optionLocale: AppLocaleType) => {
+const getLocaleRadio = (
+  uiLocale: AppLocaleType,
+  optionLocale: AppLocaleType,
+) => {
   const t = getSettingsT(uiLocale)
-  const key = optionLocale === AppLocaleType.ZH_TW
-    ? 'pages.settings.localeOptions.zhTW.label'
-    : 'pages.settings.localeOptions.en.label'
+  const key =
+    optionLocale === AppLocaleType.ZH_TW
+      ? 'pages.settings.localeOptions.zhTW.label'
+      : 'pages.settings.localeOptions.en.label'
 
   return screen.getByRole('radio', { name: t(key) })
 }
@@ -84,15 +87,21 @@ describe('Settings', () => {
   it('explains analytics data collection', () => {
     renderSettingsPage()
 
-    expect(screen.getByText(i18n.t('pages.settings.analyticsSectionTitle'))).toBeInTheDocument()
-    expect(screen.getByText(i18n.t('pages.settings.analyticsDescription'))).toBeInTheDocument()
-    expect(screen.getByText(i18n.t('pages.settings.analyticsDataNotice'))).toBeInTheDocument()
+    expect(
+      screen.getByText(i18n.t('pages.settings.analyticsSectionTitle')),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(i18n.t('pages.settings.analyticsDescription')),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(i18n.t('pages.settings.analyticsDataNotice')),
+    ).toBeInTheDocument()
   })
 
   it('allows disabling analytics', () => {
     const { store } = renderSettingsPage()
     const analyticsToggle = screen.getByRole('switch', {
-      name: i18n.t('pages.settings.analyticsToggleLabel')
+      name: i18n.t('pages.settings.analyticsToggleLabel'),
     })
 
     expect(analyticsToggle).toBeChecked()
@@ -102,7 +111,7 @@ describe('Settings', () => {
     expect(store.getState().analytics.isEnabled).toBe(false)
   })
 
-  it('updates the locale and persists it when the user changes language', async() => {
+  it('updates the locale and persists it when the user changes language', async () => {
     const { store } = renderSettingsPage()
 
     fireEvent.click(getLocaleRadio(AppLocaleType.EN, AppLocaleType.EN))
@@ -114,11 +123,13 @@ describe('Settings', () => {
     })
 
     await waitFor(() => {
-      expect(localStorage.getItem(APP_LOCALE_STORAGE_KEY)).toBe(AppLocaleType.EN)
+      expect(localStorage.getItem(APP_LOCALE_STORAGE_KEY)).toBe(
+        AppLocaleType.EN,
+      )
     })
   })
 
-  it('restores the saved locale from localStorage after mount', async() => {
+  it('restores the saved locale from localStorage after mount', async () => {
     localStorage.setItem(APP_LOCALE_STORAGE_KEY, AppLocaleType.EN)
 
     renderSettingsPage()
@@ -130,7 +141,7 @@ describe('Settings', () => {
     expect(getLocaleRadio(AppLocaleType.EN, AppLocaleType.EN)).toBeChecked()
   })
 
-  it('does not overwrite the restored locale during startup reconciliation', async() => {
+  it('does not overwrite the restored locale during startup reconciliation', async () => {
     const setItemSpy = vi.spyOn(Storage.prototype, 'setItem')
     try {
       localStorage.setItem(APP_LOCALE_STORAGE_KEY, AppLocaleType.EN)
@@ -143,14 +154,14 @@ describe('Settings', () => {
 
       expect(setItemSpy.mock.calls).not.toContainEqual([
         APP_LOCALE_STORAGE_KEY,
-        AppLocaleType.ZH_TW
+        AppLocaleType.ZH_TW,
       ])
     } finally {
       setItemSpy.mockRestore()
     }
   })
 
-  it('allows switching away from the restored locale', async() => {
+  it('allows switching away from the restored locale', async () => {
     localStorage.setItem(APP_LOCALE_STORAGE_KEY, AppLocaleType.EN)
 
     const { store } = renderSettingsPage()
@@ -167,11 +178,13 @@ describe('Settings', () => {
     })
 
     await waitFor(() => {
-      expect(localStorage.getItem(APP_LOCALE_STORAGE_KEY)).toBe(AppLocaleType.ZH_TW)
+      expect(localStorage.getItem(APP_LOCALE_STORAGE_KEY)).toBe(
+        AppLocaleType.ZH_TW,
+      )
     })
   })
 
-  it('keeps the provided locale when localStorage has no saved value', async() => {
+  it('keeps the provided locale when localStorage has no saved value', async () => {
     renderSettingsPage(AppLocaleType.EN)
 
     await waitFor(() => {
@@ -184,7 +197,11 @@ describe('Settings', () => {
   it('does not show the back button on desktop', () => {
     renderSettingsPage()
 
-    expect(screen.queryByRole('button', { name: i18n.t('pages.settings.backAriaLabel') })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', {
+        name: i18n.t('pages.settings.backAriaLabel'),
+      }),
+    ).not.toBeInTheDocument()
   })
 
   it('returns to the previous page from the settings header on mobile', () => {
@@ -192,7 +209,11 @@ describe('Settings', () => {
 
     renderSettingsPage()
 
-    fireEvent.click(screen.getByRole('button', { name: i18n.t('pages.settings.backAriaLabel') }))
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: i18n.t('pages.settings.backAriaLabel'),
+      }),
+    )
 
     expect(mockNavigate).toHaveBeenCalledWith(-1)
   })

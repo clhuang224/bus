@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
 import { AreaType } from '~/modules/enums/AreaType'
 import { AppLocaleType } from '~/modules/enums/AppLocaleType'
-import { CityNameType } from '~/modules/enums/CityNameType'
+import { CityNameType } from '@bus/shared'
 import routeSearchSlice from '~/modules/slices/routeSearchSlice'
 import { ROUTE_SEARCH_RECENT_STORAGE_KEY } from '~/modules/utils/routes/routeSearchRecentStorage'
 import { createTestStore } from '~/test/createTestStore'
@@ -15,25 +15,26 @@ import Routes from './Routes'
 const t = i18n.getFixedT(AppLocaleType.ZH_TW)
 const routeInfoOriginLabel = `${t('components.routeInfoCard.departureLabel')}: 市政府`
 
-const { mockTrackGoogleAnalyticsEvent, mockUseGetRoutesByAreaQuery } = vi.hoisted(() => ({
-  mockTrackGoogleAnalyticsEvent: vi.fn(),
-  mockUseGetRoutesByAreaQuery: vi.fn()
-}))
+const { mockTrackGoogleAnalyticsEvent, mockUseGetRoutesByAreaQuery } =
+  vi.hoisted(() => ({
+    mockTrackGoogleAnalyticsEvent: vi.fn(),
+    mockUseGetRoutesByAreaQuery: vi.fn(),
+  }))
 
 vi.mock('~/modules/apis/bus', () => ({
   busApi: {
-    useGetRoutesByAreaQuery: mockUseGetRoutesByAreaQuery
-  }
+    useGetRoutesByAreaQuery: mockUseGetRoutesByAreaQuery,
+  },
 }))
 
 vi.mock('~/modules/utils/shared/googleAnalytics', () => ({
-  trackGoogleAnalyticsEvent: mockTrackGoogleAnalyticsEvent
+  trackGoogleAnalyticsEvent: mockTrackGoogleAnalyticsEvent,
 }))
 
 vi.mock('~/components/AreaSelect', () => ({
   AreaSelect: ({
     value,
-    onChange
+    onChange,
   }: {
     value: string
     onChange: (value: AreaType) => void
@@ -49,7 +50,7 @@ vi.mock('~/components/AreaSelect', () => ({
         </option>
       ))}
     </select>
-  )
+  ),
 }))
 
 const routesData = [
@@ -71,7 +72,7 @@ const routesData = [
     City: CityNameType.TAIPEI,
     CityCode: 'TPE',
     UpdateTime: '2026-03-17T10:00:00+08:00',
-    VersionID: 1
+    VersionID: 1,
   },
   {
     RouteUID: 'route-1',
@@ -91,7 +92,7 @@ const routesData = [
     City: CityNameType.NEW_TAIPEI,
     CityCode: 'NWT',
     UpdateTime: '2026-03-17T10:05:00+08:00',
-    VersionID: 2
+    VersionID: 2,
   },
   {
     RouteUID: 'route-2',
@@ -111,7 +112,7 @@ const routesData = [
     City: CityNameType.TAIPEI,
     CityCode: 'TPE',
     UpdateTime: '2026-03-17T10:00:00+08:00',
-    VersionID: 1
+    VersionID: 1,
   },
   {
     RouteUID: 'route-3',
@@ -131,7 +132,7 @@ const routesData = [
     City: CityNameType.TAIPEI,
     CityCode: 'TPE',
     UpdateTime: '2026-03-17T10:00:00+08:00',
-    VersionID: 1
+    VersionID: 1,
   },
   {
     RouteUID: 'route-4',
@@ -151,8 +152,8 @@ const routesData = [
     City: CityNameType.TAIPEI,
     CityCode: 'TPE',
     UpdateTime: '2026-03-17T10:00:00+08:00',
-    VersionID: 1
-  }
+    VersionID: 1,
+  },
 ]
 
 function createStore(preloadedRouteSearchState?: {
@@ -161,23 +162,27 @@ function createStore(preloadedRouteSearchState?: {
 }) {
   return createTestStore({
     reducer: {
-      geolocation: (state = {
-        coords: [25.033, 121.5654] as [number, number]
-      }) => state,
-      cityGeo: (state = {
-        geojson: null
-      }) => state,
-      routeSearch: routeSearchSlice.reducer
+      geolocation: (
+        state = {
+          coords: [25.033, 121.5654] as [number, number],
+        },
+      ) => state,
+      cityGeo: (
+        state = {
+          geojson: null,
+        },
+      ) => state,
+      routeSearch: routeSearchSlice.reducer,
     },
     preloadedState: {
       locale: {
-        value: AppLocaleType.ZH_TW
+        value: AppLocaleType.ZH_TW,
       },
       routeSearch: {
         keyword: preloadedRouteSearchState?.keyword ?? '',
-        selectedArea: preloadedRouteSearchState?.selectedArea ?? null
-      }
-    }
+        selectedArea: preloadedRouteSearchState?.selectedArea ?? null,
+      },
+    },
   })
 }
 
@@ -191,8 +196,8 @@ const renderRoutes = (preloadedRouteSearchState?: {
     store,
     ...renderWithProvidersAndRouter(<Routes />, {
       store,
-      initialEntries: ['/routes']
-    })
+      initialEntries: ['/routes'],
+    }),
   }
 }
 
@@ -205,13 +210,13 @@ describe('Routes', () => {
     mockUseGetRoutesByAreaQuery.mockReturnValue({
       data: routesData,
       isLoading: false,
-      error: null
+      error: null,
     })
   })
 
   it('shows the manually selected area from store state', () => {
     const { store } = renderRoutes({
-      selectedArea: AreaType.TAICHUNG
+      selectedArea: AreaType.TAICHUNG,
     })
 
     expect(store.getState().routeSearch.selectedArea).toBe(AreaType.TAICHUNG)
@@ -224,16 +229,18 @@ describe('Routes', () => {
     expect(screen.getByLabelText('area-select')).toHaveValue(AreaType.TAIPEI)
   })
 
-  it('updates the selected area from the picker', async() => {
+  it('updates the selected area from the picker', async () => {
     const { store } = renderRoutes()
 
     fireEvent.change(screen.getByLabelText('area-select'), {
-      target: { value: AreaType.TAICHUNG }
+      target: { value: AreaType.TAICHUNG },
     })
 
     await waitFor(() => {
       expect(store.getState().routeSearch.selectedArea).toBe(AreaType.TAICHUNG)
-      expect(screen.getByLabelText('area-select')).toHaveValue(AreaType.TAICHUNG)
+      expect(screen.getByLabelText('area-select')).toHaveValue(
+        AreaType.TAICHUNG,
+      )
     })
 
     expect(HTMLElement.prototype.scrollTo).toHaveBeenCalledWith({ top: 0 })
@@ -243,7 +250,7 @@ describe('Routes', () => {
     mockUseGetRoutesByAreaQuery.mockReturnValue({
       data: [],
       isLoading: true,
-      error: null
+      error: null,
     })
 
     renderRoutes()
@@ -254,7 +261,7 @@ describe('Routes', () => {
 
   it('deduplicates routes that share the same RouteUID', () => {
     renderRoutes({
-      keyword: '藍1'
+      keyword: '藍1',
     })
 
     expect(screen.getAllByText('藍1')).toHaveLength(1)
@@ -262,29 +269,38 @@ describe('Routes', () => {
 
   it('renders available terminal text when only one terminal value is present', () => {
     mockUseGetRoutesByAreaQuery.mockReturnValue({
-      data: [{
-        ...routesData[0],
-        DepartureStopName: { 'zh-TW': '市政府', en: 'City Hall' },
-        DestinationStopName: { 'zh-TW': '', en: '' }
-      }],
+      data: [
+        {
+          ...routesData[0],
+          DepartureStopName: { 'zh-TW': '市政府', en: 'City Hall' },
+          DestinationStopName: { 'zh-TW': '', en: '' },
+        },
+      ],
       isLoading: false,
-      error: null
+      error: null,
     })
 
     renderRoutes({
-      keyword: '市政府'
+      keyword: '市政府',
     })
 
     expect(screen.getByText(routeInfoOriginLabel)).toBeInTheDocument()
-    expect(screen.queryByText(`${i18n.t('components.routeInfoCard.terminalLabel')}: 市政府`)).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(
+        `${i18n.t('components.routeInfoCard.terminalLabel')}: 市政府`,
+      ),
+    ).not.toBeInTheDocument()
   })
 
-  it('filters routes by the entered keyword', async() => {
+  it('filters routes by the entered keyword', async () => {
     const { store } = renderRoutes()
 
-    fireEvent.change(screen.getByLabelText(i18n.t('components.searchInput.ariaLabel')), {
-      target: { value: '紅25' }
-    })
+    fireEvent.change(
+      screen.getByLabelText(i18n.t('components.searchInput.ariaLabel')),
+      {
+        target: { value: '紅25' },
+      },
+    )
 
     await waitFor(() => {
       expect(store.getState().routeSearch.keyword).toBe('紅25')
@@ -295,33 +311,36 @@ describe('Routes', () => {
     expect(HTMLElement.prototype.scrollTo).toHaveBeenCalledWith({ top: 0 })
   })
 
-  it('tracks route searches with the search term and result count', async() => {
+  it('tracks route searches with the search term and result count', async () => {
     renderRoutes({
-      keyword: '　藍－１０　'
+      keyword: '　藍－１０　',
     })
 
     await waitFor(() => {
-      expect(mockTrackGoogleAnalyticsEvent).toHaveBeenCalledWith('route_search', {
-        area: AreaType.TAIPEI,
-        locale: AppLocaleType.ZH_TW,
-        normalized_search_term: '藍10',
-        result_count: 1,
-        search_term: '　藍－１０　'
-      })
+      expect(mockTrackGoogleAnalyticsEvent).toHaveBeenCalledWith(
+        'route_search',
+        {
+          area: AreaType.TAIPEI,
+          locale: AppLocaleType.ZH_TW,
+          normalized_search_term: '藍10',
+          result_count: 1,
+          search_term: '　藍－１０　',
+        },
+      )
     })
   })
 
-  it('tracks the selected route from search results', async() => {
+  it('tracks the selected route from search results', async () => {
     renderRoutes({
-      keyword: '紅25'
+      keyword: '紅25',
     })
 
     await waitFor(() => {
       expect(mockTrackGoogleAnalyticsEvent).toHaveBeenCalledWith(
         'route_search',
         expect.objectContaining({
-          normalized_search_term: '紅25'
-        })
+          normalized_search_term: '紅25',
+        }),
       )
     })
     mockTrackGoogleAnalyticsEvent.mockClear()
@@ -337,22 +356,26 @@ describe('Routes', () => {
       route_name: '紅25',
       route_uid: 'route-2',
       search_term: '紅25',
-      source: 'search_result'
+      source: 'search_result',
     })
   })
 
   it('shows recently viewed routes when the keyword is empty', () => {
-    localStorage.setItem(ROUTE_SEARCH_RECENT_STORAGE_KEY, JSON.stringify(['route-2', 'route-1']))
+    localStorage.setItem(
+      ROUTE_SEARCH_RECENT_STORAGE_KEY,
+      JSON.stringify(['route-2', 'route-1']),
+    )
 
     renderRoutes({
-      keyword: ''
+      keyword: '',
     })
 
-    expect(screen.getByText(i18n.t('pages.routes.recentViewedRoutesTitle'))).toBeInTheDocument()
-    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
-      expect.stringContaining('紅25'),
-      expect.stringContaining('藍1')
-    ])
+    expect(
+      screen.getByText(i18n.t('pages.routes.recentViewedRoutesTitle')),
+    ).toBeInTheDocument()
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual(
+      [expect.stringContaining('紅25'), expect.stringContaining('藍1')],
+    )
   })
 
   it('shows the search prompt message when the keyword is empty and there is no recent-route history', () => {
@@ -363,57 +386,59 @@ describe('Routes', () => {
   })
 
   it('keeps the default name sort when the keyword is non-empty', () => {
-    localStorage.setItem(ROUTE_SEARCH_RECENT_STORAGE_KEY, JSON.stringify(['route-2', 'route-1']))
+    localStorage.setItem(
+      ROUTE_SEARCH_RECENT_STORAGE_KEY,
+      JSON.stringify(['route-2', 'route-1']),
+    )
 
     renderRoutes({
-      keyword: '站'
+      keyword: '站',
     })
 
-    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
-      expect.stringContaining('紅25'),
-      expect.stringContaining('藍1')
-    ])
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual(
+      [expect.stringContaining('紅25'), expect.stringContaining('藍1')],
+    )
   })
 
   it('prioritizes route-name matches over departure or destination matches', () => {
     renderRoutes({
-      keyword: '市'
+      keyword: '市',
     })
 
-    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
-      expect.stringContaining('市民小巴1'),
-      expect.stringContaining('藍1')
-    ])
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual(
+      [expect.stringContaining('市民小巴1'), expect.stringContaining('藍1')],
+    )
   })
 
   it('prioritizes exact route-name matches before route-name prefix matches', () => {
     renderRoutes({
-      keyword: '藍1'
+      keyword: '藍1',
     })
 
-    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
-      expect.stringContaining('藍1'),
-      expect.stringContaining('藍10')
-    ])
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual(
+      [expect.stringContaining('藍1'), expect.stringContaining('藍10')],
+    )
   })
 
   it('normalizes full-width and hyphenated keywords before matching routes', () => {
     renderRoutes({
-      keyword: '　藍－１０　'
+      keyword: '　藍－１０　',
     })
 
-    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
-      expect.stringContaining('藍10')
-    ])
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual(
+      [expect.stringContaining('藍10')],
+    )
   })
 
-  it('shows the saved keyword from store state', async() => {
+  it('shows the saved keyword from store state', async () => {
     renderRoutes({
-      keyword: '紅25'
+      keyword: '紅25',
     })
 
     await waitFor(() => {
-      expect(screen.getByLabelText(i18n.t('components.searchInput.ariaLabel'))).toHaveValue('紅25')
+      expect(
+        screen.getByLabelText(i18n.t('components.searchInput.ariaLabel')),
+      ).toHaveValue('紅25')
       expect(screen.getAllByText('紅25').length).toBeGreaterThan(0)
       expect(screen.queryByText('藍1')).not.toBeInTheDocument()
     })

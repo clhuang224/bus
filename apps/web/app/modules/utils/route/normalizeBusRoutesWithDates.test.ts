@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CityNameType } from '../../enums/CityNameType'
+import { CityNameType } from '@bus/shared'
 import { DirectionType } from '../../enums/DirectionType'
 import type { BusRoute } from '../../interfaces/BusRoute'
 import { normalizeBusRoutesWithDates } from './normalizeBusRoutesWithDates'
@@ -26,21 +26,27 @@ describe('normalizeBusRoutesWithDates', () => {
             HolidayFirstBusTime: '',
             HolidayLastBusTime: '',
             DepartureStopName: { 'zh-TW': '市政府', en: 'City Hall' },
-            DestinationStopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' }
-          }
+            DestinationStopName: {
+              'zh-TW': '捷運昆陽站',
+              en: 'MRT Kunyang Station',
+            },
+          },
         ],
         BusRouteType: 0,
         RouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
         DepartureStopName: { 'zh-TW': '市政府', en: 'City Hall' },
-        DestinationStopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+        DestinationStopName: {
+          'zh-TW': '捷運昆陽站',
+          en: 'MRT Kunyang Station',
+        },
         TicketPriceDescription: { 'zh-TW': '', en: '' },
         FareBufferZoneDescription: { 'zh-TW': '', en: '' },
         RouteMapImageUrl: '',
         City: CityNameType.TAIPEI,
         CityCode: 'TPE',
         UpdateTime: '2026-03-21T12:00:00+08:00',
-        VersionID: 0
-      }
+        VersionID: 0,
+      },
     ]
 
     const [route] = normalizeBusRoutesWithDates(routes)
