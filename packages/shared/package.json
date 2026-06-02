@@ -7,10 +7,6 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    },
-    "./enums/*": {
-      "types": "./dist/enums/*.d.ts",
-      "import": "./dist/enums/*.js"
     }
   },
   "files": [
