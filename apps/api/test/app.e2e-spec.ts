@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { INestApplication } from '@nestjs/common'
 import request from 'supertest'
-import { App } from 'supertest/types'
 import { AppModule } from './../src/app.module.js'
 
 describe('AppController (e2e)', () => {
-  let app: INestApplication<App>
+  let app: INestApplication
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -17,6 +16,8 @@ describe('AppController (e2e)', () => {
   })
 
   it('/api/health (GET)', () => {
+    // Nest's HTTP adapter exposes the raw server as `any`.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return request(app.getHttpServer())
       .get('/api/health')
       .expect(200)
