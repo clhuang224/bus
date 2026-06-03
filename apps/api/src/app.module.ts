@@ -11,13 +11,13 @@ import { StopsModule } from './stops/stops.module.js'
 
 @Module({
   imports: [
-    AdminModule,
     FavoriteModule,
     NearbyModule,
-    RealtimeModule,
-    RoutesModule,
-    SettingsModule,
     StopsModule,
+    RoutesModule,
+    RealtimeModule,
+    SettingsModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],
