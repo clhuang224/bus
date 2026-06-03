@@ -3,42 +3,60 @@ import { CityNameType, DirectionType } from '@bus/shared'
 import { LocalizedTextDto, PositionDto } from '../../dto/shared.dto.js'
 
 export class RouteSummaryDto {
-  @ApiProperty({ description: 'Route UUID', example: 'route-1' })
+  @ApiProperty({ description: 'Route UUID', example: 'NWT10116' })
   uuid!: string
 
   @ApiProperty({
     description: 'City where the route operates',
     enum: CityNameType,
     nullable: true,
+    example: CityNameType.NEW_TAIPEI,
   })
   city!: CityNameType | null
 
-  @ApiProperty({ description: 'Localized route name', type: LocalizedTextDto })
+  @ApiProperty({
+    description: 'Localized route name',
+    type: LocalizedTextDto,
+    example: { zh_tw: '242', en: '242' },
+  })
   name!: LocalizedTextDto
 
   @ApiProperty({
     description: 'Localized departure stop name',
     type: LocalizedTextDto,
+    example: { zh_tw: '中和', en: 'Zhonghe' },
   })
   departure!: LocalizedTextDto
 
   @ApiProperty({
     description: 'Localized destination stop name',
     type: LocalizedTextDto,
+    example: { zh_tw: '西門', en: 'Ximen' },
   })
   destination!: LocalizedTextDto
-
-  @ApiProperty({
-    description: 'Last base-data update timestamp',
-    example: '2026-06-02T17:25:33+08:00',
-  })
-  updated_at!: string
 }
 
 export class RoutesResponseDto {
   @ApiProperty({
-    description: 'Routes from the app database',
+    description:
+      'Base route search index for the selected area. Realtime data is intentionally excluded.',
     type: [RouteSummaryDto],
+    example: [
+      {
+        uuid: 'NWT10116',
+        city: CityNameType.NEW_TAIPEI,
+        name: { zh_tw: '242', en: '242' },
+        departure: { zh_tw: '中和', en: 'Zhonghe' },
+        destination: { zh_tw: '西門', en: 'Ximen' },
+      },
+      {
+        uuid: 'NWT10143',
+        city: CityNameType.NEW_TAIPEI,
+        name: { zh_tw: '棕7', en: 'BR7' },
+        departure: { zh_tw: '新店', en: 'Xindian Station' },
+        destination: { zh_tw: '臺北市政府', en: 'Taipei City Hall' },
+      },
+    ],
   })
   routes!: RouteSummaryDto[]
 }

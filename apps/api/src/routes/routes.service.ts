@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { AreaType } from '@bus/shared'
 import {
   RouteDetailResponseDto,
   RoutesResponseDto,
@@ -6,7 +7,9 @@ import {
 
 @Injectable()
 export class RoutesService {
-  listRoutes(): RoutesResponseDto {
+  listRoutes(area: AreaType): RoutesResponseDto {
+    void area
+
     return { routes: [] }
   }
 
@@ -17,7 +20,6 @@ export class RoutesService {
       name: { zh_tw: '', en: '' },
       departure: { zh_tw: '', en: '' },
       destination: { zh_tw: '', en: '' },
-      updated_at: '',
       sub_routes: [],
       stops: [],
     }

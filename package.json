@@ -6,6 +6,7 @@
   "scripts": {
     "prepare": "husky",
     "build": "pnpm -r --if-present build",
+    "build:packages": "pnpm --filter './packages/*' -r --if-present build",
     "dev": "concurrently -k -n proxy,web \"pnpm --filter @bus/tdx-proxy dev\" \"pnpm --filter @bus/web dev\"",
     "dev:mobile": "concurrently -k -n proxy,web \"pnpm --filter @bus/tdx-proxy dev:mobile\" \"pnpm --filter @bus/web dev:mobile\"",
     "format": "pnpm -r --if-present format",
