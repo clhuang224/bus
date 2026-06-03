@@ -21,7 +21,6 @@ export class RoutesService {
       departure: { zh_tw: '', en: '' },
       destination: { zh_tw: '', en: '' },
       sub_routes: [],
-      stops: [],
     }
   }
 }
