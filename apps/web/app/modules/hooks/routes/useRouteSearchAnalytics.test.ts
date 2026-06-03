@@ -2,7 +2,7 @@
 
 import { act, renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { AppLocaleType } from '~/modules/enums/AppLocaleType'
+import { AppLocaleType } from '@bus/shared'
 import { AreaType } from '~/modules/enums/AreaType'
 import { CityNameType } from '@bus/shared'
 import {

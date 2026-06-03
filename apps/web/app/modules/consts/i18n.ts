@@ -1,4 +1,4 @@
-import { AppLocaleType } from '../enums/AppLocaleType'
+import { AppLocaleType } from '@bus/shared'
 
 export const APP_LOCALE_STORAGE_KEY = 'appLocale'
 export const DEFAULT_APP_LOCALE = AppLocaleType.ZH_TW

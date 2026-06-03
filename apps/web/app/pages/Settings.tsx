@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router'
 import { isSupportedAppLocale } from '~/modules/consts/i18n'
 import { APP_PAGE_PADDING } from '~/modules/consts/layout'
-import { AppLocaleType } from '~/modules/enums/AppLocaleType'
+import { AppLocaleType } from '@bus/shared'
 import {
   selectAnalyticsEnabled,
   setAnalyticsEnabled,

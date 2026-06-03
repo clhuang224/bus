@@ -5,7 +5,7 @@ import {
   type StateFromReducersMapObject,
   type UnknownAction,
 } from '@reduxjs/toolkit'
-import { AppLocaleType } from '~/modules/enums/AppLocaleType'
+import { AppLocaleType } from '@bus/shared'
 import analyticsSlice from '~/modules/slices/analyticsSlice'
 import localeSlice from '~/modules/slices/localeSlice'
 

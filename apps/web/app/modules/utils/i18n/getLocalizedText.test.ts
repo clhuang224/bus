@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { AppLocaleType } from '../../enums/AppLocaleType'
+import { AppLocaleType } from '@bus/shared'
 import { getLocalizedText } from './getLocalizedText'
 
 describe('getLocalizedText', () => {

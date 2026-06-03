@@ -3,7 +3,7 @@
 import { fireEvent, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { getFavoriteMessages } from '~/modules/consts/pageMessages'
-import { AppLocaleType } from '~/modules/enums/AppLocaleType'
+import { AppLocaleType } from '@bus/shared'
 import { DirectionType } from '~/modules/enums/DirectionType'
 import { CityNameType } from '@bus/shared'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'

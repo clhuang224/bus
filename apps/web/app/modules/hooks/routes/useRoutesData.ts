@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { busApi } from '~/modules/apis/bus'
 import { getSearchMessages } from '~/modules/consts/pageMessages'
 import { AreaType } from '~/modules/enums/AreaType'
-import type { AppLocaleType } from '~/modules/enums/AppLocaleType'
+import type { AppLocaleType } from '@bus/shared'
 import type { BusRoute } from '~/modules/interfaces/BusRoute'
 import { useLocalizedTextCollator } from '~/modules/hooks/shared/useLocalizedTextCollator'
 import {

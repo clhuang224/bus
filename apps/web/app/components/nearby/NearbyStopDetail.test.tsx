@@ -3,7 +3,7 @@
 import { fireEvent, screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
-import { AppLocaleType } from '~/modules/enums/AppLocaleType'
+import { AppLocaleType } from '@bus/shared'
 import { BearingType } from '@bus/shared'
 import { CityNameType } from '@bus/shared'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'

@@ -3,7 +3,7 @@ import {
   DEFAULT_APP_LOCALE,
   isSupportedAppLocale,
 } from '../consts/i18n'
-import type { AppLocaleType } from '../enums/AppLocaleType'
+import type { AppLocaleType } from '@bus/shared'
 import { getLocalStorage } from '../utils/shared/getLocalStorage'
 
 export function getInitialAppLocale(): AppLocaleType {

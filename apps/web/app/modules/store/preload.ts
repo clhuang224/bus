@@ -1,6 +1,6 @@
 import { DEFAULT_APP_LOCALE } from '../consts/i18n'
 import { loadLocaleFromStorage } from '../i18n/locale'
-import type { AppLocaleType } from '../enums/AppLocaleType'
+import type { AppLocaleType } from '@bus/shared'
 import routeSearchSlice from '../slices/routeSearchSlice'
 import { loadAnalyticsEnabledFromStorage } from '../utils/analytics/analyticsPreferenceStorage'
 import { loadFavoriteRouteStopsFromStorage } from '../utils/favorite/favoriteRouteStopStorage'

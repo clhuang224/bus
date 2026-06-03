@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { getInitialAppLocale } from '../i18n/locale'
-import type { AppLocaleType } from '../enums/AppLocaleType'
+import type { AppLocaleType } from '@bus/shared'
 import type { RootState } from '../store'
 
 interface LocaleState {

@@ -2,7 +2,7 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { APP_LOCALE_STORAGE_KEY, DEFAULT_APP_LOCALE } from '../consts/i18n'
-import { AppLocaleType } from '../enums/AppLocaleType'
+import { AppLocaleType } from '@bus/shared'
 import {
   getInitialAppLocale,
   loadLocaleFromStorage,
