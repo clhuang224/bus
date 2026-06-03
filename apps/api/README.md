@@ -30,9 +30,14 @@ Application endpoints are prefixed with `/api`.
 - `routes`: route list and route detail contracts
 - `stations`: station and nearby station contracts
 - `realtime`: polling-friendly realtime snapshot contracts
-- `favorite`: favorite route and stop page contracts
-- `settings`: client-facing sync and configuration state
 - `admin`: base-data sync entry points
+
+## Backlog Endpoint Groups
+
+These groups are contract placeholders and should wait for account/auth work before becoming part of the first backend scope:
+
+- `favorite`: account-based favorite route and stop contracts
+- `settings`: account-based settings sync contracts
 
 ## Planned Responsibilities
 

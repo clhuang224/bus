@@ -1,3 +1,4 @@
+export { AppLocaleType } from './AppLocaleType.js'
 export { AreaType } from './AreaType.js'
 export { BearingType } from './BearingType.js'
 export { CityNameType } from './CityNameType.js'

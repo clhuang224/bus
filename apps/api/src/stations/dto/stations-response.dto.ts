@@ -16,21 +16,21 @@ export class StationRouteDto {
   @ApiProperty({
     description: 'Localized route name',
     type: LocalizedTextDto,
-    example: { zh_tw: '242', en: '242' },
+    example: { 'zh-TW': '242', en: '242' },
   })
   name!: LocalizedTextDto
 
   @ApiProperty({
     description: 'Localized route departure stop name',
     type: LocalizedTextDto,
-    example: { zh_tw: '中和', en: 'Zhonghe' },
+    example: { 'zh-TW': '中和', en: 'Zhonghe' },
   })
   departure!: LocalizedTextDto
 
   @ApiProperty({
     description: 'Localized route destination stop name',
     type: LocalizedTextDto,
-    example: { zh_tw: '西門', en: 'Ximen' },
+    example: { 'zh-TW': '西門', en: 'Ximen' },
   })
   destination!: LocalizedTextDto
 }
@@ -65,7 +65,7 @@ export class StationDto {
   @ApiProperty({
     description: 'Localized station name',
     type: LocalizedTextDto,
-    example: { zh_tw: '捷運景安站', en: 'MRT Jingan Sta.' },
+    example: { 'zh-TW': '捷運景安站', en: 'MRT Jingan Sta.' },
   })
   name!: LocalizedTextDto
 
@@ -112,7 +112,7 @@ export class StationsResponseDto {
       {
         uuid: 'NWT1001',
         city: CityNameType.NEW_TAIPEI,
-        name: { zh_tw: '捷運景安站', en: 'MRT Jingan Sta.' },
+        name: { 'zh-TW': '捷運景安站', en: 'MRT Jingan Sta.' },
         address: '景平路近景安路',
         bearing: BearingType.EAST,
         position: { latitude: 24.9939, longitude: 121.5047 },
@@ -124,9 +124,9 @@ export class StationsResponseDto {
               {
                 uuid: 'NWT10116',
                 city: CityNameType.NEW_TAIPEI,
-                name: { zh_tw: '242', en: '242' },
-                departure: { zh_tw: '中和', en: 'Zhonghe' },
-                destination: { zh_tw: '西門', en: 'Ximen' },
+                name: { 'zh-TW': '242', en: '242' },
+                departure: { 'zh-TW': '中和', en: 'Zhonghe' },
+                destination: { 'zh-TW': '西門', en: 'Ximen' },
               },
             ],
           },
@@ -136,9 +136,9 @@ export class StationsResponseDto {
               {
                 uuid: 'NWT10143',
                 city: CityNameType.NEW_TAIPEI,
-                name: { zh_tw: '棕7', en: 'BR7' },
-                departure: { zh_tw: '新店', en: 'Xindian Station' },
-                destination: { zh_tw: '臺北市政府', en: 'Taipei City Hall' },
+                name: { 'zh-TW': '棕7', en: 'BR7' },
+                departure: { 'zh-TW': '新店', en: 'Xindian Station' },
+                destination: { 'zh-TW': '臺北市政府', en: 'Taipei City Hall' },
               },
             ],
           },

@@ -1,5 +1,6 @@
-export type LocalizedText<K extends string = 'zh-TW' | 'en'> = {
-  [key in K]: string
-}
+export type { LocalizedText } from '@bus/shared'
 
-export type TdxLocalizedText = LocalizedText<'Zh_tw' | 'En'>
+export type TdxLocalizedText = {
+  Zh_tw: string
+  En: string
+}

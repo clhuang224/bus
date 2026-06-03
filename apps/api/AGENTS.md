@@ -53,6 +53,13 @@ Use PascalCase class names:
 
 Keep response fields in `snake_case`. Do not expose TDX field names such as `RouteUID`, `StopUID`, `StopName`, or `UpdateTime`.
 
+Localized text objects are the exception to the `snake_case` rule. Use locale tags as keys:
+
+- `zh-TW`
+- `en`
+
+Do not expose TDX localized text keys such as `Zh_tw` or `En`.
+
 For a resource's own identifier, use `uuid`.
 
 Prefer nested objects over prefixed identifier fields. For example:

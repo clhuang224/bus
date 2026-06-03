@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger'
 
 export class LocalizedTextDto {
   @ApiProperty({ description: 'Traditional Chinese text', example: '市政府' })
-  zh_tw!: string
+  'zh-TW'!: string
 
   @ApiProperty({ description: 'English text', example: 'City Hall' })
   en!: string

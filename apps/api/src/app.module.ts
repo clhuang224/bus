@@ -10,12 +10,12 @@ import { SettingsModule } from './settings/settings.module.js'
 
 @Module({
   imports: [
-    FavoriteModule,
     StationsModule,
     RoutesModule,
     RealtimeModule,
-    SettingsModule,
     AdminModule,
+    FavoriteModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

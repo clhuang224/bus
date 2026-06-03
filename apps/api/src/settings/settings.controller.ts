@@ -1,6 +1,9 @@
-import { Controller, Get } from '@nestjs/common'
+import { Body, Controller, Get, Patch } from '@nestjs/common'
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
-import { SettingsResponseDto } from './dto/settings-response.dto.js'
+import {
+  SettingsResponseDto,
+  UpdateSettingsRequestDto,
+} from './dto/settings-response.dto.js'
 import { SettingsService } from './settings.service.js'
 
 @ApiTags('settings')
@@ -8,10 +11,25 @@ import { SettingsService } from './settings.service.js'
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
-  @ApiOperation({ summary: 'Get settings sync state' })
+  @ApiOperation({
+    summary: 'Get settings sync state',
+    description:
+      'WARNING: Backlog placeholder. This endpoint should wait until account/auth work starts because settings sync is user-specific and currently remains frontend-local.',
+  })
   @ApiOkResponse({ type: SettingsResponseDto })
   @Get()
   getSettings(): SettingsResponseDto {
     return this.settingsService.getSettings()
+  }
+
+  @ApiOperation({
+    summary: 'Update settings',
+    description:
+      'WARNING: Backlog placeholder. This endpoint should wait until account/auth work starts because settings sync is user-specific and currently remains frontend-local.',
+  })
+  @ApiOkResponse({ type: SettingsResponseDto })
+  @Patch()
+  updateSettings(@Body() body: UpdateSettingsRequestDto): SettingsResponseDto {
+    return this.settingsService.updateSettings(body)
   }
 }

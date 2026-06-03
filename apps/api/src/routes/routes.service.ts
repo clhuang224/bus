@@ -17,9 +17,9 @@ export class RoutesService {
     return {
       uuid,
       city: null,
-      name: { zh_tw: '', en: '' },
-      departure: { zh_tw: '', en: '' },
-      destination: { zh_tw: '', en: '' },
+      name: { 'zh-TW': '', en: '' },
+      departure: { 'zh-TW': '', en: '' },
+      destination: { 'zh-TW': '', en: '' },
       sub_routes: [],
     }
   }

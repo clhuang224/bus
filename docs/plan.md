@@ -98,15 +98,15 @@ The first phase should prove that the app can read core route and station data f
 | POST   | `/api/admin/sync/routes` | Sync route data from TDX      |
 | POST   | `/api/admin/sync/stops`  | Sync stop data from TDX       |
 
-## Later Phases
+## Backlog
 
-These features should wait until the base backend and database flow is stable:
+These features should wait until the base backend/database flow is stable and the product has a clearer account/auth direction:
 
+- account/auth system
+- favorites API
+- settings API
 - realtime ETA cache
 - realtime vehicle snapshots
 - SSE or WebSocket delivery
-- favorites API
-- settings API
-- account/auth system
 
-Favorites and settings can remain frontend-local unless the product later needs account-based sync across devices.
+Favorites and settings should remain frontend-local for now. Backend-owned favorites and settings only become useful after login exists, because their main value is syncing user-specific state across devices.

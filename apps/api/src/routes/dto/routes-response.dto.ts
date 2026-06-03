@@ -17,21 +17,21 @@ export class RouteSummaryDto {
   @ApiProperty({
     description: 'Localized route name',
     type: LocalizedTextDto,
-    example: { zh_tw: '242', en: '242' },
+    example: { 'zh-TW': '242', en: '242' },
   })
   name!: LocalizedTextDto
 
   @ApiProperty({
     description: 'Localized departure stop name',
     type: LocalizedTextDto,
-    example: { zh_tw: '中和', en: 'Zhonghe' },
+    example: { 'zh-TW': '中和', en: 'Zhonghe' },
   })
   departure!: LocalizedTextDto
 
   @ApiProperty({
     description: 'Localized destination stop name',
     type: LocalizedTextDto,
-    example: { zh_tw: '西門', en: 'Ximen' },
+    example: { 'zh-TW': '西門', en: 'Ximen' },
   })
   destination!: LocalizedTextDto
 }
@@ -45,16 +45,16 @@ export class RoutesResponseDto {
       {
         uuid: 'NWT10116',
         city: CityNameType.NEW_TAIPEI,
-        name: { zh_tw: '242', en: '242' },
-        departure: { zh_tw: '中和', en: 'Zhonghe' },
-        destination: { zh_tw: '西門', en: 'Ximen' },
+        name: { 'zh-TW': '242', en: '242' },
+        departure: { 'zh-TW': '中和', en: 'Zhonghe' },
+        destination: { 'zh-TW': '西門', en: 'Ximen' },
       },
       {
         uuid: 'NWT10143',
         city: CityNameType.NEW_TAIPEI,
-        name: { zh_tw: '棕7', en: 'BR7' },
-        departure: { zh_tw: '新店', en: 'Xindian Station' },
-        destination: { zh_tw: '臺北市政府', en: 'Taipei City Hall' },
+        name: { 'zh-TW': '棕7', en: 'BR7' },
+        departure: { 'zh-TW': '新店', en: 'Xindian Station' },
+        destination: { 'zh-TW': '臺北市政府', en: 'Taipei City Hall' },
       },
     ],
   })
@@ -81,7 +81,7 @@ export class RouteStopDto {
   @ApiProperty({
     description: 'Localized stop name',
     type: LocalizedTextDto,
-    example: { zh_tw: '中和站', en: 'Zhonghe Station' },
+    example: { 'zh-TW': '中和站', en: 'Zhonghe Station' },
   })
   name!: LocalizedTextDto
 
@@ -121,7 +121,7 @@ export class RouteSubRouteDto {
   @ApiProperty({
     description: 'Localized sub-route name',
     type: LocalizedTextDto,
-    example: { zh_tw: '242', en: '242' },
+    example: { 'zh-TW': '242', en: '242' },
   })
   name!: LocalizedTextDto
 
@@ -135,14 +135,14 @@ export class RouteSubRouteDto {
   @ApiProperty({
     description: 'Localized departure stop name',
     type: LocalizedTextDto,
-    example: { zh_tw: '中和', en: 'Zhonghe' },
+    example: { 'zh-TW': '中和', en: 'Zhonghe' },
   })
   departure!: LocalizedTextDto
 
   @ApiProperty({
     description: 'Localized destination stop name',
     type: LocalizedTextDto,
-    example: { zh_tw: '西門', en: 'Ximen' },
+    example: { 'zh-TW': '西門', en: 'Ximen' },
   })
   destination!: LocalizedTextDto
 
@@ -179,10 +179,10 @@ export class RouteDetailResponseDto extends RouteSummaryDto {
     example: [
       {
         uuid: 'NWT101160',
-        name: { zh_tw: '242', en: '242' },
+        name: { 'zh-TW': '242', en: '242' },
         direction: DirectionType.GO,
-        departure: { zh_tw: '中和', en: 'Zhonghe' },
-        destination: { zh_tw: '西門', en: 'Ximen' },
+        departure: { 'zh-TW': '中和', en: 'Zhonghe' },
+        destination: { 'zh-TW': '西門', en: 'Ximen' },
         first_bus_time: '05:30',
         last_bus_time: '17:10',
         stops: [
@@ -190,7 +190,7 @@ export class RouteDetailResponseDto extends RouteSummaryDto {
             uuid: 'NWT121560',
             station_uuid: 'NWT1001',
             sequence: 1,
-            name: { zh_tw: '中和站', en: 'Zhonghe Station' },
+            name: { 'zh-TW': '中和站', en: 'Zhonghe Station' },
             position: { latitude: 25.0018, longitude: 121.4984 },
           },
           {
@@ -198,7 +198,7 @@ export class RouteDetailResponseDto extends RouteSummaryDto {
             station_uuid: 'NWT1002',
             sequence: 2,
             name: {
-              zh_tw: '智光商職',
+              'zh-TW': '智光商職',
               en: 'Chih-Kuang Vocational High School',
             },
             position: { latitude: 25.0042, longitude: 121.5021 },
