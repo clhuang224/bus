@@ -28,8 +28,7 @@ Application endpoints are prefixed with `/api`.
 
 - `system`: service health checks
 - `routes`: route list and route detail contracts
-- `stops`: stop detail contracts
-- `nearby`: nearby stop contracts
+- `stations`: station and nearby station contracts
 - `realtime`: polling-friendly realtime snapshot contracts
 - `favorite`: favorite route and stop page contracts
 - `settings`: client-facing sync and configuration state
@@ -39,7 +38,7 @@ Application endpoints are prefixed with `/api`.
 
 - TDX authentication and upstream request shaping
 - base-data sync into PostgreSQL
-- route and stop API endpoints backed by the database
+- route and station API endpoints backed by the database
 - request pacing and TDX quota protection
 - Scalar/OpenAPI documentation
 

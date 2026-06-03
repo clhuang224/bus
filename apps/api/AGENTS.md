@@ -10,11 +10,10 @@ Keep API features grouped by domain module:
 
 - `src/admin/`: admin-only sync endpoints such as `/api/admin/sync/routes`
 - `src/favorite/`: favorite-related endpoints
-- `src/nearby/`: nearby stop endpoints
 - `src/realtime/`: polling or future realtime snapshot endpoints
 - `src/routes/`: route list and route detail endpoints
 - `src/settings/`: settings-related endpoints
-- `src/stops/`: stop detail endpoints
+- `src/stations/`: station and nearby station endpoints
 - `src/dto/`: DTOs shared across API modules, such as localized text and positions
 
 Each feature module should usually contain:
@@ -33,7 +32,7 @@ The API uses `app.setGlobalPrefix('api')`, so controller paths are written witho
 Examples:
 
 - `@Controller('routes')` becomes `/api/routes`
-- `@Controller('stops')` becomes `/api/stops`
+- `@Controller('stations')` becomes `/api/stations`
 - `@Controller('admin/sync')` becomes `/api/admin/sync`
 
 Use `:uuid` for route parameters instead of TDX-style names such as `:routeUid` or `:stopUid`.

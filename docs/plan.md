@@ -42,7 +42,7 @@ Initial responsibilities:
 
 - TDX authentication
 - scheduled or manual base-data sync
-- route and stop API endpoints backed by the database
+- route and station API endpoints backed by the database
 - request shaping and response DTOs
 - TDX quota protection
 
@@ -54,11 +54,22 @@ The first database scope should focus on non-realtime base data:
 
 - cities
 - routes
+- stations
+- station groups
 - stops
 - route stops
 - sync runs
 
 Realtime data can be added later as cached snapshots after the base-data flow is stable.
+
+Nearby station data should be modeled around stations, not only physical stop signs.
+
+The backend should evaluate TDX station-oriented endpoints as primary sync sources for nearby flows:
+
+- `/v2/Bus/Station/City/{City}`
+- `/v2/Bus/StationGroup/City/{City}`
+
+`/v2/Bus/Stop/City/{City}` and `/v2/Bus/StopOfRoute/City/{City}` are still useful for resolving physical stop signs, route directions, stop sequences, and route membership. The frontend should receive a page-ready station model and should not need to know whether the backend used station, station group, stop, or stop-of-route upstream data to compose it.
 
 ### API Documentation
 
@@ -74,7 +85,7 @@ Deploy the NestJS backend to Render and use Neon PostgreSQL as the hosted databa
 
 ## Phase 1 Scope
 
-The first phase should prove that the app can read core route and stop data from its own backend/database.
+The first phase should prove that the app can read core route and station data from its own backend/database.
 
 ### API Draft
 
@@ -82,9 +93,8 @@ The first phase should prove that the app can read core route and stop data from
 | ------ | ------------------------ | ----------------------------- |
 | GET    | `/api/health`            | Health check                  |
 | GET    | `/api/routes`            | List routes from the database |
-| GET    | `/api/routes/:routeUid`  | Get route detail data         |
-| GET    | `/api/stops/:stopUid`    | Get stop detail data          |
-| GET    | `/api/nearby-stops`      | Find nearby stops             |
+| GET    | `/api/routes/:uuid`      | Get route detail data         |
+| GET    | `/api/stations`          | Find nearby station groups    |
 | POST   | `/api/admin/sync/routes` | Sync route data from TDX      |
 | POST   | `/api/admin/sync/stops`  | Sync stop data from TDX       |
 

@@ -12,14 +12,13 @@ async function bootstrap() {
     .setDescription(
       [
         'Contract-first backend API for Finding the Bus.',
-        'The current API surface defines page-ready route, stop, favorite, realtime, settings, and admin sync contracts before the database sync layer is implemented.',
+        'The current API surface defines page-ready route, station, favorite, realtime, settings, and admin sync contracts before the database sync layer is implemented.',
       ].join(' '),
     )
     .setVersion('1.0.0')
     .addTag('system', 'Service health and operational endpoints.')
     .addTag('favorite', 'Favorite route and stop page contracts.')
-    .addTag('nearby', 'Nearby stop contracts for location-based screens.')
-    .addTag('stops', 'Stop detail contracts.')
+    .addTag('stations', 'Station and nearby station contracts.')
     .addTag('routes', 'Route list and route detail contracts.')
     .addTag('realtime', 'Polling-friendly realtime snapshot contracts.')
     .addTag('settings', 'Client-facing sync and configuration state.')
