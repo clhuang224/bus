@@ -1,18 +1,16 @@
-import { Test, TestingModule } from '@nestjs/testing'
 import { INestApplication } from '@nestjs/common'
 import request from 'supertest'
-import { AppModule } from './../src/app.module.js'
+import { createE2eApp } from './create-e2e-app.js'
 
-describe('AppController (e2e)', () => {
+describe('Health API (e2e)', () => {
   let app: INestApplication
 
   beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile()
+    app = await createE2eApp()
+  })
 
-    app = moduleFixture.createNestApplication()
-    await app.init()
+  afterEach(async () => {
+    await app.close()
   })
 
   it('/api/health (GET)', () => {
@@ -25,9 +23,5 @@ describe('AppController (e2e)', () => {
         expect(body.status).toBe('ok')
         expect(new Date(body.timestamp).toISOString()).toBe(body.timestamp)
       })
-  })
-
-  afterEach(async () => {
-    await app.close()
   })
 })

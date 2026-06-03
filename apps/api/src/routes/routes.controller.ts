@@ -1,5 +1,5 @@
 import { AreaType } from '@bus/shared'
-import { Controller, Get, Param, Query } from '@nestjs/common'
+import { Controller, Get, Param, ParseEnumPipe, Query } from '@nestjs/common'
 import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import {
   RouteDetailResponseDto,
@@ -26,7 +26,9 @@ export class RoutesController {
   })
   @ApiOkResponse({ type: RoutesResponseDto })
   @Get()
-  listRoutes(@Query('area') area: AreaType): RoutesResponseDto {
+  listRoutes(
+    @Query('area', new ParseEnumPipe(AreaType)) area: AreaType,
+  ): RoutesResponseDto {
     return this.routesService.listRoutes(area)
   }
 

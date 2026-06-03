@@ -24,6 +24,12 @@ Scalar renders the generated OpenAPI document:
 
 Application endpoints are prefixed with `/api`.
 
+## Testing
+
+- unit tests live next to source files under `src/`
+- e2e tests live under `test/` and should be grouped by API resource, such as `health.e2e-spec.ts` or `routes.e2e-spec.ts`
+- shared e2e app bootstrap belongs in `test/create-e2e-app.ts` so global prefix and future global setup stay consistent across suites
+
 ## Endpoint Groups
 
 - `system`: service health checks
