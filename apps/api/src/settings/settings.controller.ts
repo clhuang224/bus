@@ -12,7 +12,7 @@ export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
   @ApiOperation({
-    summary: 'Get settings sync state',
+    summary: 'Get settings',
     description:
       'WARNING: Backlog placeholder. This endpoint should wait until account/auth work starts because settings sync is user-specific and currently remains frontend-local.',
   })
