@@ -1,5 +1,4 @@
-import type { BearingType } from '@bus/shared'
-import type { CityNameType } from '@bus/shared'
+import type { BearingType, CityNameType } from '@bus/shared'
 import type { LngLat } from '../types/CoordsType'
 import type { LocalizedText, TdxLocalizedText } from '../types/LocalizedText'
 

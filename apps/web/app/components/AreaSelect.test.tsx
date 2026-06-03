@@ -3,7 +3,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { AreaSelect } from './AreaSelect'
-import { AreaType } from '~/modules/enums/AreaType'
+import { AreaType } from '@bus/shared'
 import i18n from '~/modules/i18n'
 
 vi.mock('@mantine/core', () => ({

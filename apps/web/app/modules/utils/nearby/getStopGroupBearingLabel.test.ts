@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { BearingType } from '@bus/shared'
-import { CityNameType } from '@bus/shared'
+import { BearingType, CityNameType } from '@bus/shared'
 import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
 import { getStopGroupBearingLabel } from './getStopGroupBearingLabel'
 

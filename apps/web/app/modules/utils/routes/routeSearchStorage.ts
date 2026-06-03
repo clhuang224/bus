@@ -1,4 +1,4 @@
-import { AreaType } from '../../enums/AreaType'
+import { AreaType } from '@bus/shared'
 import type { RouteSearchState } from '../../slices/routeSearchSlice'
 import { initialRouteSearchState } from '../../slices/routeSearchSlice'
 import { getLocalStorage } from '../shared/getLocalStorage'
