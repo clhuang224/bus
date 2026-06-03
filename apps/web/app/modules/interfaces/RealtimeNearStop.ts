@@ -3,8 +3,7 @@ import type {
   VehicleStateType,
 } from '../enums/VehicleStateType'
 import type { BusStatusType } from '../enums/BusStatusType'
-import type { CityNameType } from '@bus/shared'
-import type { DirectionType } from '../enums/DirectionType'
+import type { CityNameType, DirectionType } from '@bus/shared'
 import type { DutyStatusType } from '../enums/DutyStatusType'
 import type { MessageType } from '../enums/MessageType'
 import type { TripStartTimeType } from '../enums/TripStartTimeType'

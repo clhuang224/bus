@@ -1,5 +1,5 @@
 import { directionTranslationKeyMap } from '../../consts/direction'
-import { DirectionType } from '../../enums/DirectionType'
+import { DirectionType } from '@bus/shared'
 
 export function getDirectionTranslationKey(direction: DirectionType) {
   return (

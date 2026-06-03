@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CityNameType } from '@bus/shared'
-import { DirectionType } from '../../enums/DirectionType'
+import { CityNameType, DirectionType } from '@bus/shared'
 import { normalizeStoredFavoriteRouteStop } from './normalizeStoredFavoriteRouteStop'
 
 const validStoredFavoriteRouteStop = {
