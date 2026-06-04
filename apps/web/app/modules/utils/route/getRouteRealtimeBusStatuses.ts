@@ -1,5 +1,5 @@
 import type { TFunction } from 'i18next'
-import type { AppLocaleType } from '../../enums/AppLocaleType'
+import type { AppLocaleType } from '@bus/shared'
 import { VehicleStateType } from '../../enums/VehicleStateType'
 import { stopStatusTranslationKeyMap } from '../../consts/stopStatus'
 import { StopStatusType } from '../../enums/StopStatusType'

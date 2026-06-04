@@ -1,4 +1,4 @@
-import type { DirectionType } from '../enums/DirectionType'
+import type { DirectionType } from '@bus/shared'
 import type { VehicleStateType } from '../enums/VehicleStateType'
 
 export interface RouteRealtimeBusStatus {

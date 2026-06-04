@@ -1,4 +1,4 @@
-import { DirectionType } from '../enums/DirectionType'
+import { DirectionType } from '@bus/shared'
 
 type ZhTWLocale = typeof import('../i18n/locales/zh-TW').zhTW
 type DirectionTranslationKey =

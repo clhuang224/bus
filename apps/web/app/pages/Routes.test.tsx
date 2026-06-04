@@ -3,10 +3,9 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
-import { AreaType } from '~/modules/enums/AreaType'
-import { AppLocaleType } from '~/modules/enums/AppLocaleType'
-import { CityNameType } from '@bus/shared'
+import { AppLocaleType, AreaType, CityNameType } from '@bus/shared'
 import routeSearchSlice from '~/modules/slices/routeSearchSlice'
+import { getEnumValues } from '~/modules/utils/shared/getEnumValues'
 import { ROUTE_SEARCH_RECENT_STORAGE_KEY } from '~/modules/utils/routes/routeSearchRecentStorage'
 import { createTestStore } from '~/test/createTestStore'
 import { renderWithProvidersAndRouter } from '~/test/render'
@@ -44,7 +43,7 @@ vi.mock('~/components/AreaSelect', () => ({
       value={value}
       onChange={(event) => onChange(event.target.value as AreaType)}
     >
-      {Object.values(AreaType).map((area) => (
+      {getEnumValues(AreaType).map((area) => (
         <option key={area} value={area}>
           {area}
         </option>

@@ -5,6 +5,7 @@ import { cityMapNameToCity, countyIdMapCity } from '../../consts/city'
 import { CityNameType } from '@bus/shared'
 import { CountyIdType } from '../../enums/CountyIdType'
 import type { LatLng } from '../../types/CoordsType'
+import { getEnumValues } from '../shared/getEnumValues'
 
 interface CityProperties {
   name?: string
@@ -18,7 +19,7 @@ type CityFeature = Feature<Polygon | MultiPolygon, CityProperties>
 
 export const DEFAULT_CITY = CityNameType.TAIPEI
 
-const cityNameSet = new Set(Object.values(CityNameType))
+const cityNameSet = new Set(getEnumValues(CityNameType))
 
 function getCityByCountyId(feature: CityFeature): CityNameType | null {
   const countyId = feature.properties.COUNTYID

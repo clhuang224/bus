@@ -1,4 +1,4 @@
-import { DirectionType } from '../../enums/DirectionType'
+import { DirectionType } from '@bus/shared'
 import type { FavoriteRouteStop } from '../../interfaces/FavoriteRouteStop'
 import type { LocalizedText } from '../../types/LocalizedText'
 import { getEnumValues } from '../shared/getEnumValues'

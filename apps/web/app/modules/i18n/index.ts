@@ -1,7 +1,7 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import { DEFAULT_APP_LOCALE, SUPPORTED_APP_LOCALES } from '../consts/i18n'
-import { AppLocaleType } from '../enums/AppLocaleType'
+import { AppLocaleType } from '@bus/shared'
 import { getInitialAppLocale } from './locale'
 import { en } from './locales/en'
 import { zhTW } from './locales/zh-TW'

@@ -1,6 +1,6 @@
 import type { FeatureCollection } from 'geojson'
 import { cityMapArea } from '../../consts/area'
-import { AreaType } from '../../enums/AreaType'
+import { AreaType } from '@bus/shared'
 import type { LatLng } from '../../types/CoordsType'
 import { getCityByCoords } from './getCityByCoords'
 

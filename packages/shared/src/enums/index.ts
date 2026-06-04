@@ -1,2 +1,7 @@
+export { AppLocaleType } from './AppLocaleType.js'
+export { AreaType } from './AreaType.js'
 export { BearingType } from './BearingType.js'
 export { CityNameType } from './CityNameType.js'
+export { DirectionType } from './DirectionType.js'
+export { SyncResourceType } from './SyncResourceType.js'
+export { SyncStatusType } from './SyncStatusType.js'

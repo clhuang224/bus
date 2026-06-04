@@ -1,5 +1,4 @@
-import type { CityNameType } from '@bus/shared'
-import type { DirectionType } from '../enums/DirectionType'
+import type { CityNameType, DirectionType } from '@bus/shared'
 import type { MessageType } from '../enums/MessageType'
 import type { StopStatusType } from '../enums/StopStatusType'
 import type { LocalizedText, TdxLocalizedText } from '../types/LocalizedText'

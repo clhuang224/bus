@@ -1,7 +1,7 @@
 import { Select } from '@mantine/core'
 import { useEffect, useState, type ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AreaType } from '~/modules/enums/AreaType'
+import { AreaType } from '@bus/shared'
 import { getAreaTranslationKey } from '~/modules/utils/i18n/getAreaTranslationKey'
 import { getEnumValues } from '~/modules/utils/shared/getEnumValues'
 

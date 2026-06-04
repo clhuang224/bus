@@ -1,5 +1,5 @@
 import { areaTranslationKeyMap } from '../../consts/area'
-import type { AreaType } from '../../enums/AreaType'
+import type { AreaType } from '@bus/shared'
 
 export function getAreaTranslationKey(area: AreaType) {
   return areaTranslationKeyMap[area]

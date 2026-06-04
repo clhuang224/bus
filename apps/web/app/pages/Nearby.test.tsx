@@ -9,9 +9,7 @@ import {
   getGeoPermissionMessages,
 } from '~/modules/consts/geoMessages'
 import { getNearbyMessages } from '~/modules/consts/pageMessages'
-import { AreaType } from '~/modules/enums/AreaType'
-import { BearingType } from '@bus/shared'
-import { CityNameType } from '@bus/shared'
+import { AreaType, BearingType, CityNameType } from '@bus/shared'
 import { GeoErrorType } from '~/modules/enums/geo/GeoErrorType'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
 import { createTestStore } from '~/test/createTestStore'

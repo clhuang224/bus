@@ -1,4 +1,4 @@
-import { AppLocaleType } from '../../enums/AppLocaleType'
+import { AppLocaleType } from '@bus/shared'
 import type { LocalizedText } from '../../types/LocalizedText'
 
 type LocalizedTextLike = Pick<LocalizedText, 'zh-TW' | 'en'>

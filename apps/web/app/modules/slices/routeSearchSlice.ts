@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import type { AreaType } from '../enums/AreaType'
+import type { AreaType } from '@bus/shared'
 
 export interface RouteSearchState {
   keyword: string

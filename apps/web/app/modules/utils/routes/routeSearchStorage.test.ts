@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { AreaType } from '../../enums/AreaType'
+import { AreaType } from '@bus/shared'
 import { initialRouteSearchState } from '../../slices/routeSearchSlice'
 import {
   getRouteSearchFromStorage,
