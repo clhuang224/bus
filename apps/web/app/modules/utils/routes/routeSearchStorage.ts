@@ -1,6 +1,7 @@
 import { AreaType } from '@bus/shared'
 import type { RouteSearchState } from '../../slices/routeSearchSlice'
 import { initialRouteSearchState } from '../../slices/routeSearchSlice'
+import { getEnumValues } from '../shared/getEnumValues'
 import { getLocalStorage } from '../shared/getLocalStorage'
 
 export const ROUTE_SEARCH_STORAGE_KEY = 'bus-route-search'
@@ -10,7 +11,7 @@ interface RouteSearchStorage {
 }
 
 function isAreaType(value: unknown): value is AreaType {
-  return Object.values(AreaType).includes(value as AreaType)
+  return getEnumValues(AreaType).includes(value as AreaType)
 }
 
 function normalizeStoredRouteSearch(value: unknown): RouteSearchState {

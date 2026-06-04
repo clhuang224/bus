@@ -121,4 +121,4 @@ pnpm --filter @bus/api build
 pnpm --filter @bus/api test
 ```
 
-`test:e2e` may fail in restricted local sandboxes because Supertest needs to bind a server port. Treat that as an environment limitation unless it also fails in normal local development or CI.
+`test:e2e` may fail in restricted local sandboxes that disallow creating HTTP servers or sockets. Treat that as an environment limitation unless it also fails in normal local development or CI.

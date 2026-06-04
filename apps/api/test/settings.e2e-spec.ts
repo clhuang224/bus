@@ -48,4 +48,28 @@ describe('Settings API (e2e)', () => {
         expect(body).toEqual(payload)
       })
   })
+
+  it('/api/settings (PATCH) falls back when the payload does not match the contract', () => {
+    const payload = {
+      locale: 'invalid',
+      share_usage_data: 'yes',
+    }
+
+    // Nest's HTTP adapter exposes the raw server as `any`.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    return request(app.getHttpServer())
+      .patch('/api/settings')
+      .send(payload)
+      .expect(200)
+      .expect(
+        ({
+          body,
+        }: {
+          body: { locale: AppLocaleType; share_usage_data: boolean }
+        }) => {
+          expect(body.locale).toBe(AppLocaleType.ZH_TW)
+          expect(body.share_usage_data).toBe(true)
+        },
+      )
+  })
 })

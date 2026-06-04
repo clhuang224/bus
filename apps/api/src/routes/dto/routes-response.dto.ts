@@ -66,13 +66,6 @@ export class RouteStopDto {
   uuid!: string
 
   @ApiProperty({
-    description: 'Station UUID used to group physical stop signs',
-    example: 'NWT1001',
-    nullable: true,
-  })
-  station_uuid!: string | null
-
-  @ApiProperty({
     description: 'Stop sequence in the sub-route direction',
     example: 1,
   })
@@ -188,14 +181,12 @@ export class RouteDetailResponseDto extends RouteSummaryDto {
         stops: [
           {
             uuid: 'NWT121560',
-            station_uuid: 'NWT1001',
             sequence: 1,
             name: { 'zh-TW': '中和站', en: 'Zhonghe Station' },
             position: { latitude: 25.0018, longitude: 121.4984 },
           },
           {
             uuid: 'NWT121561',
-            station_uuid: 'NWT1002',
             sequence: 2,
             name: {
               'zh-TW': '智光商職',
