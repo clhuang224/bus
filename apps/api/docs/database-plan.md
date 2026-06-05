@@ -30,18 +30,124 @@ Out of scope for the first database pass:
 - Use `snake_case` for database columns.
 - Use `uuid` for stable public or TDX identifiers.
 - Use `id` for internal database relations.
+- Define our own domain enums instead of storing TDX numeric enum values directly.
+- Use `snake_case` string values for enums.
+- Do not use numbers as database enum values.
+- If a TDX raw code needs to be kept, store it as `tdx_*_code`.
+- Name boolean columns as `is_*`.
 - Store localized text as separate columns for now:
   - `name_zh_tw`
   - `name_en`
 - Store coordinates as:
   - `latitude`
   - `longitude`
+- Name timestamp columns as `*_at`.
+- Store `*_at` values in UTC.
+- Name duration or countdown columns by unit, such as `*_seconds`.
 - Keep TDX update time as `tdx_updated_at`.
 - Keep local row timestamps as `created_at` and `updated_at`.
 - Use soft delete for base data that may be referenced by favorites:
   - `is_active`
   - `inactive_at`
 - Favorite rows can be hard deleted when the user removes a favorite.
+
+## Column And Type Rules
+
+These are the planned database-level types. They can still be adjusted when writing the Prisma schema, but the API and database should follow the same naming direction.
+
+### String Length
+
+- `uuid`: `varchar(64)`
+- TDX ID fields such as `tdx_route_id`, `tdx_stop_id`, `tdx_station_id`: `varchar(64)`
+- name fields such as `name_zh_tw`, `name_en`, `departure_zh_tw`, `destination_en`: `varchar(100)`
+- address fields such as `address_zh_tw`, `address_en`: `varchar(255)`
+- phone fields: `varchar(50)`
+- URL fields: `text`
+- free-form error messages: `text`
+- original TDX payload or parsed path data: JSON
+
+### Numeric Types
+
+- `latitude`: `double precision`
+- `longitude`: `double precision`
+- ordered sequence fields such as `sequence` and `stop_sequence`: integer
+- distance fields should include the unit in the name, such as `distance_meters`
+- `distance_meters`: integer for user-facing nearby station distance
+- count fields such as `records_read`, `records_created`, and `records_updated`: integer
+
+Use `sequence` for ordered route-stop data. Avoid `order` as a column name.
+
+### Time Types
+
+- timestamp fields must use `*_at`
+- `*_at` values are stored in UTC
+- duration or countdown fields should include the unit in the name
+- duration or countdown fields should use integer values unless the API needs sub-second precision
+- example: `estimated_arrival_seconds`
+
+### Boolean Types
+
+- Boolean columns should use `is_*`.
+- Example: `is_active`.
+- Avoid `has_*` unless the column really means the row owns or contains another resource.
+
+### JSON Types
+
+Use JSON only when the structure is naturally nested or comes from an external source.
+
+Planned JSON fields:
+
+- `route_shape.path`
+- `route_shape.geometry`
+- `sync_error.payload`
+
+### Enums
+
+Use our own enum values in the database and API. Convert TDX values during sync.
+
+#### `direction`
+
+TDX uses numeric direction values. The database should store string values.
+
+- `go`
+- `return`
+- `loop`
+- `shuttle`
+- `unknown`
+
+#### `bearing`
+
+TDX may provide short direction codes. The database should store readable string values.
+
+- `east`
+- `west`
+- `south`
+- `north`
+- `southeast`
+- `northeast`
+- `southwest`
+- `northwest`
+- `unknown`
+
+#### `route_shape_source`
+
+- `encoded_polyline`
+- `geometry`
+- `stop_positions`
+
+#### `sync_resource`
+
+- `routes`
+- `stations`
+- `stops`
+- `shapes`
+
+#### `sync_status`
+
+- `pending`
+- `running`
+- `success`
+- `failed`
 
 ## Relationship Draft
 
