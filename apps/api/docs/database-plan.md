@@ -8,13 +8,13 @@ It is not a Prisma schema yet. The goal is to make the data model easier to disc
 
 First database scope:
 
-- routes
-- subroutes
-- station groups
-- stations
-- stops
-- route stops
-- route shapes
+- `route`
+- `subroute`
+- `station_group`
+- `station`
+- `stop`
+- `route_stop`
+- `route_shape`
 - sync records
 
 Out of scope for the first database pass:
@@ -44,6 +44,7 @@ Out of scope for the first database pass:
 - Name timestamp columns as `*_at`.
 - Store `*_at` values in UTC.
 - Name duration or countdown columns by unit, such as `*_seconds`.
+- Local clock times that are not exact timestamps can use `*_time`.
 - Keep TDX update time as `tdx_updated_at`.
 - Keep local row timestamps as `created_at` and `updated_at`.
 - Use soft delete for base data that may be referenced by favorites:
@@ -75,14 +76,16 @@ These are the planned database-level types. They can still be adjusted when writ
 - `distance_meters`: integer for user-facing nearby station distance
 - count fields such as `records_read`, `records_created`, and `records_updated`: integer
 
-Use `sequence` for ordered route-stop data. Avoid `order` as a column name.
+Use `sequence` for ordered `route_stop` data. Avoid `order` as a column name.
 
 ### Time Types
 
 - timestamp fields must use `*_at`
 - `*_at` values are stored in UTC
+- local clock time fields can use `*_time`
 - duration or countdown fields should include the unit in the name
 - duration or countdown fields should use integer values unless the API needs sub-second precision
+- example: `first_bus_time`
 - example: `estimated_arrival_seconds`
 
 ### Boolean Types
@@ -644,7 +647,7 @@ Indexes:
 Notes:
 
 - If the user removes a favorite, delete this row directly.
-- Soft delete is for referenced bus data such as routes, subroutes, stops, and route stops.
+- Soft delete is for referenced bus data such as routes, subroutes, stops, and `route_stop` rows.
 
 ### user_setting
 
@@ -653,7 +656,7 @@ Fields:
 - `id`
 - `user_id`
 - `locale`
-- `share_usage_data`
+- `is_google_analytics_enabled`
 - `created_at`
 - `updated_at`
 
@@ -704,7 +707,7 @@ Flow:
 
 1. Find nearby stations by coordinates.
 2. Find stops under those stations.
-3. Use route stops to find routes and directions.
+3. Use `route_stop` rows to find routes and directions.
 4. Return nearby station data.
 
 ### `POST /api/admin/sync/routes`
