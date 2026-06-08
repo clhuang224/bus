@@ -3,6 +3,9 @@ name: PR Checks
 on:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   workspace-checks:
     name: ${{ matrix.workspace }} / ${{ matrix.command }}
