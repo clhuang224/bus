@@ -1,0 +1,10 @@
+enum BearingType {
+  EAST      @map("east")
+  WEST      @map("west")
+  SOUTH     @map("south")
+  NORTH     @map("north")
+  SOUTHEAST @map("southeast")
+  NORTHEAST @map("northeast")
+  SOUTHWEST @map("southwest")
+  NORTHWEST @map("northwest")
+}

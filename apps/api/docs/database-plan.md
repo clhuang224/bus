@@ -60,7 +60,7 @@ These are the planned database-level types. They can still be adjusted when writ
 
 - `uuid`: `varchar(64)`
 - TDX ID fields such as `tdx_route_id`, `tdx_stop_id`, `tdx_station_id`: `varchar(64)`
-- name fields such as `name_zh_tw`, `name_en`, `departure_zh_tw`, `destination_en`: `varchar(100)`
+- name fields such as `name_zh_tw`, `name_en`, `name_ja`, `name_ko`, `departure_zh_tw`, and `destination_en`: `varchar(100)`
 - address fields such as `address_zh_tw`, `address_en`: `varchar(255)`
 - phone fields: `varchar(50)`
 - URL fields: `text`
@@ -296,10 +296,16 @@ Fields:
 - `city`
 - `name_zh_tw`
 - `name_en`
+- `name_ja`
+- `name_ko`
 - `departure_zh_tw`
 - `departure_en`
+- `departure_ja`
+- `departure_ko`
 - `destination_zh_tw`
 - `destination_en`
+- `destination_ja`
+- `destination_ko`
 - `is_active`
 - `inactive_at`
 - `tdx_updated_at`
@@ -329,10 +335,16 @@ Fields:
 - `direction`
 - `name_zh_tw`
 - `name_en`
+- `name_ja`
+- `name_ko`
 - `departure_zh_tw`
 - `departure_en`
+- `departure_ja`
+- `departure_ko`
 - `destination_zh_tw`
 - `destination_en`
+- `destination_ja`
+- `destination_ko`
 - `first_bus_time`
 - `last_bus_time`
 - `is_active`
@@ -363,6 +375,8 @@ Fields:
 - `city`
 - `name_zh_tw`
 - `name_en`
+- `name_ja`
+- `name_ko`
 - `latitude`
 - `longitude`
 - `is_active`
@@ -393,6 +407,8 @@ Fields:
 - `city`
 - `name_zh_tw`
 - `name_en`
+- `name_ja`
+- `name_ko`
 - `address_zh_tw`
 - `address_en`
 - `latitude`
@@ -427,6 +443,8 @@ Fields:
 - `city`
 - `name_zh_tw`
 - `name_en`
+- `name_ja`
+- `name_ko`
 - `address_zh_tw`
 - `address_en`
 - `latitude`
@@ -731,6 +749,31 @@ Writes:
 - `stop`
 - `route_stop`
 - `route_shape`
+
+## Follow-up Quality Checks
+
+Add API workspace quality scripts after the first Prisma schema foundation is reviewed.
+
+Planned scripts:
+
+- `lint`
+- `typecheck`
+- `test`
+- `test:e2e`
+- `prisma:format`
+- `prisma:validate`
+
+Prisma schema formatting should use `prisma format`.
+
+Prisma schema validation should use `prisma validate`.
+
+Consider Husky integration after the API scripts are stable:
+
+- `pre-commit` can run API lint, typecheck, and Prisma validation only when API files are staged.
+- Prisma formatting can be manual first.
+- If format enforcement is needed later, use a check that runs `prisma format` and fails when it creates a git diff.
+
+Keep CI changes separate from the first Prisma schema PR. Add API CI after the local scripts are stable.
 
 ## Plan Order
 
