@@ -750,6 +750,31 @@ Writes:
 - `route_stop`
 - `route_shape`
 
+## Follow-up Quality Checks
+
+Add API workspace quality scripts after the first Prisma schema foundation is reviewed.
+
+Planned scripts:
+
+- `lint`
+- `typecheck`
+- `test`
+- `test:e2e`
+- `prisma:format`
+- `prisma:validate`
+
+Prisma schema formatting should use `prisma format`.
+
+Prisma schema validation should use `prisma validate`.
+
+Consider Husky integration after the API scripts are stable:
+
+- `pre-commit` can run API lint, typecheck, and Prisma validation only when API files are staged.
+- Prisma formatting can be manual first.
+- If format enforcement is needed later, use a check that runs `prisma format` and fails when it creates a git diff.
+
+Keep CI changes separate from the first Prisma schema PR. Add API CI after the local scripts are stable.
+
 ## Plan Order
 
 1. Add Prisma and PostgreSQL setup.
