@@ -4,11 +4,17 @@ model Route {
   tdx_route_id       String       @db.VarChar(64)
   city               CityNameType
   name_zh_tw         String       @db.VarChar(100)
-  name_en            String       @db.VarChar(100)
+  name_en            String?      @db.VarChar(100)
+  name_ja            String?      @db.VarChar(100)
+  name_ko            String?      @db.VarChar(100)
   departure_zh_tw    String       @db.VarChar(100)
-  departure_en       String       @db.VarChar(100)
+  departure_en       String?      @db.VarChar(100)
+  departure_ja       String?      @db.VarChar(100)
+  departure_ko       String?      @db.VarChar(100)
   destination_zh_tw  String       @db.VarChar(100)
-  destination_en     String       @db.VarChar(100)
+  destination_en     String?      @db.VarChar(100)
+  destination_ja     String?      @db.VarChar(100)
+  destination_ko     String?      @db.VarChar(100)
   is_active          Boolean      @default(true)
   inactive_at        DateTime?
   tdx_updated_at     DateTime?

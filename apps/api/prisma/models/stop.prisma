@@ -6,7 +6,9 @@ model Stop {
   station        Station?     @relation(fields: [station_id], references: [id])
   city           CityNameType
   name_zh_tw     String       @db.VarChar(100)
-  name_en        String       @db.VarChar(100)
+  name_en        String?      @db.VarChar(100)
+  name_ja        String?      @db.VarChar(100)
+  name_ko        String?      @db.VarChar(100)
   address_zh_tw  String?      @db.VarChar(255)
   address_en     String?      @db.VarChar(255)
   latitude       Float
