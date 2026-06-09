@@ -1,0 +1,7 @@
+enum DirectionType {
+  GO      @map("go")
+  RETURN  @map("return")
+  LOOP    @map("loop")
+  SHUTTLE @map("shuttle")
+  UNKNOWN @map("unknown")
+}
