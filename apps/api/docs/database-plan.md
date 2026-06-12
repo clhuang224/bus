@@ -485,7 +485,7 @@ Fields:
 
 Indexes:
 
-- unique `subroute_id + stop_id + sequence`
+- unique `subroute_id + sequence`
 - index `stop_id`
 - index `subroute_id + sequence`
 
