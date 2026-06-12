@@ -21,6 +21,7 @@ model Route {
   created_at         DateTime     @default(now())
   updated_at         DateTime     @updatedAt
   subroutes          SubRoute[]
+  route_operators    RouteOperator[]
 
   @@unique([city, tdx_route_id])
   @@map("route")

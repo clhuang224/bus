@@ -24,6 +24,7 @@ model SubRoute {
   tdx_updated_at     DateTime?
   created_at         DateTime      @default(now())
   updated_at         DateTime      @updatedAt
+  route_shape        RouteShape?
 
   @@unique([route_id, direction, tdx_subroute_id])
   @@index([route_id])
