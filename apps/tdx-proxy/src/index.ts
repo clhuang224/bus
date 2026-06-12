@@ -139,23 +139,26 @@ function logProxyRequest({
   durationMs,
   path,
   retriedAfterUnauthorized,
-  search,
-  status
+  searchLength,
+  status,
+  urlLength
 }: {
   durationMs: number
   path: string
   retriedAfterUnauthorized: boolean
-  search: string
+  searchLength: number
   status: number
+  urlLength: number
 }) {
   console.log(JSON.stringify({
     type: 'tdx-proxy-request',
     timestamp: new Date().toISOString(),
     path,
-    search,
     status,
     durationMs,
     requestCount: 1,
+    searchLength,
+    urlLength,
     retriedAfterUnauthorized
   }))
 }
@@ -231,8 +234,9 @@ export default {
         durationMs,
         path: requestUrl.pathname.replace(/^\/api\/tdx/, ''),
         retriedAfterUnauthorized,
-        search: requestUrl.search,
-        status: upstreamResponse.status
+        searchLength: requestUrl.search.length,
+        status: upstreamResponse.status,
+        urlLength: requestUrl.href.length
       })
 
       return new Response(upstreamResponse.body, {
@@ -246,7 +250,8 @@ export default {
         type: 'tdx-proxy-error',
         timestamp: new Date().toISOString(),
         path: requestUrl.pathname.replace(/^\/api\/tdx/, ''),
-        search: requestUrl.search,
+        searchLength: requestUrl.search.length,
+        urlLength: requestUrl.href.length,
         message: error instanceof Error ? error.message : 'Unknown error'
       }))
 
