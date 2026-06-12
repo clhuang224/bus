@@ -1,6 +1,4 @@
 enum AppLocaleType {
   ZH_TW @map("zh-TW")
   EN    @map("en")
-  JA    @map("ja")
-  KO    @map("ko")
 }
