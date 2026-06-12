@@ -1,0 +1,5 @@
+enum RouteShapeSource {
+  ENCODED_POLYLINE @map("encoded_polyline")
+  GEOMETRY          @map("geometry")
+  STOP_POSITIONS    @map("stop_positions")
+}

@@ -1,0 +1,22 @@
+model FavoriteRouteStop {
+  id            String        @id @default(uuid()) @db.Uuid
+  uuid          String        @unique @db.VarChar(64)
+  user_id       String        @db.Uuid
+  user          User          @relation(fields: [user_id], references: [id])
+  route_id      String        @db.Uuid
+  route         Route         @relation(fields: [route_id], references: [id])
+  subroute_id   String        @db.Uuid
+  subroute      SubRoute      @relation(fields: [subroute_id], references: [id])
+  stop_id       String        @db.Uuid
+  stop          Stop          @relation(fields: [stop_id], references: [id])
+  direction     DirectionType
+  stop_sequence Int
+  created_at    DateTime      @default(now())
+  updated_at    DateTime      @updatedAt
+
+  @@unique([user_id, route_id, subroute_id, stop_id, direction])
+  @@index([route_id])
+  @@index([subroute_id])
+  @@index([stop_id])
+  @@map("favorite_route_stop")
+}

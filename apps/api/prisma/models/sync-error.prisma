@@ -1,0 +1,14 @@
+model SyncError {
+  id          String           @id @default(uuid()) @db.Uuid
+  sync_run_id String           @db.Uuid
+  sync_run    SyncRun          @relation(fields: [sync_run_id], references: [id])
+  resource    SyncResourceType
+  tdx_uuid    String?          @db.VarChar(64)
+  message     String           @db.Text
+  payload     Json?
+  created_at  DateTime         @default(now())
+
+  @@index([sync_run_id])
+  @@index([resource])
+  @@map("sync_error")
+}

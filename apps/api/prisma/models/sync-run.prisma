@@ -1,0 +1,19 @@
+model SyncRun {
+  id                  String         @id @default(uuid()) @db.Uuid
+  resource            SyncResourceType
+  status              SyncStatusType @default(QUEUED)
+  started_at          DateTime?
+  finished_at         DateTime?
+  records_read        Int            @default(0)
+  records_created     Int            @default(0)
+  records_updated     Int            @default(0)
+  records_deactivated Int            @default(0)
+  error_message       String?        @db.Text
+  created_at          DateTime       @default(now())
+  updated_at          DateTime       @updatedAt
+  errors              SyncError[]
+
+  @@index([resource, status])
+  @@index([created_at])
+  @@map("sync_run")
+}

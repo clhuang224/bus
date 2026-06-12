@@ -1,0 +1,11 @@
+model Vehicle {
+  id           String       @id @default(uuid()) @db.Uuid
+  uuid         String       @unique @db.VarChar(64)
+  plate_number String       @db.VarChar(50)
+  city         CityNameType
+  created_at   DateTime     @default(now())
+  updated_at   DateTime     @updatedAt
+
+  @@unique([city, plate_number])
+  @@map("vehicle")
+}

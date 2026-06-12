@@ -1,0 +1,10 @@
+model RouteOperator {
+  route_id    String   @db.Uuid
+  route       Route    @relation(fields: [route_id], references: [id])
+  operator_id String   @db.Uuid
+  operator    Operator @relation(fields: [operator_id], references: [id])
+
+  @@id([route_id, operator_id])
+  @@index([operator_id])
+  @@map("route_operator")
+}

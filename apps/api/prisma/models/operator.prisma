@@ -1,0 +1,15 @@
+model Operator {
+  id               String          @id @default(uuid()) @db.Uuid
+  tdx_operator_id  String          @unique @db.VarChar(64)
+  name_zh_tw       String          @db.VarChar(100)
+  name_en          String?         @db.VarChar(100)
+  phone            String?         @db.VarChar(50)
+  website_url      String?         @db.Text
+  is_active        Boolean         @default(true)
+  inactive_at      DateTime?
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+  route_operators  RouteOperator[]
+
+  @@map("operator")
+}

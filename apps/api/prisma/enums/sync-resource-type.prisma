@@ -1,0 +1,6 @@
+enum SyncResourceType {
+  ROUTES   @map("routes")
+  STOPS    @map("stops")
+  STATIONS @map("stations")
+  SHAPES   @map("shapes")
+}
