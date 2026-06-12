@@ -147,9 +147,9 @@ TDX may provide short direction codes. The database should store readable string
 
 #### `sync_status`
 
-- `pending`
+- `queued`
 - `running`
-- `success`
+- `succeeded`
 - `failed`
 
 ## Relationship Draft
@@ -589,9 +589,9 @@ Possible `resource` values:
 
 Possible `status` values:
 
-- `pending`
+- `queued`
 - `running`
-- `success`
+- `succeeded`
 - `failed`
 
 ### sync_error

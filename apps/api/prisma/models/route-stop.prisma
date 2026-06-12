@@ -1,0 +1,18 @@
+model RouteStop {
+  id             String    @id @default(uuid()) @db.Uuid
+  subroute_id    String    @db.Uuid
+  subroute       SubRoute  @relation(fields: [subroute_id], references: [id])
+  stop_id        String    @db.Uuid
+  stop           Stop      @relation(fields: [stop_id], references: [id])
+  sequence       Int
+  is_active      Boolean   @default(true)
+  inactive_at    DateTime?
+  tdx_updated_at DateTime?
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+
+  @@unique([subroute_id, stop_id, sequence])
+  @@index([stop_id])
+  @@index([subroute_id, sequence])
+  @@map("route_stop")
+}

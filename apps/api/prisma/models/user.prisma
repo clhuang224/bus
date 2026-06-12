@@ -1,0 +1,13 @@
+model User {
+  id                   String              @id @default(uuid()) @db.Uuid
+  uuid                 String              @unique @db.VarChar(64)
+  name                 String              @db.VarChar(100)
+  email                String              @unique @db.VarChar(255)
+  password_hash        String              @db.VarChar(255)
+  created_at           DateTime            @default(now())
+  updated_at           DateTime            @updatedAt
+  favorite_route_stops FavoriteRouteStop[]
+  setting              UserSetting?
+
+  @@map("user")
+}
