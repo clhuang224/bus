@@ -156,7 +156,7 @@ function logProxyRequest({
     path,
     status,
     durationMs,
-    requestCount: 1,
+    requestCount: retriedAfterUnauthorized ? 2 : 1,
     searchLength,
     urlLength,
     retriedAfterUnauthorized
