@@ -13,10 +13,8 @@
     "lint": "concurrently \"eslint \\\"{src,test}/**/*.ts\\\"\" \"prisma validate\"",
     "prisma:format": "prisma format",
     "prisma:validate": "prisma validate",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
-    "test:cov": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test": "concurrently \"pnpm run test:unit\" \"pnpm run test:e2e\"",
+    "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-e2e.json",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
