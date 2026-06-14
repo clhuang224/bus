@@ -561,6 +561,10 @@ Sync tables are not bus data.
 
 They are logs for sync jobs. For example, when `/api/admin/sync/routes` runs, `sync_run` records when it started, whether it succeeded, and how many rows were created, updated, or marked inactive.
 
+Build the sync API contract before implementing the real TDX import.
+
+The first sync API pass should define the endpoint, request DTO, response DTO, and service boundary. It can return typed placeholder data without writing to PostgreSQL or calling TDX. The database-backed `sync_run` and `sync_error` behavior can be connected after the API shape is stable.
+
 ### sync_run
 
 One sync attempt.
@@ -775,16 +779,32 @@ Consider Husky integration after the API scripts are stable:
 
 Keep CI changes separate from the first Prisma schema PR. Add API CI after the local scripts are stable.
 
+## Operational Setup
+
+These are the practical setup items needed before the backend can run outside local development.
+
+- Create or confirm the managed PostgreSQL project.
+- Create or confirm the backend hosting project.
+- Set local API environment variables in `.env.local`.
+- Set deployment environment variables in the hosting provider.
+- Keep shared values in `.env.example`, but never commit real secrets.
+- Confirm how the deployed API connects to PostgreSQL.
+- Confirm how Prisma migrations will run for the deployed database.
+- Confirm how manual admin sync endpoints are protected before they can modify data.
+- Decide where scheduled sync jobs will run after the manual sync flow works.
+- Keep deployment and scheduled jobs separate from the first sync API contract pass.
+
 ## Plan Order
 
-1. Add Prisma and PostgreSQL setup.
-2. Add base data schema.
-3. Add migrations.
-4. Add small seed data for route search.
-5. Read `GET /api/routes?area=...` from the database.
-6. Read `GET /api/routes/:uuid` from the database.
-7. Read `GET /api/stations?latitude=...&longitude=...` from the database.
-8. Implement route sync.
-9. Implement stop and station sync.
-10. Discuss realtime cache.
-11. Discuss auth, favorites, and settings.
+1. Add sync API contract stubs for planned admin sync endpoints.
+2. Add Prisma migrations for the current schema.
+3. Add Prisma service integration in the API workspace.
+4. Persist `sync_run` and `sync_error` records from sync endpoints.
+5. Add small seed data for route search.
+6. Read `GET /api/routes?area=...` from the database.
+7. Read `GET /api/routes/:uuid` from the database.
+8. Read `GET /api/stations?latitude=...&longitude=...` from the database.
+9. Implement route sync from TDX.
+10. Implement stop and station sync from TDX.
+11. Discuss realtime cache.
+12. Discuss auth, favorites, and settings.
