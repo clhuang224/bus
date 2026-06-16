@@ -17,7 +17,13 @@ export class AdminService {
       uuid: null,
       resource,
       status: SyncStatusType.QUEUED,
-      created_at: null,
+      started_at: null,
+      finished_at: null,
+      records_read: 0,
+      records_created: 0,
+      records_updated: 0,
+      records_deactivated: 0,
+      error_message: null,
     }
   }
 }
