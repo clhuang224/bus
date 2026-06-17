@@ -14,7 +14,7 @@ export class AdminSyncController {
       'Contract stub for syncing route, subroute, operator, route-operator, and route shape base data. This endpoint does not import TDX data yet.',
   })
   @ApiOkResponse({
-    description: 'Route sync run placeholder.',
+    description: 'Queued route sync run.',
     type: SyncResponseDto,
   })
   @HttpCode(200)
@@ -29,7 +29,7 @@ export class AdminSyncController {
       'Contract stub for syncing station group, station, stop, route-stop, and fallback route shape base data. This endpoint does not import TDX data yet.',
   })
   @ApiOkResponse({
-    description: 'Stop sync run placeholder.',
+    description: 'Queued stop sync run.',
     type: SyncResponseDto,
   })
   @HttpCode(200)
