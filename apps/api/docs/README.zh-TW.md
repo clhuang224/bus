@@ -42,6 +42,26 @@ Prisma schema files 放在 `prisma/` 底下。
 pnpm --filter @bus/api prisma:generate
 ```
 
+### Database URL
+
+先從範例檔建立本地環境變數檔：
+
+```bash
+cp apps/api/.env.example apps/api/.env.local
+```
+
+在 `apps/api/.env.local` 設定 `DATABASE_URL`。
+
+PostgreSQL connection string 可以從資料庫服務的 dashboard 取得。以目前的 Prisma Postgres 流程來說，建立或打開 database project，複製 pooled PostgreSQL connection string，然後貼到 `DATABASE_URL`。
+
+真實 connection string 只應該放在本地或部署環境變數裡。
+
+設定好 `DATABASE_URL` 之後，先套用 migrations，再測試會寫入資料庫的 endpoints：
+
+```bash
+pnpm --filter @bus/api prisma:migrate:dev
+```
+
 常用 Prisma scripts：
 
 | Script | 說明 |

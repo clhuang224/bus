@@ -42,6 +42,26 @@ The generated Prisma Client is written to `src/generated/prisma` and is ignored 
 pnpm --filter @bus/api prisma:generate
 ```
 
+### Database URL
+
+Create a local environment file from the example file:
+
+```bash
+cp apps/api/.env.example apps/api/.env.local
+```
+
+Set `DATABASE_URL` in `apps/api/.env.local`.
+
+You can get a PostgreSQL connection string from the database provider dashboard. For the current Prisma Postgres workflow, create or open the database project, copy the pooled PostgreSQL connection string, and paste it into `DATABASE_URL`.
+
+Keep the real connection string only in local or deployment environment variables.
+
+After setting `DATABASE_URL`, apply migrations before testing database-backed endpoints:
+
+```bash
+pnpm --filter @bus/api prisma:migrate:dev
+```
+
 Useful Prisma scripts:
 
 | Script | Description |
