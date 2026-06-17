@@ -78,6 +78,18 @@ Useful Prisma scripts:
 
 Use `--output prisma/migrations/<timestamp>_<name>/migration.sql` with a diff script when intentionally writing SQL output to a migration file.
 
+## Database E2E
+
+Database e2e tests exercise the real PostgreSQL connection. They require `DATABASE_URL` and applied migrations, and they may create temporary rows.
+
+Run them manually when checking database-backed flows:
+
+```bash
+pnpm --filter @bus/api test:e2e:db
+```
+
+Do not add database e2e tests to pre-push yet. Keep them manual until there is a stable test database or a dedicated CI job with isolated credentials.
+
 ## Endpoint Groups
 
 - `system`: service health checks

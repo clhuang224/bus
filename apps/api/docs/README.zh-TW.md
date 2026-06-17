@@ -78,6 +78,18 @@ pnpm --filter @bus/api prisma:migrate:dev
 
 確定要把 diff 寫成 migration file 時，再搭配 diff script 使用 `--output prisma/migrations/<timestamp>_<name>/migration.sql`。
 
+## Database E2E
+
+Database e2e tests 會使用真實 PostgreSQL 連線。它們需要 `DATABASE_URL` 和已套用的 migrations，也可能建立暫時資料。
+
+檢查 database-backed flows 時，可以手動執行：
+
+```bash
+pnpm --filter @bus/api test:e2e:db
+```
+
+目前不要把 database e2e tests 加進 pre-push。等之後有穩定的測試資料庫，或有使用獨立 credentials 的 CI job，再考慮納入自動流程。
+
 ## Endpoint Groups
 
 - `system`：服務健康檢查

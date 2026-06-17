@@ -131,6 +131,14 @@ Write diff output to `prisma/migrations/<timestamp>_<name>/migration.sql` only w
 
 Keep migration files committed. Keep generated Prisma Client files uncommitted.
 
+Database e2e tests use the real PostgreSQL connection and should stay out of pre-push for now. Run them manually with:
+
+```sh
+pnpm --filter @bus/api test:e2e:db
+```
+
+Only add database e2e to automated hooks or CI after a stable isolated test database exists.
+
 ## Endpoint Stubs
 
 Until database work starts, endpoints may return:

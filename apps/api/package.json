@@ -23,6 +23,7 @@
     "test": "concurrently \"pnpm run test:unit\" \"pnpm run test:e2e\"",
     "test:unit": "pnpm run prisma:generate && NODE_OPTIONS=--experimental-vm-modules jest",
     "test:e2e": "pnpm run prisma:generate && NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-e2e.json",
+    "test:e2e:db": "pnpm run prisma:generate && NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-db-e2e.json",
     "typecheck": "pnpm run prisma:generate && tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
