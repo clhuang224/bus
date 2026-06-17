@@ -8,19 +8,33 @@ import { SyncResponseDto } from './dto/sync-response.dto.js'
 export class AdminSyncController {
   constructor(private readonly adminService: AdminService) {}
 
-  @ApiOperation({ summary: 'Sync route base data' })
-  @ApiOkResponse({ type: SyncResponseDto })
+  @ApiOperation({
+    summary: 'Queue route base-data sync',
+    description:
+      'Contract stub for syncing route, subroute, operator, route-operator, and route shape base data. This endpoint does not import TDX data yet.',
+  })
+  @ApiOkResponse({
+    description: 'Queued route sync run.',
+    type: SyncResponseDto,
+  })
   @HttpCode(200)
   @Post('routes')
-  syncRoutes(): SyncResponseDto {
+  syncRoutes(): Promise<SyncResponseDto> {
     return this.adminService.syncRoutes()
   }
 
-  @ApiOperation({ summary: 'Sync stop base data' })
-  @ApiOkResponse({ type: SyncResponseDto })
+  @ApiOperation({
+    summary: 'Queue stop base-data sync',
+    description:
+      'Contract stub for syncing station group, station, stop, route-stop, and fallback route shape base data. This endpoint does not import TDX data yet.',
+  })
+  @ApiOkResponse({
+    description: 'Queued stop sync run.',
+    type: SyncResponseDto,
+  })
   @HttpCode(200)
   @Post('stops')
-  syncStops(): SyncResponseDto {
+  syncStops(): Promise<SyncResponseDto> {
     return this.adminService.syncStops()
   }
 }

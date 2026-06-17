@@ -2,8 +2,7 @@
   "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": ".",
   "testEnvironment": "node",
-  "testRegex": ".e2e-spec.ts$",
-  "testPathIgnorePatterns": [".*-db\\.e2e-spec\\.ts$"],
+  "testRegex": ".*-db\\.e2e-spec\\.ts$",
   "extensionsToTreatAsEsm": [".ts"],
   "transform": {
     "^.+\\.(t|j)s$": [

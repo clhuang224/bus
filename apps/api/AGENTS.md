@@ -100,6 +100,45 @@ import { RoutesService } from './routes.service.js'
 
 Do not omit the extension in API source files.
 
+## Prisma
+
+Prisma schema files live under `prisma/` and may be split into `prisma/models/` and `prisma/enums/`.
+
+The generated Prisma Client output is `src/generated/prisma`. It is ignored by Git. Do not edit generated Prisma files by hand.
+
+Use these scripts instead of ad hoc Prisma commands:
+
+```sh
+pnpm --filter @bus/api prisma:generate
+pnpm --filter @bus/api prisma:format
+pnpm --filter @bus/api prisma:validate
+pnpm --filter @bus/api prisma:migrate:status
+```
+
+For normal schema changes with a reachable database, create migrations with:
+
+```sh
+pnpm --filter @bus/api prisma:migrate:create -- --name describe_change
+```
+
+For the first schema-only migration or review-only SQL output, use:
+
+```sh
+pnpm --filter @bus/api prisma:migrate:diff:empty
+```
+
+Write diff output to `prisma/migrations/<timestamp>_<name>/migration.sql` only when intentionally creating a migration file.
+
+Keep migration files committed. Keep generated Prisma Client files uncommitted.
+
+Database e2e tests use the real PostgreSQL connection and should stay out of pre-push for now. Run them manually with:
+
+```sh
+pnpm --filter @bus/api test:e2e:db
+```
+
+Only add database e2e to automated hooks or CI after a stable isolated test database exists.
+
 ## Endpoint Stubs
 
 Until database work starts, endpoints may return:
