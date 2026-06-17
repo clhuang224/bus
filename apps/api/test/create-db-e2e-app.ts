@@ -4,7 +4,7 @@ import { config as dotenvConfig } from 'dotenv'
 import { AppModule } from './../src/app.module.js'
 
 dotenvConfig({ path: '.env', quiet: true })
-dotenvConfig({ path: '.env.local', override: true, quiet: true })
+dotenvConfig({ path: '.env.local', quiet: true })
 
 export async function createDbE2eApp(): Promise<INestApplication> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
