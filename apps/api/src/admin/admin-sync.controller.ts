@@ -19,7 +19,7 @@ export class AdminSyncController {
   })
   @HttpCode(200)
   @Post('routes')
-  syncRoutes(): SyncResponseDto {
+  syncRoutes(): Promise<SyncResponseDto> {
     return this.adminService.syncRoutes()
   }
 
@@ -34,7 +34,7 @@ export class AdminSyncController {
   })
   @HttpCode(200)
   @Post('stops')
-  syncStops(): SyncResponseDto {
+  syncStops(): Promise<SyncResponseDto> {
     return this.adminService.syncStops()
   }
 }

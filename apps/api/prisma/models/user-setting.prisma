@@ -1,11 +1,11 @@
 model UserSetting {
-  id                           String        @id @default(uuid()) @db.Uuid
-  user_id                      String        @unique @db.Uuid
-  user                         User          @relation(fields: [user_id], references: [id])
-  locale                       AppLocaleType @default(ZH_TW)
-  is_google_analytics_enabled  Boolean       @default(true)
-  created_at                   DateTime      @default(now())
-  updated_at                   DateTime      @updatedAt
+  id                          String        @id @default(uuid()) @db.Uuid
+  user_id                     String        @unique @db.Uuid
+  user                        User          @relation(fields: [user_id], references: [id])
+  locale                      AppLocaleType @default(ZH_TW)
+  is_google_analytics_enabled Boolean       @default(true)
+  created_at                  DateTime      @default(now())
+  updated_at                  DateTime      @updatedAt
 
   @@map("user_setting")
 }
