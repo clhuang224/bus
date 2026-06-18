@@ -139,6 +139,20 @@ pnpm --filter @bus/api test:e2e:db
 
 Only add database e2e to automated hooks or CI after a stable isolated test database exists.
 
+## TDX Sync
+
+Design sync code for the TDX basic membership limits:
+
+- 5 requests per minute per key
+- 3 virtual points per month
+- bus API charging reference:
+  - 1,500 requests per point
+  - 150MB per point
+
+Do not rely on exact point math inside feature sync services. Sync must be designed as a batched, resumable process instead of a large burst of upstream requests.
+
+Keep TDX request throttling inside `TdxClientService`. Feature sync services such as `RoutesSyncService` should describe what data to sync, while `TdxClientService` owns how quickly TDX may be called. Do not scatter sleep, retry, or rate-limit logic across individual sync services.
+
 ## Endpoint Stubs
 
 Until database work starts, endpoints may return:
