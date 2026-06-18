@@ -1,5 +1,5 @@
 import { AppLocaleType } from '@bus/shared'
-import type { LocalizedText } from '../../types/LocalizedText'
+import type { LocalizedText } from '@bus/shared'
 
 type LocalizedTextLike = Pick<LocalizedText, 'zh-TW' | 'en'>
 type LegacyLocalizedTextLike = {

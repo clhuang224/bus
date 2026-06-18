@@ -1,55 +1,11 @@
-import type { CityNameType, DirectionType } from '@bus/shared'
-import type { LocalizedText, TdxLocalizedText } from '../types/LocalizedText'
+import type {
+  CityNameType,
+  LocalizedText,
+  TdxBusRoute,
+  TdxBusSubRoute,
+} from '@bus/shared'
 
-export interface TdxBusSubRoute<D = string, L = TdxLocalizedText> {
-  SubRouteUID: string
-  SubRouteID: string
-  OperatorIDs: string[]
-  SubRouteName: L
-  Direction: DirectionType
-  FirstBusTime: D
-  LastBusTime: D
-  HolidayFirstBusTime: D
-  HolidayLastBusTime: D
-  DepartureStopNameZh: string
-  DepartureStopNameEn: string
-  DestinationStopNameZh: string
-  DestinationStopNameEn: string
-}
-
-export interface TdxBusRoute<
-  D = string,
-  L = TdxLocalizedText,
-  S = TdxBusSubRoute<D, L>,
-> {
-  RouteUID: string
-  RouteID: string
-  HasSubRoutes: true
-  Operators: {
-    OperatorID: string
-    OperatorName: L
-    OperatorCode: string
-    OperatorNo: string
-  }[]
-  AuthorityID: string
-  ProviderID: string
-  SubRoutes: S[]
-  BusRouteType: 0
-  RouteName: L
-  DepartureStopNameZh: string
-  DepartureStopNameEn: string
-  DestinationStopNameZh: string
-  DestinationStopNameEn: string
-  TicketPriceDescriptionZh: string
-  TicketPriceDescriptionEn: string
-  FareBufferZoneDescriptionZh: string
-  FareBufferZoneDescriptionEn: string
-  RouteMapImageUrl: string
-  City: CityNameType
-  CityCode: string
-  UpdateTime: D
-  VersionID: 0
-}
+export type { TdxBusRoute, TdxBusSubRoute } from '@bus/shared'
 
 export interface BusSubRoute<D = Date | null> extends Omit<
   TdxBusSubRoute<D, LocalizedText>,
@@ -57,13 +13,22 @@ export interface BusSubRoute<D = Date | null> extends Omit<
   | 'DepartureStopNameEn'
   | 'DestinationStopNameZh'
   | 'DestinationStopNameEn'
+  | 'FirstBusTime'
+  | 'LastBusTime'
+  | 'HolidayFirstBusTime'
+  | 'HolidayLastBusTime'
 > {
+  FirstBusTime: D
+  LastBusTime: D
+  HolidayFirstBusTime: D
+  HolidayLastBusTime: D
   DepartureStopName: LocalizedText
   DestinationStopName: LocalizedText
 }
 
 export interface BusRoute<D = Date | null> extends Omit<
   TdxBusRoute<D, LocalizedText, BusSubRoute<D>>,
+  | 'SubRoutes'
   | 'DepartureStopNameZh'
   | 'DepartureStopNameEn'
   | 'DestinationStopNameZh'
@@ -72,7 +37,10 @@ export interface BusRoute<D = Date | null> extends Omit<
   | 'TicketPriceDescriptionEn'
   | 'FareBufferZoneDescriptionZh'
   | 'FareBufferZoneDescriptionEn'
+  | 'City'
 > {
+  City: CityNameType
+  SubRoutes: BusSubRoute<D>[]
   DepartureStopName: LocalizedText
   DestinationStopName: LocalizedText
   TicketPriceDescription: LocalizedText

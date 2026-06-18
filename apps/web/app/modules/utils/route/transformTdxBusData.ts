@@ -44,9 +44,11 @@ export function transformEstimatedArrival(
 
 export function transformBusRoute(
   busRoute: TdxBusRoute<string>,
+  city: CityNameType,
 ): BusRoute<string> {
   return {
     ...busRoute,
+    City: busRoute.City ?? city,
     Operators: busRoute.Operators.map((operator) => ({
       ...operator,
       OperatorName: toLocalizedText(operator.OperatorName),
@@ -70,6 +72,10 @@ export function transformBusRoute(
     },
     SubRoutes: (busRoute.SubRoutes ?? []).map((busSubRoute) => ({
       ...busSubRoute,
+      FirstBusTime: busSubRoute.FirstBusTime ?? '',
+      LastBusTime: busSubRoute.LastBusTime ?? '',
+      HolidayFirstBusTime: busSubRoute.HolidayFirstBusTime ?? '',
+      HolidayLastBusTime: busSubRoute.HolidayLastBusTime ?? '',
       DepartureStopName: {
         'zh-TW':
           busSubRoute.DepartureStopNameZh ?? busRoute.DepartureStopNameZh ?? '',

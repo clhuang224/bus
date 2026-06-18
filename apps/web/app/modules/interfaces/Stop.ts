@@ -1,6 +1,6 @@
 import type { BearingType, CityNameType } from '@bus/shared'
 import type { LngLat } from '../types/CoordsType'
-import type { LocalizedText, TdxLocalizedText } from '../types/LocalizedText'
+import type { LocalizedText, TdxLocalizedText } from '@bus/shared'
 
 export interface TdxStop {
   StopUID: string

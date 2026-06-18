@@ -1,5 +1,5 @@
 import type { CityNameType, DirectionType } from '@bus/shared'
-import type { LocalizedText } from '../types/LocalizedText'
+import type { LocalizedText } from '@bus/shared'
 
 export interface FavoriteRouteStop {
   favoriteId: string

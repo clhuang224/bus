@@ -1,6 +1,6 @@
 import { DirectionType } from '@bus/shared'
 import type { FavoriteRouteStop } from '../../interfaces/FavoriteRouteStop'
-import type { LocalizedText } from '../../types/LocalizedText'
+import type { LocalizedText } from '@bus/shared'
 import { getEnumValues } from '../shared/getEnumValues'
 import { isCityName } from '../shared/isCityName'
 

@@ -1,5 +1,5 @@
 import type { LngLat } from '../../types/CoordsType'
-import type { LocalizedText, TdxLocalizedText } from '../../types/LocalizedText'
+import type { LocalizedText, TdxLocalizedText } from '@bus/shared'
 
 export function toLocalizedText(
   text?: TdxLocalizedText | null,
