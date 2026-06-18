@@ -4,6 +4,7 @@ model SyncRun {
   status              SyncStatusType   @default(QUEUED)
   started_at          DateTime?
   finished_at         DateTime?
+  resume_after_at     DateTime?
   records_read        Int              @default(0)
   records_created     Int              @default(0)
   records_updated     Int              @default(0)
@@ -12,8 +13,10 @@ model SyncRun {
   created_at          DateTime         @default(now())
   updated_at          DateTime         @updatedAt
   errors              SyncError[]
+  tdx_request_logs    TdxRequestLog[]
 
   @@index([resource, status])
+  @@index([resume_after_at])
   @@index([created_at])
   @@map("sync_run")
 }

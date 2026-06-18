@@ -9,6 +9,8 @@ describe('getLocalizedText', () => {
         {
           'zh-TW': '藍1',
           en: 'Blue 1',
+          ja: '',
+          ko: '',
         },
         AppLocaleType.ZH_TW,
       ),
@@ -21,6 +23,8 @@ describe('getLocalizedText', () => {
         {
           'zh-TW': '藍1',
           en: 'Blue 1',
+          ja: '',
+          ko: '',
         },
         AppLocaleType.EN,
       ),
@@ -33,6 +37,8 @@ describe('getLocalizedText', () => {
         {
           'zh-TW': '捷運昆陽站',
           en: '  ',
+          ja: '',
+          ko: '',
         },
         AppLocaleType.EN,
       ),

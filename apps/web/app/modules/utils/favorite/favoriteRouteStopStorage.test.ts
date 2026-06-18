@@ -14,18 +14,28 @@ const favoriteRouteStop: FavoriteRouteStop = {
   favoriteId: 'route-1-subroute-1-0-station-1',
   city: CityNameType.TAIPEI,
   routeUID: 'route-1',
-  routeName: { 'zh-TW': '藍1', en: 'Blue 1' },
+  routeName: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
   subRouteUID: 'subroute-1',
-  subRouteName: { 'zh-TW': '往捷運昆陽站', en: 'To MRT Kunyang Station' },
+  subRouteName: {
+    'zh-TW': '往捷運昆陽站',
+    en: 'To MRT Kunyang Station',
+    ja: '',
+    ko: '',
+  },
   direction: DirectionType.GO,
   stopUID: 'stop-1',
   stopID: 'stop-id-1',
   stationID: 'station-1',
   stationKey: 'station-1',
-  stopName: { 'zh-TW': '市政府', en: 'City Hall' },
+  stopName: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
   stopSequence: 1,
-  departure: { 'zh-TW': '市政府', en: 'City Hall' },
-  destination: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+  departure: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
+  destination: {
+    'zh-TW': '捷運昆陽站',
+    en: 'MRT Kunyang Station',
+    ja: '',
+    ko: '',
+  },
 }
 
 describe('favoriteRouteStopStorage', () => {

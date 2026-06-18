@@ -1,0 +1,19 @@
+model TdxRequestLog {
+  id             String            @id @default(uuid()) @db.Uuid
+  sync_run_id    String?           @db.Uuid
+  sync_run       SyncRun?          @relation(fields: [sync_run_id], references: [id])
+  resource       SyncResourceType?
+  method         String            @db.VarChar(10)
+  path           String            @db.Text
+  status_code    Int?
+  request_bytes  Int               @default(0)
+  response_bytes Int               @default(0)
+  duration_ms    Int?
+  requested_at   DateTime          @default(now())
+  error_message  String?           @db.Text
+
+  @@index([sync_run_id])
+  @@index([requested_at])
+  @@index([resource, requested_at])
+  @@map("tdx_request_log")
+}

@@ -57,18 +57,26 @@ export function transformBusRoute(
     DepartureStopName: {
       'zh-TW': busRoute.DepartureStopNameZh ?? '',
       en: busRoute.DepartureStopNameEn ?? '',
+      ja: '',
+      ko: '',
     },
     DestinationStopName: {
       'zh-TW': busRoute.DestinationStopNameZh ?? '',
       en: busRoute.DestinationStopNameEn ?? '',
+      ja: '',
+      ko: '',
     },
     TicketPriceDescription: {
       'zh-TW': busRoute.TicketPriceDescriptionZh ?? '',
       en: busRoute.TicketPriceDescriptionEn ?? '',
+      ja: '',
+      ko: '',
     },
     FareBufferZoneDescription: {
       'zh-TW': busRoute.FareBufferZoneDescriptionZh ?? '',
       en: busRoute.FareBufferZoneDescriptionEn ?? '',
+      ja: '',
+      ko: '',
     },
     SubRoutes: (busRoute.SubRoutes ?? []).map((busSubRoute) => ({
       ...busSubRoute,
@@ -81,6 +89,8 @@ export function transformBusRoute(
           busSubRoute.DepartureStopNameZh ?? busRoute.DepartureStopNameZh ?? '',
         en:
           busSubRoute.DepartureStopNameEn ?? busRoute.DepartureStopNameEn ?? '',
+        ja: '',
+        ko: '',
       },
       DestinationStopName: {
         'zh-TW':
@@ -91,6 +101,8 @@ export function transformBusRoute(
           busSubRoute.DestinationStopNameEn ??
           busRoute.DestinationStopNameEn ??
           '',
+        ja: '',
+        ko: '',
       },
       SubRouteName: toLocalizedText(
         busSubRoute.SubRouteName,

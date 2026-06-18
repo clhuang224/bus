@@ -149,6 +149,7 @@ TDX may provide short direction codes. The database should store readable string
 
 - `queued`
 - `running`
+- `pending`
 - `succeeded`
 - `failed`
 
@@ -157,6 +158,7 @@ TDX may provide short direction codes. The database should store readable string
 ```mermaid
 erDiagram
   sync_run ||--o{ sync_error : has
+  sync_run ||--o{ tdx_request_log : records
 
   route ||--o{ subroute : has
   route ||--o{ route_operator : has
@@ -576,6 +578,7 @@ Fields:
 - `status`
 - `started_at`
 - `finished_at`
+- `resume_after_at`
 - `records_read`
 - `records_created`
 - `records_updated`
@@ -595,8 +598,11 @@ Possible `status` values:
 
 - `queued`
 - `running`
+- `pending`
 - `succeeded`
 - `failed`
+
+Use `pending` when a sync run is paused because it can continue later, such as when TDX request quota is temporarily exhausted. Store the next possible resume time in `resume_after_at`.
 
 ### sync_error
 
@@ -617,6 +623,32 @@ Fields:
 Relations:
 
 - belongs to `sync_run`
+
+### tdx_request_log
+
+One upstream TDX request.
+
+This table is used for quota tracking and diagnostics. It should be written by the TDX client layer, not by individual feature sync services.
+
+Fields:
+
+- `id`
+- `sync_run_id`
+- `resource`
+- `method`
+- `path`
+- `status_code`
+- `request_bytes`
+- `response_bytes`
+- `duration_ms`
+- `requested_at`
+- `error_message`
+
+Relations:
+
+- optionally belongs to `sync_run`
+
+Quota checks can use this table to count requests and response bytes for the current month. Minute-level pacing still belongs in the TDX client layer.
 
 ## Later Tables
 
@@ -737,6 +769,7 @@ Flow:
 Writes:
 
 - `sync_run`
+- `tdx_request_log`
 - `route`
 - `subroute`
 - `operator`
@@ -748,6 +781,7 @@ Writes:
 Writes:
 
 - `sync_run`
+- `tdx_request_log`
 - `station_group`
 - `station`
 - `stop`

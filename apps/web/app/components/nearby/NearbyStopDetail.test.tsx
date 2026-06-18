@@ -14,7 +14,7 @@ const t = i18n.getFixedT(AppLocaleType.ZH_TW)
 
 const stopGroup = {
   StationID: 'station-1',
-  StopName: { 'zh-TW': '市政府', en: 'City Hall' },
+  StopName: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
   City: CityNameType.TAIPEI,
   position: [121.5654, 25.033] as [number, number],
   stops: [
@@ -26,7 +26,7 @@ const stopGroup = {
       StationGroupID: 'group-1',
       position: [121.5654, 25.033] as [number, number],
       GeoHash: null,
-      StopName: { 'zh-TW': '市政府', en: 'City Hall' },
+      StopName: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
       StopAddress: 'Address 1',
       Bearing: null as BearingType | null,
       StopDescription: null,

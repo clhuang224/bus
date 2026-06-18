@@ -1,6 +1,7 @@
 enum SyncStatusType {
   QUEUED    @map("queued")
   RUNNING   @map("running")
+  PENDING   @map("pending")
   SUCCEEDED @map("succeeded")
   FAILED    @map("failed")
 }

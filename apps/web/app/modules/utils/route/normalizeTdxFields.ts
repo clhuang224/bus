@@ -8,6 +8,8 @@ export function toLocalizedText(
   return {
     'zh-TW': text?.Zh_tw ?? defaultText?.Zh_tw ?? '',
     en: text?.En ?? defaultText?.En ?? '',
+    ja: text?.Ja ?? defaultText?.Ja ?? '',
+    ko: text?.Ko ?? defaultText?.Ko ?? '',
   }
 }
 

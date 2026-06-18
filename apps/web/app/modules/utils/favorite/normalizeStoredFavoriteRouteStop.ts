@@ -27,6 +27,8 @@ function toStoredLocalizedText(value: unknown): LocalizedText | null {
     return {
       'zh-TW': value,
       en: '',
+      ja: '',
+      ko: '',
     }
   }
 
@@ -40,6 +42,8 @@ function toStoredLocalizedText(value: unknown): LocalizedText | null {
       return {
         'zh-TW': localizedValue['zh-TW'],
         en: localizedValue.en,
+        ja: isString(localizedValue.ja) ? localizedValue.ja : '',
+        ko: isString(localizedValue.ko) ? localizedValue.ko : '',
       }
     }
 
@@ -47,6 +51,8 @@ function toStoredLocalizedText(value: unknown): LocalizedText | null {
       return {
         'zh-TW': localizedValue.zh_TW,
         en: localizedValue.en,
+        ja: isString(localizedValue.ja) ? localizedValue.ja : '',
+        ko: isString(localizedValue.ko) ? localizedValue.ko : '',
       }
     }
   }

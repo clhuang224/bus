@@ -40,6 +40,8 @@ describe('transformTdxBusData', () => {
         SubRouteName: {
           'zh-TW': '藍1',
           en: 'Blue 1',
+          ja: '',
+          ko: '',
         },
       }),
     )
@@ -198,10 +200,14 @@ describe('transformTdxBusData', () => {
         DepartureStopName: {
           'zh-TW': '圓環',
           en: 'Yuanhuan',
+          ja: '',
+          ko: '',
         },
         DestinationStopName: {
           'zh-TW': '大龍峒',
           en: 'Dalongdong',
+          ja: '',
+          ko: '',
         },
       }),
     )

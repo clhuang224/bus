@@ -12,6 +12,8 @@ describe('normalizeTdxFields', () => {
       ).toEqual({
         'zh-TW': '藍1',
         en: 'Blue 1',
+        ja: '',
+        ko: '',
       })
     })
 
@@ -24,6 +26,8 @@ describe('normalizeTdxFields', () => {
       ).toEqual({
         'zh-TW': '藍1',
         en: 'Blue 1',
+        ja: '',
+        ko: '',
       })
     })
 
@@ -31,6 +35,8 @@ describe('normalizeTdxFields', () => {
       expect(toLocalizedText()).toEqual({
         'zh-TW': '',
         en: '',
+        ja: '',
+        ko: '',
       })
     })
   })
