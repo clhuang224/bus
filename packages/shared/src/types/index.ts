@@ -1,4 +1,4 @@
-export type { AppLocale, LocalizedText } from './LocalizedText.js'
+export type { LocalizedText } from './LocalizedText.js'
 export type {
   TdxBusOperator,
   TdxBusRoute,
