@@ -563,9 +563,41 @@ Sync tables are not bus data.
 
 They are logs for sync jobs. For example, when `/api/admin/sync/routes` runs, `sync_run` records when it started, whether it succeeded, and how many rows were created, updated, or marked inactive.
 
-Build the sync API contract before implementing the real TDX import.
+The sync implementation should start with `routes` and `stops`.
 
-The first sync API pass should define the endpoint, request DTO, response DTO, and service boundary. It can return typed placeholder data without writing to PostgreSQL or calling TDX. The database-backed `sync_run` and `sync_error` behavior can be connected after the API shape is stable.
+The admin endpoint should create a `sync_run` and return it quickly. The actual TDX import should run in the background so the HTTP request does not need to stay open while all cities are being synced.
+
+Initial city scope can be Shuangbei first, then expand to all cities after the flow is stable. Full Taiwan sync is acceptable for base route and stop data because those records do not change often. A monthly sync cadence should be enough for the first version.
+
+TDX basic member limits must be respected:
+
+- request frequency: 5 requests per minute
+- monthly points: 3 points
+- bus API counting: 1 point per 1,500 requests, or 1 point per 150 MB
+
+The TDX client layer should own pacing and quota checks. Feature sync services should ask the client for one TDX request at a time and should not implement their own sleep or quota math.
+
+If quota is temporarily exhausted, update the sync run to `pending` and store the earliest retry time in `resume_after_at`.
+
+Recommended first sync flow:
+
+1. `POST /api/admin/sync/routes` or `POST /api/admin/sync/stops` creates a queued `sync_run`.
+2. A background sync service marks the run as `running`.
+3. The route or stop sync service asks the TDX client for one request at a time.
+4. The TDX client checks minute and monthly quota before each request.
+5. The TDX client writes one `tdx_request_log` row per upstream request.
+6. Mappers convert TDX payloads into Prisma-friendly records.
+7. Sync services upsert active records.
+8. Records missing from the latest TDX response are marked `is_active = false` and get `inactive_at`.
+9. If a previously inactive record appears again, mark `is_active = true` and clear `inactive_at`.
+10. When all work is done, update the run to `succeeded`.
+11. If a recoverable quota limit is hit, update the run to `pending`.
+12. If an unexpected error happens, update the run to `failed`.
+
+Use separate mappers for different boundaries:
+
+- TDX to database sync records: close to Prisma fields and database naming.
+- Database records to API response models: close to frontend page-ready contracts.
 
 ### sync_run
 
@@ -649,6 +681,8 @@ Relations:
 - optionally belongs to `sync_run`
 
 Quota checks can use this table to count requests and response bytes for the current month. Minute-level pacing still belongs in the TDX client layer.
+
+The TDX client may keep short-lived in-memory state for minute pacing, but monthly quota should be calculated from persisted request logs so a server restart does not forget usage.
 
 ## Later Tables
 
@@ -833,12 +867,15 @@ These are the practical setup items needed before the backend can run outside lo
 1. Add sync API contract stubs for planned admin sync endpoints.
 2. Add Prisma migrations for the current schema.
 3. Add Prisma service integration in the API workspace.
-4. Persist `sync_run` and `sync_error` records from sync endpoints.
-5. Add small seed data for route search.
-6. Read `GET /api/routes?area=...` from the database.
-7. Read `GET /api/routes/:uuid` from the database.
-8. Read `GET /api/stations?latitude=...&longitude=...` from the database.
-9. Implement route sync from TDX.
-10. Implement stop and station sync from TDX.
-11. Discuss realtime cache.
-12. Discuss auth, favorites, and settings.
+4. Persist `sync_run` records from sync endpoints.
+5. Add TDX request logging and quota-aware sync status fields.
+6. Implement the TDX client boundary.
+7. Implement route sync from TDX for the first city scope.
+8. Implement stop, station, station group, and route stop sync from TDX for the first city scope.
+9. Expand sync city scope after the first city scope is stable.
+10. Add small seed data or synced sample data for route search.
+11. Read `GET /api/routes?area=...` from the database.
+12. Read `GET /api/routes/:uuid` from the database.
+13. Read `GET /api/stations?latitude=...&longitude=...` from the database.
+14. Discuss realtime cache.
+15. Discuss auth, favorites, and settings.
