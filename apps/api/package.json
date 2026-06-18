@@ -20,7 +20,7 @@
     "prisma:migrate:diff:empty": "prisma migrate diff --from-empty --to-schema prisma --script",
     "prisma:migrate:status": "prisma migrate status",
     "prisma:validate": "prisma validate",
-    "test": "concurrently \"pnpm run test:unit\" \"pnpm run test:e2e\"",
+    "test": "pnpm run test:unit && pnpm run test:e2e",
     "test:unit": "pnpm run prisma:generate && NODE_OPTIONS=--experimental-vm-modules jest",
     "test:e2e": "pnpm run prisma:generate && NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-e2e.json",
     "test:e2e:db": "pnpm run prisma:generate && NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-db-e2e.json",
