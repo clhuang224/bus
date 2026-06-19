@@ -6,6 +6,7 @@ overrides:
   concurrently>shell-quote: 1.8.4
   form-data: 4.0.6
   miniflare>ws: 8.21.0
+  undici: 8.5.0
 allowBuilds:
   '@nestjs/core': true
   '@prisma/engines': true
