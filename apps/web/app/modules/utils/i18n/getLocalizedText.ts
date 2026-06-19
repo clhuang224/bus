@@ -1,32 +1,15 @@
 import { AppLocaleType } from '@bus/shared'
-
-type LocalizedTextLike = {
-  'zh-TW': string
-  en: string
-  ja?: string
-  ko?: string
-}
-
-type LegacyLocalizedTextLike = {
-  zh_TW?: string
-  en?: string
-}
+import type { LocalizedText } from '@bus/shared'
 
 export function getLocalizedText(
-  text: LocalizedTextLike | LegacyLocalizedTextLike | null | undefined,
+  text: LocalizedText | null | undefined,
   locale: AppLocaleType,
 ) {
   if (!text) return ''
 
-  const zhTwModern = ('zh-TW' in text ? text['zh-TW'] : undefined)?.trim() ?? ''
-  const zhTwLegacy = ('zh_TW' in text ? text.zh_TW : undefined)?.trim() ?? ''
-  const zhText = zhTwModern || zhTwLegacy
+  const localizedText = text[locale].trim()
 
-  const englishText = text.en?.trim() ?? ''
+  if (localizedText) return localizedText
 
-  if (locale === AppLocaleType.EN) {
-    if (englishText) return englishText
-  }
-
-  return zhText
+  return text[AppLocaleType.ZH_TW].trim()
 }
