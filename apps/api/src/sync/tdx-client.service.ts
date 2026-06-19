@@ -48,6 +48,7 @@ export class TdxClientService {
   private accessToken: string | null = null
   private accessTokenExpiresAt = 0
   private requestTimestamps: number[] = []
+  private quotaQueue: Promise<void> = Promise.resolve()
   private usageState: TdxUsageState = {
     month_key: this.getMonthKey(new Date()),
     requests: 0,
@@ -94,8 +95,7 @@ export class TdxClientService {
   ): Promise<Response> {
     // TODO(sync): Write one tdx_request_log row per upstream request, including
     // status, duration, request bytes, response bytes, and related sync_run_id.
-    await this.waitForMinuteQuota()
-    this.reserveMonthlyRequestQuota()
+    await this.acquireQuotaSlot()
 
     const response = await fetch(url, {
       headers: {
@@ -105,6 +105,25 @@ export class TdxClientService {
     })
 
     return response
+  }
+
+  private async acquireQuotaSlot(): Promise<void> {
+    const previous = this.quotaQueue
+    let release!: () => void
+
+    this.quotaQueue = new Promise<void>((resolve) => {
+      release = resolve
+    })
+
+    await previous
+
+    try {
+      // TODO(sync): Use a shared limiter if the API runs on multiple instances.
+      await this.waitForMinuteQuota()
+      this.reserveMonthlyRequestQuota()
+    } finally {
+      release()
+    }
   }
 
   private async readResponseText(
