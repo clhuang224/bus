@@ -14,3 +14,6 @@ allowBuilds:
   sharp: false
   unrs-resolver: true
   workerd: true
+minimumReleaseAgeExclude:
+  - miniflare@4.20260617.1
+  - wrangler@4.103.0
