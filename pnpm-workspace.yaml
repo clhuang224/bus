@@ -8,7 +8,7 @@ overrides:
   form-data: 4.0.6
   hono: 4.12.25
   miniflare>ws: 8.21.0
-  undici: 8.5.0
+  undici: 7.28.0
 allowBuilds:
   '@nestjs/core': true
   '@prisma/engines': true
