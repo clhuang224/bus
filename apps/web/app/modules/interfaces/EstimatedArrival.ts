@@ -1,7 +1,7 @@
 import type { CityNameType, DirectionType } from '@bus/shared'
 import type { MessageType } from '../enums/MessageType'
 import type { StopStatusType } from '../enums/StopStatusType'
-import type { LocalizedText, TdxLocalizedText } from '../types/LocalizedText'
+import type { LocalizedText, TdxLocalizedText } from '@bus/shared'
 
 export interface TdxEstimatedArrival<L = TdxLocalizedText> {
   PlateNumb?: string | null

@@ -78,8 +78,8 @@ export const busApi = createApi({
     }),
     getRoutesByCity: build.query<BusRoute<string>[], CityNameType>({
       query: (city) => `/Route/City/${city}?%24format=JSON`,
-      transformResponse: (res: TdxBusRoute<string>[]) =>
-        res.map(transformBusRoute),
+      transformResponse: (res: TdxBusRoute<string>[], _meta, city) =>
+        res.map((route) => transformBusRoute(route, city)),
     }),
     getStopOfRoutesByCity: build.query<
       StopOfRoute[],
@@ -169,8 +169,10 @@ export const busApi = createApi({
         }
 
         return {
-          data: cityResults.flatMap(({ result }) =>
-            (result.data as TdxBusRoute<string>[]).map(transformBusRoute),
+          data: cityResults.flatMap(({ city, result }) =>
+            (result.data as TdxBusRoute<string>[]).map((route) =>
+              transformBusRoute(route, city),
+            ),
           ),
         }
       },

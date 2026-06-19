@@ -5,7 +5,7 @@ import { getStopGroupBearingLabel } from './getStopGroupBearingLabel'
 
 const stopGroupBase: NearbyStopGroup = {
   StationID: 'station-1',
-  StopName: { 'zh-TW': '市政府', en: 'City Hall' },
+  StopName: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
   City: CityNameType.TAIPEI,
   position: [121.5654, 25.033],
   stops: [],

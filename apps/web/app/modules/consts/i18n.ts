@@ -7,6 +7,10 @@ export const SUPPORTED_APP_LOCALES = [
   AppLocaleType.EN,
 ] as const
 
-export function isSupportedAppLocale(value: string): value is AppLocaleType {
-  return SUPPORTED_APP_LOCALES.includes(value as AppLocaleType)
+export type SupportedAppLocale = (typeof SUPPORTED_APP_LOCALES)[number]
+
+export function isSupportedAppLocale(
+  value: string,
+): value is SupportedAppLocale {
+  return SUPPORTED_APP_LOCALES.includes(value as SupportedAppLocale)
 }

@@ -7,7 +7,7 @@ import type { CityNameType, DirectionType } from '@bus/shared'
 import type { DutyStatusType } from '../enums/DutyStatusType'
 import type { MessageType } from '../enums/MessageType'
 import type { TripStartTimeType } from '../enums/TripStartTimeType'
-import type { LocalizedText, TdxLocalizedText } from '../types/LocalizedText'
+import type { LocalizedText, TdxLocalizedText } from '@bus/shared'
 
 export interface TdxRealtimeNearStop<L = TdxLocalizedText, D = string> {
   PlateNumb: string

@@ -1,5 +1,5 @@
 import type { LngLat } from '../../types/CoordsType'
-import type { LocalizedText, TdxLocalizedText } from '../../types/LocalizedText'
+import type { LocalizedText, TdxLocalizedText } from '@bus/shared'
 
 export function toLocalizedText(
   text?: TdxLocalizedText | null,
@@ -8,6 +8,8 @@ export function toLocalizedText(
   return {
     'zh-TW': text?.Zh_tw ?? defaultText?.Zh_tw ?? '',
     en: text?.En ?? defaultText?.En ?? '',
+    ja: text?.Ja ?? defaultText?.Ja ?? '',
+    ko: text?.Ko ?? defaultText?.Ko ?? '',
   }
 }
 

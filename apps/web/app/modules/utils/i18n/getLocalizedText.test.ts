@@ -9,6 +9,8 @@ describe('getLocalizedText', () => {
         {
           'zh-TW': '藍1',
           en: 'Blue 1',
+          ja: '',
+          ko: '',
         },
         AppLocaleType.ZH_TW,
       ),
@@ -21,6 +23,8 @@ describe('getLocalizedText', () => {
         {
           'zh-TW': '藍1',
           en: 'Blue 1',
+          ja: '',
+          ko: '',
         },
         AppLocaleType.EN,
       ),
@@ -33,23 +37,47 @@ describe('getLocalizedText', () => {
         {
           'zh-TW': '捷運昆陽站',
           en: '  ',
+          ja: '',
+          ko: '',
         },
         AppLocaleType.EN,
       ),
     ).toBe('捷運昆陽站')
   })
 
-  it('supports legacy zh_TW stored text', () => {
+  it.each([
+    [AppLocaleType.JA, 'ブルー1'],
+    [AppLocaleType.KO, '블루 1'],
+  ])('returns the requested localized text in %s mode', (locale, expected) => {
     expect(
       getLocalizedText(
         {
-          zh_TW: '市政府',
-          en: 'City Hall',
+          'zh-TW': '藍1',
+          en: 'Blue 1',
+          ja: 'ブルー1',
+          ko: '블루 1',
         },
-        AppLocaleType.ZH_TW,
+        locale,
       ),
-    ).toBe('市政府')
+    ).toBe(expected)
   })
+
+  it.each([AppLocaleType.JA, AppLocaleType.KO])(
+    'falls back to zh-TW when localized text is missing in %s mode',
+    (locale) => {
+      expect(
+        getLocalizedText(
+          {
+            'zh-TW': '藍1',
+            en: 'Blue 1',
+            ja: '',
+            ko: '',
+          },
+          locale,
+        ),
+      ).toBe('藍1')
+    },
+  )
 
   it('returns an empty string when localized text is missing', () => {
     expect(getLocalizedText(null, AppLocaleType.EN)).toBe('')

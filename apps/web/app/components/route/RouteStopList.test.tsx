@@ -19,18 +19,23 @@ const favoriteRouteStop = {
   favoriteId: 'favorite-1',
   city: CityNameType.TAIPEI,
   routeUID: 'route-1',
-  routeName: { 'zh-TW': '藍1', en: 'Blue 1' },
+  routeName: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
   subRouteUID: 'subroute-1',
-  subRouteName: { 'zh-TW': '藍1', en: 'Blue 1' },
+  subRouteName: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
   direction: DirectionType.GO,
   stopUID: 'stop-1',
   stopID: 'stop-1',
   stationID: 'station-1',
   stationKey: 'station-1',
-  stopName: { 'zh-TW': '市政府', en: 'City Hall' },
+  stopName: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
   stopSequence: 1,
-  departure: { 'zh-TW': '市政府', en: 'City Hall' },
-  destination: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+  departure: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
+  destination: {
+    'zh-TW': '捷運昆陽站',
+    en: 'MRT Kunyang Station',
+    ja: '',
+    ko: '',
+  },
 }
 
 const realtimeBus: RouteRealtimeBusStatus = {
@@ -48,7 +53,12 @@ const realtimeBus: RouteRealtimeBusStatus = {
 const secondFavoriteRouteStop = {
   ...favoriteRouteStop,
   stopID: 'stop-2',
-  stopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+  stopName: {
+    'zh-TW': '捷運昆陽站',
+    en: 'MRT Kunyang Station',
+    ja: '',
+    ko: '',
+  },
   stopSequence: 2,
   stopUID: 'stop-2',
 }
@@ -296,7 +306,12 @@ describe('RouteStopList', () => {
             favoriteRouteStop: {
               ...favoriteRouteStop,
               stopID: 'stop-2',
-              stopName: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+              stopName: {
+                'zh-TW': '捷運昆陽站',
+                en: 'MRT Kunyang Station',
+                ja: '',
+                ko: '',
+              },
               stopSequence: 2,
               stopUID: 'stop-2',
             },

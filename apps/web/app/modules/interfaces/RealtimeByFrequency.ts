@@ -3,7 +3,7 @@ import type { CityNameType, DirectionType } from '@bus/shared'
 import type { DutyStatusType } from '../enums/DutyStatusType'
 import type { MessageType } from '../enums/MessageType'
 import type { LngLat } from '../types/CoordsType'
-import type { LocalizedText, TdxLocalizedText } from '../types/LocalizedText'
+import type { LocalizedText, TdxLocalizedText } from '@bus/shared'
 
 export interface TdxRealtimeByFrequency<L = TdxLocalizedText, D = string> {
   PlateNumb: string

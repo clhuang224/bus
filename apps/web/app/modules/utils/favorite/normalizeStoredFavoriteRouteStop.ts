@@ -1,6 +1,6 @@
 import { DirectionType } from '@bus/shared'
 import type { FavoriteRouteStop } from '../../interfaces/FavoriteRouteStop'
-import type { LocalizedText } from '../../types/LocalizedText'
+import type { LocalizedText } from '@bus/shared'
 import { getEnumValues } from '../shared/getEnumValues'
 import { isCityName } from '../shared/isCityName'
 
@@ -27,6 +27,8 @@ function toStoredLocalizedText(value: unknown): LocalizedText | null {
     return {
       'zh-TW': value,
       en: '',
+      ja: '',
+      ko: '',
     }
   }
 
@@ -40,6 +42,8 @@ function toStoredLocalizedText(value: unknown): LocalizedText | null {
       return {
         'zh-TW': localizedValue['zh-TW'],
         en: localizedValue.en,
+        ja: isString(localizedValue.ja) ? localizedValue.ja : '',
+        ko: isString(localizedValue.ko) ? localizedValue.ko : '',
       }
     }
 
@@ -47,6 +51,8 @@ function toStoredLocalizedText(value: unknown): LocalizedText | null {
       return {
         'zh-TW': localizedValue.zh_TW,
         en: localizedValue.en,
+        ja: isString(localizedValue.ja) ? localizedValue.ja : '',
+        ko: isString(localizedValue.ko) ? localizedValue.ko : '',
       }
     }
   }

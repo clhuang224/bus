@@ -1,5 +1,5 @@
 import type { CityNameType, DirectionType } from '@bus/shared'
-import type { LocalizedText, TdxLocalizedText } from '../types/LocalizedText'
+import type { LocalizedText, TdxLocalizedText } from '@bus/shared'
 import type { LngLat } from '../types/CoordsType'
 
 export interface TdxRouteShape {
