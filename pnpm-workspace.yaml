@@ -5,7 +5,7 @@ overrides:
   '@prisma/dev>@hono/node-server': 1.19.13
   concurrently>shell-quote: 1.8.4
   form-data: 4.0.6
-  miniflare>ws: 8.20.1
+  miniflare>ws: 8.21.0
 allowBuilds:
   '@nestjs/core': true
   '@prisma/engines': true
