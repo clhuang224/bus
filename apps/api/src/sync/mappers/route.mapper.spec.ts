@@ -82,7 +82,7 @@ describe('routeMapper', () => {
         },
         subroutes: [
           {
-            uuid: 'NWT101160',
+            uuid: 'NWT101160-0',
             tdx_subroute_id: '101160',
             direction: PrismaDirectionType.GO,
             name_zh_tw: '242',

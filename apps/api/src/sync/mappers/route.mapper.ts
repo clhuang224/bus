@@ -115,7 +115,7 @@ function mapSubRoute(
   updatedAt: Date | null,
 ): SubRouteRecord {
   return {
-    uuid: subroute.SubRouteUID,
+    uuid: `${subroute.SubRouteUID}-${subroute.Direction}`,
     tdx_subroute_id: subroute.SubRouteID,
     direction: mapDirection(subroute.Direction),
     ...mapLocalizedName(subroute.SubRouteName),
