@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { CityNameType, getEnumValues } from '@bus/shared'
 import { SyncStatusType as PrismaSyncStatusType } from '../generated/prisma/enums.js'
 import { PrismaService } from '../prisma/prisma.service.js'
@@ -22,9 +22,12 @@ const emptyResult = (): RoutesSyncResult => ({
   records_updated: 0,
   records_deactivated: 0,
 })
+const ROUTE_PROGRESS_INTERVAL = 50
 
 @Injectable()
 export class RoutesSyncService {
+  private readonly logger = new Logger(RoutesSyncService.name)
+
   constructor(
     private readonly prismaService: PrismaService,
     private readonly tdxClientService: TdxClientService,
@@ -43,9 +46,17 @@ export class RoutesSyncService {
     })
 
     const result = emptyResult()
+    const cities = getEnumValues(CityNameType)
+
+    this.logger.log(
+      `Route sync ${syncRunId} started for ${cities.length} cities.`,
+    )
 
     try {
-      for (const city of getEnumValues(CityNameType)) {
+      for (const [index, city] of cities.entries()) {
+        this.logger.log(
+          `Route sync ${syncRunId}: starting ${city} (${index + 1}/${cities.length}).`,
+        )
         const cityResult = await this.syncCityRoutes(city, syncRunId)
 
         result.records_read += cityResult.records_read
@@ -57,6 +68,10 @@ export class RoutesSyncService {
           where: { id: syncRunId },
           data: result,
         })
+
+        this.logger.log(
+          `Route sync ${syncRunId}: completed ${city} (${index + 1}/${cities.length}), read ${cityResult.records_read}, created ${cityResult.records_created}, updated ${cityResult.records_updated}, deactivated ${cityResult.records_deactivated}.`,
+        )
       }
 
       await this.prismaService.syncRun.update({
@@ -67,6 +82,10 @@ export class RoutesSyncService {
           ...result,
         },
       })
+
+      this.logger.log(
+        `Route sync ${syncRunId} succeeded: read ${result.records_read}, created ${result.records_created}, updated ${result.records_updated}, deactivated ${result.records_deactivated}.`,
+      )
 
       return result
     } catch (error) {
@@ -82,11 +101,22 @@ export class RoutesSyncService {
     const tdxRoutes = await this.tdxClientService.fetchRoutes(city, syncRunId)
     const routes = routeMapper({ city, tdxRoutes })
 
-    return this.saveRoutes(routes)
+    this.logger.log(
+      `Route sync ${syncRunId}: ${city} returned ${routes.length} routes from TDX.`,
+    )
+
+    return this.saveRoutes(routes, { city, syncRunId })
   }
 
   private async saveRoutes(
     routes: RouteSyncRecord[],
+    {
+      city: cityName,
+      syncRunId,
+    }: {
+      city: CityNameType
+      syncRunId: string
+    },
   ): Promise<RoutesSyncResult> {
     const city = routes[0]?.route.city
 
@@ -105,7 +135,7 @@ export class RoutesSyncService {
     let recordsCreated = 0
     let recordsUpdated = 0
 
-    for (const record of routes) {
+    for (const [index, record] of routes.entries()) {
       if (existingRouteUuids.has(record.route.uuid)) {
         recordsUpdated += 1
       } else {
@@ -130,6 +160,17 @@ export class RoutesSyncService {
         await this.saveSubRoutes(transaction, route.id, record)
         await this.saveOperators(transaction, route.id, record)
       })
+
+      const persistedCount = index + 1
+
+      if (
+        persistedCount % ROUTE_PROGRESS_INTERVAL === 0 ||
+        persistedCount === routes.length
+      ) {
+        this.logger.log(
+          `Route sync ${syncRunId}: persisted ${persistedCount}/${routes.length} routes for ${cityName}.`,
+        )
+      }
     }
 
     const deactivatedRoutes = await this.prismaService.route.updateMany({
