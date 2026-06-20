@@ -39,9 +39,9 @@ function createPrismaMock({
   const createCalls: unknown[] = []
   const updateCalls: unknown[] = []
   const transaction = {
-    $queryRawUnsafe: (query: string) => {
+    $executeRawUnsafe: (query: string) => {
       advisoryLockQueries.push(query)
-      return Promise.resolve([])
+      return Promise.resolve(0)
     },
     tdxRequestLog: {
       count: () => Promise.resolve(monthlyRequestCount),

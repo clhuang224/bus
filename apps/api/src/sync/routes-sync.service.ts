@@ -52,6 +52,11 @@ export class RoutesSyncService {
         result.records_created += cityResult.records_created
         result.records_updated += cityResult.records_updated
         result.records_deactivated += cityResult.records_deactivated
+
+        await this.prismaService.syncRun.update({
+          where: { id: syncRunId },
+          data: result,
+        })
       }
 
       await this.prismaService.syncRun.update({
@@ -89,25 +94,25 @@ export class RoutesSyncService {
       return emptyResult()
     }
 
-    return this.prismaService.$transaction(async (transaction) => {
-      const existingRoutes = await transaction.route.findMany({
-        where: { city },
-        select: { uuid: true },
-      })
-      const existingRouteUuids = new Set(
-        existingRoutes.map((route) => route.uuid),
-      )
-      const incomingRouteUuids = routes.map(({ route }) => route.uuid)
-      let recordsCreated = 0
-      let recordsUpdated = 0
+    const existingRoutes = await this.prismaService.route.findMany({
+      where: { city },
+      select: { uuid: true },
+    })
+    const existingRouteUuids = new Set(
+      existingRoutes.map((route) => route.uuid),
+    )
+    const incomingRouteUuids = routes.map(({ route }) => route.uuid)
+    let recordsCreated = 0
+    let recordsUpdated = 0
 
-      for (const record of routes) {
-        if (existingRouteUuids.has(record.route.uuid)) {
-          recordsUpdated += 1
-        } else {
-          recordsCreated += 1
-        }
+    for (const record of routes) {
+      if (existingRouteUuids.has(record.route.uuid)) {
+        recordsUpdated += 1
+      } else {
+        recordsCreated += 1
+      }
 
+      await this.prismaService.$transaction(async (transaction) => {
         const route = await transaction.route.upsert({
           where: { uuid: record.route.uuid },
           create: {
@@ -124,27 +129,27 @@ export class RoutesSyncService {
 
         await this.saveSubRoutes(transaction, route.id, record)
         await this.saveOperators(transaction, route.id, record)
-      }
-
-      const deactivatedRoutes = await transaction.route.updateMany({
-        where: {
-          city,
-          is_active: true,
-          uuid: { notIn: incomingRouteUuids },
-        },
-        data: {
-          is_active: false,
-          inactive_at: new Date(),
-        },
       })
+    }
 
-      return {
-        records_read: routes.length,
-        records_created: recordsCreated,
-        records_updated: recordsUpdated,
-        records_deactivated: deactivatedRoutes.count,
-      }
+    const deactivatedRoutes = await this.prismaService.route.updateMany({
+      where: {
+        city,
+        is_active: true,
+        uuid: { notIn: incomingRouteUuids },
+      },
+      data: {
+        is_active: false,
+        inactive_at: new Date(),
+      },
     })
+
+    return {
+      records_read: routes.length,
+      records_created: recordsCreated,
+      records_updated: recordsUpdated,
+      records_deactivated: deactivatedRoutes.count,
+    }
   }
 
   private async saveSubRoutes(

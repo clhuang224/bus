@@ -28,6 +28,25 @@ interface ClaimQuery extends ReadyRunQuery {
   }
 }
 
+interface StaleRecoveryQuery {
+  where: {
+    resource: PrismaSyncResourceType
+    status: PrismaSyncStatusType
+    updated_at: { lt: Date }
+  }
+  data: {
+    status: PrismaSyncStatusType
+    started_at: null
+    finished_at: null
+    resume_after_at: null
+    records_read: number
+    records_created: number
+    records_updated: number
+    records_deactivated: number
+    error_message: string
+  }
+}
+
 function createService({
   readyRunIds,
   claimCount = 1,
@@ -36,7 +55,7 @@ function createService({
   claimCount?: number
 }) {
   const readyRunQueryCalls: unknown[] = []
-  const claimCalls: unknown[] = []
+  const updateManyCalls: unknown[] = []
   const syncedRunIds: string[] = []
   const prismaService = {
     syncRun: {
@@ -45,8 +64,10 @@ function createService({
         return Promise.resolve(readyRunIds.map((id) => ({ id })))
       },
       updateMany: (args: unknown) => {
-        claimCalls.push(args)
-        return Promise.resolve({ count: claimCount })
+        updateManyCalls.push(args)
+        return Promise.resolve({
+          count: updateManyCalls.length === 1 ? 0 : claimCount,
+        })
       },
     },
   }
@@ -66,12 +87,12 @@ function createService({
     routesSyncService as unknown as RoutesSyncService,
   )
 
-  return { claimCalls, readyRunQueryCalls, service, syncedRunIds }
+  return { readyRunQueryCalls, service, syncedRunIds, updateManyCalls }
 }
 
 describe('SyncService', () => {
   it('claims and runs ready route syncs', async () => {
-    const { claimCalls, readyRunQueryCalls, service, syncedRunIds } =
+    const { readyRunQueryCalls, service, syncedRunIds, updateManyCalls } =
       createService({
         readyRunIds: ['sync-run-1'],
       })
@@ -86,8 +107,24 @@ describe('SyncService', () => {
     expect(readyRunQuery.where.OR[1].resume_after_at.lte).toBeInstanceOf(Date)
     expect(readyRunQuery.select).toEqual({ id: true })
 
-    expect(claimCalls).toHaveLength(1)
-    const claim = claimCalls[0] as ClaimQuery
+    expect(updateManyCalls).toHaveLength(2)
+    const recovery = updateManyCalls[0] as StaleRecoveryQuery
+    expect(recovery.where.resource).toBe(PrismaSyncResourceType.ROUTES)
+    expect(recovery.where.status).toBe(PrismaSyncStatusType.RUNNING)
+    expect(recovery.where.updated_at.lt).toBeInstanceOf(Date)
+    expect(recovery.data).toEqual({
+      status: PrismaSyncStatusType.QUEUED,
+      started_at: null,
+      finished_at: null,
+      resume_after_at: null,
+      records_read: 0,
+      records_created: 0,
+      records_updated: 0,
+      records_deactivated: 0,
+      error_message: 'Recovered after the previous sync worker stopped.',
+    })
+
+    const claim = updateManyCalls[1] as ClaimQuery
     expect(claim.where.id).toBe('sync-run-1')
     expect(claim.where.resource).toBe(PrismaSyncResourceType.ROUTES)
     expect(claim.where.OR[1].resume_after_at.lte).toBeInstanceOf(Date)

@@ -179,7 +179,7 @@ export class TdxClientService {
     context: TdxRequestContext,
   ): Promise<QuotaResult> {
     return this.prismaService.$transaction(async (transaction) => {
-      await transaction.$queryRawUnsafe(
+      await transaction.$executeRawUnsafe(
         `SELECT pg_advisory_xact_lock(${TDX_QUOTA_ADVISORY_LOCK_ID})`,
       )
 
@@ -343,7 +343,12 @@ export class TdxClientService {
     })
 
     if (!tokenResponse.ok) {
-      throw new Error(`Failed to get TDX token: ${tokenResponse.status}`)
+      const responseText = (await tokenResponse.text()).trim()
+      const responseDetail = responseText ? `: ${responseText}` : ''
+
+      throw new Error(
+        `Failed to get TDX token: ${tokenResponse.status}${responseDetail}`,
+      )
     }
 
     const tokenPayload = (await tokenResponse.json()) as TdxTokenResponse

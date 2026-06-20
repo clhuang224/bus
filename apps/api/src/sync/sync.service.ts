@@ -12,6 +12,7 @@ import { PrismaService } from '../prisma/prisma.service.js'
 import { RoutesSyncService } from './routes-sync.service.js'
 
 const READY_SYNC_POLL_INTERVAL_MS = 60_000
+const STALE_RUNNING_THRESHOLD_MS = 15 * 60_000
 
 @Injectable()
 export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
@@ -46,6 +47,8 @@ export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
 
   async resumeReadyRuns(): Promise<void> {
     const now = new Date()
+    await this.recoverStaleRuns(now)
+
     const readyRuns = await this.prismaService.syncRun.findMany({
       where: {
         resource: PrismaSyncResourceType.ROUTES,
@@ -61,6 +64,29 @@ export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
     })
 
     await Promise.all(readyRuns.map(({ id }) => this.dispatch(id)))
+  }
+
+  private async recoverStaleRuns(now: Date): Promise<void> {
+    await this.prismaService.syncRun.updateMany({
+      where: {
+        resource: PrismaSyncResourceType.ROUTES,
+        status: PrismaSyncStatusType.RUNNING,
+        updated_at: {
+          lt: new Date(now.getTime() - STALE_RUNNING_THRESHOLD_MS),
+        },
+      },
+      data: {
+        status: PrismaSyncStatusType.QUEUED,
+        started_at: null,
+        finished_at: null,
+        resume_after_at: null,
+        records_read: 0,
+        records_created: 0,
+        records_updated: 0,
+        records_deactivated: 0,
+        error_message: 'Recovered after the previous sync worker stopped.',
+      },
+    })
   }
 
   private async dispatch(syncRunId: string): Promise<void> {
