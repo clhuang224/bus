@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import type { CityNameType, TdxBusRoute } from '@bus/shared'
+import { SyncResourceType as PrismaSyncResourceType } from '../generated/prisma/enums.js'
+import { PrismaService } from '../prisma/prisma.service.js'
 
 const TDX_BUS_BASE_URL = 'https://tdx.transportdata.tw/api/basic/v2/Bus'
 const TDX_TOKEN_ENDPOINT =
@@ -11,16 +13,39 @@ const REQUESTS_PER_POINT = 1500
 const BYTES_PER_POINT = 150 * 1024 * 1024
 const MONTHLY_REQUEST_LIMIT = BASIC_MONTHLY_POINTS * REQUESTS_PER_POINT
 const MONTHLY_BYTE_LIMIT = BASIC_MONTHLY_POINTS * BYTES_PER_POINT
+const QUOTA_WINDOW_MS = 60 * 1000
+const TDX_QUOTA_ADVISORY_LOCK_ID = 7_324_689
 
 interface TdxTokenResponse {
   access_token: string
   expires_in: number
 }
 
-interface TdxUsageState {
-  month_key: string
-  requests: number
-  bytes: number
+interface TdxRequestContext {
+  syncRunId: string
+  resource: PrismaSyncResourceType
+}
+
+interface RequestReservation {
+  id: string
+  startedAt: number
+}
+
+interface QuotaReservation {
+  type: 'reserved'
+  reservation: RequestReservation
+}
+
+interface QuotaWait {
+  type: 'wait'
+  retryAt: Date
+}
+
+type QuotaResult = QuotaReservation | QuotaWait
+
+interface LoggedResponse {
+  response: Response
+  reservation: RequestReservation
 }
 
 export class TdxClientConfigError extends Error {
@@ -42,25 +67,27 @@ export class TdxMonthlyQuotaExceededError extends Error {
 
 @Injectable()
 export class TdxClientService {
-  // TODO(sync): Move monthly quota accounting to persisted tdx_request_log rows.
-  // In-memory state is okay for minute-level pacing, but monthly usage must
-  // survive API restarts before this is used for real sync jobs.
   private accessToken: string | null = null
   private accessTokenExpiresAt = 0
-  private requestTimestamps: number[] = []
   private quotaQueue: Promise<void> = Promise.resolve()
-  private usageState: TdxUsageState = {
-    month_key: this.getMonthKey(new Date()),
-    requests: 0,
-    bytes: 0,
+
+  constructor(private readonly prismaService: PrismaService) {}
+
+  async fetchRoutes(
+    city: CityNameType,
+    syncRunId: string,
+  ): Promise<TdxBusRoute[]> {
+    return this.fetchJsonArray<TdxBusRoute>(`/Route/City/${city}`, {
+      syncRunId,
+      resource: PrismaSyncResourceType.ROUTES,
+    })
   }
 
-  async fetchRoutes(city: CityNameType): Promise<TdxBusRoute[]> {
-    return this.fetchJsonArray<TdxBusRoute>(`/Route/City/${city}`)
-  }
-
-  private async fetchJsonArray<T>(path: string): Promise<T[]> {
-    const responseText = await this.fetchText(path)
+  private async fetchJsonArray<T>(
+    path: string,
+    context: TdxRequestContext,
+  ): Promise<T[]> {
+    const responseText = await this.fetchText(path, context)
     const payload: unknown = JSON.parse(responseText)
 
     if (!Array.isArray(payload)) {
@@ -70,18 +97,26 @@ export class TdxClientService {
     return payload.filter((value) => this.isRecord(value)) as T[]
   }
 
-  private async fetchText(path: string): Promise<string> {
+  private async fetchText(
+    path: string,
+    context: TdxRequestContext,
+  ): Promise<string> {
     const url = new URL(`${TDX_BUS_BASE_URL}${path}`)
     url.searchParams.set('$format', 'JSON')
 
     const accessToken = await this.getAccessToken()
-    const response = await this.fetchWithQuota(url, accessToken)
+    const response = await this.fetchWithQuota(url, accessToken, context)
 
-    if (response.status === 401) {
+    if (response.response.status === 401) {
+      await this.readResponseText(response, url, false)
       this.clearAccessToken()
 
       const refreshedAccessToken = await this.getAccessToken()
-      const retryResponse = await this.fetchWithQuota(url, refreshedAccessToken)
+      const retryResponse = await this.fetchWithQuota(
+        url,
+        refreshedAccessToken,
+        context,
+      )
 
       return this.readResponseText(retryResponse, url)
     }
@@ -92,22 +127,31 @@ export class TdxClientService {
   private async fetchWithQuota(
     url: URL,
     accessToken: string,
-  ): Promise<Response> {
-    // TODO(sync): Write one tdx_request_log row per upstream request, including
-    // status, duration, request bytes, response bytes, and related sync_run_id.
-    await this.acquireQuotaSlot()
+    context: TdxRequestContext,
+  ): Promise<LoggedResponse> {
+    const reservation = await this.acquireQuotaSlot(url, context)
 
-    const response = await fetch(url, {
-      headers: {
-        accept: 'application/json',
-        authorization: `Bearer ${accessToken}`,
-      },
-    })
+    try {
+      const response = await fetch(url, {
+        headers: {
+          accept: 'application/json',
+          authorization: `Bearer ${accessToken}`,
+        },
+      })
 
-    return response
+      return { response, reservation }
+    } catch (error) {
+      await this.finishRequestLog(reservation, {
+        errorMessage: this.getErrorMessage(error),
+      })
+      throw error
+    }
   }
 
-  private async acquireQuotaSlot(): Promise<void> {
+  private async acquireQuotaSlot(
+    url: URL,
+    context: TdxRequestContext,
+  ): Promise<RequestReservation> {
     const previous = this.quotaQueue
     let release!: () => void
 
@@ -118,26 +162,155 @@ export class TdxClientService {
     await previous
 
     try {
-      // TODO(sync): Use a shared limiter if the API runs on multiple instances.
-      await this.waitForMinuteQuota()
-      this.reserveMonthlyRequestQuota()
+      while (true) {
+        const result = await this.reservePersistedQuotaSlot(url, context)
+
+        if (result.type === 'reserved') return result.reservation
+
+        await this.sleep(result.retryAt.getTime() - Date.now())
+      }
     } finally {
       release()
     }
   }
 
-  private async readResponseText(
-    response: Response,
+  private reservePersistedQuotaSlot(
     url: URL,
+    context: TdxRequestContext,
+  ): Promise<QuotaResult> {
+    return this.prismaService.$transaction(async (transaction) => {
+      await transaction.$queryRawUnsafe(
+        `SELECT pg_advisory_xact_lock(${TDX_QUOTA_ADVISORY_LOCK_ID})`,
+      )
+
+      const now = new Date()
+      const monthStart = this.getMonthStart(now)
+      const [monthlyRequestCount, monthlyBytes, recentRequests] =
+        await Promise.all([
+          transaction.tdxRequestLog.count({
+            where: { requested_at: { gte: monthStart } },
+          }),
+          transaction.tdxRequestLog.aggregate({
+            where: { requested_at: { gte: monthStart } },
+            _sum: { response_bytes: true },
+          }),
+          transaction.tdxRequestLog.findMany({
+            where: {
+              requested_at: {
+                gt: new Date(now.getTime() - QUOTA_WINDOW_MS),
+              },
+            },
+            orderBy: { requested_at: 'asc' },
+            select: { requested_at: true },
+            take: REQUEST_LIMIT_PER_MINUTE,
+          }),
+        ])
+
+      if (monthlyRequestCount >= MONTHLY_REQUEST_LIMIT) {
+        throw new TdxMonthlyQuotaExceededError(
+          'TDX monthly request quota has been exhausted.',
+          this.getNextMonthStart(now),
+        )
+      }
+
+      if ((monthlyBytes._sum.response_bytes ?? 0) >= MONTHLY_BYTE_LIMIT) {
+        throw new TdxMonthlyQuotaExceededError(
+          'TDX monthly response byte quota has been exhausted.',
+          this.getNextMonthStart(now),
+        )
+      }
+
+      if (recentRequests.length >= REQUEST_LIMIT_PER_MINUTE) {
+        return {
+          type: 'wait',
+          retryAt: new Date(
+            recentRequests[0].requested_at.getTime() + QUOTA_WINDOW_MS,
+          ),
+        }
+      }
+
+      const requestLog = await transaction.tdxRequestLog.create({
+        data: {
+          sync_run_id: context.syncRunId,
+          resource: context.resource,
+          method: 'GET',
+          path: `${url.pathname}${url.search}`,
+          request_bytes: new TextEncoder().encode(url.toString()).byteLength,
+          requested_at: now,
+        },
+        select: { id: true },
+      })
+
+      return {
+        type: 'reserved',
+        reservation: {
+          id: requestLog.id,
+          startedAt: Date.now(),
+        },
+      }
+    })
+  }
+
+  private async readResponseText(
+    loggedResponse: LoggedResponse,
+    url: URL,
+    throwOnHttpError = true,
   ): Promise<string> {
-    const responseText = await response.text()
-    this.recordResponseBytes(responseText)
+    const { response, reservation } = loggedResponse
 
-    if (!response.ok) {
-      throw new Error(`TDX request failed: ${response.status} ${url.pathname}`)
+    try {
+      const responseText = await response.text()
+      const errorMessage = response.ok
+        ? null
+        : `TDX request failed: ${response.status} ${url.pathname}`
+
+      await this.finishRequestLog(reservation, {
+        statusCode: response.status,
+        responseBytes: new TextEncoder().encode(responseText).byteLength,
+        errorMessage,
+      })
+
+      if (errorMessage && throwOnHttpError) throw new Error(errorMessage)
+
+      return responseText
+    } catch (error) {
+      if (
+        !(
+          error instanceof Error &&
+          error.message.startsWith('TDX request failed:')
+        )
+      ) {
+        await this.finishRequestLog(reservation, {
+          statusCode: response.status,
+          errorMessage: this.getErrorMessage(error),
+        })
+      }
+
+      throw error
     }
+  }
 
-    return responseText
+  private finishRequestLog(
+    reservation: RequestReservation,
+    {
+      statusCode,
+      responseBytes,
+      errorMessage,
+    }: {
+      statusCode?: number
+      responseBytes?: number
+      errorMessage: string | null
+    },
+  ): Promise<unknown> {
+    return this.prismaService.tdxRequestLog.update({
+      where: { id: reservation.id },
+      data: {
+        status_code: statusCode,
+        response_bytes: responseBytes,
+        duration_ms: Date.now() - reservation.startedAt,
+        error_message: errorMessage,
+      },
+    })
   }
 
   private async getAccessToken(): Promise<string> {
@@ -186,68 +359,8 @@ export class TdxClientService {
     this.accessTokenExpiresAt = 0
   }
 
-  private async waitForMinuteQuota(): Promise<void> {
-    const now = Date.now()
-    const windowStart = now - 60 * 1000
-
-    this.requestTimestamps = this.requestTimestamps.filter(
-      (timestamp) => timestamp > windowStart,
-    )
-
-    if (this.requestTimestamps.length >= REQUEST_LIMIT_PER_MINUTE) {
-      const nextAvailableAt = this.requestTimestamps[0] + 60 * 1000
-      await this.sleep(nextAvailableAt - now)
-    }
-
-    this.requestTimestamps.push(Date.now())
-  }
-
-  private reserveMonthlyRequestQuota(): void {
-    this.resetUsageStateIfNeeded()
-
-    if (this.usageState.requests >= MONTHLY_REQUEST_LIMIT) {
-      throw new TdxMonthlyQuotaExceededError(
-        'TDX monthly request quota has been exhausted.',
-        this.getNextMonthStart(new Date()),
-      )
-    }
-
-    this.usageState.requests += 1
-  }
-
-  private recordResponseBytes(responseText: string): void {
-    this.resetUsageStateIfNeeded()
-
-    const responseBytes = new TextEncoder().encode(responseText).byteLength
-
-    if (this.usageState.bytes + responseBytes > MONTHLY_BYTE_LIMIT) {
-      throw new TdxMonthlyQuotaExceededError(
-        'TDX monthly response byte quota has been exhausted.',
-        this.getNextMonthStart(new Date()),
-      )
-    }
-
-    this.usageState.bytes += responseBytes
-  }
-
-  private resetUsageStateIfNeeded(): void {
-    const currentMonthKey = this.getMonthKey(new Date())
-
-    if (this.usageState.month_key === currentMonthKey) {
-      return
-    }
-
-    this.usageState = {
-      month_key: currentMonthKey,
-      requests: 0,
-      bytes: 0,
-    }
-  }
-
-  private getMonthKey(date: Date): string {
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0')
-
-    return `${date.getUTCFullYear()}-${month}`
+  private getMonthStart(date: Date): Date {
+    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1))
   }
 
   private getNextMonthStart(date: Date): Date {
@@ -258,6 +371,10 @@ export class TdxClientService {
     return new Promise((resolve) => {
       setTimeout(resolve, Math.max(durationMs, 0))
     })
+  }
+
+  private getErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error)
   }
 
   private isRecord(value: unknown): value is Record<string, unknown> {

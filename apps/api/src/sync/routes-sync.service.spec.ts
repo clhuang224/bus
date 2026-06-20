@@ -104,7 +104,7 @@ describe('RoutesSyncService', () => {
     )
 
     await expect(
-      service.syncCityRoutes(CityNameType.NEW_TAIPEI),
+      service.syncCityRoutes(CityNameType.NEW_TAIPEI, 'sync-run-id'),
     ).resolves.toEqual({
       records_read: 1,
       records_created: 1,

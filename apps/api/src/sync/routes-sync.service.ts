@@ -46,7 +46,7 @@ export class RoutesSyncService {
 
     try {
       for (const city of getEnumValues(CityNameType)) {
-        const cityResult = await this.syncCityRoutes(city)
+        const cityResult = await this.syncCityRoutes(city, syncRunId)
 
         result.records_read += cityResult.records_read
         result.records_created += cityResult.records_created
@@ -70,8 +70,11 @@ export class RoutesSyncService {
     }
   }
 
-  async syncCityRoutes(city: CityNameType): Promise<RoutesSyncResult> {
-    const tdxRoutes = await this.tdxClientService.fetchRoutes(city)
+  async syncCityRoutes(
+    city: CityNameType,
+    syncRunId: string,
+  ): Promise<RoutesSyncResult> {
+    const tdxRoutes = await this.tdxClientService.fetchRoutes(city, syncRunId)
     const routes = routeMapper({ city, tdxRoutes })
 
     return this.saveRoutes(routes)
