@@ -5,17 +5,27 @@ import {
   SyncStatusType as PrismaSyncStatusType,
 } from '../generated/prisma/enums.js'
 import { PrismaService } from '../prisma/prisma.service.js'
+import { SyncService } from '../sync/sync.service.js'
 import { SyncResponseDto } from './dto/sync-response.dto.js'
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly syncService: SyncService,
+  ) {}
 
   async syncRoutes(): Promise<SyncResponseDto> {
-    return this.createSyncRun({
+    const response = await this.createSyncRun({
       apiResource: SyncResourceType.ROUTES,
       prismaResource: PrismaSyncResourceType.ROUTES,
     })
+
+    if (response.uuid) {
+      this.syncService.enqueue(response.uuid)
+    }
+
+    return response
   }
 
   async syncStops(): Promise<SyncResponseDto> {

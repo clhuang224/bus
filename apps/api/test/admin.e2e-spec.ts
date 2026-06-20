@@ -6,6 +6,7 @@ import {
   SyncStatusType as PrismaSyncStatusType,
 } from '../src/generated/prisma/enums.js'
 import { PrismaService } from '../src/prisma/prisma.service.js'
+import { SyncService } from '../src/sync/sync.service.js'
 import { createE2eApp } from './create-e2e-app.js'
 
 const syncRunUuid = '550e8400-e29b-41d4-a716-446655440000'
@@ -88,12 +89,22 @@ function expectQueuedSyncResponse(
 describe('Admin Sync API (e2e)', () => {
   let app: INestApplication
   let prismaService: ReturnType<typeof createMockPrismaService>
+  let enqueuedSyncRunIds: string[]
 
   beforeEach(async () => {
     prismaService = createMockPrismaService()
+    enqueuedSyncRunIds = []
     app = await createE2eApp({
       configureModule: (builder) =>
-        builder.overrideProvider(PrismaService).useValue(prismaService),
+        builder
+          .overrideProvider(PrismaService)
+          .useValue(prismaService)
+          .overrideProvider(SyncService)
+          .useValue({
+            enqueue: (syncRunId: string) => {
+              enqueuedSyncRunIds.push(syncRunId)
+            },
+          }),
     })
   })
 
@@ -117,6 +128,7 @@ describe('Admin Sync API (e2e)', () => {
             },
           },
         ])
+        expect(enqueuedSyncRunIds).toEqual([syncRunUuid])
       })
   })
 
@@ -136,6 +148,7 @@ describe('Admin Sync API (e2e)', () => {
             },
           },
         ])
+        expect(enqueuedSyncRunIds).toEqual([])
       })
   })
 })

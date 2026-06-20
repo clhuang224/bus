@@ -11,7 +11,7 @@ export class AdminSyncController {
   @ApiOperation({
     summary: 'Queue route base-data sync',
     description:
-      'Contract stub for syncing route, subroute, operator, route-operator, and route shape base data. This endpoint does not import TDX data yet.',
+      'Queues a background sync for route, subroute, operator, and route-operator base data.',
   })
   @ApiOkResponse({
     description: 'Queued route sync run.',
