@@ -1,10 +1,35 @@
 import { CityNameType, getEnumValues } from '@bus/shared'
+import { Test } from '@nestjs/testing'
 import { cityMapper } from './mappers/route.mapper.js'
-import type { RoutePersistenceService } from './route-persistence.service.js'
+import { RoutePersistenceService } from './route-persistence.service.js'
 import { RoutesSyncService } from './routes-sync.service.js'
-import type { SyncCheckpointService } from './sync-checkpoint.service.js'
-import type { TdxClientService } from './tdx-client.service.js'
-import { TdxMonthlyQuotaExceededError } from './tdx-client.service.js'
+import { SyncCheckpointService } from './sync-checkpoint.service.js'
+import type { SyncResult } from './sync-result.js'
+import {
+  TdxClientService,
+  TdxMonthlyQuotaExceededError,
+} from './tdx-client.service.js'
+
+async function createService({
+  tdxClientService,
+  routePersistenceService = {},
+  syncCheckpointService,
+}: {
+  tdxClientService: object
+  routePersistenceService?: object
+  syncCheckpointService: object
+}) {
+  const module = await Test.createTestingModule({
+    providers: [
+      RoutesSyncService,
+      { provide: TdxClientService, useValue: tdxClientService },
+      { provide: RoutePersistenceService, useValue: routePersistenceService },
+      { provide: SyncCheckpointService, useValue: syncCheckpointService },
+    ],
+  }).compile()
+
+  return module.get(RoutesSyncService)
+}
 
 describe('RoutesSyncService', () => {
   it('marks the current city and run when the monthly quota is exhausted', async () => {
@@ -13,32 +38,30 @@ describe('RoutesSyncService', () => {
       'TDX monthly request quota has been exhausted.',
       retryAt,
     )
-    const failedCities: unknown[] = []
-    const failedRuns: unknown[] = []
+    const failedCities: Array<[string, CityNameType, Error]> = []
+    const failedRuns: Array<[string, Error, SyncResult]> = []
     const tdxClientService = {
       fetchRoutes: () => Promise.reject(quotaError),
     }
-    const routePersistenceService = {}
     const syncCheckpointService = {
       startRun: () => Promise.resolve(),
       ensureCities: () => Promise.resolve(),
       getCompletedCities: () => Promise.resolve(new Map()),
       startCity: () => Promise.resolve(),
       updateRunResult: () => Promise.resolve(),
-      failCity: (...args: unknown[]) => {
-        failedCities.push(args)
+      failCity: (syncRunId: string, city: CityNameType, error: Error) => {
+        failedCities.push([syncRunId, city, error])
         return Promise.resolve()
       },
-      failRun: (...args: unknown[]) => {
-        failedRuns.push(args)
+      failRun: (syncRunId: string, error: Error, result: SyncResult) => {
+        failedRuns.push([syncRunId, error, result])
         return Promise.resolve()
       },
     }
-    const service = new RoutesSyncService(
-      tdxClientService as unknown as TdxClientService,
-      routePersistenceService as RoutePersistenceService,
-      syncCheckpointService as unknown as SyncCheckpointService,
-    )
+    const service = await createService({
+      tdxClientService,
+      syncCheckpointService,
+    })
 
     await expect(service.syncAllRoutes('sync-run-id')).rejects.toBe(quotaError)
 
@@ -82,21 +105,16 @@ describe('RoutesSyncService', () => {
         return Promise.reject(new Error('Run checkpoint unavailable'))
       },
     }
-    const service = new RoutesSyncService(
-      tdxClientService as unknown as TdxClientService,
-      {} as RoutePersistenceService,
-      syncCheckpointService as unknown as SyncCheckpointService,
-    )
-    const serviceWithLogger = service as unknown as {
-      logger: {
-        error: (message: string) => void
-        log: (message: string) => void
-      }
-    }
-    serviceWithLogger.logger = {
-      error: (message) => loggedErrors.push(message),
-      log: () => undefined,
-    }
+    const service = await createService({
+      tdxClientService,
+      syncCheckpointService,
+    })
+    Object.defineProperty(service, 'logger', {
+      value: {
+        error: (message: string) => loggedErrors.push(message),
+        log: () => undefined,
+      },
+    })
 
     await expect(service.syncAllRoutes('sync-run-id')).rejects.toBe(syncError)
 
@@ -123,7 +141,6 @@ describe('RoutesSyncService', () => {
         return Promise.resolve([])
       },
     }
-    const routePersistenceService = {}
     const syncCheckpointService = {
       startRun: () => Promise.resolve(),
       ensureCities: () => Promise.resolve(),
@@ -136,11 +153,10 @@ describe('RoutesSyncService', () => {
       updateRunResult: () => Promise.resolve(),
       completeRun: () => Promise.resolve(),
     }
-    const service = new RoutesSyncService(
-      tdxClientService as unknown as TdxClientService,
-      routePersistenceService as RoutePersistenceService,
-      syncCheckpointService as unknown as SyncCheckpointService,
-    )
+    const service = await createService({
+      tdxClientService,
+      syncCheckpointService,
+    })
 
     await expect(service.syncAllRoutes('sync-run-id')).resolves.toEqual({
       records_read: 22,
@@ -153,7 +169,7 @@ describe('RoutesSyncService', () => {
 
   it('resumes from the first city without a completed checkpoint', async () => {
     const fetchedCities: CityNameType[] = []
-    const runResults: unknown[] = []
+    const runResults: SyncResult[] = []
     const taipeiCheckpoint = {
       city: cityMapper(CityNameType.TAIPEI),
       records_read: 419,
@@ -184,17 +200,17 @@ describe('RoutesSyncService', () => {
       startCity: () => Promise.resolve(),
       touch: () => Promise.resolve(),
       completeCity: () => Promise.resolve(),
-      updateRunResult: (_syncRunId: string, result: unknown) => {
+      updateRunResult: (_syncRunId: string, result: SyncResult) => {
         runResults.push(structuredClone(result))
         return Promise.resolve()
       },
       completeRun: () => Promise.resolve(),
     }
-    const service = new RoutesSyncService(
-      tdxClientService as unknown as TdxClientService,
-      routePersistenceService as unknown as RoutePersistenceService,
-      syncCheckpointService as unknown as SyncCheckpointService,
-    )
+    const service = await createService({
+      tdxClientService,
+      routePersistenceService,
+      syncCheckpointService,
+    })
 
     await expect(service.syncAllRoutes('sync-run-id')).resolves.toEqual({
       records_read: 419,

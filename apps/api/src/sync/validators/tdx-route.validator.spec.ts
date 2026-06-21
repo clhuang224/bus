@@ -1,4 +1,4 @@
-import { DirectionType } from '@bus/shared'
+import { CityNameType, DirectionType } from '@bus/shared'
 import type { TdxBusRoute } from '@bus/shared'
 import { isTdxBusRoute } from './tdx-route.validator.js'
 
@@ -26,7 +26,7 @@ const route = {
   ],
   BusRouteType: 11,
   RouteName: { Zh_tw: 'Example Route', En: 'Example Route' },
-  City: 'Taipei',
+  City: CityNameType.TAIPEI,
   UpdateTime: '2026-06-21T00:00:00+08:00',
   VersionID: 1,
 } satisfies TdxBusRoute

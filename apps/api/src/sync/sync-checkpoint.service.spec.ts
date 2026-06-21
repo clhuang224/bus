@@ -1,6 +1,8 @@
 import { CityNameType } from '@bus/shared'
+import { Test } from '@nestjs/testing'
+import type { Prisma } from '../generated/prisma/client.js'
 import { SyncStatusType as PrismaSyncStatusType } from '../generated/prisma/enums.js'
-import type { PrismaService } from '../prisma/prisma.service.js'
+import { PrismaService } from '../prisma/prisma.service.js'
 import { cityMapper } from './mappers/route.mapper.js'
 import { SyncCheckpointService } from './sync-checkpoint.service.js'
 import { TdxMonthlyQuotaExceededError } from './tdx-client.service.js'
@@ -12,25 +14,29 @@ describe('SyncCheckpointService', () => {
       'TDX monthly request quota has been exhausted.',
       retryAt,
     )
-    const cityUpdates: unknown[] = []
-    const runUpdates: unknown[] = []
+    const cityUpdates: Prisma.SyncRunCityUpdateArgs[] = []
+    const runUpdates: Prisma.SyncRunUpdateArgs[] = []
     const prismaService = {
       syncRun: {
-        update: (args: unknown) => {
+        update: (args: Prisma.SyncRunUpdateArgs) => {
           runUpdates.push(args)
           return Promise.resolve({})
         },
       },
       syncRunCity: {
-        update: (args: unknown) => {
+        update: (args: Prisma.SyncRunCityUpdateArgs) => {
           cityUpdates.push(args)
           return Promise.resolve({})
         },
       },
     }
-    const service = new SyncCheckpointService(
-      prismaService as unknown as PrismaService,
-    )
+    const module = await Test.createTestingModule({
+      providers: [
+        SyncCheckpointService,
+        { provide: PrismaService, useValue: prismaService },
+      ],
+    }).compile()
+    const service = module.get(SyncCheckpointService)
     const result = {
       records_read: 0,
       records_created: 0,

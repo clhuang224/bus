@@ -1,7 +1,8 @@
 import { CityNameType, DirectionType } from '@bus/shared'
 import type { TdxBusRoute } from '@bus/shared'
+import { Test } from '@nestjs/testing'
 import type { Prisma } from '../generated/prisma/client.js'
-import type { PrismaService } from '../prisma/prisma.service.js'
+import { PrismaService } from '../prisma/prisma.service.js'
 import { routeMapper } from './mappers/route.mapper.js'
 import { RoutePersistenceService } from './route-persistence.service.js'
 
@@ -99,12 +100,21 @@ function createPersistenceMocks({
   return { calls, prismaService }
 }
 
+async function createService(prismaService: object) {
+  const module = await Test.createTestingModule({
+    providers: [
+      RoutePersistenceService,
+      { provide: PrismaService, useValue: prismaService },
+    ],
+  }).compile()
+
+  return module.get(RoutePersistenceService)
+}
+
 describe('RoutePersistenceService', () => {
   it('rejects an empty city response without changing stored routes', async () => {
     const { calls, prismaService } = createPersistenceMocks()
-    const service = new RoutePersistenceService(
-      prismaService as unknown as PrismaService,
-    )
+    const service = await createService(prismaService)
 
     await expect(
       service.persistRoutes([], { city: CityNameType.NEW_TAIPEI }),
@@ -117,9 +127,7 @@ describe('RoutePersistenceService', () => {
 
   it('persists routes with their subroutes and operators', async () => {
     const { calls, prismaService } = createPersistenceMocks()
-    const service = new RoutePersistenceService(
-      prismaService as unknown as PrismaService,
-    )
+    const service = await createService(prismaService)
     const routes = routeMapper({
       city: CityNameType.NEW_TAIPEI,
       tdxRoutes: [tdxRoute],
@@ -203,9 +211,7 @@ describe('RoutePersistenceService', () => {
         return { id: 'route-db-id' }
       },
     })
-    const service = new RoutePersistenceService(
-      prismaService as unknown as PrismaService,
-    )
+    const service = await createService(prismaService)
     const routes = routeMapper({
       city: CityNameType.NEW_TAIPEI,
       tdxRoutes: Array.from({ length: 6 }, (_, index) => ({

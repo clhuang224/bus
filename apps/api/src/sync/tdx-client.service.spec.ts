@@ -1,6 +1,8 @@
 import { CityNameType } from '@bus/shared'
+import { Test } from '@nestjs/testing'
+import type { Prisma } from '../generated/prisma/client.js'
 import { SyncResourceType as PrismaSyncResourceType } from '../generated/prisma/enums.js'
-import type { PrismaService } from '../prisma/prisma.service.js'
+import { PrismaService } from '../prisma/prisma.service.js'
 import {
   TdxClientService,
   TdxMonthlyQuotaExceededError,
@@ -28,6 +30,8 @@ interface RequestLogUpdateCall {
   }
 }
 
+type SqlValue = string | number | bigint | boolean | Date | null
+
 function createPrismaMock({
   monthlyRequestCount = 0,
   monthlyResponseBytes = 0,
@@ -36,10 +40,10 @@ function createPrismaMock({
   monthlyResponseBytes?: number
 } = {}) {
   const advisoryLockQueries: string[] = []
-  const createCalls: unknown[] = []
-  const updateCalls: unknown[] = []
+  const createCalls: Prisma.TdxRequestLogCreateArgs[] = []
+  const updateCalls: Prisma.TdxRequestLogUpdateArgs[] = []
   const transaction = {
-    $executeRaw: (strings: TemplateStringsArray, ...values: unknown[]) => {
+    $executeRaw: (strings: TemplateStringsArray, ...values: SqlValue[]) => {
       advisoryLockQueries.push(renderSql(strings, values))
       return Promise.resolve(0)
     },
@@ -50,7 +54,7 @@ function createPrismaMock({
           _sum: { response_bytes: monthlyResponseBytes },
         }),
       findMany: () => Promise.resolve([]),
-      create: (args: unknown) => {
+      create: (args: Prisma.TdxRequestLogCreateArgs) => {
         createCalls.push(args)
         return Promise.resolve({ id: 'request-log-id' })
       },
@@ -61,7 +65,7 @@ function createPrismaMock({
       callback: (client: typeof transaction) => Promise<T>,
     ): Promise<T> => callback(transaction),
     tdxRequestLog: {
-      update: (args: unknown) => {
+      update: (args: Prisma.TdxRequestLogUpdateArgs) => {
         updateCalls.push(args)
         return Promise.resolve({})
       },
@@ -71,7 +75,18 @@ function createPrismaMock({
   return { advisoryLockQueries, createCalls, prismaService, updateCalls }
 }
 
-function renderSql(strings: TemplateStringsArray, values: unknown[]): string {
+async function createService(prismaService: object) {
+  const module = await Test.createTestingModule({
+    providers: [
+      TdxClientService,
+      { provide: PrismaService, useValue: prismaService },
+    ],
+  }).compile()
+
+  return module.get(TdxClientService)
+}
+
+function renderSql(strings: TemplateStringsArray, values: SqlValue[]): string {
   return strings
     .reduce(
       (sql, segment, index) =>
@@ -123,9 +138,7 @@ describe('TdxClientService', () => {
 
       return Promise.resolve(new Response('[]', { status: 200 }))
     }) as typeof fetch
-    const service = new TdxClientService(
-      prismaService as unknown as PrismaService,
-    )
+    const service = await createService(prismaService)
 
     await expect(
       service.fetchRoutes(CityNameType.NEW_TAIPEI, 'sync-run-id'),
@@ -169,9 +182,7 @@ describe('TdxClientService', () => {
         ),
       )
     }) as typeof fetch
-    const service = new TdxClientService(
-      prismaService as unknown as PrismaService,
-    )
+    const service = await createService(prismaService)
 
     await expect(
       service.fetchRoutes(CityNameType.NEW_TAIPEI, 'sync-run-id'),
@@ -202,9 +213,7 @@ describe('TdxClientService', () => {
       busRequestCount += 1
       return Promise.resolve(new Response('[]', { status: 200 }))
     }) as typeof fetch
-    const service = new TdxClientService(
-      prismaService as unknown as PrismaService,
-    )
+    const service = await createService(prismaService)
 
     await Promise.all([
       service.fetchRoutes(CityNameType.TAIPEI, 'sync-run-id'),
@@ -235,9 +244,7 @@ describe('TdxClientService', () => {
         }),
       )
     }) as typeof fetch
-    const service = new TdxClientService(
-      prismaService as unknown as PrismaService,
-    )
+    const service = await createService(prismaService)
 
     await expect(
       service.fetchRoutes(CityNameType.TAIPEI, 'sync-run-id'),
@@ -263,9 +270,7 @@ describe('TdxClientService', () => {
       return Promise.resolve(new Response('[]', { status: 200 }))
     }
     const { prismaService } = createPrismaMock()
-    const service = new TdxClientService(
-      prismaService as unknown as PrismaService,
-    )
+    const service = await createService(prismaService)
 
     await service.fetchRoutes(CityNameType.TAIPEI, 'sync-run-id')
 

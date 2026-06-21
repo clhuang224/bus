@@ -1,9 +1,11 @@
+import { Test } from '@nestjs/testing'
 import {
   SyncResourceType as PrismaSyncResourceType,
   SyncStatusType as PrismaSyncStatusType,
 } from '../generated/prisma/enums.js'
-import type { PrismaService } from '../prisma/prisma.service.js'
-import type { RoutesSyncService } from './routes-sync.service.js'
+import type { Prisma } from '../generated/prisma/client.js'
+import { PrismaService } from '../prisma/prisma.service.js'
+import { RoutesSyncService } from './routes-sync.service.js'
 import { SyncService } from './sync.service.js'
 
 interface ReadyRunQuery {
@@ -56,7 +58,7 @@ interface StaleCityRecoveryQuery {
   data: Omit<StaleRecoveryQuery['data'], 'resume_after_at'>
 }
 
-function createService({
+async function createService({
   readyRunIds,
   claimCount = 1,
   recoveryError,
@@ -67,23 +69,23 @@ function createService({
   recoveryError?: Error
   recoveryGate?: Promise<void>
 }) {
-  const readyRunQueryCalls: unknown[] = []
-  const cityUpdateManyCalls: unknown[] = []
-  const updateManyCalls: unknown[] = []
+  const readyRunQueryCalls: Prisma.SyncRunFindManyArgs[] = []
+  const cityUpdateManyCalls: Prisma.SyncRunCityUpdateManyArgs[] = []
+  const updateManyCalls: Prisma.SyncRunUpdateManyArgs[] = []
   const syncedRunIds: string[] = []
   const prismaService = {
     syncRunCity: {
-      updateMany: (args: unknown) => {
+      updateMany: (args: Prisma.SyncRunCityUpdateManyArgs) => {
         cityUpdateManyCalls.push(args)
         return Promise.resolve({ count: 0 })
       },
     },
     syncRun: {
-      findMany: (args: unknown) => {
+      findMany: (args: Prisma.SyncRunFindManyArgs) => {
         readyRunQueryCalls.push(args)
         return Promise.resolve(readyRunIds.map((id) => ({ id })))
       },
-      updateMany: (args: unknown) => {
+      updateMany: (args: Prisma.SyncRunUpdateManyArgs) => {
         updateManyCalls.push(args)
 
         if (updateManyCalls.length === 1 && recoveryError) {
@@ -111,10 +113,14 @@ function createService({
       })
     },
   }
-  const service = new SyncService(
-    prismaService as unknown as PrismaService,
-    routesSyncService as unknown as RoutesSyncService,
-  )
+  const module = await Test.createTestingModule({
+    providers: [
+      SyncService,
+      { provide: PrismaService, useValue: prismaService },
+      { provide: RoutesSyncService, useValue: routesSyncService },
+    ],
+  }).compile()
+  const service = module.get(SyncService)
 
   return {
     cityUpdateManyCalls,
@@ -133,7 +139,7 @@ describe('SyncService', () => {
       service,
       syncedRunIds,
       updateManyCalls,
-    } = createService({
+    } = await createService({
       readyRunIds: ['sync-run-1'],
     })
 
@@ -192,7 +198,7 @@ describe('SyncService', () => {
   })
 
   it('does not dispatch route sync runs concurrently in one process', async () => {
-    const { service, syncedRunIds } = createService({
+    const { service, syncedRunIds } = await createService({
       readyRunIds: ['sync-run-1', 'sync-run-2'],
     })
 
@@ -202,7 +208,7 @@ describe('SyncService', () => {
   })
 
   it('does not run a sync that another instance already claimed', async () => {
-    const { service, syncedRunIds } = createService({
+    const { service, syncedRunIds } = await createService({
       readyRunIds: ['sync-run-1'],
       claimCount: 0,
     })
@@ -222,7 +228,7 @@ describe('SyncService', () => {
       readyRunQueryCalls,
       service,
       updateManyCalls,
-    } = createService({
+    } = await createService({
       readyRunIds: [],
       recoveryGate,
     })
@@ -239,16 +245,13 @@ describe('SyncService', () => {
 
   it('logs errors from the background resume poll', async () => {
     const loggedErrors: string[] = []
-    const { service } = createService({
+    const { service } = await createService({
       readyRunIds: [],
       recoveryError: new Error('Database unavailable'),
     })
-    const serviceWithLogger = service as unknown as {
-      logger: { error: (message: string) => void }
-    }
-    serviceWithLogger.logger = {
-      error: (message) => loggedErrors.push(message),
-    }
+    Object.defineProperty(service, 'logger', {
+      value: { error: (message: string) => loggedErrors.push(message) },
+    })
 
     service.onApplicationBootstrap()
     await new Promise((resolve) => setImmediate(resolve))
