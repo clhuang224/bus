@@ -50,9 +50,11 @@ interface StaleRecoveryQuery {
 function createService({
   readyRunIds,
   claimCount = 1,
+  recoveryError,
 }: {
   readyRunIds: string[]
   claimCount?: number
+  recoveryError?: Error
 }) {
   const readyRunQueryCalls: unknown[] = []
   const updateManyCalls: unknown[] = []
@@ -65,6 +67,11 @@ function createService({
       },
       updateMany: (args: unknown) => {
         updateManyCalls.push(args)
+
+        if (updateManyCalls.length === 1 && recoveryError) {
+          return Promise.reject(recoveryError)
+        }
+
         return Promise.resolve({
           count: updateManyCalls.length === 1 ? 0 : claimCount,
         })
@@ -154,5 +161,27 @@ describe('SyncService', () => {
     await service.resumeReadyRuns()
 
     expect(syncedRunIds).toEqual([])
+  })
+
+  it('logs errors from the background resume poll', async () => {
+    const loggedErrors: string[] = []
+    const { service } = createService({
+      readyRunIds: [],
+      recoveryError: new Error('Database unavailable'),
+    })
+    const serviceWithLogger = service as unknown as {
+      logger: { error: (message: string) => void }
+    }
+    serviceWithLogger.logger = {
+      error: (message) => loggedErrors.push(message),
+    }
+
+    service.onApplicationBootstrap()
+    await new Promise((resolve) => setImmediate(resolve))
+    service.onModuleDestroy()
+
+    expect(loggedErrors).toEqual([
+      'Sync resume poll failed: Database unavailable',
+    ])
   })
 })

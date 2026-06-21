@@ -26,10 +26,10 @@ export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
   ) {}
 
   onApplicationBootstrap(): void {
-    void this.resumeReadyRuns()
+    this.pollReadyRuns()
 
     this.pollTimer = setInterval(() => {
-      void this.resumeReadyRuns()
+      this.pollReadyRuns()
     }, READY_SYNC_POLL_INTERVAL_MS)
     this.pollTimer.unref()
   }
@@ -64,6 +64,13 @@ export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
     })
 
     await Promise.all(readyRuns.map(({ id }) => this.dispatch(id)))
+  }
+
+  private pollReadyRuns(): void {
+    void this.resumeReadyRuns().catch((error: unknown) => {
+      const message = error instanceof Error ? error.message : String(error)
+      this.logger.error(`Sync resume poll failed: ${message}`)
+    })
   }
 
   private async recoverStaleRuns(now: Date): Promise<void> {
