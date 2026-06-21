@@ -26,6 +26,12 @@ pnpm --filter @bus/api start:dev
 
 在 macOS 執行時間較長的本地 sync 時，可以使用 `start:dev:awake`。一般的 `start:dev` 仍保留給跨平台開發與部署環境使用。
 
+### Route Sync
+
+完整的 route sync 會依序處理全台 22 個城市。以本機 API 連線遠端 PostgreSQL 的一次實測大約需要一小時；實際時間會受到資料庫延遲和 TDX 資料量影響。
+
+同步進度會以城市為單位建立 checkpoint。如果執行途中中斷，重新執行失敗的 sync run 時會跳過已完成的城市，從第一個尚未完成的城市繼續。
+
 ## API 文件
 
 Scalar 會渲染產生出來的 OpenAPI 文件：

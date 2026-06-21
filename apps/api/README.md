@@ -26,6 +26,12 @@ Local development scripts:
 
 Use `start:dev:awake` for long local sync runs on macOS. Keep the regular `start:dev` command for cross-platform development and deployment environments.
 
+### Route Sync
+
+A full route sync processes all 22 cities sequentially. One local run against a remote PostgreSQL database took approximately one hour; actual duration depends on database latency and the amount of TDX data.
+
+Progress is checkpointed by city. If a run is interrupted, retrying the failed run skips cities that already succeeded and resumes from the first incomplete city.
+
 ## API Documentation
 
 Scalar renders the generated OpenAPI document:
