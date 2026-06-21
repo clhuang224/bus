@@ -7,6 +7,8 @@ import type { SyncResult } from './sync-result.js'
 import { addSyncResult, createEmptySyncResult } from './sync-result.js'
 import { TdxClientService } from './tdx-client.service.js'
 
+const CITY_SYNC_HEARTBEAT_INTERVAL_MS = 60_000
+
 @Injectable()
 export class RoutesSyncService {
   private readonly logger = new Logger(RoutesSyncService.name)
@@ -88,21 +90,52 @@ export class RoutesSyncService {
     city: CityNameType,
     syncRunId: string,
   ): Promise<SyncResult> {
-    const tdxRoutes = await this.tdxClientService.fetchRoutes(city, syncRunId)
-    const routes = routeMapper({ city, tdxRoutes })
+    const heartbeatTimer = this.startCityHeartbeat(syncRunId, city)
 
-    this.logger.log(
-      `Route sync ${syncRunId}: ${city} returned ${routes.length} routes from TDX.`,
-    )
+    try {
+      const tdxRoutes = await this.tdxClientService.fetchRoutes(city, syncRunId)
+      const routes = routeMapper({ city, tdxRoutes })
 
-    return this.routePersistenceService.persistRoutes(routes, {
-      city,
-      onProgress: async (persistedCount, totalCount) => {
-        await this.syncCheckpointService.touch(syncRunId, city)
-        this.logger.log(
-          `Route sync ${syncRunId}: persisted ${persistedCount}/${totalCount} routes for ${city}.`,
-        )
-      },
-    })
+      this.logger.log(
+        `Route sync ${syncRunId}: ${city} returned ${routes.length} routes from TDX.`,
+      )
+
+      return await this.routePersistenceService.persistRoutes(routes, {
+        city,
+        onProgress: async (persistedCount, totalCount) => {
+          await this.syncCheckpointService.touch(syncRunId, city)
+          this.logger.log(
+            `Route sync ${syncRunId}: persisted ${persistedCount}/${totalCount} routes for ${city}.`,
+          )
+        },
+      })
+    } finally {
+      clearInterval(heartbeatTimer)
+    }
+  }
+
+  private startCityHeartbeat(
+    syncRunId: string,
+    city: CityNameType,
+  ): ReturnType<typeof setInterval> {
+    let heartbeatPromise: Promise<void> | null = null
+    const timer = setInterval(() => {
+      if (heartbeatPromise) return
+
+      heartbeatPromise = this.syncCheckpointService
+        .touch(syncRunId, city)
+        .catch((error: unknown) => {
+          const message = error instanceof Error ? error.message : String(error)
+          this.logger.error(
+            `Route sync ${syncRunId}: heartbeat failed for ${city}: ${message}`,
+          )
+        })
+        .finally(() => {
+          heartbeatPromise = null
+        })
+    }, CITY_SYNC_HEARTBEAT_INTERVAL_MS)
+    timer.unref()
+
+    return timer
   }
 }
