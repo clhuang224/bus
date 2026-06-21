@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common'
 import type { CityNameType, TdxBusRoute } from '@bus/shared'
 import { SyncResourceType as PrismaSyncResourceType } from '../generated/prisma/enums.js'
 import { PrismaService } from '../prisma/prisma.service.js'
+import {
+  AdvisoryLockNamespace,
+  TdxQuotaLockId,
+} from './advisory-lock.constants.js'
 
 const TDX_BUS_BASE_URL = 'https://tdx.transportdata.tw/api/basic/v2/Bus'
 const TDX_TOKEN_ENDPOINT =
@@ -14,7 +18,6 @@ const BYTES_PER_POINT = 150 * 1024 * 1024
 const MONTHLY_REQUEST_LIMIT = BASIC_MONTHLY_POINTS * REQUESTS_PER_POINT
 const MONTHLY_BYTE_LIMIT = BASIC_MONTHLY_POINTS * BYTES_PER_POINT
 const QUOTA_WINDOW_MS = 60 * 1000
-const TDX_QUOTA_ADVISORY_LOCK_ID = 7_324_689
 
 interface TdxTokenResponse {
   access_token: string
@@ -180,7 +183,7 @@ export class TdxClientService {
   ): Promise<QuotaResult> {
     return this.prismaService.$transaction(async (transaction) => {
       await transaction.$executeRawUnsafe(
-        `SELECT pg_advisory_xact_lock(${TDX_QUOTA_ADVISORY_LOCK_ID})`,
+        `SELECT pg_advisory_xact_lock(${AdvisoryLockNamespace.TDX_QUOTA}, ${TdxQuotaLockId.GLOBAL})`,
       )
 
       const now = new Date()

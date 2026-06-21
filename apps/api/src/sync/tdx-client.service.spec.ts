@@ -120,7 +120,7 @@ describe('TdxClientService', () => {
 
     expect(requestedUrls).toHaveLength(2)
     expect(advisoryLockQueries).toHaveLength(1)
-    expect(advisoryLockQueries[0]).toContain('pg_advisory_xact_lock')
+    expect(advisoryLockQueries[0]).toBe('SELECT pg_advisory_xact_lock(2, 1)')
 
     expect(createCalls).toHaveLength(1)
     const createCall = createCalls[0] as RequestLogCreateCall

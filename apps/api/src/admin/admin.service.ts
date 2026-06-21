@@ -5,6 +5,10 @@ import {
   SyncStatusType as PrismaSyncStatusType,
 } from '../generated/prisma/enums.js'
 import { PrismaService } from '../prisma/prisma.service.js'
+import {
+  AdvisoryLockNamespace,
+  SyncResourceLockId,
+} from '../sync/advisory-lock.constants.js'
 import { SyncService } from '../sync/sync.service.js'
 import { SyncResponseDto } from './dto/sync-response.dto.js'
 
@@ -14,11 +18,14 @@ const ACTIVE_SYNC_STATUSES: PrismaSyncStatusType[] = [
   PrismaSyncStatusType.PENDING,
 ]
 
-const SYNC_RESOURCE_LOCK_IDS: Record<PrismaSyncResourceType, number> = {
-  [PrismaSyncResourceType.ROUTES]: 7_324_701,
-  [PrismaSyncResourceType.STOPS]: 7_324_702,
-  [PrismaSyncResourceType.STATIONS]: 7_324_703,
-  [PrismaSyncResourceType.SHAPES]: 7_324_704,
+const SYNC_RESOURCE_LOCK_IDS: Record<
+  PrismaSyncResourceType,
+  SyncResourceLockId
+> = {
+  [PrismaSyncResourceType.ROUTES]: SyncResourceLockId.ROUTES,
+  [PrismaSyncResourceType.STOPS]: SyncResourceLockId.STOPS,
+  [PrismaSyncResourceType.STATIONS]: SyncResourceLockId.STATIONS,
+  [PrismaSyncResourceType.SHAPES]: SyncResourceLockId.SHAPES,
 }
 
 interface SyncRunRecord {
@@ -70,7 +77,7 @@ export class AdminService {
     const syncRun = await this.prismaService.$transaction(
       async (transaction) => {
         await transaction.$executeRawUnsafe(
-          `SELECT pg_advisory_xact_lock(${SYNC_RESOURCE_LOCK_IDS[prismaResource]})`,
+          `SELECT pg_advisory_xact_lock(${AdvisoryLockNamespace.SYNC_RUN}, ${SYNC_RESOURCE_LOCK_IDS[prismaResource]})`,
         )
 
         const latestSyncRun = await transaction.syncRun.findFirst({
