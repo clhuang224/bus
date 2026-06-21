@@ -59,6 +59,55 @@ describe('RoutesSyncService', () => {
     ])
   })
 
+  it('preserves the sync error when checkpoint finalization fails', async () => {
+    const syncError = new Error('TDX unavailable')
+    const loggedErrors: string[] = []
+    let failCityCount = 0
+    let failRunCount = 0
+    const tdxClientService = {
+      fetchRoutes: () => Promise.reject(syncError),
+    }
+    const syncCheckpointService = {
+      startRun: () => Promise.resolve(),
+      ensureCities: () => Promise.resolve(),
+      getCompletedCities: () => Promise.resolve(new Map()),
+      startCity: () => Promise.resolve(),
+      updateRunResult: () => Promise.resolve(),
+      failCity: () => {
+        failCityCount += 1
+        return Promise.reject(new Error('City checkpoint unavailable'))
+      },
+      failRun: () => {
+        failRunCount += 1
+        return Promise.reject(new Error('Run checkpoint unavailable'))
+      },
+    }
+    const service = new RoutesSyncService(
+      tdxClientService as unknown as TdxClientService,
+      {} as RoutePersistenceService,
+      syncCheckpointService as unknown as SyncCheckpointService,
+    )
+    const serviceWithLogger = service as unknown as {
+      logger: {
+        error: (message: string) => void
+        log: (message: string) => void
+      }
+    }
+    serviceWithLogger.logger = {
+      error: (message) => loggedErrors.push(message),
+      log: () => undefined,
+    }
+
+    await expect(service.syncAllRoutes('sync-run-id')).rejects.toBe(syncError)
+
+    expect(failCityCount).toBe(1)
+    expect(failRunCount).toBe(1)
+    expect(loggedErrors).toEqual([
+      'Route sync sync-run-id: failed to mark Taipei as failed: City checkpoint unavailable',
+      'Route sync sync-run-id: failed to mark the sync run as failed: Run checkpoint unavailable',
+    ])
+  })
+
   it('skips cities that already have succeeded checkpoints', async () => {
     let fetchCount = 0
     const checkpoints = getEnumValues(CityNameType).map((city) => ({

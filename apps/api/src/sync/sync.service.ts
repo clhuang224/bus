@@ -19,8 +19,7 @@ const STALE_RUNNING_THRESHOLD_MS = 15 * 60_000
 export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
   private readonly logger = new Logger(SyncService.name)
   private readonly activeSyncRunIds = new Set<string>()
-  // TODO(sync): Guard the resume poll itself so a slow database poll cannot
-  // overlap the next interval and duplicate recovery and ready-run queries.
+  private readyRunsPromise: Promise<void> | null = null
   private pollTimer: ReturnType<typeof setInterval> | null = null
 
   constructor(
@@ -49,6 +48,18 @@ export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
   }
 
   async resumeReadyRuns(): Promise<void> {
+    if (this.readyRunsPromise) return this.readyRunsPromise
+
+    this.readyRunsPromise = this.resumeReadyRunsOnce()
+
+    try {
+      await this.readyRunsPromise
+    } finally {
+      this.readyRunsPromise = null
+    }
+  }
+
+  private async resumeReadyRunsOnce(): Promise<void> {
     const now = new Date()
     await this.recoverStaleRuns(now)
 

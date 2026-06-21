@@ -180,4 +180,96 @@ describe('TdxClientService', () => {
     expect(requestedUrls).toHaveLength(1)
     expect(createCalls).toEqual([])
   })
+
+  it('shares one token refresh across concurrent requests', async () => {
+    const { prismaService } = createPrismaMock()
+    let tokenRequestCount = 0
+    let busRequestCount = 0
+
+    globalThis.fetch = ((input) => {
+      const url = String(input)
+
+      if (url.includes('/protocol/openid-connect/token')) {
+        tokenRequestCount += 1
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({ access_token: 'token', expires_in: 3600 }),
+            { status: 200 },
+          ),
+        )
+      }
+
+      busRequestCount += 1
+      return Promise.resolve(new Response('[]', { status: 200 }))
+    }) as typeof fetch
+    const service = new TdxClientService(
+      prismaService as unknown as PrismaService,
+    )
+
+    await Promise.all([
+      service.fetchRoutes(CityNameType.TAIPEI, 'sync-run-id'),
+      service.fetchRoutes(CityNameType.NEW_TAIPEI, 'sync-run-id'),
+    ])
+
+    expect(tokenRequestCount).toBe(1)
+    expect(busRequestCount).toBe(2)
+  })
+
+  it('rejects a malformed route instead of silently dropping it', async () => {
+    const { prismaService } = createPrismaMock()
+    globalThis.fetch = ((input) => {
+      const url = String(input)
+
+      if (url.includes('/protocol/openid-connect/token')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({ access_token: 'token', expires_in: 3600 }),
+            { status: 200 },
+          ),
+        )
+      }
+
+      return Promise.resolve(
+        new Response(JSON.stringify([{ RouteUID: 'TPE-invalid' }]), {
+          status: 200,
+        }),
+      )
+    }) as typeof fetch
+    const service = new TdxClientService(
+      prismaService as unknown as PrismaService,
+    )
+
+    await expect(
+      service.fetchRoutes(CityNameType.TAIPEI, 'sync-run-id'),
+    ).rejects.toThrow('Invalid TDX record at index 0 for /Route/City/Taipei.')
+  })
+
+  it('applies an abort signal to token and bus requests', async () => {
+    const requestSignals: AbortSignal[] = []
+    globalThis.fetch = (input: string | URL | Request, init?: RequestInit) => {
+      if (init?.signal) requestSignals.push(init.signal)
+
+      const url = input instanceof Request ? input.url : input.toString()
+
+      if (url.includes('/protocol/openid-connect/token')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({ access_token: 'token', expires_in: 3600 }),
+            { status: 200 },
+          ),
+        )
+      }
+
+      return Promise.resolve(new Response('[]', { status: 200 }))
+    }
+    const { prismaService } = createPrismaMock()
+    const service = new TdxClientService(
+      prismaService as unknown as PrismaService,
+    )
+
+    await service.fetchRoutes(CityNameType.TAIPEI, 'sync-run-id')
+
+    expect(requestSignals).toHaveLength(2)
+    expect(requestSignals.every((signal) => !signal.aborted)).toBe(true)
+  })
 })

@@ -6,12 +6,12 @@ import {
   AdvisoryLockNamespace,
   TdxQuotaLockId,
 } from './advisory-lock.constants.js'
+import { isTdxBusRoute } from './validators/tdx-route.validator.js'
 
 const TDX_BUS_BASE_URL = 'https://tdx.transportdata.tw/api/basic/v2/Bus'
 const TDX_TOKEN_ENDPOINT =
   'https://tdx.transportdata.tw/auth/realms/TDXConnect/protocol/openid-connect/token'
-// TODO(sync): Add abort timeouts to token, upstream fetch, and body reads so a
-// hung TDX connection cannot keep a sync run alive indefinitely.
+const REQUEST_TIMEOUT_MS = 30 * 1000
 const TOKEN_REFRESH_BUFFER_MS = 60 * 1000
 const REQUEST_LIMIT_PER_MINUTE = 5
 const BASIC_MONTHLY_POINTS = 3
@@ -51,6 +51,13 @@ type QuotaResult = QuotaReservation | QuotaWait
 interface LoggedResponse {
   response: Response
   reservation: RequestReservation
+  timeout: RequestTimeout
+}
+
+interface RequestTimeout {
+  signal: AbortSignal
+  cancel: () => void
+  didTimeout: () => boolean
 }
 
 export class TdxClientConfigError extends Error {
@@ -74,8 +81,7 @@ export class TdxMonthlyQuotaExceededError extends Error {
 export class TdxClientService {
   private accessToken: string | null = null
   private accessTokenExpiresAt = 0
-  // TODO(sync): Share an in-flight token refresh promise so concurrent feature
-  // syncs do not request duplicate access tokens.
+  private accessTokenRefresh: Promise<string> | null = null
   private quotaQueue: Promise<void> = Promise.resolve()
 
   constructor(private readonly prismaService: PrismaService) {}
@@ -84,15 +90,20 @@ export class TdxClientService {
     city: CityNameType,
     syncRunId: string,
   ): Promise<TdxBusRoute[]> {
-    return this.fetchJsonArray<TdxBusRoute>(`/Route/City/${city}`, {
-      syncRunId,
-      resource: PrismaSyncResourceType.ROUTES,
-    })
+    return this.fetchJsonArray(
+      `/Route/City/${city}`,
+      {
+        syncRunId,
+        resource: PrismaSyncResourceType.ROUTES,
+      },
+      isTdxBusRoute,
+    )
   }
 
   private async fetchJsonArray<T>(
     path: string,
     context: TdxRequestContext,
+    isItem: (value: unknown) => value is T,
   ): Promise<T[]> {
     const responseText = await this.fetchText(path, context)
     const payload: unknown = JSON.parse(responseText)
@@ -101,9 +112,17 @@ export class TdxClientService {
       throw new Error(`Expected TDX response to be an array for ${path}.`)
     }
 
-    // TODO(sync): Validate every upstream record and fail the city import when
-    // any item is malformed instead of silently dropping data before soft-delete.
-    return payload.filter((value) => this.isRecord(value)) as T[]
+    const items: T[] = []
+
+    for (const [index, value] of payload.entries()) {
+      if (!isItem(value)) {
+        throw new Error(`Invalid TDX record at index ${index} for ${path}.`)
+      }
+
+      items.push(value)
+    }
+
+    return items
   }
 
   private async fetchText(
@@ -118,7 +137,7 @@ export class TdxClientService {
 
     if (response.response.status === 401) {
       await this.readResponseText(response, url, false)
-      this.clearAccessToken()
+      this.clearAccessToken(accessToken)
 
       const refreshedAccessToken = await this.getAccessToken()
       const retryResponse = await this.fetchWithQuota(
@@ -139,21 +158,25 @@ export class TdxClientService {
     context: TdxRequestContext,
   ): Promise<LoggedResponse> {
     const reservation = await this.acquireQuotaSlot(url, context)
+    const timeout = this.createRequestTimeout()
 
     try {
       const response = await fetch(url, {
+        signal: timeout.signal,
         headers: {
           accept: 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
       })
 
-      return { response, reservation }
+      return { response, reservation, timeout }
     } catch (error) {
+      timeout.cancel()
+      const requestError = this.toRequestError(error, timeout, 'TDX request')
       await this.finishRequestLog(reservation, {
-        errorMessage: this.getErrorMessage(error),
+        errorMessage: this.getErrorMessage(requestError),
       })
-      throw error
+      throw requestError
     }
   }
 
@@ -268,7 +291,7 @@ export class TdxClientService {
     url: URL,
     throwOnHttpError = true,
   ): Promise<string> {
-    const { response, reservation } = loggedResponse
+    const { response, reservation, timeout } = loggedResponse
 
     try {
       const responseText = await response.text()
@@ -286,19 +309,23 @@ export class TdxClientService {
 
       return responseText
     } catch (error) {
+      const requestError = this.toRequestError(error, timeout, 'TDX request')
+
       if (
         !(
-          error instanceof Error &&
-          error.message.startsWith('TDX request failed:')
+          requestError instanceof Error &&
+          requestError.message.startsWith('TDX request failed:')
         )
       ) {
         await this.finishRequestLog(reservation, {
           statusCode: response.status,
-          errorMessage: this.getErrorMessage(error),
+          errorMessage: this.getErrorMessage(requestError),
         })
       }
 
-      throw error
+      throw requestError
+    } finally {
+      timeout.cancel()
     }
   }
 
@@ -333,6 +360,19 @@ export class TdxClientService {
       return this.accessToken
     }
 
+    if (this.accessTokenRefresh) return this.accessTokenRefresh
+
+    const refresh = this.requestAccessToken()
+    this.accessTokenRefresh = refresh
+
+    try {
+      return await refresh
+    } finally {
+      if (this.accessTokenRefresh === refresh) this.accessTokenRefresh = null
+    }
+  }
+
+  private async requestAccessToken(): Promise<string> {
     const clientId = process.env.TDX_CLIENT_ID
     const clientSecret = process.env.TDX_CLIENT_SECRET
 
@@ -342,38 +382,84 @@ export class TdxClientService {
       )
     }
 
-    const tokenResponse = await fetch(TDX_TOKEN_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        grant_type: 'client_credentials',
-        client_id: clientId,
-        client_secret: clientSecret,
-      }),
-    })
+    const timeout = this.createRequestTimeout()
 
-    if (!tokenResponse.ok) {
-      const responseText = (await tokenResponse.text()).trim()
-      const responseDetail = responseText ? `: ${responseText}` : ''
+    try {
+      const tokenResponse = await fetch(TDX_TOKEN_ENDPOINT, {
+        method: 'POST',
+        signal: timeout.signal,
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'client_credentials',
+          client_id: clientId,
+          client_secret: clientSecret,
+        }),
+      })
 
-      throw new Error(
-        `Failed to get TDX token: ${tokenResponse.status}${responseDetail}`,
-      )
+      if (!tokenResponse.ok) {
+        const responseText = (await tokenResponse.text()).trim()
+        const responseDetail = responseText ? `: ${responseText}` : ''
+
+        throw new Error(
+          `Failed to get TDX token: ${tokenResponse.status}${responseDetail}`,
+        )
+      }
+
+      const tokenPayload: unknown = await tokenResponse.json()
+
+      if (!this.isTdxTokenResponse(tokenPayload)) {
+        throw new Error('TDX token response is malformed.')
+      }
+
+      this.accessToken = tokenPayload.access_token
+      this.accessTokenExpiresAt = Date.now() + tokenPayload.expires_in * 1000
+
+      return this.accessToken
+    } catch (error) {
+      throw this.toRequestError(error, timeout, 'TDX token request')
+    } finally {
+      timeout.cancel()
     }
-
-    const tokenPayload = (await tokenResponse.json()) as TdxTokenResponse
-
-    this.accessToken = tokenPayload.access_token
-    this.accessTokenExpiresAt = Date.now() + tokenPayload.expires_in * 1000
-
-    return this.accessToken
   }
 
-  private clearAccessToken(): void {
+  private clearAccessToken(rejectedToken: string): void {
+    if (this.accessToken !== rejectedToken) return
+
     this.accessToken = null
     this.accessTokenExpiresAt = 0
+  }
+
+  private createRequestTimeout(): RequestTimeout {
+    const controller = new AbortController()
+    let timedOut = false
+    const timer = setTimeout(() => {
+      timedOut = true
+      controller.abort()
+    }, REQUEST_TIMEOUT_MS)
+    timer.unref()
+
+    return {
+      signal: controller.signal,
+      cancel: () => clearTimeout(timer),
+      didTimeout: () => timedOut,
+    }
+  }
+
+  private toRequestError(
+    error: unknown,
+    timeout: RequestTimeout,
+    requestName: string,
+  ): unknown {
+    if (!timeout.didTimeout()) return error
+
+    return new Error(
+      `${requestName} timed out after ${REQUEST_TIMEOUT_MS}ms.`,
+      {
+        cause: error,
+      },
+    )
   }
 
   private getMonthStart(date: Date): Date {
@@ -396,5 +482,19 @@ export class TdxClientService {
 
   private isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null && !Array.isArray(value)
+  }
+
+  private isTdxTokenResponse(value: unknown): value is TdxTokenResponse {
+    return (
+      this.isRecord(value) &&
+      this.isNonEmptyString(value.access_token) &&
+      typeof value.expires_in === 'number' &&
+      Number.isFinite(value.expires_in) &&
+      value.expires_in > 0
+    )
+  }
+
+  private isNonEmptyString(value: unknown): value is string {
+    return typeof value === 'string' && value.trim().length > 0
   }
 }

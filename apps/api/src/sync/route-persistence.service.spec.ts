@@ -42,7 +42,11 @@ const tdxRoute: TdxBusRoute = {
   VersionID: 7931,
 }
 
-function createPersistenceMocks() {
+function createPersistenceMocks({
+  routeUpsert,
+}: {
+  routeUpsert?: (args: Prisma.RouteUpsertArgs) => Promise<{ id: string }>
+} = {}) {
   const calls = {
     routeFindMany: 0,
     routeUpsert: [] as Prisma.RouteUpsertArgs[],
@@ -60,7 +64,7 @@ function createPersistenceMocks() {
       },
       upsert: (args: Prisma.RouteUpsertArgs) => {
         calls.routeUpsert.push(args)
-        return Promise.resolve({ id: 'route-db-id' })
+        return routeUpsert?.(args) ?? Promise.resolve({ id: 'route-db-id' })
       },
       updateMany: (args: Prisma.RouteUpdateManyArgs) => {
         calls.routeUpdateMany.push(args)
@@ -184,5 +188,43 @@ describe('RoutePersistenceService', () => {
     expect(subRouteDeactivation.data.inactive_at).toBe(
       routeDeactivation.data.inactive_at,
     )
+  })
+
+  it('persists routes with bounded concurrency', async () => {
+    let activeUpserts = 0
+    let maximumActiveUpserts = 0
+    const { prismaService } = createPersistenceMocks({
+      routeUpsert: async () => {
+        activeUpserts += 1
+        maximumActiveUpserts = Math.max(maximumActiveUpserts, activeUpserts)
+        await new Promise<void>((resolve) => setImmediate(resolve))
+        activeUpserts -= 1
+
+        return { id: 'route-db-id' }
+      },
+    })
+    const service = new RoutePersistenceService(
+      prismaService as unknown as PrismaService,
+    )
+    const routes = routeMapper({
+      city: CityNameType.NEW_TAIPEI,
+      tdxRoutes: Array.from({ length: 6 }, (_, index) => ({
+        ...tdxRoute,
+        RouteUID: `NWT10116-${index}`,
+        RouteID: `10116-${index}`,
+      })),
+    })
+    const progress: Array<[number, number]> = []
+
+    await service.persistRoutes(routes, {
+      city: CityNameType.NEW_TAIPEI,
+      onProgress: (persistedCount, totalCount) => {
+        progress.push([persistedCount, totalCount])
+        return Promise.resolve()
+      },
+    })
+
+    expect(maximumActiveUpserts).toBe(5)
+    expect(progress).toEqual([[6, 6]])
   })
 })

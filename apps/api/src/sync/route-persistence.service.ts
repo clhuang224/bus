@@ -10,6 +10,7 @@ interface PersistRoutesOptions {
 }
 
 const ROUTE_PROGRESS_INTERVAL = 50
+const ROUTE_PERSISTENCE_CONCURRENCY = 5
 
 @Injectable()
 export class RoutePersistenceService {
@@ -32,51 +33,38 @@ export class RoutePersistenceService {
       existingRoutes.map((route) => route.uuid),
     )
     const incomingRouteUuids = routes.map(({ route }) => route.uuid)
-    let recordsCreated = 0
-    let recordsUpdated = 0
+    const recordsCreated = routes.filter(
+      ({ route }) => !existingRouteUuids.has(route.uuid),
+    ).length
+    const recordsUpdated = routes.length - recordsCreated
+    let nextProgressCount = ROUTE_PROGRESS_INTERVAL
 
-    // TODO(sync): Replace fully sequential remote database writes with measured
-    // batching or bounded concurrency after route and stop sync behavior is stable.
-    for (const [index, record] of routes.entries()) {
-      if (existingRouteUuids.has(record.route.uuid)) {
-        recordsUpdated += 1
-      } else {
-        recordsCreated += 1
-      }
+    for (
+      let batchStart = 0;
+      batchStart < routes.length;
+      batchStart += ROUTE_PERSISTENCE_CONCURRENCY
+    ) {
+      const batch = routes.slice(
+        batchStart,
+        batchStart + ROUTE_PERSISTENCE_CONCURRENCY,
+      )
 
-      try {
-        const route = await this.prismaService.route.upsert({
-          where: { uuid: record.route.uuid },
-          create: {
-            ...record.route,
-            is_active: true,
-            inactive_at: null,
-          },
-          update: {
-            ...record.route,
-            is_active: true,
-            inactive_at: null,
-          },
-        })
+      await Promise.all(
+        batch.map((record) => this.persistRoute(record, cityName)),
+      )
 
-        await this.persistSubRoutes(route.id, record)
-        await this.persistOperators(route.id, record)
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error)
-
-        throw new Error(
-          `Failed to persist route ${record.route.uuid} for ${cityName}: ${message}`,
-        )
-      }
-
-      const persistedCount = index + 1
+      const persistedCount = Math.min(batchStart + batch.length, routes.length)
 
       if (
         onProgress &&
-        (persistedCount % ROUTE_PROGRESS_INTERVAL === 0 ||
+        (persistedCount >= nextProgressCount ||
           persistedCount === routes.length)
       ) {
         await onProgress(persistedCount, routes.length)
+
+        while (nextProgressCount <= persistedCount) {
+          nextProgressCount += ROUTE_PROGRESS_INTERVAL
+        }
       }
     }
 
@@ -111,6 +99,36 @@ export class RoutePersistenceService {
       records_created: recordsCreated,
       records_updated: recordsUpdated,
       records_deactivated: deactivatedRoutes.count,
+    }
+  }
+
+  private async persistRoute(
+    record: RouteSyncRecord,
+    cityName: CityNameType,
+  ): Promise<void> {
+    try {
+      const route = await this.prismaService.route.upsert({
+        where: { uuid: record.route.uuid },
+        create: {
+          ...record.route,
+          is_active: true,
+          inactive_at: null,
+        },
+        update: {
+          ...record.route,
+          is_active: true,
+          inactive_at: null,
+        },
+      })
+
+      await this.persistSubRoutes(route.id, record)
+      await this.persistOperators(route.id, record)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+
+      throw new Error(
+        `Failed to persist route ${record.route.uuid} for ${cityName}: ${message}`,
+      )
     }
   }
 

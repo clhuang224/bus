@@ -79,12 +79,32 @@ export class RoutesSyncService {
 
       return result
     } catch (error) {
-      // TODO(sync): Make checkpoint finalization best-effort so failCity or
-      // failRun database errors do not replace the original sync failure.
       if (currentCity) {
-        await this.syncCheckpointService.failCity(syncRunId, currentCity, error)
+        try {
+          await this.syncCheckpointService.failCity(
+            syncRunId,
+            currentCity,
+            error,
+          )
+        } catch (checkpointError) {
+          this.logCheckpointFailure(
+            syncRunId,
+            `mark ${currentCity} as failed`,
+            checkpointError,
+          )
+        }
       }
-      await this.syncCheckpointService.failRun(syncRunId, error, result)
+
+      try {
+        await this.syncCheckpointService.failRun(syncRunId, error, result)
+      } catch (checkpointError) {
+        this.logCheckpointFailure(
+          syncRunId,
+          'mark the sync run as failed',
+          checkpointError,
+        )
+      }
+
       throw error
     }
   }
@@ -140,5 +160,16 @@ export class RoutesSyncService {
     timer.unref()
 
     return timer
+  }
+
+  private logCheckpointFailure(
+    syncRunId: string,
+    action: string,
+    error: unknown,
+  ): void {
+    const message = error instanceof Error ? error.message : String(error)
+    this.logger.error(
+      `Route sync ${syncRunId}: failed to ${action}: ${message}`,
+    )
   }
 }

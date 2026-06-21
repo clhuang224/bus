@@ -60,10 +60,12 @@ function createService({
   readyRunIds,
   claimCount = 1,
   recoveryError,
+  recoveryGate,
 }: {
   readyRunIds: string[]
   claimCount?: number
   recoveryError?: Error
+  recoveryGate?: Promise<void>
 }) {
   const readyRunQueryCalls: unknown[] = []
   const cityUpdateManyCalls: unknown[] = []
@@ -86,6 +88,10 @@ function createService({
 
         if (updateManyCalls.length === 1 && recoveryError) {
           return Promise.reject(recoveryError)
+        }
+
+        if (updateManyCalls.length === 1 && recoveryGate) {
+          return recoveryGate.then(() => ({ count: 0 }))
         }
 
         return Promise.resolve({
@@ -204,6 +210,31 @@ describe('SyncService', () => {
     await service.resumeReadyRuns()
 
     expect(syncedRunIds).toEqual([])
+  })
+
+  it('shares an in-flight ready-run poll', async () => {
+    let releaseRecovery!: () => void
+    const recoveryGate = new Promise<void>((resolve) => {
+      releaseRecovery = resolve
+    })
+    const {
+      cityUpdateManyCalls,
+      readyRunQueryCalls,
+      service,
+      updateManyCalls,
+    } = createService({
+      readyRunIds: [],
+      recoveryGate,
+    })
+
+    const firstPoll = service.resumeReadyRuns()
+    const secondPoll = service.resumeReadyRuns()
+    releaseRecovery()
+    await Promise.all([firstPoll, secondPoll])
+
+    expect(cityUpdateManyCalls).toHaveLength(1)
+    expect(updateManyCalls).toHaveLength(1)
+    expect(readyRunQueryCalls).toHaveLength(1)
   })
 
   it('logs errors from the background resume poll', async () => {
