@@ -8,6 +8,31 @@ import { PrismaService } from '../prisma/prisma.service.js'
 import { SyncService } from '../sync/sync.service.js'
 import { SyncResponseDto } from './dto/sync-response.dto.js'
 
+const ACTIVE_SYNC_STATUSES = [
+  PrismaSyncStatusType.QUEUED,
+  PrismaSyncStatusType.RUNNING,
+  PrismaSyncStatusType.PENDING,
+]
+
+const SYNC_RESOURCE_LOCK_IDS: Record<PrismaSyncResourceType, number> = {
+  [PrismaSyncResourceType.ROUTES]: 7_324_701,
+  [PrismaSyncResourceType.STOPS]: 7_324_702,
+  [PrismaSyncResourceType.STATIONS]: 7_324_703,
+  [PrismaSyncResourceType.SHAPES]: 7_324_704,
+}
+
+interface SyncRunRecord {
+  id: string
+  status: PrismaSyncStatusType
+  started_at: Date | null
+  finished_at: Date | null
+  records_read: number
+  records_created: number
+  records_updated: number
+  records_deactivated: number
+  error_message: string | null
+}
+
 @Injectable()
 export class AdminService {
   constructor(
@@ -42,17 +67,42 @@ export class AdminService {
     apiResource: SyncResourceType
     prismaResource: PrismaSyncResourceType
   }): Promise<SyncResponseDto> {
-    const syncRun = await this.prismaService.syncRun.create({
-      data: {
-        resource: prismaResource,
-        status: PrismaSyncStatusType.QUEUED,
-      },
-    })
+    const syncRun = await this.prismaService.$transaction(
+      async (transaction) => {
+        await transaction.$executeRawUnsafe(
+          `SELECT pg_advisory_xact_lock(${SYNC_RESOURCE_LOCK_IDS[prismaResource]})`,
+        )
 
+        const activeSyncRun = await transaction.syncRun.findFirst({
+          where: {
+            resource: prismaResource,
+            status: { in: ACTIVE_SYNC_STATUSES },
+          },
+          orderBy: { created_at: 'asc' },
+        })
+
+        if (activeSyncRun) return activeSyncRun
+
+        return transaction.syncRun.create({
+          data: {
+            resource: prismaResource,
+            status: PrismaSyncStatusType.QUEUED,
+          },
+        })
+      },
+    )
+
+    return this.toSyncResponse(syncRun, apiResource)
+  }
+
+  private toSyncResponse(
+    syncRun: SyncRunRecord,
+    resource: SyncResourceType,
+  ): SyncResponseDto {
     return {
       uuid: syncRun.id,
-      resource: apiResource,
-      status: SyncStatusType.QUEUED,
+      resource,
+      status: this.toApiStatus(syncRun.status),
       started_at: syncRun.started_at?.toISOString() ?? null,
       finished_at: syncRun.finished_at?.toISOString() ?? null,
       records_read: syncRun.records_read,
@@ -60,6 +110,21 @@ export class AdminService {
       records_updated: syncRun.records_updated,
       records_deactivated: syncRun.records_deactivated,
       error_message: syncRun.error_message,
+    }
+  }
+
+  private toApiStatus(status: PrismaSyncStatusType): SyncStatusType {
+    switch (status) {
+      case PrismaSyncStatusType.QUEUED:
+        return SyncStatusType.QUEUED
+      case PrismaSyncStatusType.RUNNING:
+        return SyncStatusType.RUNNING
+      case PrismaSyncStatusType.PENDING:
+        return SyncStatusType.PENDING
+      case PrismaSyncStatusType.SUCCEEDED:
+        return SyncStatusType.SUCCEEDED
+      case PrismaSyncStatusType.FAILED:
+        return SyncStatusType.FAILED
     }
   }
 }

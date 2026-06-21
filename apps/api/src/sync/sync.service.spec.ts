@@ -135,9 +135,9 @@ describe('SyncService', () => {
     expect(syncedRunIds).toEqual(['sync-run-1'])
   })
 
-  it('does not dispatch the same run twice in one process', async () => {
+  it('does not dispatch route sync runs concurrently in one process', async () => {
     const { service, syncedRunIds } = createService({
-      readyRunIds: ['sync-run-1', 'sync-run-1'],
+      readyRunIds: ['sync-run-1', 'sync-run-2'],
     })
 
     await service.resumeReadyRuns()

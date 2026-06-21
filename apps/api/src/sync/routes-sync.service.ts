@@ -167,6 +167,11 @@ export class RoutesSyncService {
         persistedCount % ROUTE_PROGRESS_INTERVAL === 0 ||
         persistedCount === routes.length
       ) {
+        await this.prismaService.syncRun.update({
+          where: { id: syncRunId },
+          data: { updated_at: new Date() },
+        })
+
         this.logger.log(
           `Route sync ${syncRunId}: persisted ${persistedCount}/${routes.length} routes for ${cityName}.`,
         )

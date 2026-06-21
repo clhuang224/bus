@@ -16,6 +16,16 @@ pnpm --filter @bus/api start:dev
 
 開發伺服器預設使用 `3000` port。
 
+本地開發 scripts：
+
+| Script                                     | 說明                                                 |
+| ------------------------------------------ | ---------------------------------------------------- |
+| `pnpm --filter @bus/api start:dev`         | 以 watch mode 啟動 API。                             |
+| `pnpm --filter @bus/api start:dev:awake`   | 以 watch mode 啟動 API，並在 macOS 防止閒置休眠。    |
+| `pnpm --filter @bus/api sync:routes:local` | 透過執行於 `localhost:3000` 的 API 建立 route sync。 |
+
+在 macOS 執行時間較長的本地 sync 時，可以使用 `start:dev:awake`。一般的 `start:dev` 仍保留給跨平台開發與部署環境使用。
+
 ## API 文件
 
 Scalar 會渲染產生出來的 OpenAPI 文件：
@@ -64,17 +74,17 @@ pnpm --filter @bus/api prisma:migrate:dev
 
 常用 Prisma scripts：
 
-| Script | 說明 |
-| --- | --- |
-| `pnpm --filter @bus/api prisma:generate` | 產生 Prisma Client 到 `src/generated/prisma`。 |
-| `pnpm --filter @bus/api prisma:format` | 格式化 Prisma schema files。 |
-| `pnpm --filter @bus/api prisma:validate` | 檢查 Prisma schema files 是否有效。 |
-| `pnpm --filter @bus/api prisma:migrate:status` | 查看目前設定的資料庫 migration 狀態。 |
+| Script                                                                     | 說明                                                          |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `pnpm --filter @bus/api prisma:generate`                                   | 產生 Prisma Client 到 `src/generated/prisma`。                |
+| `pnpm --filter @bus/api prisma:format`                                     | 格式化 Prisma schema files。                                  |
+| `pnpm --filter @bus/api prisma:validate`                                   | 檢查 Prisma schema files 是否有效。                           |
+| `pnpm --filter @bus/api prisma:migrate:status`                             | 查看目前設定的資料庫 migration 狀態。                         |
 | `pnpm --filter @bus/api prisma:migrate:create -- --name add_example_table` | 建立可重複使用的 migration file，但不套用。需要連得到資料庫。 |
-| `pnpm --filter @bus/api prisma:migrate:dev` | 在本地開發時套用 migrations。 |
-| `pnpm --filter @bus/api prisma:migrate:deploy` | 部署時套用已 commit 的 migrations。 |
-| `pnpm --filter @bus/api prisma:migrate:diff` | 預覽已 commit migrations 到目前 schema 之間的 SQL 差異。 |
-| `pnpm --filter @bus/api prisma:migrate:diff:empty` | 預覽從空資料庫建立目前 schema 所需的 SQL。 |
+| `pnpm --filter @bus/api prisma:migrate:dev`                                | 在本地開發時套用 migrations。                                 |
+| `pnpm --filter @bus/api prisma:migrate:deploy`                             | 部署時套用已 commit 的 migrations。                           |
+| `pnpm --filter @bus/api prisma:migrate:diff`                               | 預覽已 commit migrations 到目前 schema 之間的 SQL 差異。      |
+| `pnpm --filter @bus/api prisma:migrate:diff:empty`                         | 預覽從空資料庫建立目前 schema 所需的 SQL。                    |
 
 確定要把 diff 寫成 migration file 時，再搭配 diff script 使用 `--output prisma/migrations/<timestamp>_<name>/migration.sql`。
 

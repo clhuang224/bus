@@ -67,10 +67,15 @@ export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
   }
 
   private async recoverStaleRuns(now: Date): Promise<void> {
+    const activeSyncRunIds = [...this.activeSyncRunIds]
+
     await this.prismaService.syncRun.updateMany({
       where: {
         resource: PrismaSyncResourceType.ROUTES,
         status: PrismaSyncStatusType.RUNNING,
+        ...(activeSyncRunIds.length > 0
+          ? { id: { notIn: activeSyncRunIds } }
+          : {}),
         updated_at: {
           lt: new Date(now.getTime() - STALE_RUNNING_THRESHOLD_MS),
         },
@@ -90,7 +95,12 @@ export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
   }
 
   private async dispatch(syncRunId: string): Promise<void> {
-    if (this.activeSyncRunIds.has(syncRunId)) return
+    if (
+      this.activeSyncRunIds.has(syncRunId) ||
+      this.activeSyncRunIds.size > 0
+    ) {
+      return
+    }
 
     this.activeSyncRunIds.add(syncRunId)
 
