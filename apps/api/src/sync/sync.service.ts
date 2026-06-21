@@ -18,6 +18,8 @@ const STALE_RUNNING_THRESHOLD_MS = 15 * 60_000
 export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
   private readonly logger = new Logger(SyncService.name)
   private readonly activeSyncRunIds = new Set<string>()
+  // TODO(sync): Guard the resume poll itself so a slow database poll cannot
+  // overlap the next interval and duplicate recovery and ready-run queries.
   private pollTimer: ReturnType<typeof setInterval> | null = null
 
   constructor(

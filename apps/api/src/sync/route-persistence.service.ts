@@ -35,6 +35,8 @@ export class RoutePersistenceService {
     let recordsCreated = 0
     let recordsUpdated = 0
 
+    // TODO(sync): Replace fully sequential remote database writes with measured
+    // batching or bounded concurrency after route and stop sync behavior is stable.
     for (const [index, record] of routes.entries()) {
       if (existingRouteUuids.has(record.route.uuid)) {
         recordsUpdated += 1

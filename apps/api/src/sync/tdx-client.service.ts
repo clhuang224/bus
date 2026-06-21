@@ -10,6 +10,8 @@ import {
 const TDX_BUS_BASE_URL = 'https://tdx.transportdata.tw/api/basic/v2/Bus'
 const TDX_TOKEN_ENDPOINT =
   'https://tdx.transportdata.tw/auth/realms/TDXConnect/protocol/openid-connect/token'
+// TODO(sync): Add abort timeouts to token, upstream fetch, and body reads so a
+// hung TDX connection cannot keep a sync run alive indefinitely.
 const TOKEN_REFRESH_BUFFER_MS = 60 * 1000
 const REQUEST_LIMIT_PER_MINUTE = 5
 const BASIC_MONTHLY_POINTS = 3
@@ -72,6 +74,8 @@ export class TdxMonthlyQuotaExceededError extends Error {
 export class TdxClientService {
   private accessToken: string | null = null
   private accessTokenExpiresAt = 0
+  // TODO(sync): Share an in-flight token refresh promise so concurrent feature
+  // syncs do not request duplicate access tokens.
   private quotaQueue: Promise<void> = Promise.resolve()
 
   constructor(private readonly prismaService: PrismaService) {}
@@ -97,6 +101,8 @@ export class TdxClientService {
       throw new Error(`Expected TDX response to be an array for ${path}.`)
     }
 
+    // TODO(sync): Validate every upstream record and fail the city import when
+    // any item is malformed instead of silently dropping data before soft-delete.
     return payload.filter((value) => this.isRecord(value)) as T[]
   }
 

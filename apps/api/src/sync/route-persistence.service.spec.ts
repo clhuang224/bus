@@ -1,5 +1,6 @@
 import { CityNameType, DirectionType } from '@bus/shared'
 import type { TdxBusRoute } from '@bus/shared'
+import type { Prisma } from '../generated/prisma/client.js'
 import type { PrismaService } from '../prisma/prisma.service.js'
 import { routeMapper } from './mappers/route.mapper.js'
 import { RoutePersistenceService } from './route-persistence.service.js'
@@ -44,12 +45,12 @@ const tdxRoute: TdxBusRoute = {
 function createPersistenceMocks() {
   const calls = {
     routeFindMany: 0,
-    routeUpsert: [] as unknown[],
-    routeUpdateMany: [] as unknown[],
-    subRouteUpsert: [] as unknown[],
-    subRouteUpdateMany: [] as unknown[],
-    operatorUpsert: [] as unknown[],
-    routeOperatorUpsert: [] as unknown[],
+    routeUpsert: [] as Prisma.RouteUpsertArgs[],
+    routeUpdateMany: [] as Prisma.RouteUpdateManyArgs[],
+    subRouteUpsert: [] as Prisma.SubRouteUpsertArgs[],
+    subRouteUpdateMany: [] as Prisma.SubRouteUpdateManyArgs[],
+    operatorUpsert: [] as Prisma.OperatorUpsertArgs[],
+    routeOperatorUpsert: [] as Prisma.RouteOperatorUpsertArgs[],
   }
   const prismaService = {
     route: {
@@ -57,33 +58,33 @@ function createPersistenceMocks() {
         calls.routeFindMany += 1
         return Promise.resolve([])
       },
-      upsert: (args: unknown) => {
+      upsert: (args: Prisma.RouteUpsertArgs) => {
         calls.routeUpsert.push(args)
         return Promise.resolve({ id: 'route-db-id' })
       },
-      updateMany: (args: unknown) => {
+      updateMany: (args: Prisma.RouteUpdateManyArgs) => {
         calls.routeUpdateMany.push(args)
         return Promise.resolve({ count: 2 })
       },
     },
     subRoute: {
-      upsert: (args: unknown) => {
+      upsert: (args: Prisma.SubRouteUpsertArgs) => {
         calls.subRouteUpsert.push(args)
         return Promise.resolve({ id: 'subroute-db-id' })
       },
-      updateMany: (args: unknown) => {
+      updateMany: (args: Prisma.SubRouteUpdateManyArgs) => {
         calls.subRouteUpdateMany.push(args)
         return Promise.resolve({ count: 0 })
       },
     },
     operator: {
-      upsert: (args: unknown) => {
+      upsert: (args: Prisma.OperatorUpsertArgs) => {
         calls.operatorUpsert.push(args)
         return Promise.resolve({ id: 'operator-db-id' })
       },
     },
     routeOperator: {
-      upsert: (args: unknown) => {
+      upsert: (args: Prisma.RouteOperatorUpsertArgs) => {
         calls.routeOperatorUpsert.push(args)
         return Promise.resolve({})
       },
@@ -153,14 +154,8 @@ describe('RoutePersistenceService', () => {
         update: {},
       },
     ])
-    const routeDeactivation = calls.routeUpdateMany[0] as {
-      where: unknown
-      data: { is_active: boolean; inactive_at: Date }
-    }
-    const subRouteDeactivation = calls.subRouteUpdateMany[1] as {
-      where: unknown
-      data: { is_active: boolean; inactive_at: Date }
-    }
+    const routeDeactivation = calls.routeUpdateMany[0]
+    const subRouteDeactivation = calls.subRouteUpdateMany[1]
     expect(calls.subRouteUpdateMany[0]).toEqual(
       expect.objectContaining({
         where: {

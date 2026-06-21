@@ -79,6 +79,8 @@ export class RoutesSyncService {
 
       return result
     } catch (error) {
+      // TODO(sync): Make checkpoint finalization best-effort so failCity or
+      // failRun database errors do not replace the original sync failure.
       if (currentCity) {
         await this.syncCheckpointService.failCity(syncRunId, currentCity, error)
       }
