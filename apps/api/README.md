@@ -16,6 +16,22 @@ pnpm --filter @bus/api start:dev
 
 The development server uses port `3000` by default.
 
+Local development scripts:
+
+| Script                                     | Description                                                     |
+| ------------------------------------------ | --------------------------------------------------------------- |
+| `pnpm --filter @bus/api start:dev`         | Start the API in watch mode.                                    |
+| `pnpm --filter @bus/api start:dev:awake`   | Start the API in watch mode and prevent idle sleep on macOS.    |
+| `pnpm --filter @bus/api sync:routes:local` | Queue a route sync through the API running on `localhost:3000`. |
+
+Use `start:dev:awake` for long local sync runs on macOS. Keep the regular `start:dev` command for cross-platform development and deployment environments.
+
+### Route Sync
+
+A full route sync processes all 22 cities sequentially. One local run against a remote PostgreSQL database took approximately one hour; actual duration depends on database latency and the amount of TDX data.
+
+Progress is checkpointed by city. If a run is interrupted, retrying the failed run skips cities that already succeeded and resumes from the first incomplete city.
+
 ## API Documentation
 
 Scalar renders the generated OpenAPI document:
@@ -64,17 +80,17 @@ pnpm --filter @bus/api prisma:migrate:dev
 
 Useful Prisma scripts:
 
-| Script | Description |
-| --- | --- |
-| `pnpm --filter @bus/api prisma:generate` | Generate the Prisma Client into `src/generated/prisma`. |
-| `pnpm --filter @bus/api prisma:format` | Format Prisma schema files. |
-| `pnpm --filter @bus/api prisma:validate` | Validate Prisma schema files. |
-| `pnpm --filter @bus/api prisma:migrate:status` | Show the current migration status for the configured database. |
+| Script                                                                     | Description                                                                          |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `pnpm --filter @bus/api prisma:generate`                                   | Generate the Prisma Client into `src/generated/prisma`.                              |
+| `pnpm --filter @bus/api prisma:format`                                     | Format Prisma schema files.                                                          |
+| `pnpm --filter @bus/api prisma:validate`                                   | Validate Prisma schema files.                                                        |
+| `pnpm --filter @bus/api prisma:migrate:status`                             | Show the current migration status for the configured database.                       |
 | `pnpm --filter @bus/api prisma:migrate:create -- --name add_example_table` | Create a reusable migration file without applying it. Requires a reachable database. |
-| `pnpm --filter @bus/api prisma:migrate:dev` | Apply migrations locally during development. |
-| `pnpm --filter @bus/api prisma:migrate:deploy` | Apply committed migrations in deployment. |
-| `pnpm --filter @bus/api prisma:migrate:diff` | Preview SQL differences from committed migrations to the current schema. |
-| `pnpm --filter @bus/api prisma:migrate:diff:empty` | Preview SQL for building the current schema from an empty database. |
+| `pnpm --filter @bus/api prisma:migrate:dev`                                | Apply migrations locally during development.                                         |
+| `pnpm --filter @bus/api prisma:migrate:deploy`                             | Apply committed migrations in deployment.                                            |
+| `pnpm --filter @bus/api prisma:migrate:diff`                               | Preview SQL differences from committed migrations to the current schema.             |
+| `pnpm --filter @bus/api prisma:migrate:diff:empty`                         | Preview SQL for building the current schema from an empty database.                  |
 
 Use `--output prisma/migrations/<timestamp>_<name>/migration.sql` with a diff script when intentionally writing SQL output to a migration file.
 

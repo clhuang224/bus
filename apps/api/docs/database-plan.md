@@ -1,8 +1,8 @@
 # Database Plan
 
-This document records the planned database tables and relationships for the API.
+This document records the database decisions, table relationships, and remaining implementation order for the API.
 
-It is not a Prisma schema yet. The goal is to make the data model easier to discuss before writing migrations.
+The Prisma schema and initial migrations now exist under `apps/api/prisma`. This document stays at the design level and should be updated when implementation decisions change.
 
 ## Scope
 
@@ -15,9 +15,11 @@ First database scope:
 - `stop`
 - `route_stop`
 - `route_shape`
+- `operator`
+- `route_operator`
 - sync records
 
-Out of scope for the first database pass:
+Out of scope for the first sync implementation:
 
 - realtime ETA cache
 - realtime vehicle snapshots
@@ -38,6 +40,8 @@ Out of scope for the first database pass:
 - Store localized text as separate columns for now:
   - `name_zh_tw`
   - `name_en`
+  - `name_ja`
+  - `name_ko`
 - Store coordinates as:
   - `latitude`
   - `longitude`
@@ -101,7 +105,6 @@ Use JSON only when the structure is naturally nested or comes from an external s
 Planned JSON fields:
 
 - `route_shape.path`
-- `route_shape.geometry`
 - `sync_error.payload`
 
 ### Enums
@@ -130,7 +133,6 @@ TDX may provide short direction codes. The database should store readable string
 - `northeast`
 - `southwest`
 - `northwest`
-- `unknown`
 
 #### `route_shape_source`
 
@@ -563,11 +565,11 @@ Sync tables are not bus data.
 
 They are logs for sync jobs. For example, when `/api/admin/sync/routes` runs, `sync_run` records when it started, whether it succeeded, and how many rows were created, updated, or marked inactive.
 
-The sync implementation should start with `routes` and `stops`.
+The sync implementation starts with `routes`, followed by station and stop data.
 
 The admin endpoint should create a `sync_run` and return it quickly. The actual TDX import should run in the background so the HTTP request does not need to stay open while all cities are being synced.
 
-Initial city scope can be Shuangbei first, then expand to all cities after the flow is stable. Full Taiwan sync is acceptable for base route and stop data because those records do not change often. A monthly sync cadence should be enough for the first version.
+Route sync currently processes all supported cities. A full run uses per-city checkpoints so a restarted worker can skip completed cities and continue from unfinished work. A monthly sync cadence should be enough for the first version because base route and stop records do not change often.
 
 TDX basic member limits must be respected:
 
@@ -579,7 +581,7 @@ The TDX client layer should own pacing and quota checks. Feature sync services s
 
 If quota is temporarily exhausted, update the sync run to `pending` and store the earliest retry time in `resume_after_at`.
 
-Recommended first sync flow:
+Sync flow:
 
 1. `POST /api/admin/sync/routes` or `POST /api/admin/sync/stops` creates a queued `sync_run`.
 2. A background sync service marks the run as `running`.
@@ -636,6 +638,8 @@ Possible `status` values:
 
 Use `pending` when a sync run is paused because it can continue later, such as when TDX request quota is temporarily exhausted. Store the next possible resume time in `resume_after_at`.
 
+The generic `records_*` counters use the sync resource as their unit. For a `routes` run, they count route rows. Related subroute and operator writes are part of route persistence but are not added to only one counter category.
+
 ### sync_error
 
 One error inside a sync run.
@@ -655,6 +659,33 @@ Fields:
 Relations:
 
 - belongs to `sync_run`
+
+### sync_run_city
+
+One city checkpoint inside a city-based sync run.
+
+Fields:
+
+- `id`
+- `sync_run_id`
+- `city`
+- `status`
+- `started_at`
+- `finished_at`
+- `records_read`
+- `records_created`
+- `records_updated`
+- `records_deactivated`
+- `error_message`
+- `created_at`
+- `updated_at`
+
+Indexes:
+
+- unique `sync_run_id + city`
+- index `sync_run_id + status`
+
+Route and stop syncs can use this table as a resumable city checkpoint. A resumed run skips cities whose checkpoint status is already `succeeded`. If a process stops while a city is running, that city is safe to run again because sync writes are idempotent.
 
 ### tdx_request_log
 
@@ -680,13 +711,11 @@ Relations:
 
 - optionally belongs to `sync_run`
 
-Quota checks can use this table to count requests and response bytes for the current month. Minute-level pacing still belongs in the TDX client layer.
+Quota checks use this table to count requests and response bytes for the current minute and month. The TDX client serializes local reservations, while a PostgreSQL advisory lock coordinates quota reservations across API instances.
 
-The TDX client may keep short-lived in-memory state for minute pacing, but monthly quota should be calculated from persisted request logs so a server restart does not forget usage.
+## Later Feature Models
 
-## Later Tables
-
-These are not part of the first database pass.
+Prisma models may already exist for these records, but their application workflows are not part of the first sync implementation.
 
 ### vehicle
 
@@ -822,11 +851,9 @@ Writes:
 - `route_stop`
 - `route_shape`
 
-## Follow-up Quality Checks
+## Quality Checks
 
-Add API workspace quality scripts after the first Prisma schema foundation is reviewed.
-
-Planned scripts:
+The API workspace currently provides:
 
 - `lint`
 - `typecheck`
@@ -839,13 +866,15 @@ Prisma schema formatting should use `prisma format`.
 
 Prisma schema validation should use `prisma validate`.
 
-Consider Husky integration after the API scripts are stable:
+Husky uses workspace-aware checks:
 
-- `pre-commit` can run API lint, typecheck, and Prisma validation only when API files are staged.
-- Prisma formatting can be manual first.
+- `pre-commit` runs API lint, typecheck, and Prisma validation when API files are staged.
+- `pre-push` runs test scripts across the workspaces.
+- Database e2e tests remain manual until an isolated test database is available.
+- Prisma formatting remains an explicit workspace command.
 - If format enforcement is needed later, use a check that runs `prisma format` and fails when it creates a git diff.
 
-Keep CI changes separate from the first Prisma schema PR. Add API CI after the local scripts are stable.
+API CI remains a follow-up. The local scripts and workspace-aware Husky checks are already in place.
 
 ## Operational Setup
 
@@ -862,20 +891,38 @@ These are the practical setup items needed before the backend can run outside lo
 - Decide where scheduled sync jobs will run after the manual sync flow works.
 - Keep deployment and scheduled jobs separate from the first sync API contract pass.
 
+## Admin Manager Backlog
+
+Consider adding a dedicated `apps/manager` workspace after route and stop sync, API deployment, and admin access control are stable.
+
+The first version should focus on sync operations:
+
+- list sync runs and their current status
+- show per-city checkpoints and progress
+- show TDX request usage and sync errors
+- trigger or retry a sync run
+
+Keep the first version read-only apart from explicit sync actions. Do not add bus data editing until there is a concrete operational need for it. All manager routes and admin API actions must be protected before they are exposed outside local development.
+
+Use Prisma Studio and application logs for local inspection until the manager provides enough value to justify its own application and deployment.
+
+## Completed Foundation
+
+- Sync API contract and queued `sync_run` creation
+- Prisma schema, migrations, and API integration
+- TDX request logging and persisted quota accounting
+- Background route sync with all-city checkpoints and stale-run recovery
+- Route, subroute, operator, and route-operator persistence
+- Soft deactivation and reactivation of route base data
+
 ## Plan Order
 
-1. Add sync API contract stubs for planned admin sync endpoints.
-2. Add Prisma migrations for the current schema.
-3. Add Prisma service integration in the API workspace.
-4. Persist `sync_run` records from sync endpoints.
-5. Add TDX request logging and quota-aware sync status fields.
-6. Implement the TDX client boundary.
-7. Implement route sync from TDX for the first city scope.
-8. Implement stop, station, station group, and route stop sync from TDX for the first city scope.
-9. Expand sync city scope after the first city scope is stable.
-10. Add small seed data or synced sample data for route search.
-11. Read `GET /api/routes?area=...` from the database.
-12. Read `GET /api/routes/:uuid` from the database.
-13. Read `GET /api/stations?latitude=...&longitude=...` from the database.
-14. Discuss realtime cache.
-15. Discuss auth, favorites, and settings.
+1. Implement station group, station, stop, route-stop, and fallback route-shape sync.
+2. Read `GET /api/routes?area=...` from the database.
+3. Read `GET /api/routes/:uuid` from the database.
+4. Read `GET /api/stations?latitude=...&longitude=...` from the database.
+5. Deploy the API, run migrations safely, and protect admin operations.
+6. Decide where scheduled monthly sync jobs run after deployment is stable.
+7. Discuss realtime cache.
+8. Discuss auth, favorites, and settings.
+9. Add `apps/manager` for sync monitoring and controlled retry actions.

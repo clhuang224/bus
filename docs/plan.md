@@ -16,7 +16,7 @@ The backend should not be only a proxy. The main goal is to store non-realtime b
 
 ### Monorepo
 
-Move the project to a pnpm workspace:
+The project uses a pnpm workspace:
 
 ```txt
 apps/
@@ -32,7 +32,7 @@ packages/
 - `apps/api`: new NestJS backend
 - `packages/shared`: shared API contracts and domain types
 
-The shared package should stay small and only contain contracts that are truly shared between frontend and backend, such as DTOs, enums, interfaces, and pure type helpers.
+The shared package should stay small and only contain contracts that are truly shared between frontend and backend, such as enums, interfaces, and pure type helpers. Nest-specific DTO classes stay in the API workspace.
 
 ### Backend
 
@@ -52,7 +52,6 @@ Use PostgreSQL with Prisma.
 
 The first database scope should focus on non-realtime base data:
 
-- cities
 - routes
 - stations
 - station groups
@@ -97,6 +96,14 @@ The first phase should prove that the app can read core route and station data f
 | GET    | `/api/stations`          | Find nearby station groups    |
 | POST   | `/api/admin/sync/routes` | Sync route data from TDX      |
 | POST   | `/api/admin/sync/stops`  | Sync stop data from TDX       |
+
+### Current Progress
+
+- The monorepo, NestJS API, Scalar documentation, Prisma schema, and initial migrations are in place.
+- Route sync runs in the background, records TDX requests, protects the basic-member quota, and resumes by city checkpoint.
+- Route sync currently covers all supported cities and soft-deactivates routes and subroutes missing from the latest city response.
+- Stop, station, station group, and route-stop sync is the next base-data milestone.
+- Public route and station endpoints still need to read from the database.
 
 ## Backlog
 

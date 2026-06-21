@@ -1,83 +1,175 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { CityNameType, getEnumValues } from '@bus/shared'
-import { SyncStatusType as PrismaSyncStatusType } from '../generated/prisma/enums.js'
-import { PrismaService } from '../prisma/prisma.service.js'
-import type { RouteSyncRecord } from './mappers/route.mapper.js'
-import { routeMapper } from './mappers/route.mapper.js'
+import { RoutePersistenceService } from './route-persistence.service.js'
+import { cityMapper, routeMapper } from './mappers/route.mapper.js'
+import { SyncCheckpointService } from './sync-checkpoint.service.js'
+import type { SyncResult } from './sync-result.js'
+import { addSyncResult, createEmptySyncResult } from './sync-result.js'
 import { TdxClientService } from './tdx-client.service.js'
 
-interface RoutesSyncResult {
-  records_read: number
-  records_created: number
-  records_updated: number
-  records_deactivated: number
-}
+const CITY_SYNC_HEARTBEAT_INTERVAL_MS = 60_000
 
 @Injectable()
 export class RoutesSyncService {
-  // TODO(sync): Keep this service focused on route/subroute/operator/shape imports.
-  // The admin endpoint should create a sync_run, then call this service from a
-  // background worker instead of doing the whole import inside the HTTP request.
+  private readonly logger = new Logger(RoutesSyncService.name)
+
   constructor(
-    private readonly prismaService: PrismaService,
     private readonly tdxClientService: TdxClientService,
+    private readonly routePersistenceService: RoutePersistenceService,
+    private readonly syncCheckpointService: SyncCheckpointService,
   ) {}
 
-  async syncAllRoutes(syncRunId: string): Promise<RoutesSyncResult> {
-    await this.prismaService.syncRun.update({
-      where: { id: syncRunId },
-      data: {
-        status: PrismaSyncStatusType.RUNNING,
-        started_at: new Date(),
-      },
-    })
+  async syncAllRoutes(syncRunId: string): Promise<SyncResult> {
+    await this.syncCheckpointService.startRun(syncRunId)
 
-    const result: RoutesSyncResult = {
-      records_read: 0,
-      records_created: 0,
-      records_updated: 0,
-      records_deactivated: 0,
+    const result = createEmptySyncResult()
+    const cities = getEnumValues(CityNameType)
+    let currentCity: CityNameType | null = null
+
+    this.logger.log(
+      `Route sync ${syncRunId} started for ${cities.length} cities.`,
+    )
+
+    try {
+      await this.syncCheckpointService.ensureCities(syncRunId, cities)
+      const completedCities =
+        await this.syncCheckpointService.getCompletedCities(syncRunId)
+
+      for (const checkpoint of completedCities.values()) {
+        addSyncResult(result, checkpoint)
+      }
+      await this.syncCheckpointService.updateRunResult(syncRunId, result)
+
+      for (const [index, city] of cities.entries()) {
+        if (completedCities.has(cityMapper(city))) {
+          this.logger.log(
+            `Route sync ${syncRunId}: skipping completed city ${city} (${index + 1}/${cities.length}).`,
+          )
+          continue
+        }
+
+        currentCity = city
+        await this.syncCheckpointService.startCity(syncRunId, city)
+
+        this.logger.log(
+          `Route sync ${syncRunId}: starting ${city} (${index + 1}/${cities.length}).`,
+        )
+        const cityResult = await this.syncCityRoutes(city, syncRunId)
+
+        addSyncResult(result, cityResult)
+        await this.syncCheckpointService.completeCity(
+          syncRunId,
+          city,
+          cityResult,
+        )
+        currentCity = null
+
+        await this.syncCheckpointService.updateRunResult(syncRunId, result)
+
+        this.logger.log(
+          `Route sync ${syncRunId}: completed ${city} (${index + 1}/${cities.length}), read ${cityResult.records_read}, created ${cityResult.records_created}, updated ${cityResult.records_updated}, deactivated ${cityResult.records_deactivated}.`,
+        )
+      }
+
+      await this.syncCheckpointService.completeRun(syncRunId, result)
+
+      this.logger.log(
+        `Route sync ${syncRunId} succeeded: read ${result.records_read}, created ${result.records_created}, updated ${result.records_updated}, deactivated ${result.records_deactivated}.`,
+      )
+
+      return result
+    } catch (error) {
+      if (currentCity) {
+        try {
+          await this.syncCheckpointService.failCity(
+            syncRunId,
+            currentCity,
+            error,
+          )
+        } catch (checkpointError) {
+          this.logCheckpointFailure(
+            syncRunId,
+            `mark ${currentCity} as failed`,
+            checkpointError,
+          )
+        }
+      }
+
+      try {
+        await this.syncCheckpointService.failRun(syncRunId, error, result)
+      } catch (checkpointError) {
+        this.logCheckpointFailure(
+          syncRunId,
+          'mark the sync run as failed',
+          checkpointError,
+        )
+      }
+
+      throw error
     }
-
-    for (const city of getEnumValues(CityNameType)) {
-      const cityResult = await this.syncCityRoutes(city)
-
-      result.records_read += cityResult.records_read
-      result.records_created += cityResult.records_created
-      result.records_updated += cityResult.records_updated
-      result.records_deactivated += cityResult.records_deactivated
-    }
-
-    await this.prismaService.syncRun.update({
-      where: { id: syncRunId },
-      data: {
-        status: PrismaSyncStatusType.SUCCEEDED,
-        finished_at: new Date(),
-        ...result,
-      },
-    })
-
-    return result
   }
 
-  async syncCityRoutes(city: CityNameType): Promise<RoutesSyncResult> {
-    const tdxRoutes = await this.tdxClientService.fetchRoutes(city)
-    const routes = routeMapper({ city, tdxRoutes })
+  async syncCityRoutes(
+    city: CityNameType,
+    syncRunId: string,
+  ): Promise<SyncResult> {
+    const heartbeatTimer = this.startCityHeartbeat(syncRunId, city)
 
-    // TODO(sync): Upsert mapped routes, subroutes, operators, route_operator,
-    // and route_shape rows. Mark missing records inactive instead of deleting
-    // them, and reactivate records that appear again.
-    this.saveRoutes(routes)
+    try {
+      const tdxRoutes = await this.tdxClientService.fetchRoutes(city, syncRunId)
+      const routes = routeMapper({ city, tdxRoutes })
 
-    return {
-      records_read: tdxRoutes.length,
-      records_created: 0,
-      records_updated: 0,
-      records_deactivated: 0,
+      this.logger.log(
+        `Route sync ${syncRunId}: ${city} returned ${routes.length} routes from TDX.`,
+      )
+
+      return await this.routePersistenceService.persistRoutes(routes, {
+        city,
+        onProgress: async (persistedCount, totalCount) => {
+          await this.syncCheckpointService.touch(syncRunId, city)
+          this.logger.log(
+            `Route sync ${syncRunId}: persisted ${persistedCount}/${totalCount} routes for ${city}.`,
+          )
+        },
+      })
+    } finally {
+      clearInterval(heartbeatTimer)
     }
   }
 
-  private saveRoutes(routes: RouteSyncRecord[]): void {
-    void routes
+  private startCityHeartbeat(
+    syncRunId: string,
+    city: CityNameType,
+  ): ReturnType<typeof setInterval> {
+    let heartbeatPromise: Promise<void> | null = null
+    const timer = setInterval(() => {
+      if (heartbeatPromise) return
+
+      heartbeatPromise = this.syncCheckpointService
+        .touch(syncRunId, city)
+        .catch((error: unknown) => {
+          const message = error instanceof Error ? error.message : String(error)
+          this.logger.error(
+            `Route sync ${syncRunId}: heartbeat failed for ${city}: ${message}`,
+          )
+        })
+        .finally(() => {
+          heartbeatPromise = null
+        })
+    }, CITY_SYNC_HEARTBEAT_INTERVAL_MS)
+    timer.unref()
+
+    return timer
+  }
+
+  private logCheckpointFailure(
+    syncRunId: string,
+    action: string,
+    error: unknown,
+  ): void {
+    const message = error instanceof Error ? error.message : String(error)
+    this.logger.error(
+      `Route sync ${syncRunId}: failed to ${action}: ${message}`,
+    )
   }
 }

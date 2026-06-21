@@ -1,14 +1,168 @@
-import type { CityNameType, TdxBusRoute } from '@bus/shared'
+import { CityNameType, DirectionType } from '@bus/shared'
+import type {
+  TdxBusOperator,
+  TdxBusRoute,
+  TdxBusSubRoute,
+  TdxLocalizedText,
+} from '@bus/shared'
+import {
+  PRISMA_CITY_BY_TDX_CITY,
+  PRISMA_DIRECTION_BY_TDX_DIRECTION,
+} from '../../constants/enum-mappings.js'
+import {
+  CityNameType as PrismaCityNameType,
+  DirectionType as PrismaDirectionType,
+} from '../../generated/prisma/enums.js'
 
-export interface RouteSyncRecord {
-  city: CityNameType
-  tdx_route: TdxBusRoute
+interface RouteRecord {
+  uuid: string
+  tdx_route_id: string
+  city: PrismaCityNameType
+  name_zh_tw: string
+  name_en: string | null
+  name_ja: string | null
+  name_ko: string | null
+  departure_zh_tw: string
+  departure_en: string | null
+  departure_ja: string | null
+  departure_ko: string | null
+  destination_zh_tw: string
+  destination_en: string | null
+  destination_ja: string | null
+  destination_ko: string | null
+  tdx_updated_at: Date | null
 }
 
-// TODO(sync): Replace this placeholder with a Prisma-friendly mapper.
-// It should flatten TDX route fields into route, subroute, operator,
-// route_operator, and route_shape sync records. API response mapping should
-// live separately from this database sync mapper.
+interface SubRouteRecord {
+  uuid: string
+  tdx_subroute_id: string
+  direction: PrismaDirectionType
+  name_zh_tw: string
+  name_en: string | null
+  name_ja: string | null
+  name_ko: string | null
+  departure_zh_tw: string
+  departure_en: string | null
+  departure_ja: string | null
+  departure_ko: string | null
+  destination_zh_tw: string
+  destination_en: string | null
+  destination_ja: string | null
+  destination_ko: string | null
+  first_bus_time: string | null
+  last_bus_time: string | null
+  tdx_updated_at: Date | null
+}
+
+interface OperatorRecord {
+  tdx_operator_id: string
+  name_zh_tw: string
+  name_en: string | null
+}
+
+export interface RouteSyncRecord {
+  route: RouteRecord
+  subroutes: SubRouteRecord[]
+  operators: OperatorRecord[]
+}
+
+function mapRoute(
+  city: CityNameType,
+  route: TdxBusRoute,
+  updatedAt: Date | null,
+): RouteRecord {
+  return {
+    uuid: route.RouteUID,
+    tdx_route_id: route.RouteID,
+    city: cityMapper(city),
+    ...mapLocalizedName(route.RouteName),
+    departure_zh_tw: toRequiredText(route.DepartureStopNameZh),
+    departure_en: toNullableText(route.DepartureStopNameEn),
+    departure_ja: null,
+    departure_ko: null,
+    destination_zh_tw: toRequiredText(route.DestinationStopNameZh),
+    destination_en: toNullableText(route.DestinationStopNameEn),
+    destination_ja: null,
+    destination_ko: null,
+    tdx_updated_at: updatedAt,
+  }
+}
+
+function mapSubRoute(
+  route: TdxBusRoute,
+  subroute: TdxBusSubRoute,
+  updatedAt: Date | null,
+): SubRouteRecord {
+  return {
+    uuid: `${subroute.SubRouteUID}-${subroute.Direction}`,
+    tdx_subroute_id: subroute.SubRouteID,
+    direction: mapDirection(subroute.Direction),
+    ...mapLocalizedName(subroute.SubRouteName),
+    departure_zh_tw: toRequiredText(
+      subroute.DepartureStopNameZh ?? route.DepartureStopNameZh,
+    ),
+    departure_en: toNullableText(
+      subroute.DepartureStopNameEn ?? route.DepartureStopNameEn,
+    ),
+    departure_ja: null,
+    departure_ko: null,
+    destination_zh_tw: toRequiredText(
+      subroute.DestinationStopNameZh ?? route.DestinationStopNameZh,
+    ),
+    destination_en: toNullableText(
+      subroute.DestinationStopNameEn ?? route.DestinationStopNameEn,
+    ),
+    destination_ja: null,
+    destination_ko: null,
+    first_bus_time: toNullableText(subroute.FirstBusTime),
+    last_bus_time: toNullableText(subroute.LastBusTime),
+    tdx_updated_at: updatedAt,
+  }
+}
+
+function mapOperator(operator: TdxBusOperator): OperatorRecord {
+  return {
+    tdx_operator_id: operator.OperatorID,
+    name_zh_tw: toRequiredText(operator.OperatorName.Zh_tw),
+    name_en: toNullableText(operator.OperatorName.En),
+  }
+}
+
+function mapLocalizedName(text: TdxLocalizedText) {
+  return {
+    name_zh_tw: toRequiredText(text.Zh_tw),
+    name_en: toNullableText(text.En),
+    name_ja: toNullableText(text.Ja),
+    name_ko: toNullableText(text.Ko),
+  }
+}
+
+function mapDirection(direction: DirectionType): PrismaDirectionType {
+  return (
+    PRISMA_DIRECTION_BY_TDX_DIRECTION[direction] ?? PrismaDirectionType.UNKNOWN
+  )
+}
+
+function toRequiredText(value: string | null | undefined): string {
+  return value?.trim() ?? ''
+}
+
+function toNullableText(value: string | null | undefined): string | null {
+  const text = value?.trim()
+
+  return text ? text : null
+}
+
+function toDate(value: string): Date | null {
+  const date = new Date(value)
+
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
+export function cityMapper(city: CityNameType): PrismaCityNameType {
+  return PRISMA_CITY_BY_TDX_CITY[city]
+}
+
 export function routeMapper({
   city,
   tdxRoutes,
@@ -16,8 +170,15 @@ export function routeMapper({
   city: CityNameType
   tdxRoutes: TdxBusRoute[]
 }): RouteSyncRecord[] {
-  return tdxRoutes.map((tdxRoute) => ({
-    city,
-    tdx_route: tdxRoute,
-  }))
+  return tdxRoutes.map((tdxRoute) => {
+    const updatedAt = toDate(tdxRoute.UpdateTime)
+
+    return {
+      route: mapRoute(city, tdxRoute, updatedAt),
+      subroutes: (tdxRoute.SubRoutes ?? []).map((subroute) =>
+        mapSubRoute(tdxRoute, subroute, updatedAt),
+      ),
+      operators: tdxRoute.Operators.map(mapOperator),
+    }
+  })
 }

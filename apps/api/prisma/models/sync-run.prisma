@@ -13,6 +13,7 @@ model SyncRun {
   created_at          DateTime         @default(now())
   updated_at          DateTime         @updatedAt
   errors              SyncError[]
+  cities              SyncRunCity[]
   tdx_request_logs    TdxRequestLog[]
 
   @@index([resource, status])

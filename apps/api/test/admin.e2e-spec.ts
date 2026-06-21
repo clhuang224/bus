@@ -6,6 +6,7 @@ import {
   SyncStatusType as PrismaSyncStatusType,
 } from '../src/generated/prisma/enums.js'
 import { PrismaService } from '../src/prisma/prisma.service.js'
+import { SyncService } from '../src/sync/sync.service.js'
 import { createE2eApp } from './create-e2e-app.js'
 
 const syncRunUuid = '550e8400-e29b-41d4-a716-446655440000'
@@ -29,15 +30,25 @@ function createMockSyncRun(resource: PrismaSyncResourceType) {
 }
 
 function createMockPrismaService() {
+  let activeSyncRun: ReturnType<typeof createMockSyncRun> | null = null
+  const advisoryLockQueries: string[] = []
   const createCalls: Array<{
     data: {
       resource: PrismaSyncResourceType
       status: PrismaSyncStatusType
     }
   }> = []
+  const updateCalls: unknown[] = []
 
-  return {
+  const transaction = {
+    $executeRaw(strings: TemplateStringsArray, ...values: unknown[]) {
+      advisoryLockQueries.push(renderSql(strings, values))
+      return Promise.resolve(0)
+    },
     syncRun: {
+      findFirst() {
+        return Promise.resolve(activeSyncRun)
+      },
       create({
         data,
       }: {
@@ -47,11 +58,52 @@ function createMockPrismaService() {
         }
       }) {
         createCalls.push({ data })
-        return Promise.resolve(createMockSyncRun(data.resource))
+        activeSyncRun = createMockSyncRun(data.resource)
+        return Promise.resolve(activeSyncRun)
+      },
+      update(args: {
+        where: { id: string }
+        data: Partial<ReturnType<typeof createMockSyncRun>>
+      }) {
+        updateCalls.push(args)
+
+        if (!activeSyncRun) {
+          return Promise.reject(new Error('No sync run to update.'))
+        }
+
+        activeSyncRun = { ...activeSyncRun, ...args.data }
+        return Promise.resolve(activeSyncRun)
       },
     },
-    createCalls,
   }
+
+  return {
+    $transaction<T>(
+      callback: (client: typeof transaction) => Promise<T>,
+    ): Promise<T> {
+      return callback(transaction)
+    },
+    advisoryLockQueries,
+    createCalls,
+    setLatestSyncRunStatus(status: PrismaSyncStatusType) {
+      if (!activeSyncRun) throw new Error('No sync run to update.')
+      activeSyncRun.status = status
+    },
+    updateCalls,
+  }
+}
+
+function renderSql(strings: TemplateStringsArray, values: unknown[]): string {
+  return strings
+    .reduce(
+      (sql, segment, index) =>
+        `${sql}${segment}${index < values.length ? String(values[index]) : ''}`,
+      '',
+    )
+    .replace(/\s+/g, ' ')
+    .replace(/\(\s+/g, '(')
+    .replace(/\s+\)/g, ')')
+    .trim()
 }
 
 interface SyncResponseBody {
@@ -88,12 +140,22 @@ function expectQueuedSyncResponse(
 describe('Admin Sync API (e2e)', () => {
   let app: INestApplication
   let prismaService: ReturnType<typeof createMockPrismaService>
+  let enqueuedSyncRunIds: string[]
 
   beforeEach(async () => {
     prismaService = createMockPrismaService()
+    enqueuedSyncRunIds = []
     app = await createE2eApp({
       configureModule: (builder) =>
-        builder.overrideProvider(PrismaService).useValue(prismaService),
+        builder
+          .overrideProvider(PrismaService)
+          .useValue(prismaService)
+          .overrideProvider(SyncService)
+          .useValue({
+            enqueue: (syncRunId: string) => {
+              enqueuedSyncRunIds.push(syncRunId)
+            },
+          }),
     })
   })
 
@@ -117,7 +179,64 @@ describe('Admin Sync API (e2e)', () => {
             },
           },
         ])
+        expect(enqueuedSyncRunIds).toEqual([syncRunUuid])
+        expect(prismaService.advisoryLockQueries).toEqual([
+          'SELECT pg_advisory_xact_lock(1, 1)',
+        ])
       })
+  })
+
+  it('/api/admin/sync/routes (POST) reuses an active route sync', async () => {
+    // Nest's HTTP adapter exposes the raw server as `any`.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    await request(app.getHttpServer())
+      .post('/api/admin/sync/routes')
+      .expect(200)
+    // Nest's HTTP adapter exposes the raw server as `any`.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    await request(app.getHttpServer())
+      .post('/api/admin/sync/routes')
+      .expect(200)
+      .expect(({ body }: { body: SyncResponseBody }) => {
+        expectQueuedSyncResponse(body, SyncResourceType.ROUTES)
+      })
+
+    expect(prismaService.createCalls).toHaveLength(1)
+    expect(prismaService.advisoryLockQueries).toHaveLength(2)
+    expect(enqueuedSyncRunIds).toEqual([syncRunUuid, syncRunUuid])
+  })
+
+  it('/api/admin/sync/routes (POST) resumes the latest failed route sync', async () => {
+    // Nest's HTTP adapter exposes the raw server as `any`.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    await request(app.getHttpServer())
+      .post('/api/admin/sync/routes')
+      .expect(200)
+
+    prismaService.setLatestSyncRunStatus(PrismaSyncStatusType.FAILED)
+
+    // Nest's HTTP adapter exposes the raw server as `any`.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    await request(app.getHttpServer())
+      .post('/api/admin/sync/routes')
+      .expect(200)
+      .expect(({ body }: { body: SyncResponseBody }) => {
+        expectQueuedSyncResponse(body, SyncResourceType.ROUTES)
+      })
+
+    expect(prismaService.createCalls).toHaveLength(1)
+    expect(prismaService.updateCalls).toEqual([
+      {
+        where: { id: syncRunUuid },
+        data: {
+          status: PrismaSyncStatusType.QUEUED,
+          started_at: null,
+          finished_at: null,
+          resume_after_at: null,
+          error_message: null,
+        },
+      },
+    ])
   })
 
   it('/api/admin/sync/stops (POST) queues stop sync', () => {
@@ -136,6 +255,7 @@ describe('Admin Sync API (e2e)', () => {
             },
           },
         ])
+        expect(enqueuedSyncRunIds).toEqual([])
       })
   })
 })

@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import { Test, TestingModule, TestingModuleBuilder } from '@nestjs/testing'
 import { PrismaService } from '../src/prisma/prisma.service.js'
+import { SyncService } from '../src/sync/sync.service.js'
 import { AppModule } from './../src/app.module.js'
 
 interface CreateE2eAppOptions {
@@ -16,6 +17,10 @@ export async function createE2eApp(
     .overrideProvider(PrismaService)
     .useValue({
       $disconnect: () => Promise.resolve(),
+    })
+    .overrideProvider(SyncService)
+    .useValue({
+      enqueue: () => undefined,
     })
 
   if (options.configureModule) {

@@ -1,0 +1,20 @@
+model SyncRunCity {
+  id                  String         @id @default(uuid()) @db.Uuid
+  sync_run_id         String         @db.Uuid
+  sync_run            SyncRun        @relation(fields: [sync_run_id], references: [id], onDelete: Cascade)
+  city                CityNameType
+  status              SyncStatusType @default(QUEUED)
+  started_at          DateTime?
+  finished_at         DateTime?
+  records_read        Int            @default(0)
+  records_created     Int            @default(0)
+  records_updated     Int            @default(0)
+  records_deactivated Int            @default(0)
+  error_message       String?        @db.Text
+  created_at          DateTime       @default(now())
+  updated_at          DateTime       @updatedAt
+
+  @@unique([sync_run_id, city])
+  @@index([sync_run_id, status])
+  @@map("sync_run_city")
+}
