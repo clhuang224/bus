@@ -62,6 +62,8 @@ describe('SyncCheckpointService', () => {
         data: {
           status: PrismaSyncStatusType.PENDING,
           resume_after_at: retryAt,
+          finished_at: null,
+          error_message: quotaError.message,
           ...result,
         },
       },

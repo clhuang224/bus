@@ -142,6 +142,8 @@ export class SyncCheckpointService {
         data: {
           status: PrismaSyncStatusType.PENDING,
           resume_after_at: error.retry_at,
+          finished_at: null,
+          error_message: this.errorMessage(error),
           ...result,
         },
       })
