@@ -50,12 +50,14 @@ function createPersistenceMocks() {
     operatorUpsert: [] as unknown[],
     routeOperatorUpsert: [] as unknown[],
   }
-  const transaction = {
+  const prismaService = {
     route: {
+      findMany: () => Promise.resolve([]),
       upsert: (args: unknown) => {
         calls.routeUpsert.push(args)
         return Promise.resolve({ id: 'route-db-id' })
       },
+      updateMany: () => Promise.resolve({ count: 2 }),
     },
     subRoute: {
       upsert: (args: unknown) => {
@@ -77,15 +79,6 @@ function createPersistenceMocks() {
       },
       deleteMany: () => Promise.resolve({ count: 0 }),
     },
-  }
-  const prismaService = {
-    route: {
-      findMany: () => Promise.resolve([]),
-      updateMany: () => Promise.resolve({ count: 2 }),
-    },
-    $transaction: (
-      callback: (client: typeof transaction) => Promise<unknown>,
-    ) => callback(transaction),
     syncRun: {
       update: () => Promise.resolve({}),
     },

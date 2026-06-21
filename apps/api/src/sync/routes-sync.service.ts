@@ -142,8 +142,8 @@ export class RoutesSyncService {
         recordsCreated += 1
       }
 
-      await this.prismaService.$transaction(async (transaction) => {
-        const route = await transaction.route.upsert({
+      try {
+        const route = await this.prismaService.route.upsert({
           where: { uuid: record.route.uuid },
           create: {
             ...record.route,
@@ -157,9 +157,15 @@ export class RoutesSyncService {
           },
         })
 
-        await this.saveSubRoutes(transaction, route.id, record)
-        await this.saveOperators(transaction, route.id, record)
-      })
+        await this.saveSubRoutes(route.id, record)
+        await this.saveOperators(route.id, record)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+
+        throw new Error(
+          `Failed to persist route ${record.route.uuid} for ${cityName}: ${message}`,
+        )
+      }
 
       const persistedCount = index + 1
 
@@ -199,7 +205,6 @@ export class RoutesSyncService {
   }
 
   private async saveSubRoutes(
-    transaction: Parameters<Parameters<PrismaService['$transaction']>[0]>[0],
     routeId: string,
     record: RouteSyncRecord,
   ): Promise<void> {
@@ -208,7 +213,7 @@ export class RoutesSyncService {
     )
 
     for (const subroute of record.subroutes) {
-      await transaction.subRoute.upsert({
+      await this.prismaService.subRoute.upsert({
         where: { uuid: subroute.uuid },
         create: {
           ...subroute,
@@ -225,7 +230,7 @@ export class RoutesSyncService {
       })
     }
 
-    await transaction.subRoute.updateMany({
+    await this.prismaService.subRoute.updateMany({
       where: {
         route_id: routeId,
         is_active: true,
@@ -239,14 +244,13 @@ export class RoutesSyncService {
   }
 
   private async saveOperators(
-    transaction: Parameters<Parameters<PrismaService['$transaction']>[0]>[0],
     routeId: string,
     record: RouteSyncRecord,
   ): Promise<void> {
     const operatorIds: string[] = []
 
     for (const operator of record.operators) {
-      const savedOperator = await transaction.operator.upsert({
+      const savedOperator = await this.prismaService.operator.upsert({
         where: { tdx_operator_id: operator.tdx_operator_id },
         create: {
           ...operator,
@@ -262,7 +266,7 @@ export class RoutesSyncService {
 
       operatorIds.push(savedOperator.id)
 
-      await transaction.routeOperator.upsert({
+      await this.prismaService.routeOperator.upsert({
         where: {
           route_id_operator_id: {
             route_id: routeId,
@@ -277,7 +281,7 @@ export class RoutesSyncService {
       })
     }
 
-    await transaction.routeOperator.deleteMany({
+    await this.prismaService.routeOperator.deleteMany({
       where: {
         route_id: routeId,
         operator_id: { notIn: operatorIds },
