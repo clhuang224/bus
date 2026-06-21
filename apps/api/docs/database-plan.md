@@ -889,6 +889,21 @@ These are the practical setup items needed before the backend can run outside lo
 - Decide where scheduled sync jobs will run after the manual sync flow works.
 - Keep deployment and scheduled jobs separate from the first sync API contract pass.
 
+## Admin Manager Backlog
+
+Consider adding a dedicated `apps/manager` workspace after route and stop sync, API deployment, and admin access control are stable.
+
+The first version should focus on sync operations:
+
+- list sync runs and their current status
+- show per-city checkpoints and progress
+- show TDX request usage and sync errors
+- trigger or retry a sync run
+
+Keep the first version read-only apart from explicit sync actions. Do not add bus data editing until there is a concrete operational need for it. All manager routes and admin API actions must be protected before they are exposed outside local development.
+
+Use Prisma Studio and application logs for local inspection until the manager provides enough value to justify its own application and deployment.
+
 ## Plan Order
 
 1. Add sync API contract stubs for planned admin sync endpoints.
@@ -906,3 +921,5 @@ These are the practical setup items needed before the backend can run outside lo
 13. Read `GET /api/stations?latitude=...&longitude=...` from the database.
 14. Discuss realtime cache.
 15. Discuss auth, favorites, and settings.
+16. Deploy the API and protect admin operations.
+17. Add `apps/manager` for sync monitoring and controlled retry actions.
