@@ -78,15 +78,29 @@ export class RoutePersistenceService {
       }
     }
 
+    const inactiveAt = new Date()
+    const missingRouteWhere = {
+      city,
+      uuid: { notIn: incomingRouteUuids },
+    }
     const deactivatedRoutes = await this.prismaService.route.updateMany({
       where: {
-        city,
+        ...missingRouteWhere,
         is_active: true,
-        uuid: { notIn: incomingRouteUuids },
       },
       data: {
         is_active: false,
-        inactive_at: new Date(),
+        inactive_at: inactiveAt,
+      },
+    })
+    await this.prismaService.subRoute.updateMany({
+      where: {
+        is_active: true,
+        route: missingRouteWhere,
+      },
+      data: {
+        is_active: false,
+        inactive_at: inactiveAt,
       },
     })
 

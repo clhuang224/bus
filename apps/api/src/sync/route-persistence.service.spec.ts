@@ -45,8 +45,9 @@ function createPersistenceMocks() {
   const calls = {
     routeFindMany: 0,
     routeUpsert: [] as unknown[],
-    routeUpdateMany: 0,
+    routeUpdateMany: [] as unknown[],
     subRouteUpsert: [] as unknown[],
+    subRouteUpdateMany: [] as unknown[],
     operatorUpsert: [] as unknown[],
     routeOperatorUpsert: [] as unknown[],
   }
@@ -60,8 +61,8 @@ function createPersistenceMocks() {
         calls.routeUpsert.push(args)
         return Promise.resolve({ id: 'route-db-id' })
       },
-      updateMany: () => {
-        calls.routeUpdateMany += 1
+      updateMany: (args: unknown) => {
+        calls.routeUpdateMany.push(args)
         return Promise.resolve({ count: 2 })
       },
     },
@@ -70,7 +71,10 @@ function createPersistenceMocks() {
         calls.subRouteUpsert.push(args)
         return Promise.resolve({ id: 'subroute-db-id' })
       },
-      updateMany: () => Promise.resolve({ count: 0 }),
+      updateMany: (args: unknown) => {
+        calls.subRouteUpdateMany.push(args)
+        return Promise.resolve({ count: 0 })
+      },
     },
     operator: {
       upsert: (args: unknown) => {
@@ -102,7 +106,8 @@ describe('RoutePersistenceService', () => {
     ).rejects.toThrow('TDX returned 0 routes for NewTaipei.')
     expect(calls.routeFindMany).toBe(0)
     expect(calls.routeUpsert).toHaveLength(0)
-    expect(calls.routeUpdateMany).toBe(0)
+    expect(calls.routeUpdateMany).toHaveLength(0)
+    expect(calls.subRouteUpdateMany).toHaveLength(0)
   })
 
   it('persists routes with their subroutes and operators', async () => {
@@ -148,5 +153,41 @@ describe('RoutePersistenceService', () => {
         update: {},
       },
     ])
+    const routeDeactivation = calls.routeUpdateMany[0] as {
+      where: unknown
+      data: { is_active: boolean; inactive_at: Date }
+    }
+    const subRouteDeactivation = calls.subRouteUpdateMany[1] as {
+      where: unknown
+      data: { is_active: boolean; inactive_at: Date }
+    }
+    expect(calls.subRouteUpdateMany[0]).toEqual(
+      expect.objectContaining({
+        where: {
+          route_id: 'route-db-id',
+          is_active: true,
+          uuid: { notIn: ['NWT101160-0'] },
+        },
+      }),
+    )
+    expect(routeDeactivation.where).toEqual({
+      city: 'NEW_TAIPEI',
+      uuid: { notIn: ['NWT10116'] },
+      is_active: true,
+    })
+    expect(subRouteDeactivation.where).toEqual({
+      is_active: true,
+      route: {
+        city: 'NEW_TAIPEI',
+        uuid: { notIn: ['NWT10116'] },
+      },
+    })
+    expect(routeDeactivation.data.is_active).toBe(false)
+    expect(routeDeactivation.data.inactive_at).toBeInstanceOf(Date)
+    expect(subRouteDeactivation.data.is_active).toBe(false)
+    expect(subRouteDeactivation.data.inactive_at).toBeInstanceOf(Date)
+    expect(subRouteDeactivation.data.inactive_at).toBe(
+      routeDeactivation.data.inactive_at,
+    )
   })
 })
