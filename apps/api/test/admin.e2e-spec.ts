@@ -41,8 +41,8 @@ function createMockPrismaService() {
   const updateCalls: unknown[] = []
 
   const transaction = {
-    $executeRawUnsafe(query: string) {
-      advisoryLockQueries.push(query)
+    $executeRaw(strings: TemplateStringsArray, ...values: unknown[]) {
+      advisoryLockQueries.push(renderSql(strings, values))
       return Promise.resolve(0)
     },
     syncRun: {
@@ -91,6 +91,19 @@ function createMockPrismaService() {
     },
     updateCalls,
   }
+}
+
+function renderSql(strings: TemplateStringsArray, values: unknown[]): string {
+  return strings
+    .reduce(
+      (sql, segment, index) =>
+        `${sql}${segment}${index < values.length ? String(values[index]) : ''}`,
+      '',
+    )
+    .replace(/\s+/g, ' ')
+    .replace(/\(\s+/g, '(')
+    .replace(/\s+\)/g, ')')
+    .trim()
 }
 
 interface SyncResponseBody {

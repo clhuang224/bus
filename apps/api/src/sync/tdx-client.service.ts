@@ -182,9 +182,12 @@ export class TdxClientService {
     context: TdxRequestContext,
   ): Promise<QuotaResult> {
     return this.prismaService.$transaction(async (transaction) => {
-      await transaction.$executeRawUnsafe(
-        `SELECT pg_advisory_xact_lock(${AdvisoryLockNamespace.TDX_QUOTA}, ${TdxQuotaLockId.GLOBAL})`,
-      )
+      await transaction.$executeRaw`
+        SELECT pg_advisory_xact_lock(
+          ${AdvisoryLockNamespace.TDX_QUOTA},
+          ${TdxQuotaLockId.GLOBAL}
+        )
+      `
 
       const now = new Date()
       const monthStart = this.getMonthStart(now)

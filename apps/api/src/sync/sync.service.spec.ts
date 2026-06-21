@@ -17,6 +17,7 @@ interface ReadyRunQuery {
       },
     ]
   }
+  orderBy: { created_at: 'asc' }
   select: { id: boolean }
 }
 
@@ -112,6 +113,7 @@ describe('SyncService', () => {
     expect(readyRunQuery.where.OR[0].status).toBe(PrismaSyncStatusType.QUEUED)
     expect(readyRunQuery.where.OR[1].status).toBe(PrismaSyncStatusType.PENDING)
     expect(readyRunQuery.where.OR[1].resume_after_at.lte).toBeInstanceOf(Date)
+    expect(readyRunQuery.orderBy).toEqual({ created_at: 'asc' })
     expect(readyRunQuery.select).toEqual({ id: true })
 
     expect(updateManyCalls).toHaveLength(2)

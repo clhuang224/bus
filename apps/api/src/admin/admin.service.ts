@@ -77,9 +77,12 @@ export class AdminService {
   }): Promise<SyncResponseDto> {
     const syncRun = await this.prismaService.$transaction(
       async (transaction) => {
-        await transaction.$executeRawUnsafe(
-          `SELECT pg_advisory_xact_lock(${AdvisoryLockNamespace.SYNC_RUN}, ${SYNC_RESOURCE_LOCK_IDS[prismaResource]})`,
-        )
+        await transaction.$executeRaw`
+          SELECT pg_advisory_xact_lock(
+            ${AdvisoryLockNamespace.SYNC_RUN},
+            ${SYNC_RESOURCE_LOCK_IDS[prismaResource]}
+          )
+        `
 
         const latestSyncRun = await transaction.syncRun.findFirst({
           where: {

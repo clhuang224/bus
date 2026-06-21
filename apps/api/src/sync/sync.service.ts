@@ -60,6 +60,7 @@ export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
           },
         ],
       },
+      orderBy: { created_at: 'asc' },
       select: { id: true },
     })
 

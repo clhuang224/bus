@@ -24,6 +24,7 @@ describe('RoutesSyncService', () => {
       ensureCities: () => Promise.resolve(),
       getCompletedCities: () => Promise.resolve(new Map()),
       startCity: () => Promise.resolve(),
+      updateRunResult: () => Promise.resolve(),
       failCity: (...args: unknown[]) => {
         failedCities.push(args)
         return Promise.resolve()
@@ -83,6 +84,7 @@ describe('RoutesSyncService', () => {
             checkpoints.map((checkpoint) => [checkpoint.city, checkpoint]),
           ),
         ),
+      updateRunResult: () => Promise.resolve(),
       completeRun: () => Promise.resolve(),
     }
     const service = new RoutesSyncService(
@@ -102,6 +104,7 @@ describe('RoutesSyncService', () => {
 
   it('resumes from the first city without a completed checkpoint', async () => {
     const fetchedCities: CityNameType[] = []
+    const runResults: unknown[] = []
     const taipeiCheckpoint = {
       city: cityMapper(CityNameType.TAIPEI),
       records_read: 419,
@@ -132,7 +135,10 @@ describe('RoutesSyncService', () => {
       startCity: () => Promise.resolve(),
       touch: () => Promise.resolve(),
       completeCity: () => Promise.resolve(),
-      updateRunResult: () => Promise.resolve(),
+      updateRunResult: (_syncRunId: string, result: unknown) => {
+        runResults.push(structuredClone(result))
+        return Promise.resolve()
+      },
       completeRun: () => Promise.resolve(),
     }
     const service = new RoutesSyncService(
@@ -150,5 +156,11 @@ describe('RoutesSyncService', () => {
     expect(fetchedCities).toHaveLength(21)
     expect(fetchedCities[0]).toBe(CityNameType.NEW_TAIPEI)
     expect(fetchedCities).not.toContain(CityNameType.TAIPEI)
+    expect(runResults[0]).toEqual({
+      records_read: 419,
+      records_created: 13,
+      records_updated: 406,
+      records_deactivated: 0,
+    })
   })
 })

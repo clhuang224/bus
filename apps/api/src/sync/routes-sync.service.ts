@@ -38,6 +38,7 @@ export class RoutesSyncService {
       for (const checkpoint of completedCities.values()) {
         addSyncResult(result, checkpoint)
       }
+      await this.syncCheckpointService.updateRunResult(syncRunId, result)
 
       for (const [index, city] of cities.entries()) {
         if (completedCities.has(cityMapper(city))) {
