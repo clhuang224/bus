@@ -6,6 +6,10 @@ import type {
   TdxLocalizedText,
 } from '@bus/shared'
 import {
+  PRISMA_CITY_BY_TDX_CITY,
+  PRISMA_DIRECTION_BY_TDX_DIRECTION,
+} from '../../constants/enum-mappings.js'
+import {
   CityNameType as PrismaCityNameType,
   DirectionType as PrismaDirectionType,
 } from '../../generated/prisma/enums.js'
@@ -60,31 +64,6 @@ export interface RouteSyncRecord {
   route: RouteRecord
   subroutes: SubRouteRecord[]
   operators: OperatorRecord[]
-}
-
-const prismaCityByTdxCity: Record<CityNameType, PrismaCityNameType> = {
-  [CityNameType.TAIPEI]: PrismaCityNameType.TAIPEI,
-  [CityNameType.NEW_TAIPEI]: PrismaCityNameType.NEW_TAIPEI,
-  [CityNameType.TAOYUAN]: PrismaCityNameType.TAOYUAN,
-  [CityNameType.TAICHUNG]: PrismaCityNameType.TAICHUNG,
-  [CityNameType.TAINAN]: PrismaCityNameType.TAINAN,
-  [CityNameType.KAOHSIUNG]: PrismaCityNameType.KAOHSIUNG,
-  [CityNameType.KEELUNG]: PrismaCityNameType.KEELUNG,
-  [CityNameType.HSINCHU]: PrismaCityNameType.HSINCHU,
-  [CityNameType.HSINCHU_COUNTY]: PrismaCityNameType.HSINCHU_COUNTY,
-  [CityNameType.MIAOLI_COUNTY]: PrismaCityNameType.MIAOLI_COUNTY,
-  [CityNameType.CHANGHUA_COUNTY]: PrismaCityNameType.CHANGHUA_COUNTY,
-  [CityNameType.NANTOU_COUNTY]: PrismaCityNameType.NANTOU_COUNTY,
-  [CityNameType.YUNLIN_COUNTY]: PrismaCityNameType.YUNLIN_COUNTY,
-  [CityNameType.CHIAYI_COUNTY]: PrismaCityNameType.CHIAYI_COUNTY,
-  [CityNameType.CHIAYI]: PrismaCityNameType.CHIAYI,
-  [CityNameType.PINGTUNG_COUNTY]: PrismaCityNameType.PINGTUNG_COUNTY,
-  [CityNameType.YILAN_COUNTY]: PrismaCityNameType.YILAN_COUNTY,
-  [CityNameType.HUALIEN_COUNTY]: PrismaCityNameType.HUALIEN_COUNTY,
-  [CityNameType.TAITUNG_COUNTY]: PrismaCityNameType.TAITUNG_COUNTY,
-  [CityNameType.KINMEN_COUNTY]: PrismaCityNameType.KINMEN_COUNTY,
-  [CityNameType.PENGHU_COUNTY]: PrismaCityNameType.PENGHU_COUNTY,
-  [CityNameType.LIENCHIANG_COUNTY]: PrismaCityNameType.LIENCHIANG_COUNTY,
 }
 
 function mapRoute(
@@ -159,18 +138,9 @@ function mapLocalizedName(text: TdxLocalizedText) {
 }
 
 function mapDirection(direction: DirectionType): PrismaDirectionType {
-  switch (direction) {
-    case DirectionType.GO:
-      return PrismaDirectionType.GO
-    case DirectionType.RETURN:
-      return PrismaDirectionType.RETURN
-    case DirectionType.LOOP:
-      return PrismaDirectionType.LOOP
-    case DirectionType.SHUTTLE:
-      return PrismaDirectionType.SHUTTLE
-    default:
-      return PrismaDirectionType.UNKNOWN
-  }
+  return (
+    PRISMA_DIRECTION_BY_TDX_DIRECTION[direction] ?? PrismaDirectionType.UNKNOWN
+  )
 }
 
 function toRequiredText(value: string | null | undefined): string {
@@ -190,7 +160,7 @@ function toDate(value: string): Date | null {
 }
 
 export function cityMapper(city: CityNameType): PrismaCityNameType {
-  return prismaCityByTdxCity[city]
+  return PRISMA_CITY_BY_TDX_CITY[city]
 }
 
 export function routeMapper({

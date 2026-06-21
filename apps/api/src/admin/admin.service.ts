@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { SyncResourceType, SyncStatusType } from '@bus/shared'
+import { SyncResourceType } from '@bus/shared'
+import { API_SYNC_STATUS_BY_PRISMA } from '../constants/enum-mappings.js'
 import {
   SyncResourceType as PrismaSyncResourceType,
   SyncStatusType as PrismaSyncStatusType,
@@ -126,7 +127,7 @@ export class AdminService {
     return {
       uuid: syncRun.id,
       resource,
-      status: this.toApiStatus(syncRun.status),
+      status: API_SYNC_STATUS_BY_PRISMA[syncRun.status],
       started_at: syncRun.started_at?.toISOString() ?? null,
       finished_at: syncRun.finished_at?.toISOString() ?? null,
       records_read: syncRun.records_read,
@@ -134,21 +135,6 @@ export class AdminService {
       records_updated: syncRun.records_updated,
       records_deactivated: syncRun.records_deactivated,
       error_message: syncRun.error_message,
-    }
-  }
-
-  private toApiStatus(status: PrismaSyncStatusType): SyncStatusType {
-    switch (status) {
-      case PrismaSyncStatusType.QUEUED:
-        return SyncStatusType.QUEUED
-      case PrismaSyncStatusType.RUNNING:
-        return SyncStatusType.RUNNING
-      case PrismaSyncStatusType.PENDING:
-        return SyncStatusType.PENDING
-      case PrismaSyncStatusType.SUCCEEDED:
-        return SyncStatusType.SUCCEEDED
-      case PrismaSyncStatusType.FAILED:
-        return SyncStatusType.FAILED
     }
   }
 }
