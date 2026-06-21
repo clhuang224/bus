@@ -95,7 +95,7 @@ function mapRoute(
   return {
     uuid: route.RouteUID,
     tdx_route_id: route.RouteID,
-    city: prismaCityByTdxCity[city],
+    city: cityMapper(city),
     ...mapLocalizedName(route.RouteName),
     departure_zh_tw: toRequiredText(route.DepartureStopNameZh),
     departure_en: toNullableText(route.DepartureStopNameEn),
@@ -187,6 +187,10 @@ function toDate(value: string): Date | null {
   const date = new Date(value)
 
   return Number.isNaN(date.getTime()) ? null : date
+}
+
+export function cityMapper(city: CityNameType): PrismaCityNameType {
+  return prismaCityByTdxCity[city]
 }
 
 export function routeMapper({

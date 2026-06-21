@@ -1,7 +1,8 @@
-import { CityNameType, DirectionType } from '@bus/shared'
+import { CityNameType, DirectionType, getEnumValues } from '@bus/shared'
 import type { TdxBusRoute } from '@bus/shared'
 import { SyncStatusType as PrismaSyncStatusType } from '../generated/prisma/enums.js'
 import type { PrismaService } from '../prisma/prisma.service.js'
+import { cityMapper } from './mappers/route.mapper.js'
 import { RoutesSyncService } from './routes-sync.service.js'
 import type { TdxClientService } from './tdx-client.service.js'
 import { TdxMonthlyQuotaExceededError } from './tdx-client.service.js'
@@ -82,6 +83,9 @@ function createPersistenceMocks() {
     syncRun: {
       update: () => Promise.resolve({}),
     },
+    syncRunCity: {
+      update: () => Promise.resolve({}),
+    },
   }
 
   return { calls, prismaService }
@@ -147,6 +151,11 @@ describe('RoutesSyncService', () => {
           return Promise.resolve({})
         },
       },
+      syncRunCity: {
+        createMany: () => Promise.resolve({ count: 22 }),
+        findMany: () => Promise.resolve([]),
+        update: () => Promise.resolve({}),
+      },
     }
     const tdxClientService = {
       fetchRoutes: () => Promise.reject(quotaError),
@@ -172,5 +181,43 @@ describe('RoutesSyncService', () => {
         },
       },
     ])
+  })
+
+  it('skips cities that already have succeeded checkpoints', async () => {
+    let fetchCount = 0
+    const checkpoints = getEnumValues(CityNameType).map((city) => ({
+      city: cityMapper(city),
+      records_read: 1,
+      records_created: 1,
+      records_updated: 0,
+      records_deactivated: 0,
+    }))
+    const prismaService = {
+      syncRun: {
+        update: () => Promise.resolve({}),
+      },
+      syncRunCity: {
+        createMany: () => Promise.resolve({ count: 0 }),
+        findMany: () => Promise.resolve(checkpoints),
+      },
+    }
+    const tdxClientService = {
+      fetchRoutes: () => {
+        fetchCount += 1
+        return Promise.resolve([])
+      },
+    }
+    const service = new RoutesSyncService(
+      prismaService as unknown as PrismaService,
+      tdxClientService as unknown as TdxClientService,
+    )
+
+    await expect(service.syncAllRoutes('sync-run-id')).resolves.toEqual({
+      records_read: 22,
+      records_created: 22,
+      records_updated: 0,
+      records_deactivated: 0,
+    })
+    expect(fetchCount).toBe(0)
   })
 })

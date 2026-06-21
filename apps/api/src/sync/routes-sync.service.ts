@@ -3,7 +3,7 @@ import { CityNameType, getEnumValues } from '@bus/shared'
 import { SyncStatusType as PrismaSyncStatusType } from '../generated/prisma/enums.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import type { RouteSyncRecord } from './mappers/route.mapper.js'
-import { routeMapper } from './mappers/route.mapper.js'
+import { cityMapper, routeMapper } from './mappers/route.mapper.js'
 import {
   TdxClientService,
   TdxMonthlyQuotaExceededError,
@@ -47,13 +47,49 @@ export class RoutesSyncService {
 
     const result = emptyResult()
     const cities = getEnumValues(CityNameType)
+    let currentCity: CityNameType | null = null
 
     this.logger.log(
       `Route sync ${syncRunId} started for ${cities.length} cities.`,
     )
 
     try {
+      await this.ensureCityCheckpoints(syncRunId, cities)
+      const completedCities = await this.getCompletedCities(syncRunId)
+
+      for (const checkpoint of completedCities.values()) {
+        result.records_read += checkpoint.records_read
+        result.records_created += checkpoint.records_created
+        result.records_updated += checkpoint.records_updated
+        result.records_deactivated += checkpoint.records_deactivated
+      }
+
       for (const [index, city] of cities.entries()) {
+        const prismaCity = cityMapper(city)
+
+        if (completedCities.has(prismaCity)) {
+          this.logger.log(
+            `Route sync ${syncRunId}: skipping completed city ${city} (${index + 1}/${cities.length}).`,
+          )
+          continue
+        }
+
+        currentCity = city
+        await this.prismaService.syncRunCity.update({
+          where: {
+            sync_run_id_city: {
+              sync_run_id: syncRunId,
+              city: prismaCity,
+            },
+          },
+          data: {
+            status: PrismaSyncStatusType.RUNNING,
+            started_at: new Date(),
+            finished_at: null,
+            error_message: null,
+          },
+        })
+
         this.logger.log(
           `Route sync ${syncRunId}: starting ${city} (${index + 1}/${cities.length}).`,
         )
@@ -63,6 +99,22 @@ export class RoutesSyncService {
         result.records_created += cityResult.records_created
         result.records_updated += cityResult.records_updated
         result.records_deactivated += cityResult.records_deactivated
+
+        await this.prismaService.syncRunCity.update({
+          where: {
+            sync_run_id_city: {
+              sync_run_id: syncRunId,
+              city: prismaCity,
+            },
+          },
+          data: {
+            status: PrismaSyncStatusType.SUCCEEDED,
+            finished_at: new Date(),
+            error_message: null,
+            ...cityResult,
+          },
+        })
+        currentCity = null
 
         await this.prismaService.syncRun.update({
           where: { id: syncRunId },
@@ -89,6 +141,9 @@ export class RoutesSyncService {
 
       return result
     } catch (error) {
+      if (currentCity) {
+        await this.finishFailedCity(syncRunId, currentCity, error)
+      }
       await this.finishFailedSync(syncRunId, error, result)
       throw error
     }
@@ -175,6 +230,15 @@ export class RoutesSyncService {
       ) {
         await this.prismaService.syncRun.update({
           where: { id: syncRunId },
+          data: { updated_at: new Date() },
+        })
+        await this.prismaService.syncRunCity.update({
+          where: {
+            sync_run_id_city: {
+              sync_run_id: syncRunId,
+              city: cityMapper(cityName),
+            },
+          },
           data: { updated_at: new Date() },
         })
 
@@ -285,6 +349,63 @@ export class RoutesSyncService {
       where: {
         route_id: routeId,
         operator_id: { notIn: operatorIds },
+      },
+    })
+  }
+
+  private async ensureCityCheckpoints(
+    syncRunId: string,
+    cities: CityNameType[],
+  ): Promise<void> {
+    await this.prismaService.syncRunCity.createMany({
+      data: cities.map((city) => ({
+        sync_run_id: syncRunId,
+        city: cityMapper(city),
+      })),
+      skipDuplicates: true,
+    })
+  }
+
+  private async getCompletedCities(syncRunId: string) {
+    const checkpoints = await this.prismaService.syncRunCity.findMany({
+      where: {
+        sync_run_id: syncRunId,
+        status: PrismaSyncStatusType.SUCCEEDED,
+      },
+      select: {
+        city: true,
+        records_read: true,
+        records_created: true,
+        records_updated: true,
+        records_deactivated: true,
+      },
+    })
+
+    return new Map(
+      checkpoints.map((checkpoint) => [checkpoint.city, checkpoint]),
+    )
+  }
+
+  private async finishFailedCity(
+    syncRunId: string,
+    city: CityNameType,
+    error: unknown,
+  ): Promise<void> {
+    const isPending = error instanceof TdxMonthlyQuotaExceededError
+
+    await this.prismaService.syncRunCity.update({
+      where: {
+        sync_run_id_city: {
+          sync_run_id: syncRunId,
+          city: cityMapper(city),
+        },
+      },
+      data: {
+        status: isPending
+          ? PrismaSyncStatusType.PENDING
+          : PrismaSyncStatusType.FAILED,
+        finished_at: isPending ? null : new Date(),
+        error_message: error instanceof Error ? error.message : String(error),
       },
     })
   }

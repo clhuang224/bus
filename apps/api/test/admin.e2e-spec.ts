@@ -38,6 +38,7 @@ function createMockPrismaService() {
       status: PrismaSyncStatusType
     }
   }> = []
+  const updateCalls: unknown[] = []
 
   const transaction = {
     $executeRawUnsafe(query: string) {
@@ -60,6 +61,19 @@ function createMockPrismaService() {
         activeSyncRun = createMockSyncRun(data.resource)
         return Promise.resolve(activeSyncRun)
       },
+      update(args: {
+        where: { id: string }
+        data: Partial<ReturnType<typeof createMockSyncRun>>
+      }) {
+        updateCalls.push(args)
+
+        if (!activeSyncRun) {
+          return Promise.reject(new Error('No sync run to update.'))
+        }
+
+        activeSyncRun = { ...activeSyncRun, ...args.data }
+        return Promise.resolve(activeSyncRun)
+      },
     },
   }
 
@@ -71,6 +85,11 @@ function createMockPrismaService() {
     },
     advisoryLockQueries,
     createCalls,
+    setLatestSyncRunStatus(status: PrismaSyncStatusType) {
+      if (!activeSyncRun) throw new Error('No sync run to update.')
+      activeSyncRun.status = status
+    },
+    updateCalls,
   }
 }
 
@@ -170,6 +189,39 @@ describe('Admin Sync API (e2e)', () => {
     expect(prismaService.createCalls).toHaveLength(1)
     expect(prismaService.advisoryLockQueries).toHaveLength(2)
     expect(enqueuedSyncRunIds).toEqual([syncRunUuid, syncRunUuid])
+  })
+
+  it('/api/admin/sync/routes (POST) resumes the latest failed route sync', async () => {
+    // Nest's HTTP adapter exposes the raw server as `any`.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    await request(app.getHttpServer())
+      .post('/api/admin/sync/routes')
+      .expect(200)
+
+    prismaService.setLatestSyncRunStatus(PrismaSyncStatusType.FAILED)
+
+    // Nest's HTTP adapter exposes the raw server as `any`.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    await request(app.getHttpServer())
+      .post('/api/admin/sync/routes')
+      .expect(200)
+      .expect(({ body }: { body: SyncResponseBody }) => {
+        expectQueuedSyncResponse(body, SyncResourceType.ROUTES)
+      })
+
+    expect(prismaService.createCalls).toHaveLength(1)
+    expect(prismaService.updateCalls).toEqual([
+      {
+        where: { id: syncRunUuid },
+        data: {
+          status: PrismaSyncStatusType.QUEUED,
+          started_at: null,
+          finished_at: null,
+          resume_after_at: null,
+          error_message: null,
+        },
+      },
+    ])
   })
 
   it('/api/admin/sync/stops (POST) queues stop sync', () => {

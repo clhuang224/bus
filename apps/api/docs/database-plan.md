@@ -656,6 +656,33 @@ Relations:
 
 - belongs to `sync_run`
 
+### sync_run_city
+
+One city checkpoint inside a city-based sync run.
+
+Fields:
+
+- `id`
+- `sync_run_id`
+- `city`
+- `status`
+- `started_at`
+- `finished_at`
+- `records_read`
+- `records_created`
+- `records_updated`
+- `records_deactivated`
+- `error_message`
+- `created_at`
+- `updated_at`
+
+Indexes:
+
+- unique `sync_run_id + city`
+- index `sync_run_id + status`
+
+Route and stop syncs can use this table as a resumable city checkpoint. A resumed run skips cities whose checkpoint status is already `succeeded`. If a process stops while a city is running, that city is safe to run again because sync writes are idempotent.
+
 ### tdx_request_log
 
 One upstream TDX request.

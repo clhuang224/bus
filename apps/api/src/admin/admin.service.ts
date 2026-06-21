@@ -8,7 +8,7 @@ import { PrismaService } from '../prisma/prisma.service.js'
 import { SyncService } from '../sync/sync.service.js'
 import { SyncResponseDto } from './dto/sync-response.dto.js'
 
-const ACTIVE_SYNC_STATUSES = [
+const ACTIVE_SYNC_STATUSES: PrismaSyncStatusType[] = [
   PrismaSyncStatusType.QUEUED,
   PrismaSyncStatusType.RUNNING,
   PrismaSyncStatusType.PENDING,
@@ -73,15 +73,32 @@ export class AdminService {
           `SELECT pg_advisory_xact_lock(${SYNC_RESOURCE_LOCK_IDS[prismaResource]})`,
         )
 
-        const activeSyncRun = await transaction.syncRun.findFirst({
+        const latestSyncRun = await transaction.syncRun.findFirst({
           where: {
             resource: prismaResource,
-            status: { in: ACTIVE_SYNC_STATUSES },
           },
-          orderBy: { created_at: 'asc' },
+          orderBy: { created_at: 'desc' },
         })
 
-        if (activeSyncRun) return activeSyncRun
+        if (
+          latestSyncRun &&
+          ACTIVE_SYNC_STATUSES.includes(latestSyncRun.status)
+        ) {
+          return latestSyncRun
+        }
+
+        if (latestSyncRun?.status === PrismaSyncStatusType.FAILED) {
+          return transaction.syncRun.update({
+            where: { id: latestSyncRun.id },
+            data: {
+              status: PrismaSyncStatusType.QUEUED,
+              started_at: null,
+              finished_at: null,
+              resume_after_at: null,
+              error_message: null,
+            },
+          })
+        }
 
         return transaction.syncRun.create({
           data: {
