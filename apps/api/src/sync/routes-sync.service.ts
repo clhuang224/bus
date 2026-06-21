@@ -1,51 +1,26 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { CityNameType, getEnumValues } from '@bus/shared'
-import { SyncStatusType as PrismaSyncStatusType } from '../generated/prisma/enums.js'
-import { PrismaService } from '../prisma/prisma.service.js'
-import type { RouteSyncRecord } from './mappers/route.mapper.js'
+import { RoutePersistenceService } from './route-persistence.service.js'
 import { cityMapper, routeMapper } from './mappers/route.mapper.js'
-import {
-  TdxClientService,
-  TdxMonthlyQuotaExceededError,
-} from './tdx-client.service.js'
-
-interface RoutesSyncResult {
-  records_read: number
-  records_created: number
-  records_updated: number
-  records_deactivated: number
-}
-
-const emptyResult = (): RoutesSyncResult => ({
-  records_read: 0,
-  records_created: 0,
-  records_updated: 0,
-  records_deactivated: 0,
-})
-const ROUTE_PROGRESS_INTERVAL = 50
+import { SyncCheckpointService } from './sync-checkpoint.service.js'
+import type { SyncResult } from './sync-result.js'
+import { addSyncResult, createEmptySyncResult } from './sync-result.js'
+import { TdxClientService } from './tdx-client.service.js'
 
 @Injectable()
 export class RoutesSyncService {
   private readonly logger = new Logger(RoutesSyncService.name)
 
   constructor(
-    private readonly prismaService: PrismaService,
     private readonly tdxClientService: TdxClientService,
+    private readonly routePersistenceService: RoutePersistenceService,
+    private readonly syncCheckpointService: SyncCheckpointService,
   ) {}
 
-  async syncAllRoutes(syncRunId: string): Promise<RoutesSyncResult> {
-    await this.prismaService.syncRun.update({
-      where: { id: syncRunId },
-      data: {
-        status: PrismaSyncStatusType.RUNNING,
-        started_at: new Date(),
-        finished_at: null,
-        resume_after_at: null,
-        error_message: null,
-      },
-    })
+  async syncAllRoutes(syncRunId: string): Promise<SyncResult> {
+    await this.syncCheckpointService.startRun(syncRunId)
 
-    const result = emptyResult()
+    const result = createEmptySyncResult()
     const cities = getEnumValues(CityNameType)
     let currentCity: CityNameType | null = null
 
@@ -54,20 +29,16 @@ export class RoutesSyncService {
     )
 
     try {
-      await this.ensureCityCheckpoints(syncRunId, cities)
-      const completedCities = await this.getCompletedCities(syncRunId)
+      await this.syncCheckpointService.ensureCities(syncRunId, cities)
+      const completedCities =
+        await this.syncCheckpointService.getCompletedCities(syncRunId)
 
       for (const checkpoint of completedCities.values()) {
-        result.records_read += checkpoint.records_read
-        result.records_created += checkpoint.records_created
-        result.records_updated += checkpoint.records_updated
-        result.records_deactivated += checkpoint.records_deactivated
+        addSyncResult(result, checkpoint)
       }
 
       for (const [index, city] of cities.entries()) {
-        const prismaCity = cityMapper(city)
-
-        if (completedCities.has(prismaCity)) {
+        if (completedCities.has(cityMapper(city))) {
           this.logger.log(
             `Route sync ${syncRunId}: skipping completed city ${city} (${index + 1}/${cities.length}).`,
           )
@@ -75,65 +46,29 @@ export class RoutesSyncService {
         }
 
         currentCity = city
-        await this.prismaService.syncRunCity.update({
-          where: {
-            sync_run_id_city: {
-              sync_run_id: syncRunId,
-              city: prismaCity,
-            },
-          },
-          data: {
-            status: PrismaSyncStatusType.RUNNING,
-            started_at: new Date(),
-            finished_at: null,
-            error_message: null,
-          },
-        })
+        await this.syncCheckpointService.startCity(syncRunId, city)
 
         this.logger.log(
           `Route sync ${syncRunId}: starting ${city} (${index + 1}/${cities.length}).`,
         )
         const cityResult = await this.syncCityRoutes(city, syncRunId)
 
-        result.records_read += cityResult.records_read
-        result.records_created += cityResult.records_created
-        result.records_updated += cityResult.records_updated
-        result.records_deactivated += cityResult.records_deactivated
-
-        await this.prismaService.syncRunCity.update({
-          where: {
-            sync_run_id_city: {
-              sync_run_id: syncRunId,
-              city: prismaCity,
-            },
-          },
-          data: {
-            status: PrismaSyncStatusType.SUCCEEDED,
-            finished_at: new Date(),
-            error_message: null,
-            ...cityResult,
-          },
-        })
+        addSyncResult(result, cityResult)
+        await this.syncCheckpointService.completeCity(
+          syncRunId,
+          city,
+          cityResult,
+        )
         currentCity = null
 
-        await this.prismaService.syncRun.update({
-          where: { id: syncRunId },
-          data: result,
-        })
+        await this.syncCheckpointService.updateRunResult(syncRunId, result)
 
         this.logger.log(
           `Route sync ${syncRunId}: completed ${city} (${index + 1}/${cities.length}), read ${cityResult.records_read}, created ${cityResult.records_created}, updated ${cityResult.records_updated}, deactivated ${cityResult.records_deactivated}.`,
         )
       }
 
-      await this.prismaService.syncRun.update({
-        where: { id: syncRunId },
-        data: {
-          status: PrismaSyncStatusType.SUCCEEDED,
-          finished_at: new Date(),
-          ...result,
-        },
-      })
+      await this.syncCheckpointService.completeRun(syncRunId, result)
 
       this.logger.log(
         `Route sync ${syncRunId} succeeded: read ${result.records_read}, created ${result.records_created}, updated ${result.records_updated}, deactivated ${result.records_deactivated}.`,
@@ -142,9 +77,9 @@ export class RoutesSyncService {
       return result
     } catch (error) {
       if (currentCity) {
-        await this.finishFailedCity(syncRunId, currentCity, error)
+        await this.syncCheckpointService.failCity(syncRunId, currentCity, error)
       }
-      await this.finishFailedSync(syncRunId, error, result)
+      await this.syncCheckpointService.failRun(syncRunId, error, result)
       throw error
     }
   }
@@ -152,7 +87,7 @@ export class RoutesSyncService {
   async syncCityRoutes(
     city: CityNameType,
     syncRunId: string,
-  ): Promise<RoutesSyncResult> {
+  ): Promise<SyncResult> {
     const tdxRoutes = await this.tdxClientService.fetchRoutes(city, syncRunId)
     const routes = routeMapper({ city, tdxRoutes })
 
@@ -160,281 +95,13 @@ export class RoutesSyncService {
       `Route sync ${syncRunId}: ${city} returned ${routes.length} routes from TDX.`,
     )
 
-    return this.saveRoutes(routes, { city, syncRunId })
-  }
-
-  private async saveRoutes(
-    routes: RouteSyncRecord[],
-    {
-      city: cityName,
-      syncRunId,
-    }: {
-      city: CityNameType
-      syncRunId: string
-    },
-  ): Promise<RoutesSyncResult> {
-    const city = routes[0]?.route.city
-
-    if (!city) {
-      return emptyResult()
-    }
-
-    const existingRoutes = await this.prismaService.route.findMany({
-      where: { city },
-      select: { uuid: true },
-    })
-    const existingRouteUuids = new Set(
-      existingRoutes.map((route) => route.uuid),
-    )
-    const incomingRouteUuids = routes.map(({ route }) => route.uuid)
-    let recordsCreated = 0
-    let recordsUpdated = 0
-
-    for (const [index, record] of routes.entries()) {
-      if (existingRouteUuids.has(record.route.uuid)) {
-        recordsUpdated += 1
-      } else {
-        recordsCreated += 1
-      }
-
-      try {
-        const route = await this.prismaService.route.upsert({
-          where: { uuid: record.route.uuid },
-          create: {
-            ...record.route,
-            is_active: true,
-            inactive_at: null,
-          },
-          update: {
-            ...record.route,
-            is_active: true,
-            inactive_at: null,
-          },
-        })
-
-        await this.saveSubRoutes(route.id, record)
-        await this.saveOperators(route.id, record)
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error)
-
-        throw new Error(
-          `Failed to persist route ${record.route.uuid} for ${cityName}: ${message}`,
-        )
-      }
-
-      const persistedCount = index + 1
-
-      if (
-        persistedCount % ROUTE_PROGRESS_INTERVAL === 0 ||
-        persistedCount === routes.length
-      ) {
-        await this.prismaService.syncRun.update({
-          where: { id: syncRunId },
-          data: { updated_at: new Date() },
-        })
-        await this.prismaService.syncRunCity.update({
-          where: {
-            sync_run_id_city: {
-              sync_run_id: syncRunId,
-              city: cityMapper(cityName),
-            },
-          },
-          data: { updated_at: new Date() },
-        })
-
+    return this.routePersistenceService.persistRoutes(routes, {
+      city,
+      onProgress: async (persistedCount, totalCount) => {
+        await this.syncCheckpointService.touch(syncRunId, city)
         this.logger.log(
-          `Route sync ${syncRunId}: persisted ${persistedCount}/${routes.length} routes for ${cityName}.`,
+          `Route sync ${syncRunId}: persisted ${persistedCount}/${totalCount} routes for ${city}.`,
         )
-      }
-    }
-
-    const deactivatedRoutes = await this.prismaService.route.updateMany({
-      where: {
-        city,
-        is_active: true,
-        uuid: { notIn: incomingRouteUuids },
-      },
-      data: {
-        is_active: false,
-        inactive_at: new Date(),
-      },
-    })
-
-    return {
-      records_read: routes.length,
-      records_created: recordsCreated,
-      records_updated: recordsUpdated,
-      records_deactivated: deactivatedRoutes.count,
-    }
-  }
-
-  private async saveSubRoutes(
-    routeId: string,
-    record: RouteSyncRecord,
-  ): Promise<void> {
-    const incomingSubRouteUuids = record.subroutes.map(
-      (subroute) => subroute.uuid,
-    )
-
-    for (const subroute of record.subroutes) {
-      await this.prismaService.subRoute.upsert({
-        where: { uuid: subroute.uuid },
-        create: {
-          ...subroute,
-          route_id: routeId,
-          is_active: true,
-          inactive_at: null,
-        },
-        update: {
-          ...subroute,
-          route_id: routeId,
-          is_active: true,
-          inactive_at: null,
-        },
-      })
-    }
-
-    await this.prismaService.subRoute.updateMany({
-      where: {
-        route_id: routeId,
-        is_active: true,
-        uuid: { notIn: incomingSubRouteUuids },
-      },
-      data: {
-        is_active: false,
-        inactive_at: new Date(),
-      },
-    })
-  }
-
-  private async saveOperators(
-    routeId: string,
-    record: RouteSyncRecord,
-  ): Promise<void> {
-    const operatorIds: string[] = []
-
-    for (const operator of record.operators) {
-      const savedOperator = await this.prismaService.operator.upsert({
-        where: { tdx_operator_id: operator.tdx_operator_id },
-        create: {
-          ...operator,
-          is_active: true,
-          inactive_at: null,
-        },
-        update: {
-          ...operator,
-          is_active: true,
-          inactive_at: null,
-        },
-      })
-
-      operatorIds.push(savedOperator.id)
-
-      await this.prismaService.routeOperator.upsert({
-        where: {
-          route_id_operator_id: {
-            route_id: routeId,
-            operator_id: savedOperator.id,
-          },
-        },
-        create: {
-          route_id: routeId,
-          operator_id: savedOperator.id,
-        },
-        update: {},
-      })
-    }
-
-    await this.prismaService.routeOperator.deleteMany({
-      where: {
-        route_id: routeId,
-        operator_id: { notIn: operatorIds },
-      },
-    })
-  }
-
-  private async ensureCityCheckpoints(
-    syncRunId: string,
-    cities: CityNameType[],
-  ): Promise<void> {
-    await this.prismaService.syncRunCity.createMany({
-      data: cities.map((city) => ({
-        sync_run_id: syncRunId,
-        city: cityMapper(city),
-      })),
-      skipDuplicates: true,
-    })
-  }
-
-  private async getCompletedCities(syncRunId: string) {
-    const checkpoints = await this.prismaService.syncRunCity.findMany({
-      where: {
-        sync_run_id: syncRunId,
-        status: PrismaSyncStatusType.SUCCEEDED,
-      },
-      select: {
-        city: true,
-        records_read: true,
-        records_created: true,
-        records_updated: true,
-        records_deactivated: true,
-      },
-    })
-
-    return new Map(
-      checkpoints.map((checkpoint) => [checkpoint.city, checkpoint]),
-    )
-  }
-
-  private async finishFailedCity(
-    syncRunId: string,
-    city: CityNameType,
-    error: unknown,
-  ): Promise<void> {
-    const isPending = error instanceof TdxMonthlyQuotaExceededError
-
-    await this.prismaService.syncRunCity.update({
-      where: {
-        sync_run_id_city: {
-          sync_run_id: syncRunId,
-          city: cityMapper(city),
-        },
-      },
-      data: {
-        status: isPending
-          ? PrismaSyncStatusType.PENDING
-          : PrismaSyncStatusType.FAILED,
-        finished_at: isPending ? null : new Date(),
-        error_message: error instanceof Error ? error.message : String(error),
-      },
-    })
-  }
-
-  private async finishFailedSync(
-    syncRunId: string,
-    error: unknown,
-    result: RoutesSyncResult,
-  ): Promise<void> {
-    if (error instanceof TdxMonthlyQuotaExceededError) {
-      await this.prismaService.syncRun.update({
-        where: { id: syncRunId },
-        data: {
-          status: PrismaSyncStatusType.PENDING,
-          resume_after_at: error.retry_at,
-          ...result,
-        },
-      })
-
-      return
-    }
-
-    await this.prismaService.syncRun.update({
-      where: { id: syncRunId },
-      data: {
-        status: PrismaSyncStatusType.FAILED,
-        finished_at: new Date(),
-        error_message: error instanceof Error ? error.message : String(error),
-        ...result,
       },
     })
   }
