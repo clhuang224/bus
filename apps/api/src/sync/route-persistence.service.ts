@@ -3,7 +3,6 @@ import type { CityNameType } from '@bus/shared'
 import { PrismaService } from '../prisma/prisma.service.js'
 import type { RouteSyncRecord } from './mappers/route.mapper.js'
 import type { SyncResult } from './sync-result.js'
-import { createEmptySyncResult } from './sync-result.js'
 
 interface PersistRoutesOptions {
   city: CityNameType
@@ -20,12 +19,11 @@ export class RoutePersistenceService {
     routes: RouteSyncRecord[],
     { city: cityName, onProgress }: PersistRoutesOptions,
   ): Promise<SyncResult> {
-    const city = routes[0]?.route.city
-
-    if (!city) {
-      return createEmptySyncResult()
+    if (routes.length === 0) {
+      throw new Error(`TDX returned 0 routes for ${cityName}.`)
     }
 
+    const city = routes[0].route.city
     const existingRoutes = await this.prismaService.route.findMany({
       where: { city },
       select: { uuid: true },

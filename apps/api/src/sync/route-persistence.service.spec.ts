@@ -43,19 +43,27 @@ const tdxRoute: TdxBusRoute = {
 
 function createPersistenceMocks() {
   const calls = {
+    routeFindMany: 0,
     routeUpsert: [] as unknown[],
+    routeUpdateMany: 0,
     subRouteUpsert: [] as unknown[],
     operatorUpsert: [] as unknown[],
     routeOperatorUpsert: [] as unknown[],
   }
   const prismaService = {
     route: {
-      findMany: () => Promise.resolve([]),
+      findMany: () => {
+        calls.routeFindMany += 1
+        return Promise.resolve([])
+      },
       upsert: (args: unknown) => {
         calls.routeUpsert.push(args)
         return Promise.resolve({ id: 'route-db-id' })
       },
-      updateMany: () => Promise.resolve({ count: 2 }),
+      updateMany: () => {
+        calls.routeUpdateMany += 1
+        return Promise.resolve({ count: 2 })
+      },
     },
     subRoute: {
       upsert: (args: unknown) => {
@@ -83,6 +91,20 @@ function createPersistenceMocks() {
 }
 
 describe('RoutePersistenceService', () => {
+  it('rejects an empty city response without changing stored routes', async () => {
+    const { calls, prismaService } = createPersistenceMocks()
+    const service = new RoutePersistenceService(
+      prismaService as unknown as PrismaService,
+    )
+
+    await expect(
+      service.persistRoutes([], { city: CityNameType.NEW_TAIPEI }),
+    ).rejects.toThrow('TDX returned 0 routes for NewTaipei.')
+    expect(calls.routeFindMany).toBe(0)
+    expect(calls.routeUpsert).toHaveLength(0)
+    expect(calls.routeUpdateMany).toBe(0)
+  })
+
   it('persists routes with their subroutes and operators', async () => {
     const { calls, prismaService } = createPersistenceMocks()
     const service = new RoutePersistenceService(
