@@ -8,6 +8,7 @@ import {
   SyncResourceType as PrismaSyncResourceType,
   SyncStatusType as PrismaSyncStatusType,
 } from '../generated/prisma/enums.js'
+import type { Prisma } from '../generated/prisma/client.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import { RoutesSyncService } from './routes-sync.service.js'
 
@@ -78,18 +79,36 @@ export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
 
   private async recoverStaleRuns(now: Date): Promise<void> {
     const activeSyncRunIds = [...this.activeSyncRunIds]
+    const staleRunWhere = {
+      resource: PrismaSyncResourceType.ROUTES,
+      status: PrismaSyncStatusType.RUNNING,
+      ...(activeSyncRunIds.length > 0
+        ? { id: { notIn: activeSyncRunIds } }
+        : {}),
+      updated_at: {
+        lt: new Date(now.getTime() - STALE_RUNNING_THRESHOLD_MS),
+      },
+    } satisfies Prisma.SyncRunWhereInput
+
+    await this.prismaService.syncRunCity.updateMany({
+      where: {
+        status: PrismaSyncStatusType.RUNNING,
+        sync_run: staleRunWhere,
+      },
+      data: {
+        status: PrismaSyncStatusType.QUEUED,
+        started_at: null,
+        finished_at: null,
+        records_read: 0,
+        records_created: 0,
+        records_updated: 0,
+        records_deactivated: 0,
+        error_message: 'Recovered after the previous sync worker stopped.',
+      },
+    })
 
     await this.prismaService.syncRun.updateMany({
-      where: {
-        resource: PrismaSyncResourceType.ROUTES,
-        status: PrismaSyncStatusType.RUNNING,
-        ...(activeSyncRunIds.length > 0
-          ? { id: { notIn: activeSyncRunIds } }
-          : {}),
-        updated_at: {
-          lt: new Date(now.getTime() - STALE_RUNNING_THRESHOLD_MS),
-        },
-      },
+      where: staleRunWhere,
       data: {
         status: PrismaSyncStatusType.QUEUED,
         started_at: null,

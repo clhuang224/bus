@@ -48,6 +48,14 @@ interface StaleRecoveryQuery {
   }
 }
 
+interface StaleCityRecoveryQuery {
+  where: {
+    status: PrismaSyncStatusType
+    sync_run: StaleRecoveryQuery['where']
+  }
+  data: Omit<StaleRecoveryQuery['data'], 'resume_after_at'>
+}
+
 function createService({
   readyRunIds,
   claimCount = 1,
@@ -58,9 +66,16 @@ function createService({
   recoveryError?: Error
 }) {
   const readyRunQueryCalls: unknown[] = []
+  const cityUpdateManyCalls: unknown[] = []
   const updateManyCalls: unknown[] = []
   const syncedRunIds: string[] = []
   const prismaService = {
+    syncRunCity: {
+      updateMany: (args: unknown) => {
+        cityUpdateManyCalls.push(args)
+        return Promise.resolve({ count: 0 })
+      },
+    },
     syncRun: {
       findMany: (args: unknown) => {
         readyRunQueryCalls.push(args)
@@ -95,15 +110,26 @@ function createService({
     routesSyncService as unknown as RoutesSyncService,
   )
 
-  return { readyRunQueryCalls, service, syncedRunIds, updateManyCalls }
+  return {
+    cityUpdateManyCalls,
+    readyRunQueryCalls,
+    service,
+    syncedRunIds,
+    updateManyCalls,
+  }
 }
 
 describe('SyncService', () => {
   it('claims and runs ready route syncs', async () => {
-    const { readyRunQueryCalls, service, syncedRunIds, updateManyCalls } =
-      createService({
-        readyRunIds: ['sync-run-1'],
-      })
+    const {
+      cityUpdateManyCalls,
+      readyRunQueryCalls,
+      service,
+      syncedRunIds,
+      updateManyCalls,
+    } = createService({
+      readyRunIds: ['sync-run-1'],
+    })
 
     await service.resumeReadyRuns()
 
@@ -126,6 +152,21 @@ describe('SyncService', () => {
       started_at: null,
       finished_at: null,
       resume_after_at: null,
+      records_read: 0,
+      records_created: 0,
+      records_updated: 0,
+      records_deactivated: 0,
+      error_message: 'Recovered after the previous sync worker stopped.',
+    })
+
+    expect(cityUpdateManyCalls).toHaveLength(1)
+    const cityRecovery = cityUpdateManyCalls[0] as StaleCityRecoveryQuery
+    expect(cityRecovery.where.status).toBe(PrismaSyncStatusType.RUNNING)
+    expect(cityRecovery.where.sync_run).toEqual(recovery.where)
+    expect(cityRecovery.data).toEqual({
+      status: PrismaSyncStatusType.QUEUED,
+      started_at: null,
+      finished_at: null,
       records_read: 0,
       records_created: 0,
       records_updated: 0,
