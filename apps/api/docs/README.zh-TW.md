@@ -52,7 +52,7 @@ Scalar 會渲染產生出來的 OpenAPI 文件：
 
 Prisma schema files 放在 `prisma/` 底下。
 
-產生出來的 Prisma Client 會寫到 `src/generated/prisma`，並且不會進 Git。直接跑 TypeScript 前，需要先產生 Prisma Client：
+產生出來的 Prisma Client 會寫到 `src/generated/prisma`，並且不會進 Git。`start:dev`、`test`、`typecheck` 等 scripts 會自動執行 `prisma:generate`。如果在這些 scripts 以外直接呼叫 TypeScript 工具，需要先手動產生：
 
 ```bash
 pnpm --filter @bus/api prisma:generate
@@ -82,6 +82,7 @@ pnpm --filter @bus/api prisma:migrate:dev
 
 | Script                                                                     | 說明                                                          |
 | -------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `pnpm --filter @bus/api format`                                            | 格式化所有 source files 和 Prisma schema files。              |
 | `pnpm --filter @bus/api prisma:generate`                                   | 產生 Prisma Client 到 `src/generated/prisma`。                |
 | `pnpm --filter @bus/api prisma:format`                                     | 格式化 Prisma schema files。                                  |
 | `pnpm --filter @bus/api prisma:validate`                                   | 檢查 Prisma schema files 是否有效。                           |

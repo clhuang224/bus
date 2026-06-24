@@ -52,7 +52,7 @@ Application endpoints are prefixed with `/api`.
 
 Prisma schema files live under `prisma/`.
 
-The generated Prisma Client is written to `src/generated/prisma` and is ignored by Git. Generate it before running TypeScript directly:
+The generated Prisma Client is written to `src/generated/prisma` and is ignored by Git. The `start:dev`, `test`, and `typecheck` scripts run `prisma:generate` automatically. If you invoke TypeScript tooling directly outside of these scripts, generate the client first:
 
 ```bash
 pnpm --filter @bus/api prisma:generate
@@ -82,6 +82,7 @@ Useful Prisma scripts:
 
 | Script                                                                     | Description                                                                          |
 | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `pnpm --filter @bus/api format`                                            | Format all source files and Prisma schema files.                                     |
 | `pnpm --filter @bus/api prisma:generate`                                   | Generate the Prisma Client into `src/generated/prisma`.                              |
 | `pnpm --filter @bus/api prisma:format`                                     | Format Prisma schema files.                                                          |
 | `pnpm --filter @bus/api prisma:validate`                                   | Validate Prisma schema files.                                                        |
