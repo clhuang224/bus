@@ -1,6 +1,12 @@
-import { CityNameType, DirectionType, SyncStatusType } from '@bus/shared'
+import {
+  BearingType,
+  CityNameType,
+  DirectionType,
+  SyncStatusType,
+} from '@bus/shared'
 import {
   CityNameType as PrismaCityNameType,
+  BearingType as PrismaBearingType,
   DirectionType as PrismaDirectionType,
   SyncStatusType as PrismaSyncStatusType,
 } from '../generated/prisma/enums.js'
@@ -45,3 +51,14 @@ export const PRISMA_DIRECTION_BY_TDX_DIRECTION = {
   [DirectionType.SHUTTLE]: PrismaDirectionType.SHUTTLE,
   [DirectionType.UNKNOWN]: PrismaDirectionType.UNKNOWN,
 } satisfies Record<DirectionType, PrismaDirectionType>
+
+export const PRISMA_BEARING_BY_TDX_BEARING = {
+  [BearingType.EAST]: PrismaBearingType.EAST,
+  [BearingType.WEST]: PrismaBearingType.WEST,
+  [BearingType.SOUTH]: PrismaBearingType.SOUTH,
+  [BearingType.NORTH]: PrismaBearingType.NORTH,
+  [BearingType.SOUTHEAST]: PrismaBearingType.SOUTHEAST,
+  [BearingType.NORTHEAST]: PrismaBearingType.NORTHEAST,
+  [BearingType.SOUTHWEST]: PrismaBearingType.SOUTHWEST,
+  [BearingType.NORTHWEST]: PrismaBearingType.NORTHWEST,
+} satisfies Record<BearingType, PrismaBearingType>

@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import type { CityNameType, TdxBusRoute } from '@bus/shared'
+import type {
+  TdxStation,
+  TdxStationGroup,
+  TdxStop,
+  TdxStopOfRoute,
+} from '@bus/shared'
 import { SyncResourceType as PrismaSyncResourceType } from '../generated/prisma/enums.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import {
@@ -7,6 +13,12 @@ import {
   TdxQuotaLockId,
 } from './advisory-lock.constants.js'
 import { isTdxBusRoute } from './validators/tdx-route.validator.js'
+import {
+  isTdxStation,
+  isTdxStationGroup,
+  isTdxStop,
+  isTdxStopOfRoute,
+} from './validators/tdx-stop-data.validator.js'
 
 const TDX_BUS_BASE_URL = 'https://tdx.transportdata.tw/api/basic/v2/Bus'
 const TDX_TOKEN_ENDPOINT =
@@ -97,6 +109,59 @@ export class TdxClientService {
         resource: PrismaSyncResourceType.ROUTES,
       },
       isTdxBusRoute,
+    )
+  }
+
+  async fetchStationGroups(
+    city: CityNameType,
+    syncRunId: string,
+  ): Promise<TdxStationGroup[]> {
+    return this.fetchJsonArray(
+      `/StationGroup/City/${city}`,
+      {
+        syncRunId,
+        resource: PrismaSyncResourceType.STOPS,
+      },
+      isTdxStationGroup,
+    )
+  }
+
+  async fetchStations(
+    city: CityNameType,
+    syncRunId: string,
+  ): Promise<TdxStation[]> {
+    return this.fetchJsonArray(
+      `/Station/City/${city}`,
+      {
+        syncRunId,
+        resource: PrismaSyncResourceType.STOPS,
+      },
+      isTdxStation,
+    )
+  }
+
+  async fetchStops(city: CityNameType, syncRunId: string): Promise<TdxStop[]> {
+    return this.fetchJsonArray(
+      `/Stop/City/${city}`,
+      {
+        syncRunId,
+        resource: PrismaSyncResourceType.STOPS,
+      },
+      isTdxStop,
+    )
+  }
+
+  async fetchStopOfRoutes(
+    city: CityNameType,
+    syncRunId: string,
+  ): Promise<TdxStopOfRoute[]> {
+    return this.fetchJsonArray(
+      `/StopOfRoute/City/${city}`,
+      {
+        syncRunId,
+        resource: PrismaSyncResourceType.STOPS,
+      },
+      isTdxStopOfRoute,
     )
   }
 

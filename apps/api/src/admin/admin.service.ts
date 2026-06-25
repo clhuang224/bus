@@ -62,10 +62,16 @@ export class AdminService {
   }
 
   async syncStops(): Promise<SyncResponseDto> {
-    return this.createSyncRun({
+    const response = await this.createSyncRun({
       apiResource: SyncResourceType.STOPS,
       prismaResource: PrismaSyncResourceType.STOPS,
     })
+
+    if (response.uuid) {
+      this.syncService.enqueue(response.uuid)
+    }
+
+    return response
   }
 
   private async createSyncRun({

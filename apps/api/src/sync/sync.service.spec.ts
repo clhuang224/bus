@@ -6,11 +6,12 @@ import {
 import type { Prisma } from '../generated/prisma/client.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import { RoutesSyncService } from './routes-sync.service.js'
+import { StopsSyncService } from './stops-sync.service.js'
 import { SyncService } from './sync.service.js'
 
 interface ReadyRunQuery {
   where: {
-    resource: PrismaSyncResourceType
+    resource: { in: PrismaSyncResourceType[] }
     OR: [
       { status: PrismaSyncStatusType },
       {
@@ -33,7 +34,7 @@ interface ClaimQuery extends ReadyRunQuery {
 
 interface StaleRecoveryQuery {
   where: {
-    resource: PrismaSyncResourceType
+    resource: { in: PrismaSyncResourceType[] }
     status: PrismaSyncStatusType
     updated_at: { lt: Date }
   }
@@ -85,6 +86,11 @@ async function createService({
         readyRunQueryCalls.push(args)
         return Promise.resolve(readyRunIds.map((id) => ({ id })))
       },
+      findUnique: ({ where }: { where: { id: string } }) =>
+        Promise.resolve({
+          resource: PrismaSyncResourceType.ROUTES,
+          id: where.id,
+        }),
       updateMany: (args: Prisma.SyncRunUpdateManyArgs) => {
         updateManyCalls.push(args)
 
@@ -113,11 +119,21 @@ async function createService({
       })
     },
   }
+  const stopsSyncService = {
+    syncAllStops: () =>
+      Promise.resolve({
+        records_read: 0,
+        records_created: 0,
+        records_updated: 0,
+        records_deactivated: 0,
+      }),
+  }
   const module = await Test.createTestingModule({
     providers: [
       SyncService,
       { provide: PrismaService, useValue: prismaService },
       { provide: RoutesSyncService, useValue: routesSyncService },
+      { provide: StopsSyncService, useValue: stopsSyncService },
     ],
   }).compile()
   const service = module.get(SyncService)
@@ -147,7 +163,10 @@ describe('SyncService', () => {
 
     expect(readyRunQueryCalls).toHaveLength(1)
     const readyRunQuery = readyRunQueryCalls[0] as ReadyRunQuery
-    expect(readyRunQuery.where.resource).toBe(PrismaSyncResourceType.ROUTES)
+    expect(readyRunQuery.where.resource.in).toEqual([
+      PrismaSyncResourceType.ROUTES,
+      PrismaSyncResourceType.STOPS,
+    ])
     expect(readyRunQuery.where.OR[0].status).toBe(PrismaSyncStatusType.QUEUED)
     expect(readyRunQuery.where.OR[1].status).toBe(PrismaSyncStatusType.PENDING)
     expect(readyRunQuery.where.OR[1].resume_after_at.lte).toBeInstanceOf(Date)
@@ -156,7 +175,10 @@ describe('SyncService', () => {
 
     expect(updateManyCalls).toHaveLength(2)
     const recovery = updateManyCalls[0] as StaleRecoveryQuery
-    expect(recovery.where.resource).toBe(PrismaSyncResourceType.ROUTES)
+    expect(recovery.where.resource.in).toEqual([
+      PrismaSyncResourceType.ROUTES,
+      PrismaSyncResourceType.STOPS,
+    ])
     expect(recovery.where.status).toBe(PrismaSyncStatusType.RUNNING)
     expect(recovery.where.updated_at.lt).toBeInstanceOf(Date)
     expect(recovery.data).toEqual({

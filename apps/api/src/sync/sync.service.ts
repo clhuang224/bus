@@ -11,9 +11,14 @@ import {
 import type { Prisma } from '../generated/prisma/client.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import { RoutesSyncService } from './routes-sync.service.js'
+import { StopsSyncService } from './stops-sync.service.js'
 
 const READY_SYNC_POLL_INTERVAL_MS = 60_000
 const STALE_RUNNING_THRESHOLD_MS = 15 * 60_000
+const DISPATCHABLE_SYNC_RESOURCES = [
+  PrismaSyncResourceType.ROUTES,
+  PrismaSyncResourceType.STOPS,
+] as const
 
 @Injectable()
 export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
@@ -25,6 +30,7 @@ export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly routesSyncService: RoutesSyncService,
+    private readonly stopsSyncService: StopsSyncService,
   ) {}
 
   onApplicationBootstrap(): void {
@@ -65,7 +71,7 @@ export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
 
     const readyRuns = await this.prismaService.syncRun.findMany({
       where: {
-        resource: PrismaSyncResourceType.ROUTES,
+        resource: { in: [...DISPATCHABLE_SYNC_RESOURCES] },
         OR: [
           { status: PrismaSyncStatusType.QUEUED },
           {
@@ -91,7 +97,7 @@ export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
   private async recoverStaleRuns(now: Date): Promise<void> {
     const activeSyncRunIds = [...this.activeSyncRunIds]
     const staleRunWhere = {
-      resource: PrismaSyncResourceType.ROUTES,
+      resource: { in: [...DISPATCHABLE_SYNC_RESOURCES] },
       status: PrismaSyncStatusType.RUNNING,
       ...(activeSyncRunIds.length > 0
         ? { id: { notIn: activeSyncRunIds } }
@@ -145,10 +151,24 @@ export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
     this.activeSyncRunIds.add(syncRunId)
 
     try {
+      const syncRun = await this.prismaService.syncRun.findUnique({
+        where: { id: syncRunId },
+        select: { resource: true },
+      })
+
+      if (
+        !syncRun ||
+        !DISPATCHABLE_SYNC_RESOURCES.includes(
+          syncRun.resource as (typeof DISPATCHABLE_SYNC_RESOURCES)[number],
+        )
+      ) {
+        return
+      }
+
       const claimedRun = await this.prismaService.syncRun.updateMany({
         where: {
           id: syncRunId,
-          resource: PrismaSyncResourceType.ROUTES,
+          resource: syncRun.resource,
           OR: [
             { status: PrismaSyncStatusType.QUEUED },
             {
@@ -165,10 +185,15 @@ export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
 
       if (claimedRun.count === 0) return
 
-      await this.routesSyncService.syncAllRoutes(syncRunId)
+      if (syncRun.resource === PrismaSyncResourceType.ROUTES) {
+        await this.routesSyncService.syncAllRoutes(syncRunId)
+        return
+      }
+
+      await this.stopsSyncService.syncAllStops(syncRunId)
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
-      this.logger.error(`Route sync ${syncRunId} stopped: ${message}`)
+      this.logger.error(`Sync ${syncRunId} stopped: ${message}`)
     } finally {
       this.activeSyncRunIds.delete(syncRunId)
     }
