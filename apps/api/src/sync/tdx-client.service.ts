@@ -362,7 +362,7 @@ export class TdxClientService {
       const responseText = await response.text()
       const errorMessage = response.ok
         ? null
-        : `TDX request failed: ${response.status} ${url.pathname}`
+        : this.createHttpErrorMessage(response, responseText, url)
 
       await this.finishRequestLog(reservation, {
         statusCode: response.status,
@@ -539,6 +539,20 @@ export class TdxClientService {
     return new Promise((resolve) => {
       setTimeout(resolve, Math.max(durationMs, 0))
     })
+  }
+
+  private createHttpErrorMessage(
+    response: Response,
+    responseText: string,
+    url: URL,
+  ): string {
+    const responseDetail = responseText.trim()
+
+    if (!responseDetail) {
+      return `TDX request failed: ${response.status} ${url.pathname}`
+    }
+
+    return `TDX request failed: ${response.status} ${url.pathname}: ${responseDetail}`
   }
 
   private getErrorMessage(error: unknown): string {

@@ -12,7 +12,7 @@ export interface TdxStop {
   StopID: string
   AuthorityID: string
   StationID: string | null
-  StationGroupID: string
+  StationGroupID?: string | null
   StopName: TdxLocalizedText
   StopPosition: TdxStopPosition
   StopAddress?: string | null

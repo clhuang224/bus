@@ -76,7 +76,7 @@ export function isTdxStop(value: unknown): value is TdxStop {
     isNonEmptyString(value.StopID) &&
     isNonEmptyString(value.AuthorityID) &&
     isNullableString(value.StationID) &&
-    isNonEmptyString(value.StationGroupID) &&
+    isNullableString(value.StationGroupID) &&
     isTdxLocalizedText(value.StopName) &&
     isTdxStopPosition(value.StopPosition) &&
     isNullableString(value.StopAddress) &&

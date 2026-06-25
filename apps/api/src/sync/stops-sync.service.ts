@@ -9,6 +9,22 @@ import { addSyncResult, createEmptySyncResult } from './sync-result.js'
 import { TdxClientService } from './tdx-client.service.js'
 
 const CITY_SYNC_HEARTBEAT_INTERVAL_MS = 60_000
+const STATION_GROUP_SUPPORTED_CITIES = new Set<CityNameType>([
+  CityNameType.HSINCHU,
+  CityNameType.HSINCHU_COUNTY,
+  CityNameType.MIAOLI_COUNTY,
+  CityNameType.CHANGHUA_COUNTY,
+  CityNameType.NANTOU_COUNTY,
+  CityNameType.YUNLIN_COUNTY,
+  CityNameType.CHIAYI_COUNTY,
+  CityNameType.CHIAYI,
+  CityNameType.PINGTUNG_COUNTY,
+  CityNameType.YILAN_COUNTY,
+  CityNameType.HUALIEN_COUNTY,
+  CityNameType.TAITUNG_COUNTY,
+  CityNameType.PENGHU_COUNTY,
+  CityNameType.KEELUNG,
+])
 
 @Injectable()
 export class StopsSyncService {
@@ -117,10 +133,7 @@ export class StopsSyncService {
     const heartbeatTimer = this.startCityHeartbeat(syncRunId, city)
 
     try {
-      const stationGroups = await this.tdxClientService.fetchStationGroups(
-        city,
-        syncRunId,
-      )
+      const stationGroups = await this.fetchStationGroups(city, syncRunId)
       const stations = await this.tdxClientService.fetchStations(
         city,
         syncRunId,
@@ -155,6 +168,18 @@ export class StopsSyncService {
     } finally {
       clearInterval(heartbeatTimer)
     }
+  }
+
+  private async fetchStationGroups(city: CityNameType, syncRunId: string) {
+    if (STATION_GROUP_SUPPORTED_CITIES.has(city)) {
+      return this.tdxClientService.fetchStationGroups(city, syncRunId)
+    }
+
+    this.logger.log(
+      `Stop sync ${syncRunId}: skipping station groups for ${city} because TDX does not support StationGroup/City for this city.`,
+    )
+
+    return []
   }
 
   private startCityHeartbeat(
