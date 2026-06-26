@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import type { CityNameType } from '@bus/shared'
 import { randomUUID } from 'node:crypto'
+import {
+  DB_BEARING_BY_PRISMA,
+  DB_CITY_NAME_BY_PRISMA,
+  DB_ROUTE_SHAPE_SOURCE_BY_PRISMA,
+} from '../constants/enum-mappings.js'
 import { Prisma } from '../generated/prisma/client.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import {
@@ -30,42 +35,6 @@ interface PersistStopsOptions {
 }
 
 const BULK_WRITE_BATCH_SIZE = 500
-
-const DB_CITY_NAME_BY_PRISMA = {
-  [PrismaCityNameType.TAIPEI]: 'Taipei',
-  [PrismaCityNameType.NEW_TAIPEI]: 'NewTaipei',
-  [PrismaCityNameType.TAOYUAN]: 'Taoyuan',
-  [PrismaCityNameType.TAICHUNG]: 'Taichung',
-  [PrismaCityNameType.TAINAN]: 'Tainan',
-  [PrismaCityNameType.KAOHSIUNG]: 'Kaohsiung',
-  [PrismaCityNameType.KEELUNG]: 'Keelung',
-  [PrismaCityNameType.HSINCHU]: 'Hsinchu',
-  [PrismaCityNameType.HSINCHU_COUNTY]: 'HsinchuCounty',
-  [PrismaCityNameType.MIAOLI_COUNTY]: 'MiaoliCounty',
-  [PrismaCityNameType.CHANGHUA_COUNTY]: 'ChanghuaCounty',
-  [PrismaCityNameType.NANTOU_COUNTY]: 'NantouCounty',
-  [PrismaCityNameType.YUNLIN_COUNTY]: 'YunlinCounty',
-  [PrismaCityNameType.CHIAYI_COUNTY]: 'ChiayiCounty',
-  [PrismaCityNameType.CHIAYI]: 'Chiayi',
-  [PrismaCityNameType.PINGTUNG_COUNTY]: 'PingtungCounty',
-  [PrismaCityNameType.YILAN_COUNTY]: 'YilanCounty',
-  [PrismaCityNameType.HUALIEN_COUNTY]: 'HualienCounty',
-  [PrismaCityNameType.TAITUNG_COUNTY]: 'TaitungCounty',
-  [PrismaCityNameType.KINMEN_COUNTY]: 'KinmenCounty',
-  [PrismaCityNameType.PENGHU_COUNTY]: 'PenghuCounty',
-  [PrismaCityNameType.LIENCHIANG_COUNTY]: 'LienchiangCounty',
-} satisfies Record<PrismaCityNameType, string>
-
-const DB_BEARING_BY_PRISMA = {
-  [PrismaBearingType.EAST]: 'east',
-  [PrismaBearingType.WEST]: 'west',
-  [PrismaBearingType.SOUTH]: 'south',
-  [PrismaBearingType.NORTH]: 'north',
-  [PrismaBearingType.SOUTHEAST]: 'southeast',
-  [PrismaBearingType.NORTHEAST]: 'northeast',
-  [PrismaBearingType.SOUTHWEST]: 'southwest',
-  [PrismaBearingType.NORTHWEST]: 'northwest',
-} satisfies Record<PrismaBearingType, string>
 
 interface AddressRecord {
   address_zh_tw: string | null
@@ -688,15 +657,7 @@ export class StopPersistenceService {
   }
 
   private dbRouteShapeSource(source: PrismaRouteShapeSource): string {
-    if (source === PrismaRouteShapeSource.STOP_POSITIONS) {
-      return 'stop_positions'
-    }
-
-    if (source === PrismaRouteShapeSource.ENCODED_POLYLINE) {
-      return 'encoded_polyline'
-    }
-
-    return 'geometry'
+    return DB_ROUTE_SHAPE_SOURCE_BY_PRISMA[source]
   }
 
   private async loadStationGroupIds(
