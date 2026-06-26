@@ -14,6 +14,7 @@ import { RoutesSyncService } from './routes-sync.service.js'
 import { StopsSyncService } from './stops-sync.service.js'
 
 const READY_SYNC_POLL_INTERVAL_MS = 60_000
+const POLL_ERROR_LOG_INTERVAL_MS = 10 * 60_000
 const STALE_RUNNING_THRESHOLD_MS = 15 * 60_000
 const DISPATCHABLE_SYNC_RESOURCES = [
   PrismaSyncResourceType.ROUTES,
@@ -26,6 +27,8 @@ export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
   private readonly activeSyncRunIds = new Set<string>()
   private readyRunsPromise: Promise<void> | null = null
   private pollTimer: ReturnType<typeof setInterval> | null = null
+  private lastPollErrorMessage: string | null = null
+  private lastPollErrorLoggedAt = 0
 
   constructor(
     private readonly prismaService: PrismaService,
@@ -90,8 +93,21 @@ export class SyncService implements OnApplicationBootstrap, OnModuleDestroy {
   private pollReadyRuns(): void {
     void this.resumeReadyRuns().catch((error: unknown) => {
       const message = error instanceof Error ? error.message : String(error)
-      this.logger.error(`Sync resume poll failed: ${message}`)
+      this.logPollError(message)
     })
+  }
+
+  private logPollError(message: string): void {
+    const now = Date.now()
+    const shouldLog =
+      message !== this.lastPollErrorMessage ||
+      now - this.lastPollErrorLoggedAt >= POLL_ERROR_LOG_INTERVAL_MS
+
+    if (!shouldLog) return
+
+    this.lastPollErrorMessage = message
+    this.lastPollErrorLoggedAt = now
+    this.logger.error(`Sync resume poll failed: ${message}`)
   }
 
   private async recoverStaleRuns(now: Date): Promise<void> {

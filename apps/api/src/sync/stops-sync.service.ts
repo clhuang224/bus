@@ -1,11 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { CityNameType, getEnumValues } from '@bus/shared'
+import { CityNameType } from '@bus/shared'
 import { stopMapper } from './mappers/stop.mapper.js'
 import { cityMapper } from './mappers/route.mapper.js'
 import { StopPersistenceService } from './stop-persistence.service.js'
 import { SyncCheckpointService } from './sync-checkpoint.service.js'
 import type { SyncResult } from './sync-result.js'
 import { addSyncResult, createEmptySyncResult } from './sync-result.js'
+import { resolveSyncCities } from './sync-cities.js'
+import type { StopSyncStage } from './stop-persistence.service.js'
 import { TdxClientService } from './tdx-client.service.js'
 
 const CITY_SYNC_HEARTBEAT_INTERVAL_MS = 60_000
@@ -40,7 +42,7 @@ export class StopsSyncService {
     await this.syncCheckpointService.startRun(syncRunId)
 
     const result = createEmptySyncResult()
-    const cities = getEnumValues(CityNameType)
+    const cities = resolveSyncCities()
     let currentCity: CityNameType | null = null
 
     this.logger.log(
@@ -158,10 +160,15 @@ export class StopsSyncService {
 
       return await this.stopPersistenceService.persistStops(records, {
         city,
-        onProgress: async (persistedCount, totalCount) => {
+        onStageStart: (stage, totalCount) => {
+          this.logger.log(
+            `Stop sync ${syncRunId}: persisting ${totalCount} ${this.stageLabel(stage)} for ${city}.`,
+          )
+        },
+        onProgress: async (stage, persistedCount, totalCount) => {
           await this.syncCheckpointService.touch(syncRunId, city)
           this.logger.log(
-            `Stop sync ${syncRunId}: persisted ${persistedCount}/${totalCount} stops for ${city}.`,
+            `Stop sync ${syncRunId}: persisted ${persistedCount}/${totalCount} ${this.stageLabel(stage)} for ${city}.`,
           )
         },
       })
@@ -180,6 +187,21 @@ export class StopsSyncService {
     )
 
     return []
+  }
+
+  private stageLabel(stage: StopSyncStage): string {
+    switch (stage) {
+      case 'station_groups':
+        return 'station groups'
+      case 'stations':
+        return 'stations'
+      case 'stops':
+        return 'stops'
+      case 'route_stops':
+        return 'route stops'
+      case 'route_shapes':
+        return 'route shapes'
+    }
   }
 
   private startCityHeartbeat(

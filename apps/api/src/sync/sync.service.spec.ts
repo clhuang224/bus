@@ -59,6 +59,10 @@ interface StaleCityRecoveryQuery {
   data: Omit<StaleRecoveryQuery['data'], 'resume_after_at'>
 }
 
+interface PollErrorLogger {
+  logPollError(message: string): void
+}
+
 async function createService({
   readyRunIds,
   claimCount = 1,
@@ -281,6 +285,24 @@ describe('SyncService', () => {
 
     expect(loggedErrors).toEqual([
       'Sync resume poll failed: Database unavailable',
+    ])
+  })
+
+  it('throttles repeated background resume poll errors', async () => {
+    const loggedErrors: string[] = []
+    const { service } = await createService({ readyRunIds: [] })
+    Object.defineProperty(service, 'logger', {
+      value: { error: (message: string) => loggedErrors.push(message) },
+    })
+    const pollErrorLogger = service as unknown as PollErrorLogger
+
+    pollErrorLogger.logPollError('planLimitReached')
+    pollErrorLogger.logPollError('planLimitReached')
+    pollErrorLogger.logPollError('Different database error')
+
+    expect(loggedErrors).toEqual([
+      'Sync resume poll failed: planLimitReached',
+      'Sync resume poll failed: Different database error',
     ])
   })
 })

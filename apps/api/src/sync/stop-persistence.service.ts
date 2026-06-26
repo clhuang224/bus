@@ -3,14 +3,26 @@ import type { CityNameType } from '@bus/shared'
 import { PrismaService } from '../prisma/prisma.service.js'
 import { RouteShapeSource as PrismaRouteShapeSource } from '../generated/prisma/enums.js'
 import type { StopSyncRecords } from './mappers/stop.mapper.js'
+import { createProgressCounter } from './sync-progress.js'
 import type { SyncResult } from './sync-result.js'
+
+export type StopSyncStage =
+  | 'station_groups'
+  | 'stations'
+  | 'stops'
+  | 'route_stops'
+  | 'route_shapes'
 
 interface PersistStopsOptions {
   city: CityNameType
-  onProgress?: (persistedCount: number, totalCount: number) => Promise<void>
+  onStageStart?: (stage: StopSyncStage, totalCount: number) => void
+  onProgress?: (
+    stage: StopSyncStage,
+    persistedCount: number,
+    totalCount: number,
+  ) => Promise<void>
 }
 
-const STOP_PROGRESS_INTERVAL = 100
 const STOP_PERSISTENCE_CONCURRENCY = 5
 
 interface AddressRecord {
@@ -24,20 +36,33 @@ export class StopPersistenceService {
 
   async persistStops(
     records: StopSyncRecords,
-    { city, onProgress }: PersistStopsOptions,
+    { city, onStageStart, onProgress }: PersistStopsOptions,
   ): Promise<SyncResult> {
     if (records.stops.length === 0) {
       throw new Error(`TDX returned 0 stops for ${city}.`)
     }
 
     const prismaCity = records.stops[0].city
-    await this.persistStationGroups(records.stationGroups, prismaCity)
-    await this.persistStations(records.stations, prismaCity)
-    const stopResult = await this.persistStopRecords(records.stops, {
+    await this.persistStationGroups(records.stationGroups, prismaCity, {
+      onStageStart,
       onProgress,
     })
-    await this.persistRouteStops(records.routeStops, prismaCity)
-    await this.persistRouteShapes(records.routeShapes)
+    await this.persistStations(records.stations, prismaCity, {
+      onStageStart,
+      onProgress,
+    })
+    const stopResult = await this.persistStopRecords(records.stops, {
+      onStageStart,
+      onProgress,
+    })
+    await this.persistRouteStops(records.routeStops, prismaCity, {
+      onStageStart,
+      onProgress,
+    })
+    await this.persistRouteShapes(records.routeShapes, {
+      onStageStart,
+      onProgress,
+    })
 
     return stopResult
   }
@@ -45,8 +70,13 @@ export class StopPersistenceService {
   private async persistStationGroups(
     stationGroups: StopSyncRecords['stationGroups'],
     city: StopSyncRecords['stationGroups'][number]['city'],
+    options: Pick<PersistStopsOptions, 'onStageStart' | 'onProgress'>,
   ): Promise<void> {
     const incomingUuids = stationGroups.map((record) => record.uuid)
+    const progress = createProgressCounter(stationGroups.length)
+    let persistedCount = 0
+
+    options.onStageStart?.('station_groups', stationGroups.length)
 
     for (const record of stationGroups) {
       await this.prismaService.stationGroup.upsert({
@@ -62,6 +92,16 @@ export class StopPersistenceService {
           inactive_at: null,
         },
       })
+
+      persistedCount += 1
+
+      if (options.onProgress && progress.shouldReport(persistedCount)) {
+        await options.onProgress(
+          'station_groups',
+          persistedCount,
+          stationGroups.length,
+        )
+      }
     }
 
     const inactiveAt = new Date()
@@ -81,10 +121,15 @@ export class StopPersistenceService {
   private async persistStations(
     stations: StopSyncRecords['stations'],
     city: StopSyncRecords['stations'][number]['city'],
+    options: Pick<PersistStopsOptions, 'onStageStart' | 'onProgress'>,
   ): Promise<void> {
     const stationGroupIds = await this.loadStationGroupIds(city)
     const incomingUuids = stations.map((record) => record.uuid)
     const existingAddresses = await this.loadStationAddresses(city)
+    const progress = createProgressCounter(stations.length)
+    let persistedCount = 0
+
+    options.onStageStart?.('stations', stations.length)
 
     for (const record of stations) {
       const stationGroupId = record.station_group_uuid
@@ -133,6 +178,12 @@ export class StopPersistenceService {
           inactive_at: null,
         },
       })
+
+      persistedCount += 1
+
+      if (options.onProgress && progress.shouldReport(persistedCount)) {
+        await options.onProgress('stations', persistedCount, stations.length)
+      }
     }
 
     const inactiveAt = new Date()
@@ -152,9 +203,15 @@ export class StopPersistenceService {
   private async persistStopRecords(
     stops: StopSyncRecords['stops'],
     {
+      onStageStart,
       onProgress,
     }: {
-      onProgress?: (persistedCount: number, totalCount: number) => Promise<void>
+      onStageStart?: (stage: StopSyncStage, totalCount: number) => void
+      onProgress?: (
+        stage: StopSyncStage,
+        persistedCount: number,
+        totalCount: number,
+      ) => Promise<void>
     },
   ): Promise<SyncResult> {
     const city = stops[0].city
@@ -170,7 +227,9 @@ export class StopPersistenceService {
     ).length
     const recordsUpdated = stops.length - recordsCreated
     const existingAddresses = await this.loadStopAddresses(city)
-    let nextProgressCount = STOP_PROGRESS_INTERVAL
+    const progress = createProgressCounter(stops.length)
+
+    onStageStart?.('stops', stops.length)
 
     for (
       let batchStart = 0;
@@ -190,15 +249,8 @@ export class StopPersistenceService {
 
       const persistedCount = Math.min(batchStart + batch.length, stops.length)
 
-      if (
-        onProgress &&
-        (persistedCount >= nextProgressCount || persistedCount === stops.length)
-      ) {
-        await onProgress(persistedCount, stops.length)
-
-        while (nextProgressCount <= persistedCount) {
-          nextProgressCount += STOP_PROGRESS_INTERVAL
-        }
+      if (onProgress && progress.shouldReport(persistedCount)) {
+        await onProgress('stops', persistedCount, stops.length)
       }
     }
 
@@ -279,43 +331,59 @@ export class StopPersistenceService {
   private async persistRouteStops(
     routeStops: StopSyncRecords['routeStops'],
     city: StopSyncRecords['stops'][number]['city'],
+    options: Pick<PersistStopsOptions, 'onStageStart' | 'onProgress'>,
   ): Promise<void> {
+    options.onStageStart?.('route_stops', routeStops.length)
+
     if (routeStops.length === 0) return
 
     const subrouteIds = await this.loadSubRouteIds(routeStops)
     const stopIds = await this.loadStopIdsByUuid(city)
     const incomingKeys = new Set<string>()
+    const progress = createProgressCounter(routeStops.length)
+    let persistedCount = 0
 
     for (const record of routeStops) {
+      const nextPersistedCount = persistedCount + 1
       const subrouteId = subrouteIds.get(record.subroute_uuid)
       const stopId = stopIds.get(record.stop_uuid)
 
-      if (!subrouteId || !stopId) continue
+      if (subrouteId && stopId) {
+        incomingKeys.add(`${subrouteId}:${record.sequence}`)
 
-      incomingKeys.add(`${subrouteId}:${record.sequence}`)
-
-      await this.prismaService.routeStop.upsert({
-        where: {
-          subroute_id_sequence: {
-            subroute_id: subrouteId,
-            sequence: record.sequence,
+        await this.prismaService.routeStop.upsert({
+          where: {
+            subroute_id_sequence: {
+              subroute_id: subrouteId,
+              sequence: record.sequence,
+            },
           },
-        },
-        create: {
-          subroute_id: subrouteId,
-          stop_id: stopId,
-          sequence: record.sequence,
-          tdx_updated_at: record.tdx_updated_at,
-          is_active: true,
-          inactive_at: null,
-        },
-        update: {
-          stop_id: stopId,
-          tdx_updated_at: record.tdx_updated_at,
-          is_active: true,
-          inactive_at: null,
-        },
-      })
+          create: {
+            subroute_id: subrouteId,
+            stop_id: stopId,
+            sequence: record.sequence,
+            tdx_updated_at: record.tdx_updated_at,
+            is_active: true,
+            inactive_at: null,
+          },
+          update: {
+            stop_id: stopId,
+            tdx_updated_at: record.tdx_updated_at,
+            is_active: true,
+            inactive_at: null,
+          },
+        })
+      }
+
+      persistedCount = nextPersistedCount
+
+      if (options.onProgress && progress.shouldReport(persistedCount)) {
+        await options.onProgress(
+          'route_stops',
+          persistedCount,
+          routeStops.length,
+        )
+      }
     }
 
     const subrouteUuidList = [
@@ -362,50 +430,64 @@ export class StopPersistenceService {
 
   private async persistRouteShapes(
     routeShapes: StopSyncRecords['routeShapes'],
+    options: Pick<PersistStopsOptions, 'onStageStart' | 'onProgress'>,
   ): Promise<void> {
+    options.onStageStart?.('route_shapes', routeShapes.length)
+
     if (routeShapes.length === 0) return
 
     const subrouteIds = await this.loadSubRouteIds(routeShapes)
+    const progress = createProgressCounter(routeShapes.length)
+    let persistedCount = 0
 
     for (const record of routeShapes) {
+      const nextPersistedCount = persistedCount + 1
       const subrouteId = subrouteIds.get(record.subroute_uuid)
 
-      if (!subrouteId) continue
+      if (subrouteId) {
+        const existingShape = await this.prismaService.routeShape.findUnique({
+          where: { subroute_id: subrouteId },
+          select: { source: true },
+        })
 
-      const existingShape = await this.prismaService.routeShape.findUnique({
-        where: { subroute_id: subrouteId },
-        select: { source: true },
-      })
-
-      if (
-        existingShape &&
-        existingShape.source !== PrismaRouteShapeSource.STOP_POSITIONS
-      ) {
-        continue
+        if (
+          !existingShape ||
+          existingShape.source === PrismaRouteShapeSource.STOP_POSITIONS
+        ) {
+          await this.prismaService.routeShape.upsert({
+            where: { subroute_id: subrouteId },
+            create: {
+              subroute_id: subrouteId,
+              source: record.source,
+              path: record.path,
+              encoded_polyline: null,
+              geometry: null,
+              tdx_updated_at: record.tdx_updated_at,
+              is_active: true,
+              inactive_at: null,
+            },
+            update: {
+              source: record.source,
+              path: record.path,
+              encoded_polyline: null,
+              geometry: null,
+              tdx_updated_at: record.tdx_updated_at,
+              is_active: true,
+              inactive_at: null,
+            },
+          })
+        }
       }
 
-      await this.prismaService.routeShape.upsert({
-        where: { subroute_id: subrouteId },
-        create: {
-          subroute_id: subrouteId,
-          source: record.source,
-          path: record.path,
-          encoded_polyline: null,
-          geometry: null,
-          tdx_updated_at: record.tdx_updated_at,
-          is_active: true,
-          inactive_at: null,
-        },
-        update: {
-          source: record.source,
-          path: record.path,
-          encoded_polyline: null,
-          geometry: null,
-          tdx_updated_at: record.tdx_updated_at,
-          is_active: true,
-          inactive_at: null,
-        },
-      })
+      persistedCount = nextPersistedCount
+
+      if (options.onProgress && progress.shouldReport(persistedCount)) {
+        await options.onProgress(
+          'route_shapes',
+          persistedCount,
+          routeShapes.length,
+        )
+      }
     }
   }
 

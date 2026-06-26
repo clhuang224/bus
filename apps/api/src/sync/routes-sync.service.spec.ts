@@ -32,6 +32,17 @@ async function createService({
 }
 
 describe('RoutesSyncService', () => {
+  const originalSyncCities = process.env.SYNC_CITIES
+
+  beforeEach(() => {
+    delete process.env.SYNC_CITIES
+  })
+
+  afterEach(() => {
+    if (originalSyncCities === undefined) delete process.env.SYNC_CITIES
+    else process.env.SYNC_CITIES = originalSyncCities
+  })
+
   it('marks the current city and run when the monthly quota is exhausted', async () => {
     const retryAt = new Date('2026-07-01T00:00:00.000Z')
     const quotaError = new TdxMonthlyQuotaExceededError(

@@ -1,10 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { CityNameType, getEnumValues } from '@bus/shared'
+import { CityNameType } from '@bus/shared'
 import { RoutePersistenceService } from './route-persistence.service.js'
 import { cityMapper, routeMapper } from './mappers/route.mapper.js'
 import { SyncCheckpointService } from './sync-checkpoint.service.js'
 import type { SyncResult } from './sync-result.js'
 import { addSyncResult, createEmptySyncResult } from './sync-result.js'
+import { resolveSyncCities } from './sync-cities.js'
 import { TdxClientService } from './tdx-client.service.js'
 
 const CITY_SYNC_HEARTBEAT_INTERVAL_MS = 60_000
@@ -23,7 +24,7 @@ export class RoutesSyncService {
     await this.syncCheckpointService.startRun(syncRunId)
 
     const result = createEmptySyncResult()
-    const cities = getEnumValues(CityNameType)
+    const cities = resolveSyncCities()
     let currentCity: CityNameType | null = null
 
     this.logger.log(

@@ -23,14 +23,29 @@ pnpm --filter @bus/api start:dev
 | `pnpm --filter @bus/api start:dev`         | 以 watch mode 啟動 API。                             |
 | `pnpm --filter @bus/api start:dev:awake`   | 以 watch mode 啟動 API，並在 macOS 防止閒置休眠。    |
 | `pnpm --filter @bus/api sync:routes:local` | 透過執行於 `localhost:3000` 的 API 建立 route sync。 |
+| `pnpm --filter @bus/api sync:stops:local`  | 透過執行於 `localhost:3000` 的 API 建立 stop sync。  |
 
 在 macOS 執行時間較長的本地 sync 時，可以使用 `start:dev:awake`。一般的 `start:dev` 仍保留給跨平台開發與部署環境使用。
+
+測試資料量較大的 sync 流程時，可以用 `SYNC_CITIES` 限制本地同步城市：
+
+```bash
+SYNC_CITIES=Taipei pnpm --filter @bus/api start:dev:awake
+```
+
+城市名稱使用 TDX 的格式，例如 `Taipei`、`NewTaipei`，多個城市用逗號分隔。
 
 ### Route Sync
 
 完整的 route sync 會依序處理全台 22 個城市。以本機 API 連線遠端 PostgreSQL 的一次實測大約需要一小時；實際時間會受到資料庫延遲和 TDX 資料量影響。
 
 同步進度會以城市為單位建立 checkpoint。如果執行途中中斷，重新執行失敗的 sync run 時會跳過已完成的城市，從第一個尚未完成的城市繼續。
+
+### Stop Sync
+
+Stop sync 的資料量比 route sync 大很多。單一主要城市就可能包含數萬筆 stops 和 route-stop 關聯資料。在免費資料庫方案或本地測試時，建議先用 `SYNC_CITIES` 縮小範圍，再考慮全台 22 個城市同步。
+
+進度 log 會依階段顯示，並且每個階段大約回報十次，讓大量匯入時看得到進度，但不會把 logs 洗得太長。
 
 ## API 文件
 
