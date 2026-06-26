@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import type { CityNameType } from '@bus/shared'
+import { randomUUID } from 'node:crypto'
+import { Prisma } from '../generated/prisma/client.js'
 import { PrismaService } from '../prisma/prisma.service.js'
-import { RouteShapeSource as PrismaRouteShapeSource } from '../generated/prisma/enums.js'
+import {
+  BearingType as PrismaBearingType,
+  CityNameType as PrismaCityNameType,
+  RouteShapeSource as PrismaRouteShapeSource,
+} from '../generated/prisma/enums.js'
 import type { StopSyncRecords } from './mappers/stop.mapper.js'
 import { createProgressCounter } from './sync-progress.js'
 import type { SyncResult } from './sync-result.js'
@@ -23,7 +29,43 @@ interface PersistStopsOptions {
   ) => Promise<void>
 }
 
-const STOP_PERSISTENCE_CONCURRENCY = 5
+const BULK_WRITE_BATCH_SIZE = 500
+
+const DB_CITY_NAME_BY_PRISMA = {
+  [PrismaCityNameType.TAIPEI]: 'Taipei',
+  [PrismaCityNameType.NEW_TAIPEI]: 'NewTaipei',
+  [PrismaCityNameType.TAOYUAN]: 'Taoyuan',
+  [PrismaCityNameType.TAICHUNG]: 'Taichung',
+  [PrismaCityNameType.TAINAN]: 'Tainan',
+  [PrismaCityNameType.KAOHSIUNG]: 'Kaohsiung',
+  [PrismaCityNameType.KEELUNG]: 'Keelung',
+  [PrismaCityNameType.HSINCHU]: 'Hsinchu',
+  [PrismaCityNameType.HSINCHU_COUNTY]: 'HsinchuCounty',
+  [PrismaCityNameType.MIAOLI_COUNTY]: 'MiaoliCounty',
+  [PrismaCityNameType.CHANGHUA_COUNTY]: 'ChanghuaCounty',
+  [PrismaCityNameType.NANTOU_COUNTY]: 'NantouCounty',
+  [PrismaCityNameType.YUNLIN_COUNTY]: 'YunlinCounty',
+  [PrismaCityNameType.CHIAYI_COUNTY]: 'ChiayiCounty',
+  [PrismaCityNameType.CHIAYI]: 'Chiayi',
+  [PrismaCityNameType.PINGTUNG_COUNTY]: 'PingtungCounty',
+  [PrismaCityNameType.YILAN_COUNTY]: 'YilanCounty',
+  [PrismaCityNameType.HUALIEN_COUNTY]: 'HualienCounty',
+  [PrismaCityNameType.TAITUNG_COUNTY]: 'TaitungCounty',
+  [PrismaCityNameType.KINMEN_COUNTY]: 'KinmenCounty',
+  [PrismaCityNameType.PENGHU_COUNTY]: 'PenghuCounty',
+  [PrismaCityNameType.LIENCHIANG_COUNTY]: 'LienchiangCounty',
+} satisfies Record<PrismaCityNameType, string>
+
+const DB_BEARING_BY_PRISMA = {
+  [PrismaBearingType.EAST]: 'east',
+  [PrismaBearingType.WEST]: 'west',
+  [PrismaBearingType.SOUTH]: 'south',
+  [PrismaBearingType.NORTH]: 'north',
+  [PrismaBearingType.SOUTHEAST]: 'southeast',
+  [PrismaBearingType.NORTHEAST]: 'northeast',
+  [PrismaBearingType.SOUTHWEST]: 'southwest',
+  [PrismaBearingType.NORTHWEST]: 'northwest',
+} satisfies Record<PrismaBearingType, string>
 
 interface AddressRecord {
   address_zh_tw: string | null
@@ -78,22 +120,60 @@ export class StopPersistenceService {
 
     options.onStageStart?.('station_groups', stationGroups.length)
 
-    for (const record of stationGroups) {
-      await this.prismaService.stationGroup.upsert({
-        where: { uuid: record.uuid },
-        create: {
-          ...record,
-          is_active: true,
-          inactive_at: null,
-        },
-        update: {
-          ...record,
-          is_active: true,
-          inactive_at: null,
-        },
-      })
+    for (const batch of this.chunk(stationGroups)) {
+      await this.prismaService.$executeRaw`
+        INSERT INTO "station_group" (
+          "id",
+          "uuid",
+          "tdx_station_group_id",
+          "city",
+          "name_zh_tw",
+          "name_en",
+          "name_ja",
+          "name_ko",
+          "latitude",
+          "longitude",
+          "tdx_updated_at",
+          "is_active",
+          "inactive_at",
+          "updated_at"
+        )
+        VALUES ${Prisma.join(
+          batch.map(
+            (record) => Prisma.sql`(
+              ${randomUUID()}::uuid,
+              ${record.uuid},
+              ${record.tdx_station_group_id},
+              ${this.dbCity(record.city)}::"CityNameType",
+              ${record.name_zh_tw},
+              ${record.name_en},
+              ${record.name_ja},
+              ${record.name_ko},
+              ${record.latitude},
+              ${record.longitude},
+              ${record.tdx_updated_at},
+              true,
+              NULL,
+              now()
+            )`,
+          ),
+        )}
+        ON CONFLICT ("uuid") DO UPDATE SET
+          "tdx_station_group_id" = EXCLUDED."tdx_station_group_id",
+          "city" = EXCLUDED."city",
+          "name_zh_tw" = EXCLUDED."name_zh_tw",
+          "name_en" = EXCLUDED."name_en",
+          "name_ja" = EXCLUDED."name_ja",
+          "name_ko" = EXCLUDED."name_ko",
+          "latitude" = EXCLUDED."latitude",
+          "longitude" = EXCLUDED."longitude",
+          "tdx_updated_at" = EXCLUDED."tdx_updated_at",
+          "is_active" = true,
+          "inactive_at" = NULL,
+          "updated_at" = now()
+      `
 
-      persistedCount += 1
+      persistedCount += batch.length
 
       if (options.onProgress && progress.shouldReport(persistedCount)) {
         await options.onProgress(
@@ -131,55 +211,80 @@ export class StopPersistenceService {
 
     options.onStageStart?.('stations', stations.length)
 
-    for (const record of stations) {
-      const stationGroupId = record.station_group_uuid
-        ? (stationGroupIds.get(record.station_group_uuid) ?? null)
-        : null
-      const address = this.resolveAddress(
-        existingAddresses.get(record.uuid),
-        record.address_zh_tw,
-      )
+    for (const batch of this.chunk(stations)) {
+      await this.prismaService.$executeRaw`
+        INSERT INTO "station" (
+          "id",
+          "uuid",
+          "tdx_station_id",
+          "station_group_id",
+          "city",
+          "name_zh_tw",
+          "name_en",
+          "name_ja",
+          "name_ko",
+          "address_zh_tw",
+          "address_en",
+          "latitude",
+          "longitude",
+          "bearing",
+          "tdx_updated_at",
+          "is_active",
+          "inactive_at",
+          "updated_at"
+        )
+        VALUES ${Prisma.join(
+          batch.map((record) => {
+            const stationGroupId = record.station_group_uuid
+              ? (stationGroupIds.get(record.station_group_uuid) ?? null)
+              : null
+            const address = this.resolveAddress(
+              existingAddresses.get(record.uuid),
+              record.address_zh_tw,
+            )
 
-      await this.prismaService.station.upsert({
-        where: { uuid: record.uuid },
-        create: {
-          uuid: record.uuid,
-          tdx_station_id: record.tdx_station_id,
-          station_group_id: stationGroupId,
-          city: record.city,
-          name_zh_tw: record.name_zh_tw,
-          name_en: record.name_en,
-          name_ja: record.name_ja,
-          name_ko: record.name_ko,
-          address_zh_tw: address.address_zh_tw,
-          address_en: address.address_en,
-          latitude: record.latitude,
-          longitude: record.longitude,
-          bearing: record.bearing,
-          tdx_updated_at: record.tdx_updated_at,
-          is_active: true,
-          inactive_at: null,
-        },
-        update: {
-          tdx_station_id: record.tdx_station_id,
-          station_group_id: stationGroupId,
-          city: record.city,
-          name_zh_tw: record.name_zh_tw,
-          name_en: record.name_en,
-          name_ja: record.name_ja,
-          name_ko: record.name_ko,
-          address_zh_tw: address.address_zh_tw,
-          address_en: address.address_en,
-          latitude: record.latitude,
-          longitude: record.longitude,
-          bearing: record.bearing,
-          tdx_updated_at: record.tdx_updated_at,
-          is_active: true,
-          inactive_at: null,
-        },
-      })
+            return Prisma.sql`(
+              ${randomUUID()}::uuid,
+              ${record.uuid},
+              ${record.tdx_station_id},
+              ${stationGroupId}::uuid,
+              ${this.dbCity(record.city)}::"CityNameType",
+              ${record.name_zh_tw},
+              ${record.name_en},
+              ${record.name_ja},
+              ${record.name_ko},
+              ${address.address_zh_tw},
+              ${address.address_en},
+              ${record.latitude},
+              ${record.longitude},
+              ${this.dbBearing(record.bearing)}::"BearingType",
+              ${record.tdx_updated_at},
+              true,
+              NULL,
+              now()
+            )`
+          }),
+        )}
+        ON CONFLICT ("uuid") DO UPDATE SET
+          "tdx_station_id" = EXCLUDED."tdx_station_id",
+          "station_group_id" = EXCLUDED."station_group_id",
+          "city" = EXCLUDED."city",
+          "name_zh_tw" = EXCLUDED."name_zh_tw",
+          "name_en" = EXCLUDED."name_en",
+          "name_ja" = EXCLUDED."name_ja",
+          "name_ko" = EXCLUDED."name_ko",
+          "address_zh_tw" = EXCLUDED."address_zh_tw",
+          "address_en" = EXCLUDED."address_en",
+          "latitude" = EXCLUDED."latitude",
+          "longitude" = EXCLUDED."longitude",
+          "bearing" = EXCLUDED."bearing",
+          "tdx_updated_at" = EXCLUDED."tdx_updated_at",
+          "is_active" = true,
+          "inactive_at" = NULL,
+          "updated_at" = now()
+      `
 
-      persistedCount += 1
+      persistedCount += batch.length
 
       if (options.onProgress && progress.shouldReport(persistedCount)) {
         await options.onProgress('stations', persistedCount, stations.length)
@@ -231,23 +336,82 @@ export class StopPersistenceService {
 
     onStageStart?.('stops', stops.length)
 
-    for (
-      let batchStart = 0;
-      batchStart < stops.length;
-      batchStart += STOP_PERSISTENCE_CONCURRENCY
-    ) {
-      const batch = stops.slice(
-        batchStart,
-        batchStart + STOP_PERSISTENCE_CONCURRENCY,
-      )
+    let persistedCount = 0
 
-      await Promise.all(
-        batch.map((record) =>
-          this.persistStopRecord(record, stationIds, existingAddresses),
-        ),
-      )
+    for (const batch of this.chunk(stops)) {
+      await this.prismaService.$executeRaw`
+        INSERT INTO "stop" (
+          "id",
+          "uuid",
+          "tdx_stop_id",
+          "station_id",
+          "city",
+          "name_zh_tw",
+          "name_en",
+          "name_ja",
+          "name_ko",
+          "address_zh_tw",
+          "address_en",
+          "latitude",
+          "longitude",
+          "bearing",
+          "tdx_updated_at",
+          "is_active",
+          "inactive_at",
+          "updated_at"
+        )
+        VALUES ${Prisma.join(
+          batch.map((record) => {
+            const stationId = record.station_tdx_id
+              ? (stationIds.get(record.station_tdx_id) ?? null)
+              : null
+            const address = this.resolveAddress(
+              existingAddresses.get(record.uuid),
+              record.address_zh_tw,
+            )
 
-      const persistedCount = Math.min(batchStart + batch.length, stops.length)
+            return Prisma.sql`(
+              ${randomUUID()}::uuid,
+              ${record.uuid},
+              ${record.tdx_stop_id},
+              ${stationId}::uuid,
+              ${this.dbCity(record.city)}::"CityNameType",
+              ${record.name_zh_tw},
+              ${record.name_en},
+              ${record.name_ja},
+              ${record.name_ko},
+              ${address.address_zh_tw},
+              ${address.address_en},
+              ${record.latitude},
+              ${record.longitude},
+              ${this.dbBearing(record.bearing)}::"BearingType",
+              ${record.tdx_updated_at},
+              true,
+              NULL,
+              now()
+            )`
+          }),
+        )}
+        ON CONFLICT ("uuid") DO UPDATE SET
+          "tdx_stop_id" = EXCLUDED."tdx_stop_id",
+          "station_id" = EXCLUDED."station_id",
+          "city" = EXCLUDED."city",
+          "name_zh_tw" = EXCLUDED."name_zh_tw",
+          "name_en" = EXCLUDED."name_en",
+          "name_ja" = EXCLUDED."name_ja",
+          "name_ko" = EXCLUDED."name_ko",
+          "address_zh_tw" = EXCLUDED."address_zh_tw",
+          "address_en" = EXCLUDED."address_en",
+          "latitude" = EXCLUDED."latitude",
+          "longitude" = EXCLUDED."longitude",
+          "bearing" = EXCLUDED."bearing",
+          "tdx_updated_at" = EXCLUDED."tdx_updated_at",
+          "is_active" = true,
+          "inactive_at" = NULL,
+          "updated_at" = now()
+      `
+
+      persistedCount += batch.length
 
       if (onProgress && progress.shouldReport(persistedCount)) {
         await onProgress('stops', persistedCount, stops.length)
@@ -275,59 +439,6 @@ export class StopPersistenceService {
     }
   }
 
-  private async persistStopRecord(
-    record: StopSyncRecords['stops'][number],
-    stationIds: Map<string, string>,
-    existingAddresses: Map<string, AddressRecord>,
-  ): Promise<void> {
-    const stationId = record.station_tdx_id
-      ? (stationIds.get(record.station_tdx_id) ?? null)
-      : null
-    const address = this.resolveAddress(
-      existingAddresses.get(record.uuid),
-      record.address_zh_tw,
-    )
-
-    await this.prismaService.stop.upsert({
-      where: { uuid: record.uuid },
-      create: {
-        uuid: record.uuid,
-        tdx_stop_id: record.tdx_stop_id,
-        station_id: stationId,
-        city: record.city,
-        name_zh_tw: record.name_zh_tw,
-        name_en: record.name_en,
-        name_ja: record.name_ja,
-        name_ko: record.name_ko,
-        address_zh_tw: address.address_zh_tw,
-        address_en: address.address_en,
-        latitude: record.latitude,
-        longitude: record.longitude,
-        bearing: record.bearing,
-        tdx_updated_at: record.tdx_updated_at,
-        is_active: true,
-        inactive_at: null,
-      },
-      update: {
-        tdx_stop_id: record.tdx_stop_id,
-        station_id: stationId,
-        city: record.city,
-        name_zh_tw: record.name_zh_tw,
-        name_en: record.name_en,
-        name_ja: record.name_ja,
-        name_ko: record.name_ko,
-        address_zh_tw: address.address_zh_tw,
-        address_en: address.address_en,
-        latitude: record.latitude,
-        longitude: record.longitude,
-        bearing: record.bearing,
-        tdx_updated_at: record.tdx_updated_at,
-        is_active: true,
-        inactive_at: null,
-      },
-    })
-  }
-
   private async persistRouteStops(
     routeStops: StopSyncRecords['routeStops'],
     city: StopSyncRecords['stops'][number]['city'],
@@ -343,39 +454,61 @@ export class StopPersistenceService {
     const progress = createProgressCounter(routeStops.length)
     let persistedCount = 0
 
-    for (const record of routeStops) {
-      const nextPersistedCount = persistedCount + 1
-      const subrouteId = subrouteIds.get(record.subroute_uuid)
-      const stopId = stopIds.get(record.stop_uuid)
+    for (const batch of this.chunk(routeStops)) {
+      const values = batch.flatMap((record) => {
+        const subrouteId = subrouteIds.get(record.subroute_uuid)
+        const stopId = stopIds.get(record.stop_uuid)
 
-      if (subrouteId && stopId) {
+        if (!subrouteId || !stopId) return []
+
         incomingKeys.add(`${subrouteId}:${record.sequence}`)
 
-        await this.prismaService.routeStop.upsert({
-          where: {
-            subroute_id_sequence: {
-              subroute_id: subrouteId,
-              sequence: record.sequence,
-            },
-          },
-          create: {
-            subroute_id: subrouteId,
-            stop_id: stopId,
+        return [
+          {
+            subrouteId,
+            stopId,
             sequence: record.sequence,
-            tdx_updated_at: record.tdx_updated_at,
-            is_active: true,
-            inactive_at: null,
+            tdxUpdatedAt: record.tdx_updated_at,
           },
-          update: {
-            stop_id: stopId,
-            tdx_updated_at: record.tdx_updated_at,
-            is_active: true,
-            inactive_at: null,
-          },
-        })
+        ]
+      })
+
+      if (values.length > 0) {
+        await this.prismaService.$executeRaw`
+          INSERT INTO "route_stop" (
+            "id",
+            "subroute_id",
+            "stop_id",
+            "sequence",
+            "tdx_updated_at",
+            "is_active",
+            "inactive_at",
+            "updated_at"
+          )
+          VALUES ${Prisma.join(
+            values.map(
+              (value) => Prisma.sql`(
+                ${randomUUID()}::uuid,
+                ${value.subrouteId}::uuid,
+                ${value.stopId}::uuid,
+                ${value.sequence},
+                ${value.tdxUpdatedAt},
+                true,
+                NULL,
+                now()
+              )`,
+            ),
+          )}
+          ON CONFLICT ("subroute_id", "sequence") DO UPDATE SET
+            "stop_id" = EXCLUDED."stop_id",
+            "tdx_updated_at" = EXCLUDED."tdx_updated_at",
+            "is_active" = true,
+            "inactive_at" = NULL,
+            "updated_at" = now()
+        `
       }
 
-      persistedCount = nextPersistedCount
+      persistedCount += batch.length
 
       if (options.onProgress && progress.shouldReport(persistedCount)) {
         await options.onProgress(
@@ -440,46 +573,66 @@ export class StopPersistenceService {
     const progress = createProgressCounter(routeShapes.length)
     let persistedCount = 0
 
-    for (const record of routeShapes) {
-      const nextPersistedCount = persistedCount + 1
-      const subrouteId = subrouteIds.get(record.subroute_uuid)
+    for (const batch of this.chunk(routeShapes)) {
+      const values = batch.flatMap((record) => {
+        const subrouteId = subrouteIds.get(record.subroute_uuid)
 
-      if (subrouteId) {
-        const existingShape = await this.prismaService.routeShape.findUnique({
-          where: { subroute_id: subrouteId },
-          select: { source: true },
-        })
+        if (!subrouteId) return []
 
-        if (
-          !existingShape ||
-          existingShape.source === PrismaRouteShapeSource.STOP_POSITIONS
-        ) {
-          await this.prismaService.routeShape.upsert({
-            where: { subroute_id: subrouteId },
-            create: {
-              subroute_id: subrouteId,
-              source: record.source,
-              path: record.path,
-              encoded_polyline: null,
-              geometry: null,
-              tdx_updated_at: record.tdx_updated_at,
-              is_active: true,
-              inactive_at: null,
-            },
-            update: {
-              source: record.source,
-              path: record.path,
-              encoded_polyline: null,
-              geometry: null,
-              tdx_updated_at: record.tdx_updated_at,
-              is_active: true,
-              inactive_at: null,
-            },
-          })
-        }
+        return [
+          {
+            subrouteId,
+            source: record.source,
+            path: record.path,
+            tdxUpdatedAt: record.tdx_updated_at,
+          },
+        ]
+      })
+
+      if (values.length > 0) {
+        await this.prismaService.$executeRaw`
+          INSERT INTO "route_shape" (
+            "id",
+            "subroute_id",
+            "source",
+            "path",
+            "encoded_polyline",
+            "geometry",
+            "tdx_updated_at",
+            "is_active",
+            "inactive_at",
+            "updated_at"
+          )
+          VALUES ${Prisma.join(
+            values.map(
+              (value) => Prisma.sql`(
+                ${randomUUID()}::uuid,
+                ${value.subrouteId}::uuid,
+                ${this.dbRouteShapeSource(value.source)}::"RouteShapeSource",
+                ${JSON.stringify(value.path)}::jsonb,
+                NULL,
+                NULL,
+                ${value.tdxUpdatedAt},
+                true,
+                NULL,
+                now()
+              )`,
+            ),
+          )}
+          ON CONFLICT ("subroute_id") DO UPDATE SET
+            "source" = EXCLUDED."source",
+            "path" = EXCLUDED."path",
+            "encoded_polyline" = NULL,
+            "geometry" = NULL,
+            "tdx_updated_at" = EXCLUDED."tdx_updated_at",
+            "is_active" = true,
+            "inactive_at" = NULL,
+            "updated_at" = now()
+          WHERE "route_shape"."source" = 'stop_positions'::"RouteShapeSource"
+        `
       }
 
-      persistedCount = nextPersistedCount
+      persistedCount += batch.length
 
       if (options.onProgress && progress.shouldReport(persistedCount)) {
         await options.onProgress(
@@ -510,6 +663,40 @@ export class StopPersistenceService {
       address_zh_tw: incomingAddressZhTw,
       address_en: null,
     }
+  }
+
+  private chunk<T>(records: T[]): T[][] {
+    const chunks: T[][] = []
+
+    for (
+      let index = 0;
+      index < records.length;
+      index += BULK_WRITE_BATCH_SIZE
+    ) {
+      chunks.push(records.slice(index, index + BULK_WRITE_BATCH_SIZE))
+    }
+
+    return chunks
+  }
+
+  private dbCity(city: PrismaCityNameType): string {
+    return DB_CITY_NAME_BY_PRISMA[city]
+  }
+
+  private dbBearing(bearing: PrismaBearingType | null): string | null {
+    return bearing ? DB_BEARING_BY_PRISMA[bearing] : null
+  }
+
+  private dbRouteShapeSource(source: PrismaRouteShapeSource): string {
+    if (source === PrismaRouteShapeSource.STOP_POSITIONS) {
+      return 'stop_positions'
+    }
+
+    if (source === PrismaRouteShapeSource.ENCODED_POLYLINE) {
+      return 'encoded_polyline'
+    }
+
+    return 'geometry'
   }
 
   private async loadStationGroupIds(
