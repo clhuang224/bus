@@ -91,6 +91,8 @@ export class StopPersistenceService {
       },
     )
 
+    if (stationGroups.length === 0) return
+
     const inactiveAt = new Date()
     await this.prismaService.stationGroup.updateMany({
       where: {
