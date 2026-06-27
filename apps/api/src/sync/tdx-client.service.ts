@@ -546,13 +546,18 @@ export class TdxClientService {
     responseText: string,
     url: URL,
   ): string {
-    const responseDetail = responseText.trim()
+    const responseDetail = responseText.trim().replace(/\s+/g, ' ')
+    const maxDetailLength = 1000
+    const truncatedDetail =
+      responseDetail.length > maxDetailLength
+        ? `${responseDetail.slice(0, maxDetailLength)}...`
+        : responseDetail
 
-    if (!responseDetail) {
+    if (!truncatedDetail) {
       return `TDX request failed: ${response.status} ${url.pathname}`
     }
 
-    return `TDX request failed: ${response.status} ${url.pathname}: ${responseDetail}`
+    return `TDX request failed: ${response.status} ${url.pathname}: ${truncatedDetail}`
   }
 
   private getErrorMessage(error: unknown): string {

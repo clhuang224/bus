@@ -251,8 +251,12 @@ describe('TdxClientService', () => {
     ).rejects.toThrow('Invalid TDX record at index 0 for /Route/City/Taipei.')
   })
 
-  it('includes the response body when a TDX request fails', async () => {
+  it('sanitizes and truncates the response body when a TDX request fails', async () => {
     const { prismaService, updateCalls } = createPrismaMock()
+    const longDetail = `City is not supported by this endpoint.\n${'x'.repeat(1200)}`
+    const expectedDetail = `City is not supported by this endpoint. ${'x'.repeat(960)}...`
+    const expectedMessage = `TDX request failed: 400 /api/basic/v2/Bus/StationGroup/City/Taipei: ${expectedDetail}`
+
     globalThis.fetch = ((input) => {
       const url = String(input)
 
@@ -266,7 +270,7 @@ describe('TdxClientService', () => {
       }
 
       return Promise.resolve(
-        new Response('City is not supported by this endpoint.', {
+        new Response(longDetail, {
           status: 400,
         }),
       )
@@ -275,15 +279,11 @@ describe('TdxClientService', () => {
 
     await expect(
       service.fetchStationGroups(CityNameType.TAIPEI, 'sync-run-id'),
-    ).rejects.toThrow(
-      'TDX request failed: 400 /api/basic/v2/Bus/StationGroup/City/Taipei: City is not supported by this endpoint.',
-    )
+    ).rejects.toThrow(expectedMessage)
 
     expect(updateCalls).toHaveLength(1)
     const updateCall = updateCalls[0] as RequestLogUpdateCall
-    expect(updateCall.data.error_message).toBe(
-      'TDX request failed: 400 /api/basic/v2/Bus/StationGroup/City/Taipei: City is not supported by this endpoint.',
-    )
+    expect(updateCall.data.error_message).toBe(expectedMessage)
   })
 
   it('applies an abort signal to token and bus requests', async () => {
