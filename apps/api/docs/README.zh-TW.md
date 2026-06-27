@@ -4,7 +4,7 @@
 
 Finding the Bus 的 NestJS 後端 workspace。
 
-API 目前採用 contract-first 的方式開發：在資料庫同步和 TDX 上游整合真正實作前，先把 endpoint 和 DTO 設計成前後端拆分後會使用的形狀。
+API 正在從 contract-first endpoints 逐步走向由資料庫支援的路線和站位資料。Route sync 已經實作，stop sync 也已經建立第一版 persistence foundation，包含 station groups、stations、stops、route stops，以及 fallback route shapes。
 
 ## 本地開發
 
@@ -139,8 +139,8 @@ pnpm --filter @bus/api test:e2e:db
 
 ## Planned Responsibilities
 
-- TDX authentication 和上游 request shaping
-- 基礎資料同步到 PostgreSQL
+- 持續完善 TDX authentication 和上游 request shaping
+- 持續完善基礎資料同步到 PostgreSQL
 - 由資料庫支援的 route 和 station API endpoints
 - request pacing 和 TDX quota 保護
 - Scalar/OpenAPI 文件

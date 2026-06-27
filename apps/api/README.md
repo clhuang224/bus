@@ -4,7 +4,7 @@
 
 NestJS backend workspace for Finding the Bus.
 
-The API is currently contract-first: endpoints and DTOs are shaped for the planned frontend/backend split before database sync and upstream TDX integration are implemented.
+The API is moving from contract-first endpoints toward database-backed route and station data. Route sync is implemented, and stop sync now has the first persistence foundation for station groups, stations, stops, route stops, and fallback route shapes.
 
 ## Local Development
 
@@ -139,8 +139,8 @@ These groups are contract placeholders and should wait for account/auth work bef
 
 ## Planned Responsibilities
 
-- TDX authentication and upstream request shaping
-- base-data sync into PostgreSQL
+- continue TDX authentication and upstream request shaping
+- continue base-data sync into PostgreSQL
 - route and station API endpoints backed by the database
 - request pacing and TDX quota protection
 - Scalar/OpenAPI documentation
