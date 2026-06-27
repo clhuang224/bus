@@ -274,16 +274,23 @@ export class StopPersistenceService {
       },
     })
     const inactiveAt = new Date()
+    const sequencesToDeactivate = new Map<string, number[]>()
 
     for (const routeStop of existingRouteStops) {
       const key = `${routeStop.subroute_id}:${routeStop.sequence}`
 
       if (incomingKeys.has(key)) continue
 
+      const sequences = sequencesToDeactivate.get(routeStop.subroute_id) ?? []
+      sequences.push(routeStop.sequence)
+      sequencesToDeactivate.set(routeStop.subroute_id, sequences)
+    }
+
+    for (const [subrouteId, sequences] of sequencesToDeactivate) {
       await this.prismaService.routeStop.updateMany({
         where: {
-          subroute_id: routeStop.subroute_id,
-          sequence: routeStop.sequence,
+          subroute_id: subrouteId,
+          sequence: { in: sequences },
           is_active: true,
         },
         data: {
