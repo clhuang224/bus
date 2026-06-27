@@ -112,6 +112,10 @@ export class StopPersistenceService {
     city: StopSyncRecords['stations'][number]['city'],
     options: Pick<PersistStopsOptions, 'onStageStart' | 'onProgress'>,
   ): Promise<void> {
+    if (stations.length === 0) {
+      throw new Error(`TDX returned 0 stations for ${city}.`)
+    }
+
     const stationGroupIds = await this.loadStationGroupIds(city)
     const incomingUuids = stations.map((record) => record.uuid)
     const existingAddresses = await this.loadStationAddresses(city)

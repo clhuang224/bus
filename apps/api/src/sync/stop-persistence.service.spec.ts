@@ -6,6 +6,21 @@ import type { StopBulkWriterService } from './stop-bulk-writer.service.js'
 import { StopPersistenceService } from './stop-persistence.service.js'
 
 describe('StopPersistenceService', () => {
+  const stationRecord: StopSyncRecords['stations'][number] = {
+    uuid: 'TPE-station-1',
+    tdx_station_id: 'station-1',
+    station_group_uuid: null,
+    city: PrismaCityNameType.TAIPEI,
+    name_zh_tw: '測試站位',
+    name_en: 'Test Station',
+    name_ja: null,
+    name_ko: null,
+    address_zh_tw: null,
+    latitude: 25,
+    longitude: 121,
+    bearing: null,
+    tdx_updated_at: null,
+  }
   const stopRecord: StopSyncRecords['stops'][number] = {
     uuid: 'TPE-stop-1',
     tdx_stop_id: 'stop-1',
@@ -55,7 +70,7 @@ describe('StopPersistenceService', () => {
     )
     const records: StopSyncRecords = {
       stationGroups: [],
-      stations: [],
+      stations: [stationRecord],
       stops: [stopRecord],
       routeStops: [],
       routeShapes: [],
@@ -70,6 +85,51 @@ describe('StopPersistenceService', () => {
       records_deactivated: 0,
     })
     expect(stationGroupUpdateCount).toBe(0)
+  })
+
+  it('rejects an empty station response without deactivating stored stations', async () => {
+    let stationUpdateCount = 0
+    const prismaService = {
+      stationGroup: {
+        findMany: () => Promise.resolve([]),
+        updateMany: () => Promise.resolve({ count: 0 }),
+      },
+      station: {
+        findMany: () => Promise.resolve([]),
+        updateMany: () => {
+          stationUpdateCount += 1
+
+          return Promise.resolve({ count: 0 })
+        },
+      },
+      stop: {
+        findMany: () => Promise.resolve([]),
+        updateMany: () => Promise.resolve({ count: 0 }),
+      },
+    } as unknown as PrismaService
+    const stopBulkWriterService = {
+      upsertStationGroups: () => Promise.resolve(),
+      upsertStations: () => Promise.resolve(),
+      upsertStops: () => Promise.resolve(),
+      upsertRouteStops: () => Promise.resolve(),
+      upsertRouteShapes: () => Promise.resolve(),
+    } as unknown as StopBulkWriterService
+    const service = new StopPersistenceService(
+      prismaService,
+      stopBulkWriterService,
+    )
+    const records: StopSyncRecords = {
+      stationGroups: [],
+      stations: [],
+      stops: [stopRecord],
+      routeStops: [],
+      routeShapes: [],
+    }
+
+    await expect(
+      service.persistStops(records, { city: CityNameType.TAIPEI }),
+    ).rejects.toThrow('TDX returned 0 stations for TAIPEI.')
+    expect(stationUpdateCount).toBe(0)
   })
 
   it('deactivates missing route stops in batches by subroute', async () => {
@@ -140,7 +200,7 @@ describe('StopPersistenceService', () => {
     )
     const records: StopSyncRecords = {
       stationGroups: [],
-      stations: [],
+      stations: [stationRecord],
       stops: [stopRecord],
       routeStops: [
         {
