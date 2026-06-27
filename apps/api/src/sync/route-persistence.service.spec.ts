@@ -231,6 +231,9 @@ describe('RoutePersistenceService', () => {
     })
 
     expect(maximumActiveUpserts).toBe(5)
-    expect(progress).toEqual([[6, 6]])
+    expect(progress).toEqual([
+      [5, 6],
+      [6, 6],
+    ])
   })
 })

@@ -1,26 +1,44 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { CityNameType } from '@bus/shared'
-import { RoutePersistenceService } from './route-persistence.service.js'
-import { cityMapper, routeMapper } from './mappers/route.mapper.js'
+import { stopMapper } from './mappers/stop.mapper.js'
+import { cityMapper } from './mappers/route.mapper.js'
+import { StopPersistenceService } from './stop-persistence.service.js'
 import { SyncCheckpointService } from './sync-checkpoint.service.js'
 import type { SyncResult } from './sync-result.js'
 import { addSyncResult, createEmptySyncResult } from './sync-result.js'
 import { resolveSyncCities } from './sync-cities.js'
+import type { StopSyncStage } from './stop-persistence.service.js'
 import { TdxClientService } from './tdx-client.service.js'
 
 const CITY_SYNC_HEARTBEAT_INTERVAL_MS = 60_000
+const STATION_GROUP_SUPPORTED_CITIES = new Set<CityNameType>([
+  CityNameType.HSINCHU,
+  CityNameType.HSINCHU_COUNTY,
+  CityNameType.MIAOLI_COUNTY,
+  CityNameType.CHANGHUA_COUNTY,
+  CityNameType.NANTOU_COUNTY,
+  CityNameType.YUNLIN_COUNTY,
+  CityNameType.CHIAYI_COUNTY,
+  CityNameType.CHIAYI,
+  CityNameType.PINGTUNG_COUNTY,
+  CityNameType.YILAN_COUNTY,
+  CityNameType.HUALIEN_COUNTY,
+  CityNameType.TAITUNG_COUNTY,
+  CityNameType.PENGHU_COUNTY,
+  CityNameType.KEELUNG,
+])
 
 @Injectable()
-export class RoutesSyncService {
-  private readonly logger = new Logger(RoutesSyncService.name)
+export class StopsSyncService {
+  private readonly logger = new Logger(StopsSyncService.name)
 
   constructor(
     private readonly tdxClientService: TdxClientService,
-    private readonly routePersistenceService: RoutePersistenceService,
+    private readonly stopPersistenceService: StopPersistenceService,
     private readonly syncCheckpointService: SyncCheckpointService,
   ) {}
 
-  async syncAllRoutes(syncRunId: string): Promise<SyncResult> {
+  async syncAllStops(syncRunId: string): Promise<SyncResult> {
     await this.syncCheckpointService.startRun(syncRunId)
 
     const result = createEmptySyncResult()
@@ -28,7 +46,7 @@ export class RoutesSyncService {
     let currentCity: CityNameType | null = null
 
     this.logger.log(
-      `Route sync ${syncRunId} started for ${cities.length} cities.`,
+      `Stop sync ${syncRunId} started for ${cities.length} cities.`,
     )
 
     try {
@@ -44,7 +62,7 @@ export class RoutesSyncService {
       for (const [index, city] of cities.entries()) {
         if (completedCities.has(cityMapper(city))) {
           this.logger.log(
-            `Route sync ${syncRunId}: skipping completed city ${city} (${index + 1}/${cities.length}).`,
+            `Stop sync ${syncRunId}: skipping completed city ${city} (${index + 1}/${cities.length}).`,
           )
           continue
         }
@@ -53,9 +71,9 @@ export class RoutesSyncService {
         await this.syncCheckpointService.startCity(syncRunId, city)
 
         this.logger.log(
-          `Route sync ${syncRunId}: starting ${city} (${index + 1}/${cities.length}).`,
+          `Stop sync ${syncRunId}: starting ${city} (${index + 1}/${cities.length}).`,
         )
-        const cityResult = await this.syncCityRoutes(city, syncRunId)
+        const cityResult = await this.syncCityStops(city, syncRunId)
 
         addSyncResult(result, cityResult)
         await this.syncCheckpointService.completeCity(
@@ -68,14 +86,14 @@ export class RoutesSyncService {
         await this.syncCheckpointService.updateRunResult(syncRunId, result)
 
         this.logger.log(
-          `Route sync ${syncRunId}: completed ${city} (${index + 1}/${cities.length}), read ${cityResult.records_read}, created ${cityResult.records_created}, updated ${cityResult.records_updated}, deactivated ${cityResult.records_deactivated}.`,
+          `Stop sync ${syncRunId}: completed ${city} (${index + 1}/${cities.length}), read ${cityResult.records_read}, created ${cityResult.records_created}, updated ${cityResult.records_updated}, deactivated ${cityResult.records_deactivated}.`,
         )
       }
 
       await this.syncCheckpointService.completeRun(syncRunId, result)
 
       this.logger.log(
-        `Route sync ${syncRunId} succeeded: read ${result.records_read}, created ${result.records_created}, updated ${result.records_updated}, deactivated ${result.records_deactivated}.`,
+        `Stop sync ${syncRunId} succeeded: read ${result.records_read}, created ${result.records_created}, updated ${result.records_updated}, deactivated ${result.records_deactivated}.`,
       )
 
       return result
@@ -110,31 +128,79 @@ export class RoutesSyncService {
     }
   }
 
-  async syncCityRoutes(
+  async syncCityStops(
     city: CityNameType,
     syncRunId: string,
   ): Promise<SyncResult> {
     const heartbeatTimer = this.startCityHeartbeat(syncRunId, city)
 
     try {
-      const tdxRoutes = await this.tdxClientService.fetchRoutes(city, syncRunId)
-      const routes = routeMapper({ city, tdxRoutes })
-
-      this.logger.log(
-        `Route sync ${syncRunId}: ${city} returned ${routes.length} routes from TDX.`,
+      const stationGroups = await this.fetchStationGroups(city, syncRunId)
+      const stations = await this.tdxClientService.fetchStations(
+        city,
+        syncRunId,
+      )
+      const stops = await this.tdxClientService.fetchStops(city, syncRunId)
+      const stopOfRoutes = await this.tdxClientService.fetchStopOfRoutes(
+        city,
+        syncRunId,
       )
 
-      return await this.routePersistenceService.persistRoutes(routes, {
+      const records = stopMapper({
         city,
-        onProgress: async (persistedCount, totalCount) => {
+        stationGroups,
+        stations,
+        stops,
+        stopOfRoutes,
+      })
+
+      this.logger.log(
+        `Stop sync ${syncRunId}: ${city} returned ${records.stops.length} stops, ${records.stations.length} stations, ${records.stationGroups.length} station groups, and ${records.routeStops.length} route stops from TDX.`,
+      )
+
+      return await this.stopPersistenceService.persistStops(records, {
+        city,
+        onStageStart: (stage, totalCount) => {
+          this.logger.log(
+            `Stop sync ${syncRunId}: persisting ${totalCount} ${this.stageLabel(stage)} for ${city}.`,
+          )
+        },
+        onProgress: async (stage, persistedCount, totalCount) => {
           await this.syncCheckpointService.touch(syncRunId, city)
           this.logger.log(
-            `Route sync ${syncRunId}: persisted ${persistedCount}/${totalCount} routes for ${city}.`,
+            `Stop sync ${syncRunId}: persisted ${persistedCount}/${totalCount} ${this.stageLabel(stage)} for ${city}.`,
           )
         },
       })
     } finally {
       clearInterval(heartbeatTimer)
+    }
+  }
+
+  private async fetchStationGroups(city: CityNameType, syncRunId: string) {
+    if (STATION_GROUP_SUPPORTED_CITIES.has(city)) {
+      return this.tdxClientService.fetchStationGroups(city, syncRunId)
+    }
+
+    this.logger.log(
+      `Stop sync ${syncRunId}: skipping station groups for ${city} because TDX does not support StationGroup/City for this city.`,
+    )
+
+    return []
+  }
+
+  private stageLabel(stage: StopSyncStage): string {
+    switch (stage) {
+      case 'station_groups':
+        return 'station groups'
+      case 'stations':
+        return 'stations'
+      case 'stops':
+        return 'stops'
+      case 'route_stops':
+        return 'route stops'
+      case 'route_shapes':
+        return 'route shapes'
     }
   }
 
@@ -151,7 +217,7 @@ export class RoutesSyncService {
         .catch((error: unknown) => {
           const message = error instanceof Error ? error.message : String(error)
           this.logger.error(
-            `Route sync ${syncRunId}: heartbeat failed for ${city}: ${message}`,
+            `Stop sync ${syncRunId}: heartbeat failed for ${city}: ${message}`,
           )
         })
         .finally(() => {
@@ -169,8 +235,6 @@ export class RoutesSyncService {
     error: unknown,
   ): void {
     const message = error instanceof Error ? error.message : String(error)
-    this.logger.error(
-      `Route sync ${syncRunId}: failed to ${action}: ${message}`,
-    )
+    this.logger.error(`Stop sync ${syncRunId}: failed to ${action}: ${message}`)
   }
 }

@@ -914,10 +914,11 @@ Use Prisma Studio and application logs for local inspection until the manager pr
 - Background route sync with all-city checkpoints and stale-run recovery
 - Route, subroute, operator, and route-operator persistence
 - Soft deactivation and reactivation of route base data
+- Initial stop sync foundation for station groups, stations, stops, route stops, and fallback route shapes
 
 ## Plan Order
 
-1. Implement station group, station, stop, route-stop, and fallback route-shape sync.
+1. Validate stop sync with real data in small city batches and tune database usage.
 2. Read `GET /api/routes?area=...` from the database.
 3. Read `GET /api/routes/:uuid` from the database.
 4. Read `GET /api/stations?latitude=...&longitude=...` from the database.

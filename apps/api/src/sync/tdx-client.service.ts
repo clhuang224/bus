@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import type { CityNameType, TdxBusRoute } from '@bus/shared'
+import type {
+  TdxStation,
+  TdxStationGroup,
+  TdxStop,
+  TdxStopOfRoute,
+} from '@bus/shared'
 import { SyncResourceType as PrismaSyncResourceType } from '../generated/prisma/enums.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import {
@@ -7,6 +13,12 @@ import {
   TdxQuotaLockId,
 } from './advisory-lock.constants.js'
 import { isTdxBusRoute } from './validators/tdx-route.validator.js'
+import {
+  isTdxStation,
+  isTdxStationGroup,
+  isTdxStop,
+  isTdxStopOfRoute,
+} from './validators/tdx-stop-data.validator.js'
 
 const TDX_BUS_BASE_URL = 'https://tdx.transportdata.tw/api/basic/v2/Bus'
 const TDX_TOKEN_ENDPOINT =
@@ -97,6 +109,59 @@ export class TdxClientService {
         resource: PrismaSyncResourceType.ROUTES,
       },
       isTdxBusRoute,
+    )
+  }
+
+  async fetchStationGroups(
+    city: CityNameType,
+    syncRunId: string,
+  ): Promise<TdxStationGroup[]> {
+    return this.fetchJsonArray(
+      `/StationGroup/City/${city}`,
+      {
+        syncRunId,
+        resource: PrismaSyncResourceType.STOPS,
+      },
+      isTdxStationGroup,
+    )
+  }
+
+  async fetchStations(
+    city: CityNameType,
+    syncRunId: string,
+  ): Promise<TdxStation[]> {
+    return this.fetchJsonArray(
+      `/Station/City/${city}`,
+      {
+        syncRunId,
+        resource: PrismaSyncResourceType.STOPS,
+      },
+      isTdxStation,
+    )
+  }
+
+  async fetchStops(city: CityNameType, syncRunId: string): Promise<TdxStop[]> {
+    return this.fetchJsonArray(
+      `/Stop/City/${city}`,
+      {
+        syncRunId,
+        resource: PrismaSyncResourceType.STOPS,
+      },
+      isTdxStop,
+    )
+  }
+
+  async fetchStopOfRoutes(
+    city: CityNameType,
+    syncRunId: string,
+  ): Promise<TdxStopOfRoute[]> {
+    return this.fetchJsonArray(
+      `/StopOfRoute/City/${city}`,
+      {
+        syncRunId,
+        resource: PrismaSyncResourceType.STOPS,
+      },
+      isTdxStopOfRoute,
     )
   }
 
@@ -297,7 +362,7 @@ export class TdxClientService {
       const responseText = await response.text()
       const errorMessage = response.ok
         ? null
-        : `TDX request failed: ${response.status} ${url.pathname}`
+        : this.createHttpErrorMessage(response, responseText, url)
 
       await this.finishRequestLog(reservation, {
         statusCode: response.status,
@@ -474,6 +539,25 @@ export class TdxClientService {
     return new Promise((resolve) => {
       setTimeout(resolve, Math.max(durationMs, 0))
     })
+  }
+
+  private createHttpErrorMessage(
+    response: Response,
+    responseText: string,
+    url: URL,
+  ): string {
+    const responseDetail = responseText.trim().replace(/\s+/g, ' ')
+    const maxDetailLength = 1000
+    const truncatedDetail =
+      responseDetail.length > maxDetailLength
+        ? `${responseDetail.slice(0, maxDetailLength)}...`
+        : responseDetail
+
+    if (!truncatedDetail) {
+      return `TDX request failed: ${response.status} ${url.pathname}`
+    }
+
+    return `TDX request failed: ${response.status} ${url.pathname}: ${truncatedDetail}`
   }
 
   private getErrorMessage(error: unknown): string {

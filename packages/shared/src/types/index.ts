@@ -4,4 +4,10 @@ export type {
   TdxBusRoute,
   TdxBusSubRoute,
   TdxLocalizedText,
+  TdxStation,
+  TdxStationGroup,
+  TdxStop,
+  TdxStopOfRoute,
+  TdxStopOfRouteStop,
+  TdxStopPosition,
 } from './tdx/index.js'

@@ -251,6 +251,41 @@ describe('TdxClientService', () => {
     ).rejects.toThrow('Invalid TDX record at index 0 for /Route/City/Taipei.')
   })
 
+  it('sanitizes and truncates the response body when a TDX request fails', async () => {
+    const { prismaService, updateCalls } = createPrismaMock()
+    const longDetail = `City is not supported by this endpoint.\n${'x'.repeat(1200)}`
+    const expectedDetail = `City is not supported by this endpoint. ${'x'.repeat(960)}...`
+    const expectedMessage = `TDX request failed: 400 /api/basic/v2/Bus/StationGroup/City/Taipei: ${expectedDetail}`
+
+    globalThis.fetch = ((input) => {
+      const url = String(input)
+
+      if (url.includes('/protocol/openid-connect/token')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({ access_token: 'token', expires_in: 3600 }),
+            { status: 200 },
+          ),
+        )
+      }
+
+      return Promise.resolve(
+        new Response(longDetail, {
+          status: 400,
+        }),
+      )
+    }) as typeof fetch
+    const service = await createService(prismaService)
+
+    await expect(
+      service.fetchStationGroups(CityNameType.TAIPEI, 'sync-run-id'),
+    ).rejects.toThrow(expectedMessage)
+
+    expect(updateCalls).toHaveLength(1)
+    const updateCall = updateCalls[0] as RequestLogUpdateCall
+    expect(updateCall.data.error_message).toBe(expectedMessage)
+  })
+
   it('applies an abort signal to token and bus requests', async () => {
     const requestSignals: AbortSignal[] = []
     globalThis.fetch = (input: string | URL | Request, init?: RequestInit) => {
