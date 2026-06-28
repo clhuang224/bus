@@ -255,7 +255,10 @@ describe('Admin Sync API (e2e)', () => {
             },
           },
         ])
-        expect(enqueuedSyncRunIds).toEqual([])
+        expect(enqueuedSyncRunIds).toEqual([syncRunUuid])
+        expect(prismaService.advisoryLockQueries).toEqual([
+          'SELECT pg_advisory_xact_lock(1, 2)',
+        ])
       })
   })
 })

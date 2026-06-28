@@ -4,7 +4,7 @@
 
 NestJS backend workspace for Finding the Bus.
 
-The API is currently contract-first: endpoints and DTOs are shaped for the planned frontend/backend split before database sync and upstream TDX integration are implemented.
+The API is moving from contract-first endpoints toward database-backed route and station data. Route sync is implemented, and stop sync now has the first persistence foundation for station groups, stations, stops, route stops, and fallback route shapes.
 
 ## Local Development
 
@@ -23,14 +23,29 @@ Local development scripts:
 | `pnpm --filter @bus/api start:dev`         | Start the API in watch mode.                                    |
 | `pnpm --filter @bus/api start:dev:awake`   | Start the API in watch mode and prevent idle sleep on macOS.    |
 | `pnpm --filter @bus/api sync:routes:local` | Queue a route sync through the API running on `localhost:3000`. |
+| `pnpm --filter @bus/api sync:stops:local`  | Queue a stop sync through the API running on `localhost:3000`.  |
 
 Use `start:dev:awake` for long local sync runs on macOS. Keep the regular `start:dev` command for cross-platform development and deployment environments.
+
+Limit local sync runs with `SYNC_CITIES` when testing large sync flows:
+
+```bash
+SYNC_CITIES=Taipei pnpm --filter @bus/api start:dev:awake
+```
+
+Use TDX city names such as `Taipei` and `NewTaipei`, separated by commas.
 
 ### Route Sync
 
 A full route sync processes all 22 cities sequentially. One local run against a remote PostgreSQL database took approximately one hour; actual duration depends on database latency and the amount of TDX data.
 
 Progress is checkpointed by city. If a run is interrupted, retrying the failed run skips cities that already succeeded and resumes from the first incomplete city.
+
+### Stop Sync
+
+Stop sync is much larger than route sync. A single major city can include tens of thousands of stops and route-stop rows. Prefer testing with `SYNC_CITIES` before running a full 22-city stop sync, especially on free database plans.
+
+Progress logs are grouped by stage and report roughly ten times per stage so large imports remain visible without flooding logs.
 
 ## API Documentation
 
@@ -124,8 +139,8 @@ These groups are contract placeholders and should wait for account/auth work bef
 
 ## Planned Responsibilities
 
-- TDX authentication and upstream request shaping
-- base-data sync into PostgreSQL
+- continue TDX authentication and upstream request shaping
+- continue base-data sync into PostgreSQL
 - route and station API endpoints backed by the database
 - request pacing and TDX quota protection
 - Scalar/OpenAPI documentation

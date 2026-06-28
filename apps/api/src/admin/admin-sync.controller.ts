@@ -26,7 +26,7 @@ export class AdminSyncController {
   @ApiOperation({
     summary: 'Queue stop base-data sync',
     description:
-      'Contract stub for syncing station group, station, stop, route-stop, and fallback route shape base data. This endpoint does not import TDX data yet.',
+      'Queues a background sync for station group, station, stop, route-stop, and fallback route shape base data.',
   })
   @ApiOkResponse({
     description: 'Queued stop sync run.',

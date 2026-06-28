@@ -102,7 +102,8 @@ The first phase should prove that the app can read core route and station data f
 - The monorepo, NestJS API, Scalar documentation, Prisma schema, and initial migrations are in place.
 - Route sync runs in the background, records TDX requests, protects the basic-member quota, and resumes by city checkpoint.
 - Route sync currently covers all supported cities and soft-deactivates routes and subroutes missing from the latest city response.
-- Stop, station, station group, and route-stop sync is the next base-data milestone.
+- Stop sync has an initial persistence foundation for station groups, stations, stops, route stops, and fallback route shapes.
+- Full stop sync still needs more real-data validation and database usage tuning before it should be considered stable.
 - Public route and station endpoints still need to read from the database.
 
 ## Backlog

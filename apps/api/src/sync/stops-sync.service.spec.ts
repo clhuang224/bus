@@ -1,8 +1,8 @@
 import { CityNameType, getEnumValues } from '@bus/shared'
 import { Test } from '@nestjs/testing'
 import { cityMapper } from './mappers/route.mapper.js'
-import { RoutePersistenceService } from './route-persistence.service.js'
-import { RoutesSyncService } from './routes-sync.service.js'
+import { StopPersistenceService } from './stop-persistence.service.js'
+import { StopsSyncService } from './stops-sync.service.js'
 import { SyncCheckpointService } from './sync-checkpoint.service.js'
 import type { SyncResult } from './sync-result.js'
 import {
@@ -12,26 +12,26 @@ import {
 
 async function createService({
   tdxClientService,
-  routePersistenceService = {},
+  stopPersistenceService = {},
   syncCheckpointService,
 }: {
   tdxClientService: object
-  routePersistenceService?: object
+  stopPersistenceService?: object
   syncCheckpointService: object
 }) {
   const module = await Test.createTestingModule({
     providers: [
-      RoutesSyncService,
+      StopsSyncService,
       { provide: TdxClientService, useValue: tdxClientService },
-      { provide: RoutePersistenceService, useValue: routePersistenceService },
+      { provide: StopPersistenceService, useValue: stopPersistenceService },
       { provide: SyncCheckpointService, useValue: syncCheckpointService },
     ],
   }).compile()
 
-  return module.get(RoutesSyncService)
+  return module.get(StopsSyncService)
 }
 
-describe('RoutesSyncService', () => {
+describe('StopsSyncService', () => {
   const originalSyncCities = process.env.SYNC_CITIES
 
   beforeEach(() => {
@@ -52,7 +52,10 @@ describe('RoutesSyncService', () => {
     const failedCities: Array<[string, CityNameType, Error]> = []
     const failedRuns: Array<[string, Error, SyncResult]> = []
     const tdxClientService = {
-      fetchRoutes: () => Promise.reject(quotaError),
+      fetchStationGroups: () => Promise.resolve([]),
+      fetchStations: () => Promise.reject(quotaError),
+      fetchStops: () => Promise.resolve([]),
+      fetchStopOfRoutes: () => Promise.resolve([]),
     }
     const syncCheckpointService = {
       startRun: () => Promise.resolve(),
@@ -74,7 +77,7 @@ describe('RoutesSyncService', () => {
       syncCheckpointService,
     })
 
-    await expect(service.syncAllRoutes('sync-run-id')).rejects.toBe(quotaError)
+    await expect(service.syncAllStops('sync-run-id')).rejects.toBe(quotaError)
 
     expect(failedCities).toEqual([
       ['sync-run-id', CityNameType.TAIPEI, quotaError],
@@ -93,50 +96,6 @@ describe('RoutesSyncService', () => {
     ])
   })
 
-  it('preserves the sync error when checkpoint finalization fails', async () => {
-    const syncError = new Error('TDX unavailable')
-    const loggedErrors: string[] = []
-    let failCityCount = 0
-    let failRunCount = 0
-    const tdxClientService = {
-      fetchRoutes: () => Promise.reject(syncError),
-    }
-    const syncCheckpointService = {
-      startRun: () => Promise.resolve(),
-      ensureCities: () => Promise.resolve(),
-      getCompletedCities: () => Promise.resolve(new Map()),
-      startCity: () => Promise.resolve(),
-      updateRunResult: () => Promise.resolve(),
-      failCity: () => {
-        failCityCount += 1
-        return Promise.reject(new Error('City checkpoint unavailable'))
-      },
-      failRun: () => {
-        failRunCount += 1
-        return Promise.reject(new Error('Run checkpoint unavailable'))
-      },
-    }
-    const service = await createService({
-      tdxClientService,
-      syncCheckpointService,
-    })
-    Object.defineProperty(service, 'logger', {
-      value: {
-        error: (message: string) => loggedErrors.push(message),
-        log: () => undefined,
-      },
-    })
-
-    await expect(service.syncAllRoutes('sync-run-id')).rejects.toBe(syncError)
-
-    expect(failCityCount).toBe(1)
-    expect(failRunCount).toBe(1)
-    expect(loggedErrors).toEqual([
-      'Route sync sync-run-id: failed to mark Taipei as failed: City checkpoint unavailable',
-      'Route sync sync-run-id: failed to mark the sync run as failed: Run checkpoint unavailable',
-    ])
-  })
-
   it('skips cities that already have succeeded checkpoints', async () => {
     let fetchCount = 0
     const checkpoints = getEnumValues(CityNameType).map((city) => ({
@@ -147,10 +106,13 @@ describe('RoutesSyncService', () => {
       records_deactivated: 0,
     }))
     const tdxClientService = {
-      fetchRoutes: () => {
+      fetchStationGroups: () => {
         fetchCount += 1
         return Promise.resolve([])
       },
+      fetchStations: () => Promise.resolve([]),
+      fetchStops: () => Promise.resolve([]),
+      fetchStopOfRoutes: () => Promise.resolve([]),
     }
     const syncCheckpointService = {
       startRun: () => Promise.resolve(),
@@ -169,7 +131,7 @@ describe('RoutesSyncService', () => {
       syncCheckpointService,
     })
 
-    await expect(service.syncAllRoutes('sync-run-id')).resolves.toEqual({
+    await expect(service.syncAllStops('sync-run-id')).resolves.toEqual({
       records_read: 22,
       records_created: 22,
       records_updated: 0,
@@ -178,65 +140,63 @@ describe('RoutesSyncService', () => {
     expect(fetchCount).toBe(0)
   })
 
-  it('resumes from the first city without a completed checkpoint', async () => {
-    const fetchedCities: CityNameType[] = []
-    const runResults: SyncResult[] = []
-    const taipeiCheckpoint = {
-      city: cityMapper(CityNameType.TAIPEI),
-      records_read: 419,
-      records_created: 13,
-      records_updated: 406,
-      records_deactivated: 0,
-    }
+  it('skips station groups when TDX does not support the city', async () => {
+    let fetchStationGroupsCallCount = 0
     const tdxClientService = {
-      fetchRoutes: (city: CityNameType) => {
-        fetchedCities.push(city)
+      fetchStationGroups: () => {
+        fetchStationGroupsCallCount += 1
+
         return Promise.resolve([])
       },
+      fetchStations: () => Promise.resolve([]),
+      fetchStops: () =>
+        Promise.resolve([
+          {
+            StopUID: 'TPE-stop-1',
+            StopID: 'stop-1',
+            StopName: { Zh_tw: '測試站', En: 'Test Stop' },
+            StopPosition: { PositionLat: 25, PositionLon: 121 },
+            AuthorityID: '004',
+            StationID: 'station-1',
+            StationGroupID: 'station-group-1',
+            UpdateTime: '2026-06-25T00:00:00+08:00',
+            VersionID: 1,
+          },
+        ]),
+      fetchStopOfRoutes: () => Promise.resolve([]),
     }
-    const routePersistenceService = {
-      persistRoutes: () =>
-        Promise.resolve({
-          records_read: 0,
-          records_created: 0,
+    const persistedStationGroupCounts: number[] = []
+    const stopPersistenceService = {
+      persistStops: (records: { stationGroups: unknown[] }) => {
+        persistedStationGroupCounts.push(records.stationGroups.length)
+
+        return Promise.resolve({
+          records_read: 1,
+          records_created: 1,
           records_updated: 0,
           records_deactivated: 0,
-        }),
+        })
+      },
     }
     const syncCheckpointService = {
-      startRun: () => Promise.resolve(),
-      ensureCities: () => Promise.resolve(),
-      getCompletedCities: () =>
-        Promise.resolve(new Map([[taipeiCheckpoint.city, taipeiCheckpoint]])),
-      startCity: () => Promise.resolve(),
       touch: () => Promise.resolve(),
-      completeCity: () => Promise.resolve(),
-      updateRunResult: (_syncRunId: string, result: SyncResult) => {
-        runResults.push(structuredClone(result))
-        return Promise.resolve()
-      },
-      completeRun: () => Promise.resolve(),
     }
     const service = await createService({
       tdxClientService,
-      routePersistenceService,
+      stopPersistenceService,
       syncCheckpointService,
     })
 
-    await expect(service.syncAllRoutes('sync-run-id')).resolves.toEqual({
-      records_read: 419,
-      records_created: 13,
-      records_updated: 406,
+    await expect(
+      service.syncCityStops(CityNameType.TAIPEI, 'sync-run-id'),
+    ).resolves.toEqual({
+      records_read: 1,
+      records_created: 1,
+      records_updated: 0,
       records_deactivated: 0,
     })
-    expect(fetchedCities).toHaveLength(21)
-    expect(fetchedCities[0]).toBe(CityNameType.NEW_TAIPEI)
-    expect(fetchedCities).not.toContain(CityNameType.TAIPEI)
-    expect(runResults[0]).toEqual({
-      records_read: 419,
-      records_created: 13,
-      records_updated: 406,
-      records_deactivated: 0,
-    })
+
+    expect(fetchStationGroupsCallCount).toBe(0)
+    expect(persistedStationGroupCounts).toEqual([0])
   })
 })

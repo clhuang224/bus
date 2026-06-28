@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import type { CityNameType } from '@bus/shared'
 import { PrismaService } from '../prisma/prisma.service.js'
 import type { RouteSyncRecord } from './mappers/route.mapper.js'
+import { createProgressCounter } from './sync-progress.js'
 import type { SyncResult } from './sync-result.js'
 
 interface PersistRoutesOptions {
@@ -9,7 +10,6 @@ interface PersistRoutesOptions {
   onProgress?: (persistedCount: number, totalCount: number) => Promise<void>
 }
 
-const ROUTE_PROGRESS_INTERVAL = 50
 const ROUTE_PERSISTENCE_CONCURRENCY = 5
 
 @Injectable()
@@ -37,7 +37,7 @@ export class RoutePersistenceService {
       ({ route }) => !existingRouteUuids.has(route.uuid),
     ).length
     const recordsUpdated = routes.length - recordsCreated
-    let nextProgressCount = ROUTE_PROGRESS_INTERVAL
+    const progress = createProgressCounter(routes.length)
 
     for (
       let batchStart = 0;
@@ -55,16 +55,8 @@ export class RoutePersistenceService {
 
       const persistedCount = Math.min(batchStart + batch.length, routes.length)
 
-      if (
-        onProgress &&
-        (persistedCount >= nextProgressCount ||
-          persistedCount === routes.length)
-      ) {
+      if (onProgress && progress.shouldReport(persistedCount)) {
         await onProgress(persistedCount, routes.length)
-
-        while (nextProgressCount <= persistedCount) {
-          nextProgressCount += ROUTE_PROGRESS_INTERVAL
-        }
       }
     }
 
