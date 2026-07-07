@@ -1,7 +1,8 @@
 import { INestApplication } from '@nestjs/common'
 import request from 'supertest'
-import { SyncResourceType, SyncStatusType } from '@bus/shared'
+import { CityNameType, SyncResourceType, SyncStatusType } from '@bus/shared'
 import {
+  CityNameType as PrismaCityNameType,
   SyncResourceType as PrismaSyncResourceType,
   SyncStatusType as PrismaSyncStatusType,
 } from '../src/generated/prisma/enums.js'
@@ -19,6 +20,7 @@ function createMockSyncRun(resource: PrismaSyncResourceType) {
     status: PrismaSyncStatusType.QUEUED,
     started_at: null,
     finished_at: null,
+    resume_after_at: null,
     records_read: 0,
     records_created: 0,
     records_updated: 0,
@@ -26,6 +28,24 @@ function createMockSyncRun(resource: PrismaSyncResourceType) {
     error_message: null,
     created_at: syncRunCreatedAt,
     updated_at: syncRunCreatedAt,
+  }
+}
+
+function createMockSyncRunCity() {
+  return {
+    id: '660e8400-e29b-41d4-a716-446655440000',
+    sync_run_id: syncRunUuid,
+    city: PrismaCityNameType.TAIPEI,
+    status: PrismaSyncStatusType.SUCCEEDED,
+    started_at: new Date('2026-06-16T00:01:00.000Z'),
+    finished_at: new Date('2026-06-16T00:02:00.000Z'),
+    records_read: 10,
+    records_created: 7,
+    records_updated: 3,
+    records_deactivated: 0,
+    error_message: null,
+    created_at: new Date('2026-06-16T00:00:30.000Z'),
+    updated_at: new Date('2026-06-16T00:02:00.000Z'),
   }
 }
 
@@ -85,6 +105,32 @@ function createMockPrismaService() {
     },
     advisoryLockQueries,
     createCalls,
+    syncRun: {
+      findMany() {
+        return Promise.resolve(activeSyncRun ? [activeSyncRun] : [])
+      },
+      findFirst({
+        where,
+      }: {
+        where: {
+          id: string
+          resource: { in: PrismaSyncResourceType[] }
+        }
+      }) {
+        if (
+          !activeSyncRun ||
+          activeSyncRun.id !== where.id ||
+          !where.resource.in.includes(activeSyncRun.resource)
+        ) {
+          return Promise.resolve(null)
+        }
+
+        return Promise.resolve({
+          ...activeSyncRun,
+          cities: [createMockSyncRunCity()],
+        })
+      },
+    },
     setLatestSyncRunStatus(status: PrismaSyncStatusType) {
       if (!activeSyncRun) throw new Error('No sync run to update.')
       activeSyncRun.status = status
@@ -117,6 +163,28 @@ interface SyncResponseBody {
   records_updated: number
   records_deactivated: number
   error_message: string | null
+}
+
+interface SyncRunSummaryResponseBody extends SyncResponseBody {
+  uuid: string
+  created_at: string
+  updated_at: string
+  resume_after_at: string | null
+}
+
+interface SyncRunDetailResponseBody extends SyncRunSummaryResponseBody {
+  cities: Array<{
+    city: CityNameType
+    status: SyncStatusType
+    started_at: string | null
+    finished_at: string | null
+    updated_at: string
+    records_read: number
+    records_created: number
+    records_updated: number
+    records_deactivated: number
+    error_message: string | null
+  }>
 }
 
 function expectQueuedSyncResponse(
@@ -259,6 +327,80 @@ describe('Admin Sync API (e2e)', () => {
         expect(prismaService.advisoryLockQueries).toEqual([
           'SELECT pg_advisory_xact_lock(1, 2)',
         ])
+      })
+  })
+
+  it('/api/admin/sync/runs (GET) lists recent sync runs', async () => {
+    // Nest's HTTP adapter exposes the raw server as `any`.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    await request(app.getHttpServer()).post('/api/admin/sync/stops').expect(200)
+
+    // Nest's HTTP adapter exposes the raw server as `any`.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    await request(app.getHttpServer())
+      .get('/api/admin/sync/runs')
+      .expect(200)
+      .expect(({ body }: { body: SyncRunSummaryResponseBody[] }) => {
+        expect(body).toEqual([
+          {
+            uuid: syncRunUuid,
+            resource: SyncResourceType.STOPS,
+            status: SyncStatusType.QUEUED,
+            created_at: syncRunCreatedAt.toISOString(),
+            updated_at: syncRunCreatedAt.toISOString(),
+            started_at: null,
+            finished_at: null,
+            resume_after_at: null,
+            records_read: 0,
+            records_created: 0,
+            records_updated: 0,
+            records_deactivated: 0,
+            error_message: null,
+          },
+        ])
+      })
+  })
+
+  it('/api/admin/sync/runs/:uuid (GET) returns sync run detail', async () => {
+    // Nest's HTTP adapter exposes the raw server as `any`.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    await request(app.getHttpServer()).post('/api/admin/sync/stops').expect(200)
+
+    // Nest's HTTP adapter exposes the raw server as `any`.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    await request(app.getHttpServer())
+      .get(`/api/admin/sync/runs/${syncRunUuid}`)
+      .expect(200)
+      .expect(({ body }: { body: SyncRunDetailResponseBody }) => {
+        expect(body).toEqual({
+          uuid: syncRunUuid,
+          resource: SyncResourceType.STOPS,
+          status: SyncStatusType.QUEUED,
+          created_at: syncRunCreatedAt.toISOString(),
+          updated_at: syncRunCreatedAt.toISOString(),
+          started_at: null,
+          finished_at: null,
+          resume_after_at: null,
+          records_read: 0,
+          records_created: 0,
+          records_updated: 0,
+          records_deactivated: 0,
+          error_message: null,
+          cities: [
+            {
+              city: CityNameType.TAIPEI,
+              status: SyncStatusType.SUCCEEDED,
+              started_at: '2026-06-16T00:01:00.000Z',
+              finished_at: '2026-06-16T00:02:00.000Z',
+              updated_at: '2026-06-16T00:02:00.000Z',
+              records_read: 10,
+              records_created: 7,
+              records_updated: 3,
+              records_deactivated: 0,
+              error_message: null,
+            },
+          ],
+        })
       })
   })
 })
