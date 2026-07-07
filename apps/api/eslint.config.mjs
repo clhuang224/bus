@@ -44,4 +44,10 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    files: ['test/**/*.e2e-spec.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-argument': 'off',
+    },
+  },
 )

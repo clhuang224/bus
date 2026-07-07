@@ -15,8 +15,6 @@ describe('Settings API (e2e)', () => {
   })
 
   it('/api/settings (GET) returns the current settings placeholder', () => {
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return request(app.getHttpServer())
       .get('/api/settings')
       .expect(200)
@@ -37,9 +35,6 @@ describe('Settings API (e2e)', () => {
       locale: AppLocaleType.EN,
       share_usage_data: false,
     }
-
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return request(app.getHttpServer())
       .patch('/api/settings')
       .send(payload)
@@ -54,9 +49,6 @@ describe('Settings API (e2e)', () => {
       locale: 'invalid',
       share_usage_data: 'yes',
     }
-
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return request(app.getHttpServer())
       .patch('/api/settings')
       .send(payload)

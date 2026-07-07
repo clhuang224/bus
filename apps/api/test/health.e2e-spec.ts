@@ -14,8 +14,6 @@ describe('Health API (e2e)', () => {
   })
 
   it('/api/health (GET)', () => {
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return request(app.getHttpServer())
       .get('/api/health')
       .expect(200)

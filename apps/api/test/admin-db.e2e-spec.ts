@@ -43,8 +43,6 @@ describe('Admin Sync API database flow (e2e)', () => {
   })
 
   it('/api/admin/sync/routes (POST) persists a queued sync run', async () => {
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const response = await request(app.getHttpServer())
       .post('/api/admin/sync/routes')
       .expect(200)

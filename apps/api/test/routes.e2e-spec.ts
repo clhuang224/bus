@@ -15,8 +15,6 @@ describe('Routes API (e2e)', () => {
   })
 
   it('/api/routes (GET) returns route search results for a valid area', () => {
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return request(app.getHttpServer())
       .get('/api/routes')
       .query({ area: AreaType.TAIPEI })
@@ -28,9 +26,6 @@ describe('Routes API (e2e)', () => {
 
   it('/api/routes/:uuid (GET) returns route detail placeholder data', () => {
     const routeUuid = 'route-1'
-
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return request(app.getHttpServer())
       .get(`/api/routes/${routeUuid}`)
       .expect(200)
@@ -54,14 +49,10 @@ describe('Routes API (e2e)', () => {
   })
 
   it('/api/routes (GET) rejects requests without area', () => {
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return request(app.getHttpServer()).get('/api/routes').expect(400)
   })
 
   it('/api/routes (GET) rejects invalid area values', () => {
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return request(app.getHttpServer())
       .get('/api/routes')
       .query({ area: 'InvalidArea' })

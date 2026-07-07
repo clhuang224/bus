@@ -15,9 +15,6 @@ describe('Realtime API (e2e)', () => {
 
   it('/api/realtime/routes/:uuid (GET) returns a polling snapshot', () => {
     const routeUuid = 'route-1'
-
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return request(app.getHttpServer())
       .get(`/api/realtime/routes/${routeUuid}`)
       .expect(200)

@@ -232,8 +232,6 @@ describe('Admin Sync API (e2e)', () => {
   })
 
   it('/api/admin/sync/routes (POST) queues route sync', () => {
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return request(app.getHttpServer())
       .post('/api/admin/sync/routes')
       .expect(200)
@@ -255,13 +253,9 @@ describe('Admin Sync API (e2e)', () => {
   })
 
   it('/api/admin/sync/routes (POST) reuses an active route sync', async () => {
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     await request(app.getHttpServer())
       .post('/api/admin/sync/routes')
       .expect(200)
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     await request(app.getHttpServer())
       .post('/api/admin/sync/routes')
       .expect(200)
@@ -275,16 +269,11 @@ describe('Admin Sync API (e2e)', () => {
   })
 
   it('/api/admin/sync/routes (POST) resumes the latest failed route sync', async () => {
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     await request(app.getHttpServer())
       .post('/api/admin/sync/routes')
       .expect(200)
 
     prismaService.setLatestSyncRunStatus(PrismaSyncStatusType.FAILED)
-
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     await request(app.getHttpServer())
       .post('/api/admin/sync/routes')
       .expect(200)
@@ -308,8 +297,6 @@ describe('Admin Sync API (e2e)', () => {
   })
 
   it('/api/admin/sync/stops (POST) queues stop sync', () => {
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return request(app.getHttpServer())
       .post('/api/admin/sync/stops')
       .expect(200)
@@ -331,12 +318,7 @@ describe('Admin Sync API (e2e)', () => {
   })
 
   it('/api/admin/sync/runs (GET) lists recent sync runs', async () => {
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     await request(app.getHttpServer()).post('/api/admin/sync/stops').expect(200)
-
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     await request(app.getHttpServer())
       .get('/api/admin/sync/runs')
       .expect(200)
@@ -362,12 +344,7 @@ describe('Admin Sync API (e2e)', () => {
   })
 
   it('/api/admin/sync/runs/:uuid (GET) returns sync run detail', async () => {
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     await request(app.getHttpServer()).post('/api/admin/sync/stops').expect(200)
-
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     await request(app.getHttpServer())
       .get(`/api/admin/sync/runs/${syncRunUuid}`)
       .expect(200)
