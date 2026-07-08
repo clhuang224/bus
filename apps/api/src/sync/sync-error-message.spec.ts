@@ -36,4 +36,12 @@ Failed at /tmp/example-workspace/bus/apps/api/src/sync/stop-persistence.service.
       ),
     ).toBe('Failed at apps/api/src/main.ts:1:2')
   })
+
+  it('keeps repo-relative paths when line and column are missing', () => {
+    expect(
+      getSyncErrorMessage(
+        new Error('Failed at /tmp/example-workspace/bus/apps/api/src/main.ts'),
+      ),
+    ).toBe('Failed at apps/api/src/main.ts')
+  })
 })
