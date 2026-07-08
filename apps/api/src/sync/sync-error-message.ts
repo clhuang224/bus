@@ -9,7 +9,7 @@ export function getSyncErrorMessage(error: unknown): string {
 
   if (lines.some((line) => PRISMA_INVOCATION_MARKER.test(line))) {
     const detail = lines.at(-1) ?? 'Unknown Prisma error.'
-    return `Prisma query failed: ${detail}`
+    return `Prisma query failed: ${removeLocalFilePaths(detail).trim()}`
   }
 
   return removeLocalFilePaths(message).trim()

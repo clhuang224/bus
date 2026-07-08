@@ -17,6 +17,16 @@ The query parameter limit supported by your database is exceeded.`)
     )
   })
 
+  it('keeps repo-relative paths from Prisma error detail lines', () => {
+    const error = new Error(`
+Invalid \`this.prismaService.stop.updateMany()\` invocation
+Failed at /tmp/example-workspace/bus/apps/api/src/sync/stop-persistence.service.ts:206:60`)
+
+    expect(getSyncErrorMessage(error)).toBe(
+      'Prisma query failed: Failed at apps/api/src/sync/stop-persistence.service.ts:206:60',
+    )
+  })
+
   it('keeps repo-relative paths from non-Prisma errors', () => {
     expect(
       getSyncErrorMessage(
