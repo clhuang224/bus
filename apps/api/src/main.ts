@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { apiReference } from '@scalar/nestjs-api-reference'
 import { config as dotenvConfig } from 'dotenv'
+import { ADMIN_API_KEY_HEADER } from './admin/admin-api-key.guard.js'
 import { AppModule } from './app.module.js'
 
 dotenvConfig({ path: '.env' })
@@ -25,7 +26,7 @@ async function bootstrap() {
       {
         type: 'apiKey',
         in: 'header',
-        name: 'x-admin-api-key',
+        name: ADMIN_API_KEY_HEADER,
         description: 'API key required by administrative endpoints.',
       },
       'adminApiKey',
