@@ -21,6 +21,15 @@ async function bootstrap() {
       ].join(' '),
     )
     .setVersion('1.0.0')
+    .addApiKey(
+      {
+        type: 'apiKey',
+        in: 'header',
+        name: 'x-admin-api-key',
+        description: 'API key required by administrative endpoints.',
+      },
+      'adminApiKey',
+    )
     .addTag('system', 'Service health and operational endpoints.')
     .addTag('routes', 'Route list and route detail contracts.')
     .addTag('stations', 'Station and nearby station contracts.')

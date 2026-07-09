@@ -1,10 +1,20 @@
-import { Controller, Get, HttpCode, Param, Post } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common'
 import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiSecurity,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
+import { AdminApiKeyGuard } from './admin-api-key.guard.js'
 import { AdminService } from './admin.service.js'
 import {
   SyncRunDetailResponseDto,
@@ -13,6 +23,11 @@ import {
 import { SyncResponseDto } from './dto/sync-response.dto.js'
 
 @ApiTags('admin')
+@ApiSecurity('adminApiKey')
+@ApiUnauthorizedResponse({
+  description: 'A valid admin API key is required.',
+})
+@UseGuards(AdminApiKeyGuard)
 @Controller('admin/sync')
 export class AdminSyncController {
   constructor(private readonly adminService: AdminService) {}

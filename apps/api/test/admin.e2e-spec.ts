@@ -12,6 +12,8 @@ import { createE2eApp } from './create-e2e-app.js'
 
 const syncRunUuid = '550e8400-e29b-41d4-a716-446655440000'
 const syncRunCreatedAt = new Date('2026-06-16T00:00:00.000Z')
+const adminApiKey = 'test-admin-api-key'
+const originalAdminApiKey = process.env.ADMIN_API_KEY
 
 function createMockSyncRun(resource: PrismaSyncResourceType) {
   return {
@@ -211,6 +213,7 @@ describe('Admin Sync API (e2e)', () => {
   let enqueuedSyncRunIds: string[]
 
   beforeEach(async () => {
+    process.env.ADMIN_API_KEY = adminApiKey
     prismaService = createMockPrismaService()
     enqueuedSyncRunIds = []
     app = await createE2eApp({
@@ -229,11 +232,22 @@ describe('Admin Sync API (e2e)', () => {
 
   afterEach(async () => {
     await app.close()
+
+    if (originalAdminApiKey === undefined) {
+      delete process.env.ADMIN_API_KEY
+    } else {
+      process.env.ADMIN_API_KEY = originalAdminApiKey
+    }
+  })
+
+  it('/api/admin/sync/runs (GET) rejects requests without an API key', () => {
+    return request(app.getHttpServer()).get('/api/admin/sync/runs').expect(401)
   })
 
   it('/api/admin/sync/routes (POST) queues route sync', () => {
     return request(app.getHttpServer())
       .post('/api/admin/sync/routes')
+      .set('x-admin-api-key', adminApiKey)
       .expect(200)
       .expect(({ body }: { body: SyncResponseBody }) => {
         expectQueuedSyncResponse(body, SyncResourceType.ROUTES)
@@ -255,9 +269,11 @@ describe('Admin Sync API (e2e)', () => {
   it('/api/admin/sync/routes (POST) reuses an active route sync', async () => {
     await request(app.getHttpServer())
       .post('/api/admin/sync/routes')
+      .set('x-admin-api-key', adminApiKey)
       .expect(200)
     await request(app.getHttpServer())
       .post('/api/admin/sync/routes')
+      .set('x-admin-api-key', adminApiKey)
       .expect(200)
       .expect(({ body }: { body: SyncResponseBody }) => {
         expectQueuedSyncResponse(body, SyncResourceType.ROUTES)
@@ -271,11 +287,13 @@ describe('Admin Sync API (e2e)', () => {
   it('/api/admin/sync/routes (POST) resumes the latest failed route sync', async () => {
     await request(app.getHttpServer())
       .post('/api/admin/sync/routes')
+      .set('x-admin-api-key', adminApiKey)
       .expect(200)
 
     prismaService.setLatestSyncRunStatus(PrismaSyncStatusType.FAILED)
     await request(app.getHttpServer())
       .post('/api/admin/sync/routes')
+      .set('x-admin-api-key', adminApiKey)
       .expect(200)
       .expect(({ body }: { body: SyncResponseBody }) => {
         expectQueuedSyncResponse(body, SyncResourceType.ROUTES)
@@ -299,6 +317,7 @@ describe('Admin Sync API (e2e)', () => {
   it('/api/admin/sync/stops (POST) queues stop sync', () => {
     return request(app.getHttpServer())
       .post('/api/admin/sync/stops')
+      .set('x-admin-api-key', adminApiKey)
       .expect(200)
       .expect(({ body }: { body: SyncResponseBody }) => {
         expectQueuedSyncResponse(body, SyncResourceType.STOPS)
@@ -318,9 +337,13 @@ describe('Admin Sync API (e2e)', () => {
   })
 
   it('/api/admin/sync/runs (GET) lists recent sync runs', async () => {
-    await request(app.getHttpServer()).post('/api/admin/sync/stops').expect(200)
+    await request(app.getHttpServer())
+      .post('/api/admin/sync/stops')
+      .set('x-admin-api-key', adminApiKey)
+      .expect(200)
     await request(app.getHttpServer())
       .get('/api/admin/sync/runs')
+      .set('x-admin-api-key', adminApiKey)
       .expect(200)
       .expect(({ body }: { body: SyncRunSummaryResponseBody[] }) => {
         expect(body).toEqual([
@@ -344,9 +367,13 @@ describe('Admin Sync API (e2e)', () => {
   })
 
   it('/api/admin/sync/runs/:uuid (GET) returns sync run detail', async () => {
-    await request(app.getHttpServer()).post('/api/admin/sync/stops').expect(200)
+    await request(app.getHttpServer())
+      .post('/api/admin/sync/stops')
+      .set('x-admin-api-key', adminApiKey)
+      .expect(200)
     await request(app.getHttpServer())
       .get(`/api/admin/sync/runs/${syncRunUuid}`)
+      .set('x-admin-api-key', adminApiKey)
       .expect(200)
       .expect(({ body }: { body: SyncRunDetailResponseBody }) => {
         expect(body).toEqual({
