@@ -20,7 +20,7 @@ Local development scripts:
 
 | Script                                          | Description                                                     |
 | ----------------------------------------------- | --------------------------------------------------------------- |
-| `pnpm --filter @bus/api generate:admin-api-key` | Generate a random admin API key for local or deployment use.    |
+| `pnpm --filter @bus/api generate:admin-api-key` | Generate a random admin API key and save it to `.env.local`.    |
 | `pnpm --filter @bus/api start:dev`              | Start the API in watch mode.                                    |
 | `pnpm --filter @bus/api start:dev:awake`        | Start the API in watch mode and prevent idle sleep on macOS.    |
 | `pnpm --filter @bus/api sync:routes:local`      | Queue a route sync through the API running on `localhost:3000`. |
@@ -28,7 +28,7 @@ Local development scripts:
 
 Use `start:dev:awake` for long local sync runs on macOS. Keep the regular `start:dev` command for cross-platform development and deployment environments.
 
-Generate a key and set the output as `ADMIN_API_KEY` in `.env.local`:
+Generate a key and save it as `ADMIN_API_KEY` in `.env.local`:
 
 ```bash
 pnpm --filter @bus/api generate:admin-api-key
