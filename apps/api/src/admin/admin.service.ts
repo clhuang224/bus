@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { CityNameType, SyncResourceType } from '@bus/shared'
+import { SyncResourceType } from '@bus/shared'
 import {
   API_SYNC_STATUS_BY_PRISMA,
   DB_CITY_NAME_BY_PRISMA,
@@ -243,7 +243,7 @@ export class AdminService {
 
   private toSyncRunCity(city: SyncRunCityRecord) {
     return {
-      city: DB_CITY_NAME_BY_PRISMA[city.city] as CityNameType,
+      city: DB_CITY_NAME_BY_PRISMA[city.city],
       status: API_SYNC_STATUS_BY_PRISMA[city.status],
       started_at: city.started_at?.toISOString() ?? null,
       finished_at: city.finished_at?.toISOString() ?? null,
