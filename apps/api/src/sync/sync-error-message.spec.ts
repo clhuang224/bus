@@ -54,4 +54,12 @@ Failed at /tmp/example-workspace/bus/apps/api/src/sync/stop-persistence.service.
       ),
     ).toBe('Failed at apps/api/src/main.ts')
   })
+
+  it('does not treat repeated non-repo segments as a local repo path', () => {
+    const noisyPath = `/${'!/'.repeat(100)}not-the-repo/apps/api/src/main.ts`
+
+    expect(getSyncErrorMessage(new Error(`Failed at ${noisyPath}`))).toBe(
+      `Failed at ${noisyPath}`,
+    )
+  })
 })
