@@ -37,6 +37,16 @@ Failed at /tmp/example-workspace/bus/apps/api/src/sync/stop-persistence.service.
     ).toBe('Failed at apps/api/src/main.ts:1:2')
   })
 
+  it('keeps repo-relative paths for Windows-style paths', () => {
+    expect(
+      getSyncErrorMessage(
+        new Error(
+          String.raw`Failed at C:\tmp\example-workspace\bus\apps\api\src\main.ts:1:2`,
+        ),
+      ),
+    ).toBe('Failed at apps/api/src/main.ts:1:2')
+  })
+
   it('keeps repo-relative paths when line and column are missing', () => {
     expect(
       getSyncErrorMessage(

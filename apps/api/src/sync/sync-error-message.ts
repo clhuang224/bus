@@ -16,5 +16,8 @@ export function getSyncErrorMessage(error: unknown): string {
 }
 
 function removeLocalFilePaths(message: string): string {
-  return message.replace(/\/[^\s:\n]*\/bus\/([^\s)\n]+)/g, '$1')
+  return message.replace(
+    /(?:[A-Za-z]:)?[\\/](?:[^\s:()\n]+[\\/])*bus[\\/]([^\s)\n]+)/g,
+    (_absolutePath, repoPath: string) => repoPath.replaceAll('\\', '/'),
+  )
 }
