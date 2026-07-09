@@ -1,7 +1,8 @@
 import { INestApplication } from '@nestjs/common'
 import request from 'supertest'
-import { SyncResourceType, SyncStatusType } from '@bus/shared'
+import { CityNameType, SyncResourceType, SyncStatusType } from '@bus/shared'
 import {
+  CityNameType as PrismaCityNameType,
   SyncResourceType as PrismaSyncResourceType,
   SyncStatusType as PrismaSyncStatusType,
 } from '../src/generated/prisma/enums.js'
@@ -11,6 +12,8 @@ import { createE2eApp } from './create-e2e-app.js'
 
 const syncRunUuid = '550e8400-e29b-41d4-a716-446655440000'
 const syncRunCreatedAt = new Date('2026-06-16T00:00:00.000Z')
+const adminApiKey = 'test-admin-api-key'
+const originalAdminApiKey = process.env.ADMIN_API_KEY
 
 function createMockSyncRun(resource: PrismaSyncResourceType) {
   return {
@@ -19,6 +22,7 @@ function createMockSyncRun(resource: PrismaSyncResourceType) {
     status: PrismaSyncStatusType.QUEUED,
     started_at: null,
     finished_at: null,
+    resume_after_at: null,
     records_read: 0,
     records_created: 0,
     records_updated: 0,
@@ -26,6 +30,24 @@ function createMockSyncRun(resource: PrismaSyncResourceType) {
     error_message: null,
     created_at: syncRunCreatedAt,
     updated_at: syncRunCreatedAt,
+  }
+}
+
+function createMockSyncRunCity() {
+  return {
+    id: '660e8400-e29b-41d4-a716-446655440000',
+    sync_run_id: syncRunUuid,
+    city: PrismaCityNameType.TAIPEI,
+    status: PrismaSyncStatusType.SUCCEEDED,
+    started_at: new Date('2026-06-16T00:01:00.000Z'),
+    finished_at: new Date('2026-06-16T00:02:00.000Z'),
+    records_read: 10,
+    records_created: 7,
+    records_updated: 3,
+    records_deactivated: 0,
+    error_message: null,
+    created_at: new Date('2026-06-16T00:00:30.000Z'),
+    updated_at: new Date('2026-06-16T00:02:00.000Z'),
   }
 }
 
@@ -85,6 +107,32 @@ function createMockPrismaService() {
     },
     advisoryLockQueries,
     createCalls,
+    syncRun: {
+      findMany() {
+        return Promise.resolve(activeSyncRun ? [activeSyncRun] : [])
+      },
+      findFirst({
+        where,
+      }: {
+        where: {
+          id: string
+          resource: { in: PrismaSyncResourceType[] }
+        }
+      }) {
+        if (
+          !activeSyncRun ||
+          activeSyncRun.id !== where.id ||
+          !where.resource.in.includes(activeSyncRun.resource)
+        ) {
+          return Promise.resolve(null)
+        }
+
+        return Promise.resolve({
+          ...activeSyncRun,
+          cities: [createMockSyncRunCity()],
+        })
+      },
+    },
     setLatestSyncRunStatus(status: PrismaSyncStatusType) {
       if (!activeSyncRun) throw new Error('No sync run to update.')
       activeSyncRun.status = status
@@ -119,6 +167,28 @@ interface SyncResponseBody {
   error_message: string | null
 }
 
+interface SyncRunSummaryResponseBody extends SyncResponseBody {
+  uuid: string
+  created_at: string
+  updated_at: string
+  resume_after_at: string | null
+}
+
+interface SyncRunDetailResponseBody extends SyncRunSummaryResponseBody {
+  cities: Array<{
+    city: CityNameType
+    status: SyncStatusType
+    started_at: string | null
+    finished_at: string | null
+    updated_at: string
+    records_read: number
+    records_created: number
+    records_updated: number
+    records_deactivated: number
+    error_message: string | null
+  }>
+}
+
 function expectQueuedSyncResponse(
   body: SyncResponseBody,
   resource: SyncResourceType,
@@ -143,6 +213,7 @@ describe('Admin Sync API (e2e)', () => {
   let enqueuedSyncRunIds: string[]
 
   beforeEach(async () => {
+    process.env.ADMIN_API_KEY = adminApiKey
     prismaService = createMockPrismaService()
     enqueuedSyncRunIds = []
     app = await createE2eApp({
@@ -161,13 +232,22 @@ describe('Admin Sync API (e2e)', () => {
 
   afterEach(async () => {
     await app.close()
+
+    if (originalAdminApiKey === undefined) {
+      delete process.env.ADMIN_API_KEY
+    } else {
+      process.env.ADMIN_API_KEY = originalAdminApiKey
+    }
+  })
+
+  it('/api/admin/sync/runs (GET) rejects requests without an API key', () => {
+    return request(app.getHttpServer()).get('/api/admin/sync/runs').expect(401)
   })
 
   it('/api/admin/sync/routes (POST) queues route sync', () => {
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return request(app.getHttpServer())
       .post('/api/admin/sync/routes')
+      .set('x-admin-api-key', adminApiKey)
       .expect(200)
       .expect(({ body }: { body: SyncResponseBody }) => {
         expectQueuedSyncResponse(body, SyncResourceType.ROUTES)
@@ -187,15 +267,13 @@ describe('Admin Sync API (e2e)', () => {
   })
 
   it('/api/admin/sync/routes (POST) reuses an active route sync', async () => {
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     await request(app.getHttpServer())
       .post('/api/admin/sync/routes')
+      .set('x-admin-api-key', adminApiKey)
       .expect(200)
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     await request(app.getHttpServer())
       .post('/api/admin/sync/routes')
+      .set('x-admin-api-key', adminApiKey)
       .expect(200)
       .expect(({ body }: { body: SyncResponseBody }) => {
         expectQueuedSyncResponse(body, SyncResourceType.ROUTES)
@@ -207,18 +285,15 @@ describe('Admin Sync API (e2e)', () => {
   })
 
   it('/api/admin/sync/routes (POST) resumes the latest failed route sync', async () => {
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     await request(app.getHttpServer())
       .post('/api/admin/sync/routes')
+      .set('x-admin-api-key', adminApiKey)
       .expect(200)
 
     prismaService.setLatestSyncRunStatus(PrismaSyncStatusType.FAILED)
-
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     await request(app.getHttpServer())
       .post('/api/admin/sync/routes')
+      .set('x-admin-api-key', adminApiKey)
       .expect(200)
       .expect(({ body }: { body: SyncResponseBody }) => {
         expectQueuedSyncResponse(body, SyncResourceType.ROUTES)
@@ -240,10 +315,9 @@ describe('Admin Sync API (e2e)', () => {
   })
 
   it('/api/admin/sync/stops (POST) queues stop sync', () => {
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return request(app.getHttpServer())
       .post('/api/admin/sync/stops')
+      .set('x-admin-api-key', adminApiKey)
       .expect(200)
       .expect(({ body }: { body: SyncResponseBody }) => {
         expectQueuedSyncResponse(body, SyncResourceType.STOPS)
@@ -259,6 +333,78 @@ describe('Admin Sync API (e2e)', () => {
         expect(prismaService.advisoryLockQueries).toEqual([
           'SELECT pg_advisory_xact_lock(1, 2)',
         ])
+      })
+  })
+
+  it('/api/admin/sync/runs (GET) lists recent sync runs', async () => {
+    await request(app.getHttpServer())
+      .post('/api/admin/sync/stops')
+      .set('x-admin-api-key', adminApiKey)
+      .expect(200)
+    await request(app.getHttpServer())
+      .get('/api/admin/sync/runs')
+      .set('x-admin-api-key', adminApiKey)
+      .expect(200)
+      .expect(({ body }: { body: SyncRunSummaryResponseBody[] }) => {
+        expect(body).toEqual([
+          {
+            uuid: syncRunUuid,
+            resource: SyncResourceType.STOPS,
+            status: SyncStatusType.QUEUED,
+            created_at: syncRunCreatedAt.toISOString(),
+            updated_at: syncRunCreatedAt.toISOString(),
+            started_at: null,
+            finished_at: null,
+            resume_after_at: null,
+            records_read: 0,
+            records_created: 0,
+            records_updated: 0,
+            records_deactivated: 0,
+            error_message: null,
+          },
+        ])
+      })
+  })
+
+  it('/api/admin/sync/runs/:uuid (GET) returns sync run detail', async () => {
+    await request(app.getHttpServer())
+      .post('/api/admin/sync/stops')
+      .set('x-admin-api-key', adminApiKey)
+      .expect(200)
+    await request(app.getHttpServer())
+      .get(`/api/admin/sync/runs/${syncRunUuid}`)
+      .set('x-admin-api-key', adminApiKey)
+      .expect(200)
+      .expect(({ body }: { body: SyncRunDetailResponseBody }) => {
+        expect(body).toEqual({
+          uuid: syncRunUuid,
+          resource: SyncResourceType.STOPS,
+          status: SyncStatusType.QUEUED,
+          created_at: syncRunCreatedAt.toISOString(),
+          updated_at: syncRunCreatedAt.toISOString(),
+          started_at: null,
+          finished_at: null,
+          resume_after_at: null,
+          records_read: 0,
+          records_created: 0,
+          records_updated: 0,
+          records_deactivated: 0,
+          error_message: null,
+          cities: [
+            {
+              city: CityNameType.TAIPEI,
+              status: SyncStatusType.SUCCEEDED,
+              started_at: '2026-06-16T00:01:00.000Z',
+              finished_at: '2026-06-16T00:02:00.000Z',
+              updated_at: '2026-06-16T00:02:00.000Z',
+              records_read: 10,
+              records_created: 7,
+              records_updated: 3,
+              records_deactivated: 0,
+              error_message: null,
+            },
+          ],
+        })
       })
   })
 })

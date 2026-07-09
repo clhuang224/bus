@@ -15,8 +15,6 @@ describe('Favorite API (e2e)', () => {
   })
 
   it('/api/favorite/route-stops (GET) returns favorite route stops', () => {
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return request(app.getHttpServer())
       .get('/api/favorite/route-stops')
       .expect(200)
@@ -49,9 +47,6 @@ describe('Favorite API (e2e)', () => {
         sequence: 10,
       },
     }
-
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return request(app.getHttpServer())
       .post('/api/favorite/route-stops')
       .send(payload)
@@ -62,8 +57,6 @@ describe('Favorite API (e2e)', () => {
   })
 
   it('/api/favorite/route-stops/:uuid (DELETE) removes a favorite route stop', () => {
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return request(app.getHttpServer())
       .delete('/api/favorite/route-stops/test-favorite')
       .expect(204)

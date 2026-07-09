@@ -19,6 +19,7 @@ import {
   isTdxStop,
   isTdxStopOfRoute,
 } from './validators/tdx-stop-data.validator.js'
+import { getSyncErrorMessage } from './sync-error-message.js'
 
 const TDX_BUS_BASE_URL = 'https://tdx.transportdata.tw/api/basic/v2/Bus'
 const TDX_TOKEN_ENDPOINT =
@@ -561,7 +562,7 @@ export class TdxClientService {
   }
 
   private getErrorMessage(error: unknown): string {
-    return error instanceof Error ? error.message : String(error)
+    return getSyncErrorMessage(error)
   }
 
   private isRecord(value: unknown): value is Record<string, unknown> {

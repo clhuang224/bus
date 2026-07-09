@@ -3,6 +3,7 @@ import type { CityNameType } from '@bus/shared'
 import { SyncStatusType as PrismaSyncStatusType } from '../generated/prisma/enums.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import { cityMapper } from './mappers/route.mapper.js'
+import { getSyncErrorMessage } from './sync-error-message.js'
 import type { SyncResult } from './sync-result.js'
 import { TdxMonthlyQuotaExceededError } from './tdx-client.service.js'
 
@@ -126,7 +127,7 @@ export class SyncCheckpointService {
           ? PrismaSyncStatusType.PENDING
           : PrismaSyncStatusType.FAILED,
         finished_at: isPending ? null : new Date(),
-        error_message: this.errorMessage(error),
+        error_message: getSyncErrorMessage(error),
       },
     })
   }
@@ -143,7 +144,7 @@ export class SyncCheckpointService {
           status: PrismaSyncStatusType.PENDING,
           resume_after_at: error.retry_at,
           finished_at: null,
-          error_message: this.errorMessage(error),
+          error_message: getSyncErrorMessage(error),
           ...result,
         },
       })
@@ -156,7 +157,7 @@ export class SyncCheckpointService {
       data: {
         status: PrismaSyncStatusType.FAILED,
         finished_at: new Date(),
-        error_message: this.errorMessage(error),
+        error_message: getSyncErrorMessage(error),
         ...result,
       },
     })
@@ -169,9 +170,5 @@ export class SyncCheckpointService {
         city: cityMapper(city),
       },
     }
-  }
-
-  private errorMessage(error: unknown): string {
-    return error instanceof Error ? error.message : String(error)
   }
 }

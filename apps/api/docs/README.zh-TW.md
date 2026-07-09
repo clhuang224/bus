@@ -18,14 +18,25 @@ pnpm --filter @bus/api start:dev
 
 本地開發 scripts：
 
-| Script                                     | 說明                                                 |
-| ------------------------------------------ | ---------------------------------------------------- |
-| `pnpm --filter @bus/api start:dev`         | 以 watch mode 啟動 API。                             |
-| `pnpm --filter @bus/api start:dev:awake`   | 以 watch mode 啟動 API，並在 macOS 防止閒置休眠。    |
-| `pnpm --filter @bus/api sync:routes:local` | 透過執行於 `localhost:3000` 的 API 建立 route sync。 |
-| `pnpm --filter @bus/api sync:stops:local`  | 透過執行於 `localhost:3000` 的 API 建立 stop sync。  |
+| Script                                          | 說明                                                 |
+| ----------------------------------------------- | ---------------------------------------------------- |
+| `pnpm --filter @bus/api generate:admin-api-key` | 產生隨機 admin API key，並寫入 `.env.local`。       |
+| `pnpm --filter @bus/api start:dev`              | 以 watch mode 啟動 API。                             |
+| `pnpm --filter @bus/api start:dev:awake`        | 以 watch mode 啟動 API，並在 macOS 防止閒置休眠。    |
+| `pnpm --filter @bus/api sync:routes:local`      | 透過執行於 `localhost:3000` 的 API 建立 route sync。 |
+| `pnpm --filter @bus/api sync:stops:local`       | 透過執行於 `localhost:3000` 的 API 建立 stop sync。  |
 
 在 macOS 執行時間較長的本地 sync 時，可以使用 `start:dev:awake`。一般的 `start:dev` 仍保留給跨平台開發與部署環境使用。
+
+產生 key，並寫入 `.env.local` 裡的 `ADMIN_API_KEY`：
+
+```bash
+pnpm --filter @bus/api generate:admin-api-key
+```
+
+所有 `/api/admin/*` endpoints 都必須透過 `x-admin-api-key` request
+header 提供這組金鑰。本地 sync scripts 會自動讀取 `.env.local`
+並加上 header。公開部署時必須另外設定專用的 secret。
 
 測試資料量較大的 sync 流程時，可以用 `SYNC_CITIES` 限制本地同步城市：
 

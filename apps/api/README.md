@@ -18,14 +18,25 @@ The development server uses port `3000` by default.
 
 Local development scripts:
 
-| Script                                     | Description                                                     |
-| ------------------------------------------ | --------------------------------------------------------------- |
-| `pnpm --filter @bus/api start:dev`         | Start the API in watch mode.                                    |
-| `pnpm --filter @bus/api start:dev:awake`   | Start the API in watch mode and prevent idle sleep on macOS.    |
-| `pnpm --filter @bus/api sync:routes:local` | Queue a route sync through the API running on `localhost:3000`. |
-| `pnpm --filter @bus/api sync:stops:local`  | Queue a stop sync through the API running on `localhost:3000`.  |
+| Script                                          | Description                                                     |
+| ----------------------------------------------- | --------------------------------------------------------------- |
+| `pnpm --filter @bus/api generate:admin-api-key` | Generate a random admin API key and save it to `.env.local`.    |
+| `pnpm --filter @bus/api start:dev`              | Start the API in watch mode.                                    |
+| `pnpm --filter @bus/api start:dev:awake`        | Start the API in watch mode and prevent idle sleep on macOS.    |
+| `pnpm --filter @bus/api sync:routes:local`      | Queue a route sync through the API running on `localhost:3000`. |
+| `pnpm --filter @bus/api sync:stops:local`       | Queue a stop sync through the API running on `localhost:3000`.  |
 
 Use `start:dev:awake` for long local sync runs on macOS. Keep the regular `start:dev` command for cross-platform development and deployment environments.
+
+Generate a key and save it as `ADMIN_API_KEY` in `.env.local`:
+
+```bash
+pnpm --filter @bus/api generate:admin-api-key
+```
+
+All `/api/admin/*` endpoints require this value in the `x-admin-api-key`
+request header. The local sync scripts read `.env.local` and add the header
+automatically. Public deployments must configure their own secret value.
 
 Limit local sync runs with `SYNC_CITIES` when testing large sync flows:
 

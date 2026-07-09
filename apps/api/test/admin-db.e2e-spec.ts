@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import request from 'supertest'
 import { SyncResourceType, SyncStatusType } from '@bus/shared'
+import { ADMIN_API_KEY_HEADER } from '../src/admin/admin-api-key.guard.js'
 import { PrismaService } from '../src/prisma/prisma.service.js'
 import { createDbE2eApp } from './create-db-e2e-app.js'
 
@@ -15,6 +16,16 @@ interface SyncResponseBody {
   records_updated: number
   records_deactivated: number
   error_message: string | null
+}
+
+function getRequiredAdminApiKey(): string {
+  const adminApiKey = process.env.ADMIN_API_KEY
+
+  if (!adminApiKey) {
+    throw new Error('ADMIN_API_KEY is required to run admin DB e2e tests.')
+  }
+
+  return adminApiKey
 }
 
 describe('Admin Sync API database flow (e2e)', () => {
@@ -43,10 +54,9 @@ describe('Admin Sync API database flow (e2e)', () => {
   })
 
   it('/api/admin/sync/routes (POST) persists a queued sync run', async () => {
-    // Nest's HTTP adapter exposes the raw server as `any`.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const response = await request(app.getHttpServer())
       .post('/api/admin/sync/routes')
+      .set(ADMIN_API_KEY_HEADER, getRequiredAdminApiKey())
       .expect(200)
 
     const body = response.body as unknown as SyncResponseBody
