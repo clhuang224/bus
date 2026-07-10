@@ -906,6 +906,45 @@ Keep the first version read-only apart from explicit sync actions. Do not add bu
 
 Use Prisma Studio and application logs for local inspection until the manager provides enough value to justify its own application and deployment.
 
+## Current Storage Snapshot
+
+Observed after one full route sync and one full stop sync on 2026-07-10.
+
+Database size:
+
+- total database size: about 148 MB
+- Prisma Free storage limit reference: 512 MiB
+
+Largest tables:
+
+| Table | Estimated rows | Total size | Table data | Indexes | Notes |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `route_stop` | 233,698 | 65 MiB | 25 MiB | 41 MiB | Largest table; indexes are larger than row data. |
+| `stop` | 134,869 | 46 MiB | 27 MiB | 19 MiB | Main stop sync table. |
+| `station` | 49,874 | 14 MiB | 7.71 MiB | 6.30 MiB | Station data is not available for every city. |
+| `route_shape` | 6,771 | 8.05 MiB | 7.38 MiB | 624 KiB | Shared by route detail rendering and stop-position fallback shapes. |
+| `subroute` | 6,798 | 2.70 MiB | 1.43 MiB | 1.23 MiB | Route direction and variant rows. |
+| `station_group` | 6,580 | 1.88 MiB | 1000 KiB | 888 KiB | Optional because TDX support differs by city. |
+| `route` | 3,034 | 1000 KiB | 560 KiB | 400 KiB | Route list data. |
+| `route_operator` | 3,296 | 520 KiB | 200 KiB | 288 KiB | Route/operator join rows. |
+| `operator` | 153 | 96 KiB | 24 KiB | 32 KiB | Operator reference rows. |
+
+Approximate grouping:
+
+- route-related base tables excluding `route_shape`: about 4.3 MiB
+- stop-related base tables excluding `route_shape`: about 127 MiB
+- shared shape table: about 8.05 MiB
+- sync bookkeeping tables: currently small, less than 1 MiB combined
+
+Empty or mostly unused tables are expected at this stage:
+
+- `sync_error`: planned for partial per-record parse/save errors. Current failed syncs store the main error on `sync_run.error_message`.
+- `user`, `user_setting`, and `favorite_route_stop`: planned for auth, settings, and favorite sync later.
+- `vehicle`: planned for realtime-related work later.
+
+These tables still take a small amount of space because PostgreSQL stores table
+and index metadata even when there are no rows.
+
 ## Completed Foundation
 
 - Sync API contract and queued `sync_run` creation
@@ -914,14 +953,15 @@ Use Prisma Studio and application logs for local inspection until the manager pr
 - Background route sync with all-city checkpoints and stale-run recovery
 - Route, subroute, operator, and route-operator persistence
 - Soft deactivation and reactivation of route base data
-- Initial stop sync foundation for station groups, stations, stops, route stops, and fallback route shapes
+- Stop sync for station groups, stations, stops, route stops, and fallback route shapes
+- Full real-data stop sync validation across Taiwan
 
 ## Plan Order
 
-1. Validate stop sync with real data in small city batches and tune database usage.
-2. Read `GET /api/routes?area=...` from the database.
-3. Read `GET /api/routes/:uuid` from the database.
-4. Read `GET /api/stations?latitude=...&longitude=...` from the database.
+1. Read `GET /api/routes?area=...` from the database.
+2. Read `GET /api/routes/:uuid` from the database.
+3. Read `GET /api/stations?latitude=...&longitude=...` from the database.
+4. Continue monitoring database size after full sync runs.
 5. Deploy the API, run migrations safely, and protect admin operations.
 6. Decide where scheduled monthly sync jobs run after deployment is stable.
 7. Discuss realtime cache.
