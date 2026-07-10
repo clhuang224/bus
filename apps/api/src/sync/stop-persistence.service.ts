@@ -9,6 +9,8 @@ import {
 import { createProgressCounter } from './sync-progress.js'
 import type { SyncResult } from './sync-result.js'
 
+const DEACTIVATE_UUID_BATCH_SIZE = 500
+
 export type StopSyncStage =
   | 'station_groups'
   | 'stations'
@@ -93,18 +95,7 @@ export class StopPersistenceService {
 
     if (stationGroups.length === 0) return
 
-    const inactiveAt = new Date()
-    await this.prismaService.stationGroup.updateMany({
-      where: {
-        city,
-        uuid: { notIn: incomingUuids },
-        is_active: true,
-      },
-      data: {
-        is_active: false,
-        inactive_at: inactiveAt,
-      },
-    })
+    await this.deactivateMissingStationGroups(city, incomingUuids)
   }
 
   private async persistStations(
@@ -140,18 +131,7 @@ export class StopPersistenceService {
       },
     )
 
-    const inactiveAt = new Date()
-    await this.prismaService.station.updateMany({
-      where: {
-        city,
-        uuid: { notIn: incomingUuids },
-        is_active: true,
-      },
-      data: {
-        is_active: false,
-        inactive_at: inactiveAt,
-      },
-    })
+    await this.deactivateMissingStations(city, incomingUuids)
   }
 
   private async persistStopRecords(
@@ -203,24 +183,17 @@ export class StopPersistenceService {
       },
     )
 
-    const inactiveAt = new Date()
-    const deactivatedStops = await this.prismaService.stop.updateMany({
-      where: {
-        city,
-        uuid: { notIn: incomingStopUuids },
-        is_active: true,
-      },
-      data: {
-        is_active: false,
-        inactive_at: inactiveAt,
-      },
-    })
+    const deactivatedStopCount = await this.deactivateMissingStops(
+      city,
+      existingStops.map((stop) => stop.uuid),
+      incomingStopUuids,
+    )
 
     return {
       records_read: stops.length,
       records_created: recordsCreated,
       records_updated: recordsUpdated,
-      records_deactivated: deactivatedStops.count,
+      records_deactivated: deactivatedStopCount,
     }
   }
 
@@ -343,6 +316,113 @@ export class StopPersistenceService {
     if (!options.onProgress || !progress.shouldReport(persistedCount)) return
 
     await options.onProgress(stage, persistedCount, totalCount)
+  }
+
+  private async deactivateMissingStationGroups(
+    city: StopSyncRecords['stationGroups'][number]['city'],
+    incomingUuids: string[],
+  ): Promise<void> {
+    const activeStationGroups = await this.prismaService.stationGroup.findMany({
+      where: { city, is_active: true },
+      select: { uuid: true },
+    })
+    const missingUuids = this.getMissingUuids(
+      activeStationGroups.map((group) => group.uuid),
+      incomingUuids,
+    )
+    const inactiveAt = new Date()
+
+    for (const uuidBatch of this.chunk(missingUuids)) {
+      await this.prismaService.stationGroup.updateMany({
+        where: {
+          city,
+          uuid: { in: uuidBatch },
+          is_active: true,
+        },
+        data: {
+          is_active: false,
+          inactive_at: inactiveAt,
+        },
+      })
+    }
+  }
+
+  private async deactivateMissingStations(
+    city: StopSyncRecords['stations'][number]['city'],
+    incomingUuids: string[],
+  ): Promise<void> {
+    const activeStations = await this.prismaService.station.findMany({
+      where: { city, is_active: true },
+      select: { uuid: true },
+    })
+    const missingUuids = this.getMissingUuids(
+      activeStations.map((station) => station.uuid),
+      incomingUuids,
+    )
+    const inactiveAt = new Date()
+
+    for (const uuidBatch of this.chunk(missingUuids)) {
+      await this.prismaService.station.updateMany({
+        where: {
+          city,
+          uuid: { in: uuidBatch },
+          is_active: true,
+        },
+        data: {
+          is_active: false,
+          inactive_at: inactiveAt,
+        },
+      })
+    }
+  }
+
+  private async deactivateMissingStops(
+    city: StopSyncRecords['stops'][number]['city'],
+    existingUuids: string[],
+    incomingUuids: string[],
+  ): Promise<number> {
+    const missingUuids = this.getMissingUuids(existingUuids, incomingUuids)
+    const inactiveAt = new Date()
+    let deactivatedCount = 0
+
+    for (const uuidBatch of this.chunk(missingUuids)) {
+      const deactivatedStops = await this.prismaService.stop.updateMany({
+        where: {
+          city,
+          uuid: { in: uuidBatch },
+          is_active: true,
+        },
+        data: {
+          is_active: false,
+          inactive_at: inactiveAt,
+        },
+      })
+
+      deactivatedCount += deactivatedStops.count
+    }
+
+    return deactivatedCount
+  }
+
+  private getMissingUuids(
+    existingUuids: string[],
+    incomingUuids: string[],
+  ): string[] {
+    const incomingUuidSet = new Set(incomingUuids)
+
+    return existingUuids.filter((uuid) => !incomingUuidSet.has(uuid))
+  }
+
+  private chunk<T>(records: T[]): T[][] {
+    const chunks: T[][] = []
+    let index = 0
+
+    while (index < records.length) {
+      chunks.push(records.slice(index, index + DEACTIVATE_UUID_BATCH_SIZE))
+      index += DEACTIVATE_UUID_BATCH_SIZE
+    }
+
+    return chunks
   }
 
   private async loadStationGroupIds(

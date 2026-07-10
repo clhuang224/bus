@@ -231,4 +231,83 @@ describe('StopPersistenceService', () => {
       }),
     ])
   })
+
+  it('deactivates missing stops in uuid batches without notIn filters', async () => {
+    const stopUpdateManyArgs: Array<{
+      where: {
+        city: PrismaCityNameType
+        uuid: { in?: string[]; notIn?: string[] }
+        is_active: true
+      }
+    }> = []
+    const existingStops = [
+      { uuid: 'TPE-stop-1' },
+      ...Array.from({ length: 501 }, (_, index) => ({
+        uuid: `TPE-old-stop-${index}`,
+      })),
+    ]
+    const prismaService = {
+      stationGroup: {
+        findMany: () => Promise.resolve([]),
+        updateMany: () => Promise.resolve({ count: 0 }),
+      },
+      station: {
+        findMany: () => Promise.resolve([]),
+        updateMany: () => Promise.resolve({ count: 0 }),
+      },
+      stop: {
+        findMany: ({
+          select,
+        }: {
+          select: { uuid?: true; address_zh_tw?: true; address_en?: true }
+        }) => {
+          if (select.address_zh_tw || select.address_en) {
+            return Promise.resolve([
+              {
+                uuid: 'TPE-stop-1',
+                address_zh_tw: null,
+                address_en: null,
+              },
+            ])
+          }
+
+          return Promise.resolve(existingStops)
+        },
+        updateMany: (args: (typeof stopUpdateManyArgs)[number]) => {
+          stopUpdateManyArgs.push(args)
+
+          return Promise.resolve({ count: args.where.uuid.in?.length ?? 0 })
+        },
+      },
+    } as unknown as PrismaService
+    const stopBulkWriterService = {
+      upsertStationGroups: () => Promise.resolve(),
+      upsertStations: () => Promise.resolve(),
+      upsertStops: () => Promise.resolve(),
+      upsertRouteStops: () => Promise.resolve(),
+      upsertRouteShapes: () => Promise.resolve(),
+    } as unknown as StopBulkWriterService
+    const service = new StopPersistenceService(
+      prismaService,
+      stopBulkWriterService,
+    )
+    const records: StopSyncRecords = {
+      stationGroups: [],
+      stations: [stationRecord],
+      stops: [stopRecord],
+      routeStops: [],
+      routeShapes: [],
+    }
+
+    await expect(
+      service.persistStops(records, { city: CityNameType.TAIPEI }),
+    ).resolves.toMatchObject({
+      records_deactivated: 501,
+    })
+    expect(stopUpdateManyArgs).toHaveLength(2)
+    expect(stopUpdateManyArgs[0].where.uuid.in).toHaveLength(500)
+    expect(stopUpdateManyArgs[0].where.uuid.notIn).toBeUndefined()
+    expect(stopUpdateManyArgs[1].where.uuid.in).toHaveLength(1)
+    expect(stopUpdateManyArgs[1].where.uuid.notIn).toBeUndefined()
+  })
 })
