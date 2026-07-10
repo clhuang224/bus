@@ -58,6 +58,9 @@ Stop sync 的資料量比 route sync 大很多。單一主要城市就可能包�
 
 進度 log 會依階段顯示，並且每個階段大約回報十次，讓大量匯入時看得到進度，但不會把 logs 洗得太長。
 
+已知的 sync 失敗情境與 TDX 資料形狀筆記，放在
+[Sync Troubleshooting](./sync-troubleshooting.md)。
+
 ## API 文件
 
 Scalar 會渲染產生出來的 OpenAPI 文件：
