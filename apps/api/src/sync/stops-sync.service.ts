@@ -27,6 +27,9 @@ const STATION_GROUP_SUPPORTED_CITIES = new Set<CityNameType>([
   CityNameType.PENGHU_COUNTY,
   CityNameType.KEELUNG,
 ])
+const STATION_UNSUPPORTED_CITIES = new Set<CityNameType>([
+  CityNameType.LIENCHIANG_COUNTY,
+])
 
 @Injectable()
 export class StopsSyncService {
@@ -136,10 +139,7 @@ export class StopsSyncService {
 
     try {
       const stationGroups = await this.fetchStationGroups(city, syncRunId)
-      const stations = await this.tdxClientService.fetchStations(
-        city,
-        syncRunId,
-      )
+      const stations = await this.fetchStations(city, syncRunId)
       const stops = await this.tdxClientService.fetchStops(city, syncRunId)
       const stopOfRoutes = await this.tdxClientService.fetchStopOfRoutes(
         city,
@@ -160,6 +160,7 @@ export class StopsSyncService {
 
       return await this.stopPersistenceService.persistStops(records, {
         city,
+        syncStations: this.isStationSupported(city),
         onStageStart: (stage, totalCount) => {
           this.logger.log(
             `Stop sync ${syncRunId}: persisting ${totalCount} ${this.stageLabel(stage)} for ${city}.`,
@@ -187,6 +188,22 @@ export class StopsSyncService {
     )
 
     return []
+  }
+
+  private async fetchStations(city: CityNameType, syncRunId: string) {
+    if (this.isStationSupported(city)) {
+      return this.tdxClientService.fetchStations(city, syncRunId)
+    }
+
+    this.logger.log(
+      `Stop sync ${syncRunId}: skipping stations for ${city} because TDX does not support Station/City for this city.`,
+    )
+
+    return []
+  }
+
+  private isStationSupported(city: CityNameType): boolean {
+    return !STATION_UNSUPPORTED_CITIES.has(city)
   }
 
   private stageLabel(stage: StopSyncStage): string {

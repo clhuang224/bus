@@ -58,6 +58,9 @@ Stop sync is much larger than route sync. A single major city can include tens o
 
 Progress logs are grouped by stage and report roughly ten times per stage so large imports remain visible without flooding logs.
 
+For known sync failure modes and TDX data-shape notes, see
+[Sync Troubleshooting](./docs/sync-troubleshooting.md).
+
 ## API Documentation
 
 Scalar renders the generated OpenAPI document:

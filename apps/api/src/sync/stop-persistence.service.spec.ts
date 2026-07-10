@@ -132,6 +132,265 @@ describe('StopPersistenceService', () => {
     expect(stationUpdateCount).toBe(0)
   })
 
+  it('allows empty stations when station sync is disabled', async () => {
+    let stationUpdateCount = 0
+    const prismaService = {
+      stationGroup: {
+        findMany: () => Promise.resolve([]),
+        updateMany: () => Promise.resolve({ count: 0 }),
+      },
+      station: {
+        findMany: () => Promise.resolve([]),
+        updateMany: () => {
+          stationUpdateCount += 1
+
+          return Promise.resolve({ count: 0 })
+        },
+      },
+      stop: {
+        findMany: () =>
+          Promise.resolve([
+            {
+              uuid: 'TPE-stop-1',
+              address_zh_tw: null,
+              address_en: null,
+            },
+          ]),
+        updateMany: () => Promise.resolve({ count: 0 }),
+      },
+    } as unknown as PrismaService
+    const stopBulkWriterService = {
+      upsertStationGroups: () => Promise.resolve(),
+      upsertStations: () => Promise.resolve(),
+      upsertStops: () => Promise.resolve(),
+      upsertRouteStops: () => Promise.resolve(),
+      upsertRouteShapes: () => Promise.resolve(),
+    } as unknown as StopBulkWriterService
+    const service = new StopPersistenceService(
+      prismaService,
+      stopBulkWriterService,
+    )
+    const records: StopSyncRecords = {
+      stationGroups: [],
+      stations: [],
+      stops: [stopRecord],
+      routeStops: [],
+      routeShapes: [],
+    }
+
+    await expect(
+      service.persistStops(records, {
+        city: CityNameType.TAIPEI,
+        syncStations: false,
+      }),
+    ).resolves.toEqual({
+      records_read: 1,
+      records_created: 0,
+      records_updated: 1,
+      records_deactivated: 0,
+    })
+    expect(stationUpdateCount).toBe(0)
+  })
+
+  it('deactivates missing station groups in uuid batches without notIn filters', async () => {
+    const stationGroupUpdateManyArgs: Array<{
+      where: {
+        city: PrismaCityNameType
+        uuid: { in?: string[]; notIn?: string[] }
+        is_active: true
+      }
+    }> = []
+    const incomingStationGroup = {
+      uuid: 'TPE-station-group-1',
+      tdx_station_group_id: 'station-group-1',
+      city: PrismaCityNameType.TAIPEI,
+      name_zh_tw: '測試站群',
+      name_en: 'Test Station Group',
+      name_ja: null,
+      name_ko: null,
+      latitude: 25,
+      longitude: 121,
+      tdx_updated_at: null,
+    }
+    const activeStationGroups = [
+      { uuid: incomingStationGroup.uuid },
+      ...Array.from({ length: 501 }, (_, index) => ({
+        uuid: `TPE-old-station-group-${index}`,
+      })),
+    ]
+    const prismaService = {
+      stationGroup: {
+        findMany: () => Promise.resolve(activeStationGroups),
+        updateMany: (args: (typeof stationGroupUpdateManyArgs)[number]) => {
+          stationGroupUpdateManyArgs.push(args)
+
+          return Promise.resolve({ count: args.where.uuid.in?.length ?? 0 })
+        },
+      },
+      station: {
+        findMany: () => Promise.resolve([]),
+        updateMany: () => Promise.resolve({ count: 0 }),
+      },
+      stop: {
+        findMany: ({
+          where,
+          select,
+        }: {
+          where: { is_active?: true }
+          select: { uuid?: true; address_zh_tw?: true; address_en?: true }
+        }) => {
+          if (select.address_zh_tw || select.address_en || where.is_active) {
+            return Promise.resolve([
+              {
+                uuid: 'TPE-stop-1',
+                address_zh_tw: null,
+                address_en: null,
+              },
+            ])
+          }
+
+          return Promise.resolve([{ uuid: 'TPE-stop-1' }])
+        },
+        updateMany: () => Promise.resolve({ count: 0 }),
+      },
+    } as unknown as PrismaService
+    const stopBulkWriterService = {
+      upsertStationGroups: () => Promise.resolve(),
+      upsertStations: () => Promise.resolve(),
+      upsertStops: () => Promise.resolve(),
+      upsertRouteStops: () => Promise.resolve(),
+      upsertRouteShapes: () => Promise.resolve(),
+    } as unknown as StopBulkWriterService
+    const service = new StopPersistenceService(
+      prismaService,
+      stopBulkWriterService,
+    )
+    const records: StopSyncRecords = {
+      stationGroups: [incomingStationGroup],
+      stations: [],
+      stops: [stopRecord],
+      routeStops: [],
+      routeShapes: [],
+    }
+
+    await service.persistStops(records, {
+      city: CityNameType.TAIPEI,
+      syncStations: false,
+    })
+
+    expect(stationGroupUpdateManyArgs).toHaveLength(2)
+    expect(stationGroupUpdateManyArgs[0].where.uuid.in).toHaveLength(500)
+    expect(stationGroupUpdateManyArgs[0].where.uuid.notIn).toBeUndefined()
+    expect(stationGroupUpdateManyArgs[1].where.uuid.in).toHaveLength(1)
+    expect(stationGroupUpdateManyArgs[1].where.uuid.notIn).toBeUndefined()
+  })
+
+  it('deactivates missing stations in uuid batches without notIn filters', async () => {
+    const stationUpdateManyArgs: Array<{
+      where: {
+        city: PrismaCityNameType
+        uuid: { in?: string[]; notIn?: string[] }
+        is_active: true
+      }
+    }> = []
+    const activeStations = [
+      { uuid: stationRecord.uuid },
+      ...Array.from({ length: 501 }, (_, index) => ({
+        uuid: `TPE-old-station-${index}`,
+      })),
+    ]
+    const prismaService = {
+      stationGroup: {
+        findMany: () => Promise.resolve([]),
+        updateMany: () => Promise.resolve({ count: 0 }),
+      },
+      station: {
+        findMany: ({
+          where,
+          select,
+        }: {
+          where: { is_active?: true }
+          select: {
+            id?: true
+            tdx_station_id?: true
+            uuid?: true
+            address_zh_tw?: true
+            address_en?: true
+          }
+        }) => {
+          if (select.address_zh_tw || select.address_en) {
+            return Promise.resolve([
+              {
+                uuid: stationRecord.uuid,
+                address_zh_tw: null,
+                address_en: null,
+              },
+            ])
+          }
+
+          if (where.is_active) {
+            return Promise.resolve(activeStations)
+          }
+
+          return Promise.resolve([])
+        },
+        updateMany: (args: (typeof stationUpdateManyArgs)[number]) => {
+          stationUpdateManyArgs.push(args)
+
+          return Promise.resolve({ count: args.where.uuid.in?.length ?? 0 })
+        },
+      },
+      stop: {
+        findMany: ({
+          where,
+          select,
+        }: {
+          where: { is_active?: true }
+          select: { uuid?: true; address_zh_tw?: true; address_en?: true }
+        }) => {
+          if (select.address_zh_tw || select.address_en || where.is_active) {
+            return Promise.resolve([
+              {
+                uuid: 'TPE-stop-1',
+                address_zh_tw: null,
+                address_en: null,
+              },
+            ])
+          }
+
+          return Promise.resolve([{ uuid: 'TPE-stop-1' }])
+        },
+        updateMany: () => Promise.resolve({ count: 0 }),
+      },
+    } as unknown as PrismaService
+    const stopBulkWriterService = {
+      upsertStationGroups: () => Promise.resolve(),
+      upsertStations: () => Promise.resolve(),
+      upsertStops: () => Promise.resolve(),
+      upsertRouteStops: () => Promise.resolve(),
+      upsertRouteShapes: () => Promise.resolve(),
+    } as unknown as StopBulkWriterService
+    const service = new StopPersistenceService(
+      prismaService,
+      stopBulkWriterService,
+    )
+    const records: StopSyncRecords = {
+      stationGroups: [],
+      stations: [stationRecord],
+      stops: [stopRecord],
+      routeStops: [],
+      routeShapes: [],
+    }
+
+    await service.persistStops(records, { city: CityNameType.TAIPEI })
+
+    expect(stationUpdateManyArgs).toHaveLength(2)
+    expect(stationUpdateManyArgs[0].where.uuid.in).toHaveLength(500)
+    expect(stationUpdateManyArgs[0].where.uuid.notIn).toBeUndefined()
+    expect(stationUpdateManyArgs[1].where.uuid.in).toHaveLength(1)
+    expect(stationUpdateManyArgs[1].where.uuid.notIn).toBeUndefined()
+  })
+
   it('deactivates missing route stops in batches by subroute', async () => {
     const routeStopUpdateManyArgs: unknown[] = []
     const prismaService = {
@@ -230,5 +489,94 @@ describe('StopPersistenceService', () => {
         },
       }),
     ])
+  })
+
+  it('deactivates missing stops in uuid batches without notIn filters', async () => {
+    const stopUpdateManyArgs: Array<{
+      where: {
+        city: PrismaCityNameType
+        uuid: { in?: string[]; notIn?: string[] }
+        is_active: true
+      }
+    }> = []
+    const existingStops = [
+      { uuid: 'TPE-stop-1' },
+      { uuid: 'TPE-inactive-stop-1' },
+      ...Array.from({ length: 501 }, (_, index) => ({
+        uuid: `TPE-old-stop-${index}`,
+      })),
+    ]
+    const activeStops = existingStops.filter(
+      (stop) => stop.uuid !== 'TPE-inactive-stop-1',
+    )
+    const prismaService = {
+      stationGroup: {
+        findMany: () => Promise.resolve([]),
+        updateMany: () => Promise.resolve({ count: 0 }),
+      },
+      station: {
+        findMany: () => Promise.resolve([]),
+        updateMany: () => Promise.resolve({ count: 0 }),
+      },
+      stop: {
+        findMany: ({
+          where,
+          select,
+        }: {
+          where: { is_active?: true }
+          select: { uuid?: true; address_zh_tw?: true; address_en?: true }
+        }) => {
+          if (select.address_zh_tw || select.address_en) {
+            return Promise.resolve([
+              {
+                uuid: 'TPE-stop-1',
+                address_zh_tw: null,
+                address_en: null,
+              },
+            ])
+          }
+
+          if (where.is_active) {
+            return Promise.resolve(activeStops)
+          }
+
+          return Promise.resolve(existingStops)
+        },
+        updateMany: (args: (typeof stopUpdateManyArgs)[number]) => {
+          stopUpdateManyArgs.push(args)
+
+          return Promise.resolve({ count: args.where.uuid.in?.length ?? 0 })
+        },
+      },
+    } as unknown as PrismaService
+    const stopBulkWriterService = {
+      upsertStationGroups: () => Promise.resolve(),
+      upsertStations: () => Promise.resolve(),
+      upsertStops: () => Promise.resolve(),
+      upsertRouteStops: () => Promise.resolve(),
+      upsertRouteShapes: () => Promise.resolve(),
+    } as unknown as StopBulkWriterService
+    const service = new StopPersistenceService(
+      prismaService,
+      stopBulkWriterService,
+    )
+    const records: StopSyncRecords = {
+      stationGroups: [],
+      stations: [stationRecord],
+      stops: [stopRecord],
+      routeStops: [],
+      routeShapes: [],
+    }
+
+    await expect(
+      service.persistStops(records, { city: CityNameType.TAIPEI }),
+    ).resolves.toMatchObject({
+      records_deactivated: 501,
+    })
+    expect(stopUpdateManyArgs).toHaveLength(2)
+    expect(stopUpdateManyArgs[0].where.uuid.in).toHaveLength(500)
+    expect(stopUpdateManyArgs[0].where.uuid.notIn).toBeUndefined()
+    expect(stopUpdateManyArgs[1].where.uuid.in).toHaveLength(1)
+    expect(stopUpdateManyArgs[1].where.uuid.notIn).toBeUndefined()
   })
 })

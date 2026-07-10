@@ -199,4 +199,66 @@ describe('StopsSyncService', () => {
     expect(fetchStationGroupsCallCount).toBe(0)
     expect(persistedStationGroupCounts).toEqual([0])
   })
+
+  it('skips stations when TDX does not support Station/City for the city', async () => {
+    let fetchStationsCallCount = 0
+    const tdxClientService = {
+      fetchStationGroups: () => Promise.resolve([]),
+      fetchStations: () => {
+        fetchStationsCallCount += 1
+
+        return Promise.resolve([])
+      },
+      fetchStops: () =>
+        Promise.resolve([
+          {
+            StopUID: 'MFK-stop-1',
+            StopID: 'stop-1',
+            StopName: { Zh_tw: '測試站', En: 'Test Stop' },
+            StopPosition: { PositionLat: 26, PositionLon: 120 },
+            AuthorityID: '004',
+            StationID: 'station-1',
+            UpdateTime: '2026-06-25T00:00:00+08:00',
+            VersionID: 1,
+          },
+        ]),
+      fetchStopOfRoutes: () => Promise.resolve([]),
+    }
+    const persistedSyncStations: Array<boolean | undefined> = []
+    const stopPersistenceService = {
+      persistStops: (
+        _records: unknown,
+        options: { syncStations?: boolean },
+      ) => {
+        persistedSyncStations.push(options.syncStations)
+
+        return Promise.resolve({
+          records_read: 1,
+          records_created: 1,
+          records_updated: 0,
+          records_deactivated: 0,
+        })
+      },
+    }
+    const syncCheckpointService = {
+      touch: () => Promise.resolve(),
+    }
+    const service = await createService({
+      tdxClientService,
+      stopPersistenceService,
+      syncCheckpointService,
+    })
+
+    await expect(
+      service.syncCityStops(CityNameType.LIENCHIANG_COUNTY, 'sync-run-id'),
+    ).resolves.toEqual({
+      records_read: 1,
+      records_created: 1,
+      records_updated: 0,
+      records_deactivated: 0,
+    })
+
+    expect(fetchStationsCallCount).toBe(0)
+    expect(persistedSyncStations).toEqual([false])
+  })
 })
