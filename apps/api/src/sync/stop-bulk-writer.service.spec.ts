@@ -67,6 +67,42 @@ function createStationGroup(
   }
 }
 
+function createStation(index: number): StopSyncRecords['stations'][number] {
+  return {
+    uuid: `station-${index}`,
+    tdx_station_id: `station-id-${index}`,
+    station_group_uuid: null,
+    city: PrismaCityNameType.TAIPEI,
+    name_zh_tw: `站位 ${index}`,
+    name_en: `Station ${index}`,
+    name_ja: null,
+    name_ko: null,
+    address_zh_tw: null,
+    latitude: 25 + index / 1000,
+    longitude: 121 + index / 1000,
+    bearing: null,
+    tdx_updated_at: null,
+  }
+}
+
+function createStop(index: number): StopSyncRecords['stops'][number] {
+  return {
+    uuid: `stop-${index}`,
+    tdx_stop_id: `stop-id-${index}`,
+    station_tdx_id: null,
+    city: PrismaCityNameType.TAIPEI,
+    name_zh_tw: `站牌 ${index}`,
+    name_en: `Stop ${index}`,
+    name_ja: null,
+    name_ko: null,
+    address_zh_tw: null,
+    latitude: 25 + index / 1000,
+    longitude: 121 + index / 1000,
+    bearing: null,
+    tdx_updated_at: null,
+  }
+}
+
 describe('StopBulkWriterService', () => {
   it('chunks station group upserts before writing raw SQL', async () => {
     const { prismaService, rawQueryCalls } = createPrismaMock()
@@ -91,6 +127,84 @@ describe('StopBulkWriterService', () => {
     expect(renderRawQuery(rawQueryCalls[0])).toContain(
       'ON CONFLICT ("uuid") DO UPDATE SET',
     )
+  })
+
+  it('deduplicates station groups by uuid before writing raw SQL', async () => {
+    const { prismaService, rawQueryCalls } = createPrismaMock()
+    const service = new StopBulkWriterService(prismaService)
+    const firstRecord = createStationGroup(1)
+    const latestRecord = {
+      ...createStationGroup(2),
+      uuid: firstRecord.uuid,
+      tdx_station_group_id: 'latest-station-group-id',
+      name_zh_tw: '最新站群',
+    }
+
+    await service.upsertStationGroups([firstRecord, latestRecord], () =>
+      Promise.resolve(),
+    )
+
+    const nestedValues = getNestedRawValues(rawQueryCalls[0])
+
+    expect(rawQueryCalls).toHaveLength(1)
+    expect(nestedValues).toContain('latest-station-group-id')
+    expect(nestedValues).toContain('最新站群')
+    expect(nestedValues).not.toContain(firstRecord.tdx_station_group_id)
+    expect(nestedValues).not.toContain(firstRecord.name_zh_tw)
+  })
+
+  it('deduplicates stations by uuid before writing raw SQL', async () => {
+    const { prismaService, rawQueryCalls } = createPrismaMock()
+    const service = new StopBulkWriterService(prismaService)
+    const firstRecord = createStation(1)
+    const latestRecord = {
+      ...createStation(2),
+      uuid: firstRecord.uuid,
+      tdx_station_id: 'latest-station-id',
+      name_zh_tw: '最新站位',
+    }
+
+    await service.upsertStations(
+      [firstRecord, latestRecord],
+      new Map(),
+      new Map(),
+      () => Promise.resolve(),
+    )
+
+    const nestedValues = getNestedRawValues(rawQueryCalls[0])
+
+    expect(rawQueryCalls).toHaveLength(1)
+    expect(nestedValues).toContain('latest-station-id')
+    expect(nestedValues).toContain('最新站位')
+    expect(nestedValues).not.toContain(firstRecord.tdx_station_id)
+    expect(nestedValues).not.toContain(firstRecord.name_zh_tw)
+  })
+
+  it('deduplicates stops by uuid before writing raw SQL', async () => {
+    const { prismaService, rawQueryCalls } = createPrismaMock()
+    const service = new StopBulkWriterService(prismaService)
+    const firstRecord = createStop(1)
+    const latestRecord = {
+      ...createStop(2),
+      uuid: firstRecord.uuid,
+      tdx_stop_id: 'latest-stop-id',
+      name_zh_tw: '最新站牌',
+    }
+
+    await service.upsertStops(
+      [firstRecord, latestRecord],
+      new Map(),
+      new Map(),
+      () => Promise.resolve(),
+    )
+
+    const nestedValues = getNestedRawValues(rawQueryCalls[0])
+
+    expect(rawQueryCalls).toHaveLength(1)
+    expect(nestedValues).toContain('latest-stop-id')
+    expect(nestedValues).toContain('最新站牌')
+    expect(nestedValues).not.toContain(firstRecord.tdx_stop_id)
+    expect(nestedValues).not.toContain(firstRecord.name_zh_tw)
   })
 
   it('writes route stops only when subroute and stop ids are available', async () => {
