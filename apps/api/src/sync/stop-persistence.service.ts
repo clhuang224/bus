@@ -193,7 +193,6 @@ export class StopPersistenceService {
 
     const deactivatedStopCount = await this.deactivateMissingStops(
       city,
-      existingStops.map((stop) => stop.uuid),
       incomingStopUuids,
     )
 
@@ -386,10 +385,16 @@ export class StopPersistenceService {
 
   private async deactivateMissingStops(
     city: StopSyncRecords['stops'][number]['city'],
-    existingUuids: string[],
     incomingUuids: string[],
   ): Promise<number> {
-    const missingUuids = this.getMissingUuids(existingUuids, incomingUuids)
+    const activeStops = await this.prismaService.stop.findMany({
+      where: { city, is_active: true },
+      select: { uuid: true },
+    })
+    const missingUuids = this.getMissingUuids(
+      activeStops.map((stop) => stop.uuid),
+      incomingUuids,
+    )
     const inactiveAt = new Date()
     let deactivatedCount = 0
 

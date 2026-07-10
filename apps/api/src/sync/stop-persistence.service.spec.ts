@@ -302,10 +302,14 @@ describe('StopPersistenceService', () => {
     }> = []
     const existingStops = [
       { uuid: 'TPE-stop-1' },
+      { uuid: 'TPE-inactive-stop-1' },
       ...Array.from({ length: 501 }, (_, index) => ({
         uuid: `TPE-old-stop-${index}`,
       })),
     ]
+    const activeStops = existingStops.filter(
+      (stop) => stop.uuid !== 'TPE-inactive-stop-1',
+    )
     const prismaService = {
       stationGroup: {
         findMany: () => Promise.resolve([]),
@@ -317,8 +321,10 @@ describe('StopPersistenceService', () => {
       },
       stop: {
         findMany: ({
+          where,
           select,
         }: {
+          where: { is_active?: true }
           select: { uuid?: true; address_zh_tw?: true; address_en?: true }
         }) => {
           if (select.address_zh_tw || select.address_en) {
@@ -329,6 +335,10 @@ describe('StopPersistenceService', () => {
                 address_en: null,
               },
             ])
+          }
+
+          if (where.is_active) {
+            return Promise.resolve(activeStops)
           }
 
           return Promise.resolve(existingStops)
