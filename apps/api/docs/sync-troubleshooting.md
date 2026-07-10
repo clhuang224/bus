@@ -64,8 +64,40 @@ Conflict keys:
 | route stops     | `subroute_id` + `sequence` |
 | route shapes    | `subroute_id`              |
 
-The writer logs a warning when duplicate records are dropped. The warning keeps
-only a small sample so large syncs do not flood logs.
+Duplicate rows are dropped silently for now. If this becomes hard to debug, add
+targeted logging with small samples instead of logging every duplicate row.
+
+## TDX Endpoint City Support Differs By Resource
+
+Error example:
+
+```text
+TDX request failed: 400 /api/basic/v2/Bus/Station/City/LienchiangCounty:
+{"Message":"City: 'LienchiangCounty' is not accepted but ..."}
+```
+
+Cause:
+
+TDX bus endpoints do not all support the same city list. A city can be valid for
+one resource but rejected by another resource.
+
+Observed examples:
+
+- `StationGroup/City` does not support every city. Taipei and NewTaipei are
+  skipped for station groups during stop sync.
+- `Station/City` does not support LienchiangCounty. Stop sync skips station
+  import for LienchiangCounty and continues with stops, route stops, and route
+  shapes.
+
+Current handling:
+
+- Keep the unsupported-city logic close to the sync orchestration code.
+- Treat unsupported optional resources as a skip, not a failed sync.
+- Keep required resources strict. For example, an empty stop response still
+  fails fast because stop sync cannot be useful without stops.
+
+When adding another TDX resource, check the Swagger accepted city list before
+assuming all 22 cities are supported.
 
 ## TDX StopOfRoute Can Duplicate One Subroute By Operator
 
@@ -123,4 +155,3 @@ sequence: 1
 
 The route stop table intentionally stores only one row per subroute sequence, so
 the duplicate TDX rows are deduplicated before writing to the database.
-
