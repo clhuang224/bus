@@ -132,6 +132,66 @@ describe('StopPersistenceService', () => {
     expect(stationUpdateCount).toBe(0)
   })
 
+  it('allows empty stations when station sync is disabled', async () => {
+    let stationUpdateCount = 0
+    const prismaService = {
+      stationGroup: {
+        findMany: () => Promise.resolve([]),
+        updateMany: () => Promise.resolve({ count: 0 }),
+      },
+      station: {
+        findMany: () => Promise.resolve([]),
+        updateMany: () => {
+          stationUpdateCount += 1
+
+          return Promise.resolve({ count: 0 })
+        },
+      },
+      stop: {
+        findMany: () =>
+          Promise.resolve([
+            {
+              uuid: 'TPE-stop-1',
+              address_zh_tw: null,
+              address_en: null,
+            },
+          ]),
+        updateMany: () => Promise.resolve({ count: 0 }),
+      },
+    } as unknown as PrismaService
+    const stopBulkWriterService = {
+      upsertStationGroups: () => Promise.resolve(),
+      upsertStations: () => Promise.resolve(),
+      upsertStops: () => Promise.resolve(),
+      upsertRouteStops: () => Promise.resolve(),
+      upsertRouteShapes: () => Promise.resolve(),
+    } as unknown as StopBulkWriterService
+    const service = new StopPersistenceService(
+      prismaService,
+      stopBulkWriterService,
+    )
+    const records: StopSyncRecords = {
+      stationGroups: [],
+      stations: [],
+      stops: [stopRecord],
+      routeStops: [],
+      routeShapes: [],
+    }
+
+    await expect(
+      service.persistStops(records, {
+        city: CityNameType.TAIPEI,
+        syncStations: false,
+      }),
+    ).resolves.toEqual({
+      records_read: 1,
+      records_created: 0,
+      records_updated: 1,
+      records_deactivated: 0,
+    })
+    expect(stationUpdateCount).toBe(0)
+  })
+
   it('deactivates missing route stops in batches by subroute', async () => {
     const routeStopUpdateManyArgs: unknown[] = []
     const prismaService = {

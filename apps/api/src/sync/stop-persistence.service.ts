@@ -20,6 +20,7 @@ export type StopSyncStage =
 
 interface PersistStopsOptions {
   city: CityNameType
+  syncStations?: boolean
   onStageStart?: (stage: StopSyncStage, totalCount: number) => void
   onProgress?: (
     stage: StopSyncStage,
@@ -37,7 +38,12 @@ export class StopPersistenceService {
 
   async persistStops(
     records: StopSyncRecords,
-    { city, onStageStart, onProgress }: PersistStopsOptions,
+    {
+      city,
+      syncStations = true,
+      onStageStart,
+      onProgress,
+    }: PersistStopsOptions,
   ): Promise<SyncResult> {
     if (records.stops.length === 0) {
       throw new Error(`TDX returned 0 stops for ${city}.`)
@@ -48,10 +54,12 @@ export class StopPersistenceService {
       onStageStart,
       onProgress,
     })
-    await this.persistStations(records.stations, prismaCity, {
-      onStageStart,
-      onProgress,
-    })
+    if (syncStations) {
+      await this.persistStations(records.stations, prismaCity, {
+        onStageStart,
+        onProgress,
+      })
+    }
     const stopResult = await this.persistStopRecords(records.stops, {
       onStageStart,
       onProgress,
