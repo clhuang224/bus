@@ -30,6 +30,8 @@ export class StopBulkWriterService {
     onBatch: (count: number) => Promise<void>,
   ): Promise<void> {
     for (const batch of this.chunk(stationGroups)) {
+      const records = this.uniqueBy(batch, (record) => record.uuid)
+
       await this.prismaService.$executeRaw`
         INSERT INTO "station_group" (
           "id",
@@ -48,7 +50,7 @@ export class StopBulkWriterService {
           "updated_at"
         )
         VALUES ${Prisma.join(
-          batch.map(
+          records.map(
             (record) => Prisma.sql`(
               ${randomUUID()}::uuid,
               ${record.uuid},
@@ -93,6 +95,8 @@ export class StopBulkWriterService {
     onBatch: (count: number) => Promise<void>,
   ): Promise<void> {
     for (const batch of this.chunk(stations)) {
+      const records = this.uniqueBy(batch, (record) => record.uuid)
+
       await this.prismaService.$executeRaw`
         INSERT INTO "station" (
           "id",
@@ -115,7 +119,7 @@ export class StopBulkWriterService {
           "updated_at"
         )
         VALUES ${Prisma.join(
-          batch.map((record) => {
+          records.map((record) => {
             const stationGroupId = record.station_group_uuid
               ? (stationGroupIds.get(record.station_group_uuid) ?? null)
               : null
@@ -176,6 +180,8 @@ export class StopBulkWriterService {
     onBatch: (count: number) => Promise<void>,
   ): Promise<void> {
     for (const batch of this.chunk(stops)) {
+      const records = this.uniqueBy(batch, (record) => record.uuid)
+
       await this.prismaService.$executeRaw`
         INSERT INTO "stop" (
           "id",
@@ -198,7 +204,7 @@ export class StopBulkWriterService {
           "updated_at"
         )
         VALUES ${Prisma.join(
-          batch.map((record) => {
+          records.map((record) => {
             const stationId = record.station_tdx_id
               ? (stationIds.get(record.station_tdx_id) ?? null)
               : null
@@ -260,23 +266,34 @@ export class StopBulkWriterService {
     onBatch: (count: number) => Promise<void>,
   ): Promise<void> {
     for (const batch of this.chunk(routeStops)) {
-      const values = batch.flatMap((record) => {
+      const valueByKey = new Map<
+        string,
+        {
+          subrouteId: string
+          stopId: string
+          sequence: number
+          tdxUpdatedAt: Date | null
+        }
+      >()
+
+      for (const record of batch) {
         const subrouteId = subrouteIds.get(record.subroute_uuid)
         const stopId = stopIds.get(record.stop_uuid)
 
-        if (!subrouteId || !stopId) return []
+        if (!subrouteId || !stopId) continue
 
-        incomingKeys.add(`${subrouteId}:${record.sequence}`)
+        const key = `${subrouteId}:${record.sequence}`
 
-        return [
-          {
-            subrouteId,
-            stopId,
-            sequence: record.sequence,
-            tdxUpdatedAt: record.tdx_updated_at,
-          },
-        ]
-      })
+        incomingKeys.add(key)
+        valueByKey.set(key, {
+          subrouteId,
+          stopId,
+          sequence: record.sequence,
+          tdxUpdatedAt: record.tdx_updated_at,
+        })
+      }
+
+      const values = [...valueByKey.values()]
 
       if (values.length > 0) {
         await this.prismaService.$executeRaw`
@@ -323,20 +340,30 @@ export class StopBulkWriterService {
     onBatch: (count: number) => Promise<void>,
   ): Promise<void> {
     for (const batch of this.chunk(routeShapes)) {
-      const values = batch.flatMap((record) => {
+      const valueByKey = new Map<
+        string,
+        {
+          subrouteId: string
+          source: PrismaRouteShapeSource
+          path: Array<[number, number]>
+          tdxUpdatedAt: Date | null
+        }
+      >()
+
+      for (const record of batch) {
         const subrouteId = subrouteIds.get(record.subroute_uuid)
 
-        if (!subrouteId) return []
+        if (!subrouteId) continue
 
-        return [
-          {
-            subrouteId,
-            source: record.source,
-            path: record.path,
-            tdxUpdatedAt: record.tdx_updated_at,
-          },
-        ]
-      })
+        valueByKey.set(subrouteId, {
+          subrouteId,
+          source: record.source,
+          path: record.path,
+          tdxUpdatedAt: record.tdx_updated_at,
+        })
+      }
+
+      const values = [...valueByKey.values()]
 
       if (values.length > 0) {
         await this.prismaService.$executeRaw`
@@ -397,6 +424,12 @@ export class StopBulkWriterService {
     }
 
     return chunks
+  }
+
+  private uniqueBy<T>(records: T[], getKey: (record: T) => string): T[] {
+    return [
+      ...new Map(records.map((record) => [getKey(record), record])).values(),
+    ]
   }
 
   private resolveAddress(

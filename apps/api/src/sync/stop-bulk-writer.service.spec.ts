@@ -35,6 +35,21 @@ function renderRawQuery(call: RawQueryCall): string {
     .trim()
 }
 
+function getNestedRawValues(call: RawQueryCall): unknown[] {
+  return call.values.flatMap((value) => {
+    if (
+      value &&
+      typeof value === 'object' &&
+      'values' in value &&
+      Array.isArray((value as { values: unknown[] }).values)
+    ) {
+      return (value as { values: unknown[] }).values
+    }
+
+    return [value]
+  })
+}
+
 function createStationGroup(
   index: number,
 ): StopSyncRecords['stationGroups'][number] {
@@ -122,6 +137,44 @@ describe('StopBulkWriterService', () => {
     )
   })
 
+  it('deduplicates route stops by subroute and sequence before writing raw SQL', async () => {
+    const { prismaService, rawQueryCalls } = createPrismaMock()
+    const service = new StopBulkWriterService(prismaService)
+    const incomingKeys = new Set<string>()
+    const routeStops: StopSyncRecords['routeStops'] = [
+      {
+        subroute_uuid: 'subroute-1',
+        stop_uuid: 'stop-1',
+        sequence: 1,
+        tdx_updated_at: null,
+      },
+      {
+        subroute_uuid: 'subroute-1',
+        stop_uuid: 'stop-2',
+        sequence: 1,
+        tdx_updated_at: null,
+      },
+    ]
+
+    await service.upsertRouteStops(
+      routeStops,
+      new Map([['subroute-1', 'subroute-db-1']]),
+      new Map([
+        ['stop-1', 'stop-db-1'],
+        ['stop-2', 'stop-db-2'],
+      ]),
+      incomingKeys,
+      () => Promise.resolve(),
+    )
+
+    const nestedValues = getNestedRawValues(rawQueryCalls[0])
+
+    expect(incomingKeys).toEqual(new Set(['subroute-db-1:1']))
+    expect(rawQueryCalls).toHaveLength(1)
+    expect(nestedValues).toContain('stop-db-2')
+    expect(nestedValues).not.toContain('stop-db-1')
+  })
+
   it('preserves non-fallback route shapes when upserting fallback shapes', async () => {
     const { prismaService, rawQueryCalls } = createPrismaMock()
     const service = new StopBulkWriterService(prismaService)
@@ -145,5 +198,36 @@ describe('StopBulkWriterService', () => {
     expect(renderRawQuery(rawQueryCalls[0])).toContain(
       `WHERE "route_shape"."source" = 'stop_positions'::"RouteShapeSource"`,
     )
+  })
+
+  it('deduplicates route shapes by subroute before writing raw SQL', async () => {
+    const { prismaService, rawQueryCalls } = createPrismaMock()
+    const service = new StopBulkWriterService(prismaService)
+    const routeShapes: StopSyncRecords['routeShapes'] = [
+      {
+        subroute_uuid: 'subroute-1',
+        source: PrismaRouteShapeSource.STOP_POSITIONS,
+        path: [[121, 25]],
+        tdx_updated_at: null,
+      },
+      {
+        subroute_uuid: 'subroute-1',
+        source: PrismaRouteShapeSource.STOP_POSITIONS,
+        path: [[122, 26]],
+        tdx_updated_at: null,
+      },
+    ]
+
+    await service.upsertRouteShapes(
+      routeShapes,
+      new Map([['subroute-1', 'subroute-db-1']]),
+      () => Promise.resolve(),
+    )
+
+    const nestedValues = getNestedRawValues(rawQueryCalls[0])
+
+    expect(rawQueryCalls).toHaveLength(1)
+    expect(nestedValues).toContain(JSON.stringify([[122, 26]]))
+    expect(nestedValues).not.toContain(JSON.stringify([[121, 25]]))
   })
 })
