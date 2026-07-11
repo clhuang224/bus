@@ -91,6 +91,26 @@ export function ApiDefaultErrorResponses() {
   )
 }
 
+export function ApiErrorResponse({
+  code,
+  description,
+  status,
+}: {
+  code: ErrorCode
+  description: string
+  status: number
+}) {
+  return applyDecorators(
+    ApiExtraModels(ApiErrorDto, ApiErrorResponseDto),
+    ApiResponse({
+      status,
+      description,
+      schema: { $ref: getSchemaPath(ApiErrorResponseDto) },
+      example: createErrorExample(status, code),
+    }),
+  )
+}
+
 function createErrorExample(status: number, code: ErrorCode) {
   return {
     status,

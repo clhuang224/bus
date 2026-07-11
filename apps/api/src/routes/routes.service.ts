@@ -1,11 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
-import { AreaType, CITIES_BY_AREA, CityNameType } from '@bus/shared'
+import { HttpStatus, Injectable } from '@nestjs/common'
+import { AreaType, CITIES_BY_AREA, CityNameType, ErrorCode } from '@bus/shared'
 import {
   DB_CITY_NAME_BY_PRISMA,
   DB_DIRECTION_BY_PRISMA,
   PRISMA_CITY_BY_TDX_CITY,
 } from '../constants/enum-mappings.js'
 import { PrismaService } from '../prisma/prisma.service.js'
+import { ApiErrorException } from '../dto/api-error.exception.js'
 import type { LocalizedTextDto, PositionDto } from '../dto/shared.dto.js'
 import type {
   CityNameType as PrismaCityNameType,
@@ -262,7 +263,10 @@ export class RoutesService {
     })
 
     if (!route) {
-      throw new NotFoundException(`Route ${uuid} was not found.`)
+      throw new ApiErrorException(
+        ErrorCode.ROUTE_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      )
     }
 
     return this.toRouteDetail(route)

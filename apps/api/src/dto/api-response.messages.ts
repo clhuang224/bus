@@ -7,4 +7,5 @@ export const API_ERROR_MESSAGE_BY_CODE = {
   [ErrorCode.SYSTEM_NOT_FOUND]: '找不到資料。',
   [ErrorCode.SYSTEM_CONFLICT]: '資料狀態衝突，請重新整理後再試一次。',
   [ErrorCode.SYSTEM_INTERNAL_SERVER_ERROR]: '系統發生錯誤，請稍後再試。',
+  [ErrorCode.ROUTE_NOT_FOUND]: '找不到路線資料。',
 } satisfies Record<ErrorCode, string>

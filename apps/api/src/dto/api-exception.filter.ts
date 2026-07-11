@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common'
 import type { Response } from 'express'
 import { ErrorCode, type ApiErrorResponse } from '@bus/shared'
+import { ApiErrorException } from './api-error.exception.js'
 import { API_ERROR_MESSAGE_BY_CODE } from './api-response.messages.js'
 
 const ERROR_CODE_BY_STATUS: Readonly<Record<number, ErrorCode>> = {
@@ -22,7 +23,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<Response>()
     const status = this.getStatus(exception)
-    const code = this.getErrorCode(status)
+    const code = this.getErrorCode(exception, status)
 
     response.status(status).json({
       status,
@@ -41,7 +42,11 @@ export class ApiExceptionFilter implements ExceptionFilter {
     return HttpStatus.INTERNAL_SERVER_ERROR
   }
 
-  private getErrorCode(status: number): ErrorCode {
+  private getErrorCode(exception: unknown, status: number): ErrorCode {
+    if (exception instanceof ApiErrorException) {
+      return exception.code
+    }
+
     return (
       ERROR_CODE_BY_STATUS[status] ?? ErrorCode.SYSTEM_INTERNAL_SERVER_ERROR
     )

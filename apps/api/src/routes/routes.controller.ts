@@ -3,8 +3,10 @@ import { Controller, Get, Param, ParseEnumPipe, Query } from '@nestjs/common'
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import {
   ApiDefaultErrorResponses,
+  ApiErrorResponse,
   ApiSuccessResponse,
 } from '../dto/api-response.decorator.js'
+import { ErrorCode } from '@bus/shared'
 import {
   RouteDetailResponseDto,
   RoutesResponseDto,
@@ -39,6 +41,11 @@ export class RoutesController {
 
   @ApiOperation({ summary: 'Get route detail' })
   @ApiSuccessResponse({ type: RouteDetailResponseDto })
+  @ApiErrorResponse({
+    status: 404,
+    code: ErrorCode.ROUTE_NOT_FOUND,
+    description: 'Route UUID was not found or is inactive.',
+  })
   @Get(':uuid')
   async getRoute(@Param('uuid') uuid: string): Promise<RouteDetailResponseDto> {
     return await this.routesService.getRoute(uuid)
