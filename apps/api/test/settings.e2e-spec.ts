@@ -22,10 +22,12 @@ describe('Settings API (e2e)', () => {
         ({
           body,
         }: {
-          body: { locale: AppLocaleType; share_usage_data: boolean }
+          body: {
+            data: { locale: AppLocaleType; share_usage_data: boolean }
+          }
         }) => {
-          expect(body.locale).toBe(AppLocaleType.ZH_TW)
-          expect(body.share_usage_data).toBe(true)
+          expect(body.data.locale).toBe(AppLocaleType.ZH_TW)
+          expect(body.data.share_usage_data).toBe(true)
         },
       )
   })
@@ -39,8 +41,8 @@ describe('Settings API (e2e)', () => {
       .patch('/api/settings')
       .send(payload)
       .expect(200)
-      .expect(({ body }: { body: typeof payload }) => {
-        expect(body).toEqual(payload)
+      .expect(({ body }: { body: { data: typeof payload } }) => {
+        expect(body.data).toEqual(payload)
       })
   })
 
@@ -57,10 +59,12 @@ describe('Settings API (e2e)', () => {
         ({
           body,
         }: {
-          body: { locale: AppLocaleType; share_usage_data: boolean }
+          body: {
+            data: { locale: AppLocaleType; share_usage_data: boolean }
+          }
         }) => {
-          expect(body.locale).toBe(AppLocaleType.ZH_TW)
-          expect(body.share_usage_data).toBe(true)
+          expect(body.data.locale).toBe(AppLocaleType.ZH_TW)
+          expect(body.data.share_usage_data).toBe(true)
         },
       )
   })

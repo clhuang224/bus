@@ -18,8 +18,8 @@ describe('Favorite API (e2e)', () => {
     return request(app.getHttpServer())
       .get('/api/favorite/route-stops')
       .expect(200)
-      .expect(({ body }: { body: { route_stops: unknown[] } }) => {
-        expect(Array.isArray(body.route_stops)).toBe(true)
+      .expect(({ body }: { body: { data: { route_stops: unknown[] } } }) => {
+        expect(Array.isArray(body.data.route_stops)).toBe(true)
       })
   })
 
@@ -51,8 +51,8 @@ describe('Favorite API (e2e)', () => {
       .post('/api/favorite/route-stops')
       .send(payload)
       .expect(201)
-      .expect(({ body }: { body: typeof payload }) => {
-        expect(body).toEqual(payload)
+      .expect(({ body }: { body: { data: typeof payload } }) => {
+        expect(body.data).toEqual(payload)
       })
   })
 

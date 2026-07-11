@@ -1,6 +1,10 @@
 import { AreaType } from '@bus/shared'
 import { Controller, Get, Param, ParseEnumPipe, Query } from '@nestjs/common'
-import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
+import {
+  ApiDefaultErrorResponses,
+  ApiSuccessResponse,
+} from '../dto/api-response.decorator.js'
 import {
   RouteDetailResponseDto,
   RoutesResponseDto,
@@ -8,6 +12,7 @@ import {
 import { RoutesService } from './routes.service.js'
 
 @ApiTags('routes')
+@ApiDefaultErrorResponses()
 @Controller('routes')
 export class RoutesController {
   constructor(private readonly routesService: RoutesService) {}
@@ -24,7 +29,7 @@ export class RoutesController {
     description:
       'Search area selected by the client. The backend owns the area-to-city mapping.',
   })
-  @ApiOkResponse({ type: RoutesResponseDto })
+  @ApiSuccessResponse({ type: RoutesResponseDto })
   @Get()
   async listRoutes(
     @Query('area', new ParseEnumPipe(AreaType)) area: AreaType,
@@ -33,7 +38,7 @@ export class RoutesController {
   }
 
   @ApiOperation({ summary: 'Get route detail' })
-  @ApiOkResponse({ type: RouteDetailResponseDto })
+  @ApiSuccessResponse({ type: RouteDetailResponseDto })
   @Get(':uuid')
   async getRoute(@Param('uuid') uuid: string): Promise<RouteDetailResponseDto> {
     return await this.routesService.getRoute(uuid)

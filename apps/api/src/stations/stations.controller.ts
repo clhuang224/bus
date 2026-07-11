@@ -6,11 +6,16 @@ import {
   ParseIntPipe,
   Query,
 } from '@nestjs/common'
-import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
+import {
+  ApiDefaultErrorResponses,
+  ApiSuccessResponse,
+} from '../dto/api-response.decorator.js'
 import { StationsResponseDto } from './dto/stations-response.dto.js'
 import { StationsService } from './stations.service.js'
 
 @ApiTags('stations')
+@ApiDefaultErrorResponses()
 @Controller('stations')
 export class StationsController {
   constructor(private readonly stationsService: StationsService) {}
@@ -41,7 +46,7 @@ export class StationsController {
     description: 'Search radius in meters.',
     example: 500,
   })
-  @ApiOkResponse({ type: StationsResponseDto })
+  @ApiSuccessResponse({ type: StationsResponseDto })
   @Get()
   listStations(
     @Query('latitude', ParseFloatPipe) latitude: number,

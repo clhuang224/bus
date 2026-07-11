@@ -17,9 +17,23 @@ describe('Health API (e2e)', () => {
     return request(app.getHttpServer())
       .get('/api/health')
       .expect(200)
-      .expect(({ body }: { body: { status: string; timestamp: string } }) => {
-        expect(body.status).toBe('ok')
-        expect(new Date(body.timestamp).toISOString()).toBe(body.timestamp)
-      })
+      .expect(
+        ({
+          body,
+        }: {
+          body: {
+            status: number
+            message: string | null
+            data: { status: string; timestamp: string }
+          }
+        }) => {
+          expect(body.status).toBe(200)
+          expect(body.message).toBeNull()
+          expect(body.data.status).toBe('ok')
+          expect(new Date(body.data.timestamp).toISOString()).toBe(
+            body.data.timestamp,
+          )
+        },
+      )
   })
 })

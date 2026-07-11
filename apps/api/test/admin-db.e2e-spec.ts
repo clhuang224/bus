@@ -59,7 +59,7 @@ describe('Admin Sync API database flow (e2e)', () => {
       .set(ADMIN_API_KEY_HEADER, getRequiredAdminApiKey())
       .expect(200)
 
-    const body = response.body as unknown as SyncResponseBody
+    const body = (response.body as { data: SyncResponseBody }).data
 
     expect(typeof body.uuid).toBe('string')
     expect(body).toEqual({

@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common'
 import request from 'supertest'
-import { AreaType, CityNameType, DirectionType } from '@bus/shared'
+import { AreaType, CityNameType, DirectionType, ErrorCode } from '@bus/shared'
 import {
   CityNameType as PrismaCityNameType,
   DirectionType as PrismaDirectionType,
@@ -103,8 +103,8 @@ describe('Routes API (e2e)', () => {
       .get('/api/routes')
       .query({ area: AreaType.TAIPEI })
       .expect(200)
-      .expect(({ body }: { body: { routes: unknown[] } }) => {
-        expect(body.routes).toEqual([
+      .expect(({ body }: { body: { data: { routes: unknown[] } } }) => {
+        expect(body.data.routes).toEqual([
           {
             uuid: 'TPE-route-1',
             city: CityNameType.TAIPEI,
@@ -137,29 +137,35 @@ describe('Routes API (e2e)', () => {
           body,
         }: {
           body: {
-            uuid: string
-            city: CityNameType
-            name: { 'zh-TW': string; en: string }
-            sub_routes: Array<{
+            status: number
+            message: string | null
+            data: {
               uuid: string
-              direction: DirectionType
-              stops: Array<{
+              city: CityNameType
+              name: { 'zh-TW': string; en: string }
+              sub_routes: Array<{
                 uuid: string
-                sequence: number
-                name: { 'zh-TW': string; en: string }
-                position: { latitude: number; longitude: number }
+                direction: DirectionType
+                stops: Array<{
+                  uuid: string
+                  sequence: number
+                  name: { 'zh-TW': string; en: string }
+                  position: { latitude: number; longitude: number }
+                }>
+                shape: {
+                  path: Array<{ latitude: number; longitude: number }>
+                  updated_at: string
+                }
               }>
-              shape: {
-                path: Array<{ latitude: number; longitude: number }>
-                updated_at: string
-              }
-            }>
+            }
           }
         }) => {
-          expect(body.uuid).toBe(routeUuid)
-          expect(body.city).toBe(CityNameType.TAIPEI)
-          expect(body.name).toEqual({ 'zh-TW': '307', en: '307' })
-          expect(body.sub_routes).toEqual([
+          expect(body.status).toBe(200)
+          expect(body.message).toBeNull()
+          expect(body.data.uuid).toBe(routeUuid)
+          expect(body.data.city).toBe(CityNameType.TAIPEI)
+          expect(body.data.name).toEqual({ 'zh-TW': '307', en: '307' })
+          expect(body.data.sub_routes).toEqual([
             expect.objectContaining({
               uuid: 'TPE-subroute-1',
               direction: DirectionType.GO,
@@ -196,7 +202,8 @@ describe('Routes API (e2e)', () => {
     return request(app.getHttpServer())
       .get('/api/routes/missing-route')
       .expect(404)
-      .expect(() => {
+      .expect(({ body }: { body: { error: { code: ErrorCode } } }) => {
+        expect(body.error.code).toBe(ErrorCode.NOT_FOUND)
         expect(routeFindFirstArgs).toEqual([
           expect.objectContaining({
             where: { uuid: 'missing-route', is_active: true },
@@ -206,7 +213,12 @@ describe('Routes API (e2e)', () => {
   })
 
   it('/api/routes (GET) rejects requests without area', () => {
-    return request(app.getHttpServer()).get('/api/routes').expect(400)
+    return request(app.getHttpServer())
+      .get('/api/routes')
+      .expect(400)
+      .expect(({ body }: { body: { error: { code: ErrorCode } } }) => {
+        expect(body.error.code).toBe(ErrorCode.BAD_REQUEST)
+      })
   })
 
   it('/api/routes (GET) rejects invalid area values', () => {
@@ -214,5 +226,8 @@ describe('Routes API (e2e)', () => {
       .get('/api/routes')
       .query({ area: 'InvalidArea' })
       .expect(400)
+      .expect(({ body }: { body: { error: { code: ErrorCode } } }) => {
+        expect(body.error.code).toBe(ErrorCode.BAD_REQUEST)
+      })
   })
 })

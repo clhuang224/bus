@@ -1,15 +1,20 @@
 import { Controller, Get } from '@nestjs/common'
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
+import { ApiOperation, ApiTags } from '@nestjs/swagger'
+import {
+  ApiDefaultErrorResponses,
+  ApiSuccessResponse,
+} from './dto/api-response.decorator.js'
 import { AppService } from './app.service.js'
 import { HealthResponseDto } from './dto/health-response.dto.js'
 
 @ApiTags('system')
+@ApiDefaultErrorResponses()
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @ApiOperation({ summary: 'Health check' })
-  @ApiOkResponse({
+  @ApiSuccessResponse({
     description: 'API is healthy',
     type: HealthResponseDto,
   })

@@ -23,16 +23,18 @@ describe('Realtime API (e2e)', () => {
           body,
         }: {
           body: {
-            uuid: string
-            arrivals: unknown[]
-            vehicles: unknown[]
-            updated_at: string
+            data: {
+              uuid: string
+              arrivals: unknown[]
+              vehicles: unknown[]
+              updated_at: string
+            }
           }
         }) => {
-          expect(body.uuid).toBe(routeUuid)
-          expect(Array.isArray(body.arrivals)).toBe(true)
-          expect(Array.isArray(body.vehicles)).toBe(true)
-          expect(typeof body.updated_at).toBe('string')
+          expect(body.data.uuid).toBe(routeUuid)
+          expect(Array.isArray(body.data.arrivals)).toBe(true)
+          expect(Array.isArray(body.data.vehicles)).toBe(true)
+          expect(typeof body.data.updated_at).toBe('string')
         },
       )
   })

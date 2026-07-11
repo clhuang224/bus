@@ -1,5 +1,6 @@
 import { INestApplication } from '@nestjs/common'
 import request from 'supertest'
+import { ErrorCode } from '@bus/shared'
 import { createE2eApp } from './create-e2e-app.js'
 
 describe('Stations API (e2e)', () => {
@@ -18,8 +19,8 @@ describe('Stations API (e2e)', () => {
       .get('/api/stations')
       .query({ latitude: 24.9939, longitude: 121.5047 })
       .expect(200)
-      .expect(({ body }: { body: { stations: unknown[] } }) => {
-        expect(Array.isArray(body.stations)).toBe(true)
+      .expect(({ body }: { body: { data: { stations: unknown[] } } }) => {
+        expect(Array.isArray(body.data.stations)).toBe(true)
       })
   })
 
@@ -28,6 +29,9 @@ describe('Stations API (e2e)', () => {
       .get('/api/stations')
       .query({ longitude: 121.5047 })
       .expect(400)
+      .expect(({ body }: { body: { error: { code: ErrorCode } } }) => {
+        expect(body.error.code).toBe(ErrorCode.BAD_REQUEST)
+      })
   })
 
   it('/api/stations (GET) rejects requests without longitude', () => {
@@ -35,5 +39,8 @@ describe('Stations API (e2e)', () => {
       .get('/api/stations')
       .query({ latitude: 24.9939 })
       .expect(400)
+      .expect(({ body }: { body: { error: { code: ErrorCode } } }) => {
+        expect(body.error.code).toBe(ErrorCode.BAD_REQUEST)
+      })
   })
 })

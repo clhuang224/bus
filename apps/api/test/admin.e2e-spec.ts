@@ -1,6 +1,11 @@
 import { INestApplication } from '@nestjs/common'
 import request from 'supertest'
-import { CityNameType, SyncResourceType, SyncStatusType } from '@bus/shared'
+import {
+  CityNameType,
+  ErrorCode,
+  SyncResourceType,
+  SyncStatusType,
+} from '@bus/shared'
 import {
   CityNameType as PrismaCityNameType,
   SyncResourceType as PrismaSyncResourceType,
@@ -190,10 +195,10 @@ interface SyncRunDetailResponseBody extends SyncRunSummaryResponseBody {
 }
 
 function expectQueuedSyncResponse(
-  body: SyncResponseBody,
+  body: { data: SyncResponseBody },
   resource: SyncResourceType,
 ) {
-  expect(body).toEqual({
+  expect(body.data).toEqual({
     uuid: syncRunUuid,
     resource,
     status: SyncStatusType.QUEUED,
@@ -241,7 +246,12 @@ describe('Admin Sync API (e2e)', () => {
   })
 
   it('/api/admin/sync/runs (GET) rejects requests without an API key', () => {
-    return request(app.getHttpServer()).get('/api/admin/sync/runs').expect(401)
+    return request(app.getHttpServer())
+      .get('/api/admin/sync/runs')
+      .expect(401)
+      .expect(({ body }: { body: { error: { code: ErrorCode } } }) => {
+        expect(body.error.code).toBe(ErrorCode.UNAUTHORIZED)
+      })
   })
 
   it('/api/admin/sync/routes (POST) queues route sync', () => {
@@ -249,7 +259,7 @@ describe('Admin Sync API (e2e)', () => {
       .post('/api/admin/sync/routes')
       .set('x-admin-api-key', adminApiKey)
       .expect(200)
-      .expect(({ body }: { body: SyncResponseBody }) => {
+      .expect(({ body }: { body: { data: SyncResponseBody } }) => {
         expectQueuedSyncResponse(body, SyncResourceType.ROUTES)
         expect(prismaService.createCalls).toEqual([
           {
@@ -275,7 +285,7 @@ describe('Admin Sync API (e2e)', () => {
       .post('/api/admin/sync/routes')
       .set('x-admin-api-key', adminApiKey)
       .expect(200)
-      .expect(({ body }: { body: SyncResponseBody }) => {
+      .expect(({ body }: { body: { data: SyncResponseBody } }) => {
         expectQueuedSyncResponse(body, SyncResourceType.ROUTES)
       })
 
@@ -295,7 +305,7 @@ describe('Admin Sync API (e2e)', () => {
       .post('/api/admin/sync/routes')
       .set('x-admin-api-key', adminApiKey)
       .expect(200)
-      .expect(({ body }: { body: SyncResponseBody }) => {
+      .expect(({ body }: { body: { data: SyncResponseBody } }) => {
         expectQueuedSyncResponse(body, SyncResourceType.ROUTES)
       })
 
@@ -319,7 +329,7 @@ describe('Admin Sync API (e2e)', () => {
       .post('/api/admin/sync/stops')
       .set('x-admin-api-key', adminApiKey)
       .expect(200)
-      .expect(({ body }: { body: SyncResponseBody }) => {
+      .expect(({ body }: { body: { data: SyncResponseBody } }) => {
         expectQueuedSyncResponse(body, SyncResourceType.STOPS)
         expect(prismaService.createCalls).toEqual([
           {
@@ -345,8 +355,8 @@ describe('Admin Sync API (e2e)', () => {
       .get('/api/admin/sync/runs')
       .set('x-admin-api-key', adminApiKey)
       .expect(200)
-      .expect(({ body }: { body: SyncRunSummaryResponseBody[] }) => {
-        expect(body).toEqual([
+      .expect(({ body }: { body: { data: SyncRunSummaryResponseBody[] } }) => {
+        expect(body.data).toEqual([
           {
             uuid: syncRunUuid,
             resource: SyncResourceType.STOPS,
@@ -375,8 +385,8 @@ describe('Admin Sync API (e2e)', () => {
       .get(`/api/admin/sync/runs/${syncRunUuid}`)
       .set('x-admin-api-key', adminApiKey)
       .expect(200)
-      .expect(({ body }: { body: SyncRunDetailResponseBody }) => {
-        expect(body).toEqual({
+      .expect(({ body }: { body: { data: SyncRunDetailResponseBody } }) => {
+        expect(body.data).toEqual({
           uuid: syncRunUuid,
           resource: SyncResourceType.STOPS,
           status: SyncStatusType.QUEUED,
