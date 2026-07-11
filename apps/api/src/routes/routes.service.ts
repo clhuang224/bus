@@ -6,7 +6,7 @@ import {
   PRISMA_CITY_BY_TDX_CITY,
 } from '../constants/enum-mappings.js'
 import { PrismaService } from '../prisma/prisma.service.js'
-import { ApiErrorException } from '../dto/api-error.exception.js'
+import { FTBError } from '../dto/ftb-error.js'
 import type { LocalizedTextDto, PositionDto } from '../dto/shared.dto.js'
 import type {
   CityNameType as PrismaCityNameType,
@@ -263,10 +263,7 @@ export class RoutesService {
     })
 
     if (!route) {
-      throw new ApiErrorException(
-        ErrorCode.ROUTE_NOT_FOUND,
-        HttpStatus.NOT_FOUND,
-      )
+      throw new FTBError(ErrorCode.ROUTE_NOT_FOUND, HttpStatus.NOT_FOUND)
     }
 
     return this.toRouteDetail(route)

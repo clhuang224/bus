@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common'
 import type { Response } from 'express'
 import { ErrorCode, type ApiErrorResponse } from '@bus/shared'
-import { ApiErrorException } from './api-error.exception.js'
+import { FTBError } from './ftb-error.js'
 import { API_ERROR_MESSAGE_BY_CODE } from './api-response.messages.js'
 
 const ERROR_CODE_BY_STATUS: Readonly<Record<number, ErrorCode>> = {
@@ -43,7 +43,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
   }
 
   private getErrorCode(exception: unknown, status: number): ErrorCode {
-    if (exception instanceof ApiErrorException) {
+    if (exception instanceof FTBError) {
       return exception.code
     }
 
