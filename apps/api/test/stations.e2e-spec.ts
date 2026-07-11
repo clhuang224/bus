@@ -30,7 +30,7 @@ describe('Stations API (e2e)', () => {
       .query({ longitude: 121.5047 })
       .expect(400)
       .expect(({ body }: { body: { error: { code: ErrorCode } } }) => {
-        expect(body.error.code).toBe(ErrorCode.BAD_REQUEST)
+        expect(body.error.code).toBe(ErrorCode.SYSTEM_BAD_REQUEST)
       })
   })
 
@@ -40,7 +40,7 @@ describe('Stations API (e2e)', () => {
       .query({ latitude: 24.9939 })
       .expect(400)
       .expect(({ body }: { body: { error: { code: ErrorCode } } }) => {
-        expect(body.error.code).toBe(ErrorCode.BAD_REQUEST)
+        expect(body.error.code).toBe(ErrorCode.SYSTEM_BAD_REQUEST)
       })
   })
 })

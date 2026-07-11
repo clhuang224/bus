@@ -250,7 +250,7 @@ describe('Admin Sync API (e2e)', () => {
       .get('/api/admin/sync/runs')
       .expect(401)
       .expect(({ body }: { body: { error: { code: ErrorCode } } }) => {
-        expect(body.error.code).toBe(ErrorCode.UNAUTHORIZED)
+        expect(body.error.code).toBe(ErrorCode.SYSTEM_UNAUTHORIZED)
       })
   })
 

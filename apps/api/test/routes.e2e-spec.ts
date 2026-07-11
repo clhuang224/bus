@@ -203,7 +203,7 @@ describe('Routes API (e2e)', () => {
       .get('/api/routes/missing-route')
       .expect(404)
       .expect(({ body }: { body: { error: { code: ErrorCode } } }) => {
-        expect(body.error.code).toBe(ErrorCode.NOT_FOUND)
+        expect(body.error.code).toBe(ErrorCode.SYSTEM_NOT_FOUND)
         expect(routeFindFirstArgs).toEqual([
           expect.objectContaining({
             where: { uuid: 'missing-route', is_active: true },
@@ -217,7 +217,7 @@ describe('Routes API (e2e)', () => {
       .get('/api/routes')
       .expect(400)
       .expect(({ body }: { body: { error: { code: ErrorCode } } }) => {
-        expect(body.error.code).toBe(ErrorCode.BAD_REQUEST)
+        expect(body.error.code).toBe(ErrorCode.SYSTEM_BAD_REQUEST)
       })
   })
 
@@ -227,7 +227,7 @@ describe('Routes API (e2e)', () => {
       .query({ area: 'InvalidArea' })
       .expect(400)
       .expect(({ body }: { body: { error: { code: ErrorCode } } }) => {
-        expect(body.error.code).toBe(ErrorCode.BAD_REQUEST)
+        expect(body.error.code).toBe(ErrorCode.SYSTEM_BAD_REQUEST)
       })
   })
 })

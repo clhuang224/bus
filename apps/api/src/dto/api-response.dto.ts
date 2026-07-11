@@ -19,7 +19,7 @@ export class ApiErrorDto {
     description: 'Stable project-level error code.',
     enum: ErrorCode,
     enumName: 'ErrorCode',
-    example: ErrorCode.NOT_FOUND,
+    example: ErrorCode.SYSTEM_NOT_FOUND,
   })
   code!: ErrorCode
 

@@ -10,11 +10,11 @@ import { ErrorCode, type ApiErrorResponse } from '@bus/shared'
 import { API_ERROR_MESSAGE_BY_CODE } from './api-response.messages.js'
 
 const ERROR_CODE_BY_STATUS: Readonly<Record<number, ErrorCode>> = {
-  [HttpStatus.BAD_REQUEST]: ErrorCode.BAD_REQUEST,
-  [HttpStatus.UNAUTHORIZED]: ErrorCode.UNAUTHORIZED,
-  [HttpStatus.FORBIDDEN]: ErrorCode.FORBIDDEN,
-  [HttpStatus.NOT_FOUND]: ErrorCode.NOT_FOUND,
-  [HttpStatus.CONFLICT]: ErrorCode.CONFLICT,
+  [HttpStatus.BAD_REQUEST]: ErrorCode.SYSTEM_BAD_REQUEST,
+  [HttpStatus.UNAUTHORIZED]: ErrorCode.SYSTEM_UNAUTHORIZED,
+  [HttpStatus.FORBIDDEN]: ErrorCode.SYSTEM_FORBIDDEN,
+  [HttpStatus.NOT_FOUND]: ErrorCode.SYSTEM_NOT_FOUND,
+  [HttpStatus.CONFLICT]: ErrorCode.SYSTEM_CONFLICT,
 }
 
 @Catch()
@@ -42,6 +42,8 @@ export class ApiExceptionFilter implements ExceptionFilter {
   }
 
   private getErrorCode(status: number): ErrorCode {
-    return ERROR_CODE_BY_STATUS[status] ?? ErrorCode.INTERNAL_SERVER_ERROR
+    return (
+      ERROR_CODE_BY_STATUS[status] ?? ErrorCode.SYSTEM_INTERNAL_SERVER_ERROR
+    )
   }
 }
