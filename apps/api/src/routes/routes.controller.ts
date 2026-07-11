@@ -26,10 +26,10 @@ export class RoutesController {
   })
   @ApiOkResponse({ type: RoutesResponseDto })
   @Get()
-  listRoutes(
+  async listRoutes(
     @Query('area', new ParseEnumPipe(AreaType)) area: AreaType,
-  ): RoutesResponseDto {
-    return this.routesService.listRoutes(area)
+  ): Promise<RoutesResponseDto> {
+    return await this.routesService.listRoutes(area)
   }
 
   @ApiOperation({ summary: 'Get route detail' })
