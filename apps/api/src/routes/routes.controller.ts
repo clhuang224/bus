@@ -35,7 +35,7 @@ export class RoutesController {
   @ApiOperation({ summary: 'Get route detail' })
   @ApiOkResponse({ type: RouteDetailResponseDto })
   @Get(':uuid')
-  getRoute(@Param('uuid') uuid: string): RouteDetailResponseDto {
-    return this.routesService.getRoute(uuid)
+  async getRoute(@Param('uuid') uuid: string): Promise<RouteDetailResponseDto> {
+    return await this.routesService.getRoute(uuid)
   }
 }

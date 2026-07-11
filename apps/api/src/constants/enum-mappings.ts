@@ -89,6 +89,14 @@ export const DB_CITY_NAME_BY_PRISMA = {
   [PrismaCityNameType.LIENCHIANG_COUNTY]: CityNameType.LIENCHIANG_COUNTY,
 } satisfies Record<PrismaCityNameType, CityNameType>
 
+export const DB_DIRECTION_BY_PRISMA = {
+  [PrismaDirectionType.GO]: DirectionType.GO,
+  [PrismaDirectionType.RETURN]: DirectionType.RETURN,
+  [PrismaDirectionType.LOOP]: DirectionType.LOOP,
+  [PrismaDirectionType.SHUTTLE]: DirectionType.SHUTTLE,
+  [PrismaDirectionType.UNKNOWN]: DirectionType.UNKNOWN,
+} satisfies Record<PrismaDirectionType, DirectionType>
+
 export const DB_BEARING_BY_PRISMA = {
   [PrismaBearingType.EAST]: 'east',
   [PrismaBearingType.WEST]: 'west',
