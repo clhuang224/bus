@@ -1,4 +1,4 @@
-import { AreaType } from '@bus/shared'
+import { AreaType, ErrorCode } from '@bus/shared'
 import { Controller, Get, Param, ParseEnumPipe, Query } from '@nestjs/common'
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import {
@@ -6,7 +6,6 @@ import {
   ApiErrorResponse,
   ApiSuccessResponse,
 } from '../dto/api-response.decorator.js'
-import { ErrorCode } from '@bus/shared'
 import {
   RouteDetailResponseDto,
   RoutesResponseDto,

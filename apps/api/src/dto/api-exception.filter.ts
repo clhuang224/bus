@@ -24,12 +24,16 @@ export class ApiExceptionFilter implements ExceptionFilter {
     const response = host.switchToHttp().getResponse<Response>()
     const status = this.getStatus(exception)
     const code = this.getErrorCode(exception, status)
+    const message =
+      exception instanceof FTBError
+        ? exception.message
+        : API_ERROR_MESSAGE_BY_CODE[code]
 
     response.status(status).json({
       status,
       error: {
         code,
-        message: API_ERROR_MESSAGE_BY_CODE[code],
+        message,
       },
     } satisfies ApiErrorResponse)
   }

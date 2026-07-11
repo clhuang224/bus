@@ -1,6 +1,7 @@
 import { applyDecorators, Type } from '@nestjs/common'
 import {
   ApiBadRequestResponse,
+  ApiConflictResponse,
   ApiExtraModels,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
@@ -82,6 +83,11 @@ export function ApiDefaultErrorResponses() {
       description: 'Requested resource was not found.',
       schema,
       example: createErrorExample(404, ErrorCode.SYSTEM_NOT_FOUND),
+    }),
+    ApiConflictResponse({
+      description: 'Request failed due to a state conflict.',
+      schema,
+      example: createErrorExample(409, ErrorCode.SYSTEM_CONFLICT),
     }),
     ApiInternalServerErrorResponse({
       description: 'Unexpected server error.',
