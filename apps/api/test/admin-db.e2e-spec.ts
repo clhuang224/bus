@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common'
+import { type INestApplication } from '@nestjs/common'
 import request from 'supertest'
 import { SyncResourceType, SyncStatusType } from '@bus/shared'
 import { ADMIN_API_KEY_HEADER } from '../src/admin/admin-api-key.guard.js'

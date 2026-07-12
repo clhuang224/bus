@@ -1,6 +1,6 @@
-import { HttpException, HttpStatus } from '@nestjs/common'
+import { HttpException, type HttpStatus } from '@nestjs/common'
 import type { HttpExceptionOptions } from '@nestjs/common'
-import { ErrorCode } from '@bus/shared'
+import { type ErrorCode } from '@bus/shared'
 import { API_ERROR_MESSAGE_BY_CODE } from './api-response.messages.js'
 
 interface FTBErrorOptions extends HttpExceptionOptions {

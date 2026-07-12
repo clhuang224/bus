@@ -8,8 +8,8 @@ import type {
 } from '@bus/shared'
 import { PRISMA_BEARING_BY_TDX_BEARING } from '../../constants/enum-mappings.js'
 import {
-  BearingType as PrismaBearingType,
-  CityNameType as PrismaCityNameType,
+  type BearingType as PrismaBearingType,
+  type CityNameType as PrismaCityNameType,
   RouteShapeSource as PrismaRouteShapeSource,
 } from '../../generated/prisma/enums.js'
 import { cityMapper } from './route.mapper.js'

@@ -4,7 +4,7 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common'
-import { map, Observable } from 'rxjs'
+import { map, type Observable } from 'rxjs'
 import type { Response } from 'express'
 import type { ApiSuccessResponse } from '@bus/shared'
 

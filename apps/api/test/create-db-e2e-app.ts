@@ -1,5 +1,5 @@
-import { INestApplication } from '@nestjs/common'
-import { Test, TestingModule } from '@nestjs/testing'
+import { type INestApplication } from '@nestjs/common'
+import { Test, type TestingModule } from '@nestjs/testing'
 import { config as dotenvConfig } from 'dotenv'
 import { SyncService } from '../src/sync/sync.service.js'
 import { AppModule } from './../src/app.module.js'

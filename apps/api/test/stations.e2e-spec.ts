@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common'
+import { type INestApplication } from '@nestjs/common'
 import request from 'supertest'
 import { ErrorCode } from '@bus/shared'
 import { createE2eApp } from './create-e2e-app.js'
