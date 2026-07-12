@@ -1,6 +1,7 @@
 import {
   ArgumentsHost,
   HttpStatus,
+  HttpException,
   Logger,
   type HttpArgumentsHost,
 } from '@nestjs/common'
@@ -146,5 +147,28 @@ describe('ApiExceptionFilter', () => {
       },
     ])
     expect(errorLogs).toEqual([[error.message, error.stack]])
+  })
+
+  it('maps unlisted client HttpExceptions to system bad request', () => {
+    const response = createMockResponse()
+    const filter = new ApiExceptionFilter()
+
+    filter.catch(
+      new HttpException('Too many requests.', HttpStatus.TOO_MANY_REQUESTS),
+      createHost(response),
+    )
+
+    expect(response.statusCalls).toEqual([HttpStatus.TOO_MANY_REQUESTS])
+    expect(response.jsonCalls).toEqual([
+      {
+        status: HttpStatus.TOO_MANY_REQUESTS,
+        error: {
+          code: ErrorCode.SYSTEM_BAD_REQUEST,
+          message: API_ERROR_MESSAGE_BY_CODE.SYSTEM_BAD_REQUEST,
+        },
+      },
+    ])
+    expect(errorLogs).toEqual([])
+    expect(warnLogs).toEqual([])
   })
 })

@@ -5,7 +5,6 @@ import {
   ApiExtraModels,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
-  ApiNotFoundResponse,
   ApiResponse,
   ApiUnauthorizedResponse,
   getSchemaPath,
@@ -78,11 +77,6 @@ export function ApiDefaultErrorResponses() {
       description: 'The authenticated caller is not allowed to do this.',
       schema,
       example: createErrorExample(403, ErrorCode.SYSTEM_FORBIDDEN),
-    }),
-    ApiNotFoundResponse({
-      description: 'Requested resource was not found.',
-      schema,
-      example: createErrorExample(404, ErrorCode.SYSTEM_NOT_FOUND),
     }),
     ApiConflictResponse({
       description: 'Request failed due to a state conflict.',

@@ -93,8 +93,11 @@ export class ApiExceptionFilter implements ExceptionFilter {
       return exception.code
     }
 
-    return (
-      ERROR_CODE_BY_STATUS[status] ?? ErrorCode.SYSTEM_INTERNAL_SERVER_ERROR
-    )
+    const mapped = ERROR_CODE_BY_STATUS[status]
+
+    if (mapped) return mapped
+    if (status >= 400 && status < 500) return ErrorCode.SYSTEM_BAD_REQUEST
+
+    return ErrorCode.SYSTEM_INTERNAL_SERVER_ERROR
   }
 }

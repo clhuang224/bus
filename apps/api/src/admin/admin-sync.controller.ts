@@ -6,21 +6,15 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common'
-import {
-  ApiNotFoundResponse,
-  ApiOperation,
-  ApiSecurity,
-  ApiTags,
-  ApiUnauthorizedResponse,
-  getSchemaPath,
-} from '@nestjs/swagger'
+import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger'
+import { ErrorCode } from '@bus/shared'
 import { AdminApiKeyGuard } from './admin-api-key.guard.js'
 import { AdminService } from './admin.service.js'
 import {
   ApiDefaultErrorResponses,
+  ApiErrorResponse,
   ApiSuccessResponse,
 } from '../dto/api-response.decorator.js'
-import { ApiErrorResponseDto } from '../dto/api-response.dto.js'
 import {
   SyncRunDetailResponseDto,
   SyncRunSummaryResponseDto,
@@ -30,9 +24,10 @@ import { SyncResponseDto } from './dto/sync-response.dto.js'
 @ApiTags('admin')
 @ApiSecurity('adminApiKey')
 @ApiDefaultErrorResponses()
-@ApiUnauthorizedResponse({
+@ApiErrorResponse({
+  status: 401,
+  code: ErrorCode.SYSTEM_UNAUTHORIZED,
   description: 'A valid admin API key is required.',
-  schema: { $ref: getSchemaPath(ApiErrorResponseDto) },
 })
 @UseGuards(AdminApiKeyGuard)
 @Controller('admin/sync')
@@ -62,9 +57,10 @@ export class AdminSyncController {
     description: 'Sync run detail.',
     type: SyncRunDetailResponseDto,
   })
-  @ApiNotFoundResponse({
+  @ApiErrorResponse({
+    status: 404,
+    code: ErrorCode.SYSTEM_NOT_FOUND,
     description: 'Sync run was not found.',
-    schema: { $ref: getSchemaPath(ApiErrorResponseDto) },
   })
   @Get('runs/:uuid')
   getSyncRun(@Param('uuid') uuid: string): Promise<SyncRunDetailResponseDto> {
