@@ -55,6 +55,7 @@ interface RouteStopRecord {
 
 interface RouteShapeRecord {
   path: unknown
+  is_active: boolean
   tdx_updated_at: Date | null
   updated_at: Date
 }
@@ -139,9 +140,9 @@ export class RoutesService {
             tdx_updated_at: true,
             updated_at: true,
             route_shape: {
-              where: { is_active: true },
               select: {
                 path: true,
+                is_active: true,
                 tdx_updated_at: true,
                 updated_at: true,
               },
@@ -255,7 +256,7 @@ export class RoutesService {
     const fallbackPath = this.toStopPositionPath(stops)
     const fallbackUpdatedAt = this.toFallbackShapeUpdatedAt(subroute)
 
-    if (!routeShape) {
+    if (!routeShape || !routeShape.is_active) {
       return {
         path: fallbackPath,
         updated_at: fallbackUpdatedAt,
