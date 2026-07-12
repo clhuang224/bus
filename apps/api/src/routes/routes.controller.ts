@@ -32,10 +32,10 @@ export class RoutesController {
   })
   @ApiSuccessResponse({ type: RoutesResponseDto })
   @Get()
-  async listRoutes(
+  listRoutes(
     @Query('area', new ParseEnumPipe(AreaType)) area: AreaType,
   ): Promise<RoutesResponseDto> {
-    return await this.routesService.listRoutes(area)
+    return this.routesService.listRoutes(area)
   }
 
   @ApiOperation({ summary: 'Get route detail' })
@@ -46,7 +46,7 @@ export class RoutesController {
     description: 'Route UUID was not found or is inactive.',
   })
   @Get(':uuid')
-  async getRoute(@Param('uuid') uuid: string): Promise<RouteDetailResponseDto> {
-    return await this.routesService.getRoute(uuid)
+  getRoute(@Param('uuid') uuid: string): Promise<RouteDetailResponseDto> {
+    return this.routesService.getRoute(uuid)
   }
 }

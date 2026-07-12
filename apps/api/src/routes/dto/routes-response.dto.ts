@@ -81,10 +81,9 @@ export class RouteStopDto {
   @ApiProperty({
     description: 'Stop position',
     type: PositionDto,
-    nullable: true,
     example: { latitude: 25.0018, longitude: 121.4984 },
   })
-  position!: PositionDto | null
+  position!: PositionDto
 }
 
 export class RouteShapeDto {
