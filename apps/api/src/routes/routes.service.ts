@@ -7,12 +7,13 @@ import {
 } from '../constants/enum-mappings.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import { FTBError } from '../dto/ftb-error.js'
-import type { LocalizedTextDto, PositionDto } from '../dto/shared.dto.js'
+import type { LocalizedTextDto } from '../dto/shared.dto.js'
 import type {
   CityNameType as PrismaCityNameType,
   DirectionType as PrismaDirectionType,
 } from '../generated/prisma/enums.js'
 import {
+  PositionTuple,
   RouteDetailResponseDto,
   RouteShapeDto,
   RouteStopDto,
@@ -237,25 +238,36 @@ export class RoutesService {
     routeShape: RouteShapeRecord | null,
     stops: RouteStopDto[],
   ): RouteShapeDto {
+    const fallbackPath = this.toStopPositionPath(stops)
+
     if (!routeShape) {
       return {
-        path: stops.map((stop) => stop.position),
+        path: fallbackPath,
         updated_at: new Date(0).toISOString(),
       }
     }
 
+    const decodedPath = this.toPositionPath(routeShape.path)
+
     return {
-      path: this.toPositionPath(routeShape.path),
+      path: decodedPath.length > 0 ? decodedPath : fallbackPath,
       updated_at: (
         routeShape.tdx_updated_at ?? routeShape.updated_at
       ).toISOString(),
     }
   }
 
-  private toPositionPath(path: unknown): PositionDto[] {
+  private toStopPositionPath(stops: RouteStopDto[]): PositionTuple[] {
+    return stops.map((stop) => [
+      stop.position.longitude,
+      stop.position.latitude,
+    ])
+  }
+
+  private toPositionPath(path: unknown): PositionTuple[] {
     if (!Array.isArray(path)) return []
 
-    return path.flatMap((point): PositionDto[] => {
+    return path.flatMap((point): PositionTuple[] => {
       if (!Array.isArray(point) || point.length < 2) return []
 
       const longitude: unknown = point[0]
@@ -265,7 +277,7 @@ export class RoutesService {
         return []
       }
 
-      return [{ latitude, longitude }]
+      return [[longitude, latitude]]
     })
   }
 }

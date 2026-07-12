@@ -44,6 +44,14 @@ describe('Routes API (e2e)', () => {
                 return Promise.resolve(null)
               }
 
+              const routeShapePath =
+                args.where?.uuid === 'route-with-malformed-shape'
+                  ? ['broken-shape-path']
+                  : [
+                      [121, 25],
+                      [122, 26],
+                    ]
+
               return Promise.resolve({
                 uuid: 'TPE-route-1',
                 city: PrismaCityNameType.TAIPEI,
@@ -66,10 +74,7 @@ describe('Routes API (e2e)', () => {
                     first_bus_time: '05:30',
                     last_bus_time: '23:00',
                     route_shape: {
-                      path: [
-                        [121, 25],
-                        [122, 26],
-                      ],
+                      path: routeShapePath,
                       tdx_updated_at: new Date('2026-07-10T00:00:00.000Z'),
                       updated_at: new Date('2026-07-11T00:00:00.000Z'),
                     },
@@ -153,7 +158,7 @@ describe('Routes API (e2e)', () => {
                   position: { latitude: number; longitude: number }
                 }>
                 shape: {
-                  path: Array<{ latitude: number; longitude: number }>
+                  path: Array<[number, number]>
                   updated_at: string
                 }
               }>
@@ -182,8 +187,8 @@ describe('Routes API (e2e)', () => {
               ],
               shape: {
                 path: [
-                  { latitude: 25, longitude: 121 },
-                  { latitude: 26, longitude: 122 },
+                  [121, 25],
+                  [122, 26],
                 ],
                 updated_at: '2026-07-10T00:00:00.000Z',
               },
@@ -194,6 +199,33 @@ describe('Routes API (e2e)', () => {
               where: { uuid: routeUuid, is_active: true },
             }),
           ])
+        },
+      )
+  })
+
+  it('/api/routes/:uuid (GET) falls back to ordered stop positions when shape data is malformed', () => {
+    return request(app.getHttpServer())
+      .get('/api/routes/route-with-malformed-shape')
+      .expect(200)
+      .expect(
+        ({
+          body,
+        }: {
+          body: {
+            data: {
+              sub_routes: Array<{
+                shape: {
+                  path: Array<[number, number]>
+                  updated_at: string
+                }
+              }>
+            }
+          }
+        }) => {
+          expect(body.data.sub_routes[0]?.shape).toEqual({
+            path: [[121, 25]],
+            updated_at: '2026-07-10T00:00:00.000Z',
+          })
         },
       )
   })

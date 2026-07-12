@@ -2,6 +2,8 @@ import { ApiProperty } from '@nestjs/swagger'
 import { CityNameType, DirectionType } from '@bus/shared'
 import { LocalizedTextDto, PositionDto } from '../../dto/shared.dto.js'
 
+export type PositionTuple = [longitude: number, latitude: number]
+
 export class RouteSummaryDto {
   @ApiProperty({ description: 'Route UUID', example: 'NWT10116' })
   uuid!: string
@@ -89,14 +91,20 @@ export class RouteStopDto {
 export class RouteShapeDto {
   @ApiProperty({
     description:
-      'Decoded route shape path. If upstream shape data is unavailable, the backend falls back to ordered stop positions.',
-    type: [PositionDto],
+      'Decoded route shape path as [longitude, latitude] tuples. Precise TDX shape data is preferred; if it is unavailable or invalid, the backend falls back to ordered stop positions. Routes with stops should not return an empty path.',
+    type: 'array',
+    items: {
+      type: 'array',
+      minItems: 2,
+      maxItems: 2,
+      items: { type: 'number' },
+    },
     example: [
-      { latitude: 25.0018, longitude: 121.4984 },
-      { latitude: 25.0042, longitude: 121.5021 },
+      [121.4984, 25.0018],
+      [121.5021, 25.0042],
     ],
   })
-  path!: PositionDto[]
+  path!: PositionTuple[]
 
   @ApiProperty({
     description:
@@ -157,7 +165,7 @@ export class RouteSubRouteDto {
 
   @ApiProperty({
     description:
-      'Route shape for this sub-route direction. The frontend should render this path without caring whether it came from upstream shape data or a backend fallback.',
+      'Route shape for this sub-route direction. The frontend should render this path without caring whether it came from precise upstream shape data or a stop-position fallback.',
     type: RouteShapeDto,
   })
   shape!: RouteShapeDto
@@ -196,8 +204,8 @@ export class RouteDetailResponseDto extends RouteSummaryDto {
         ],
         shape: {
           path: [
-            { latitude: 25.0018, longitude: 121.4984 },
-            { latitude: 25.0042, longitude: 121.5021 },
+            [121.4984, 25.0018],
+            [121.5021, 25.0042],
           ],
           updated_at: '2026-06-03T18:25:13+08:00',
         },

@@ -38,7 +38,11 @@ export class RoutesController {
     return this.routesService.listRoutes(area)
   }
 
-  @ApiOperation({ summary: 'Get route detail' })
+  @ApiOperation({
+    summary: 'Get route detail',
+    description:
+      'Returns base route detail for one route. Each sub-route shape prefers the more precise route shape from TDX when available and decodable. Shape paths are returned as [longitude, latitude] tuples to reduce payload size. If the precise shape is missing or invalid, the backend falls back to ordered stop positions, so a route with stops should not return an empty shape path.',
+  })
   @ApiSuccessResponse({ type: RouteDetailResponseDto })
   @ApiErrorResponse({
     status: 404,
