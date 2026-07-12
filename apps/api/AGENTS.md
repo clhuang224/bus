@@ -76,6 +76,15 @@ Use full coordinate field names:
 
 Avoid abbreviated coordinate names such as `lat` or `lon` in API responses.
 
+Use the following coordinate shapes in API contracts:
+
+- Single coordinate points use objects with explicit keys:
+  `{ latitude: number, longitude: number }`.
+- Ordered paths or geometry-like arrays use MapLibre/GeoJSON coordinate order:
+  `[longitude, latitude][]`.
+- Keep TDX-specific coordinate names and ordering inside TDX client, mapper, or
+  sync code. Public API responses should not expose TDX coordinate field names.
+
 ## Response Contracts
 
 All non-204 API responses use the shared response envelope:
