@@ -102,6 +102,11 @@ OpenAPI/Scalar examples must match the real runtime response for their HTTP
 status. Do not reuse a 404 `SYSTEM_NOT_FOUND` example for 400, 401, 403, 409,
 or 500 responses.
 
+Use ISO 8601 UTC strings from `Date#toISOString()` for public API timestamps
+and OpenAPI/Scalar timestamp examples, such as
+`2026-06-03T18:25:13.000Z`. Do not use timezone-offset examples such as
+`+08:00` unless the endpoint intentionally returns that exact format.
+
 ## Code Organization
 
 Inside classes, keep methods in reading order. Public entry points should appear

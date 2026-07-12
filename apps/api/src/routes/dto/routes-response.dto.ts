@@ -109,7 +109,7 @@ export class RouteShapeDto {
   @ApiProperty({
     description:
       'Timestamp for the route shape data used to build this path. When falling back to stop positions, this is the timestamp of the base data used for the fallback.',
-    example: '2026-06-03T18:25:13+08:00',
+    example: '2026-06-03T18:25:13.000Z',
   })
   updated_at!: string
 }
@@ -207,7 +207,7 @@ export class RouteDetailResponseDto extends RouteSummaryDto {
             [121.4984, 25.0018],
             [121.5021, 25.0042],
           ],
-          updated_at: '2026-06-03T18:25:13+08:00',
+          updated_at: '2026-06-03T18:25:13.000Z',
         },
       },
     ],

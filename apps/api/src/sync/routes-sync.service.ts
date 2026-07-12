@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { CityNameType } from '@bus/shared'
+import { type CityNameType } from '@bus/shared'
 import { RoutePersistenceService } from './route-persistence.service.js'
 import { cityMapper, routeMapper } from './mappers/route.mapper.js'
 import { SyncCheckpointService } from './sync-checkpoint.service.js'

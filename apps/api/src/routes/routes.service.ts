@@ -1,5 +1,10 @@
 import { HttpStatus, Injectable } from '@nestjs/common'
-import { AreaType, CITIES_BY_AREA, CityNameType, ErrorCode } from '@bus/shared'
+import {
+  CITIES_BY_AREA,
+  ErrorCode,
+  type AreaType,
+  type CityNameType,
+} from '@bus/shared'
 import {
   DB_CITY_NAME_BY_PRISMA,
   DB_DIRECTION_BY_PRISMA,
@@ -12,7 +17,7 @@ import type {
   CityNameType as PrismaCityNameType,
   DirectionType as PrismaDirectionType,
 } from '../generated/prisma/enums.js'
-import {
+import type {
   PositionTuple,
   RouteDetailResponseDto,
   RouteShapeDto,
