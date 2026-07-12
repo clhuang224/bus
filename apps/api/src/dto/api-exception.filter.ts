@@ -32,7 +32,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
         ? exception.message
         : API_ERROR_MESSAGE_BY_CODE[code]
 
-    this.logUnexpectedServerError(exception, status)
+    this.logException(exception, status)
 
     response.status(status).json({
       status,
@@ -43,8 +43,13 @@ export class ApiExceptionFilter implements ExceptionFilter {
     } satisfies ApiErrorResponse)
   }
 
-  private logUnexpectedServerError(exception: unknown, status: number): void {
-    if (exception instanceof FTBError || status < 500) return
+  private logException(exception: unknown, status: number): void {
+    if (exception instanceof FTBError) {
+      this.logDomainErrorCause(exception, status)
+      return
+    }
+
+    if (status < 500) return
 
     if (exception instanceof Error) {
       this.logger.error(exception.message, exception.stack)
@@ -52,6 +57,27 @@ export class ApiExceptionFilter implements ExceptionFilter {
     }
 
     this.logger.error(String(exception))
+  }
+
+  private logDomainErrorCause(error: FTBError, status: number): void {
+    if (!error.cause) return
+
+    const message = `FTBError ${error.code} caused by: ${this.toLogMessage(error.cause)}`
+
+    if (status >= 500) {
+      this.logger.error(message, this.toLogStack(error.cause))
+      return
+    }
+
+    this.logger.warn(message)
+  }
+
+  private toLogMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error)
+  }
+
+  private toLogStack(error: unknown): string | undefined {
+    return error instanceof Error ? error.stack : undefined
   }
 
   private getStatus(exception: unknown): number {
