@@ -51,6 +51,14 @@ describe('Routes API (e2e)', () => {
                       [121, 25],
                       [122, 26],
                     ]
+              const routeShape =
+                args.where?.uuid === 'route-without-shape'
+                  ? null
+                  : {
+                      path: routeShapePath,
+                      tdx_updated_at: new Date('2026-07-10T00:00:00.000Z'),
+                      updated_at: new Date('2026-07-11T00:00:00.000Z'),
+                    }
 
               return Promise.resolve({
                 uuid: 'TPE-route-1',
@@ -73,11 +81,9 @@ describe('Routes API (e2e)', () => {
                     destination_en: 'Fuyuan St.',
                     first_bus_time: '05:30',
                     last_bus_time: '23:00',
-                    route_shape: {
-                      path: routeShapePath,
-                      tdx_updated_at: new Date('2026-07-10T00:00:00.000Z'),
-                      updated_at: new Date('2026-07-11T00:00:00.000Z'),
-                    },
+                    tdx_updated_at: new Date('2026-07-08T00:00:00.000Z'),
+                    updated_at: new Date('2026-07-12T00:00:00.000Z'),
+                    route_shape: routeShape,
                     route_stops: [
                       {
                         sequence: 1,
@@ -87,6 +93,8 @@ describe('Routes API (e2e)', () => {
                           name_en: 'Banqiao Station',
                           latitude: 25,
                           longitude: 121,
+                          tdx_updated_at: new Date('2026-07-09T00:00:00.000Z'),
+                          updated_at: new Date('2026-07-13T00:00:00.000Z'),
                         },
                       },
                     ],
@@ -224,7 +232,34 @@ describe('Routes API (e2e)', () => {
         }) => {
           expect(body.data.sub_routes[0]?.shape).toEqual({
             path: [[121, 25]],
-            updated_at: '2026-07-10T00:00:00.000Z',
+            updated_at: '2026-07-09T00:00:00.000Z',
+          })
+        },
+      )
+  })
+
+  it('/api/routes/:uuid (GET) falls back to ordered stop positions when shape data is missing', () => {
+    return request(app.getHttpServer())
+      .get('/api/routes/route-without-shape')
+      .expect(200)
+      .expect(
+        ({
+          body,
+        }: {
+          body: {
+            data: {
+              sub_routes: Array<{
+                shape: {
+                  path: Array<[number, number]>
+                  updated_at: string
+                }
+              }>
+            }
+          }
+        }) => {
+          expect(body.data.sub_routes[0]?.shape).toEqual({
+            path: [[121, 25]],
+            updated_at: '2026-07-09T00:00:00.000Z',
           })
         },
       )

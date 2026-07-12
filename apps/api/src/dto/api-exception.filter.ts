@@ -4,6 +4,7 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common'
 import type { Response } from 'express'
 import { ErrorCode, type ApiErrorResponse } from '@bus/shared'
@@ -20,6 +21,8 @@ const ERROR_CODE_BY_STATUS: Readonly<Record<number, ErrorCode>> = {
 
 @Catch()
 export class ApiExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(ApiExceptionFilter.name)
+
   catch(exception: unknown, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<Response>()
     const status = this.getStatus(exception)
@@ -29,6 +32,8 @@ export class ApiExceptionFilter implements ExceptionFilter {
         ? exception.message
         : API_ERROR_MESSAGE_BY_CODE[code]
 
+    this.logUnexpectedServerError(exception, status)
+
     response.status(status).json({
       status,
       error: {
@@ -36,6 +41,17 @@ export class ApiExceptionFilter implements ExceptionFilter {
         message,
       },
     } satisfies ApiErrorResponse)
+  }
+
+  private logUnexpectedServerError(exception: unknown, status: number): void {
+    if (exception instanceof FTBError || status < 500) return
+
+    if (exception instanceof Error) {
+      this.logger.error(exception.message, exception.stack)
+      return
+    }
+
+    this.logger.error(String(exception))
   }
 
   private getStatus(exception: unknown): number {

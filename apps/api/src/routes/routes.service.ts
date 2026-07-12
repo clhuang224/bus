@@ -39,6 +39,8 @@ interface StopRecord {
   name_en: string | null
   latitude: number
   longitude: number
+  tdx_updated_at: Date | null
+  updated_at: Date
 }
 
 interface RouteStopRecord {
@@ -63,6 +65,8 @@ interface SubRouteRecord {
   destination_en: string | null
   first_bus_time: string | null
   last_bus_time: string | null
+  tdx_updated_at: Date | null
+  updated_at: Date
   route_shape: RouteShapeRecord | null
   route_stops: RouteStopRecord[]
 }
@@ -127,6 +131,8 @@ export class RoutesService {
             destination_en: true,
             first_bus_time: true,
             last_bus_time: true,
+            tdx_updated_at: true,
+            updated_at: true,
             route_shape: {
               where: { is_active: true },
               select: {
@@ -147,6 +153,8 @@ export class RoutesService {
                     name_en: true,
                     latitude: true,
                     longitude: true,
+                    tdx_updated_at: true,
+                    updated_at: true,
                   },
                 },
               },
@@ -215,7 +223,7 @@ export class RoutesService {
       first_bus_time: subroute.first_bus_time,
       last_bus_time: subroute.last_bus_time,
       stops,
-      shape: this.toRouteShape(subroute.route_shape, stops),
+      shape: this.toRouteShape(subroute, stops),
     }
   }
 
@@ -235,26 +243,43 @@ export class RoutesService {
   }
 
   private toRouteShape(
-    routeShape: RouteShapeRecord | null,
+    subroute: SubRouteRecord,
     stops: RouteStopDto[],
   ): RouteShapeDto {
+    const routeShape = subroute.route_shape
     const fallbackPath = this.toStopPositionPath(stops)
+    const fallbackUpdatedAt = this.toFallbackShapeUpdatedAt(subroute)
 
     if (!routeShape) {
       return {
         path: fallbackPath,
-        updated_at: new Date(0).toISOString(),
+        updated_at: fallbackUpdatedAt,
       }
     }
 
     const decodedPath = this.toPositionPath(routeShape.path)
+    const usesDecodedPath = decodedPath.length > 0
 
     return {
-      path: decodedPath.length > 0 ? decodedPath : fallbackPath,
-      updated_at: (
-        routeShape.tdx_updated_at ?? routeShape.updated_at
-      ).toISOString(),
+      path: usesDecodedPath ? decodedPath : fallbackPath,
+      updated_at: usesDecodedPath
+        ? (routeShape.tdx_updated_at ?? routeShape.updated_at).toISOString()
+        : fallbackUpdatedAt,
     }
+  }
+
+  private toFallbackShapeUpdatedAt(subroute: SubRouteRecord): string {
+    const timestamps = [
+      subroute.tdx_updated_at ?? subroute.updated_at,
+      ...subroute.route_stops.map(
+        (routeStop) =>
+          routeStop.stop.tdx_updated_at ?? routeStop.stop.updated_at,
+      ),
+    ]
+
+    return new Date(
+      Math.max(...timestamps.map((timestamp) => timestamp.getTime())),
+    ).toISOString()
   }
 
   private toStopPositionPath(stops: RouteStopDto[]): PositionTuple[] {
