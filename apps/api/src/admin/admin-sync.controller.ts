@@ -23,12 +23,12 @@ import { SyncResponseDto } from './dto/sync-response.dto.js'
 
 @ApiTags('admin')
 @ApiSecurity('adminApiKey')
-@ApiDefaultErrorResponses()
 @ApiErrorResponse({
   status: 401,
   code: ErrorCode.SYSTEM_UNAUTHORIZED,
   description: 'A valid admin API key is required.',
 })
+@ApiDefaultErrorResponses()
 @UseGuards(AdminApiKeyGuard)
 @Controller('admin/sync')
 export class AdminSyncController {
