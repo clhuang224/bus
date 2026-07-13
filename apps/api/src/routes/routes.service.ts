@@ -306,7 +306,12 @@ export class RoutesService {
       const longitude: unknown = point[0]
       const latitude: unknown = point[1]
 
-      if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+      if (
+        typeof latitude !== 'number' ||
+        typeof longitude !== 'number' ||
+        !Number.isFinite(latitude) ||
+        !Number.isFinite(longitude)
+      ) {
         return []
       }
 

@@ -25,6 +25,24 @@ describe('Routes API (e2e)', () => {
   let routeFindManyArgs: unknown[]
   let routeFindFirstArgs: RouteFindFirstArgs[]
 
+  const routeShapePathFor = (uuid?: string) => {
+    switch (uuid) {
+      case 'route-with-malformed-shape':
+        return ['broken-shape-path']
+      case 'route-with-partial-shape':
+        return [[121, 25], 'broken-shape-point', [122, 26]]
+      case 'route-with-extra-shape-point':
+        return [[121, 25, 999]]
+      case 'route-with-non-finite-shape-point':
+        return [[121, Number.NaN]]
+      default:
+        return [
+          [121, 25],
+          [122, 26],
+        ]
+    }
+  }
+
   beforeEach(async () => {
     routeFindManyArgs = []
     routeFindFirstArgs = []
@@ -56,17 +74,7 @@ describe('Routes API (e2e)', () => {
                 return Promise.resolve(null)
               }
 
-              const routeShapePath =
-                args.where?.uuid === 'route-with-malformed-shape'
-                  ? ['broken-shape-path']
-                  : args.where?.uuid === 'route-with-partial-shape'
-                    ? [[121, 25], 'broken-shape-point', [122, 26]]
-                    : args.where?.uuid === 'route-with-extra-shape-point'
-                      ? [[121, 25, 999]]
-                      : [
-                          [121, 25],
-                          [122, 26],
-                        ]
+              const routeShapePath = routeShapePathFor(args.where?.uuid)
               const routeShape =
                 args.where?.uuid === 'route-without-shape'
                   ? null
@@ -233,6 +241,20 @@ describe('Routes API (e2e)', () => {
   it('/api/routes/:uuid (GET) falls back to ordered stop positions when shape points have extra values', () => {
     return request(app.getHttpServer())
       .get('/api/routes/route-with-extra-shape-point')
+      .expect(200)
+      .expect(
+        ({ body }: { body: ApiSuccessResponse<RouteDetailResponseDto> }) => {
+          expect(body.data.sub_routes[0]?.shape).toEqual({
+            path: [[121, 25]],
+            updated_at: '2026-07-09T00:00:00.000Z',
+          })
+        },
+      )
+  })
+
+  it('/api/routes/:uuid (GET) falls back to ordered stop positions when shape points are non-finite', () => {
+    return request(app.getHttpServer())
+      .get('/api/routes/route-with-non-finite-shape-point')
       .expect(200)
       .expect(
         ({ body }: { body: ApiSuccessResponse<RouteDetailResponseDto> }) => {
