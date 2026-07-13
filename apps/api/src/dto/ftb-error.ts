@@ -11,18 +11,11 @@ export class FTBError extends HttpException {
   constructor(
     readonly code: ErrorCode,
     status: HttpStatus,
-    messageOrOptions: string | FTBErrorOptions = API_ERROR_MESSAGE_BY_CODE[
-      code
-    ],
-    options?: HttpExceptionOptions,
+    options?: FTBErrorOptions,
   ) {
-    const message =
-      typeof messageOrOptions === 'string'
-        ? messageOrOptions
-        : (messageOrOptions.message ?? API_ERROR_MESSAGE_BY_CODE[code])
-    const httpOptions =
-      typeof messageOrOptions === 'string' ? options : messageOrOptions
+    const defaultMessage = API_ERROR_MESSAGE_BY_CODE[code]
+    const { message, ...exceptionOptions } = options ?? {}
 
-    super(message, status, httpOptions)
+    super(message ?? defaultMessage, status, exceptionOptions)
   }
 }

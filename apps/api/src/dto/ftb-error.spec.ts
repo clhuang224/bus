@@ -12,11 +12,11 @@ describe('FTBError', () => {
     expect(error.message).toBe(API_ERROR_MESSAGE_BY_CODE.ROUTE_NOT_FOUND)
   })
 
-  it('accepts a custom message string', () => {
+  it('accepts a custom message option', () => {
     const error = new FTBError(
       ErrorCode.ROUTE_NOT_FOUND,
       HttpStatus.NOT_FOUND,
-      'Custom route message.',
+      { message: 'Custom route message.' },
     )
 
     expect(error.message).toBe('Custom route message.')
