@@ -37,11 +37,9 @@ describe('Settings API (e2e)', () => {
       .patch('/api/settings')
       .send(payload)
       .expect(200)
-      .expect(
-        ({ body }: { body: ApiSuccessResponse<UpdateSettingsRequestDto> }) => {
-          expect(body.data).toEqual(payload)
-        },
-      )
+      .expect(({ body }: { body: ApiSuccessResponse<SettingsResponseDto> }) => {
+        expect(body.data).toEqual(payload)
+      })
   })
 
   it('/api/settings (PATCH) falls back when the payload does not match the contract', () => {

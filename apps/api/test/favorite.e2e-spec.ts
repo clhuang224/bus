@@ -7,6 +7,7 @@ import {
 } from '@bus/shared'
 import type {
   CreateFavoriteRouteStopRequestDto,
+  FavoriteRouteStopDto,
   FavoriteRouteStopsResponseDto,
 } from '../src/favorite/dto/favorite-route-stops-response.dto.js'
 import { createE2eApp } from './create-e2e-app.js'
@@ -66,11 +67,7 @@ describe('Favorite API (e2e)', () => {
       .send(payload)
       .expect(201)
       .expect(
-        ({
-          body,
-        }: {
-          body: ApiSuccessResponse<CreateFavoriteRouteStopRequestDto>
-        }) => {
+        ({ body }: { body: ApiSuccessResponse<FavoriteRouteStopDto> }) => {
           expect(body.data).toEqual(payload)
         },
       )
