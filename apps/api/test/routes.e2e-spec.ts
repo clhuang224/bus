@@ -56,6 +56,7 @@ describe('Routes API (e2e)', () => {
                   ? null
                   : {
                       path: routeShapePath,
+                      is_active: true,
                       tdx_updated_at: new Date('2026-07-10T00:00:00.000Z'),
                       updated_at: new Date('2026-07-11T00:00:00.000Z'),
                     }
