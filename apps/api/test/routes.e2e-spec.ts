@@ -1,17 +1,29 @@
 import { type INestApplication } from '@nestjs/common'
 import request from 'supertest'
-import { AreaType, CityNameType, DirectionType, ErrorCode } from '@bus/shared'
+import {
+  AreaType,
+  CityNameType,
+  DirectionType,
+  ErrorCode,
+  type ApiErrorResponse,
+  type ApiSuccessResponse,
+} from '@bus/shared'
 import {
   CityNameType as PrismaCityNameType,
   DirectionType as PrismaDirectionType,
 } from '../src/generated/prisma/enums.js'
+import type {
+  RouteDetailResponseDto,
+  RoutesResponseDto,
+} from '../src/routes/dto/routes-response.dto.js'
+import type { RouteFindFirstArgs } from '../src/generated/prisma/models/Route.js'
 import { PrismaService } from '../src/prisma/prisma.service.js'
 import { createE2eApp } from './create-e2e-app.js'
 
 describe('Routes API (e2e)', () => {
   let app: INestApplication
   let routeFindManyArgs: unknown[]
-  let routeFindFirstArgs: Array<{ where?: { uuid?: string } }>
+  let routeFindFirstArgs: RouteFindFirstArgs[]
 
   beforeEach(async () => {
     routeFindManyArgs = []
@@ -37,7 +49,7 @@ describe('Routes API (e2e)', () => {
                 },
               ])
             },
-            findFirst: (args: { where?: { uuid?: string } }) => {
+            findFirst: (args: RouteFindFirstArgs) => {
               routeFindFirstArgs.push(args)
 
               if (args.where?.uuid === 'missing-route') {
@@ -121,7 +133,7 @@ describe('Routes API (e2e)', () => {
       .get('/api/routes')
       .query({ area: AreaType.TAIPEI })
       .expect(200)
-      .expect(({ body }: { body: { data: { routes: unknown[] } } }) => {
+      .expect(({ body }: { body: ApiSuccessResponse<RoutesResponseDto> }) => {
         expect(body.data.routes).toEqual([
           {
             uuid: 'TPE-route-1',
@@ -151,33 +163,7 @@ describe('Routes API (e2e)', () => {
       .get(`/api/routes/${routeUuid}`)
       .expect(200)
       .expect(
-        ({
-          body,
-        }: {
-          body: {
-            status: number
-            message: string | null
-            data: {
-              uuid: string
-              city: CityNameType
-              name: { 'zh-TW': string; en: string }
-              sub_routes: Array<{
-                uuid: string
-                direction: DirectionType
-                stops: Array<{
-                  uuid: string
-                  sequence: number
-                  name: { 'zh-TW': string; en: string }
-                  position: { latitude: number; longitude: number }
-                }>
-                shape: {
-                  path: Array<[number, number]>
-                  updated_at: string
-                }
-              }>
-            }
-          }
-        }) => {
+        ({ body }: { body: ApiSuccessResponse<RouteDetailResponseDto> }) => {
           expect(body.status).toBe(200)
           expect(body.message).toBeNull()
           expect(body.data.uuid).toBe(routeUuid)
@@ -221,20 +207,7 @@ describe('Routes API (e2e)', () => {
       .get('/api/routes/route-with-malformed-shape')
       .expect(200)
       .expect(
-        ({
-          body,
-        }: {
-          body: {
-            data: {
-              sub_routes: Array<{
-                shape: {
-                  path: Array<[number, number]>
-                  updated_at: string
-                }
-              }>
-            }
-          }
-        }) => {
+        ({ body }: { body: ApiSuccessResponse<RouteDetailResponseDto> }) => {
           expect(body.data.sub_routes[0]?.shape).toEqual({
             path: [[121, 25]],
             updated_at: '2026-07-09T00:00:00.000Z',
@@ -248,20 +221,7 @@ describe('Routes API (e2e)', () => {
       .get('/api/routes/route-with-partial-shape')
       .expect(200)
       .expect(
-        ({
-          body,
-        }: {
-          body: {
-            data: {
-              sub_routes: Array<{
-                shape: {
-                  path: Array<[number, number]>
-                  updated_at: string
-                }
-              }>
-            }
-          }
-        }) => {
+        ({ body }: { body: ApiSuccessResponse<RouteDetailResponseDto> }) => {
           expect(body.data.sub_routes[0]?.shape).toEqual({
             path: [[121, 25]],
             updated_at: '2026-07-09T00:00:00.000Z',
@@ -275,20 +235,7 @@ describe('Routes API (e2e)', () => {
       .get('/api/routes/route-with-extra-shape-point')
       .expect(200)
       .expect(
-        ({
-          body,
-        }: {
-          body: {
-            data: {
-              sub_routes: Array<{
-                shape: {
-                  path: Array<[number, number]>
-                  updated_at: string
-                }
-              }>
-            }
-          }
-        }) => {
+        ({ body }: { body: ApiSuccessResponse<RouteDetailResponseDto> }) => {
           expect(body.data.sub_routes[0]?.shape).toEqual({
             path: [[121, 25]],
             updated_at: '2026-07-09T00:00:00.000Z',
@@ -302,20 +249,7 @@ describe('Routes API (e2e)', () => {
       .get('/api/routes/route-without-shape')
       .expect(200)
       .expect(
-        ({
-          body,
-        }: {
-          body: {
-            data: {
-              sub_routes: Array<{
-                shape: {
-                  path: Array<[number, number]>
-                  updated_at: string
-                }
-              }>
-            }
-          }
-        }) => {
+        ({ body }: { body: ApiSuccessResponse<RouteDetailResponseDto> }) => {
           expect(body.data.sub_routes[0]?.shape).toEqual({
             path: [[121, 25]],
             updated_at: '2026-07-09T00:00:00.000Z',
@@ -328,7 +262,7 @@ describe('Routes API (e2e)', () => {
     return request(app.getHttpServer())
       .get('/api/routes/missing-route')
       .expect(404)
-      .expect(({ body }: { body: { error: { code: ErrorCode } } }) => {
+      .expect(({ body }: { body: ApiErrorResponse }) => {
         expect(body.error.code).toBe(ErrorCode.ROUTE_NOT_FOUND)
         expect(routeFindFirstArgs).toEqual([
           expect.objectContaining({
@@ -342,7 +276,7 @@ describe('Routes API (e2e)', () => {
     return request(app.getHttpServer())
       .get('/api/routes')
       .expect(400)
-      .expect(({ body }: { body: { error: { code: ErrorCode } } }) => {
+      .expect(({ body }: { body: ApiErrorResponse }) => {
         expect(body.error.code).toBe(ErrorCode.SYSTEM_BAD_REQUEST)
       })
   })
@@ -352,7 +286,7 @@ describe('Routes API (e2e)', () => {
       .get('/api/routes')
       .query({ area: 'InvalidArea' })
       .expect(400)
-      .expect(({ body }: { body: { error: { code: ErrorCode } } }) => {
+      .expect(({ body }: { body: ApiErrorResponse }) => {
         expect(body.error.code).toBe(ErrorCode.SYSTEM_BAD_REQUEST)
       })
   })

@@ -1,6 +1,8 @@
 import { type INestApplication } from '@nestjs/common'
 import request from 'supertest'
 import {
+  type ApiErrorResponse,
+  type ApiSuccessResponse,
   CityNameType,
   ErrorCode,
   SyncResourceType,
@@ -11,6 +13,11 @@ import {
   SyncResourceType as PrismaSyncResourceType,
   SyncStatusType as PrismaSyncStatusType,
 } from '../src/generated/prisma/enums.js'
+import type { SyncResponseDto } from '../src/admin/dto/sync-response.dto.js'
+import type {
+  SyncRunDetailResponseDto,
+  SyncRunSummaryResponseDto,
+} from '../src/admin/dto/sync-run-response.dto.js'
 import { PrismaService } from '../src/prisma/prisma.service.js'
 import { SyncService } from '../src/sync/sync.service.js'
 import { createE2eApp } from './create-e2e-app.js'
@@ -159,43 +166,8 @@ function renderSql(strings: TemplateStringsArray, values: unknown[]): string {
     .trim()
 }
 
-interface SyncResponseBody {
-  uuid: string | null
-  resource: SyncResourceType
-  status: SyncStatusType
-  started_at: string | null
-  finished_at: string | null
-  records_read: number
-  records_created: number
-  records_updated: number
-  records_deactivated: number
-  error_message: string | null
-}
-
-interface SyncRunSummaryResponseBody extends SyncResponseBody {
-  uuid: string
-  created_at: string
-  updated_at: string
-  resume_after_at: string | null
-}
-
-interface SyncRunDetailResponseBody extends SyncRunSummaryResponseBody {
-  cities: Array<{
-    city: CityNameType
-    status: SyncStatusType
-    started_at: string | null
-    finished_at: string | null
-    updated_at: string
-    records_read: number
-    records_created: number
-    records_updated: number
-    records_deactivated: number
-    error_message: string | null
-  }>
-}
-
 function expectQueuedSyncResponse(
-  body: { data: SyncResponseBody },
+  body: ApiSuccessResponse<SyncResponseDto>,
   resource: SyncResourceType,
 ) {
   expect(body.data).toEqual({
@@ -249,7 +221,7 @@ describe('Admin Sync API (e2e)', () => {
     return request(app.getHttpServer())
       .get('/api/admin/sync/runs')
       .expect(401)
-      .expect(({ body }: { body: { error: { code: ErrorCode } } }) => {
+      .expect(({ body }: { body: ApiErrorResponse }) => {
         expect(body.error.code).toBe(ErrorCode.SYSTEM_UNAUTHORIZED)
       })
   })
@@ -259,7 +231,7 @@ describe('Admin Sync API (e2e)', () => {
       .post('/api/admin/sync/routes')
       .set('x-admin-api-key', adminApiKey)
       .expect(200)
-      .expect(({ body }: { body: { data: SyncResponseBody } }) => {
+      .expect(({ body }: { body: ApiSuccessResponse<SyncResponseDto> }) => {
         expectQueuedSyncResponse(body, SyncResourceType.ROUTES)
         expect(prismaService.createCalls).toEqual([
           {
@@ -285,7 +257,7 @@ describe('Admin Sync API (e2e)', () => {
       .post('/api/admin/sync/routes')
       .set('x-admin-api-key', adminApiKey)
       .expect(200)
-      .expect(({ body }: { body: { data: SyncResponseBody } }) => {
+      .expect(({ body }: { body: ApiSuccessResponse<SyncResponseDto> }) => {
         expectQueuedSyncResponse(body, SyncResourceType.ROUTES)
       })
 
@@ -305,7 +277,7 @@ describe('Admin Sync API (e2e)', () => {
       .post('/api/admin/sync/routes')
       .set('x-admin-api-key', adminApiKey)
       .expect(200)
-      .expect(({ body }: { body: { data: SyncResponseBody } }) => {
+      .expect(({ body }: { body: ApiSuccessResponse<SyncResponseDto> }) => {
         expectQueuedSyncResponse(body, SyncResourceType.ROUTES)
       })
 
@@ -329,7 +301,7 @@ describe('Admin Sync API (e2e)', () => {
       .post('/api/admin/sync/stops')
       .set('x-admin-api-key', adminApiKey)
       .expect(200)
-      .expect(({ body }: { body: { data: SyncResponseBody } }) => {
+      .expect(({ body }: { body: ApiSuccessResponse<SyncResponseDto> }) => {
         expectQueuedSyncResponse(body, SyncResourceType.STOPS)
         expect(prismaService.createCalls).toEqual([
           {
@@ -355,9 +327,45 @@ describe('Admin Sync API (e2e)', () => {
       .get('/api/admin/sync/runs')
       .set('x-admin-api-key', adminApiKey)
       .expect(200)
-      .expect(({ body }: { body: { data: SyncRunSummaryResponseBody[] } }) => {
-        expect(body.data).toEqual([
-          {
+      .expect(
+        ({
+          body,
+        }: {
+          body: ApiSuccessResponse<SyncRunSummaryResponseDto[]>
+        }) => {
+          expect(body.data).toEqual([
+            {
+              uuid: syncRunUuid,
+              resource: SyncResourceType.STOPS,
+              status: SyncStatusType.QUEUED,
+              created_at: syncRunCreatedAt.toISOString(),
+              updated_at: syncRunCreatedAt.toISOString(),
+              started_at: null,
+              finished_at: null,
+              resume_after_at: null,
+              records_read: 0,
+              records_created: 0,
+              records_updated: 0,
+              records_deactivated: 0,
+              error_message: null,
+            },
+          ])
+        },
+      )
+  })
+
+  it('/api/admin/sync/runs/:uuid (GET) returns sync run detail', async () => {
+    await request(app.getHttpServer())
+      .post('/api/admin/sync/stops')
+      .set('x-admin-api-key', adminApiKey)
+      .expect(200)
+    await request(app.getHttpServer())
+      .get(`/api/admin/sync/runs/${syncRunUuid}`)
+      .set('x-admin-api-key', adminApiKey)
+      .expect(200)
+      .expect(
+        ({ body }: { body: ApiSuccessResponse<SyncRunDetailResponseDto> }) => {
+          expect(body.data).toEqual({
             uuid: syncRunUuid,
             resource: SyncResourceType.STOPS,
             status: SyncStatusType.QUEUED,
@@ -371,50 +379,22 @@ describe('Admin Sync API (e2e)', () => {
             records_updated: 0,
             records_deactivated: 0,
             error_message: null,
-          },
-        ])
-      })
-  })
-
-  it('/api/admin/sync/runs/:uuid (GET) returns sync run detail', async () => {
-    await request(app.getHttpServer())
-      .post('/api/admin/sync/stops')
-      .set('x-admin-api-key', adminApiKey)
-      .expect(200)
-    await request(app.getHttpServer())
-      .get(`/api/admin/sync/runs/${syncRunUuid}`)
-      .set('x-admin-api-key', adminApiKey)
-      .expect(200)
-      .expect(({ body }: { body: { data: SyncRunDetailResponseBody } }) => {
-        expect(body.data).toEqual({
-          uuid: syncRunUuid,
-          resource: SyncResourceType.STOPS,
-          status: SyncStatusType.QUEUED,
-          created_at: syncRunCreatedAt.toISOString(),
-          updated_at: syncRunCreatedAt.toISOString(),
-          started_at: null,
-          finished_at: null,
-          resume_after_at: null,
-          records_read: 0,
-          records_created: 0,
-          records_updated: 0,
-          records_deactivated: 0,
-          error_message: null,
-          cities: [
-            {
-              city: CityNameType.TAIPEI,
-              status: SyncStatusType.SUCCEEDED,
-              started_at: '2026-06-16T00:01:00.000Z',
-              finished_at: '2026-06-16T00:02:00.000Z',
-              updated_at: '2026-06-16T00:02:00.000Z',
-              records_read: 10,
-              records_created: 7,
-              records_updated: 3,
-              records_deactivated: 0,
-              error_message: null,
-            },
-          ],
-        })
-      })
+            cities: [
+              {
+                city: CityNameType.TAIPEI,
+                status: SyncStatusType.SUCCEEDED,
+                started_at: '2026-06-16T00:01:00.000Z',
+                finished_at: '2026-06-16T00:02:00.000Z',
+                updated_at: '2026-06-16T00:02:00.000Z',
+                records_read: 10,
+                records_created: 7,
+                records_updated: 3,
+                records_deactivated: 0,
+                error_message: null,
+              },
+            ],
+          })
+        },
+      )
   })
 })

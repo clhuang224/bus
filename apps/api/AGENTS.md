@@ -107,6 +107,12 @@ and OpenAPI/Scalar timestamp examples, such as
 `2026-06-03T18:25:13.000Z`. Do not use timezone-offset examples such as
 `+08:00` unless the endpoint intentionally returns that exact format.
 
+Before adding a local test-only response type, check whether an existing DTO or
+shared contract type already represents it. In e2e tests, prefer
+`ApiSuccessResponse<SomeResponseDto>` or `ApiErrorResponse` from
+`@bus/shared`, plus the actual API DTO from `src/**/dto`, instead of rewriting
+the response envelope or DTO shape in the test file.
+
 ## Code Organization
 
 Inside classes, keep methods in reading order. Public entry points should appear

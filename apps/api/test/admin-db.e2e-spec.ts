@@ -1,22 +1,14 @@
 import { type INestApplication } from '@nestjs/common'
 import request from 'supertest'
-import { SyncResourceType, SyncStatusType } from '@bus/shared'
+import {
+  SyncResourceType,
+  SyncStatusType,
+  type ApiSuccessResponse,
+} from '@bus/shared'
 import { ADMIN_API_KEY_HEADER } from '../src/admin/admin-api-key.guard.js'
+import type { SyncResponseDto } from '../src/admin/dto/sync-response.dto.js'
 import { PrismaService } from '../src/prisma/prisma.service.js'
 import { createDbE2eApp } from './create-db-e2e-app.js'
-
-interface SyncResponseBody {
-  uuid: string
-  resource: SyncResourceType
-  status: SyncStatusType
-  started_at: string | null
-  finished_at: string | null
-  records_read: number
-  records_created: number
-  records_updated: number
-  records_deactivated: number
-  error_message: string | null
-}
 
 function getRequiredAdminApiKey(): string {
   const adminApiKey = process.env.ADMIN_API_KEY
@@ -59,9 +51,13 @@ describe('Admin Sync API database flow (e2e)', () => {
       .set(ADMIN_API_KEY_HEADER, getRequiredAdminApiKey())
       .expect(200)
 
-    const body = (response.body as { data: SyncResponseBody }).data
+    const body = (response.body as ApiSuccessResponse<SyncResponseDto>).data
 
     expect(typeof body.uuid).toBe('string')
+    if (!body.uuid) {
+      throw new Error('Expected sync response uuid.')
+    }
+
     expect(body).toEqual({
       uuid: body.uuid,
       resource: SyncResourceType.ROUTES,
