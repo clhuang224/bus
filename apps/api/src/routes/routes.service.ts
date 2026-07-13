@@ -301,7 +301,7 @@ export class RoutesService {
     const positions: PositionTuple[] = []
 
     for (const point of path) {
-      if (!Array.isArray(point) || point.length < 2) return []
+      if (!Array.isArray(point) || point.length !== 2) return []
 
       const longitude: unknown = point[0]
       const latitude: unknown = point[1]

@@ -49,10 +49,12 @@ describe('Routes API (e2e)', () => {
                   ? ['broken-shape-path']
                   : args.where?.uuid === 'route-with-partial-shape'
                     ? [[121, 25], 'broken-shape-point', [122, 26]]
-                    : [
-                        [121, 25],
-                        [122, 26],
-                      ]
+                    : args.where?.uuid === 'route-with-extra-shape-point'
+                      ? [[121, 25, 999]]
+                      : [
+                          [121, 25],
+                          [122, 26],
+                        ]
               const routeShape =
                 args.where?.uuid === 'route-without-shape'
                   ? null
@@ -244,6 +246,33 @@ describe('Routes API (e2e)', () => {
   it('/api/routes/:uuid (GET) falls back to ordered stop positions when shape data is partially malformed', () => {
     return request(app.getHttpServer())
       .get('/api/routes/route-with-partial-shape')
+      .expect(200)
+      .expect(
+        ({
+          body,
+        }: {
+          body: {
+            data: {
+              sub_routes: Array<{
+                shape: {
+                  path: Array<[number, number]>
+                  updated_at: string
+                }
+              }>
+            }
+          }
+        }) => {
+          expect(body.data.sub_routes[0]?.shape).toEqual({
+            path: [[121, 25]],
+            updated_at: '2026-07-09T00:00:00.000Z',
+          })
+        },
+      )
+  })
+
+  it('/api/routes/:uuid (GET) falls back to ordered stop positions when shape points have extra values', () => {
+    return request(app.getHttpServer())
+      .get('/api/routes/route-with-extra-shape-point')
       .expect(200)
       .expect(
         ({

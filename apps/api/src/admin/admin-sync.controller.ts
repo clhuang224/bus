@@ -28,7 +28,7 @@ import { SyncResponseDto } from './dto/sync-response.dto.js'
   code: ErrorCode.SYSTEM_UNAUTHORIZED,
   description: 'A valid admin API key is required.',
 })
-@ApiDefaultErrorResponses()
+@ApiDefaultErrorResponses({ exclude: [401] })
 @UseGuards(AdminApiKeyGuard)
 @Controller('admin/sync')
 export class AdminSyncController {
