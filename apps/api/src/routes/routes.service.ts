@@ -298,7 +298,9 @@ export class RoutesService {
   private toPositionPath(path: unknown): PositionTuple[] {
     if (!Array.isArray(path)) return []
 
-    return path.flatMap((point): PositionTuple[] => {
+    const positions: PositionTuple[] = []
+
+    for (const point of path) {
       if (!Array.isArray(point) || point.length < 2) return []
 
       const longitude: unknown = point[0]
@@ -308,7 +310,9 @@ export class RoutesService {
         return []
       }
 
-      return [[longitude, latitude]]
-    })
+      positions.push([longitude, latitude])
+    }
+
+    return positions
   }
 }
