@@ -86,7 +86,10 @@ describe('Routes API (e2e)', () => {
                     }
 
               return Promise.resolve({
-                uuid: 'TPE-route-1',
+                uuid:
+                  typeof args.where?.uuid === 'string'
+                    ? args.where.uuid
+                    : 'TPE-route-1',
                 city: PrismaCityNameType.TAIPEI,
                 name_zh_tw: '307',
                 name_en: '307',
