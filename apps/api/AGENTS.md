@@ -76,6 +76,50 @@ Use full coordinate field names:
 
 Avoid abbreviated coordinate names such as `lat` or `lon` in API responses.
 
+Use the following coordinate shapes in API contracts:
+
+- Single coordinate points use objects with explicit keys:
+  `{ latitude: number, longitude: number }`.
+- Ordered paths or geometry-like arrays use MapLibre/GeoJSON coordinate order:
+  `[longitude, latitude][]`.
+- Keep TDX-specific coordinate names and ordering inside TDX client, mapper, or
+  sync code. Public API responses should not expose TDX coordinate field names.
+
+## Response Contracts
+
+All non-204 API responses use the shared response envelope:
+
+- success: `{ status, message, data }`
+- error: `{ status, error: { code, message } }`
+
+Keep `ErrorCode` values in `packages/shared` and use a clear domain prefix. Use
+`SYSTEM_*` for generic framework/system errors, such as validation failures,
+missing authentication, or generic not-found responses. Add domain-specific
+codes, such as `ROUTE_*`, only when the runtime can intentionally emit that
+domain error.
+
+OpenAPI/Scalar examples must match the real runtime response for their HTTP
+status. Do not reuse a 404 `SYSTEM_NOT_FOUND` example for 400, 401, 403, 409,
+or 500 responses.
+
+Use ISO 8601 UTC strings from `Date#toISOString()` for public API timestamps
+and OpenAPI/Scalar timestamp examples, such as
+`2026-06-03T18:25:13.000Z`. Do not use timezone-offset examples such as
+`+08:00` unless the endpoint intentionally returns that exact format.
+
+Before adding a local test-only response type, check whether an existing DTO or
+shared contract type already represents it. In e2e tests, prefer
+`ApiSuccessResponse<SomeResponseDto>` or `ApiErrorResponse` from
+`@bus/shared`, plus the actual API DTO from `src/**/dto`, instead of rewriting
+the response envelope or DTO shape in the test file.
+
+## Code Organization
+
+Inside classes, keep methods in reading order. Public entry points should appear
+before the private helpers they call, and related helper methods should stay
+near the public method they support. Avoid putting mapper/helper methods above
+the main flow unless that is already the local pattern in the file.
+
 ## Shared Types
 
 Put cross-workspace enums and stable contract values in `packages/shared`.

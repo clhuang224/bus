@@ -1,6 +1,10 @@
-import { INestApplication } from '@nestjs/common'
+import { type INestApplication } from '@nestjs/common'
 import request from 'supertest'
-import { AppLocaleType } from '@bus/shared'
+import { AppLocaleType, type ApiSuccessResponse } from '@bus/shared'
+import type {
+  SettingsResponseDto,
+  UpdateSettingsRequestDto,
+} from '../src/settings/dto/settings-response.dto.js'
 import { createE2eApp } from './create-e2e-app.js'
 
 describe('Settings API (e2e)', () => {
@@ -18,20 +22,14 @@ describe('Settings API (e2e)', () => {
     return request(app.getHttpServer())
       .get('/api/settings')
       .expect(200)
-      .expect(
-        ({
-          body,
-        }: {
-          body: { locale: AppLocaleType; share_usage_data: boolean }
-        }) => {
-          expect(body.locale).toBe(AppLocaleType.ZH_TW)
-          expect(body.share_usage_data).toBe(true)
-        },
-      )
+      .expect(({ body }: { body: ApiSuccessResponse<SettingsResponseDto> }) => {
+        expect(body.data.locale).toBe(AppLocaleType.ZH_TW)
+        expect(body.data.share_usage_data).toBe(true)
+      })
   })
 
   it('/api/settings (PATCH) updates provided settings fields', () => {
-    const payload = {
+    const payload: UpdateSettingsRequestDto = {
       locale: AppLocaleType.EN,
       share_usage_data: false,
     }
@@ -39,8 +37,8 @@ describe('Settings API (e2e)', () => {
       .patch('/api/settings')
       .send(payload)
       .expect(200)
-      .expect(({ body }: { body: typeof payload }) => {
-        expect(body).toEqual(payload)
+      .expect(({ body }: { body: ApiSuccessResponse<SettingsResponseDto> }) => {
+        expect(body.data).toEqual(payload)
       })
   })
 
@@ -53,15 +51,9 @@ describe('Settings API (e2e)', () => {
       .patch('/api/settings')
       .send(payload)
       .expect(200)
-      .expect(
-        ({
-          body,
-        }: {
-          body: { locale: AppLocaleType; share_usage_data: boolean }
-        }) => {
-          expect(body.locale).toBe(AppLocaleType.ZH_TW)
-          expect(body.share_usage_data).toBe(true)
-        },
-      )
+      .expect(({ body }: { body: ApiSuccessResponse<SettingsResponseDto> }) => {
+        expect(body.data.locale).toBe(AppLocaleType.ZH_TW)
+        expect(body.data.share_usage_data).toBe(true)
+      })
   })
 })

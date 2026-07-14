@@ -7,13 +7,11 @@ import {
   Param,
   Post,
 } from '@nestjs/common'
+import { ApiNoContentResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
 import {
-  ApiCreatedResponse,
-  ApiNoContentResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger'
+  ApiDefaultErrorResponses,
+  ApiSuccessResponse,
+} from '../dto/api-response.decorator.js'
 import {
   CreateFavoriteRouteStopRequestDto,
   FavoriteRouteStopDto,
@@ -22,6 +20,7 @@ import {
 import { FavoriteService } from './favorite.service.js'
 
 @ApiTags('favorite')
+@ApiDefaultErrorResponses()
 @Controller('favorite')
 export class FavoriteController {
   constructor(private readonly favoriteService: FavoriteService) {}
@@ -31,7 +30,7 @@ export class FavoriteController {
     description:
       'WARNING: Backlog placeholder. This endpoint should wait until account/auth work starts because favorites are user-specific and currently remain frontend-local.',
   })
-  @ApiOkResponse({ type: FavoriteRouteStopsResponseDto })
+  @ApiSuccessResponse({ type: FavoriteRouteStopsResponseDto })
   @Get('route-stops')
   listRouteStops(): FavoriteRouteStopsResponseDto {
     return this.favoriteService.listRouteStops()
@@ -42,7 +41,7 @@ export class FavoriteController {
     description:
       'WARNING: Backlog placeholder. This endpoint should wait until account/auth work starts because favorites are user-specific and currently remain frontend-local.',
   })
-  @ApiCreatedResponse({ type: FavoriteRouteStopDto })
+  @ApiSuccessResponse({ status: 201, type: FavoriteRouteStopDto })
   @Post('route-stops')
   createRouteStop(
     @Body() body: CreateFavoriteRouteStopRequestDto,

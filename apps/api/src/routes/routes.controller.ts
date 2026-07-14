@@ -1,6 +1,11 @@
-import { AreaType } from '@bus/shared'
+import { AreaType, ErrorCode } from '@bus/shared'
 import { Controller, Get, Param, ParseEnumPipe, Query } from '@nestjs/common'
-import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
+import {
+  ApiDefaultErrorResponses,
+  ApiErrorResponse,
+  ApiSuccessResponse,
+} from '../dto/api-response.decorator.js'
 import {
   RouteDetailResponseDto,
   RoutesResponseDto,
@@ -8,6 +13,7 @@ import {
 import { RoutesService } from './routes.service.js'
 
 @ApiTags('routes')
+@ApiDefaultErrorResponses()
 @Controller('routes')
 export class RoutesController {
   constructor(private readonly routesService: RoutesService) {}
@@ -24,18 +30,27 @@ export class RoutesController {
     description:
       'Search area selected by the client. The backend owns the area-to-city mapping.',
   })
-  @ApiOkResponse({ type: RoutesResponseDto })
+  @ApiSuccessResponse({ type: RoutesResponseDto })
   @Get()
   listRoutes(
     @Query('area', new ParseEnumPipe(AreaType)) area: AreaType,
-  ): RoutesResponseDto {
+  ): Promise<RoutesResponseDto> {
     return this.routesService.listRoutes(area)
   }
 
-  @ApiOperation({ summary: 'Get route detail' })
-  @ApiOkResponse({ type: RouteDetailResponseDto })
+  @ApiOperation({
+    summary: 'Get route detail',
+    description:
+      'Returns base route detail for one route. Each sub-route shape prefers the more precise route shape from TDX when available and decodable. Shape paths are returned as [longitude, latitude] tuples to reduce payload size. If the precise shape is missing or invalid, the backend falls back to ordered stop positions, so a route with stops should not return an empty shape path.',
+  })
+  @ApiSuccessResponse({ type: RouteDetailResponseDto })
+  @ApiErrorResponse({
+    status: 404,
+    code: ErrorCode.ROUTE_NOT_FOUND,
+    description: 'Route UUID was not found or is inactive.',
+  })
   @Get(':uuid')
-  getRoute(@Param('uuid') uuid: string): RouteDetailResponseDto {
+  getRoute(@Param('uuid') uuid: string): Promise<RouteDetailResponseDto> {
     return this.routesService.getRoute(uuid)
   }
 }

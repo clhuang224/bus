@@ -1,6 +1,15 @@
-import { INestApplication } from '@nestjs/common'
+import { type INestApplication } from '@nestjs/common'
 import request from 'supertest'
-import { CityNameType, DirectionType } from '@bus/shared'
+import {
+  CityNameType,
+  DirectionType,
+  type ApiSuccessResponse,
+} from '@bus/shared'
+import type {
+  CreateFavoriteRouteStopRequestDto,
+  FavoriteRouteStopDto,
+  FavoriteRouteStopsResponseDto,
+} from '../src/favorite/dto/favorite-route-stops-response.dto.js'
 import { createE2eApp } from './create-e2e-app.js'
 
 describe('Favorite API (e2e)', () => {
@@ -18,13 +27,19 @@ describe('Favorite API (e2e)', () => {
     return request(app.getHttpServer())
       .get('/api/favorite/route-stops')
       .expect(200)
-      .expect(({ body }: { body: { route_stops: unknown[] } }) => {
-        expect(Array.isArray(body.route_stops)).toBe(true)
-      })
+      .expect(
+        ({
+          body,
+        }: {
+          body: ApiSuccessResponse<FavoriteRouteStopsResponseDto>
+        }) => {
+          expect(Array.isArray(body.data.route_stops)).toBe(true)
+        },
+      )
   })
 
   it('/api/favorite/route-stops (POST) creates a favorite route stop placeholder', () => {
-    const payload = {
+    const payload: CreateFavoriteRouteStopRequestDto = {
       uuid: 'TPE16111-TPE157463-0-60094',
       city: CityNameType.TAIPEI,
       route: {
@@ -51,9 +66,11 @@ describe('Favorite API (e2e)', () => {
       .post('/api/favorite/route-stops')
       .send(payload)
       .expect(201)
-      .expect(({ body }: { body: typeof payload }) => {
-        expect(body).toEqual(payload)
-      })
+      .expect(
+        ({ body }: { body: ApiSuccessResponse<FavoriteRouteStopDto> }) => {
+          expect(body.data).toEqual(payload)
+        },
+      )
   })
 
   it('/api/favorite/route-stops/:uuid (DELETE) removes a favorite route stop', () => {

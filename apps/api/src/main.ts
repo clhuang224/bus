@@ -19,6 +19,7 @@ async function bootstrap() {
         'Contract-first backend API for Finding the Bus.',
         'The current API surface defines page-ready route, station, realtime, and admin sync contracts before the database sync layer is implemented.',
         'Favorite and settings contracts are backlog placeholders until account/auth work starts.',
+        'Successful responses use { status, message, data }. Error responses use { status, error: { code, message } }, where code is one of the project ErrorCode enum values.',
       ].join(' '),
     )
     .setVersion('1.0.0')

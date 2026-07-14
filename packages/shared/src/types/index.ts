@@ -1,5 +1,10 @@
 export type { LocalizedText } from './LocalizedText.js'
 export type {
+  ApiErrorResponse,
+  ApiSuccessResponse,
+  PaginatedData,
+} from './ApiResponse.js'
+export type {
   TdxBusOperator,
   TdxBusRoute,
   TdxBusSubRoute,

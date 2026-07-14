@@ -1,5 +1,11 @@
-import { INestApplication } from '@nestjs/common'
+import { type INestApplication } from '@nestjs/common'
 import request from 'supertest'
+import {
+  ErrorCode,
+  type ApiErrorResponse,
+  type ApiSuccessResponse,
+} from '@bus/shared'
+import type { StationsResponseDto } from '../src/stations/dto/stations-response.dto.js'
 import { createE2eApp } from './create-e2e-app.js'
 
 describe('Stations API (e2e)', () => {
@@ -18,8 +24,8 @@ describe('Stations API (e2e)', () => {
       .get('/api/stations')
       .query({ latitude: 24.9939, longitude: 121.5047 })
       .expect(200)
-      .expect(({ body }: { body: { stations: unknown[] } }) => {
-        expect(Array.isArray(body.stations)).toBe(true)
+      .expect(({ body }: { body: ApiSuccessResponse<StationsResponseDto> }) => {
+        expect(Array.isArray(body.data.stations)).toBe(true)
       })
   })
 
@@ -28,6 +34,9 @@ describe('Stations API (e2e)', () => {
       .get('/api/stations')
       .query({ longitude: 121.5047 })
       .expect(400)
+      .expect(({ body }: { body: ApiErrorResponse }) => {
+        expect(body.error.code).toBe(ErrorCode.SYSTEM_BAD_REQUEST)
+      })
   })
 
   it('/api/stations (GET) rejects requests without longitude', () => {
@@ -35,5 +44,8 @@ describe('Stations API (e2e)', () => {
       .get('/api/stations')
       .query({ latitude: 24.9939 })
       .expect(400)
+      .expect(({ body }: { body: ApiErrorResponse }) => {
+        expect(body.error.code).toBe(ErrorCode.SYSTEM_BAD_REQUEST)
+      })
   })
 })

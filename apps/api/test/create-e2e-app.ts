@@ -1,5 +1,9 @@
-import { INestApplication } from '@nestjs/common'
-import { Test, TestingModule, TestingModuleBuilder } from '@nestjs/testing'
+import { type INestApplication } from '@nestjs/common'
+import {
+  Test,
+  type TestingModule,
+  type TestingModuleBuilder,
+} from '@nestjs/testing'
 import { PrismaService } from '../src/prisma/prisma.service.js'
 import { SyncService } from '../src/sync/sync.service.js'
 import { AppModule } from './../src/app.module.js'

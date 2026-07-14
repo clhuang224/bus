@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
-import type { CityNameType, TdxBusRoute } from '@bus/shared'
 import type {
+  CityNameType,
+  TdxBusRoute,
   TdxStation,
   TdxStationGroup,
   TdxStop,

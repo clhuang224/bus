@@ -6,16 +6,15 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common'
-import {
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiSecurity,
-  ApiTags,
-  ApiUnauthorizedResponse,
-} from '@nestjs/swagger'
+import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger'
+import { ErrorCode } from '@bus/shared'
 import { AdminApiKeyGuard } from './admin-api-key.guard.js'
 import { AdminService } from './admin.service.js'
+import {
+  ApiDefaultErrorResponses,
+  ApiErrorResponse,
+  ApiSuccessResponse,
+} from '../dto/api-response.decorator.js'
 import {
   SyncRunDetailResponseDto,
   SyncRunSummaryResponseDto,
@@ -24,9 +23,12 @@ import { SyncResponseDto } from './dto/sync-response.dto.js'
 
 @ApiTags('admin')
 @ApiSecurity('adminApiKey')
-@ApiUnauthorizedResponse({
+@ApiErrorResponse({
+  status: 401,
+  code: ErrorCode.SYSTEM_UNAUTHORIZED,
   description: 'A valid admin API key is required.',
 })
+@ApiDefaultErrorResponses({ exclude: [401] })
 @UseGuards(AdminApiKeyGuard)
 @Controller('admin/sync')
 export class AdminSyncController {
@@ -37,7 +39,7 @@ export class AdminSyncController {
     description:
       'Returns recent route and stop sync runs for local admin monitoring.',
   })
-  @ApiOkResponse({
+  @ApiSuccessResponse({
     description: 'Recent sync runs.',
     type: [SyncRunSummaryResponseDto],
   })
@@ -51,11 +53,13 @@ export class AdminSyncController {
     description:
       'Returns one sync run with per-city checkpoints for local admin monitoring.',
   })
-  @ApiOkResponse({
+  @ApiSuccessResponse({
     description: 'Sync run detail.',
     type: SyncRunDetailResponseDto,
   })
-  @ApiNotFoundResponse({
+  @ApiErrorResponse({
+    status: 404,
+    code: ErrorCode.SYSTEM_NOT_FOUND,
     description: 'Sync run was not found.',
   })
   @Get('runs/:uuid')
@@ -68,7 +72,7 @@ export class AdminSyncController {
     description:
       'Queues a background sync for route, subroute, operator, and route-operator base data.',
   })
-  @ApiOkResponse({
+  @ApiSuccessResponse({
     description: 'Queued route sync run.',
     type: SyncResponseDto,
   })
@@ -83,7 +87,7 @@ export class AdminSyncController {
     description:
       'Queues a background sync for station group, station, stop, route-stop, and fallback route shape base data.',
   })
-  @ApiOkResponse({
+  @ApiSuccessResponse({
     description: 'Queued stop sync run.',
     type: SyncResponseDto,
   })

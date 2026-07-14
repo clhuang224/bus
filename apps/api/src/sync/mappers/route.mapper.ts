@@ -1,4 +1,4 @@
-import { CityNameType, DirectionType } from '@bus/shared'
+import { type CityNameType, type DirectionType } from '@bus/shared'
 import type {
   TdxBusOperator,
   TdxBusRoute,
@@ -10,7 +10,7 @@ import {
   PRISMA_DIRECTION_BY_TDX_DIRECTION,
 } from '../../constants/enum-mappings.js'
 import {
-  CityNameType as PrismaCityNameType,
+  type CityNameType as PrismaCityNameType,
   DirectionType as PrismaDirectionType,
 } from '../../generated/prisma/enums.js'
 
