@@ -20,7 +20,7 @@ import { API_ERROR_MESSAGE_BY_CODE } from './api-response.messages.js'
 interface ApiSuccessResponseOptions {
   description?: string
   status?: number
-  type: Type<unknown> | [Type<unknown>]
+  type: Type<unknown> | readonly Type<unknown>[]
 }
 
 interface ApiDefaultErrorResponsesOptions {
@@ -32,8 +32,18 @@ export function ApiSuccessResponse({
   status = 200,
   type,
 }: ApiSuccessResponseOptions) {
-  const isArray = Array.isArray(type)
+  const isArray = isDtoTypeArray(type)
+  if (isArray && type.length !== 1) {
+    throw new Error(
+      'ApiSuccessResponse expects "type" to be a single DTO or a 1-element array [Dto] for list responses.',
+    )
+  }
+
   const dataType = isArray ? type[0] : type
+  if (!dataType) {
+    throw new Error('ApiSuccessResponse expects a DTO type.')
+  }
+
   const dataSchema = isArray
     ? {
         type: 'array',
@@ -150,4 +160,10 @@ function createErrorExample(status: number, code: ErrorCode) {
       message: API_ERROR_MESSAGE_BY_CODE[code],
     },
   }
+}
+
+function isDtoTypeArray(
+  type: ApiSuccessResponseOptions['type'],
+): type is readonly Type<unknown>[] {
+  return Array.isArray(type)
 }
