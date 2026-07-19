@@ -3,6 +3,9 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.4.0",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "prepare": "husky",
     "build": "pnpm -r --if-present build",
@@ -15,7 +18,7 @@
     "lint": "pnpm -r --if-present lint"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1",
+    "concurrently": "^10.0.3",
     "husky": "^9.1.7",
     "prettier": "^3.4.2"
   }
