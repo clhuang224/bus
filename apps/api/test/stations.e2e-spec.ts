@@ -248,6 +248,16 @@ describe('Stations API (e2e)', () => {
       })
   })
 
+  it('/api/stations (GET) rejects non-numeric keyword latitude values', () => {
+    return request(app.getHttpServer())
+      .get('/api/stations')
+      .query({ latitude: 'null', longitude: 121.5047 })
+      .expect(400)
+      .expect(({ body }: { body: ApiErrorResponse }) => {
+        expect(body.error.code).toBe(ErrorCode.SYSTEM_BAD_REQUEST)
+      })
+  })
+
   it('/api/stations (GET) rejects empty longitude values', () => {
     return request(app.getHttpServer())
       .get('/api/stations')
