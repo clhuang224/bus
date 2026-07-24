@@ -20,19 +20,12 @@ import { createE2eApp } from './create-e2e-app.js'
 
 describe('Stations API (e2e)', () => {
   let app: INestApplication
-  let stationFindManyArgs: unknown[]
+  let stationFindManyArgs: StationFindManyArgs[]
 
   const getStationFindManyArg = () => {
     expect(stationFindManyArgs).toHaveLength(1)
 
-    return stationFindManyArgs[0] as {
-      where?: {
-        is_active?: unknown
-        latitude?: unknown
-        longitude?: unknown
-      }
-      orderBy?: unknown
-    }
+    return stationFindManyArgs[0]
   }
 
   const isNumberRange = (value: unknown) =>

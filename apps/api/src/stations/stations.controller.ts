@@ -23,15 +23,19 @@ export class StationsController {
     name: 'latitude',
     type: Number,
     required: true,
-    description: 'Current user latitude.',
+    description: 'Current user latitude. Allowed range is -90 to 90.',
     example: 24.9939,
+    minimum: -90,
+    maximum: 90,
   })
   @ApiQuery({
     name: 'longitude',
     type: Number,
     required: true,
-    description: 'Current user longitude.',
+    description: 'Current user longitude. Allowed range is -180 to 180.',
     example: 121.5047,
+    minimum: -180,
+    maximum: 180,
   })
   @ApiQuery({
     name: 'radius_meters',

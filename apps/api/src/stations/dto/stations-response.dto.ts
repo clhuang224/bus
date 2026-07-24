@@ -57,10 +57,9 @@ export class StationDto {
   @ApiProperty({
     description: 'City where the station is located',
     enum: CityNameType,
-    nullable: true,
     example: CityNameType.NEW_TAIPEI,
   })
-  city!: CityNameType | null
+  city!: CityNameType
 
   @ApiProperty({
     description: 'Localized station name',
