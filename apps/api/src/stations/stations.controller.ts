@@ -43,7 +43,8 @@ export class StationsController {
     name: 'radius_meters',
     type: Number,
     required: false,
-    description: 'Search radius in meters.',
+    description:
+      'Search radius in meters. Defaults to 500; allowed range is 500 to 3000.',
     example: 500,
   })
   @ApiSuccessResponse({ type: StationsResponseDto })
@@ -53,7 +54,7 @@ export class StationsController {
     @Query('longitude', ParseFloatPipe) longitude: number,
     @Query('radius_meters', new DefaultValuePipe(500), ParseIntPipe)
     radiusMeters: number,
-  ): StationsResponseDto {
+  ): Promise<StationsResponseDto> {
     return this.stationsService.listStations({
       latitude,
       longitude,

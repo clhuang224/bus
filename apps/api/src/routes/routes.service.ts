@@ -6,37 +6,25 @@ import {
   type CityNameType,
 } from '@bus/shared'
 import {
-  DB_CITY_NAME_BY_PRISMA,
   DB_DIRECTION_BY_PRISMA,
   PRISMA_CITY_BY_TDX_CITY,
 } from '../constants/enum-mappings.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import { FTBError } from '../dto/ftb-error.js'
-import type { LocalizedTextDto } from '../dto/shared.dto.js'
-import type {
-  CityNameType as PrismaCityNameType,
-  DirectionType as PrismaDirectionType,
-} from '../generated/prisma/enums.js'
+import type { DirectionType as PrismaDirectionType } from '../generated/prisma/enums.js'
+import {
+  toLocalizedText,
+  toRouteSummary,
+  type RouteSummaryRecord,
+} from './route-response.mapper.js'
 import type {
   PositionTuple,
   RouteDetailResponseDto,
   RouteShapeDto,
   RouteStopDto,
   RouteSubRouteDto,
-  RouteSummaryDto,
   RoutesResponseDto,
 } from './dto/routes-response.dto.js'
-
-interface RouteSummaryRecord {
-  uuid: string
-  city: PrismaCityNameType
-  name_zh_tw: string
-  name_en: string | null
-  departure_zh_tw: string
-  departure_en: string | null
-  destination_zh_tw: string
-  destination_en: string | null
-}
 
 interface StopRecord {
   uuid: string
@@ -107,7 +95,7 @@ export class RoutesService {
     })
 
     return {
-      routes: routes.map((route) => this.toRouteSummary(route)),
+      routes: routes.map((route) => toRouteSummary(route)),
     }
   }
 
@@ -177,32 +165,9 @@ export class RoutesService {
     return this.toRouteDetail(route)
   }
 
-  private toRouteSummary(route: RouteSummaryRecord): RouteSummaryDto {
-    return {
-      uuid: route.uuid,
-      city: DB_CITY_NAME_BY_PRISMA[route.city],
-      name: this.toLocalizedText(route.name_zh_tw, route.name_en),
-      departure: this.toLocalizedText(
-        route.departure_zh_tw,
-        route.departure_en,
-      ),
-      destination: this.toLocalizedText(
-        route.destination_zh_tw,
-        route.destination_en,
-      ),
-    }
-  }
-
-  private toLocalizedText(zhTw: string, en: string | null): LocalizedTextDto {
-    return {
-      'zh-TW': zhTw,
-      en: en ?? '',
-    }
-  }
-
   private toRouteDetail(route: RouteDetailRecord): RouteDetailResponseDto {
     return {
-      ...this.toRouteSummary(route),
+      ...toRouteSummary(route),
       sub_routes: route.subroutes.map((subroute) =>
         this.toRouteSubRoute(subroute),
       ),
@@ -216,13 +181,13 @@ export class RoutesService {
 
     return {
       uuid: subroute.uuid,
-      name: this.toLocalizedText(subroute.name_zh_tw, subroute.name_en),
+      name: toLocalizedText(subroute.name_zh_tw, subroute.name_en),
       direction: DB_DIRECTION_BY_PRISMA[subroute.direction],
-      departure: this.toLocalizedText(
+      departure: toLocalizedText(
         subroute.departure_zh_tw,
         subroute.departure_en,
       ),
-      destination: this.toLocalizedText(
+      destination: toLocalizedText(
         subroute.destination_zh_tw,
         subroute.destination_en,
       ),
@@ -237,10 +202,7 @@ export class RoutesService {
     return {
       uuid: routeStop.stop.uuid,
       sequence: routeStop.sequence,
-      name: this.toLocalizedText(
-        routeStop.stop.name_zh_tw,
-        routeStop.stop.name_en,
-      ),
+      name: toLocalizedText(routeStop.stop.name_zh_tw, routeStop.stop.name_en),
       position: {
         latitude: routeStop.stop.latitude,
         longitude: routeStop.stop.longitude,
