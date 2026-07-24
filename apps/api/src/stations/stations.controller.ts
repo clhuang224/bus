@@ -6,7 +6,12 @@ import {
 } from '../dto/api-response.decorator.js'
 import { ParseStrictNumberPipe } from '../dto/parse-strict-number.pipe.js'
 import { StationsResponseDto } from './dto/stations-response.dto.js'
-import { StationsService } from './stations.service.js'
+import {
+  DEFAULT_STATION_SEARCH_RADIUS_METERS,
+  MAX_STATION_SEARCH_RADIUS_METERS,
+  MIN_STATION_SEARCH_RADIUS_METERS,
+  StationsService,
+} from './stations.service.js'
 
 @ApiTags('stations')
 @ApiDefaultErrorResponses()
@@ -41,11 +46,10 @@ export class StationsController {
     name: 'radius_meters',
     type: 'integer',
     required: false,
-    description:
-      'Integer search radius in meters. Defaults to 500; allowed range is 500 to 3000.',
-    example: 500,
-    minimum: 500,
-    maximum: 3000,
+    description: `Integer search radius in meters. Defaults to ${DEFAULT_STATION_SEARCH_RADIUS_METERS}; allowed range is ${MIN_STATION_SEARCH_RADIUS_METERS} to ${MAX_STATION_SEARCH_RADIUS_METERS}.`,
+    example: DEFAULT_STATION_SEARCH_RADIUS_METERS,
+    minimum: MIN_STATION_SEARCH_RADIUS_METERS,
+    maximum: MAX_STATION_SEARCH_RADIUS_METERS,
   })
   @ApiSuccessResponse({ type: StationsResponseDto })
   @Get()
@@ -55,7 +59,7 @@ export class StationsController {
     longitude: number,
     @Query(
       'radius_meters',
-      new DefaultValuePipe(500),
+      new DefaultValuePipe(DEFAULT_STATION_SEARCH_RADIUS_METERS),
       new ParseStrictNumberPipe('radius_meters'),
     )
     radiusMeters: number,

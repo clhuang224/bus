@@ -21,9 +21,9 @@ import type {
   StationsResponseDto,
 } from './dto/stations-response.dto.js'
 
-const DEFAULT_RADIUS_METERS = 500
-const MIN_RADIUS_METERS = 500
-const MAX_RADIUS_METERS = 3000
+export const DEFAULT_STATION_SEARCH_RADIUS_METERS = 500
+export const MIN_STATION_SEARCH_RADIUS_METERS = 500
+export const MAX_STATION_SEARCH_RADIUS_METERS = 3000
 const EARTH_RADIUS_METERS = 6_371_000
 const LATITUDE_DEGREES_PER_METER = 1 / 111_320
 
@@ -71,7 +71,7 @@ export class StationsService {
   async listStations({
     latitude,
     longitude,
-    radius_meters = DEFAULT_RADIUS_METERS,
+    radius_meters = DEFAULT_STATION_SEARCH_RADIUS_METERS,
   }: ListStationsOptions): Promise<StationsResponseDto> {
     this.assertValidSearch(latitude, longitude, radius_meters)
 
@@ -166,11 +166,11 @@ export class StationsService {
 
     if (
       !Number.isInteger(radiusMeters) ||
-      radiusMeters < MIN_RADIUS_METERS ||
-      radiusMeters > MAX_RADIUS_METERS
+      radiusMeters < MIN_STATION_SEARCH_RADIUS_METERS ||
+      radiusMeters > MAX_STATION_SEARCH_RADIUS_METERS
     ) {
       throw new BadRequestException(
-        `radius_meters must be an integer between ${MIN_RADIUS_METERS} and ${MAX_RADIUS_METERS}.`,
+        `radius_meters must be an integer between ${MIN_STATION_SEARCH_RADIUS_METERS} and ${MAX_STATION_SEARCH_RADIUS_METERS}.`,
       )
     }
   }
@@ -209,11 +209,12 @@ export class StationsService {
       Math.cos(queryLatitude) *
         Math.cos(stationLatitude) *
         Math.sin(longitudeDelta / 2) ** 2
+    const clampedHaversine = Math.min(1, haversine)
 
     return (
       2 *
       EARTH_RADIUS_METERS *
-      Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine))
+      Math.atan2(Math.sqrt(clampedHaversine), Math.sqrt(1 - clampedHaversine))
     )
   }
 
