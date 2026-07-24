@@ -64,6 +64,15 @@ interface NearbyStationRecord {
   distance_meters: number
 }
 
+interface CoordinateBounds {
+  minLatitude: number
+  maxLatitude: number
+  longitudeRanges: Array<{
+    minLongitude: number
+    maxLongitude: number
+  }>
+}
+
 @Injectable()
 export class StationsService {
   constructor(private readonly prismaService: PrismaService) {}
@@ -80,9 +89,8 @@ export class StationsService {
       where: {
         is_active: true,
         latitude: { gte: bounds.minLatitude, lte: bounds.maxLatitude },
-        longitude: { gte: bounds.minLongitude, lte: bounds.maxLongitude },
+        ...this.toLongitudeWhere(bounds.longitudeRanges),
       },
-      orderBy: [{ city: 'asc' }, { uuid: 'asc' }],
       select: {
         uuid: true,
         city: true,
@@ -169,7 +177,7 @@ export class StationsService {
       radiusMeters > MAX_RADIUS_METERS
     ) {
       throw new BadRequestException(
-        `radius_meters must be between ${MIN_RADIUS_METERS} and ${MAX_RADIUS_METERS}.`,
+        `radius_meters must be an integer between ${MIN_RADIUS_METERS} and ${MAX_RADIUS_METERS}.`,
       )
     }
   }
@@ -178,7 +186,7 @@ export class StationsService {
     latitude: number,
     longitude: number,
     radiusMeters: number,
-  ) {
+  ): CoordinateBounds {
     const latitudeDelta = radiusMeters * LATITUDE_DEGREES_PER_METER
     const longitudeScale = Math.cos(this.toRadians(latitude))
     const longitudeDelta =
@@ -186,11 +194,63 @@ export class StationsService {
         ? 180
         : latitudeDelta / Math.abs(longitudeScale)
 
+    if (longitudeDelta >= 180) {
+      return {
+        minLatitude: Math.max(-90, latitude - latitudeDelta),
+        maxLatitude: Math.min(90, latitude + latitudeDelta),
+        longitudeRanges: [{ minLongitude: -180, maxLongitude: 180 }],
+      }
+    }
+
+    const minLongitude = longitude - longitudeDelta
+    const maxLongitude = longitude + longitudeDelta
+
     return {
       minLatitude: Math.max(-90, latitude - latitudeDelta),
       maxLatitude: Math.min(90, latitude + latitudeDelta),
-      minLongitude: Math.max(-180, longitude - longitudeDelta),
-      maxLongitude: Math.min(180, longitude + longitudeDelta),
+      longitudeRanges: this.toLongitudeRanges(minLongitude, maxLongitude),
+    }
+  }
+
+  private toLongitudeRanges(minLongitude: number, maxLongitude: number) {
+    if (minLongitude < -180) {
+      return [
+        { minLongitude: minLongitude + 360, maxLongitude: 180 },
+        { minLongitude: -180, maxLongitude },
+      ]
+    }
+
+    if (maxLongitude > 180) {
+      return [
+        { minLongitude, maxLongitude: 180 },
+        { minLongitude: -180, maxLongitude: maxLongitude - 360 },
+      ]
+    }
+
+    return [{ minLongitude, maxLongitude }]
+  }
+
+  private toLongitudeWhere(
+    longitudeRanges: CoordinateBounds['longitudeRanges'],
+  ) {
+    const range = longitudeRanges[0]
+
+    if (longitudeRanges.length === 1 && range) {
+      return {
+        longitude: {
+          gte: range.minLongitude,
+          lte: range.maxLongitude,
+        },
+      }
+    }
+
+    return {
+      OR: longitudeRanges.map((longitudeRange) => ({
+        longitude: {
+          gte: longitudeRange.minLongitude,
+          lte: longitudeRange.maxLongitude,
+        },
+      })),
     }
   }
 
@@ -228,7 +288,10 @@ export class StationsService {
       uuid: station.uuid,
       city: DB_CITY_NAME_BY_PRISMA[station.city],
       name: toLocalizedText(station.name_zh_tw, station.name_en),
-      address: station.address_zh_tw,
+      address: this.toOptionalLocalizedText(
+        station.address_zh_tw,
+        station.address_en,
+      ),
       bearing: station.bearing ? API_BEARING_BY_PRISMA[station.bearing] : null,
       position: {
         latitude: station.latitude,
@@ -270,5 +333,11 @@ export class StationsService {
           .sort((left, right) => left.uuid.localeCompare(right.uuid))
           .map((route) => toRouteSummary(route)),
       }))
+  }
+
+  private toOptionalLocalizedText(zhTw: string | null, en: string | null) {
+    if (!zhTw && !en) return null
+
+    return toLocalizedText(zhTw ?? '', en)
   }
 }

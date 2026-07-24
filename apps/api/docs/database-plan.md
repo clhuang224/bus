@@ -835,6 +835,9 @@ Flow:
 3. Use `route_stop` rows to find routes and directions.
 4. Return nearby station data.
 
+Returned station addresses use the same localized object shape as names. `address_en`
+is optional and may be empty until a translated value is available.
+
 ### `POST /api/admin/sync/routes`
 
 Writes:

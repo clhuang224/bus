@@ -22,6 +22,20 @@ describe('Stations API (e2e)', () => {
   let app: INestApplication
   let stationFindManyArgs: unknown[]
 
+  const getStationFindManyArg = () => {
+    expect(stationFindManyArgs).toHaveLength(1)
+
+    return stationFindManyArgs[0] as {
+      where?: {
+        is_active?: unknown
+        latitude?: unknown
+        longitude?: unknown
+        OR?: unknown
+      }
+      orderBy?: unknown
+    }
+  }
+
   const isNumberRange = (value: unknown) =>
     typeof value === 'object' &&
     value !== null &&
@@ -29,6 +43,12 @@ describe('Stations API (e2e)', () => {
     'lte' in value &&
     typeof value.gte === 'number' &&
     typeof value.lte === 'number'
+
+  const isLongitudeRangeFilter = (value: unknown) =>
+    typeof value === 'object' &&
+    value !== null &&
+    'longitude' in value &&
+    isNumberRange(value.longitude)
 
   beforeEach(async () => {
     stationFindManyArgs = []
@@ -137,7 +157,10 @@ describe('Stations API (e2e)', () => {
             uuid: 'NWT-station-1',
             city: CityNameType.NEW_TAIPEI,
             name: { 'zh-TW': '捷運景安站', en: 'MRT Jingan Sta.' },
-            address: '景平路近景安路',
+            address: {
+              'zh-TW': '景平路近景安路',
+              en: 'Jingping Rd. near Jingan Rd.',
+            },
             bearing: BearingType.EAST,
             position: { latitude: 24.9939, longitude: 121.5047 },
             distance_meters: 0,
@@ -172,19 +195,33 @@ describe('Stations API (e2e)', () => {
             ],
           },
         ])
-        expect(stationFindManyArgs).toHaveLength(1)
-        const where = (
-          stationFindManyArgs[0] as {
-            where?: {
-              is_active?: unknown
-              latitude?: unknown
-              longitude?: unknown
-            }
-          }
-        ).where
+        const { orderBy, where } = getStationFindManyArg()
+        expect(orderBy).toBeUndefined()
         expect(where?.is_active).toBe(true)
         expect(isNumberRange(where?.latitude)).toBe(true)
         expect(isNumberRange(where?.longitude)).toBe(true)
+      })
+  })
+
+  it('/api/stations (GET) splits longitude filters when radius crosses the dateline', () => {
+    return request(app.getHttpServer())
+      .get('/api/stations')
+      .query({ latitude: 0, longitude: 179.99, radius_meters: 3000 })
+      .expect(200)
+      .expect(({ body }: { body: ApiSuccessResponse<StationsResponseDto> }) => {
+        expect(body.data.stations).toEqual([])
+        const { where } = getStationFindManyArg()
+        expect(where?.longitude).toBeUndefined()
+        expect(Array.isArray(where?.OR)).toBe(true)
+
+        if (!Array.isArray(where?.OR)) {
+          throw new Error('Expected dateline query to use OR longitude ranges.')
+        }
+
+        expect(where.OR).toHaveLength(2)
+        expect(where.OR.every((filter) => isLongitudeRangeFilter(filter))).toBe(
+          true,
+        )
       })
   })
 
