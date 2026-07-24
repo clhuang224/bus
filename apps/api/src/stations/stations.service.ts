@@ -159,7 +159,9 @@ export class StationsService {
       longitude < -180 ||
       longitude > 180
     ) {
-      throw new BadRequestException('Invalid coordinates.')
+      throw new BadRequestException(
+        'latitude must be between -90 and 90, and longitude must be between -180 and 180.',
+      )
     }
 
     if (

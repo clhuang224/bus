@@ -35,11 +35,13 @@ export class StationsController {
   })
   @ApiQuery({
     name: 'radius_meters',
-    type: Number,
+    type: 'integer',
     required: false,
     description:
       'Integer search radius in meters. Defaults to 500; allowed range is 500 to 3000.',
     example: 500,
+    minimum: 500,
+    maximum: 3000,
   })
   @ApiSuccessResponse({ type: StationsResponseDto })
   @Get()
