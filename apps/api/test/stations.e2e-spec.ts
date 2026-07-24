@@ -18,6 +18,9 @@ import { PrismaService } from '../src/prisma/prisma.service.js'
 import type { StationsResponseDto } from '../src/stations/dto/stations-response.dto.js'
 import { createE2eApp } from './create-e2e-app.js'
 
+const EARTH_RADIUS_METERS = 6_371_000
+const DEGREES_PER_RADIAN = 180 / Math.PI
+
 describe('Stations API (e2e)', () => {
   let app: INestApplication
   let stationFindManyArgs: StationFindManyArgs[]
@@ -198,6 +201,17 @@ describe('Stations API (e2e)', () => {
         expect(where?.is_active).toBe(true)
         expect(isNumberRange(where?.latitude)).toBe(true)
         expect(isNumberRange(where?.longitude)).toBe(true)
+
+        if (isNumberRange(where?.latitude)) {
+          const latitudeDelta = (500 / EARTH_RADIUS_METERS) * DEGREES_PER_RADIAN
+
+          expect(where.latitude.gte).toBeLessThanOrEqual(
+            24.9939 - latitudeDelta,
+          )
+          expect(where.latitude.lte).toBeGreaterThanOrEqual(
+            24.9939 + latitudeDelta,
+          )
+        }
       })
   })
 

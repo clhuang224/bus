@@ -25,7 +25,7 @@ export const DEFAULT_STATION_SEARCH_RADIUS_METERS = 500
 export const MIN_STATION_SEARCH_RADIUS_METERS = 500
 export const MAX_STATION_SEARCH_RADIUS_METERS = 3000
 const EARTH_RADIUS_METERS = 6_371_000
-const LATITUDE_DEGREES_PER_METER = 1 / 111_320
+const DEGREES_PER_RADIAN = 180 / Math.PI
 
 interface ListStationsOptions {
   latitude: number
@@ -180,7 +180,8 @@ export class StationsService {
     longitude: number,
     radiusMeters: number,
   ) {
-    const latitudeDelta = radiusMeters * LATITUDE_DEGREES_PER_METER
+    const latitudeDelta =
+      (radiusMeters / EARTH_RADIUS_METERS) * DEGREES_PER_RADIAN
     const longitudeScale = Math.cos(this.toRadians(latitude))
     const longitudeDelta =
       Math.abs(longitudeScale) < Number.EPSILON
