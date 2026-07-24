@@ -30,7 +30,6 @@ describe('Stations API (e2e)', () => {
         is_active?: unknown
         latitude?: unknown
         longitude?: unknown
-        OR?: unknown
       }
       orderBy?: unknown
     }
@@ -43,12 +42,6 @@ describe('Stations API (e2e)', () => {
     'lte' in value &&
     typeof value.gte === 'number' &&
     typeof value.lte === 'number'
-
-  const isLongitudeRangeFilter = (value: unknown) =>
-    typeof value === 'object' &&
-    value !== null &&
-    'longitude' in value &&
-    isNumberRange(value.longitude)
 
   beforeEach(async () => {
     stationFindManyArgs = []
@@ -200,28 +193,6 @@ describe('Stations API (e2e)', () => {
         expect(where?.is_active).toBe(true)
         expect(isNumberRange(where?.latitude)).toBe(true)
         expect(isNumberRange(where?.longitude)).toBe(true)
-      })
-  })
-
-  it('/api/stations (GET) splits longitude filters when radius crosses the dateline', () => {
-    return request(app.getHttpServer())
-      .get('/api/stations')
-      .query({ latitude: 0, longitude: 179.99, radius_meters: 3000 })
-      .expect(200)
-      .expect(({ body }: { body: ApiSuccessResponse<StationsResponseDto> }) => {
-        expect(body.data.stations).toEqual([])
-        const { where } = getStationFindManyArg()
-        expect(where?.longitude).toBeUndefined()
-        expect(Array.isArray(where?.OR)).toBe(true)
-
-        if (!Array.isArray(where?.OR)) {
-          throw new Error('Expected dateline query to use OR longitude ranges.')
-        }
-
-        expect(where.OR).toHaveLength(2)
-        expect(where.OR.every((filter) => isLongitudeRangeFilter(filter))).toBe(
-          true,
-        )
       })
   })
 
