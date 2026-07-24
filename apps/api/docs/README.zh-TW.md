@@ -4,7 +4,7 @@
 
 Finding the Bus 的 NestJS 後端 workspace。
 
-API 正在從 contract-first endpoints 逐步走向由資料庫支援的路線和站位資料。Route sync 已經實作，stop sync 也已經建立第一版 persistence foundation，包含 station groups、stations、stops、route stops，以及 fallback route shapes。
+API 正在從 contract-first endpoints 逐步走向由資料庫支援的路線和站位資料。Route sync 和 stop sync 已經實作，公開的 route/station endpoints 也已經開始從資料庫讀取。
 
 ## 本地開發
 
@@ -139,8 +139,8 @@ pnpm --filter @bus/api test:e2e:db
 ## Endpoint Groups
 
 - `system`：服務健康檢查
-- `routes`：路線列表和路線詳情 contracts
-- `stations`：站位和附近站位 contracts
+- `routes`：由資料庫支援的路線列表和路線詳情 endpoints
+- `stations`：由資料庫支援的站位和附近站位 endpoints
 - `realtime`：適合 polling 的即時資料快照 contracts
 - `admin`：基礎資料同步入口
 
@@ -155,7 +155,7 @@ pnpm --filter @bus/api test:e2e:db
 
 - 持續完善 TDX authentication 和上游 request shaping
 - 持續完善基礎資料同步到 PostgreSQL
-- 由資料庫支援的 route 和 station API endpoints
+- 持續補齊由資料庫支援的 route 和 station API endpoints
 - request pacing 和 TDX quota 保護
 - Scalar/OpenAPI 文件
 

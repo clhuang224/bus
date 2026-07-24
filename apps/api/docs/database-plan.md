@@ -809,7 +809,15 @@ Returns:
 - stop positions
 - shape path
 
-### `GET /api/stations?latitude=...&longitude=...`
+### `GET /api/stations?latitude=...&longitude=...&radius_meters=...`
+
+Rules:
+
+- `latitude` and `longitude` are required.
+- `radius_meters` defaults to 500.
+- `radius_meters` must be between 500 and 3000.
+- Empty nearby results return a successful response with an empty station list.
+- The first implementation searches all active stations by coordinate bounds and precise distance. It does not use city boundary filtering, so nearby results can naturally cross city borders.
 
 Reads:
 
@@ -955,6 +963,7 @@ and index metadata even when there are no rows.
 - Soft deactivation and reactivation of route base data
 - Stop sync for station groups, stations, stops, route stops, and fallback route shapes
 - Full real-data stop sync validation across Taiwan
+- Public route and nearby station endpoints backed by the database
 
 ## Plan Order
 
@@ -962,8 +971,9 @@ and index metadata even when there are no rows.
 2. Read `GET /api/routes/:uuid` from the database.
 3. Read `GET /api/stations?latitude=...&longitude=...` from the database.
 4. Continue monitoring database size after full sync runs.
-5. Deploy the API, run migrations safely, and protect admin operations.
-6. Decide where scheduled monthly sync jobs run after deployment is stable.
-7. Discuss realtime cache.
-8. Discuss auth, favorites, and settings.
-9. Add `apps/manager` for sync monitoring and controlled retry actions.
+5. Build the next public read endpoint, starting with stops if route pages need stop-level lookup.
+6. Deploy the API, run migrations safely, and protect admin operations.
+7. Decide where scheduled monthly sync jobs run after deployment is stable.
+8. Discuss realtime cache.
+9. Discuss auth, favorites, and settings.
+10. Add `apps/manager` for sync monitoring and controlled retry actions.
