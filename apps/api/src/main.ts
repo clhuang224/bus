@@ -16,8 +16,8 @@ async function bootstrap() {
     .setTitle('Finding the Bus API')
     .setDescription(
       [
-        'Contract-first backend API for Finding the Bus.',
-        'The current API surface defines page-ready route, station, realtime, and admin sync contracts before the database sync layer is implemented.',
+        'Backend API for Finding the Bus.',
+        'The current API surface provides page-ready route, station, realtime, and admin sync endpoints while database-backed coverage continues to expand.',
         'Favorite and settings contracts are backlog placeholders until account/auth work starts.',
         'Successful responses use { status, message, data }. Error responses use { status, error: { code, message } }, where code is one of the project ErrorCode enum values.',
       ].join(' '),
@@ -33,8 +33,8 @@ async function bootstrap() {
       'adminApiKey',
     )
     .addTag('system', 'Service health and operational endpoints.')
-    .addTag('routes', 'Route list and route detail contracts.')
-    .addTag('stations', 'Station and nearby station contracts.')
+    .addTag('routes', 'Database-backed route list and route detail endpoints.')
+    .addTag('stations', 'Database-backed station and nearby station endpoints.')
     .addTag('realtime', 'Polling-friendly realtime snapshot contracts.')
     .addTag('admin', 'Administrative base-data sync endpoints.')
     .addTag(
