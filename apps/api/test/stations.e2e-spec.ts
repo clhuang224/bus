@@ -128,6 +128,18 @@ describe('Stations API (e2e)', () => {
                   bearing: null,
                   stops: [],
                 },
+                {
+                  uuid: 'NWT-station-rounded-outside-radius',
+                  city: PrismaCityNameType.NEW_TAIPEI,
+                  name_zh_tw: '四捨五入邊界站',
+                  name_en: 'Rounding Edge Station',
+                  address_zh_tw: null,
+                  address_en: null,
+                  latitude: 24.9984002,
+                  longitude: 121.5047,
+                  bearing: null,
+                  stops: [],
+                },
               ])
             },
           },

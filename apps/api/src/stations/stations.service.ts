@@ -61,7 +61,7 @@ interface StationRecord {
 
 interface NearbyStationRecord {
   station: StationRecord
-  distance_meters: number
+  distanceMeters: number
 }
 
 @Injectable()
@@ -132,12 +132,12 @@ export class StationsService {
       stations: stations
         .map((station) => ({
           station,
-          distance_meters: this.toDistanceMeters(latitude, longitude, station),
+          distanceMeters: this.toDistanceMeters(latitude, longitude, station),
         }))
-        .filter(({ distance_meters }) => distance_meters <= radius_meters)
+        .filter(({ distanceMeters }) => distanceMeters <= radius_meters)
         .sort((left, right) => {
-          if (left.distance_meters !== right.distance_meters) {
-            return left.distance_meters - right.distance_meters
+          if (left.distanceMeters !== right.distanceMeters) {
+            return left.distanceMeters - right.distanceMeters
           }
 
           return left.station.uuid.localeCompare(right.station.uuid)
@@ -210,10 +210,10 @@ export class StationsService {
         Math.cos(stationLatitude) *
         Math.sin(longitudeDelta / 2) ** 2
 
-    return Math.round(
+    return (
       2 *
-        EARTH_RADIUS_METERS *
-        Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine)),
+      EARTH_RADIUS_METERS *
+      Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine))
     )
   }
 
@@ -223,7 +223,7 @@ export class StationsService {
 
   private toStation({
     station,
-    distance_meters,
+    distanceMeters,
   }: NearbyStationRecord): StationDto {
     return {
       uuid: station.uuid,
@@ -238,7 +238,7 @@ export class StationsService {
         latitude: station.latitude,
         longitude: station.longitude,
       },
-      distance_meters,
+      distance_meters: Math.ceil(distanceMeters),
       route_directions: this.toRouteDirections(station),
     }
   }
