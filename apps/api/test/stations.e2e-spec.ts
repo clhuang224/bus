@@ -218,6 +218,36 @@ describe('Stations API (e2e)', () => {
       })
   })
 
+  it('/api/stations (GET) rejects malformed latitude values', () => {
+    return request(app.getHttpServer())
+      .get('/api/stations')
+      .query({ latitude: '24abc', longitude: 121.5047 })
+      .expect(400)
+      .expect(({ body }: { body: ApiErrorResponse }) => {
+        expect(body.error.code).toBe(ErrorCode.SYSTEM_BAD_REQUEST)
+      })
+  })
+
+  it('/api/stations (GET) rejects empty longitude values', () => {
+    return request(app.getHttpServer())
+      .get('/api/stations')
+      .query({ latitude: 24.9939, longitude: '' })
+      .expect(400)
+      .expect(({ body }: { body: ApiErrorResponse }) => {
+        expect(body.error.code).toBe(ErrorCode.SYSTEM_BAD_REQUEST)
+      })
+  })
+
+  it('/api/stations (GET) rejects decimal radius values', () => {
+    return request(app.getHttpServer())
+      .get('/api/stations')
+      .query({ latitude: 24.9939, longitude: 121.5047, radius_meters: 500.5 })
+      .expect(400)
+      .expect(({ body }: { body: ApiErrorResponse }) => {
+        expect(body.error.code).toBe(ErrorCode.SYSTEM_BAD_REQUEST)
+      })
+  })
+
   it('/api/stations (GET) rejects requests without latitude', () => {
     return request(app.getHttpServer())
       .get('/api/stations')

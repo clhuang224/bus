@@ -1,16 +1,10 @@
-import {
-  Controller,
-  DefaultValuePipe,
-  Get,
-  ParseFloatPipe,
-  ParseIntPipe,
-  Query,
-} from '@nestjs/common'
+import { Controller, DefaultValuePipe, Get, Query } from '@nestjs/common'
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import {
   ApiDefaultErrorResponses,
   ApiSuccessResponse,
 } from '../dto/api-response.decorator.js'
+import { ParseStrictNumberPipe } from '../dto/parse-strict-number.pipe.js'
 import { StationsResponseDto } from './dto/stations-response.dto.js'
 import { StationsService } from './stations.service.js'
 
@@ -50,9 +44,14 @@ export class StationsController {
   @ApiSuccessResponse({ type: StationsResponseDto })
   @Get()
   listStations(
-    @Query('latitude', ParseFloatPipe) latitude: number,
-    @Query('longitude', ParseFloatPipe) longitude: number,
-    @Query('radius_meters', new DefaultValuePipe(500), ParseIntPipe)
+    @Query('latitude', new ParseStrictNumberPipe('latitude')) latitude: number,
+    @Query('longitude', new ParseStrictNumberPipe('longitude'))
+    longitude: number,
+    @Query(
+      'radius_meters',
+      new DefaultValuePipe(500),
+      new ParseStrictNumberPipe('radius_meters'),
+    )
     radiusMeters: number,
   ): Promise<StationsResponseDto> {
     return this.stationsService.listStations({
