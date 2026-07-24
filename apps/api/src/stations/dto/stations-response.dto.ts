@@ -57,10 +57,9 @@ export class StationDto {
   @ApiProperty({
     description: 'City where the station is located',
     enum: CityNameType,
-    nullable: true,
     example: CityNameType.NEW_TAIPEI,
   })
-  city!: CityNameType | null
+  city!: CityNameType
 
   @ApiProperty({
     description: 'Localized station name',
@@ -70,11 +69,13 @@ export class StationDto {
   name!: LocalizedTextDto
 
   @ApiProperty({
-    description: 'Station address merged from stop signs in this station group',
-    example: '景平路近景安路',
+    description:
+      'Localized station address merged from stop signs in this station group',
+    type: LocalizedTextDto,
+    example: { 'zh-TW': '景平路近景安路', en: 'Jingping Rd. near Jingan Rd.' },
     nullable: true,
   })
-  address!: string | null
+  address!: LocalizedTextDto | null
 
   @ApiProperty({
     description: 'Bearing direction for the station group',
@@ -113,7 +114,10 @@ export class StationsResponseDto {
         uuid: 'NWT1001',
         city: CityNameType.NEW_TAIPEI,
         name: { 'zh-TW': '捷運景安站', en: 'MRT Jingan Sta.' },
-        address: '景平路近景安路',
+        address: {
+          'zh-TW': '景平路近景安路',
+          en: 'Jingping Rd. near Jingan Rd.',
+        },
         bearing: BearingType.EAST,
         position: { latitude: 24.9939, longitude: 121.5047 },
         distance_meters: 120,

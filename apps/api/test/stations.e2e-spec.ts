@@ -1,18 +1,146 @@
 import { type INestApplication } from '@nestjs/common'
 import request from 'supertest'
 import {
+  BearingType,
+  CityNameType,
+  DirectionType,
   ErrorCode,
   type ApiErrorResponse,
   type ApiSuccessResponse,
 } from '@bus/shared'
+import {
+  BearingType as PrismaBearingType,
+  CityNameType as PrismaCityNameType,
+  DirectionType as PrismaDirectionType,
+} from '../src/generated/prisma/enums.js'
+import type { StationFindManyArgs } from '../src/generated/prisma/models/Station.js'
+import { PrismaService } from '../src/prisma/prisma.service.js'
 import type { StationsResponseDto } from '../src/stations/dto/stations-response.dto.js'
 import { createE2eApp } from './create-e2e-app.js'
 
+const EARTH_RADIUS_METERS = 6_371_000
+const DEGREES_PER_RADIAN = 180 / Math.PI
+
 describe('Stations API (e2e)', () => {
   let app: INestApplication
+  let stationFindManyArgs: StationFindManyArgs[]
+
+  const getStationFindManyArg = () => {
+    expect(stationFindManyArgs).toHaveLength(1)
+
+    return stationFindManyArgs[0]
+  }
+
+  const isNumberRange = (value: unknown) =>
+    typeof value === 'object' &&
+    value !== null &&
+    'gte' in value &&
+    'lte' in value &&
+    typeof value.gte === 'number' &&
+    typeof value.lte === 'number'
 
   beforeEach(async () => {
-    app = await createE2eApp()
+    stationFindManyArgs = []
+    app = await createE2eApp({
+      configureModule: (builder) =>
+        builder.overrideProvider(PrismaService).useValue({
+          $disconnect: () => Promise.resolve(),
+          station: {
+            findMany: (args: StationFindManyArgs) => {
+              stationFindManyArgs.push(args)
+
+              return Promise.resolve([
+                {
+                  uuid: 'NWT-station-1',
+                  city: PrismaCityNameType.NEW_TAIPEI,
+                  name_zh_tw: '捷運景安站',
+                  name_en: 'MRT Jingan Sta.',
+                  address_zh_tw: '景平路近景安路',
+                  address_en: 'Jingping Rd. near Jingan Rd.',
+                  latitude: 24.9939,
+                  longitude: 121.5047,
+                  bearing: PrismaBearingType.EAST,
+                  stops: [
+                    {
+                      route_stops: [
+                        {
+                          subroute: {
+                            direction: PrismaDirectionType.GO,
+                            route: {
+                              uuid: 'NWT-route-242',
+                              city: PrismaCityNameType.NEW_TAIPEI,
+                              name_zh_tw: '242',
+                              name_en: '242',
+                              departure_zh_tw: '中和',
+                              departure_en: 'Zhonghe',
+                              destination_zh_tw: '西門',
+                              destination_en: 'Ximen',
+                            },
+                          },
+                        },
+                        {
+                          subroute: {
+                            direction: PrismaDirectionType.GO,
+                            route: {
+                              uuid: 'NWT-route-242',
+                              city: PrismaCityNameType.NEW_TAIPEI,
+                              name_zh_tw: '242',
+                              name_en: '242',
+                              departure_zh_tw: '中和',
+                              departure_en: 'Zhonghe',
+                              destination_zh_tw: '西門',
+                              destination_en: 'Ximen',
+                            },
+                          },
+                        },
+                        {
+                          subroute: {
+                            direction: PrismaDirectionType.RETURN,
+                            route: {
+                              uuid: 'NWT-route-BR7',
+                              city: PrismaCityNameType.NEW_TAIPEI,
+                              name_zh_tw: '棕7',
+                              name_en: 'BR7',
+                              departure_zh_tw: '新店',
+                              departure_en: 'Xindian Station',
+                              destination_zh_tw: '臺北市政府',
+                              destination_en: 'Taipei City Hall',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  uuid: 'NWT-station-outside-radius',
+                  city: PrismaCityNameType.NEW_TAIPEI,
+                  name_zh_tw: '遠方站',
+                  name_en: 'Far Station',
+                  address_zh_tw: null,
+                  address_en: null,
+                  latitude: 24.999,
+                  longitude: 121.5047,
+                  bearing: null,
+                  stops: [],
+                },
+                {
+                  uuid: 'NWT-station-rounded-outside-radius',
+                  city: PrismaCityNameType.NEW_TAIPEI,
+                  name_zh_tw: '四捨五入邊界站',
+                  name_en: 'Rounding Edge Station',
+                  address_zh_tw: null,
+                  address_en: null,
+                  latitude: 24.9984002,
+                  longitude: 121.5047,
+                  bearing: null,
+                  stops: [],
+                },
+              ])
+            },
+          },
+        }),
+    })
   })
 
   afterEach(async () => {
@@ -25,7 +153,135 @@ describe('Stations API (e2e)', () => {
       .query({ latitude: 24.9939, longitude: 121.5047 })
       .expect(200)
       .expect(({ body }: { body: ApiSuccessResponse<StationsResponseDto> }) => {
-        expect(Array.isArray(body.data.stations)).toBe(true)
+        expect(body.data.stations).toEqual([
+          {
+            uuid: 'NWT-station-1',
+            city: CityNameType.NEW_TAIPEI,
+            name: { 'zh-TW': '捷運景安站', en: 'MRT Jingan Sta.' },
+            address: {
+              'zh-TW': '景平路近景安路',
+              en: 'Jingping Rd. near Jingan Rd.',
+            },
+            bearing: BearingType.EAST,
+            position: { latitude: 24.9939, longitude: 121.5047 },
+            distance_meters: 0,
+            route_directions: [
+              {
+                direction: DirectionType.GO,
+                routes: [
+                  {
+                    uuid: 'NWT-route-242',
+                    city: CityNameType.NEW_TAIPEI,
+                    name: { 'zh-TW': '242', en: '242' },
+                    departure: { 'zh-TW': '中和', en: 'Zhonghe' },
+                    destination: { 'zh-TW': '西門', en: 'Ximen' },
+                  },
+                ],
+              },
+              {
+                direction: DirectionType.RETURN,
+                routes: [
+                  {
+                    uuid: 'NWT-route-BR7',
+                    city: CityNameType.NEW_TAIPEI,
+                    name: { 'zh-TW': '棕7', en: 'BR7' },
+                    departure: { 'zh-TW': '新店', en: 'Xindian Station' },
+                    destination: {
+                      'zh-TW': '臺北市政府',
+                      en: 'Taipei City Hall',
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ])
+        const { orderBy, where } = getStationFindManyArg()
+        expect(orderBy).toBeUndefined()
+        expect(where?.is_active).toBe(true)
+        expect(isNumberRange(where?.latitude)).toBe(true)
+        expect(isNumberRange(where?.longitude)).toBe(true)
+
+        if (isNumberRange(where?.latitude)) {
+          const latitudeDelta = (500 / EARTH_RADIUS_METERS) * DEGREES_PER_RADIAN
+
+          expect(where.latitude.gte).toBeLessThanOrEqual(
+            24.9939 - latitudeDelta,
+          )
+          expect(where.latitude.lte).toBeGreaterThanOrEqual(
+            24.9939 + latitudeDelta,
+          )
+        }
+      })
+  })
+
+  it('/api/stations (GET) returns an empty list when no stations are within radius', () => {
+    return request(app.getHttpServer())
+      .get('/api/stations')
+      .query({ latitude: 23, longitude: 120 })
+      .expect(200)
+      .expect(({ body }: { body: ApiSuccessResponse<StationsResponseDto> }) => {
+        expect(body.data.stations).toEqual([])
+      })
+  })
+
+  it('/api/stations (GET) rejects radius values above 3000 meters', () => {
+    return request(app.getHttpServer())
+      .get('/api/stations')
+      .query({ latitude: 24.9939, longitude: 121.5047, radius_meters: 3001 })
+      .expect(400)
+      .expect(({ body }: { body: ApiErrorResponse }) => {
+        expect(body.error.code).toBe(ErrorCode.SYSTEM_BAD_REQUEST)
+      })
+  })
+
+  it('/api/stations (GET) rejects radius values below 500 meters', () => {
+    return request(app.getHttpServer())
+      .get('/api/stations')
+      .query({ latitude: 24.9939, longitude: 121.5047, radius_meters: 499 })
+      .expect(400)
+      .expect(({ body }: { body: ApiErrorResponse }) => {
+        expect(body.error.code).toBe(ErrorCode.SYSTEM_BAD_REQUEST)
+      })
+  })
+
+  it('/api/stations (GET) rejects malformed latitude values', () => {
+    return request(app.getHttpServer())
+      .get('/api/stations')
+      .query({ latitude: '24abc', longitude: 121.5047 })
+      .expect(400)
+      .expect(({ body }: { body: ApiErrorResponse }) => {
+        expect(body.error.code).toBe(ErrorCode.SYSTEM_BAD_REQUEST)
+      })
+  })
+
+  it('/api/stations (GET) rejects non-numeric keyword latitude values', () => {
+    return request(app.getHttpServer())
+      .get('/api/stations')
+      .query({ latitude: 'null', longitude: 121.5047 })
+      .expect(400)
+      .expect(({ body }: { body: ApiErrorResponse }) => {
+        expect(body.error.code).toBe(ErrorCode.SYSTEM_BAD_REQUEST)
+      })
+  })
+
+  it('/api/stations (GET) rejects empty longitude values', () => {
+    return request(app.getHttpServer())
+      .get('/api/stations')
+      .query({ latitude: 24.9939, longitude: '' })
+      .expect(400)
+      .expect(({ body }: { body: ApiErrorResponse }) => {
+        expect(body.error.code).toBe(ErrorCode.SYSTEM_BAD_REQUEST)
+      })
+  })
+
+  it('/api/stations (GET) rejects decimal radius values', () => {
+    return request(app.getHttpServer())
+      .get('/api/stations')
+      .query({ latitude: 24.9939, longitude: 121.5047, radius_meters: 500.5 })
+      .expect(400)
+      .expect(({ body }: { body: ApiErrorResponse }) => {
+        expect(body.error.code).toBe(ErrorCode.SYSTEM_BAD_REQUEST)
       })
   })
 

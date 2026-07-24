@@ -4,7 +4,7 @@
 
 NestJS backend workspace for Finding the Bus.
 
-The API is moving from contract-first endpoints toward database-backed route and station data. Route sync is implemented, and stop sync now has the first persistence foundation for station groups, stations, stops, route stops, and fallback route shapes.
+The API is moving from contract-first endpoints toward database-backed route and station data. Route and stop sync are implemented, and public route/station endpoints now read from the database.
 
 ## Local Development
 
@@ -139,8 +139,8 @@ Do not add database e2e tests to pre-push yet. Keep them manual until there is a
 ## Endpoint Groups
 
 - `system`: service health checks
-- `routes`: route list and route detail contracts
-- `stations`: station and nearby station contracts
+- `routes`: database-backed route list and route detail endpoints
+- `stations`: database-backed station and nearby station endpoints
 - `realtime`: polling-friendly realtime snapshot contracts
 - `admin`: base-data sync entry points
 
@@ -155,7 +155,7 @@ These groups are contract placeholders and should wait for account/auth work bef
 
 - continue TDX authentication and upstream request shaping
 - continue base-data sync into PostgreSQL
-- route and station API endpoints backed by the database
+- continue route and station API endpoint coverage backed by the database
 - request pacing and TDX quota protection
 - Scalar/OpenAPI documentation
 

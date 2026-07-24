@@ -809,7 +809,16 @@ Returns:
 - stop positions
 - shape path
 
-### `GET /api/stations?latitude=...&longitude=...`
+### `GET /api/stations?latitude=...&longitude=...&radius_meters=...`
+
+Rules:
+
+- `latitude` and `longitude` are required.
+- `latitude` must be between -90 and 90; `longitude` must be between -180 and 180.
+- `radius_meters` defaults to 500.
+- `radius_meters` must be an integer between 500 and 3000.
+- Empty nearby results return a successful response with an empty station list.
+- The first implementation searches all active stations by coordinate bounds and precise distance. It does not use city boundary filtering, so nearby results can naturally cross city borders.
 
 Reads:
 
@@ -826,6 +835,9 @@ Flow:
 2. Find stops under those stations.
 3. Use `route_stop` rows to find routes and directions.
 4. Return nearby station data.
+
+Returned station addresses use the same localized object shape as names. `address_en`
+is optional and may be empty until a translated value is available.
 
 ### `POST /api/admin/sync/routes`
 
@@ -917,17 +929,17 @@ Database size:
 
 Largest tables:
 
-| Table | Estimated rows | Total size | Table data | Indexes | Notes |
-| --- | ---: | ---: | ---: | ---: | --- |
-| `route_stop` | 233,698 | 65 MiB | 25 MiB | 41 MiB | Largest table; indexes are larger than row data. |
-| `stop` | 134,869 | 46 MiB | 27 MiB | 19 MiB | Main stop sync table. |
-| `station` | 49,874 | 14 MiB | 7.71 MiB | 6.30 MiB | Station data is not available for every city. |
-| `route_shape` | 6,771 | 8.05 MiB | 7.38 MiB | 624 KiB | Shared by route detail rendering and stop-position fallback shapes. |
-| `subroute` | 6,798 | 2.70 MiB | 1.43 MiB | 1.23 MiB | Route direction and variant rows. |
-| `station_group` | 6,580 | 1.88 MiB | 1000 KiB | 888 KiB | Optional because TDX support differs by city. |
-| `route` | 3,034 | 1000 KiB | 560 KiB | 400 KiB | Route list data. |
-| `route_operator` | 3,296 | 520 KiB | 200 KiB | 288 KiB | Route/operator join rows. |
-| `operator` | 153 | 96 KiB | 24 KiB | 32 KiB | Operator reference rows. |
+| Table            | Estimated rows | Total size | Table data |  Indexes | Notes                                                               |
+| ---------------- | -------------: | ---------: | ---------: | -------: | ------------------------------------------------------------------- |
+| `route_stop`     |        233,698 |     65 MiB |     25 MiB |   41 MiB | Largest table; indexes are larger than row data.                    |
+| `stop`           |        134,869 |     46 MiB |     27 MiB |   19 MiB | Main stop sync table.                                               |
+| `station`        |         49,874 |     14 MiB |   7.71 MiB | 6.30 MiB | Station data is not available for every city.                       |
+| `route_shape`    |          6,771 |   8.05 MiB |   7.38 MiB |  624 KiB | Shared by route detail rendering and stop-position fallback shapes. |
+| `subroute`       |          6,798 |   2.70 MiB |   1.43 MiB | 1.23 MiB | Route direction and variant rows.                                   |
+| `station_group`  |          6,580 |   1.88 MiB |   1000 KiB |  888 KiB | Optional because TDX support differs by city.                       |
+| `route`          |          3,034 |   1000 KiB |    560 KiB |  400 KiB | Route list data.                                                    |
+| `route_operator` |          3,296 |    520 KiB |    200 KiB |  288 KiB | Route/operator join rows.                                           |
+| `operator`       |            153 |     96 KiB |     24 KiB |   32 KiB | Operator reference rows.                                            |
 
 Approximate grouping:
 
@@ -955,6 +967,7 @@ and index metadata even when there are no rows.
 - Soft deactivation and reactivation of route base data
 - Stop sync for station groups, stations, stops, route stops, and fallback route shapes
 - Full real-data stop sync validation across Taiwan
+- Public route and nearby station endpoints backed by the database
 
 ## Plan Order
 
@@ -962,8 +975,9 @@ and index metadata even when there are no rows.
 2. Read `GET /api/routes/:uuid` from the database.
 3. Read `GET /api/stations?latitude=...&longitude=...` from the database.
 4. Continue monitoring database size after full sync runs.
-5. Deploy the API, run migrations safely, and protect admin operations.
-6. Decide where scheduled monthly sync jobs run after deployment is stable.
-7. Discuss realtime cache.
-8. Discuss auth, favorites, and settings.
-9. Add `apps/manager` for sync monitoring and controlled retry actions.
+5. Build the next public read endpoint, starting with stops if route pages need stop-level lookup.
+6. Deploy the API, run migrations safely, and protect admin operations.
+7. Decide where scheduled monthly sync jobs run after deployment is stable.
+8. Discuss realtime cache.
+9. Discuss auth, favorites, and settings.
+10. Add `apps/manager` for sync monitoring and controlled retry actions.

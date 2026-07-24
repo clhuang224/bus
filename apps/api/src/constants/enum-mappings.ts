@@ -108,6 +108,17 @@ export const DB_BEARING_BY_PRISMA = {
   [PrismaBearingType.NORTHWEST]: 'northwest',
 } satisfies Record<PrismaBearingType, string>
 
+export const API_BEARING_BY_PRISMA = {
+  [PrismaBearingType.EAST]: BearingType.EAST,
+  [PrismaBearingType.WEST]: BearingType.WEST,
+  [PrismaBearingType.SOUTH]: BearingType.SOUTH,
+  [PrismaBearingType.NORTH]: BearingType.NORTH,
+  [PrismaBearingType.SOUTHEAST]: BearingType.SOUTHEAST,
+  [PrismaBearingType.NORTHEAST]: BearingType.NORTHEAST,
+  [PrismaBearingType.SOUTHWEST]: BearingType.SOUTHWEST,
+  [PrismaBearingType.NORTHWEST]: BearingType.NORTHWEST,
+} satisfies Record<PrismaBearingType, BearingType>
+
 export const DB_ROUTE_SHAPE_SOURCE_BY_PRISMA = {
   [PrismaRouteShapeSource.ENCODED_POLYLINE]: 'encoded_polyline',
   [PrismaRouteShapeSource.GEOMETRY]: 'geometry',
