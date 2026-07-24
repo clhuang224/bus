@@ -815,7 +815,7 @@ Rules:
 
 - `latitude` and `longitude` are required.
 - `radius_meters` defaults to 500.
-- `radius_meters` must be between 500 and 3000.
+- `radius_meters` must be an integer between 500 and 3000.
 - Empty nearby results return a successful response with an empty station list.
 - The first implementation searches all active stations by coordinate bounds and precise distance. It does not use city boundary filtering, so nearby results can naturally cross city borders.
 

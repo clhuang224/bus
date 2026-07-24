@@ -38,7 +38,7 @@ export class StationsController {
     type: Number,
     required: false,
     description:
-      'Search radius in meters. Defaults to 500; allowed range is 500 to 3000.',
+      'Integer search radius in meters. Defaults to 500; allowed range is 500 to 3000.',
     example: 500,
   })
   @ApiSuccessResponse({ type: StationsResponseDto })
