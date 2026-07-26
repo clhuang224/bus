@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common'
 import { ErrorCode } from '@bus/shared'
-import { API_ERROR_MESSAGE_BY_CODE } from './api-response.messages.js'
+import { DEFAULT_API_ERROR_MESSAGE_BY_CODE } from './api-response.messages.js'
 import { FTBError } from './ftb-error.js'
 
 describe('FTBError', () => {
@@ -9,7 +9,9 @@ describe('FTBError', () => {
 
     expect(error.code).toBe(ErrorCode.ROUTE_NOT_FOUND)
     expect(error.getStatus()).toBe(HttpStatus.NOT_FOUND)
-    expect(error.message).toBe(API_ERROR_MESSAGE_BY_CODE.ROUTE_NOT_FOUND)
+    expect(error.message).toBe(
+      DEFAULT_API_ERROR_MESSAGE_BY_CODE.ROUTE_NOT_FOUND,
+    )
     expect(error.customMessage).toBeUndefined()
   })
 
@@ -34,7 +36,9 @@ describe('FTBError', () => {
       },
     )
 
-    expect(error.message).toBe(API_ERROR_MESSAGE_BY_CODE.ROUTE_NOT_FOUND)
+    expect(error.message).toBe(
+      DEFAULT_API_ERROR_MESSAGE_BY_CODE.ROUTE_NOT_FOUND,
+    )
     expect(error.cause).toBe(cause)
   })
 

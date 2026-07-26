@@ -24,7 +24,7 @@ export const API_ERROR_MESSAGE_BY_LOCALE = {
   },
 } satisfies Record<ApiErrorLocale, Record<ErrorCode, string>>
 
-export const API_ERROR_MESSAGE_BY_CODE =
+export const DEFAULT_API_ERROR_MESSAGE_BY_CODE =
   API_ERROR_MESSAGE_BY_LOCALE[AppLocaleType.ZH_TW]
 
 export function getApiErrorMessage(

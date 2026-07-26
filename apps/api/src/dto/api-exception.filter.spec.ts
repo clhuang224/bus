@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common'
 import { ErrorCode, type ApiErrorResponse } from '@bus/shared'
 import { ApiExceptionFilter } from './api-exception.filter.js'
-import { API_ERROR_MESSAGE_BY_CODE } from './api-response.messages.js'
+import { DEFAULT_API_ERROR_MESSAGE_BY_CODE } from './api-response.messages.js'
 import { FTBError } from './ftb-error.js'
 
 interface MockResponse {
@@ -123,7 +123,7 @@ describe('ApiExceptionFilter', () => {
         status: HttpStatus.NOT_FOUND,
         error: {
           code: ErrorCode.ROUTE_NOT_FOUND,
-          message: API_ERROR_MESSAGE_BY_CODE.ROUTE_NOT_FOUND,
+          message: DEFAULT_API_ERROR_MESSAGE_BY_CODE.ROUTE_NOT_FOUND,
         },
       },
     ])
@@ -204,7 +204,8 @@ describe('ApiExceptionFilter', () => {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         error: {
           code: ErrorCode.SYSTEM_INTERNAL_SERVER_ERROR,
-          message: API_ERROR_MESSAGE_BY_CODE.SYSTEM_INTERNAL_SERVER_ERROR,
+          message:
+            DEFAULT_API_ERROR_MESSAGE_BY_CODE.SYSTEM_INTERNAL_SERVER_ERROR,
         },
       },
     ])
@@ -226,7 +227,7 @@ describe('ApiExceptionFilter', () => {
         status: HttpStatus.TOO_MANY_REQUESTS,
         error: {
           code: ErrorCode.SYSTEM_BAD_REQUEST,
-          message: API_ERROR_MESSAGE_BY_CODE.SYSTEM_BAD_REQUEST,
+          message: DEFAULT_API_ERROR_MESSAGE_BY_CODE.SYSTEM_BAD_REQUEST,
         },
       },
     ])

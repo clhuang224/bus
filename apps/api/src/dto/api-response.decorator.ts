@@ -6,7 +6,7 @@ import {
   ApiErrorResponseDto,
   ApiSuccessResponseDto,
 } from './api-response.dto.js'
-import { API_ERROR_MESSAGE_BY_CODE } from './api-response.messages.js'
+import { DEFAULT_API_ERROR_MESSAGE_BY_CODE } from './api-response.messages.js'
 
 interface ApiSuccessResponseOptions {
   description?: string
@@ -84,7 +84,7 @@ function createErrorExample(status: number, code: ErrorCode) {
     status,
     error: {
       code,
-      message: API_ERROR_MESSAGE_BY_CODE[code],
+      message: DEFAULT_API_ERROR_MESSAGE_BY_CODE[code],
     },
   }
 }
