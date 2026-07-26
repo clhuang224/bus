@@ -9,12 +9,12 @@ describe('getApiErrorLocale', () => {
     expect(getApiErrorLocale(undefined)).toBe(DEFAULT_API_ERROR_LOCALE)
   })
 
-  it('uses English for supported English variants', () => {
-    expect(getApiErrorLocale('en-US,en;q=0.9')).toBe(AppLocaleType.EN)
+  it('uses English when the exact supported locale is requested', () => {
+    expect(getApiErrorLocale('en, zh-TW;q=0.9')).toBe(AppLocaleType.EN)
   })
 
-  it('uses Traditional Chinese for supported Chinese variants', () => {
-    expect(getApiErrorLocale('zh-Hant-TW, en;q=0.9')).toBe(AppLocaleType.ZH_TW)
+  it('uses Traditional Chinese when the exact supported locale is requested', () => {
+    expect(getApiErrorLocale('zh-TW, en;q=0.9')).toBe(AppLocaleType.ZH_TW)
   })
 
   it('uses the highest-priority supported language', () => {
@@ -23,7 +23,10 @@ describe('getApiErrorLocale', () => {
     )
   })
 
-  it('ignores unsupported and unacceptable languages', () => {
+  it('falls back for unsupported and unacceptable locales', () => {
+    expect(getApiErrorLocale('zh-CN, en-US;q=0.9')).toBe(
+      DEFAULT_API_ERROR_LOCALE,
+    )
     expect(getApiErrorLocale('ja, en;q=0')).toBe(DEFAULT_API_ERROR_LOCALE)
   })
 })

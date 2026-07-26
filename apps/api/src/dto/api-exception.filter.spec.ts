@@ -138,7 +138,7 @@ describe('ApiExceptionFilter', () => {
 
     filter.catch(
       new FTBError(ErrorCode.ROUTE_NOT_FOUND, HttpStatus.NOT_FOUND),
-      createHost(response, 'en-US,en;q=0.9'),
+      createHost(response, 'en, zh-TW;q=0.9'),
     )
 
     expect(response.jsonCalls).toEqual([
@@ -160,7 +160,7 @@ describe('ApiExceptionFilter', () => {
       new FTBError(ErrorCode.ROUTE_NOT_FOUND, HttpStatus.NOT_FOUND, {
         message: 'Custom route message.',
       }),
-      createHost(response, 'en-US'),
+      createHost(response, 'en'),
     )
 
     expect(response.jsonCalls).toEqual([

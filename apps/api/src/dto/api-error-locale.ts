@@ -1,23 +1,16 @@
 import { AppLocaleType } from '@bus/shared'
 
-export type ApiErrorLocale = AppLocaleType.ZH_TW | AppLocaleType.EN
-
 export const DEFAULT_API_ERROR_LOCALE = AppLocaleType.ZH_TW
 
-const API_ERROR_LOCALE_BY_LANGUAGE: Readonly<Record<string, ApiErrorLocale>> = {
-  zh: AppLocaleType.ZH_TW,
-  en: AppLocaleType.EN,
-}
-
 interface LanguagePreference {
-  locale: ApiErrorLocale
+  locale: AppLocaleType.ZH_TW | AppLocaleType.EN
   quality: number
   order: number
 }
 
 export function getApiErrorLocale(
   acceptLanguage: string | string[] | undefined,
-): ApiErrorLocale {
+): AppLocaleType.ZH_TW | AppLocaleType.EN {
   if (!acceptLanguage) return DEFAULT_API_ERROR_LOCALE
 
   const headerValue = Array.isArray(acceptLanguage)
@@ -52,10 +45,14 @@ function toLanguagePreference(
 
 function toApiErrorLocale(
   languageRange: string | undefined,
-): ApiErrorLocale | null {
-  const language = languageRange?.trim().toLowerCase().split('-')[0]
+): AppLocaleType.ZH_TW | AppLocaleType.EN | null {
+  const language = languageRange?.trim()
 
-  return language ? (API_ERROR_LOCALE_BY_LANGUAGE[language] ?? null) : null
+  if (language !== AppLocaleType.ZH_TW && language !== AppLocaleType.EN) {
+    return null
+  }
+
+  return language
 }
 
 function toQuality(parameters: string[]): number {
