@@ -24,6 +24,23 @@ Error responses:
 }
 ```
 
+`error.message` is a single localized string selected from the request
+`Accept-Language` header. The API supports `zh-TW` and `en`; `zh` variants map
+to `zh-TW`, `en` variants map to `en`, and missing or unsupported preferences
+fall back to `zh-TW`. Clients should use `error.code` for programmatic handling.
+Explicit custom messages supplied by a domain error are returned unchanged.
+
+## Headers
+
+| Header                          | Direction | Required       | Purpose                                                                      |
+| ------------------------------- | --------- | -------------- | ---------------------------------------------------------------------------- |
+| `Accept-Language`               | Request   | No             | Selects `error.message`; supports `zh-TW` and `en`, with a `zh-TW` fallback. |
+| `Content-Type: application/json` | Request  | JSON body only | Identifies a JSON request body.                                              |
+| `Content-Type: application/json` | Response | Yes, except 204 | Identifies the JSON response body.                                         |
+
+The admin API key is documented on the admin endpoint group because it does not
+apply to every API request.
+
 ## Common Errors
 
 These errors can happen across the API and are documented globally instead of

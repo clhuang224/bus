@@ -8,6 +8,8 @@ interface FTBErrorOptions extends HttpExceptionOptions {
 }
 
 export class FTBError extends HttpException {
+  readonly customMessage: string | undefined
+
   constructor(
     readonly code: ErrorCode,
     status: HttpStatus,
@@ -17,5 +19,6 @@ export class FTBError extends HttpException {
     const { message, ...exceptionOptions } = options ?? {}
 
     super(message ?? defaultMessage, status, exceptionOptions)
+    this.customMessage = message
   }
 }

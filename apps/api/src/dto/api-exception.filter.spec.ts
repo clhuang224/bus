@@ -17,6 +17,12 @@ interface MockResponse {
   json: (body: ApiErrorResponse) => MockResponse
 }
 
+interface MockRequest {
+  headers: {
+    'accept-language'?: string
+  }
+}
+
 function createMockResponse(): MockResponse {
   const response: MockResponse = {
     statusCalls: [],
@@ -34,9 +40,15 @@ function createMockResponse(): MockResponse {
   return response
 }
 
-function createHost(response: MockResponse): ArgumentsHost {
+function createHost(
+  response: MockResponse,
+  acceptLanguage?: string,
+): ArgumentsHost {
+  const request: MockRequest = {
+    headers: { 'accept-language': acceptLanguage },
+  }
   const httpHost: HttpArgumentsHost = {
-    getRequest: <T = unknown>(): T => undefined as T,
+    getRequest: <T = MockRequest>(): T => request as T,
     getResponse: <T = MockResponse>(): T => response as T,
     getNext: <T = unknown>(): T => undefined as T,
   }
@@ -110,6 +122,48 @@ describe('ApiExceptionFilter', () => {
     ])
     expect(errorLogs).toEqual([])
     expect(warnLogs).toEqual([])
+  })
+
+  it('localizes default error messages from Accept-Language', () => {
+    const response = createMockResponse()
+    const filter = new ApiExceptionFilter()
+
+    filter.catch(
+      new FTBError(ErrorCode.ROUTE_NOT_FOUND, HttpStatus.NOT_FOUND),
+      createHost(response, 'en-US,en;q=0.9'),
+    )
+
+    expect(response.jsonCalls).toEqual([
+      {
+        status: HttpStatus.NOT_FOUND,
+        error: {
+          code: ErrorCode.ROUTE_NOT_FOUND,
+          message: 'The requested route was not found.',
+        },
+      },
+    ])
+  })
+
+  it('keeps explicitly provided domain messages unchanged', () => {
+    const response = createMockResponse()
+    const filter = new ApiExceptionFilter()
+
+    filter.catch(
+      new FTBError(ErrorCode.ROUTE_NOT_FOUND, HttpStatus.NOT_FOUND, {
+        message: 'Custom route message.',
+      }),
+      createHost(response, 'en-US'),
+    )
+
+    expect(response.jsonCalls).toEqual([
+      {
+        status: HttpStatus.NOT_FOUND,
+        error: {
+          code: ErrorCode.ROUTE_NOT_FOUND,
+          message: 'Custom route message.',
+        },
+      },
+    ])
   })
 
   it('logs domain errors when they wrap an original cause', () => {

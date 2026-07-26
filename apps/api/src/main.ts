@@ -36,6 +36,15 @@ async function bootstrap() {
       [
         '## Shared Response Envelopes',
         'Successful responses use `{ status, message, data }`. Error responses use `{ status, error: { code, message } }`, where `code` is one of the project `ErrorCode` enum values.',
+        '`error.message` is selected from the request `Accept-Language` header. The API supports `zh-TW` and `en`, and falls back to `zh-TW` for missing or unsupported languages.',
+        '## Headers',
+        [
+          '| Header | Direction | Required | Purpose |',
+          '| --- | --- | --- | --- |',
+          '| `Accept-Language` | Request | No | Selects `error.message`; supports `zh-TW` and `en`, with a `zh-TW` fallback. |',
+          '| `Content-Type: application/json` | Request | JSON body only | Identifies a JSON request body. |',
+          '| `Content-Type: application/json` | Response | Yes, except 204 | Identifies the JSON response body. |',
+        ].join('\n'),
       ].join('\n\n'),
     )
     .addTag(
