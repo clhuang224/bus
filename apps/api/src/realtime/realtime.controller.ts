@@ -1,14 +1,10 @@
 import { Controller, Get, Param } from '@nestjs/common'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
-import {
-  ApiDefaultErrorResponses,
-  ApiSuccessResponse,
-} from '../dto/api-response.decorator.js'
+import { ApiSuccessResponse } from '../dto/api-response.decorator.js'
 import { RouteRealtimeResponseDto } from './dto/route-realtime-response.dto.js'
 import { RealtimeService } from './realtime.service.js'
 
 @ApiTags('realtime')
-@ApiDefaultErrorResponses()
 @Controller('realtime/routes')
 export class RealtimeController {
   constructor(private readonly realtimeService: RealtimeService) {}

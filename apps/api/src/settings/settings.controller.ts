@@ -1,9 +1,6 @@
 import { Body, Controller, Get, Patch } from '@nestjs/common'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
-import {
-  ApiDefaultErrorResponses,
-  ApiSuccessResponse,
-} from '../dto/api-response.decorator.js'
+import { ApiSuccessResponse } from '../dto/api-response.decorator.js'
 import {
   SettingsResponseDto,
   UpdateSettingsRequestDto,
@@ -11,7 +8,6 @@ import {
 import { SettingsService } from './settings.service.js'
 
 @ApiTags('settings')
-@ApiDefaultErrorResponses()
 @Controller('settings')
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}

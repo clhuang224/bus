@@ -102,6 +102,12 @@ OpenAPI/Scalar examples must match the real runtime response for their HTTP
 status. Do not reuse a 404 `SYSTEM_NOT_FOUND` example for 400, 401, 403, 409,
 or 500 responses.
 
+Document common error responses globally instead of adding them to every
+controller or endpoint. Endpoint-level error response decorators should be
+reserved for domain-specific errors or other errors that the client may handle
+differently for that endpoint. Keep the shared policy in
+`docs/api-error-handling.md`.
+
 Use ISO 8601 UTC strings from `Date#toISOString()` for public API timestamps
 and OpenAPI/Scalar timestamp examples, such as
 `2026-06-03T18:25:13.000Z`. Do not use timezone-offset examples such as

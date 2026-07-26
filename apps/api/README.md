@@ -144,6 +144,9 @@ Do not add database e2e tests to pre-push yet. Keep them manual until there is a
 - `realtime`: polling-friendly realtime snapshot contracts
 - `admin`: base-data sync entry points
 
+See [docs/api-error-handling.md](./docs/api-error-handling.md) for the shared
+response envelope and global error documentation rules.
+
 ## Backlog Endpoint Groups
 
 These groups are contract placeholders and should wait for account/auth work before becoming part of the first backend scope:

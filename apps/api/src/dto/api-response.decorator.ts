@@ -1,15 +1,6 @@
 import { applyDecorators, type Type } from '@nestjs/common'
-import {
-  ApiBadRequestResponse,
-  ApiConflictResponse,
-  ApiExtraModels,
-  ApiForbiddenResponse,
-  ApiInternalServerErrorResponse,
-  ApiResponse,
-  ApiUnauthorizedResponse,
-  getSchemaPath,
-} from '@nestjs/swagger'
-import { ErrorCode } from '@bus/shared'
+import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger'
+import type { ErrorCode } from '@bus/shared'
 import {
   ApiErrorDto,
   ApiErrorResponseDto,
@@ -21,10 +12,6 @@ interface ApiSuccessResponseOptions {
   description?: string
   status?: number
   type: Type<unknown> | readonly Type<unknown>[]
-}
-
-interface ApiDefaultErrorResponsesOptions {
-  exclude?: number[]
 }
 
 export function ApiSuccessResponse({
@@ -70,66 +57,6 @@ export function ApiSuccessResponse({
       },
     }),
   )
-}
-
-export function ApiDefaultErrorResponses({
-  exclude = [],
-}: ApiDefaultErrorResponsesOptions = {}) {
-  const schema = { $ref: getSchemaPath(ApiErrorResponseDto) }
-  const excludedStatuses = new Set(exclude)
-  const decorators = [
-    ApiExtraModels(ApiErrorDto, ApiErrorResponseDto),
-    ...(excludedStatuses.has(400)
-      ? []
-      : [
-          ApiBadRequestResponse({
-            description: 'Request failed validation or parsing.',
-            schema,
-            example: createErrorExample(400, ErrorCode.SYSTEM_BAD_REQUEST),
-          }),
-        ]),
-    ...(excludedStatuses.has(401)
-      ? []
-      : [
-          ApiUnauthorizedResponse({
-            description: 'Authentication or API key is required.',
-            schema,
-            example: createErrorExample(401, ErrorCode.SYSTEM_UNAUTHORIZED),
-          }),
-        ]),
-    ...(excludedStatuses.has(403)
-      ? []
-      : [
-          ApiForbiddenResponse({
-            description: 'The authenticated caller is not allowed to do this.',
-            schema,
-            example: createErrorExample(403, ErrorCode.SYSTEM_FORBIDDEN),
-          }),
-        ]),
-    ...(excludedStatuses.has(409)
-      ? []
-      : [
-          ApiConflictResponse({
-            description: 'Request failed due to a state conflict.',
-            schema,
-            example: createErrorExample(409, ErrorCode.SYSTEM_CONFLICT),
-          }),
-        ]),
-    ...(excludedStatuses.has(500)
-      ? []
-      : [
-          ApiInternalServerErrorResponse({
-            description: 'Unexpected server error.',
-            schema,
-            example: createErrorExample(
-              500,
-              ErrorCode.SYSTEM_INTERNAL_SERVER_ERROR,
-            ),
-          }),
-        ]),
-  ]
-
-  return applyDecorators(...decorators)
 }
 
 export function ApiErrorResponse({

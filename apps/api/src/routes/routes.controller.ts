@@ -2,7 +2,6 @@ import { AreaType, ErrorCode } from '@bus/shared'
 import { Controller, Get, Param, ParseEnumPipe, Query } from '@nestjs/common'
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import {
-  ApiDefaultErrorResponses,
   ApiErrorResponse,
   ApiSuccessResponse,
 } from '../dto/api-response.decorator.js'
@@ -13,7 +12,6 @@ import {
 import { RoutesService } from './routes.service.js'
 
 @ApiTags('routes')
-@ApiDefaultErrorResponses()
 @Controller('routes')
 export class RoutesController {
   constructor(private readonly routesService: RoutesService) {}
