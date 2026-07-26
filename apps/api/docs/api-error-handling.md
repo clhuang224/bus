@@ -37,6 +37,7 @@ Explicit custom messages supplied by a domain error are returned unchanged.
 | `Accept-Language`               | Request   | No             | Selects `error.message`; supports `zh-TW` and `en`, with a `zh-TW` fallback. |
 | `Content-Type: application/json` | Request  | JSON body only | Identifies a JSON request body.                                              |
 | `Content-Type: application/json` | Response | Yes, except 204 | Identifies the JSON response body.                                         |
+| `Vary: Accept-Language`         | Response  | Localized errors | Prevents shared caches from serving an error message selected for another language. |
 
 The admin API key is documented on the admin endpoint group because it does not
 apply to every API request.

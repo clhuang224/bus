@@ -38,6 +38,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
           )
 
     this.logException(exception, status)
+    response.vary('Accept-Language')
 
     response.status(status).json({
       status,

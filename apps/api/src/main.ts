@@ -44,6 +44,7 @@ async function bootstrap() {
           '| `Accept-Language` | Request | No | Selects `error.message`; supports `zh-TW` and `en`, with a `zh-TW` fallback. |',
           '| `Content-Type: application/json` | Request | JSON body only | Identifies a JSON request body. |',
           '| `Content-Type: application/json` | Response | Yes, except 204 | Identifies the JSON response body. |',
+          '| `Vary: Accept-Language` | Response | Localized errors | Prevents shared caches from serving an error message selected for another language. |',
         ].join('\n'),
       ].join('\n\n'),
     )

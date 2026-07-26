@@ -13,8 +13,10 @@ import { FTBError } from './ftb-error.js'
 interface MockResponse {
   statusCalls: number[]
   jsonCalls: ApiErrorResponse[]
+  varyCalls: string[]
   status: (status: number) => MockResponse
   json: (body: ApiErrorResponse) => MockResponse
+  vary: (field: string) => MockResponse
 }
 
 interface MockRequest {
@@ -27,12 +29,17 @@ function createMockResponse(): MockResponse {
   const response: MockResponse = {
     statusCalls: [],
     jsonCalls: [],
+    varyCalls: [],
     status: (status) => {
       response.statusCalls.push(status)
       return response
     },
     json: (body) => {
       response.jsonCalls.push(body)
+      return response
+    },
+    vary: (field) => {
+      response.varyCalls.push(field)
       return response
     },
   }
@@ -122,6 +129,7 @@ describe('ApiExceptionFilter', () => {
     ])
     expect(errorLogs).toEqual([])
     expect(warnLogs).toEqual([])
+    expect(response.varyCalls).toEqual(['Accept-Language'])
   })
 
   it('localizes default error messages from Accept-Language', () => {
