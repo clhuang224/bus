@@ -8,10 +8,7 @@ import {
   Post,
 } from '@nestjs/common'
 import { ApiNoContentResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
-import {
-  ApiDefaultErrorResponses,
-  ApiSuccessResponse,
-} from '../dto/api-response.decorator.js'
+import { ApiSuccessResponse } from '../dto/api-response.decorator.js'
 import {
   CreateFavoriteRouteStopRequestDto,
   FavoriteRouteStopDto,
@@ -20,7 +17,6 @@ import {
 import { FavoriteService } from './favorite.service.js'
 
 @ApiTags('favorite')
-@ApiDefaultErrorResponses()
 @Controller('favorite')
 export class FavoriteController {
   constructor(private readonly favoriteService: FavoriteService) {}

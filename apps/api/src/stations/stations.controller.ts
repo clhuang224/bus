@@ -1,9 +1,6 @@
 import { Controller, DefaultValuePipe, Get, Query } from '@nestjs/common'
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
-import {
-  ApiDefaultErrorResponses,
-  ApiSuccessResponse,
-} from '../dto/api-response.decorator.js'
+import { ApiSuccessResponse } from '../dto/api-response.decorator.js'
 import { ParseStrictNumberPipe } from '../dto/parse-strict-number.pipe.js'
 import { StationsResponseDto } from './dto/stations-response.dto.js'
 import {
@@ -14,7 +11,6 @@ import {
 } from './stations.service.js'
 
 @ApiTags('stations')
-@ApiDefaultErrorResponses()
 @Controller('stations')
 export class StationsController {
   constructor(private readonly stationsService: StationsService) {}

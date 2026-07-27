@@ -11,7 +11,6 @@ import { ErrorCode } from '@bus/shared'
 import { AdminApiKeyGuard } from './admin-api-key.guard.js'
 import { AdminService } from './admin.service.js'
 import {
-  ApiDefaultErrorResponses,
   ApiErrorResponse,
   ApiSuccessResponse,
 } from '../dto/api-response.decorator.js'
@@ -23,12 +22,6 @@ import { SyncResponseDto } from './dto/sync-response.dto.js'
 
 @ApiTags('admin')
 @ApiSecurity('adminApiKey')
-@ApiErrorResponse({
-  status: 401,
-  code: ErrorCode.SYSTEM_UNAUTHORIZED,
-  description: 'A valid admin API key is required.',
-})
-@ApiDefaultErrorResponses({ exclude: [401] })
 @UseGuards(AdminApiKeyGuard)
 @Controller('admin/sync')
 export class AdminSyncController {

@@ -92,6 +92,11 @@ All non-204 API responses use the shared response envelope:
 - success: `{ status, message, data }`
 - error: `{ status, error: { code, message } }`
 
+Error `message` values are localized from the request `Accept-Language` header.
+Support `zh-TW` and `en`, with `zh-TW` as the fallback. Keep `error.code`
+locale-independent for client logic; a domain error's explicitly supplied custom
+message is returned unchanged.
+
 Keep `ErrorCode` values in `packages/shared` and use a clear domain prefix. Use
 `SYSTEM_*` for generic framework/system errors, such as validation failures,
 missing authentication, or generic not-found responses. Add domain-specific
@@ -101,6 +106,12 @@ domain error.
 OpenAPI/Scalar examples must match the real runtime response for their HTTP
 status. Do not reuse a 404 `SYSTEM_NOT_FOUND` example for 400, 401, 403, 409,
 or 500 responses.
+
+Document common error responses globally instead of adding them to every
+controller or endpoint. Endpoint-level error response decorators should be
+reserved for domain-specific errors or other errors that the client may handle
+differently for that endpoint. Keep the shared policy in
+`docs/api-error-handling.md`.
 
 Use ISO 8601 UTC strings from `Date#toISOString()` for public API timestamps
 and OpenAPI/Scalar timestamp examples, such as

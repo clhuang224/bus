@@ -7,20 +7,29 @@ import {
 } from '@nestjs/common'
 import { ErrorCode, type ApiErrorResponse } from '@bus/shared'
 import { ApiExceptionFilter } from './api-exception.filter.js'
-import { API_ERROR_MESSAGE_BY_CODE } from './api-response.messages.js'
+import { DEFAULT_API_ERROR_MESSAGE_BY_CODE } from './api-response.messages.js'
 import { FTBError } from './ftb-error.js'
 
 interface MockResponse {
   statusCalls: number[]
   jsonCalls: ApiErrorResponse[]
+  varyCalls: string[]
   status: (status: number) => MockResponse
   json: (body: ApiErrorResponse) => MockResponse
+  vary: (field: string) => MockResponse
+}
+
+interface MockRequest {
+  headers: {
+    'accept-language'?: string
+  }
 }
 
 function createMockResponse(): MockResponse {
   const response: MockResponse = {
     statusCalls: [],
     jsonCalls: [],
+    varyCalls: [],
     status: (status) => {
       response.statusCalls.push(status)
       return response
@@ -29,14 +38,24 @@ function createMockResponse(): MockResponse {
       response.jsonCalls.push(body)
       return response
     },
+    vary: (field) => {
+      response.varyCalls.push(field)
+      return response
+    },
   }
 
   return response
 }
 
-function createHost(response: MockResponse): ArgumentsHost {
+function createHost(
+  response: MockResponse,
+  acceptLanguage?: string,
+): ArgumentsHost {
+  const request: MockRequest = {
+    headers: { 'accept-language': acceptLanguage },
+  }
   const httpHost: HttpArgumentsHost = {
-    getRequest: <T = unknown>(): T => undefined as T,
+    getRequest: <T = MockRequest>(): T => request as T,
     getResponse: <T = MockResponse>(): T => response as T,
     getNext: <T = unknown>(): T => undefined as T,
   }
@@ -104,12 +123,56 @@ describe('ApiExceptionFilter', () => {
         status: HttpStatus.NOT_FOUND,
         error: {
           code: ErrorCode.ROUTE_NOT_FOUND,
-          message: API_ERROR_MESSAGE_BY_CODE.ROUTE_NOT_FOUND,
+          message: DEFAULT_API_ERROR_MESSAGE_BY_CODE.ROUTE_NOT_FOUND,
         },
       },
     ])
     expect(errorLogs).toEqual([])
     expect(warnLogs).toEqual([])
+    expect(response.varyCalls).toEqual(['Accept-Language'])
+  })
+
+  it('localizes default error messages from Accept-Language', () => {
+    const response = createMockResponse()
+    const filter = new ApiExceptionFilter()
+
+    filter.catch(
+      new FTBError(ErrorCode.ROUTE_NOT_FOUND, HttpStatus.NOT_FOUND),
+      createHost(response, 'en, zh-TW;q=0.9'),
+    )
+
+    expect(response.jsonCalls).toEqual([
+      {
+        status: HttpStatus.NOT_FOUND,
+        error: {
+          code: ErrorCode.ROUTE_NOT_FOUND,
+          message: 'The requested route was not found.',
+        },
+      },
+    ])
+  })
+
+  it('keeps explicitly provided domain messages unchanged', () => {
+    const response = createMockResponse()
+    const filter = new ApiExceptionFilter()
+
+    filter.catch(
+      new FTBError(ErrorCode.ROUTE_NOT_FOUND, HttpStatus.NOT_FOUND, {
+        message: 'Custom route message.',
+      }),
+      createHost(response, 'en'),
+    )
+
+    expect(response.jsonCalls).toEqual([
+      {
+        status: HttpStatus.NOT_FOUND,
+        error: {
+          code: ErrorCode.ROUTE_NOT_FOUND,
+          message: 'Custom route message.',
+        },
+      },
+    ])
+    expect(response.varyCalls).toEqual([])
   })
 
   it('logs domain errors when they wrap an original cause', () => {
@@ -142,7 +205,8 @@ describe('ApiExceptionFilter', () => {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         error: {
           code: ErrorCode.SYSTEM_INTERNAL_SERVER_ERROR,
-          message: API_ERROR_MESSAGE_BY_CODE.SYSTEM_INTERNAL_SERVER_ERROR,
+          message:
+            DEFAULT_API_ERROR_MESSAGE_BY_CODE.SYSTEM_INTERNAL_SERVER_ERROR,
         },
       },
     ])
@@ -164,7 +228,7 @@ describe('ApiExceptionFilter', () => {
         status: HttpStatus.TOO_MANY_REQUESTS,
         error: {
           code: ErrorCode.SYSTEM_BAD_REQUEST,
-          message: API_ERROR_MESSAGE_BY_CODE.SYSTEM_BAD_REQUEST,
+          message: DEFAULT_API_ERROR_MESSAGE_BY_CODE.SYSTEM_BAD_REQUEST,
         },
       },
     ])

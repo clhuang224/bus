@@ -6,10 +6,11 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common'
-import type { Response } from 'express'
+import type { Request, Response } from 'express'
 import { ErrorCode, type ApiErrorResponse } from '@bus/shared'
 import { FTBError } from './ftb-error.js'
-import { API_ERROR_MESSAGE_BY_CODE } from './api-response.messages.js'
+import { getApiErrorLocale } from './api-error-locale.js'
+import { getApiErrorMessage } from './api-response.messages.js'
 
 const ERROR_CODE_BY_STATUS: Readonly<Record<number, ErrorCode>> = {
   [HttpStatus.BAD_REQUEST]: ErrorCode.SYSTEM_BAD_REQUEST,
@@ -24,15 +25,23 @@ export class ApiExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(ApiExceptionFilter.name)
 
   catch(exception: unknown, host: ArgumentsHost): void {
+    const request = host.switchToHttp().getRequest<Request>()
     const response = host.switchToHttp().getResponse<Response>()
     const status = this.getStatus(exception)
     const code = this.getErrorCode(exception, status)
+    const customMessage =
+      exception instanceof FTBError ? exception.customMessage : undefined
     const message =
-      exception instanceof FTBError
-        ? exception.message
-        : API_ERROR_MESSAGE_BY_CODE[code]
+      customMessage ??
+      getApiErrorMessage(
+        code,
+        getApiErrorLocale(request.headers['accept-language']),
+      )
 
     this.logException(exception, status)
+    if (customMessage === undefined) {
+      response.vary('Accept-Language')
+    }
 
     response.status(status).json({
       status,

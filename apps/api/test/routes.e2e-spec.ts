@@ -297,6 +297,20 @@ describe('Routes API (e2e)', () => {
       })
   })
 
+  it('/api/routes/:uuid (GET) localizes missing-route errors from Accept-Language', () => {
+    return request(app.getHttpServer())
+      .get('/api/routes/missing-route')
+      .set('Accept-Language', 'en')
+      .expect('Vary', /(?:^|,\s*)Accept-Language(?:,|$)/)
+      .expect(404)
+      .expect(({ body }: { body: ApiErrorResponse }) => {
+        expect(body.error).toEqual({
+          code: ErrorCode.ROUTE_NOT_FOUND,
+          message: 'The requested route was not found.',
+        })
+      })
+  })
+
   it('/api/routes (GET) rejects requests without area', () => {
     return request(app.getHttpServer())
       .get('/api/routes')

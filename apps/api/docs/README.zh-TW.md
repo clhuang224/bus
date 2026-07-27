@@ -144,6 +144,9 @@ pnpm --filter @bus/api test:e2e:db
 - `realtime`：適合 polling 的即時資料快照 contracts
 - `admin`：基礎資料同步入口
 
+共用 response envelope 和全域錯誤文件規則請看
+[api-error-handling.md](./api-error-handling.md)。
+
 ## Backlog Endpoint Groups
 
 這些 groups 目前只是 contract placeholders，需要等 account/auth 工作完成後，才會進入第一階段後端範圍：
