@@ -172,6 +172,7 @@ describe('ApiExceptionFilter', () => {
         },
       },
     ])
+    expect(response.varyCalls).toEqual([])
   })
 
   it('logs domain errors when they wrap an original cause', () => {

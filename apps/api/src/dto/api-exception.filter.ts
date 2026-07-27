@@ -29,16 +29,19 @@ export class ApiExceptionFilter implements ExceptionFilter {
     const response = host.switchToHttp().getResponse<Response>()
     const status = this.getStatus(exception)
     const code = this.getErrorCode(exception, status)
+    const customMessage =
+      exception instanceof FTBError ? exception.customMessage : undefined
     const message =
-      exception instanceof FTBError && exception.customMessage !== undefined
-        ? exception.customMessage
-        : getApiErrorMessage(
-            code,
-            getApiErrorLocale(request.headers['accept-language']),
-          )
+      customMessage ??
+      getApiErrorMessage(
+        code,
+        getApiErrorLocale(request.headers['accept-language']),
+      )
 
     this.logException(exception, status)
-    response.vary('Accept-Language')
+    if (customMessage === undefined) {
+      response.vary('Accept-Language')
+    }
 
     response.status(status).json({
       status,

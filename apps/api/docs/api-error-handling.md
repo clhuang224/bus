@@ -25,9 +25,9 @@ Error responses:
 ```
 
 `error.message` is a single localized string selected from the request
-`Accept-Language` header. The API supports the exact locale values `zh-TW` and
-`en`; missing or unsupported preferences fall back to `zh-TW`. Clients should
-use `error.code` for programmatic handling.
+`Accept-Language` header. The API supports the locale tags `zh-TW` and `en`
+(case-insensitive); missing or unsupported preferences fall back to `zh-TW`.
+Clients should use `error.code` for programmatic handling.
 Explicit custom messages supplied by a domain error are returned unchanged.
 
 ## Headers

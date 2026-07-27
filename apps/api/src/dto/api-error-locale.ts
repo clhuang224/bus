@@ -46,13 +46,15 @@ function toLanguagePreference(
 function toApiErrorLocale(
   languageRange: string | undefined,
 ): AppLocaleType.ZH_TW | AppLocaleType.EN | null {
-  const language = languageRange?.trim()
+  const language = languageRange?.trim().toLowerCase()
 
-  if (language !== AppLocaleType.ZH_TW && language !== AppLocaleType.EN) {
-    return null
+  if (language === AppLocaleType.ZH_TW.toLowerCase()) {
+    return AppLocaleType.ZH_TW
   }
 
-  return language
+  if (language === AppLocaleType.EN) return AppLocaleType.EN
+
+  return null
 }
 
 function toQuality(parameters: string[]): number {

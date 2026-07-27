@@ -13,8 +13,8 @@ describe('getApiErrorLocale', () => {
     expect(getApiErrorLocale('en, zh-TW;q=0.9')).toBe(AppLocaleType.EN)
   })
 
-  it('uses Traditional Chinese when the exact supported locale is requested', () => {
-    expect(getApiErrorLocale('zh-TW, en;q=0.9')).toBe(AppLocaleType.ZH_TW)
+  it('matches supported locale tags without regard to casing', () => {
+    expect(getApiErrorLocale('ZH-tw, en;q=0.9')).toBe(AppLocaleType.ZH_TW)
   })
 
   it('uses the highest-priority supported language', () => {
