@@ -7,24 +7,24 @@ import { NearbySidebarContent } from '~/components/nearby/NearbySidebarContent'
 import { useNearbyData } from '~/modules/hooks/nearby/useNearbyData'
 import { useScrollSelectedItem } from '~/modules/hooks/shared/useScrollSelectedItem'
 import { useNearbySearchParams } from '~/modules/hooks/nearby/useNearbySearchParams'
-import { NearbyStopDetail } from '~/components/nearby/NearbyStopDetail'
-import { NearbyStopMap } from '~/components/nearby/NearbyStopMap'
+import { NearbyStationDetail } from '~/components/nearby/NearbyStationDetail'
+import { NearbyStationMap } from '~/components/nearby/NearbyStationMap'
 import { RiMenuFill } from '@remixicon/react'
 
 const Nearby = () => {
   const { t } = useTranslation()
   const scrollViewportRef = useRef<HTMLDivElement | null>(null)
-  const stopItemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
+  const stationItemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
   const theme = useMantineTheme()
   const isSm = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`)
   const [isSidebarOpened, { open: openSidebar, close: closeSidebar }] =
     useDisclosure(false)
   const {
-    selectedStopId,
-    selectedRouteStopId,
-    selectStop,
-    viewStopRoutes,
-    backToNearbyStops,
+    selectedStationId,
+    selectedStationRoutesId,
+    selectStation,
+    viewStationRoutes,
+    backToNearbyStations,
   } = useNearbySearchParams()
   const {
     coords,
@@ -35,23 +35,23 @@ const Nearby = () => {
     isStationRouteBadgesRateLimited,
     isStationRoutesLoading,
     isStationRoutesRateLimited,
-    isStopsLoading,
+    isStationsLoading,
     markers,
     message,
-    nearbyStopGroups,
-    selectedMapStopGroup,
+    nearbyStations,
+    selectedMapStation,
     selectedStationRoutes,
-    selectedStopGroup,
+    selectedRouteStation,
     stationRouteBadgesMap,
   } = useNearbyData({
-    selectedStopId,
-    selectedRouteStopId,
+    selectedStationId,
+    selectedStationRoutesId,
   })
 
   useScrollSelectedItem({
-    itemElementRefs: stopItemRefs,
-    listItems: nearbyStopGroups,
-    selectedItemId: selectedStopId,
+    itemElementRefs: stationItemRefs,
+    listItems: nearbyStations,
+    selectedItemId: selectedStationId,
   })
 
   useEffect(() => {
@@ -62,20 +62,20 @@ const Nearby = () => {
   }, [isSm])
 
   useEffect(() => {
-    if (!isSm || !selectedRouteStopId) return
+    if (!isSm || !selectedStationRoutesId) return
     openSidebar()
-  }, [isSm, selectedRouteStopId, openSidebar])
+  }, [isSm, selectedStationRoutesId, openSidebar])
 
-  const selectedStopPopupContent = selectedMapStopGroup ? (
-    <NearbyStopDetail
-      stopGroup={selectedMapStopGroup}
+  const selectedStationPopupContent = selectedMapStation ? (
+    <NearbyStationDetail
+      station={selectedMapStation}
       hasRoutesError={hasStationRouteBadgesError}
-      routes={stationRouteBadgesMap.get(selectedMapStopGroup.StationID) ?? []}
+      routes={stationRouteBadgesMap.get(selectedMapStation.stationId) ?? []}
       isRoutesLoading={isStationRouteBadgesLoading}
       isRoutesRateLimited={isStationRouteBadgesRateLimited}
       displayMode={isSm ? 'full' : 'title'}
-      onViewRoutes={(stationID) => {
-        viewStopRoutes(stationID)
+      onViewStationRoutes={(stationId) => {
+        viewStationRoutes(stationId)
         if (isSm) {
           openSidebar()
         }
@@ -94,22 +94,22 @@ const Nearby = () => {
             hasStationRoutesError,
             isStationRoutesLoading,
             isStationRoutesRateLimited,
-            onBack: backToNearbyStops,
-            stopGroup: selectedStopGroup,
+            onBack: backToNearbyStations,
+            station: selectedRouteStation,
             stationRoutes: selectedStationRoutes,
           }}
           listState={{
             hasStationRouteBadgesError,
-            isStopsLoading,
+            isStationsLoading,
             isStationRouteBadgesRateLimited,
             isStationRoutesLoading: isStationRouteBadgesLoading,
-            nearbyStopGroups,
-            onSelectStop: selectStop,
-            onViewRoutes: viewStopRoutes,
+            nearbyStations,
+            onSelectStation: selectStation,
+            onViewStationRoutes: viewStationRoutes,
             scrollViewportRef,
-            selectedStopId,
+            selectedStationId,
             stationRouteBadgesMap,
-            stopItemRefs,
+            stationItemRefs,
           }}
           message={message}
         />
@@ -123,7 +123,7 @@ const Nearby = () => {
           style={{ cursor: 'not-allowed' }}
         />
       )}
-      <NearbyStopMap
+      <NearbyStationMap
         center={coords}
         extraControls={
           isSm ? (
@@ -136,10 +136,10 @@ const Nearby = () => {
           ) : null
         }
         markers={markers}
-        selectedStop={selectedStopId}
-        selectedStopPopupContent={selectedStopPopupContent}
+        selectedStation={selectedStationId}
+        selectedStationPopupContent={selectedStationPopupContent}
         isSm={isSm}
-        onSelectStop={selectStop}
+        onSelectStation={selectStation}
       />
     </MapSidebarLayout>
   )

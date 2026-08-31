@@ -1,8 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { BearingType, CityNameType, DirectionType } from '@bus/shared'
+import {
+  BearingType,
+  CityNameType,
+  DirectionType,
+  type ApiStation,
+  type ApiStationRoute,
+  type ApiStationRouteDirection,
+  type StationsResponse,
+} from '@bus/shared'
 import { LocalizedTextDto, PositionDto } from '../../dto/shared.dto.js'
 
-export class StationRouteDto {
+export class StationRouteDto implements ApiStationRoute {
   @ApiProperty({ description: 'Route UUID', example: 'NWT10116' })
   uuid!: string
 
@@ -35,7 +43,7 @@ export class StationRouteDto {
   destination!: LocalizedTextDto
 }
 
-export class StationRouteDirectionDto {
+export class StationRouteDirectionDto implements ApiStationRouteDirection {
   @ApiProperty({
     description: 'Route direction serving this station',
     enum: DirectionType,
@@ -50,7 +58,7 @@ export class StationRouteDirectionDto {
   routes!: StationRouteDto[]
 }
 
-export class StationDto {
+export class StationDto implements ApiStation {
   @ApiProperty({ description: 'Station UUID', example: 'NWT1001' })
   uuid!: string
 
@@ -104,7 +112,7 @@ export class StationDto {
   route_directions!: StationRouteDirectionDto[]
 }
 
-export class StationsResponseDto {
+export class StationsResponseDto implements StationsResponse {
   @ApiProperty({
     description:
       'Nearby station groups sorted by distance from the query coordinates.',

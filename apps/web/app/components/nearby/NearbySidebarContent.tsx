@@ -21,33 +21,33 @@ import { NavigationButton } from '~/components/common/NavigationButton'
 import { SkeletonList } from '~/components/common/SkeletonList'
 import { StopDistanceText } from '~/components/common/StopDistanceText'
 import type { AlertMessageConfig } from '~/modules/interfaces/AlertMessageConfig'
-import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
+import type { NearbyStation } from '~/modules/interfaces/Nearby'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { toLatLng } from '~/modules/utils/geo/convertCoordinates'
 import { getCityTranslationKey } from '~/modules/utils/i18n/getCityTranslationKey'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
-import { getStopGroupBearingLabel } from '~/modules/utils/nearby/getStopGroupBearingLabel'
-import { NearbyStopDetail } from './NearbyStopDetail'
+import { getStationBearingLabel } from '~/modules/utils/nearby/getStationBearingLabel'
+import { NearbyStationDetail } from './NearbyStationDetail'
 import { NearbyStopRoutes } from './NearbyStopRoutes'
 
-type StopItemRefs = RefObject<Map<string, HTMLDivElement | null>>
+type StationItemRefs = RefObject<Map<string, HTMLDivElement | null>>
 
 interface NearbySidebarListState {
   hasStationRouteBadgesError: boolean
-  isStopsLoading: boolean
+  isStationsLoading: boolean
   isStationRoutesLoading: boolean
   isStationRouteBadgesRateLimited: boolean
-  nearbyStopGroups: NearbyStopGroup[]
-  onSelectStop: (value: string | null) => void
-  onViewRoutes: (stationID: string) => void
+  nearbyStations: NearbyStation[]
+  onSelectStation: (value: string | null) => void
+  onViewStationRoutes: (stationId: string) => void
   scrollViewportRef: RefObject<HTMLDivElement | null>
-  selectedStopId: string | null
+  selectedStationId: string | null
   stationRouteBadgesMap: Map<
     string,
     Array<Pick<StationRoute, 'routeUID' | 'name'>>
   >
-  stopItemRefs: StopItemRefs
+  stationItemRefs: StationItemRefs
 }
 
 interface NearbySidebarDetailState {
@@ -55,7 +55,7 @@ interface NearbySidebarDetailState {
   isStationRoutesLoading: boolean
   isStationRoutesRateLimited: boolean
   onBack: () => void
-  stopGroup: NearbyStopGroup | null
+  station: NearbyStation | null
   stationRoutes: StationRoute[]
 }
 
@@ -72,7 +72,7 @@ const NearbySidebarContentDetail = ({
 }) => {
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
-  const stopBearingLabel = getStopGroupBearingLabel(t, detailState.stopGroup!)
+  const stationBearingLabel = getStationBearingLabel(t, detailState.station!)
 
   return (
     <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
@@ -84,11 +84,11 @@ const NearbySidebarContentDetail = ({
           <RiArrowLeftSLine size={18} />
         </ActionIcon>
         <Title order={4} style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
-          {getLocalizedText(detailState.stopGroup!.StopName, locale)}
+          {getLocalizedText(detailState.station!.name, locale)}
         </Title>
-        {stopBearingLabel && (
+        {stationBearingLabel && (
           <Text size="sm" c="dimmed">
-            {stopBearingLabel}
+            {stationBearingLabel}
           </Text>
         )}
       </Flex>
@@ -99,17 +99,14 @@ const NearbySidebarContentDetail = ({
           </Text>
           <Group align="center" wrap="nowrap" gap="xs">
             <StopDistanceText
-              position={detailState.stopGroup!.position}
+              position={detailState.station!.position}
               size="sm"
             />
             <NavigationButton
               ariaLabel={t('components.routeStopList.navigateAriaLabel', {
-                stopName: getLocalizedText(
-                  detailState.stopGroup!.StopName,
-                  locale,
-                ),
+                stopName: getLocalizedText(detailState.station!.name, locale),
               })}
-              destination={toLatLng(detailState.stopGroup!.position)}
+              destination={toLatLng(detailState.station!.position)}
             />
           </Group>
         </Stack>
@@ -118,8 +115,8 @@ const NearbySidebarContentDetail = ({
             {t('components.nearbyStopDetail.cityLabel')}
           </Text>
           <Text size="sm">
-            {detailState.stopGroup!.City
-              ? t(getCityTranslationKey(detailState.stopGroup!.City))
+            {detailState.station!.city
+              ? t(getCityTranslationKey(detailState.station!.city))
               : t('components.nearbyStopDetail.notProvided')}
           </Text>
         </Stack>
@@ -128,13 +125,9 @@ const NearbySidebarContentDetail = ({
             {t('components.nearbyStopDetail.addressLabel')}
           </Text>
           <Text size="sm">
-            {Array.from(
-              new Set(
-                detailState
-                  .stopGroup!.stops.map((stop) => stop.StopAddress)
-                  .filter(Boolean),
-              ),
-            ).join('、') || t('components.nearbyStopDetail.notProvided')}
+            {detailState.station!.address
+              ? getLocalizedText(detailState.station!.address, locale)
+              : t('components.nearbyStopDetail.notProvided')}
           </Text>
         </Stack>
         <NearbyStopRoutes
@@ -161,32 +154,32 @@ const NearbySidebarContentList = ({
       viewportRef={listState.scrollViewportRef}
       style={{ flex: 1, minHeight: 0 }}
     >
-      {listState.isStopsLoading && (
+      {listState.isStationsLoading && (
         <SkeletonList count={5} gap="sm" testId="nearby-stops-skeleton">
           <Skeleton h={56} radius="md" />
         </SkeletonList>
       )}
-      {!listState.isStopsLoading && (
+      {!listState.isStationsLoading && (
         <Accordion
           variant="separated"
-          value={listState.selectedStopId}
-          onChange={listState.onSelectStop}
+          value={listState.selectedStationId}
+          onChange={listState.onSelectStation}
         >
-          {listState.nearbyStopGroups.map((stopGroup) => {
-            const stopBearingLabel = getStopGroupBearingLabel(t, stopGroup)
+          {listState.nearbyStations.map((station) => {
+            const stationBearingLabel = getStationBearingLabel(t, station)
 
             return (
               <AccordionItem
-                value={stopGroup.StationID}
-                key={stopGroup.StationID}
+                value={station.stationId}
+                key={station.stationId}
                 ref={(node) => {
                   if (node) {
-                    listState.stopItemRefs.current.set(
-                      stopGroup.StationID,
+                    listState.stationItemRefs.current.set(
+                      station.stationId,
                       node,
                     )
                   } else {
-                    listState.stopItemRefs.current.delete(stopGroup.StationID)
+                    listState.stationItemRefs.current.delete(station.stationId)
                   }
                 }}
               >
@@ -201,32 +194,31 @@ const NearbySidebarContentList = ({
                       style={{ flex: '1 1 auto', minWidth: 0 }}
                       lineClamp={1}
                     >
-                      {getLocalizedText(stopGroup.StopName, locale)}
+                      {getLocalizedText(station.name, locale)}
                     </Text>
-                    {stopBearingLabel && (
+                    {stationBearingLabel && (
                       <Text size="sm" c="dimmed" mr="xs">
-                        {stopBearingLabel}
+                        {stationBearingLabel}
                       </Text>
                     )}
                   </Flex>
                 </AccordionControl>
                 <AccordionPanel>
-                  <NearbyStopDetail
-                    stopGroup={stopGroup}
+                  <NearbyStationDetail
+                    station={station}
                     hasRoutesError={listState.hasStationRouteBadgesError}
                     routes={
-                      listState.stationRouteBadgesMap.get(
-                        stopGroup.StationID,
-                      ) ?? []
+                      listState.stationRouteBadgesMap.get(station.stationId) ??
+                      []
                     }
                     isRoutesLoading={
                       listState.isStationRoutesLoading &&
-                      listState.selectedStopId === stopGroup.StationID
+                      listState.selectedStationId === station.stationId
                     }
                     isRoutesRateLimited={
                       listState.isStationRouteBadgesRateLimited
                     }
-                    onViewRoutes={listState.onViewRoutes}
+                    onViewStationRoutes={listState.onViewStationRoutes}
                   />
                 </AccordionPanel>
               </AccordionItem>
@@ -245,7 +237,7 @@ export const NearbySidebarContent = ({
 }: PropType) => (
   <Flex direction="column" h="100%" gap="md">
     {message && <BaseAlert {...message} />}
-    {detailState.stopGroup ? (
+    {detailState.station ? (
       <NearbySidebarContentDetail detailState={detailState} />
     ) : (
       <NearbySidebarContentList listState={listState} />
