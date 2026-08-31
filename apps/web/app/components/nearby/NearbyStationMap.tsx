@@ -16,20 +16,20 @@ interface PropType {
     label: string
   }>
   extraControls?: ReactNode
-  selectedStop: string | null
-  selectedStopPopupContent?: ReactNode
+  selectedStation: string | null
+  selectedStationPopupContent?: ReactNode
   isSm?: boolean
-  onSelectStop: (id: string | null) => void
+  onSelectStation: (id: string | null) => void
 }
 
-export const NearbyStopMap = ({
+export const NearbyStationMap = ({
   center,
   markers = [],
   extraControls,
-  selectedStop,
-  selectedStopPopupContent,
+  selectedStation,
+  selectedStationPopupContent,
   isSm = false,
-  onSelectStop,
+  onSelectStation,
 }: PropType) => {
   const { t } = useTranslation()
   const [map, setMap] = useState<mapLibre.Map | null>(null)
@@ -60,14 +60,14 @@ export const NearbyStopMap = ({
         type: 'stop',
       })
 
-      const handleSelectStop = (event: MouseEvent | KeyboardEvent) => {
+      const handleSelectStation = (event: MouseEvent | KeyboardEvent) => {
         event.preventDefault()
         event.stopPropagation()
-        onSelectStop(data.id)
+        onSelectStation(data.id)
       }
 
       markerCleanupFns.push(
-        addMapMarkerActivationListeners(el, handleSelectStop),
+        addMapMarkerActivationListeners(el, handleSelectStation),
       )
 
       const marker = new Marker({ element: el })
@@ -84,7 +84,7 @@ export const NearbyStopMap = ({
       })
       markerMap.current.clear()
     }
-  }, [map, markers, onSelectStop, t])
+  }, [map, markers, onSelectStation, t])
 
   useEffect(() => {
     if (!map || !markerMap.current.size) return
@@ -95,9 +95,9 @@ export const NearbyStopMap = ({
     }
     setPopupContainer(null)
 
-    if (!selectedStop) return
+    if (!selectedStation) return
 
-    const marker = markerMap.current.get(selectedStop)
+    const marker = markerMap.current.get(selectedStation)
     if (!marker) return
 
     const popup = new Popup({
@@ -106,7 +106,7 @@ export const NearbyStopMap = ({
       closeOnClick: false,
     }).setLngLat(marker.getLngLat())
 
-    if (selectedStopPopupContent) {
+    if (selectedStationPopupContent) {
       const container = document.createElement('div')
       popup.setDOMContent(container)
       setPopupContainer(container)
@@ -123,13 +123,13 @@ export const NearbyStopMap = ({
       popupRef.current.remove()
       popupRef.current = null
     }
-  }, [map, markers, selectedStop, selectedStopPopupContent])
+  }, [map, markers, selectedStation, selectedStationPopupContent])
 
   useEffect(() => {
     if (!map) return
-    if (!selectedStop) return
+    if (!selectedStation) return
 
-    const marker = markerMap.current.get(selectedStop)
+    const marker = markerMap.current.get(selectedStation)
     if (!marker) return
 
     map.flyTo({
@@ -137,7 +137,7 @@ export const NearbyStopMap = ({
       zoom: 16,
       duration: 800,
     })
-  }, [map, markers, selectedStop])
+  }, [map, markers, selectedStation])
 
   return (
     <>
@@ -148,7 +148,7 @@ export const NearbyStopMap = ({
         extraControls={extraControls}
         onLoad={setMap}
       />
-      {popupContainer && selectedStopPopupContent
+      {popupContainer && selectedStationPopupContent
         ? createPortal(
             <div
               style={{
@@ -156,7 +156,7 @@ export const NearbyStopMap = ({
                 overflowY: 'auto',
               }}
             >
-              {selectedStopPopupContent}
+              {selectedStationPopupContent}
             </div>,
             popupContainer,
           )

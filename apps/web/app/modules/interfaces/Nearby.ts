@@ -1,12 +1,13 @@
-import type { CityNameType } from '@bus/shared'
+import type { BearingType, CityNameType, LocalizedText } from '@bus/shared'
 import type { LngLat } from '../types/CoordsType'
-import type { LocalizedText } from '@bus/shared'
-import type { Stop } from './Stop'
+import type { StationRoute } from './StationRoute'
 
-export interface NearbyStopGroup {
-  StationID: string
-  StopName: LocalizedText
-  City: CityNameType | null
+export interface NearbyStation {
+  stationId: string
+  name: LocalizedText
+  city: CityNameType | null
+  address: LocalizedText | null
+  bearings: BearingType[]
   position: LngLat
-  stops: Stop[]
+  routes: StationRoute[]
 }
