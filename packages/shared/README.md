@@ -1,6 +1,6 @@
 # Shared Package
 
-This package is reserved for shared contracts between workspaces.
+This package contains shared contracts between workspaces.
 
 ## Intended Scope
 

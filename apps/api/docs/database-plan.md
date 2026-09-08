@@ -968,16 +968,19 @@ and index metadata even when there are no rows.
 - Stop sync for station groups, stations, stops, route stops, and fallback route shapes
 - Full real-data stop sync validation across Taiwan
 - Public route and nearby station endpoints backed by the database
+- Local web API mode for the Nearby page, backed by `GET /api/stations`
 
 ## Plan Order
 
-1. Read `GET /api/routes?area=...` from the database.
-2. Read `GET /api/routes/:uuid` from the database.
-3. Read `GET /api/stations?latitude=...&longitude=...` from the database.
-4. Continue monitoring database size after full sync runs.
-5. Build the next public read endpoint, starting with stops if route pages need stop-level lookup.
-6. Deploy the API, run migrations safely, and protect admin operations.
-7. Decide where scheduled monthly sync jobs run after deployment is stable.
-8. Discuss realtime cache.
-9. Discuss auth, favorites, and settings.
-10. Add `apps/manager` for sync monitoring and controlled retry actions.
+1. Connect the web Routes and Route pages to the existing database-backed
+   route endpoints in local API mode. Keep the current TDX path available for
+   production until the API is deployed.
+2. Continue monitoring database size after full sync runs.
+3. Deploy the API to a long-running host, run migrations safely, configure
+   production CORS and admin secrets, and protect admin operations.
+4. Decide where scheduled monthly sync jobs run after deployment is stable.
+5. Build the next public read endpoint, starting with stops if route pages
+   need stop-level lookup.
+6. Discuss realtime cache.
+7. Discuss auth, favorites, and settings.
+8. Add `apps/manager` for sync monitoring and controlled retry actions.

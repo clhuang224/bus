@@ -150,4 +150,5 @@ for database-backed requests and retains `/api/tdx` for pages that still use
 the local TDX proxy.
 Only the Nearby Stops page uses the database-backed station endpoint in this
 mode; the default `pnpm run dev` and production builds continue to use the
-TDX proxy.
+TDX proxy. The next local API integration is the Routes and Route pages, using
+the existing database-backed route endpoints.
