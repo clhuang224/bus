@@ -22,11 +22,16 @@ pnpm --filter @bus/api start:dev
 | ----------------------------------------------- | ---------------------------------------------------- |
 | `pnpm --filter @bus/api generate:admin-api-key` | 產生隨機 admin API key，並寫入 `.env.local`。       |
 | `pnpm --filter @bus/api start:dev`              | 以 watch mode 啟動 API。                             |
+| `pnpm --filter @bus/api start:dev:local-api`    | 在 port `3001` 以 local web CORS 的 watch mode 啟動 API。 |
 | `pnpm --filter @bus/api start:dev:awake`        | 以 watch mode 啟動 API，並在 macOS 防止閒置休眠。    |
 | `pnpm --filter @bus/api sync:routes:local`      | 透過執行於 `localhost:3000` 的 API 建立 route sync。 |
 | `pnpm --filter @bus/api sync:stops:local`       | 透過執行於 `localhost:3000` 的 API 建立 stop sync。  |
 
 在 macOS 執行時間較長的本地 sync 時，可以使用 `start:dev:awake`。一般的 `start:dev` 仍保留給跨平台開發與部署環境使用。
+
+Root 的 `pnpm run dev:api` 會同時啟動此 local API mode、web app 與 TDX
+proxy。它只會為本機 Vite origins 設定 `CORS_ORIGINS`；部署環境若讓 browser
+直接呼叫 API，必須另外設定允許的 origins。
 
 產生 key，並寫入 `.env.local` 裡的 `ADMIN_API_KEY`：
 
