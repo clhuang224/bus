@@ -2,7 +2,10 @@
 
 This workspace contains the NestJS backend API.
 
-Use this guide for changes under `apps/api`. The current backend is still contract-first: endpoints may return empty arrays or minimal placeholder data until the database and sync flow are implemented.
+Use this guide for changes under `apps/api`. Database-backed route and station
+endpoints, plus their sync flow, are implemented. New features may still begin
+with a contract-first stub, but do not replace existing database-backed
+behavior with placeholders.
 
 ## Structure
 
@@ -210,7 +213,8 @@ Keep TDX request throttling inside `TdxClientService`. Feature sync services suc
 
 ## Endpoint Stubs
 
-Until database work starts, endpoints may return:
+For an intentionally contract-first feature that does not have database work
+yet, endpoints may return:
 
 - empty arrays for list responses
 - minimal valid objects for detail responses

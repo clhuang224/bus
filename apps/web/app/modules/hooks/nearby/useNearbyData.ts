@@ -1,9 +1,16 @@
 import distance from '@turf/distance'
 import { point } from '@turf/helpers'
+import {
+  AppLocaleType,
+  type ApiLocalizedText,
+  type ApiStation,
+} from '@bus/shared'
+import type { BearingType, LocalizedText } from '@bus/shared'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { busApi } from '~/modules/apis/bus'
+import { databaseApi, isDatabaseApiEnabled } from '~/modules/apis/database'
 import { isTdxRateLimitError } from '~/modules/apis/errors/busError'
 import { cityMapArea } from '~/modules/consts/area'
 import {
@@ -13,17 +20,16 @@ import {
 import { NEARBY_DISTANCE_KM } from '~/modules/consts/nearby'
 import { getNearbyMessages } from '~/modules/consts/pageMessages'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
-import type { AppLocaleType } from '@bus/shared'
+import { useLocalizedTextCollator } from '~/modules/hooks/shared/useLocalizedTextCollator'
 import type { BusRoute } from '~/modules/interfaces/BusRoute'
-import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
+import type { NearbyStation } from '~/modules/interfaces/Nearby'
+import type { StationRoute } from '~/modules/interfaces/StationRoute'
 import type { Stop } from '~/modules/interfaces/Stop'
 import type { StopOfRoute } from '~/modules/interfaces/StopOfRoute'
-import type { StationRoute } from '~/modules/interfaces/StationRoute'
-import { useLocalizedTextCollator } from '~/modules/hooks/shared/useLocalizedTextCollator'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import type { RootState } from '~/modules/store'
-import { getCityByCoords } from '~/modules/utils/geo/getCityByCoords'
 import { toLngLat } from '~/modules/utils/geo/convertCoordinates'
+import { getCityByCoords } from '~/modules/utils/geo/getCityByCoords'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 import { normalizeBusRoutesWithDates } from '~/modules/utils/route/normalizeBusRoutesWithDates'
 
@@ -31,105 +37,134 @@ const disabledNearbyPermissions = [
   GeoPermissionType.UNSUPPORTED,
   GeoPermissionType.DENIED,
 ]
+
 interface UseNearbyDataOptions {
-  selectedStopId: string | null
-  selectedRouteStopId: string | null
+  selectedStationId: string | null
+  selectedStationRoutesId: string | null
 }
 
-function groupNearbyStops(
+function toLocalizedText(text: ApiLocalizedText): LocalizedText {
+  return {
+    [AppLocaleType.ZH_TW]: text[AppLocaleType.ZH_TW],
+    [AppLocaleType.EN]: text[AppLocaleType.EN],
+    [AppLocaleType.JA]: '',
+    [AppLocaleType.KO]: '',
+  }
+}
+
+function toTdxAddress(addresses: string[]): LocalizedText | null {
+  if (addresses.length === 0) return null
+
+  return {
+    [AppLocaleType.ZH_TW]: addresses.join('、'),
+    [AppLocaleType.EN]: '',
+    [AppLocaleType.JA]: '',
+    [AppLocaleType.KO]: '',
+  }
+}
+
+function toNearbyTdxStops(
   allStops: Stop[] | undefined,
   coords: [number, number] | null,
   isSuccess: boolean,
-): NearbyStopGroup[] {
+): Stop[] {
   if (!coords || !isSuccess || !allStops) return []
 
   const currentPoint = point(toLngLat(coords)!)
-  const groupedStops = new Map<string, NearbyStopGroup>()
 
-  allStops.forEach((stop) => {
-    if (!stop.position) return
+  return allStops.filter((stop) => {
+    if (!stop.position) return false
 
-    const stopPoint = point(stop.position)
-    if (
-      distance(currentPoint, stopPoint, { units: 'kilometers' }) >
+    return (
+      distance(currentPoint, point(stop.position), { units: 'kilometers' }) <=
       NEARBY_DISTANCE_KM
-    ) {
-      return
-    }
-
-    const stationKey = stop.StationID ?? stop.StopUID
-    const stopGroup = groupedStops.get(stationKey)
-    if (stopGroup) {
-      stopGroup.stops.push(stop)
-      return
-    }
-
-    groupedStops.set(stationKey, {
-      StationID: stationKey,
-      StopName: stop.StopName,
-      City: stop.City,
-      position: stop.position,
-      stops: [stop],
-    })
+    )
   })
-
-  return Array.from(groupedStops.values())
 }
 
-function buildStationRouteBadgesMap(
-  stopOfRoutes: StopOfRoute[],
+function toTdxStations(
+  stops: Stop[],
+  routesByStationId: Map<string, StationRoute[]>,
+): NearbyStation[] {
+  const stopsByStationId = new Map<string, Stop[]>()
+
+  for (const stop of stops) {
+    const stationId = stop.StationID ?? stop.StopUID
+    const stationStops = stopsByStationId.get(stationId) ?? []
+
+    stationStops.push(stop)
+    stopsByStationId.set(stationId, stationStops)
+  }
+
+  return [...stopsByStationId].map(([stationId, stationStops]) => {
+    const representativeStop = stationStops[0]!
+    const addresses = [
+      ...new Set(
+        stationStops
+          .map((stop) => stop.StopAddress)
+          .filter((address): address is string => Boolean(address)),
+      ),
+    ]
+    const bearings = [
+      ...new Set(
+        stationStops
+          .map((stop) => stop.Bearing)
+          .filter((bearing): bearing is BearingType => bearing != null),
+      ),
+    ]
+
+    return {
+      stationId,
+      name: representativeStop.StopName,
+      city: representativeStop.City,
+      address: toTdxAddress(addresses),
+      bearings,
+      position: representativeStop.position,
+      routes: routesByStationId.get(stationId) ?? [],
+    }
+  })
+}
+
+function toApiStations(
+  stations: ApiStation[],
   locale: AppLocaleType,
-  routeNameCollator: Intl.Collator,
-) {
-  const stationRouteBadges = new Map<
-    string,
-    Array<Pick<StationRoute, 'routeUID' | 'name'>>
-  >()
-
-  stopOfRoutes.forEach((stopOfRoute) => {
-    const routeBadge = {
-      routeUID: stopOfRoute.RouteUID,
-      name:
-        getLocalizedText(stopOfRoute.SubRouteName, locale) ||
-        getLocalizedText(stopOfRoute.RouteName, locale),
-    }
-
-    stopOfRoute.Stops.forEach((stop) => {
-      const stationKey = stop.StationID ?? stop.StopUID
-      const stationBadges = stationRouteBadges.get(stationKey) ?? []
-
-      if (
-        !stationBadges.some(
-          (currentRoute) => currentRoute.routeUID === routeBadge.routeUID,
-        )
-      ) {
-        stationBadges.push(routeBadge)
-        stationBadges.sort((left, right) =>
-          routeNameCollator.compare(left.name, right.name),
-        )
-        stationRouteBadges.set(stationKey, stationBadges)
-      }
-    })
-  })
-
-  return stationRouteBadges
+): NearbyStation[] {
+  return stations.map((station) => ({
+    stationId: station.uuid,
+    name: toLocalizedText(station.name),
+    city: station.city,
+    address: station.address ? toLocalizedText(station.address) : null,
+    bearings: station.bearing ? [station.bearing] : [],
+    position: [station.position.longitude, station.position.latitude],
+    routes: station.route_directions.flatMap(({ direction, routes }) =>
+      routes.map((route) => ({
+        id: `${route.uuid}-${direction}`,
+        routeUID: route.uuid,
+        city: route.city,
+        name: getLocalizedText(toLocalizedText(route.name), locale),
+        departure: getLocalizedText(toLocalizedText(route.departure), locale),
+        destination: getLocalizedText(
+          toLocalizedText(route.destination),
+          locale,
+        ),
+        direction,
+      })),
+    ),
+  }))
 }
 
-function buildStationRoutes(
+function buildTdxRoutesByStationId(
   routes: BusRoute<Date | null>[],
   stopOfRoutes: StopOfRoute[],
-  selectedRouteStopId: string | null,
   locale: AppLocaleType,
-): StationRoute[] {
-  if (!selectedRouteStopId || routes.length === 0) return []
-
-  const stationRoutes = new Map<string, StationRoute[]>()
+): Map<string, StationRoute[]> {
+  const routesByStationId = new Map<string, StationRoute[]>()
   const routeDepartureMap = new Map<string, string>()
   const routeDestinationMap = new Map<string, string>()
   const routeFallbackDepartureMap = new Map<string, string>()
   const routeFallbackDestinationMap = new Map<string, string>()
 
-  routes.forEach((route) => {
+  for (const route of routes) {
     routeFallbackDepartureMap.set(
       route.RouteUID,
       getLocalizedText(route.DepartureStopName, locale) ||
@@ -141,19 +176,21 @@ function buildStationRoutes(
         getLocalizedText(route.RouteName, locale),
     )
 
-    route.SubRoutes.forEach((subRoute) => {
+    for (const subRoute of route.SubRoutes) {
+      const routeKey = `${subRoute.SubRouteUID}-${subRoute.Direction}`
+
       routeDepartureMap.set(
-        `${subRoute.SubRouteUID}-${subRoute.Direction}`,
+        routeKey,
         getLocalizedText(subRoute.DepartureStopName, locale),
       )
       routeDestinationMap.set(
-        `${subRoute.SubRouteUID}-${subRoute.Direction}`,
+        routeKey,
         getLocalizedText(subRoute.DestinationStopName, locale),
       )
-    })
-  })
+    }
+  }
 
-  stopOfRoutes.forEach((stopOfRoute) => {
+  for (const stopOfRoute of stopOfRoutes) {
     const routeKey = `${stopOfRoute.SubRouteUID}-${stopOfRoute.Direction}`
     const route = {
       id: routeKey,
@@ -173,25 +210,53 @@ function buildStationRoutes(
       direction: stopOfRoute.Direction,
     }
 
-    stopOfRoute.Stops.forEach((stop) => {
-      const stationKey = stop.StationID ?? stop.StopUID
-      const stationStopRoutes = stationRoutes.get(stationKey) ?? []
+    for (const stop of stopOfRoute.Stops) {
+      const stationId = stop.StationID ?? stop.StopUID
+      const stationRoutes = routesByStationId.get(stationId) ?? []
 
-      if (
-        !stationStopRoutes.some((currentRoute) => currentRoute.id === route.id)
-      ) {
-        stationStopRoutes.push(route)
-        stationRoutes.set(stationKey, stationStopRoutes)
+      if (!stationRoutes.some((currentRoute) => currentRoute.id === route.id)) {
+        stationRoutes.push(route)
+        routesByStationId.set(stationId, stationRoutes)
       }
-    })
-  })
+    }
+  }
 
-  return stationRoutes.get(selectedRouteStopId) ?? []
+  return routesByStationId
+}
+
+function buildStationRouteBadgesMap(
+  stations: NearbyStation[],
+  routeNameCollator: Intl.Collator,
+) {
+  const stationRouteBadges = new Map<
+    string,
+    Array<Pick<StationRoute, 'routeUID' | 'name'>>
+  >()
+
+  for (const station of stations) {
+    const routes = new Map<string, Pick<StationRoute, 'routeUID' | 'name'>>()
+
+    for (const route of station.routes) {
+      routes.set(route.routeUID, {
+        routeUID: route.routeUID,
+        name: route.name,
+      })
+    }
+
+    stationRouteBadges.set(
+      station.stationId,
+      [...routes.values()].sort((left, right) =>
+        routeNameCollator.compare(left.name, right.name),
+      ),
+    )
+  }
+
+  return stationRouteBadges
 }
 
 export function useNearbyData({
-  selectedStopId,
-  selectedRouteStopId,
+  selectedStationId,
+  selectedStationRoutesId,
 }: UseNearbyDataOptions) {
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
@@ -203,34 +268,45 @@ export function useNearbyData({
   const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
   const currentCity = getCityByCoords(coords, geojson)
   const currentArea = currentCity ? cityMapArea[currentCity] : null
+  const usesDatabaseApi = isDatabaseApiEnabled()
   const isNearbyDisabled =
     disabledNearbyPermissions.includes(permission) || geolocationError !== null
   const isAwaitingUsableLocation = !coords && !isNearbyDisabled
   const routeNameCollator = useLocalizedTextCollator()
 
   const {
+    data: apiStations = [],
+    error: apiStationsError,
+    isLoading: isApiStationsLoading,
+    isSuccess: isApiStationsSuccess,
+  } = databaseApi.useGetNearbyStationsQuery(
+    {
+      latitude: coords?.[0] ?? 0,
+      longitude: coords?.[1] ?? 0,
+      radius_meters: NEARBY_DISTANCE_KM * 1_000,
+    },
+    { skip: !usesDatabaseApi || !coords },
+  )
+
+  const {
     data: allStops,
-    isLoading: isStopsLoading,
-    error: stopsError,
-    isSuccess: isStopsSuccess,
+    isLoading: isTdxStopsLoading,
+    error: tdxStopsError,
+    isSuccess: isTdxStopsSuccess,
   } = busApi.useGetStopsByNearbyAreaQuery(
     { area: currentArea!, coords: coords! },
     {
-      skip: !coords || !currentArea,
+      skip: usesDatabaseApi || !coords || !currentArea,
     },
   )
 
-  const nearbyStopGroups = useMemo(
-    () => groupNearbyStops(allStops, coords, isStopsSuccess),
-    [allStops, coords, isStopsSuccess],
+  const nearbyTdxStops = useMemo(
+    () => toNearbyTdxStops(allStops, coords, isTdxStopsSuccess),
+    [allStops, coords, isTdxStopsSuccess],
   )
-
   const nearbyStopUIDs = useMemo(
-    () =>
-      nearbyStopGroups.flatMap((stopGroup) =>
-        stopGroup.stops.map((stop) => stop.StopUID),
-      ),
-    [nearbyStopGroups],
+    () => nearbyTdxStops.map((stop) => stop.StopUID),
+    [nearbyTdxStops],
   )
 
   const {
@@ -242,9 +318,10 @@ export function useNearbyData({
     { area: currentArea!, stopUIDs: nearbyStopUIDs },
     {
       skip:
+        usesDatabaseApi ||
         !coords ||
         !currentArea ||
-        !selectedStopId ||
+        !selectedStationId ||
         nearbyStopUIDs.length === 0,
     },
   )
@@ -255,28 +332,56 @@ export function useNearbyData({
     isLoading: isRoutesLoading,
     isError: isRoutesError,
   } = busApi.useGetRoutesByAreaQuery(currentArea!, {
-    skip: !coords || !currentArea || !selectedRouteStopId,
+    skip:
+      usesDatabaseApi || !coords || !currentArea || !selectedStationRoutesId,
   })
   const routes = useMemo(
     () => normalizeBusRoutesWithDates(routeData),
     [routeData],
   )
-  const isStationRouteBadgesRateLimited = isTdxRateLimitError(stopOfRoutesError)
+  const tdxRoutesByStationId = useMemo(
+    () => buildTdxRoutesByStationId(routes, stopOfRoutes, locale),
+    [locale, routes, stopOfRoutes],
+  )
+  const tdxStations = useMemo(
+    () => toTdxStations(nearbyTdxStops, tdxRoutesByStationId),
+    [nearbyTdxStops, tdxRoutesByStationId],
+  )
+  const nearbyStations = useMemo(
+    () => (usesDatabaseApi ? toApiStations(apiStations, locale) : tdxStations),
+    [apiStations, locale, tdxStations, usesDatabaseApi],
+  )
+  const stationRouteBadgesMap = useMemo(
+    () => buildStationRouteBadgesMap(nearbyStations, routeNameCollator),
+    [nearbyStations, routeNameCollator],
+  )
+  const isStationRouteBadgesRateLimited =
+    !usesDatabaseApi && isTdxRateLimitError(stopOfRoutesError)
   const hasStationRouteBadgesError =
-    isStopOfRoutesError && !isStationRouteBadgesRateLimited
+    !usesDatabaseApi && isStopOfRoutesError && !isStationRouteBadgesRateLimited
   const isStationRoutesRateLimited =
-    isStationRouteBadgesRateLimited || isTdxRateLimitError(routesError)
+    !usesDatabaseApi &&
+    (isStationRouteBadgesRateLimited || isTdxRateLimitError(routesError))
   const hasStationRoutesError =
-    (isStopOfRoutesError || isRoutesError) && !isStationRoutesRateLimited
+    !usesDatabaseApi &&
+    (isStopOfRoutesError || isRoutesError) &&
+    !isStationRoutesRateLimited
+  const isStationsLoading =
+    isAwaitingUsableLocation ||
+    (usesDatabaseApi ? isApiStationsLoading : isTdxStopsLoading)
+  const isStationsSuccess = usesDatabaseApi
+    ? isApiStationsSuccess
+    : isTdxStopsSuccess
+  const stationsError = usesDatabaseApi ? apiStationsError : tdxStopsError
 
   const markers = useMemo(
     () =>
-      nearbyStopGroups.map((stopGroup) => ({
-        id: stopGroup.StationID,
-        position: stopGroup.position,
-        label: getLocalizedText(stopGroup.StopName, locale),
+      nearbyStations.map((station) => ({
+        id: station.stationId,
+        position: station.position,
+        label: getLocalizedText(station.name, locale),
       })),
-    [locale, nearbyStopGroups],
+    [locale, nearbyStations],
   )
 
   const message = useMemo(() => {
@@ -288,56 +393,58 @@ export function useNearbyData({
       return getGeoPermissionMessages(t)[permission]
     }
     if (geolocationError) return getGeoErrorMessages(t)[geolocationError]
-    if (stopsError) return getNearbyMessages(t).loadStopsError
-    if (nearbyStopGroups.length === 0) return getNearbyMessages(t).emptyStops
+    if (stationsError) return getNearbyMessages(t).loadStopsError
+    if (isStationsSuccess && nearbyStations.length === 0) {
+      return getNearbyMessages(t).emptyStops
+    }
 
     return null
-  }, [permission, geolocationError, stopsError, nearbyStopGroups, t])
+  }, [
+    geolocationError,
+    isStationsSuccess,
+    nearbyStations.length,
+    permission,
+    stationsError,
+    t,
+  ])
 
-  const selectedStopGroup = useMemo(() => {
-    if (!selectedRouteStopId) return null
+  const selectedRouteStation = useMemo(() => {
+    if (!selectedStationRoutesId) return null
+
     return (
-      nearbyStopGroups.find(
-        (stopGroup) => stopGroup.StationID === selectedRouteStopId,
+      nearbyStations.find(
+        (station) => station.stationId === selectedStationRoutesId,
       ) ?? null
     )
-  }, [nearbyStopGroups, selectedRouteStopId])
+  }, [nearbyStations, selectedStationRoutesId])
 
-  const selectedMapStopGroup = useMemo(() => {
-    if (!selectedStopId) return null
+  const selectedMapStation = useMemo(() => {
+    if (!selectedStationId) return null
+
     return (
-      nearbyStopGroups.find(
-        (stopGroup) => stopGroup.StationID === selectedStopId,
+      nearbyStations.find(
+        (station) => station.stationId === selectedStationId,
       ) ?? null
     )
-  }, [nearbyStopGroups, selectedStopId])
-
-  const selectedStationRoutes = useMemo(
-    () => buildStationRoutes(routes, stopOfRoutes, selectedRouteStopId, locale),
-    [locale, routes, selectedRouteStopId, stopOfRoutes],
-  )
-
-  const stationRouteBadgesMap = useMemo(
-    () => buildStationRouteBadgesMap(stopOfRoutes, locale, routeNameCollator),
-    [locale, routeNameCollator, stopOfRoutes],
-  )
+  }, [nearbyStations, selectedStationId])
 
   return {
     coords,
     hasStationRouteBadgesError,
     hasStationRoutesError,
     isNearbyDisabled,
-    isStationRouteBadgesLoading: isStopOfRoutesLoading,
+    isStationRouteBadgesLoading: !usesDatabaseApi && isStopOfRoutesLoading,
     isStationRouteBadgesRateLimited,
-    isStationRoutesLoading: isStopOfRoutesLoading || isRoutesLoading,
+    isStationRoutesLoading:
+      !usesDatabaseApi && (isStopOfRoutesLoading || isRoutesLoading),
     isStationRoutesRateLimited,
-    isStopsLoading: isAwaitingUsableLocation || isStopsLoading,
+    isStationsLoading,
     markers,
     message,
-    nearbyStopGroups,
-    selectedMapStopGroup,
-    selectedStationRoutes,
-    selectedStopGroup,
+    nearbyStations,
+    selectedMapStation,
+    selectedRouteStation,
+    selectedStationRoutes: selectedRouteStation?.routes ?? [],
     stationRouteBadgesMap,
   }
 }

@@ -5,6 +5,7 @@
   "scripts": {
     "build": "react-router build",
     "dev": "react-router dev",
+    "dev:local-api": "react-router dev --mode local-api",
     "dev:mobile": "react-router dev --host 0.0.0.0",
     "format": "prettier --write \"app/**/*.{ts,tsx}\" \"*.{ts,js}\"",
     "start": "react-router-serve ./build/server/index.js",
@@ -15,8 +16,8 @@
   "dependencies": {
     "@mantine/core": "^8.2.1",
     "@mantine/hooks": "^8.2.1",
-    "@react-router/node": "^7.14.0",
-    "@react-router/serve": "^7.14.0",
+    "@react-router/node": "7.15.1",
+    "@react-router/serve": "7.15.1",
     "@reduxjs/toolkit": "^2.8.2",
     "@remixicon/react": "^4.6.0",
     "@turf/boolean-point-in-polygon": "^7.3.1",
@@ -30,14 +31,14 @@
     "react-dom": "^19.1.0",
     "react-i18next": "^16.6.0",
     "react-redux": "^9.2.0",
-    "react-router": "^8.3.0",
+    "react-router": "7.15.1",
     "topojson-client": "^3.1.0",
     "@bus/shared": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",
     "@eslint/json": "^0.13.0",
-    "@react-router/dev": "^7.14.0",
+    "@react-router/dev": "7.15.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/geojson": "^7946.0.16",

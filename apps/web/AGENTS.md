@@ -25,7 +25,7 @@ The current product structure is page-driven:
 
 - `Favorite`: saved stops and quick access
 - `Routes`: search-based route discovery
-- `Nearby`: nearby stop discovery based on geolocation
+- `Nearby`: nearby station discovery based on geolocation
 - `Route`: route detail view
 - `Settings`: app preferences such as language selection
 
@@ -54,7 +54,7 @@ Current examples:
 - `AppLayout.tsx`: shared page shell
 - `Favorite.tsx`: default index page
 - `Routes.tsx`: route search flow
-- `Nearby.tsx`: geolocation and nearby stop flow
+- `Nearby.tsx`: geolocation and nearby station flow
 - `Route.tsx`: route detail page
 - `Settings.tsx`: app settings flow
 
@@ -69,8 +69,8 @@ Use feature folders when a set of components clearly belongs to one page or one 
 
 Examples:
 
-- `app/components/nearby/NearbyStopDetail.tsx`
-- `app/components/nearby/NearbyStopMap.tsx`
+- `app/components/nearby/NearbyStationDetail.tsx`
+- `app/components/nearby/NearbyStationMap.tsx`
 - `app/components/nearby/NearbyStopRoutes.tsx`
 
 Component extraction is usually a good idea when:
@@ -112,7 +112,7 @@ Good fits:
 
 - API response object shapes
 - transformed app-facing object models
-- feature-specific reusable objects such as `NearbyStopGroup` or `StationRoute`
+- feature-specific reusable objects such as `NearbyStation` or `StationRoute`
 
 Prefer explicit field types in public interfaces. Avoid indexed access types such as `Stop['StopName']` unless you are doing real type plumbing and there is a clear payoff.
 

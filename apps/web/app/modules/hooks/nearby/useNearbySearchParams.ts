@@ -2,45 +2,45 @@ import { useSearchParams } from 'react-router'
 import { updateSearchParam } from '~/modules/utils/shared/updateSearchParam'
 
 interface NearbySearchParamUpdates {
-  selectedStopId?: string | null
-  selectedRouteStopId?: string | null
+  selectedStationId?: string | null
+  selectedStationRoutesId?: string | null
 }
 
 export const useNearbySearchParams = () => {
   const [searchParams, setSearchParams] = useSearchParams()
-  const selectedStopId = searchParams.get('stop')
-  const selectedRouteStopId = searchParams.get('routeStop')
+  const selectedStationId = searchParams.get('stop')
+  const selectedStationRoutesId = searchParams.get('routeStop')
 
   const setNearbySearchParams = ({
-    selectedStopId,
-    selectedRouteStopId,
+    selectedStationId,
+    selectedStationRoutesId,
   }: NearbySearchParamUpdates) => {
     setSearchParams((currentSearchParams) => {
       const nextSearchParams = new URLSearchParams(currentSearchParams)
-      updateSearchParam(nextSearchParams, 'stop', selectedStopId)
-      updateSearchParam(nextSearchParams, 'routeStop', selectedRouteStopId)
+      updateSearchParam(nextSearchParams, 'stop', selectedStationId)
+      updateSearchParam(nextSearchParams, 'routeStop', selectedStationRoutesId)
 
       return nextSearchParams
     })
   }
 
   return {
-    selectedStopId,
-    selectedRouteStopId,
-    selectStop: (stopId: string | null) =>
+    selectedStationId,
+    selectedStationRoutesId,
+    selectStation: (stationId: string | null) =>
       setNearbySearchParams({
-        selectedStopId: stopId,
-        selectedRouteStopId: null,
+        selectedStationId: stationId,
+        selectedStationRoutesId: null,
       }),
-    viewStopRoutes: (stationID: string) =>
+    viewStationRoutes: (stationId: string) =>
       setNearbySearchParams({
-        selectedStopId: stationID,
-        selectedRouteStopId: stationID,
+        selectedStationId: stationId,
+        selectedStationRoutesId: stationId,
       }),
-    backToNearbyStops: () =>
+    backToNearbyStations: () =>
       setNearbySearchParams({
-        selectedStopId: selectedRouteStopId,
-        selectedRouteStopId: null,
+        selectedStationId: selectedStationRoutesId,
+        selectedStationRoutesId: null,
       }),
   }
 }

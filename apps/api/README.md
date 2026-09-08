@@ -22,11 +22,17 @@ Local development scripts:
 | ----------------------------------------------- | --------------------------------------------------------------- |
 | `pnpm --filter @bus/api generate:admin-api-key` | Generate a random admin API key and save it to `.env.local`.    |
 | `pnpm --filter @bus/api start:dev`              | Start the API in watch mode.                                    |
+| `pnpm --filter @bus/api start:dev:local-api`    | Start the API in watch mode on port `3001` with local web CORS. |
 | `pnpm --filter @bus/api start:dev:awake`        | Start the API in watch mode and prevent idle sleep on macOS.    |
 | `pnpm --filter @bus/api sync:routes:local`      | Queue a route sync through the API running on `localhost:3000`. |
 | `pnpm --filter @bus/api sync:stops:local`       | Queue a stop sync through the API running on `localhost:3000`.  |
 
 Use `start:dev:awake` for long local sync runs on macOS. Keep the regular `start:dev` command for cross-platform development and deployment environments.
+
+The root `pnpm run dev:api` command starts this local API mode together with
+the web app and TDX proxy. It sets `CORS_ORIGINS` only for the local Vite
+origins; deployment environments must configure their own allowed origins if
+browser clients call the API directly.
 
 Generate a key and save it as `ADMIN_API_KEY` in `.env.local`:
 

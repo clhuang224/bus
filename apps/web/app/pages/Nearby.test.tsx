@@ -9,7 +9,13 @@ import {
   getGeoPermissionMessages,
 } from '~/modules/consts/geoMessages'
 import { getNearbyMessages } from '~/modules/consts/pageMessages'
-import { AreaType, BearingType, CityNameType } from '@bus/shared'
+import {
+  AreaType,
+  BearingType,
+  CityNameType,
+  DirectionType,
+  type ApiStation,
+} from '@bus/shared'
 import { GeoErrorType } from '~/modules/enums/geo/GeoErrorType'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
 import { createTestStore } from '~/test/createTestStore'
@@ -20,12 +26,16 @@ const {
   mockUseGetRoutesByAreaQuery,
   mockUseGetStopsByNearbyAreaQuery,
   mockUseGetStopOfRoutesByAreaQuery,
-  mockNearbyStopMap,
+  mockUseGetNearbyStationsQuery,
+  mockIsDatabaseApiEnabled,
+  mockNearbyStationMap,
 } = vi.hoisted(() => ({
   mockUseGetRoutesByAreaQuery: vi.fn(),
   mockUseGetStopsByNearbyAreaQuery: vi.fn(),
   mockUseGetStopOfRoutesByAreaQuery: vi.fn(),
-  mockNearbyStopMap: vi.fn(),
+  mockUseGetNearbyStationsQuery: vi.fn(),
+  mockIsDatabaseApiEnabled: vi.fn(),
+  mockNearbyStationMap: vi.fn(),
 }))
 
 vi.mock('~/modules/apis/bus', () => ({
@@ -36,19 +46,26 @@ vi.mock('~/modules/apis/bus', () => ({
   },
 }))
 
+vi.mock('~/modules/apis/database', () => ({
+  databaseApi: {
+    useGetNearbyStationsQuery: mockUseGetNearbyStationsQuery,
+  },
+  isDatabaseApiEnabled: mockIsDatabaseApiEnabled,
+}))
+
 vi.mock('~/modules/utils/geo/getCityByCoords', () => ({
   getCityByCoords: () => CityNameType.TAIPEI,
 }))
 
-vi.mock('~/components/nearby/NearbyStopMap', () => ({
-  NearbyStopMap: (props: {
+vi.mock('~/components/nearby/NearbyStationMap', () => ({
+  NearbyStationMap: (props: {
     extraControls?: React.ReactNode
-    selectedStop: string | null
-    onSelectStop: (id: string | null) => void
+    selectedStation: string | null
+    onSelectStation: (id: string | null) => void
     markers: Array<{ id: string; label: string }>
     isSm?: boolean
   }) => {
-    mockNearbyStopMap(props)
+    mockNearbyStationMap(props)
     return (
       <div>
         <div>{props.extraControls}</div>
@@ -276,11 +293,39 @@ const routesData = [
   },
 ]
 
+const nearbyApiStationsData: ApiStation[] = [
+  {
+    uuid: 'TPE-station-1',
+    city: CityNameType.TAIPEI,
+    name: { 'zh-TW': '市政府', en: 'City Hall' },
+    address: { 'zh-TW': '市府路 1 號', en: '1 City Hall Road' },
+    bearing: BearingType.NORTH,
+    position: { latitude: 25.033, longitude: 121.5654 },
+    distance_meters: 12,
+    route_directions: [
+      {
+        direction: DirectionType.GO,
+        routes: [
+          {
+            uuid: 'TPE-route-1',
+            city: CityNameType.TAIPEI,
+            name: { 'zh-TW': '藍 1', en: 'Blue 1' },
+            departure: { 'zh-TW': '市政府', en: 'City Hall' },
+            destination: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+          },
+        ],
+      },
+    ],
+  },
+]
+
 function resetNearbyMocks() {
   mockUseGetRoutesByAreaQuery.mockReset()
   mockUseGetStopsByNearbyAreaQuery.mockReset()
   mockUseGetStopOfRoutesByAreaQuery.mockReset()
-  mockNearbyStopMap.mockReset()
+  mockUseGetNearbyStationsQuery.mockReset()
+  mockIsDatabaseApiEnabled.mockReset()
+  mockNearbyStationMap.mockReset()
 }
 
 function renderNearby({
@@ -291,6 +336,7 @@ function renderNearby({
   queryState,
   routesQueryState,
   stopOfRoutesQueryState,
+  apiStationsQueryState,
 }: {
   initialEntry?: string
   coords?: [number, number] | null
@@ -313,6 +359,12 @@ function renderNearby({
     error?: unknown
     isError?: boolean
     isLoading?: boolean
+  }
+  apiStationsQueryState?: {
+    data?: ApiStation[]
+    error?: unknown
+    isLoading?: boolean
+    isSuccess?: boolean
   }
 } = {}) {
   const store = createTestStore({
@@ -356,6 +408,13 @@ function renderNearby({
     isLoading: false,
     ...stopOfRoutesQueryState,
   })
+  mockUseGetNearbyStationsQuery.mockReturnValue({
+    data: [],
+    error: null,
+    isLoading: false,
+    isSuccess: false,
+    ...apiStationsQueryState,
+  })
 
   return renderWithProvidersAndRouter(<Nearby />, {
     store,
@@ -370,6 +429,7 @@ describe('Nearby', () => {
     mockMatchMedia()
 
     resetNearbyMocks()
+    mockIsDatabaseApiEnabled.mockReturnValue(false)
   })
 
   it('shows a denied-location message when geolocation permission is denied', () => {
@@ -505,6 +565,33 @@ describe('Nearby', () => {
         skip: false,
       },
     )
+  })
+
+  it('uses the local stations API when local API mode is enabled', () => {
+    mockIsDatabaseApiEnabled.mockReturnValue(true)
+
+    renderNearby({
+      coords: [25.033, 121.5654],
+      permission: GeoPermissionType.GRANTED,
+      apiStationsQueryState: {
+        data: nearbyApiStationsData,
+        isSuccess: true,
+      },
+    })
+
+    expect(mockUseGetNearbyStationsQuery).toHaveBeenLastCalledWith(
+      {
+        latitude: 25.033,
+        longitude: 121.5654,
+        radius_meters: 500,
+      },
+      { skip: false },
+    )
+    expect(mockUseGetStopsByNearbyAreaQuery).toHaveBeenLastCalledWith(
+      expect.anything(),
+      { skip: true },
+    )
+    expect(screen.getByRole('button', { name: /^市政府/ })).toBeInTheDocument()
   })
 
   it('loads stop-of-route data when a stop is selected, but delays route detail data until viewing routes', () => {
@@ -673,15 +760,15 @@ describe('Nearby', () => {
       },
     })
 
-    const firstRenderProps = mockNearbyStopMap.mock.calls.at(-1)?.[0]
-    expect(firstRenderProps?.selectedStop).toBeNull()
+    const firstRenderProps = mockNearbyStationMap.mock.calls.at(-1)?.[0]
+    expect(firstRenderProps?.selectedStation).toBeNull()
 
     act(() => {
-      firstRenderProps?.onSelectStop('station-1')
+      firstRenderProps?.onSelectStation('station-1')
     })
 
-    const updatedProps = mockNearbyStopMap.mock.calls.at(-1)?.[0]
-    expect(updatedProps?.selectedStop).toBe('station-1')
+    const updatedProps = mockNearbyStationMap.mock.calls.at(-1)?.[0]
+    expect(updatedProps?.selectedStation).toBe('station-1')
   })
 
   it('syncs selected stop from the list back to the map props', () => {
@@ -696,8 +783,8 @@ describe('Nearby', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /^市政府/ }))
 
-    const updatedProps = mockNearbyStopMap.mock.calls.at(-1)?.[0]
-    expect(updatedProps?.selectedStop).toBe('station-1')
+    const updatedProps = mockNearbyStationMap.mock.calls.at(-1)?.[0]
+    expect(updatedProps?.selectedStation).toBe('station-1')
   })
 
   it('expands the matching list item when the map selects a stop', () => {
@@ -710,10 +797,10 @@ describe('Nearby', () => {
       },
     })
 
-    const firstRenderProps = mockNearbyStopMap.mock.calls.at(-1)?.[0]
+    const firstRenderProps = mockNearbyStationMap.mock.calls.at(-1)?.[0]
 
     act(() => {
-      firstRenderProps?.onSelectStop('station-1')
+      firstRenderProps?.onSelectStation('station-1')
     })
 
     expect(screen.getByRole('button', { name: /^市政府/ })).toHaveAttribute(

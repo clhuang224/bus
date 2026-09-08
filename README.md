@@ -4,7 +4,7 @@
 
 A Taiwan bus app organized as a pnpm monorepo. It started as a frontend-only project and is gradually growing into a clearer frontend/backend architecture.
 
-The current production app is the React Router frontend for route lookup, nearby stops, favorites, language settings, and realtime transit information. Backend, database sync, and shared API contracts will be introduced step by step.
+The current production app is the React Router frontend for route lookup, nearby stops, favorites, language settings, and realtime transit information. The NestJS backend, database sync, and shared API contracts are implemented for local development and will be introduced to production step by step.
 
 ## Workspaces
 
@@ -12,10 +12,10 @@ The current production app is the React Router frontend for route lookup, nearby
 apps/
 ├── web/          # React Router frontend
 ├── tdx-proxy/    # Cloudflare Worker proxy for TDX authentication
-└── api/          # Planned NestJS backend
+└── api/          # NestJS backend
 
 packages/
-└── shared/       # Planned shared API contracts and domain types
+└── shared/       # Shared API contracts and domain types
 ```
 
 ## Workspace Docs
@@ -24,8 +24,8 @@ packages/
 | --- | --- | --- |
 | `apps/web` | User-facing React Router app | [apps/web/README.md](./apps/web/README.md) |
 | `apps/tdx-proxy` | Cloudflare Worker proxy for TDX auth | [apps/tdx-proxy/README.md](./apps/tdx-proxy/README.md) |
-| `apps/api` | Planned NestJS backend | [apps/api/README.md](./apps/api/README.md) |
-| `packages/shared` | Planned shared API contracts and domain types | [packages/shared/README.md](./packages/shared/README.md) |
+| `apps/api` | NestJS backend | [apps/api/README.md](./apps/api/README.md) |
+| `packages/shared` | Shared API contracts and domain types | [packages/shared/README.md](./packages/shared/README.md) |
 
 For the backend and database direction, start with [docs/plan.md](./docs/plan.md).
 
