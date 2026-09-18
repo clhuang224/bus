@@ -115,7 +115,7 @@ export class StationDto implements ApiStation {
 export class StationsResponseDto implements StationsResponse {
   @ApiProperty({
     description:
-      'Nearby station groups sorted by distance from the query coordinates.',
+      'Nearby stations sorted by distance from the query coordinates.',
     type: [StationDto],
     example: [
       {

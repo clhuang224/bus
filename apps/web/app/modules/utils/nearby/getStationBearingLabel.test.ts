@@ -25,7 +25,7 @@ describe('getStationBearingLabel', () => {
     ).toBe('common.bearing.east')
   })
 
-  it('returns combined bearing labels when stop bearings differ', () => {
+  it('returns combined bearing labels when station bearings differ', () => {
     expect(
       getStationBearingLabel(t, {
         ...stationBase,
@@ -34,7 +34,7 @@ describe('getStationBearingLabel', () => {
     ).toBe('common.bearing.east / common.bearing.west')
   })
 
-  it('returns null when no stop has a bearing value', () => {
+  it('returns null when the station has no bearing values', () => {
     expect(
       getStationBearingLabel(t, {
         ...stationBase,
