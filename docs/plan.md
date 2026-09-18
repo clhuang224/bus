@@ -80,7 +80,12 @@ The first version can keep the OpenAPI contract simple and grow it together with
 
 Keep the frontend on GitHub Pages.
 
-Deploy the NestJS backend to Render and use Neon PostgreSQL as the hosted database.
+Deploy the NestJS backend to a long-running host such as Render and use a
+managed PostgreSQL database. The current local workflow uses Prisma Postgres;
+choose and document the production database provider before deployment.
+
+Do not deploy the sync worker to a serverless platform. It resumes background
+sync runs and may run for an extended period.
 
 ## Phase 1 Scope
 
@@ -93,7 +98,7 @@ The first phase should prove that the app can read core route and station data f
 | GET    | `/api/health`            | Health check                  |
 | GET    | `/api/routes`            | List routes from the database |
 | GET    | `/api/routes/:uuid`      | Get route detail data         |
-| GET    | `/api/stations`          | Find nearby station groups    |
+| GET    | `/api/stations`          | Find nearby stations          |
 | POST   | `/api/admin/sync/routes` | Sync route data from TDX      |
 | POST   | `/api/admin/sync/stops`  | Sync stop data from TDX       |
 
@@ -105,6 +110,20 @@ The first phase should prove that the app can read core route and station data f
 - Stop sync persists station groups, stations, stops, route stops, and fallback route shapes.
 - Full stop sync has been validated across Taiwan, but database usage and storage should continue to be monitored.
 - Public route and nearby station endpoints read from the database.
+- The Nearby page can use the database-backed station endpoint in local API mode; default and production web builds still use the TDX proxy.
+- The Routes and Route pages still read base data from TDX, despite their database-backed API endpoints being ready.
+
+## Next Steps
+
+1. Connect the web Routes and Route pages to `GET /api/routes` and
+   `GET /api/routes/:uuid` in local API mode. Preserve the current TDX-backed
+   production behavior until the public API is deployed, then validate that
+   route search, route detail, shapes, and locale fallback have equivalent UX.
+2. Prepare API deployment as its own change. Choose the long-running host and
+   managed PostgreSQL provider, configure production CORS and secrets, apply
+   committed Prisma migrations, and decide where the protected monthly sync
+   job will run. Do not combine this operational rollout with the frontend
+   route-data migration.
 
 ## Backlog
 

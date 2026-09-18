@@ -4,7 +4,7 @@
 
 這是一個查詢台灣公車路線的應用。一開始是單純的前端專案，現在正在慢慢長成前後端分工更清楚的 monorepo。
 
-目前正式上線的是 React Router 前端，提供路線搜尋、附近站牌、收藏、語言設定與即時公車資訊。接下來會逐步加入後端、資料庫同步，以及前後端共用的 API contract。
+目前正式上線的是 React Router 前端，提供路線搜尋、附近站牌、收藏、語言設定與即時公車資訊。NestJS 後端、資料庫同步，以及前後端共用的 API contract 已可在本機使用，接下來會逐步導入正式版。
 
 ## Workspaces
 
@@ -12,10 +12,10 @@
 apps/
 ├── web/          # React Router 前端
 ├── tdx-proxy/    # TDX 驗證用的 Cloudflare Worker proxy
-└── api/          # 待開發 NestJS 後端
+└── api/          # NestJS 後端
 
 packages/
-└── shared/       # 待開發共用 API contract 與型別
+└── shared/       # 共用 API contract 與型別
 ```
 
 ## Workspace 文件
@@ -24,8 +24,8 @@ packages/
 | --- | --- | --- |
 | `apps/web` | 使用者介面的 React Router app | [apps/web/README.md](../apps/web/README.md) |
 | `apps/tdx-proxy` | TDX 驗證用 Cloudflare Worker proxy | [apps/tdx-proxy/README.md](../apps/tdx-proxy/README.md) |
-| `apps/api` | 預計導入的 NestJS 後端 | [apps/api/README.md](../apps/api/README.md) |
-| `packages/shared` | 預計放共用 API contract 與 domain types | [packages/shared/README.md](../packages/shared/README.md) |
+| `apps/api` | NestJS 後端 | [apps/api/README.md](../apps/api/README.md) |
+| `packages/shared` | 共用 API contract 與 domain types | [packages/shared/README.md](../packages/shared/README.md) |
 
 如果想了解後端與資料庫的規劃，可以先看 [docs/plan.md](./plan.md)。
 
