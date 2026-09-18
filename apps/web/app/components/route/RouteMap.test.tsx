@@ -89,6 +89,9 @@ const { mockMap, MockLngLatBounds, MockMarker, MockPopup } = vi.hoisted(() => {
 })
 
 vi.mock('maplibre-gl', () => ({
+  Marker: MockMarker,
+  Popup: MockPopup,
+  LngLatBounds: MockLngLatBounds,
   default: {
     Marker: MockMarker,
     Popup: MockPopup,

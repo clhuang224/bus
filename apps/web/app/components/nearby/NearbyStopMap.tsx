@@ -1,4 +1,5 @@
-import mapLibre, { Marker, Popup } from 'maplibre-gl'
+import * as mapLibre from 'maplibre-gl'
+import { Marker, Popup } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
