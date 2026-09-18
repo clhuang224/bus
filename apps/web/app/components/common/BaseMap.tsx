@@ -1,6 +1,7 @@
 import { ActionIcon, Box, Flex } from '@mantine/core'
 import { useId } from '@mantine/hooks'
-import mapLibre, { Map, Marker, LngLat as MapLngLat } from 'maplibre-gl'
+import * as mapLibre from 'maplibre-gl'
+import { type Map, Marker, LngLat as MapLngLat } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { RiFocus3Line } from '@remixicon/react'
 import {

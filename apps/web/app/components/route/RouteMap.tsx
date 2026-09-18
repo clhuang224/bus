@@ -1,6 +1,6 @@
 import { Stack, Text } from '@mantine/core'
+import * as mapLibre from 'maplibre-gl'
 import type { Map as MapLibreMap, Marker, Popup } from 'maplibre-gl'
-import mapLibre from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
