@@ -63,6 +63,12 @@ export class StationDto implements ApiStation {
   uuid!: string
 
   @ApiProperty({
+    description: 'Station identifier used by legacy Nearby URL parameters',
+    example: '1001',
+  })
+  legacy_id!: string
+
+  @ApiProperty({
     description: 'City where the station is located',
     enum: CityNameType,
     example: CityNameType.NEW_TAIPEI,
@@ -86,7 +92,7 @@ export class StationDto implements ApiStation {
   address!: LocalizedTextDto | null
 
   @ApiProperty({
-    description: 'Bearing direction for the station group',
+    description: 'Bearing direction for the station',
     enum: BearingType,
     nullable: true,
   })
@@ -120,6 +126,7 @@ export class StationsResponseDto implements StationsResponse {
     example: [
       {
         uuid: 'NWT1001',
+        legacy_id: '1001',
         city: CityNameType.NEW_TAIPEI,
         name: { 'zh-TW': '捷運景安站', en: 'MRT Jingan Sta.' },
         address: {
