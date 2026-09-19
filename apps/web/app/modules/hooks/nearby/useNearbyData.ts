@@ -130,7 +130,7 @@ function toApiStations(
   locale: AppLocaleType,
 ): NearbyStation[] {
   return stations.map((station) => ({
-    stationId: station.uuid,
+    stationId: station.legacy_id,
     name: toLocalizedText(station.name),
     city: station.city,
     address: station.address ? toLocalizedText(station.address) : null,

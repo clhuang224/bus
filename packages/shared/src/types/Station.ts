@@ -28,6 +28,7 @@ export interface ApiStationRouteDirection {
 
 export interface ApiStation {
   uuid: string
+  legacy_id: string
   city: CityNameType
   name: ApiLocalizedText
   address: ApiLocalizedText | null

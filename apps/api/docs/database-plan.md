@@ -836,6 +836,11 @@ Flow:
 3. Use `route_stop` rows to find routes and directions.
 4. Return nearby station data.
 
+Returned stations keep `uuid` as their API identifier and expose `legacy_id`
+from the stored `tdx_station_id` for the Nearby page's existing `stop` and
+`routeStop` URL parameters. These URLs use the same identifier in TDX and
+local API modes.
+
 Returned station addresses use the same localized object shape as names. `address_en`
 is optional and may be empty until a translated value is available.
 

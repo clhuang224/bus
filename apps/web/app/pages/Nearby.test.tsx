@@ -2,6 +2,7 @@
 
 import { act, fireEvent, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { useLocation } from 'react-router'
 import Nearby from './Nearby'
 import i18n from '~/modules/i18n'
 import {
@@ -296,6 +297,7 @@ const routesData = [
 const nearbyApiStationsData: ApiStation[] = [
   {
     uuid: 'TPE-station-1',
+    legacy_id: 'station-1',
     city: CityNameType.TAIPEI,
     name: { 'zh-TW': '市政府', en: 'City Hall' },
     address: { 'zh-TW': '市府路 1 號', en: '1 City Hall Road' },
@@ -326,6 +328,12 @@ function resetNearbyMocks() {
   mockUseGetNearbyStationsQuery.mockReset()
   mockIsDatabaseApiEnabled.mockReset()
   mockNearbyStationMap.mockReset()
+}
+
+function NearbyUrl() {
+  const { pathname, search } = useLocation()
+
+  return <output aria-label="Nearby URL">{pathname + search}</output>
 }
 
 function renderNearby({
@@ -416,10 +424,16 @@ function renderNearby({
     ...apiStationsQueryState,
   })
 
-  return renderWithProvidersAndRouter(<Nearby />, {
-    store,
-    initialEntries: [initialEntry],
-  })
+  return renderWithProvidersAndRouter(
+    <>
+      <Nearby />
+      <NearbyUrl />
+    </>,
+    {
+      store,
+      initialEntries: [initialEntry],
+    },
+  )
 }
 
 describe('Nearby', () => {
@@ -593,6 +607,68 @@ describe('Nearby', () => {
     )
     expect(screen.getByRole('button', { name: /^市政府/ })).toBeInTheDocument()
   })
+
+  it.each([
+    { source: 'TDX', usesDatabaseApi: false },
+    { source: 'local API', usesDatabaseApi: true },
+  ])(
+    'restores station and route URLs created in $source mode in the other mode',
+    async ({ usesDatabaseApi }) => {
+      const dataOptions = {
+        coords: [25.033, 121.5654] as [number, number],
+        permission: GeoPermissionType.GRANTED,
+        queryState: { data: nearbyStopsData, isSuccess: true },
+        apiStationsQueryState: { data: nearbyApiStationsData, isSuccess: true },
+      }
+      mockIsDatabaseApiEnabled.mockReturnValue(usesDatabaseApi)
+      const sourcePage = renderNearby(dataOptions)
+
+      fireEvent.click(screen.getByRole('button', { name: /^市政府/ }))
+      const stationUrl = screen.getByLabelText('Nearby URL').textContent!
+      expect(stationUrl).toBe('/nearby?stop=station-1')
+
+      fireEvent.click(
+        await screen.findByRole('button', {
+          name: i18n.t('components.nearbyStopDetail.viewRoutesAriaLabel', {
+            stopName: '市政府',
+          }),
+        }),
+      )
+      const routesUrl = screen.getByLabelText('Nearby URL').textContent!
+      expect(routesUrl).toBe('/nearby?stop=station-1&routeStop=station-1')
+      sourcePage.unmount()
+
+      mockIsDatabaseApiEnabled.mockReturnValue(!usesDatabaseApi)
+      const stationPage = renderNearby({
+        ...dataOptions,
+        initialEntry: stationUrl,
+      })
+
+      expect(screen.getByRole('button', { name: /^市政府/ })).toHaveAttribute(
+        'aria-expanded',
+        'true',
+      )
+      expect(mockNearbyStationMap.mock.calls.at(-1)?.[0]).toMatchObject({
+        selectedStation: 'station-1',
+        selectedStationPopupContent: expect.anything(),
+      })
+      stationPage.unmount()
+
+      renderNearby({ ...dataOptions, initialEntry: routesUrl })
+
+      expect(
+        screen.getByRole('heading', { name: '市政府' }),
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole('button', {
+          name: i18n.t('components.nearbySidebarContent.backAriaLabel'),
+        }),
+      ).toBeInTheDocument()
+      expect(
+        screen.getAllByRole('link', { name: /藍\s*1/ }).length,
+      ).toBeGreaterThan(0)
+    },
+  )
 
   it('loads stop-of-route data when a stop is selected, but delays route detail data until viewing routes', () => {
     renderNearby({
