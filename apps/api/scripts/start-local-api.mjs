@@ -5,8 +5,7 @@ const apiProcess = spawn(pnpmCommand, ['run', 'start:dev'], {
   stdio: 'inherit',
   env: {
     ...process.env,
-    PORT: '3001',
-    CORS_ORIGINS: 'http://localhost:5173,http://127.0.0.1:5173',
+    BUS_LOCAL_API_MODE: '1',
   },
 })
 

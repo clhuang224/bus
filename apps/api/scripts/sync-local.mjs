@@ -15,7 +15,9 @@ if (!adminApiKey) {
   throw new Error('ADMIN_API_KEY is required in .env.local.')
 }
 
-const apiOrigin = process.env.API_ORIGIN ?? 'http://localhost:3000'
+const apiOrigin = process.argv.includes('--local-api')
+  ? 'http://localhost:3001'
+  : (process.env.API_ORIGIN ?? 'http://localhost:3000')
 const response = await fetch(`${apiOrigin}/api/admin/sync/${resource}`, {
   method: 'POST',
   headers: {
