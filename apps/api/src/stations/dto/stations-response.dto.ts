@@ -84,7 +84,7 @@ export class StationDto implements ApiStation {
 
   @ApiProperty({
     description:
-      'Localized station address merged from stop signs in this station group',
+      'Localized address combining the station and its active stops, deduplicated per language',
     type: LocalizedTextDto,
     example: { 'zh-TW': '景平路近景安路', en: 'Jingping Rd. near Jingan Rd.' },
     nullable: true,
