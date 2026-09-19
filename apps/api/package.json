@@ -16,6 +16,8 @@
     "start:prod": "node dist/main.js",
     "sync:routes:local": "node scripts/sync-local.mjs routes",
     "sync:stops:local": "node scripts/sync-local.mjs stops",
+    "sync:routes:local-api": "node scripts/sync-local.mjs routes --local-api",
+    "sync:stops:local-api": "node scripts/sync-local.mjs stops --local-api",
     "lint": "concurrently \"eslint \\\"{src,test}/**/*.ts\\\"\" \"prisma validate\"",
     "prisma:generate": "prisma generate",
     "prisma:format": "prisma format",

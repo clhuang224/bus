@@ -148,6 +148,13 @@ app in Vite's `local-api` mode. That mode loads the committed
 `.env.local-api`, which sets `VITE_API_BASE_URL=http://127.0.0.1:3001/api`
 for database-backed requests and retains `/api/tdx` for pages that still use
 the local TDX proxy.
+
+To populate the database while `dev:api` is running, use
+`pnpm --filter @bus/api sync:routes:local-api`, followed by
+`pnpm --filter @bus/api sync:stops:local-api` after route sync completes.
+These commands target the API on port `3001`; see the
+[API local development guide](../api/README.md#local-development) for setup.
+
 Only the Nearby Stops page uses the database-backed station endpoint in this
 mode; the default `pnpm run dev` and production builds continue to use the
 TDX proxy. The next local API integration is the Routes and Route pages, using
