@@ -45,7 +45,6 @@ describe('Stations API (e2e)', () => {
       configureModule: (builder) =>
         builder.overrideProvider(PrismaService).useValue({
           $disconnect: () => Promise.resolve(),
-          stop: { findMany: () => Promise.resolve([]) },
           station: {
             findMany: (args: StationFindManyArgs) => {
               stationFindManyArgs.push(args)

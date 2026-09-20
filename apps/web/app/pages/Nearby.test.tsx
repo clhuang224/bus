@@ -612,67 +612,63 @@ describe('Nearby', () => {
     expect(screen.getByRole('button', { name: /^市政府/ })).toBeInTheDocument()
   })
 
-  it.each(['TPE-station-1', 'stop:TPE-stop-1'])(
-    'creates and restores local API selection URLs for %s',
-    async (uuid) => {
-      const dataOptions = {
-        coords: [25.033, 121.5654] as [number, number],
-        permission: GeoPermissionType.GRANTED,
-        apiStationsQueryState: {
-          data: [{ ...nearbyApiStationsData[0], uuid }],
-          isSuccess: true,
-        },
-      }
-      mockIsDatabaseApiEnabled.mockReturnValue(true)
-      const sourcePage = renderNearby(dataOptions)
+  it('creates and restores local API selection URLs using station UUIDs', async () => {
+    const uuid = 'TPE-station-1'
+    const dataOptions = {
+      coords: [25.033, 121.5654] as [number, number],
+      permission: GeoPermissionType.GRANTED,
+      apiStationsQueryState: {
+        data: [{ ...nearbyApiStationsData[0], uuid }],
+        isSuccess: true,
+      },
+    }
+    mockIsDatabaseApiEnabled.mockReturnValue(true)
+    const sourcePage = renderNearby(dataOptions)
 
-      fireEvent.click(screen.getByRole('button', { name: /^市政府/ }))
-      const stationUrl = screen.getByLabelText('Nearby URL').textContent!
-      expect(stationUrl).toBe(`/nearby?stop=${encodeURIComponent(uuid)}`)
+    fireEvent.click(screen.getByRole('button', { name: /^市政府/ }))
+    const stationUrl = screen.getByLabelText('Nearby URL').textContent!
+    expect(stationUrl).toBe(`/nearby?stop=${encodeURIComponent(uuid)}`)
 
-      fireEvent.click(
-        await screen.findByRole('button', {
-          name: i18n.t('components.nearbyStopDetail.viewRoutesAriaLabel', {
-            stopName: '市政府',
-          }),
+    fireEvent.click(
+      await screen.findByRole('button', {
+        name: i18n.t('components.nearbyStopDetail.viewRoutesAriaLabel', {
+          stopName: '市政府',
         }),
-      )
-      const routesUrl = screen.getByLabelText('Nearby URL').textContent!
-      expect(routesUrl).toBe(
-        `/nearby?stop=${encodeURIComponent(uuid)}&routeStop=${encodeURIComponent(uuid)}`,
-      )
-      sourcePage.unmount()
+      }),
+    )
+    const routesUrl = screen.getByLabelText('Nearby URL').textContent!
+    expect(routesUrl).toBe(
+      `/nearby?stop=${encodeURIComponent(uuid)}&routeStop=${encodeURIComponent(uuid)}`,
+    )
+    sourcePage.unmount()
 
-      const stationPage = renderNearby({
-        ...dataOptions,
-        initialEntry: stationUrl,
-      })
+    const stationPage = renderNearby({
+      ...dataOptions,
+      initialEntry: stationUrl,
+    })
 
-      expect(screen.getByRole('button', { name: /^市政府/ })).toHaveAttribute(
-        'aria-expanded',
-        'true',
-      )
-      expect(mockNearbyStationMap.mock.calls.at(-1)?.[0]).toMatchObject({
-        selectedStation: uuid,
-        selectedStationPopupContent: expect.anything(),
-      })
-      stationPage.unmount()
+    expect(screen.getByRole('button', { name: /^市政府/ })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    )
+    expect(mockNearbyStationMap.mock.calls.at(-1)?.[0]).toMatchObject({
+      selectedStation: uuid,
+      selectedStationPopupContent: expect.anything(),
+    })
+    stationPage.unmount()
 
-      renderNearby({ ...dataOptions, initialEntry: routesUrl })
+    renderNearby({ ...dataOptions, initialEntry: routesUrl })
 
-      expect(
-        screen.getByRole('heading', { name: '市政府' }),
-      ).toBeInTheDocument()
-      expect(
-        screen.getByRole('button', {
-          name: i18n.t('components.nearbySidebarContent.backAriaLabel'),
-        }),
-      ).toBeInTheDocument()
-      expect(
-        screen.getAllByRole('link', { name: /藍\s*1/ }).length,
-      ).toBeGreaterThan(0)
-    },
-  )
+    expect(screen.getByRole('heading', { name: '市政府' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', {
+        name: i18n.t('components.nearbySidebarContent.backAriaLabel'),
+      }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getAllByRole('link', { name: /藍\s*1/ }).length,
+    ).toBeGreaterThan(0)
+  })
 
   it('keeps nearby stations from different cities independently selectable by UUID', async () => {
     const taipeiStation: ApiStation = {

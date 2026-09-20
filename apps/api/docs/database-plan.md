@@ -818,7 +818,7 @@ Rules:
 - `radius_meters` defaults to 500.
 - `radius_meters` must be an integer between 500 and 3000.
 - Empty nearby results return a successful response with an empty station list.
-- The endpoint searches active stations and unassociated stops by coordinate bounds and precise distance. It does not use city boundary filtering, so nearby results can naturally cross city borders.
+- The endpoint searches active stations by coordinate bounds and precise distance. It does not use city boundary filtering, so nearby results can naturally cross city borders.
 
 Reads:
 
@@ -831,7 +831,7 @@ Reads:
 
 Flow:
 
-1. Find nearby active stations and active stops with no station association by coordinates.
+1. Find nearby active stations by coordinates.
 2. Find stops under those stations.
 3. Use `route_stop` rows to find routes and directions.
 4. Return nearby station data.
@@ -840,11 +840,9 @@ Returned stations use `uuid` as their sole public identifier. In local API
 mode, the Nearby page's `stop` and `routeStop` URL parameters store this UUID.
 Selection URLs from TDX mode are not translated when switching to API mode.
 
-Active stops with `station_id = null` are returned in the same shape with
-their own name, coordinates, bearing, addresses, and active route directions.
-Their public UUID is `stop:<stop.uuid>` so they cannot collide with station
-identifiers. Both sources share the bounding-box lookup, exact radius filter,
-and distance ordering. Associated stops appear only through their station.
+Every result corresponds to a Station record and uses its `station.uuid`.
+Stops with `station_id = null` are excluded. Support for those standalone
+stops is deferred until their product behavior and data model are decided.
 
 Returned station addresses use the same localized object shape as names.
 The API merges the station address and addresses from its active stops,
