@@ -144,10 +144,13 @@ pnpm run dev:api
 ```
 
 This starts the TDX proxy on port `3000`, the API on port `3001`, and the web
-app in Vite's `local-api` mode. That mode loads the committed
+app on port `5173` in Vite's `local-api` mode. That mode loads the committed
 `.env.local-api`, which sets `VITE_API_BASE_URL=http://127.0.0.1:3001/api`
 for database-backed requests and retains `/api/tdx` for pages that still use
 the local TDX proxy.
+
+Port `5173` must be available. Local API mode exits if it is occupied, keeping
+the web origin aligned with the API's CORS configuration.
 
 To populate the database while `dev:api` is running, use
 `pnpm --filter @bus/api sync:routes:local-api`, followed by
