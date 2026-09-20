@@ -1,7 +1,11 @@
 import { spawn } from 'node:child_process'
 
-const pnpmCommand = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm'
-const apiProcess = spawn(pnpmCommand, ['run', 'start:dev'], {
+const isWindows = process.platform === 'win32'
+const command = isWindows ? (process.env.ComSpec ?? 'cmd.exe') : 'pnpm'
+const args = isWindows
+  ? ['/d', '/s', '/c', 'pnpm.cmd run start:dev']
+  : ['run', 'start:dev']
+const apiProcess = spawn(command, args, {
   stdio: 'inherit',
   env: {
     ...process.env,
