@@ -50,7 +50,6 @@ interface StopRecord {
 
 interface StationRecord {
   uuid: string
-  tdx_station_id: string
   city: PrismaCityNameType
   name_zh_tw: string
   name_en: string | null
@@ -87,7 +86,6 @@ export class StationsService {
       },
       select: {
         uuid: true,
-        tdx_station_id: true,
         city: true,
         name_zh_tw: true,
         name_en: true,
@@ -236,7 +234,6 @@ export class StationsService {
   }: NearbyStationRecord): StationDto {
     return {
       uuid: station.uuid,
-      legacy_id: station.tdx_station_id,
       city: DB_CITY_NAME_BY_PRISMA[station.city],
       name: toLocalizedText(station.name_zh_tw, station.name_en),
       address: this.toStationAddress(station),

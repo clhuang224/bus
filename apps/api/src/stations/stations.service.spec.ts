@@ -66,7 +66,6 @@ describe('StationsService addresses', () => {
   ])('$scenario', async ({ stationAddress, stopAddresses, expected }) => {
     const station = {
       uuid: 'TPE-station-1',
-      tdx_station_id: 'station-1',
       city: CityNameType.TAIPEI,
       name_zh_tw: '市政府',
       name_en: 'City Hall',

@@ -52,7 +52,6 @@ describe('Stations API (e2e)', () => {
               return Promise.resolve([
                 {
                   uuid: 'NWT-station-1',
-                  tdx_station_id: 'station-1',
                   city: PrismaCityNameType.NEW_TAIPEI,
                   name_zh_tw: '捷運景安站',
                   name_en: 'MRT Jingan Sta.',
@@ -117,7 +116,6 @@ describe('Stations API (e2e)', () => {
                 },
                 {
                   uuid: 'NWT-station-outside-radius',
-                  tdx_station_id: 'station-outside-radius',
                   city: PrismaCityNameType.NEW_TAIPEI,
                   name_zh_tw: '遠方站',
                   name_en: 'Far Station',
@@ -130,7 +128,6 @@ describe('Stations API (e2e)', () => {
                 },
                 {
                   uuid: 'NWT-station-rounded-outside-radius',
-                  tdx_station_id: 'station-rounded-outside-radius',
                   city: PrismaCityNameType.NEW_TAIPEI,
                   name_zh_tw: '四捨五入邊界站',
                   name_en: 'Rounding Edge Station',
@@ -152,7 +149,7 @@ describe('Stations API (e2e)', () => {
     await app.close()
   })
 
-  it('/api/stations (GET) returns nearby stations with legacy identifiers for valid coordinates', () => {
+  it('/api/stations (GET) returns nearby stations for valid coordinates', () => {
     return request(app.getHttpServer())
       .get('/api/stations')
       .query({ latitude: 24.9939, longitude: 121.5047 })
@@ -161,7 +158,6 @@ describe('Stations API (e2e)', () => {
         expect(body.data.stations).toEqual([
           {
             uuid: 'NWT-station-1',
-            legacy_id: 'station-1',
             city: CityNameType.NEW_TAIPEI,
             name: { 'zh-TW': '捷運景安站', en: 'MRT Jingan Sta.' },
             address: {
@@ -204,7 +200,6 @@ describe('Stations API (e2e)', () => {
         ])
         const { orderBy, where } = getStationFindManyArg()
         expect(getStationFindManyArg().select).toMatchObject({
-          tdx_station_id: true,
           stops: {
             where: { is_active: true },
             select: { address_zh_tw: true, address_en: true },
