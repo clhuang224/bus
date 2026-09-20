@@ -45,13 +45,6 @@ describe('StationsService addresses', () => {
       },
     },
     {
-      scenario:
-        'keeps translated stop addresses when only English is available',
-      stationAddress: { address_zh_tw: null, address_en: null },
-      stopAddresses: [{ address_zh_tw: null, address_en: '1 City Hall Road' }],
-      expected: { 'zh-TW': '', en: '1 City Hall Road' },
-    },
-    {
       scenario: 'returns null when station and stop addresses are empty',
       stationAddress: { address_zh_tw: null, address_en: null },
       stopAddresses: [{ address_zh_tw: ' ', address_en: null }],

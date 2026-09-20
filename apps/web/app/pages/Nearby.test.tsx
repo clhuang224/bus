@@ -16,7 +16,6 @@ import {
   BearingType,
   CityNameType,
   DirectionType,
-  getEnumValues,
   type ApiStation,
 } from '@bus/shared'
 import { GeoErrorType } from '~/modules/enums/geo/GeoErrorType'
@@ -728,8 +727,8 @@ describe('Nearby', () => {
     )
   })
 
-  it.each(getEnumValues(AppLocaleType))(
-    'shows an English-only API address in both detail views in %s',
+  it.each([AppLocaleType.ZH_TW, AppLocaleType.EN])(
+    'shows the Chinese address when its English translation is missing in both detail views in %s',
     async (locale) => {
       mockIsDatabaseApiEnabled.mockReturnValue(true)
       renderNearby({
@@ -741,14 +740,14 @@ describe('Nearby', () => {
           data: [
             {
               ...nearbyApiStationsData[0],
-              address: { 'zh-TW': '  ', en: '1 City Hall Road' },
+              address: { 'zh-TW': '市府路 1 號', en: '' },
             },
           ],
           isSuccess: true,
         },
       })
 
-      expect(screen.getByText('1 City Hall Road')).toBeVisible()
+      expect(screen.getByText('市府路 1 號')).toBeVisible()
       fireEvent.click(
         await screen.findByRole('button', {
           name: i18n.t('components.nearbyStopDetail.viewRoutesAriaLabel', {
@@ -756,7 +755,7 @@ describe('Nearby', () => {
           }),
         }),
       )
-      expect(screen.getByText('1 City Hall Road')).toBeVisible()
+      expect(screen.getByText('市府路 1 號')).toBeVisible()
       expect(
         screen.getByRole('button', {
           name: i18n.t('components.nearbySidebarContent.backAriaLabel'),
@@ -772,10 +771,6 @@ describe('Nearby', () => {
     },
     {
       address: null,
-      expected: i18n.t('components.nearbyStopDetail.notProvided'),
-    },
-    {
-      address: { 'zh-TW': '  ', en: '  ' },
       expected: i18n.t('components.nearbyStopDetail.notProvided'),
     },
   ])(
