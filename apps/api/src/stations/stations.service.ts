@@ -20,6 +20,7 @@ import type {
   StationRouteDirectionDto,
   StationsResponseDto,
 } from './dto/stations-response.dto.js'
+import { standaloneStopSelect, stationSelect } from './station-query.js'
 
 export const DEFAULT_STATION_SEARCH_RADIUS_METERS = 500
 export const MIN_STATION_SEARCH_RADIUS_METERS = 500
@@ -78,63 +79,29 @@ export class StationsService {
     this.assertValidSearch(latitude, longitude, radius_meters)
 
     const bounds = this.toBoundingBox(latitude, longitude, radius_meters)
-    const stations = await this.prismaService.station.findMany({
-      where: {
-        is_active: true,
-        latitude: { gte: bounds.minLatitude, lte: bounds.maxLatitude },
-        longitude: { gte: bounds.minLongitude, lte: bounds.maxLongitude },
-      },
-      select: {
-        uuid: true,
-        city: true,
-        name_zh_tw: true,
-        name_en: true,
-        address_zh_tw: true,
-        address_en: true,
-        latitude: true,
-        longitude: true,
-        bearing: true,
-        stops: {
-          where: { is_active: true },
-          orderBy: { uuid: 'asc' },
-          select: {
-            address_zh_tw: true,
-            address_en: true,
-            route_stops: {
-              where: {
-                is_active: true,
-                subroute: {
-                  is_active: true,
-                  route: { is_active: true },
-                },
-              },
-              select: {
-                subroute: {
-                  select: {
-                    direction: true,
-                    route: {
-                      select: {
-                        uuid: true,
-                        city: true,
-                        name_zh_tw: true,
-                        name_en: true,
-                        departure_zh_tw: true,
-                        departure_en: true,
-                        destination_zh_tw: true,
-                        destination_en: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    })
+    const where = {
+      is_active: true,
+      latitude: { gte: bounds.minLatitude, lte: bounds.maxLatitude },
+      longitude: { gte: bounds.minLongitude, lte: bounds.maxLongitude },
+    }
+    const [stations, standaloneStops] = await Promise.all([
+      this.prismaService.station.findMany({ where, select: stationSelect }),
+      this.prismaService.stop.findMany({
+        where: { ...where, station_id: null },
+        select: standaloneStopSelect,
+      }),
+    ])
+    const locations: StationRecord[] = [
+      ...stations,
+      ...standaloneStops.map((stop) => ({
+        ...stop,
+        uuid: `stop:${stop.uuid}`,
+        stops: [stop],
+      })),
+    ]
 
     return {
-      stations: stations
+      stations: locations
         .map((station) => ({
           station,
           distanceMeters: this.toDistanceMeters(latitude, longitude, station),

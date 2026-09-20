@@ -82,6 +82,7 @@ describe('StationsService addresses', () => {
           provide: PrismaService,
           useValue: {
             station: { findMany: () => Promise.resolve([station]) },
+            stop: { findMany: () => Promise.resolve([]) },
           },
         },
       ],

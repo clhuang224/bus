@@ -59,7 +59,10 @@ export class StationRouteDirectionDto implements ApiStationRouteDirection {
 }
 
 export class StationDto implements ApiStation {
-  @ApiProperty({ description: 'Station UUID', example: 'NWT1001' })
+  @ApiProperty({
+    description: 'Station UUID, or stop:<stop UUID> for an unassociated stop',
+    example: 'NWT1001',
+  })
   uuid!: string
 
   @ApiProperty({
@@ -115,7 +118,7 @@ export class StationDto implements ApiStation {
 export class StationsResponseDto implements StationsResponse {
   @ApiProperty({
     description:
-      'Nearby stations sorted by distance from the query coordinates.',
+      'Nearby stations and active unassociated stops, sorted together by distance from the query coordinates.',
     type: [StationDto],
     example: [
       {
