@@ -52,6 +52,18 @@ function toLocalizedText(text: ApiLocalizedText): LocalizedText {
   }
 }
 
+function toApiAddress(address: ApiLocalizedText | null): LocalizedText | null {
+  const zhTw = address?.[AppLocaleType.ZH_TW].trim() ?? ''
+  const en = address?.[AppLocaleType.EN].trim() ?? ''
+
+  if (!zhTw && !en) return null
+
+  return toLocalizedText({
+    [AppLocaleType.ZH_TW]: zhTw || en,
+    [AppLocaleType.EN]: en,
+  })
+}
+
 function toTdxAddress(addresses: string[]): LocalizedText | null {
   if (addresses.length === 0) return null
 
@@ -133,7 +145,7 @@ function toApiStations(
     stationId: station.uuid,
     name: toLocalizedText(station.name),
     city: station.city,
-    address: station.address ? toLocalizedText(station.address) : null,
+    address: toApiAddress(station.address),
     bearings: station.bearing ? [station.bearing] : [],
     position: [station.position.longitude, station.position.latitude],
     routes: station.route_directions.flatMap(({ direction, routes }) =>

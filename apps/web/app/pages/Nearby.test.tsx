@@ -12,9 +12,11 @@ import {
 import { getNearbyMessages } from '~/modules/consts/pageMessages'
 import {
   AreaType,
+  AppLocaleType,
   BearingType,
   CityNameType,
   DirectionType,
+  getEnumValues,
   type ApiStation,
 } from '@bus/shared'
 import { GeoErrorType } from '~/modules/enums/geo/GeoErrorType'
@@ -337,6 +339,7 @@ function NearbyUrl() {
 
 function renderNearby({
   initialEntry = '/nearby',
+  locale = AppLocaleType.ZH_TW,
   coords = null,
   geolocationError = null,
   permission = GeoPermissionType.PROMPT,
@@ -346,6 +349,7 @@ function renderNearby({
   apiStationsQueryState,
 }: {
   initialEntry?: string
+  locale?: AppLocaleType
   coords?: [number, number] | null
   geolocationError?: GeoErrorType | null
   permission?: GeoPermissionType
@@ -375,6 +379,7 @@ function renderNearby({
   }
 } = {}) {
   const store = createTestStore({
+    preloadedState: { locale: { value: locale } },
     reducer: {
       geolocation: (
         state = {
@@ -726,6 +731,74 @@ describe('Nearby', () => {
       '/nearby?stop=NWT1001&routeStop=NWT1001',
     )
   })
+
+  it.each(getEnumValues(AppLocaleType))(
+    'shows an English-only API address in both detail views in %s',
+    async (locale) => {
+      mockIsDatabaseApiEnabled.mockReturnValue(true)
+      renderNearby({
+        initialEntry: '/nearby?stop=TPE-station-1',
+        locale,
+        coords: [25.033, 121.5654],
+        permission: GeoPermissionType.GRANTED,
+        apiStationsQueryState: {
+          data: [
+            {
+              ...nearbyApiStationsData[0],
+              address: { 'zh-TW': '  ', en: '1 City Hall Road' },
+            },
+          ],
+          isSuccess: true,
+        },
+      })
+
+      expect(screen.getByText('1 City Hall Road')).toBeVisible()
+      fireEvent.click(
+        await screen.findByRole('button', {
+          name: i18n.t('components.nearbyStopDetail.viewRoutesAriaLabel', {
+            stopName: locale === AppLocaleType.EN ? 'City Hall' : '市政府',
+          }),
+        }),
+      )
+      expect(screen.getByText('1 City Hall Road')).toBeVisible()
+      expect(
+        screen.getByRole('button', {
+          name: i18n.t('components.nearbySidebarContent.backAriaLabel'),
+        }),
+      ).toBeInTheDocument()
+    },
+  )
+
+  it.each([
+    {
+      address: { 'zh-TW': '市府路 1 號', en: '1 City Hall Road' },
+      expected: '市府路 1 號',
+    },
+    {
+      address: null,
+      expected: i18n.t('components.nearbyStopDetail.notProvided'),
+    },
+    {
+      address: { 'zh-TW': '  ', en: '  ' },
+      expected: i18n.t('components.nearbyStopDetail.notProvided'),
+    },
+  ])(
+    'preserves the preferred address or empty label for $address',
+    ({ address, expected }) => {
+      mockIsDatabaseApiEnabled.mockReturnValue(true)
+      renderNearby({
+        initialEntry: '/nearby?stop=TPE-station-1&routeStop=TPE-station-1',
+        coords: [25.033, 121.5654],
+        permission: GeoPermissionType.GRANTED,
+        apiStationsQueryState: {
+          data: [{ ...nearbyApiStationsData[0], address }],
+          isSuccess: true,
+        },
+      })
+
+      expect(screen.getByText(expected)).toBeVisible()
+    },
+  )
 
   it('loads stop-of-route data when a stop is selected, but delays route detail data until viewing routes', () => {
     renderNearby({
