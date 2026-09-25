@@ -22,11 +22,25 @@ Local development scripts:
 | ----------------------------------------------- | --------------------------------------------------------------- |
 | `pnpm --filter @bus/api generate:admin-api-key` | Generate a random admin API key and save it to `.env.local`.    |
 | `pnpm --filter @bus/api start:dev`              | Start the API in watch mode.                                    |
+| `pnpm --filter @bus/api start:dev:local-api`    | Start the API in watch mode on port `3001` with local web CORS. |
 | `pnpm --filter @bus/api start:dev:awake`        | Start the API in watch mode and prevent idle sleep on macOS.    |
 | `pnpm --filter @bus/api sync:routes:local`      | Queue a route sync through the API running on `localhost:3000`. |
 | `pnpm --filter @bus/api sync:stops:local`       | Queue a stop sync through the API running on `localhost:3000`.  |
+| `pnpm --filter @bus/api sync:routes:local-api` | Queue a route sync on `localhost:3001` for `dev:api`. |
+| `pnpm --filter @bus/api sync:stops:local-api` | Queue a stop sync on `localhost:3001` for `dev:api`. |
 
 Use `start:dev:awake` for long local sync runs on macOS. Keep the regular `start:dev` command for cross-platform development and deployment environments.
+
+The root `pnpm run dev:api` command starts this local API mode together with
+the web app and TDX proxy. The launcher sets `BUS_LOCAL_API_MODE=1`, so after
+loading `.env` and `.env.local`, the API uses port `3001` and allows the Vite
+origins `http://localhost:5173` and `http://127.0.0.1:5173`. Normal startup
+continues to use the configured `PORT` and `CORS_ORIGINS` values.
+
+When running `dev:api`, use `sync:routes:local-api` and `sync:stops:local-api`.
+These commands always target port `3001`, even if `.env.local` sets
+`API_ORIGIN`. The `sync:*:local` commands are for standalone API development:
+they use `API_ORIGIN` when configured and otherwise target port `3000`.
 
 Generate a key and save it as `ADMIN_API_KEY` in `.env.local`:
 

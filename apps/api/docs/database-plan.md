@@ -818,7 +818,7 @@ Rules:
 - `radius_meters` defaults to 500.
 - `radius_meters` must be an integer between 500 and 3000.
 - Empty nearby results return a successful response with an empty station list.
-- The first implementation searches all active stations by coordinate bounds and precise distance. It does not use city boundary filtering, so nearby results can naturally cross city borders.
+- The endpoint searches active stations by coordinate bounds and precise distance. It does not use city boundary filtering, so nearby results can naturally cross city borders.
 
 Reads:
 
@@ -831,13 +831,25 @@ Reads:
 
 Flow:
 
-1. Find nearby stations by coordinates.
+1. Find nearby active stations by coordinates.
 2. Find stops under those stations.
 3. Use `route_stop` rows to find routes and directions.
 4. Return nearby station data.
 
-Returned station addresses use the same localized object shape as names. `address_en`
-is optional and may be empty until a translated value is available.
+Returned stations use `uuid` as their sole public identifier. In local API
+mode, the Nearby page's `stop` and `routeStop` URL parameters store this UUID.
+Selection URLs from TDX mode are not translated when switching to API mode.
+
+Every result corresponds to a Station record and uses its `station.uuid`.
+Stops with `station_id = null` are excluded. Support for those standalone
+stops is deferred until their product behavior and data model are decided.
+
+Returned station addresses use the same localized object shape as names.
+The API merges the station address and addresses from its active stops,
+removing blank and duplicate values per language. Stop addresses therefore
+remain available when the station itself has no address. English may be
+empty until a translated value is available; `address` is null only when
+neither language has an address.
 
 ### `POST /api/admin/sync/routes`
 
@@ -968,16 +980,19 @@ and index metadata even when there are no rows.
 - Stop sync for station groups, stations, stops, route stops, and fallback route shapes
 - Full real-data stop sync validation across Taiwan
 - Public route and nearby station endpoints backed by the database
+- Local web API mode for the Nearby page, backed by `GET /api/stations`
 
 ## Plan Order
 
-1. Read `GET /api/routes?area=...` from the database.
-2. Read `GET /api/routes/:uuid` from the database.
-3. Read `GET /api/stations?latitude=...&longitude=...` from the database.
-4. Continue monitoring database size after full sync runs.
-5. Build the next public read endpoint, starting with stops if route pages need stop-level lookup.
-6. Deploy the API, run migrations safely, and protect admin operations.
-7. Decide where scheduled monthly sync jobs run after deployment is stable.
-8. Discuss realtime cache.
-9. Discuss auth, favorites, and settings.
-10. Add `apps/manager` for sync monitoring and controlled retry actions.
+1. Connect the web Routes and Route pages to the existing database-backed
+   route endpoints in local API mode. Keep the current TDX path available for
+   production until the API is deployed.
+2. Continue monitoring database size after full sync runs.
+3. Deploy the API to a long-running host, run migrations safely, configure
+   production CORS and admin secrets, and protect admin operations.
+4. Decide where scheduled monthly sync jobs run after deployment is stable.
+5. Build the next public read endpoint, starting with stops if route pages
+   need stop-level lookup.
+6. Discuss realtime cache.
+7. Discuss auth, favorites, and settings.
+8. Add `apps/manager` for sync monitoring and controlled retry actions.

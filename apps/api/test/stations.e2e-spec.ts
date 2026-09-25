@@ -62,6 +62,8 @@ describe('Stations API (e2e)', () => {
                   bearing: PrismaBearingType.EAST,
                   stops: [
                     {
+                      address_zh_tw: '景平路近景安路',
+                      address_en: 'Jingping Rd. near Jingan Rd.',
                       route_stops: [
                         {
                           subroute: {
@@ -147,7 +149,7 @@ describe('Stations API (e2e)', () => {
     await app.close()
   })
 
-  it('/api/stations (GET) returns nearby station groups for valid coordinates', () => {
+  it('/api/stations (GET) returns nearby stations for valid coordinates', () => {
     return request(app.getHttpServer())
       .get('/api/stations')
       .query({ latitude: 24.9939, longitude: 121.5047 })
@@ -197,6 +199,12 @@ describe('Stations API (e2e)', () => {
           },
         ])
         const { orderBy, where } = getStationFindManyArg()
+        expect(getStationFindManyArg().select).toMatchObject({
+          stops: {
+            where: { is_active: true },
+            select: { address_zh_tw: true, address_en: true },
+          },
+        })
         expect(orderBy).toBeUndefined()
         expect(where?.is_active).toBe(true)
         expect(isNumberRange(where?.latitude)).toBe(true)

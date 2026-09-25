@@ -91,15 +91,15 @@ TDX, short for Transport Data eXchange, provides the route, stop, realtime, and 
 
 Current endpoint usage:
 
-| Endpoint | Used For |
-| --- | --- |
-| `/Route/City/:city` | route search and route detail |
-| `/StopOfRoute/City/:city` | route stop lists and nearby route relationships |
-| `/Stop/City/:city` | nearby stop discovery and map stop positions |
-| `/EstimatedTimeOfArrival/City/:city` | stop-level ETA |
-| `/RealTimeNearStop/City/:city` | stop-list vehicle cues and near-stop status |
-| `/RealTimeByFrequency/City/:city` | route map vehicle GPS positions |
-| `/Shape/City/:city` | route map path rendering |
+| Endpoint                             | Used For                                        |
+| ------------------------------------ | ----------------------------------------------- |
+| `/Route/City/:city`                  | route search and route detail                   |
+| `/StopOfRoute/City/:city`            | route stop lists and nearby route relationships |
+| `/Stop/City/:city`                   | nearby stop discovery and map stop positions    |
+| `/EstimatedTimeOfArrival/City/:city` | stop-level ETA                                  |
+| `/RealTimeNearStop/City/:city`       | stop-list vehicle cues and near-stop status     |
+| `/RealTimeByFrequency/City/:city`    | route map vehicle GPS positions                 |
+| `/Shape/City/:city`                  | route map path rendering                        |
 
 Realtime data is best-effort and may be temporarily unavailable when the shared proxy-backed key hits upstream rate limits.
 
@@ -132,3 +132,33 @@ For full local development with the proxy, use the root command:
 ```bash
 pnpm run dev
 ```
+
+### Local API Mode
+
+To develop the Nearby Stops page against the local NestJS API, first configure
+`apps/api/.env.local` with `DATABASE_URL` and the other API credentials. Then
+run:
+
+```bash
+pnpm run dev:api
+```
+
+This starts the TDX proxy on port `3000`, the API on port `3001`, and the web
+app on port `5173` in Vite's `local-api` mode. That mode loads the committed
+`.env.local-api`, which sets `VITE_API_BASE_URL=http://127.0.0.1:3001/api`
+for database-backed requests and retains `/api/tdx` for pages that still use
+the local TDX proxy.
+
+Port `5173` must be available. Local API mode exits if it is occupied, keeping
+the web origin aligned with the API's CORS configuration.
+
+To populate the database while `dev:api` is running, use
+`pnpm --filter @bus/api sync:routes:local-api`, followed by
+`pnpm --filter @bus/api sync:stops:local-api` after route sync completes.
+These commands target the API on port `3001`; see the
+[API local development guide](../api/README.md#local-development) for setup.
+
+Only the Nearby Stops page uses the database-backed station endpoint in this
+mode; the default `pnpm run dev` and production builds continue to use the
+TDX proxy. The next local API integration is the Routes and Route pages, using
+the existing database-backed route endpoints.

@@ -1,16 +1,23 @@
 import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { apiReference } from '@scalar/nestjs-api-reference'
-import { config as dotenvConfig } from 'dotenv'
 import { ADMIN_API_KEY_HEADER } from './admin/admin-api-key.guard.js'
 import { AppModule } from './app.module.js'
+import { loadApiEnvironment } from './config/load-api-environment.js'
 
-dotenvConfig({ path: '.env' })
-dotenvConfig({ path: '.env.local', override: true })
+loadApiEnvironment()
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   app.setGlobalPrefix('api')
+
+  const corsOrigins = process.env.CORS_ORIGINS?.split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+
+  if (corsOrigins?.length) {
+    app.enableCors({ origin: corsOrigins })
+  }
 
   const config = new DocumentBuilder()
     .setTitle('Finding the Bus API')

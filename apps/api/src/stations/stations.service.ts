@@ -43,6 +43,8 @@ interface RouteStopRecord {
 }
 
 interface StopRecord {
+  address_zh_tw: string | null
+  address_en: string | null
   route_stops: RouteStopRecord[]
 }
 
@@ -94,7 +96,10 @@ export class StationsService {
         bearing: true,
         stops: {
           where: { is_active: true },
+          orderBy: { uuid: 'asc' },
           select: {
+            address_zh_tw: true,
+            address_en: true,
             route_stops: {
               where: {
                 is_active: true,
@@ -231,10 +236,7 @@ export class StationsService {
       uuid: station.uuid,
       city: DB_CITY_NAME_BY_PRISMA[station.city],
       name: toLocalizedText(station.name_zh_tw, station.name_en),
-      address: this.toOptionalLocalizedText(
-        station.address_zh_tw,
-        station.address_en,
-      ),
+      address: this.toStationAddress(station),
       bearing: station.bearing ? API_BEARING_BY_PRISMA[station.bearing] : null,
       position: {
         latitude: station.latitude,
@@ -278,9 +280,19 @@ export class StationsService {
       }))
   }
 
-  private toOptionalLocalizedText(zhTw: string | null, en: string | null) {
+  private toStationAddress(station: StationRecord) {
+    const addresses = [station, ...station.stops]
+    const mergeAddresses = (key: 'address_zh_tw' | 'address_en') =>
+      [
+        ...new Set(
+          addresses.map((record) => record[key]?.trim()).filter(Boolean),
+        ),
+      ].join(key === 'address_zh_tw' ? '、' : '; ')
+    const zhTw = mergeAddresses('address_zh_tw')
+    const en = mergeAddresses('address_en')
+
     if (!zhTw && !en) return null
 
-    return toLocalizedText(zhTw ?? '', en)
+    return toLocalizedText(zhTw, en)
   }
 }

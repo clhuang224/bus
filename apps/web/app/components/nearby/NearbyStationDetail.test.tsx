@@ -5,50 +5,36 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
 import { AppLocaleType, BearingType, CityNameType } from '@bus/shared'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
+import type { NearbyStation } from '~/modules/interfaces/Nearby'
 import geoSlice from '~/modules/slices/geoSlice'
 import { createTestStore } from '~/test/createTestStore'
 import { renderWithStore } from '~/test/render'
-import { NearbyStopDetail } from './NearbyStopDetail'
+import { NearbyStationDetail } from './NearbyStationDetail'
 
 const t = i18n.getFixedT(AppLocaleType.ZH_TW)
 
-const stopGroup = {
-  StationID: 'station-1',
-  StopName: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
-  City: CityNameType.TAIPEI,
+const station: NearbyStation = {
+  stationId: 'station-1',
+  name: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
+  city: CityNameType.TAIPEI,
+  address: { 'zh-TW': 'Address 1', en: '', ja: '', ko: '' },
+  bearings: [],
   position: [121.5654, 25.033] as [number, number],
-  stops: [
-    {
-      StopUID: 'stop-1',
-      StopID: 'stop-1',
-      AuthorityID: '005',
-      StationID: 'station-1',
-      StationGroupID: 'group-1',
-      position: [121.5654, 25.033] as [number, number],
-      GeoHash: null,
-      StopName: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
-      StopAddress: 'Address 1',
-      Bearing: null as BearingType | null,
-      StopDescription: null,
-      City: CityNameType.TAIPEI,
-      UpdateTime: '2026-04-12T10:00:00+08:00',
-      VersionID: 1,
-    },
-  ],
+  routes: [],
 }
-const stopNameZhTW = stopGroup.StopName['zh-TW']
+const stopNameZhTW = station.name['zh-TW']
 const navigateToStopLabel = t('components.routeStopList.navigateAriaLabel', {
   stopName: stopNameZhTW,
 })
 
-function renderNearbyStopDetail(
+function renderNearbyStationDetail(
   displayMode: 'content' | 'full' | 'title' = 'content',
 ) {
-  return renderNearbyStopDetailWithStopGroup(stopGroup, displayMode)
+  return renderNearbyStationDetailWithStation(station, displayMode)
 }
 
-function renderNearbyStopDetailWithStopGroup(
-  targetStopGroup: typeof stopGroup,
+function renderNearbyStationDetailWithStation(
+  targetStation: NearbyStation,
   displayMode: 'content' | 'full' | 'title' = 'content',
 ) {
   const store = createTestStore({
@@ -66,24 +52,24 @@ function renderNearbyStopDetailWithStopGroup(
   })
 
   return renderWithStore(
-    <NearbyStopDetail
-      stopGroup={targetStopGroup}
+    <NearbyStationDetail
+      station={targetStation}
       routes={[]}
-      onViewRoutes={vi.fn()}
+      onViewStationRoutes={vi.fn()}
       displayMode={displayMode}
     />,
     { store },
   )
 }
 
-describe('NearbyStopDetail', () => {
+describe('NearbyStationDetail', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
     vi.spyOn(window, 'open').mockImplementation(() => null)
   })
 
   it('renders only the stop name in title mode', () => {
-    renderNearbyStopDetail('title')
+    renderNearbyStationDetail('title')
 
     expect(screen.getByText(stopNameZhTW)).toBeInTheDocument()
     expect(
@@ -92,21 +78,10 @@ describe('NearbyStopDetail', () => {
   })
 
   it('renders stop name with bearing label in title mode when bearing is available', () => {
-    renderNearbyStopDetailWithStopGroup(
+    renderNearbyStationDetailWithStation(
       {
-        ...stopGroup,
-        stops: [
-          {
-            ...stopGroup.stops[0],
-            Bearing: BearingType.NORTH,
-          },
-          {
-            ...stopGroup.stops[0],
-            StopUID: 'stop-2',
-            StopID: 'stop-2',
-            Bearing: BearingType.SOUTH,
-          },
-        ],
+        ...station,
+        bearings: [BearingType.NORTH, BearingType.SOUTH],
       },
       'title',
     )
@@ -123,7 +98,7 @@ describe('NearbyStopDetail', () => {
   })
 
   it('renders stop distance when user coordinates are available', () => {
-    renderNearbyStopDetail('content')
+    renderNearbyStationDetail('content')
 
     const distanceSection = screen.getByText('距離').closest('div')
 
@@ -132,7 +107,7 @@ describe('NearbyStopDetail', () => {
   })
 
   it('opens Google Maps directions from the navigation button', () => {
-    renderNearbyStopDetail('full')
+    renderNearbyStationDetail('full')
 
     fireEvent.click(screen.getByRole('button', { name: navigateToStopLabel }))
 

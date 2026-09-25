@@ -5,38 +5,38 @@ import { useSelector } from 'react-redux'
 import { AppBadge } from '~/components/common/AppBadge'
 import { NavigationButton } from '~/components/common/NavigationButton'
 import { StopDistanceText } from '~/components/common/StopDistanceText'
-import type { NearbyStopGroup } from '~/modules/interfaces/Nearby'
+import type { NearbyStation } from '~/modules/interfaces/Nearby'
 import type { StationRoute } from '~/modules/interfaces/StationRoute'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { toLatLng } from '~/modules/utils/geo/convertCoordinates'
 import { getCityTranslationKey } from '~/modules/utils/i18n/getCityTranslationKey'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
-import { getStopGroupBearingLabel } from '~/modules/utils/nearby/getStopGroupBearingLabel'
+import { getStationBearingLabel } from '~/modules/utils/nearby/getStationBearingLabel'
 
 interface PropType {
-  stopGroup: NearbyStopGroup
+  station: NearbyStation
   routes: Array<Pick<StationRoute, 'routeUID' | 'name'>>
   hasRoutesError?: boolean
   isRoutesLoading?: boolean
   isRoutesRateLimited?: boolean
-  onViewRoutes: (stationID: string) => void
+  onViewStationRoutes: (stationId: string) => void
   displayMode?: 'content' | 'full' | 'title'
 }
 
-export const NearbyStopDetail = ({
-  stopGroup,
+export const NearbyStationDetail = ({
+  station,
   routes,
   hasRoutesError = false,
   isRoutesLoading = false,
   isRoutesRateLimited = false,
-  onViewRoutes,
+  onViewStationRoutes,
   displayMode = 'content',
 }: PropType) => {
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
-  const stopName = getLocalizedText(stopGroup.StopName, locale)
-  const destination = toLatLng(stopGroup.position)!
-  const bearingLabel = getStopGroupBearingLabel(t, stopGroup)
+  const stopName = getLocalizedText(station.name, locale)
+  const destination = toLatLng(station.position)!
+  const bearingLabel = getStationBearingLabel(t, station)
 
   if (displayMode === 'title') {
     return (
@@ -58,7 +58,7 @@ export const NearbyStopDetail = ({
       label: t('components.nearbyStopDetail.distanceLabel'),
       content: (
         <Group align="center" wrap="nowrap" gap="xs">
-          <StopDistanceText position={stopGroup.position} size="sm" />
+          <StopDistanceText position={station.position} size="sm" />
           <NavigationButton
             ariaLabel={t('components.routeStopList.navigateAriaLabel', {
               stopName,
@@ -72,8 +72,8 @@ export const NearbyStopDetail = ({
       label: t('components.nearbyStopDetail.cityLabel'),
       content: (
         <Text size="sm">
-          {stopGroup.City
-            ? t(getCityTranslationKey(stopGroup.City))
+          {station.city
+            ? t(getCityTranslationKey(station.city))
             : t('components.nearbyStopDetail.notProvided')}
         </Text>
       ),
@@ -82,11 +82,9 @@ export const NearbyStopDetail = ({
       label: t('components.nearbyStopDetail.addressLabel'),
       content: (
         <Text size="sm">
-          {Array.from(
-            new Set(
-              stopGroup.stops.map((stop) => stop.StopAddress).filter(Boolean),
-            ),
-          ).join('、') || t('components.nearbyStopDetail.notProvided')}
+          {station.address
+            ? getLocalizedText(station.address, locale)
+            : t('components.nearbyStopDetail.notProvided')}
         </Text>
       ),
     },
@@ -152,7 +150,7 @@ export const NearbyStopDetail = ({
           aria-label={t('components.nearbyStopDetail.viewRoutesAriaLabel', {
             stopName,
           })}
-          onClick={() => onViewRoutes(stopGroup.StationID)}
+          onClick={() => onViewStationRoutes(station.stationId)}
         >
           <RiArrowRightSLine size={18} />
         </ActionIcon>

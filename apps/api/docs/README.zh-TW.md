@@ -22,11 +22,25 @@ pnpm --filter @bus/api start:dev
 | ----------------------------------------------- | ---------------------------------------------------- |
 | `pnpm --filter @bus/api generate:admin-api-key` | 產生隨機 admin API key，並寫入 `.env.local`。       |
 | `pnpm --filter @bus/api start:dev`              | 以 watch mode 啟動 API。                             |
+| `pnpm --filter @bus/api start:dev:local-api`    | 在 port `3001` 以 local web CORS 的 watch mode 啟動 API。 |
 | `pnpm --filter @bus/api start:dev:awake`        | 以 watch mode 啟動 API，並在 macOS 防止閒置休眠。    |
 | `pnpm --filter @bus/api sync:routes:local`      | 透過執行於 `localhost:3000` 的 API 建立 route sync。 |
 | `pnpm --filter @bus/api sync:stops:local`       | 透過執行於 `localhost:3000` 的 API 建立 stop sync。  |
+| `pnpm --filter @bus/api sync:routes:local-api` | 透過 `dev:api` 的 `localhost:3001` 建立 route sync。 |
+| `pnpm --filter @bus/api sync:stops:local-api` | 透過 `dev:api` 的 `localhost:3001` 建立 stop sync。 |
 
 在 macOS 執行時間較長的本地 sync 時，可以使用 `start:dev:awake`。一般的 `start:dev` 仍保留給跨平台開發與部署環境使用。
+
+Root 的 `pnpm run dev:api` 會同時啟動此 local API mode、web app 與 TDX
+proxy。啟動器會設定 `BUS_LOCAL_API_MODE=1`，讓 API 在讀取 `.env` 與
+`.env.local` 後，固定使用 port `3001`，並允許 Vite 的
+`http://localhost:5173` 與 `http://127.0.0.1:5173` origins。
+一般啟動方式仍使用設定中的 `PORT` 與 `CORS_ORIGINS`。
+
+執行 `dev:api` 時，請使用 `sync:routes:local-api` 與
+`sync:stops:local-api`。這兩個指令固定連到 port `3001`，不受
+`.env.local` 的 `API_ORIGIN` 影響。`sync:*:local` 用於單獨啟動的 API，
+優先使用設定中的 `API_ORIGIN`，未設定時則連到 port `3000`。
 
 產生 key，並寫入 `.env.local` 裡的 `ADMIN_API_KEY`：
 
