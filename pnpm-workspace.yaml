@@ -17,6 +17,8 @@ overrides:
   '@prisma/config>deepmerge-ts': 8.0.0
   # GHSA-3f6p-5ww8-9rcr: Prisma still pins a vulnerable MySQL2 release.
   'prisma>mysql2': 3.22.0
+  # GHSA-73wf-gq98-2v4g: safely normalize untrusted Browserslist stats.
+  'browserslist@<4.28.7': 4.28.7
 allowBuilds:
   '@nestjs/core': true
   '@prisma/engines': true
