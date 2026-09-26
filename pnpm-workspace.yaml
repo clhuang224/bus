@@ -15,6 +15,8 @@ overrides:
   'miniflare>sharp': 0.35.4
   # GHSA-ggr8-5vv4-36mx: Prisma's config loader still pins deepmerge-ts 7.x.
   '@prisma/config>deepmerge-ts': 8.0.0
+  # GHSA-3f6p-5ww8-9rcr: Prisma still pins a vulnerable MySQL2 release.
+  'prisma>mysql2': 3.22.0
 allowBuilds:
   '@nestjs/core': true
   '@prisma/engines': true
