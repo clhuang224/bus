@@ -26,6 +26,8 @@ overrides:
   'brace-expansion@>=5.0.0 <5.0.9': 5.0.9
   # GHSA-qfvm-cv95-jqjf: close disk upload streams when requests abort.
   '@nestjs/platform-express>multer': 2.3.0
+  # GHSA-4c8g-83qw-93j6 and related URL host normalization fixes.
+  'fast-uri@>=3.0.0 <3.1.6': 3.1.6
 allowBuilds:
   '@nestjs/core': true
   '@prisma/engines': true
