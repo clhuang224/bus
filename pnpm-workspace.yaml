@@ -28,6 +28,8 @@ overrides:
   '@nestjs/platform-express>multer': 2.3.0
   # GHSA-4c8g-83qw-93j6 and related URL host normalization fixes.
   'fast-uri@>=3.0.0 <3.1.6': 3.1.6
+  # GHSA-r28c-9q8g-f849 and GHSA-fxqj-rqcc-2cmp: restrict source map loading.
+  'postcss@>=8.0.0 <8.5.23': 8.5.23
 allowBuilds:
   '@nestjs/core': true
   '@prisma/engines': true
