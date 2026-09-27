@@ -19,6 +19,10 @@ overrides:
   'prisma>mysql2': 3.22.0
   # GHSA-73wf-gq98-2v4g: safely normalize untrusted Browserslist stats.
   'browserslist@<4.28.7': 4.28.7
+  # GHSA-rgw5-rvv9-x895: bound intermediate brace expansions in each used major.
+  'brace-expansion@<1.1.18': 1.1.18
+  'brace-expansion@>=2.0.0 <2.1.4': 2.1.4
+  'brace-expansion@>=5.0.0 <5.0.9': 5.0.9
 allowBuilds:
   '@nestjs/core': true
   '@prisma/engines': true
