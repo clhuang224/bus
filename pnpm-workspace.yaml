@@ -2,11 +2,8 @@ packages:
   - apps/*
   - packages/*
 overrides:
-  '@prisma/dev>@hono/node-server': 1.19.13
-  form-data: 4.0.6
-  hono: 4.12.25
-  '@react-router/serve>morgan': 1.11.0
-  js-yaml: 4.2.0
+  '@prisma/config>deepmerge-ts': 8.0.0
+  'prisma>mysql2': 3.24.4
 allowBuilds:
   '@nestjs/core': true
   '@prisma/engines': true
@@ -16,6 +13,3 @@ allowBuilds:
   sharp: false
   unrs-resolver: true
   workerd: true
-minimumReleaseAgeExclude:
-  - miniflare@4.20260714.0
-  - wrangler@4.112.0
