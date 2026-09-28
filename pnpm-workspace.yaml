@@ -4,7 +4,8 @@ packages:
 overrides:
   '@prisma/dev>@hono/node-server': 1.19.13
   form-data: 4.0.6
-  hono: 4.12.25
+  # GHSA-gqvv-2mrq-wpjv and related SSR, middleware, and request parsing fixes.
+  hono: 4.13.5
   '@react-router/serve>morgan': 1.11.0
   # GHSA-52cp-r559-cp3m and related merge/omap DoS fixes.
   js-yaml: 4.3.2
