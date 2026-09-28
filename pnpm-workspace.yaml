@@ -2,42 +2,8 @@ packages:
   - apps/*
   - packages/*
 overrides:
-  '@prisma/dev>@hono/node-server': 1.19.13
-  form-data: 4.0.6
-  # GHSA-gqvv-2mrq-wpjv and related SSR, middleware, and request parsing fixes.
-  hono: 4.13.5
-  '@react-router/serve>morgan': 1.11.0
-  # GHSA-52cp-r559-cp3m and related merge/omap DoS fixes.
-  js-yaml: 4.3.2
-  # GHSA-2v37-7h3g-55p8: keep Nano ID 3.x on the patched release.
-  'nanoid@<3.3.18': 3.3.18
-  # GHSA-28wg-ghj8-5hjv: patch negative sizes in Nano ID's non-secure API.
-  'nanoid@>=4.0.0 <5.1.16': 5.1.16
-  # GHSA-rgj7-g3m4-5g8c: Miniflare 4 still pins an older sharp release.
-  'miniflare>sharp': 0.35.4
-  # GHSA-ggr8-5vv4-36mx: Prisma's config loader still pins deepmerge-ts 7.x.
   '@prisma/config>deepmerge-ts': 8.0.0
-  # GHSA-3f6p-5ww8-9rcr: Prisma still pins a vulnerable MySQL2 release.
-  'prisma>mysql2': 3.22.0
-  # GHSA-73wf-gq98-2v4g: safely normalize untrusted Browserslist stats.
-  'browserslist@<4.28.7': 4.28.7
-  # GHSA-rgw5-rvv9-x895: bound intermediate brace expansions in each used major.
-  'brace-expansion@<1.1.18': 1.1.18
-  'brace-expansion@>=2.0.0 <2.1.4': 2.1.4
-  'brace-expansion@>=5.0.0 <5.0.9': 5.0.9
-  # GHSA-qfvm-cv95-jqjf: close disk upload streams when requests abort.
-  '@nestjs/platform-express>multer': 2.3.0
-  # GHSA-4c8g-83qw-93j6 and related URL host normalization fixes.
-  'fast-uri@>=3.0.0 <3.1.6': 3.1.6
-  # GHSA-r28c-9q8g-f849 and GHSA-fxqj-rqcc-2cmp: restrict source map loading.
-  'postcss@>=8.0.0 <8.5.23': 8.5.23
-  # GHSA-5qjj-4xww-7phc: safely flatten validation errors for inherited key names.
-  'valibot@>=1.0.0 <1.4.2': 1.4.2
-  # GHSA-4cwx-7wf7-3272 and related cache, header, and retry security fixes.
-  'undici@>=7.0.0 <7.29.0': 7.29.0
-  # GHSA-v422-hmwv-36x6: reject invalid body size limits in both used majors.
-  'body-parser@>=1.0.0 <1.20.6': 1.20.6
-  'body-parser@>=2.0.0 <2.3.0': 2.3.0
+  'prisma>mysql2': 3.24.4
 allowBuilds:
   '@nestjs/core': true
   '@prisma/engines': true
@@ -47,6 +13,3 @@ allowBuilds:
   sharp: false
   unrs-resolver: true
   workerd: true
-minimumReleaseAgeExclude:
-  - miniflare@4.20260714.0
-  - wrangler@4.112.0
