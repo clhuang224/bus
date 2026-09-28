@@ -35,6 +35,9 @@ overrides:
   'valibot@>=1.0.0 <1.4.2': 1.4.2
   # GHSA-4cwx-7wf7-3272 and related cache, header, and retry security fixes.
   'undici@>=7.0.0 <7.29.0': 7.29.0
+  # GHSA-v422-hmwv-36x6: reject invalid body size limits in both used majors.
+  'body-parser@>=1.0.0 <1.20.6': 1.20.6
+  'body-parser@>=2.0.0 <2.3.0': 2.3.0
 allowBuilds:
   '@nestjs/core': true
   '@prisma/engines': true
