@@ -51,6 +51,7 @@ vi.mock('maplibre-gl', () => ({
   Map: MockMap,
   Marker: MockMarker,
   LngLat: MockLngLat,
+  setWorkerUrl: vi.fn(),
 }))
 
 describe('BaseMap', () => {

@@ -2,6 +2,7 @@ import { ActionIcon, Box, Flex } from '@mantine/core'
 import { useId } from '@mantine/hooks'
 import * as mapLibre from 'maplibre-gl'
 import { type Map, Marker, LngLat as MapLngLat } from 'maplibre-gl'
+import mapWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { RiFocus3Line } from '@remixicon/react'
 import {
@@ -19,6 +20,8 @@ import type { RootState } from '~/modules/store'
 import { toLngLat } from '~/modules/utils/geo/convertCoordinates'
 import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
 import { APP_FLOATING_ACTION_OFFSET } from '~/modules/consts/layout'
+
+mapLibre.setWorkerUrl(mapWorkerUrl)
 
 const FOCUS_ZOOM = 16
 
