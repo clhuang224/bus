@@ -136,8 +136,10 @@ pnpm run dev
 ### Local API Mode
 
 To develop the Nearby Stops page against the local NestJS API, first configure
-`apps/api/.env.local` with `DATABASE_URL` and the other API credentials. Then
-run:
+`apps/api/.env.local` with `DATABASE_URL` and the other API credentials. Also
+configure `apps/tdx-proxy/.dev.vars` using the
+[TDX proxy setup](../tdx-proxy/README.md#local-setup); route search and route
+details still use that proxy. Then run:
 
 ```bash
 pnpm run dev:api

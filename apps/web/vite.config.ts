@@ -11,6 +11,13 @@ export default defineConfig(({ mode }) => ({
       '/api/tdx': {
         target: 'http://127.0.0.1:3000',
         changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            if (!req.headers.origin && req.headers.host) {
+              proxyReq.setHeader('Origin', `http://${req.headers.host}`)
+            }
+          })
+        },
       },
     },
   },
