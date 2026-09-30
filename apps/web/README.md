@@ -133,6 +133,25 @@ For full local development with the proxy, use the root command:
 pnpm run dev
 ```
 
+### Map Browser Test
+
+Install the test browser once, then run the production-build map check:
+
+```bash
+pnpm --filter @bus/web exec playwright install chromium
+pnpm --filter @bus/web test:e2e
+```
+
+Playwright builds the app and serves it on port `4173`, which must be free.
+The test opens Nearby with a fixed location and verifies that real MapLibre
+workers render vector tiles. External map and transit requests use fixtures,
+so no TDX credentials or live tile service are required.
+
+`e2e/fixtures/land.pbf` is a synthetic MVT v2 tile with extent `4096` and one
+polygon covering the tile in the `land` layer. The test checks its rendered
+fill color against `map-style.ts`, rather than accepting an empty canvas.
+PR checks run this test and save a report, screenshot, and trace on failure.
+
 ### Local API Mode
 
 To develop the Nearby Stops page against the local NestJS API, first configure
