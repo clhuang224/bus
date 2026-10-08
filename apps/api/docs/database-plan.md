@@ -981,12 +981,14 @@ and index metadata even when there are no rows.
 - Full real-data stop sync validation across Taiwan
 - Public route and nearby station endpoints backed by the database
 - Local web API mode for the Nearby page, backed by `GET /api/stations`
+- Local web API mode for the Routes page, backed by `GET /api/routes`
 
 ## Plan Order
 
-1. Connect the web Routes and Route pages to the existing database-backed
-   route endpoints in local API mode. Keep the current TDX path available for
-   production until the API is deployed.
+1. Connect the web Route page to the existing database-backed route detail
+   endpoint in local API mode. Keep the current TDX path available for
+   production until the API is deployed. See the Route Page Migration section
+   in `docs/plan.md` for the known gaps.
 2. Continue monitoring database size after full sync runs.
 3. Deploy the API to a long-running host, run migrations safely, configure
    production CORS and admin secrets, and protect admin operations.
