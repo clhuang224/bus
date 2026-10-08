@@ -7,6 +7,7 @@ export type {
   ApiStationRouteDirection,
   StationsResponse,
 } from './Station.js'
+export type { ApiRouteSummary, RoutesResponse } from './Route.js'
 export type {
   ApiErrorResponse,
   ApiSuccessResponse,
