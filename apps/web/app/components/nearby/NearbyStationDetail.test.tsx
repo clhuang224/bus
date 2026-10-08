@@ -20,7 +20,6 @@ const station: NearbyStation = {
   address: { 'zh-TW': 'Address 1', en: '', ja: '', ko: '' },
   bearings: [],
   position: [121.5654, 25.033] as [number, number],
-  routes: [],
 }
 const stopNameZhTW = station.name['zh-TW']
 const navigateToStopLabel = t('components.routeStopList.navigateAriaLabel', {

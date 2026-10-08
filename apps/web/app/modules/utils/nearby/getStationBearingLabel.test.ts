@@ -10,7 +10,6 @@ const stationBase: NearbyStation = {
   address: null,
   bearings: [],
   position: [121.5654, 25.033],
-  routes: [],
 }
 
 describe('getStationBearingLabel', () => {

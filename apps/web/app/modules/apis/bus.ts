@@ -313,8 +313,5 @@ export const {
   useGetRoutesByCityQuery,
   useGetStopOfRoutesByCityQuery,
   useGetStopsByCityQuery,
-  useGetRoutesByAreaQuery,
-  useGetStopOfRoutesByAreaQuery,
   useGetStopsByAreaQuery,
-  useGetStopsByNearbyAreaQuery,
 } = busApi
