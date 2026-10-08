@@ -1,20 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { CityNameType, DirectionType } from '@bus/shared'
+import {
+  CityNameType,
+  DirectionType,
+  type ApiRouteSummary,
+  type RoutesResponse,
+} from '@bus/shared'
 import { LocalizedTextDto, PositionDto } from '../../dto/shared.dto.js'
 
 export type PositionTuple = [longitude: number, latitude: number]
 
-export class RouteSummaryDto {
+export class RouteSummaryDto implements ApiRouteSummary {
   @ApiProperty({ description: 'Route UUID', example: 'NWT10116' })
   uuid!: string
 
   @ApiProperty({
     description: 'City where the route operates',
     enum: CityNameType,
-    nullable: true,
     example: CityNameType.NEW_TAIPEI,
   })
-  city!: CityNameType | null
+  city!: CityNameType
 
   @ApiProperty({
     description: 'Localized route name',
@@ -38,7 +42,7 @@ export class RouteSummaryDto {
   destination!: LocalizedTextDto
 }
 
-export class RoutesResponseDto {
+export class RoutesResponseDto implements RoutesResponse {
   @ApiProperty({
     description:
       'Base route search index for the selected area. Realtime data is intentionally excluded.',

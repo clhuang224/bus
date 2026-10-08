@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
-import { busApi } from '~/modules/apis/bus'
+import { transitApi } from '~/modules/apis/transit'
 import { getSearchMessages } from '~/modules/consts/pageMessages'
 import { AreaType, type AppLocaleType } from '@bus/shared'
-import type { BusRoute } from '~/modules/interfaces/BusRoute'
+import type { RouteSummary } from '~/modules/interfaces/RouteSummary'
 import { useLocalizedTextCollator } from '~/modules/hooks/shared/useLocalizedTextCollator'
 import {
   RouteSearchAnalyticsSource,
@@ -16,12 +16,11 @@ import { setKeyword, setSelectedArea } from '~/modules/slices/routeSearchSlice'
 import type { AppDispatch, RootState } from '~/modules/store'
 import { getAreaByCoords } from '~/modules/utils/geo/getAreaByCoords'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
-import { normalizeBusRoutesWithDates } from '~/modules/utils/route/normalizeBusRoutesWithDates'
 import { normalizeRouteSearchText } from '~/modules/utils/routes/normalizeRouteSearchText'
 import { loadRouteSearchRecentFromStorage } from '~/modules/utils/routes/routeSearchRecentStorage'
 
 type SearchableRoute = {
-  route: BusRoute<Date | null>
+  route: RouteSummary
   routeName: string
   normalizedRouteName: string
   normalizedDeparture: string
@@ -32,14 +31,16 @@ type DisplayRoute = {
   to: string
 } & RouteSearchAnalyticsRoute
 
+const EMPTY_ROUTES: RouteSummary[] = []
+
 type RoutesMessage = ReturnType<typeof getSearchMessages>['emptyRoutes'] | null
 
-function deduplicateRoutes(routes: BusRoute<Date | null>[]) {
+function deduplicateRoutes(routes: RouteSummary[]) {
   return Array.from(
     routes
-      .reduce<Map<string, BusRoute<Date | null>>>((result, route) => {
-        if (!result.has(route.RouteUID)) {
-          result.set(route.RouteUID, route)
+      .reduce<Map<string, RouteSummary>>((result, route) => {
+        if (!result.has(route.routeUID)) {
+          result.set(route.routeUID, route)
         }
 
         return result
@@ -48,22 +49,19 @@ function deduplicateRoutes(routes: BusRoute<Date | null>[]) {
   )
 }
 
-function getSearchableRoutes(
-  routes: BusRoute<Date | null>[],
-  locale: AppLocaleType,
-) {
+function getSearchableRoutes(routes: RouteSummary[], locale: AppLocaleType) {
   return deduplicateRoutes(routes).map((route) => {
-    const routeName = getLocalizedText(route.RouteName, locale)
+    const routeName = getLocalizedText(route.name, locale)
 
     return {
       route,
       routeName,
       normalizedRouteName: normalizeRouteSearchText(routeName),
       normalizedDeparture: normalizeRouteSearchText(
-        getLocalizedText(route.DepartureStopName, locale),
+        getLocalizedText(route.departure, locale),
       ),
       normalizedDestination: normalizeRouteSearchText(
-        getLocalizedText(route.DestinationStopName, locale),
+        getLocalizedText(route.destination, locale),
       ),
     }
   })
@@ -100,8 +98,8 @@ function compareSearchableRoutesByRecentAndName(
   recentRouteIndexMap: Map<string, number>,
   compareRouteNames: (left: string, right: string) => number,
 ) {
-  const leftRecentIndex = recentRouteIndexMap.get(left.route.RouteUID)
-  const rightRecentIndex = recentRouteIndexMap.get(right.route.RouteUID)
+  const leftRecentIndex = recentRouteIndexMap.get(left.route.routeUID)
+  const rightRecentIndex = recentRouteIndexMap.get(right.route.routeUID)
   if (leftRecentIndex != null || rightRecentIndex != null) {
     const recentIndexDiff =
       (leftRecentIndex ?? Number.POSITIVE_INFINITY) -
@@ -117,7 +115,7 @@ function compareSearchableRoutesByRecentAndName(
     return routeNameCompare
   }
 
-  return left.route.RouteUID.localeCompare(right.route.RouteUID)
+  return left.route.routeUID.localeCompare(right.route.routeUID)
 }
 
 function getFilteredRoutes(
@@ -162,7 +160,7 @@ function getRecentRoutes(
   compareRouteNames: (left: string, right: string) => number,
 ) {
   return routes
-    .filter((route) => recentRouteIndexMap.has(route.route.RouteUID))
+    .filter((route) => recentRouteIndexMap.has(route.route.routeUID))
     .sort((left, right) => {
       return compareSearchableRoutesByRecentAndName(
         left,
@@ -176,17 +174,17 @@ function getRecentRoutes(
 }
 
 function toDisplayRoute(
-  route: BusRoute<Date | null>,
+  route: RouteSummary,
   locale: AppLocaleType,
   analyticsSource: RouteSearchAnalyticsSource,
 ): DisplayRoute {
   return {
-    routeUID: route.RouteUID,
-    city: route.City,
-    to: `/routes/${route.City}/${route.RouteUID}`,
-    name: getLocalizedText(route.RouteName, locale),
-    departure: getLocalizedText(route.DepartureStopName, locale),
-    destination: getLocalizedText(route.DestinationStopName, locale),
+    routeUID: route.routeUID,
+    city: route.city,
+    to: `/routes/${route.city}/${route.routeUID}`,
+    name: getLocalizedText(route.name, locale),
+    departure: getLocalizedText(route.departure, locale),
+    destination: getLocalizedText(route.destination, locale),
     analyticsSource,
   }
 }
@@ -259,14 +257,10 @@ export function useRoutesData() {
   const currentArea = getAreaByCoords(coords, geojson)
   const area = selectedArea ?? currentArea ?? AreaType.TAIPEI
   const {
-    data: routeData = [],
+    data: routes = EMPTY_ROUTES,
     isLoading,
     error,
-  } = busApi.useGetRoutesByAreaQuery(area)
-  const routes = useMemo(
-    () => normalizeBusRoutesWithDates(routeData),
-    [routeData],
-  )
+  } = transitApi.useGetRouteSummariesQuery(area)
   const routeNameCollator = useLocalizedTextCollator()
   const recentRouteUIDs = useMemo(() => loadRouteSearchRecentFromStorage(), [])
   const recentRouteIndexMap = useMemo(
@@ -283,7 +277,7 @@ export function useRoutesData() {
 
   const filteredRoutes = useMemo(() => {
     if (!normalizedKeyword) {
-      return [] as BusRoute<Date | null>[]
+      return [] as RouteSummary[]
     }
 
     return getFilteredRoutes(
@@ -301,7 +295,7 @@ export function useRoutesData() {
 
   const recentRoutes = useMemo(() => {
     if (normalizedKeyword) {
-      return [] as BusRoute<Date | null>[]
+      return [] as RouteSummary[]
     }
 
     return getRecentRoutes(

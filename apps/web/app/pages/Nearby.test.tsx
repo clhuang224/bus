@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { skipToken } from '@reduxjs/toolkit/query/react'
 import { act, fireEvent, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useLocation } from 'react-router'
@@ -20,39 +21,38 @@ import {
 } from '@bus/shared'
 import { GeoErrorType } from '~/modules/enums/geo/GeoErrorType'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
+import type { NearbyStationRoutesQuery } from '~/modules/apis/transit'
+import type { BusRoute } from '~/modules/interfaces/BusRoute'
+import type {
+  NearbyStationRoutesMap,
+  NearbyStationsResult,
+} from '~/modules/interfaces/Nearby'
+import type { Stop } from '~/modules/interfaces/Stop'
+import type { StopOfRoute } from '~/modules/interfaces/StopOfRoute'
+import {
+  toNearbyStationRoutesFromTdx,
+  toNearbyStationsFromApi,
+  toNearbyStationsFromTdx,
+} from '~/modules/utils/nearby/toNearbyStations'
 import { createTestStore } from '~/test/createTestStore'
 import { mockMatchMedia } from '~/test/mockMatchMedia'
 import { renderWithProvidersAndRouter } from '~/test/render'
 
 const {
-  mockUseGetRoutesByAreaQuery,
-  mockUseGetStopsByNearbyAreaQuery,
-  mockUseGetStopOfRoutesByAreaQuery,
   mockUseGetNearbyStationsQuery,
-  mockIsDatabaseApiEnabled,
+  mockUseGetNearbyStationRoutesQuery,
   mockNearbyStationMap,
 } = vi.hoisted(() => ({
-  mockUseGetRoutesByAreaQuery: vi.fn(),
-  mockUseGetStopsByNearbyAreaQuery: vi.fn(),
-  mockUseGetStopOfRoutesByAreaQuery: vi.fn(),
   mockUseGetNearbyStationsQuery: vi.fn(),
-  mockIsDatabaseApiEnabled: vi.fn(),
+  mockUseGetNearbyStationRoutesQuery: vi.fn(),
   mockNearbyStationMap: vi.fn(),
 }))
 
-vi.mock('~/modules/apis/bus', () => ({
-  busApi: {
-    useGetRoutesByAreaQuery: mockUseGetRoutesByAreaQuery,
-    useGetStopsByNearbyAreaQuery: mockUseGetStopsByNearbyAreaQuery,
-    useGetStopOfRoutesByAreaQuery: mockUseGetStopOfRoutesByAreaQuery,
-  },
-}))
-
-vi.mock('~/modules/apis/database', () => ({
-  databaseApi: {
+vi.mock('~/modules/apis/transit', () => ({
+  transitApi: {
     useGetNearbyStationsQuery: mockUseGetNearbyStationsQuery,
+    useGetNearbyStationRoutesQuery: mockUseGetNearbyStationRoutesQuery,
   },
-  isDatabaseApiEnabled: mockIsDatabaseApiEnabled,
 }))
 
 vi.mock('~/modules/utils/geo/getCityByCoords', () => ({
@@ -97,7 +97,7 @@ vi.mock('~/components/common/MapSidebarLayout', () => ({
   ),
 }))
 
-const nearbyStopsData = [
+const nearbyStopsData: Stop[] = [
   {
     StopUID: 'stop-1',
     AuthorityID: '005',
@@ -153,7 +153,7 @@ const nearbyStopsData = [
   },
 ]
 
-const stopOfRoutesData = [
+const stopOfRoutesData: StopOfRoute[] = [
   {
     RouteUID: 'route-1',
     RouteID: '1',
@@ -162,7 +162,7 @@ const stopOfRoutesData = [
     SubRouteID: '1',
     City: CityNameType.TAIPEI,
     SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
-    Direction: 0,
+    Direction: DirectionType.GO,
     Stops: [
       {
         StopUID: 'stop-1',
@@ -181,7 +181,7 @@ const stopOfRoutesData = [
     SubRouteID: '2',
     City: CityNameType.NEW_TAIPEI,
     SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
-    Direction: 1,
+    Direction: DirectionType.RETURN,
     Stops: [
       {
         StopUID: 'stop-2',
@@ -194,7 +194,7 @@ const stopOfRoutesData = [
   },
 ]
 
-const routesData = [
+const routesData: BusRoute<string>[] = [
   {
     RouteUID: 'route-1',
     RouteID: '1',
@@ -224,7 +224,7 @@ const routesData = [
         SubRouteID: '1',
         OperatorIDs: [],
         SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
-        Direction: 0,
+        Direction: DirectionType.GO,
         FirstBusTime: '',
         LastBusTime: '',
         HolidayFirstBusTime: '',
@@ -273,7 +273,7 @@ const routesData = [
         SubRouteID: '2',
         OperatorIDs: [],
         SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
-        Direction: 1,
+        Direction: DirectionType.RETURN,
         FirstBusTime: '',
         LastBusTime: '',
         HolidayFirstBusTime: '',
@@ -321,12 +321,35 @@ const nearbyApiStationsData: ApiStation[] = [
   },
 ]
 
+const tdxStationsResult: NearbyStationsResult = {
+  stations: toNearbyStationsFromTdx(nearbyStopsData),
+  routesByStationId: null,
+}
+const routeBadgesData = toNearbyStationRoutesFromTdx(stopOfRoutesData, null)
+const stationRoutesData = toNearbyStationRoutesFromTdx(
+  stopOfRoutesData,
+  routesData,
+)
+
+interface QueryState<T> {
+  data?: T
+  error?: unknown
+  isError?: boolean
+  isLoading?: boolean
+  isSuccess?: boolean
+}
+
+const skippedQueryState = {
+  data: undefined,
+  error: undefined,
+  isError: false,
+  isLoading: false,
+  isSuccess: false,
+}
+
 function resetNearbyMocks() {
-  mockUseGetRoutesByAreaQuery.mockReset()
-  mockUseGetStopsByNearbyAreaQuery.mockReset()
-  mockUseGetStopOfRoutesByAreaQuery.mockReset()
   mockUseGetNearbyStationsQuery.mockReset()
-  mockIsDatabaseApiEnabled.mockReset()
+  mockUseGetNearbyStationRoutesQuery.mockReset()
   mockNearbyStationMap.mockReset()
 }
 
@@ -342,40 +365,18 @@ function renderNearby({
   coords = null,
   geolocationError = null,
   permission = GeoPermissionType.PROMPT,
-  queryState,
-  routesQueryState,
-  stopOfRoutesQueryState,
-  apiStationsQueryState,
+  stationsQueryState,
+  routeBadgesQueryState,
+  stationRoutesQueryState,
 }: {
   initialEntry?: string
   locale?: AppLocaleType
   coords?: [number, number] | null
   geolocationError?: GeoErrorType | null
   permission?: GeoPermissionType
-  queryState?: {
-    data?: unknown[]
-    isLoading?: boolean
-    error?: unknown
-    isSuccess?: boolean
-  }
-  routesQueryState?: {
-    data?: unknown[]
-    error?: unknown
-    isError?: boolean
-    isLoading?: boolean
-  }
-  stopOfRoutesQueryState?: {
-    data?: unknown[]
-    error?: unknown
-    isError?: boolean
-    isLoading?: boolean
-  }
-  apiStationsQueryState?: {
-    data?: ApiStation[]
-    error?: unknown
-    isLoading?: boolean
-    isSuccess?: boolean
-  }
+  stationsQueryState?: QueryState<NearbyStationsResult>
+  routeBadgesQueryState?: QueryState<NearbyStationRoutesMap>
+  stationRoutesQueryState?: QueryState<NearbyStationRoutesMap>
 } = {}) {
   const store = createTestStore({
     preloadedState: { locale: { value: locale } },
@@ -398,34 +399,33 @@ function renderNearby({
     },
   })
 
-  mockUseGetStopsByNearbyAreaQuery.mockReturnValue({
-    data: [],
-    isLoading: false,
-    error: null,
-    isSuccess: false,
-    ...queryState,
-  })
-  mockUseGetRoutesByAreaQuery.mockReturnValue({
-    data: routesData,
-    error: null,
-    isError: false,
-    isLoading: false,
-    ...routesQueryState,
-  })
-  mockUseGetStopOfRoutesByAreaQuery.mockReturnValue({
-    data: stopOfRoutesData,
-    error: null,
-    isError: false,
-    isLoading: false,
-    ...stopOfRoutesQueryState,
-  })
-  mockUseGetNearbyStationsQuery.mockReturnValue({
-    data: [],
-    error: null,
-    isLoading: false,
-    isSuccess: false,
-    ...apiStationsQueryState,
-  })
+  mockUseGetNearbyStationsQuery.mockImplementation((query) =>
+    query === skipToken
+      ? skippedQueryState
+      : {
+          ...skippedQueryState,
+          ...stationsQueryState,
+        },
+  )
+  mockUseGetNearbyStationRoutesQuery.mockImplementation(
+    (query: NearbyStationRoutesQuery | typeof skipToken) => {
+      if (query === skipToken) return skippedQueryState
+
+      return query.includeTerminals
+        ? {
+            ...skippedQueryState,
+            data: stationRoutesData,
+            isSuccess: true,
+            ...stationRoutesQueryState,
+          }
+        : {
+            ...skippedQueryState,
+            data: routeBadgesData,
+            isSuccess: true,
+            ...routeBadgesQueryState,
+          }
+    },
+  )
 
   return renderWithProvidersAndRouter(
     <>
@@ -446,7 +446,6 @@ describe('Nearby', () => {
     mockMatchMedia()
 
     resetNearbyMocks()
-    mockIsDatabaseApiEnabled.mockReturnValue(false)
   })
 
   it('shows a denied-location message when geolocation permission is denied', () => {
@@ -474,10 +473,8 @@ describe('Nearby', () => {
     renderNearby({
       coords: [25.033, 121.5654],
       permission: GeoPermissionType.GRANTED,
-      queryState: {
-        data: nearbyStopsData,
-        isLoading: false,
-        error: null,
+      stationsQueryState: {
+        data: tdxStationsResult,
         isSuccess: true,
       },
     })
@@ -518,7 +515,7 @@ describe('Nearby', () => {
     renderNearby({
       coords: [25.033, 121.5654],
       permission: GeoPermissionType.GRANTED,
-      queryState: {
+      stationsQueryState: {
         isLoading: true,
       },
     })
@@ -532,8 +529,9 @@ describe('Nearby', () => {
     renderNearby({
       coords: [25.033, 121.5654],
       permission: GeoPermissionType.GRANTED,
-      queryState: {
+      stationsQueryState: {
         error: new Error('network error'),
+        isError: true,
       },
     })
 
@@ -549,8 +547,8 @@ describe('Nearby', () => {
     renderNearby({
       coords: [25.033, 121.5654],
       permission: GeoPermissionType.GRANTED,
-      queryState: {
-        data: [],
+      stationsQueryState: {
+        data: { stations: [], routesByStationId: null },
         isSuccess: true,
       },
     })
@@ -563,52 +561,40 @@ describe('Nearby', () => {
     ).toBeInTheDocument()
   })
 
-  it('loads nearby stops with bounded area query params once coords are available', () => {
+  it('loads nearby stations for the located area once coords are available', () => {
     renderNearby({
       coords: [25.033, 121.5654],
       permission: GeoPermissionType.GRANTED,
-      queryState: {
-        data: nearbyStopsData,
+      stationsQueryState: {
+        data: tdxStationsResult,
         isSuccess: true,
       },
     })
 
-    expect(mockUseGetStopsByNearbyAreaQuery).toHaveBeenLastCalledWith(
-      {
-        area: AreaType.TAIPEI,
-        coords: [25.033, 121.5654],
-      },
-      {
-        skip: false,
-      },
-    )
+    expect(mockUseGetNearbyStationsQuery).toHaveBeenLastCalledWith({
+      area: AreaType.TAIPEI,
+      coords: [25.033, 121.5654],
+    })
   })
 
-  it('uses the local stations API when local API mode is enabled', () => {
-    mockIsDatabaseApiEnabled.mockReturnValue(true)
-
+  it('does not request station routes separately when they arrive with the stations', () => {
     renderNearby({
+      initialEntry: '/nearby?stop=TPE-station-1&routeStop=TPE-station-1',
       coords: [25.033, 121.5654],
       permission: GeoPermissionType.GRANTED,
-      apiStationsQueryState: {
-        data: nearbyApiStationsData,
+      stationsQueryState: {
+        data: toNearbyStationsFromApi(nearbyApiStationsData),
         isSuccess: true,
       },
     })
 
-    expect(mockUseGetNearbyStationsQuery).toHaveBeenLastCalledWith(
-      {
-        latitude: 25.033,
-        longitude: 121.5654,
-        radius_meters: 500,
-      },
-      { skip: false },
-    )
-    expect(mockUseGetStopsByNearbyAreaQuery).toHaveBeenLastCalledWith(
-      expect.anything(),
-      { skip: true },
-    )
-    expect(screen.getByRole('button', { name: /^市政府/ })).toBeInTheDocument()
+    expect(mockUseGetNearbyStationRoutesQuery).toHaveBeenCalled()
+    for (const [query] of mockUseGetNearbyStationRoutesQuery.mock.calls) {
+      expect(query).toBe(skipToken)
+    }
+    expect(
+      screen.getAllByRole('link', { name: /藍\s*1/ }).length,
+    ).toBeGreaterThan(0)
   })
 
   it('creates and restores local API selection URLs using station UUIDs', async () => {
@@ -616,12 +602,11 @@ describe('Nearby', () => {
     const dataOptions = {
       coords: [25.033, 121.5654] as [number, number],
       permission: GeoPermissionType.GRANTED,
-      apiStationsQueryState: {
-        data: [{ ...nearbyApiStationsData[0], uuid }],
+      stationsQueryState: {
+        data: toNearbyStationsFromApi([{ ...nearbyApiStationsData[0], uuid }]),
         isSuccess: true,
       },
     }
-    mockIsDatabaseApiEnabled.mockReturnValue(true)
     const sourcePage = renderNearby(dataOptions)
 
     fireEvent.click(screen.getByRole('button', { name: /^市政府/ }))
@@ -681,12 +666,11 @@ describe('Nearby', () => {
       city: CityNameType.NEW_TAIPEI,
       name: { 'zh-TW': '新北站點', en: 'New Taipei Station' },
     }
-    mockIsDatabaseApiEnabled.mockReturnValue(true)
     renderNearby({
       coords: [25.033, 121.5654],
       permission: GeoPermissionType.GRANTED,
-      apiStationsQueryState: {
-        data: [taipeiStation, newTaipeiStation],
+      stationsQueryState: {
+        data: toNearbyStationsFromApi([taipeiStation, newTaipeiStation]),
         isSuccess: true,
       },
     })
@@ -730,19 +714,18 @@ describe('Nearby', () => {
   it.each([AppLocaleType.ZH_TW, AppLocaleType.EN])(
     'shows the Chinese address when its English translation is missing in both detail views in %s',
     async (locale) => {
-      mockIsDatabaseApiEnabled.mockReturnValue(true)
       renderNearby({
         initialEntry: '/nearby?stop=TPE-station-1',
         locale,
         coords: [25.033, 121.5654],
         permission: GeoPermissionType.GRANTED,
-        apiStationsQueryState: {
-          data: [
+        stationsQueryState: {
+          data: toNearbyStationsFromApi([
             {
               ...nearbyApiStationsData[0],
               address: { 'zh-TW': '市府路 1 號', en: '' },
             },
-          ],
+          ]),
           isSuccess: true,
         },
       })
@@ -776,13 +759,14 @@ describe('Nearby', () => {
   ])(
     'preserves the preferred address or empty label for $address',
     ({ address, expected }) => {
-      mockIsDatabaseApiEnabled.mockReturnValue(true)
       renderNearby({
         initialEntry: '/nearby?stop=TPE-station-1&routeStop=TPE-station-1',
         coords: [25.033, 121.5654],
         permission: GeoPermissionType.GRANTED,
-        apiStationsQueryState: {
-          data: [{ ...nearbyApiStationsData[0], address }],
+        stationsQueryState: {
+          data: toNearbyStationsFromApi([
+            { ...nearbyApiStationsData[0], address },
+          ]),
           isSuccess: true,
         },
       })
@@ -791,66 +775,50 @@ describe('Nearby', () => {
     },
   )
 
-  it('loads stop-of-route data when a stop is selected, but delays route detail data until viewing routes', () => {
+  it('loads route names when a station is selected, but delays terminal names until viewing routes', () => {
+    const nearbyQuery = {
+      area: AreaType.TAIPEI,
+      coords: [25.033, 121.5654],
+    }
+    const routeQueries = () =>
+      mockUseGetNearbyStationRoutesQuery.mock.calls.map(([query]) => query)
+
     renderNearby({
       coords: [25.033, 121.5654],
       permission: GeoPermissionType.GRANTED,
-      queryState: {
-        data: nearbyStopsData,
+      stationsQueryState: {
+        data: tdxStationsResult,
         isSuccess: true,
       },
     })
 
-    expect(mockUseGetRoutesByAreaQuery).toHaveBeenLastCalledWith(
-      expect.anything(),
-      {
-        skip: true,
-      },
-    )
-    expect(mockUseGetStopOfRoutesByAreaQuery).toHaveBeenLastCalledWith(
-      {
-        area: AreaType.TAIPEI,
-        stopUIDs: ['stop-1', 'stop-2', 'stop-3'],
-      },
-      {
-        skip: true,
-      },
-    )
+    expect(routeQueries().every((query) => query === skipToken)).toBe(true)
 
     fireEvent.click(screen.getByRole('button', { name: /^市政府/ }))
 
-    expect(mockUseGetRoutesByAreaQuery).toHaveBeenLastCalledWith(
-      expect.anything(),
-      {
-        skip: true,
-      },
-    )
-    expect(mockUseGetStopOfRoutesByAreaQuery).toHaveBeenLastCalledWith(
-      {
-        area: AreaType.TAIPEI,
-        stopUIDs: ['stop-1', 'stop-2', 'stop-3'],
-      },
-      {
-        skip: false,
-      },
-    )
+    expect(routeQueries()).toContainEqual({
+      ...nearbyQuery,
+      includeTerminals: false,
+    })
+    expect(routeQueries()).not.toContainEqual({
+      ...nearbyQuery,
+      includeTerminals: true,
+    })
 
     renderNearby({
       initialEntry: '/nearby?stop=station-1&routeStop=station-1',
       coords: [25.033, 121.5654],
       permission: GeoPermissionType.GRANTED,
-      queryState: {
-        data: nearbyStopsData,
+      stationsQueryState: {
+        data: tdxStationsResult,
         isSuccess: true,
       },
     })
 
-    expect(mockUseGetRoutesByAreaQuery).toHaveBeenLastCalledWith(
-      expect.anything(),
-      {
-        skip: false,
-      },
-    )
+    expect(routeQueries()).toContainEqual({
+      ...nearbyQuery,
+      includeTerminals: true,
+    })
   })
 
   it('shows route skeletons while nearby station routes are loading', () => {
@@ -858,16 +826,16 @@ describe('Nearby', () => {
       initialEntry: '/nearby?stop=station-1&routeStop=station-1',
       coords: [25.033, 121.5654],
       permission: GeoPermissionType.GRANTED,
-      queryState: {
-        data: nearbyStopsData,
+      stationsQueryState: {
+        data: tdxStationsResult,
         isSuccess: true,
       },
-      routesQueryState: {
-        data: [],
+      routeBadgesQueryState: {
+        data: undefined,
         isLoading: true,
       },
-      stopOfRoutesQueryState: {
-        data: [],
+      stationRoutesQueryState: {
+        data: undefined,
         isLoading: true,
       },
     })
@@ -882,17 +850,17 @@ describe('Nearby', () => {
       initialEntry: '/nearby?stop=station-1&routeStop=station-1',
       coords: [25.033, 121.5654],
       permission: GeoPermissionType.GRANTED,
-      queryState: {
-        data: nearbyStopsData,
+      stationsQueryState: {
+        data: tdxStationsResult,
         isSuccess: true,
       },
-      stopOfRoutesQueryState: {
-        data: [],
+      routeBadgesQueryState: {
+        data: undefined,
         error: { status: 429 },
         isError: true,
       },
-      routesQueryState: {
-        data: [],
+      stationRoutesQueryState: {
+        data: undefined,
         error: { status: 429 },
         isError: true,
       },
@@ -911,8 +879,8 @@ describe('Nearby', () => {
       initialEntry: '/nearby?stop=station-1&routeStop=station-1',
       coords: [25.033, 121.5654],
       permission: GeoPermissionType.GRANTED,
-      queryState: {
-        data: nearbyStopsData,
+      stationsQueryState: {
+        data: tdxStationsResult,
         isSuccess: true,
       },
     })
@@ -932,8 +900,8 @@ describe('Nearby', () => {
       initialEntry: '/nearby?stop=station-1&routeStop=station-1',
       coords: [25.033, 121.5654],
       permission: GeoPermissionType.GRANTED,
-      queryState: {
-        data: nearbyStopsData,
+      stationsQueryState: {
+        data: tdxStationsResult,
         isSuccess: true,
       },
     })
@@ -951,8 +919,8 @@ describe('Nearby', () => {
     renderNearby({
       coords: [25.033, 121.5654],
       permission: GeoPermissionType.GRANTED,
-      queryState: {
-        data: nearbyStopsData,
+      stationsQueryState: {
+        data: tdxStationsResult,
         isSuccess: true,
       },
     })
@@ -972,8 +940,8 @@ describe('Nearby', () => {
     renderNearby({
       coords: [25.033, 121.5654],
       permission: GeoPermissionType.GRANTED,
-      queryState: {
-        data: nearbyStopsData,
+      stationsQueryState: {
+        data: tdxStationsResult,
         isSuccess: true,
       },
     })
@@ -988,8 +956,8 @@ describe('Nearby', () => {
     renderNearby({
       coords: [25.033, 121.5654],
       permission: GeoPermissionType.GRANTED,
-      queryState: {
-        data: nearbyStopsData,
+      stationsQueryState: {
+        data: tdxStationsResult,
         isSuccess: true,
       },
     })

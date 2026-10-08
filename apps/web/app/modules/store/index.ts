@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { busApi } from '../apis/bus'
 import { databaseApi } from '../apis/database'
+import { transitApi } from '../apis/transit'
 import analyticsSlice from '../slices/analyticsSlice'
 import cityGeoSlice, { setGeoJSON } from '../slices/cityGeoSlice'
 import favoriteSlice from '../slices/favoriteSlice'
@@ -17,6 +18,7 @@ export const store = configureStore({
   reducer: {
     [busApi.reducerPath]: busApi.reducer,
     [databaseApi.reducerPath]: databaseApi.reducer,
+    [transitApi.reducerPath]: transitApi.reducer,
     analytics: analyticsSlice.reducer,
     geolocation: geoSlice.reducer,
     favorite: favoriteSlice.reducer,
@@ -35,11 +37,12 @@ export const store = configureStore({
           'cityGeo.geojson',
           busApi.reducerPath,
           databaseApi.reducerPath,
+          transitApi.reducerPath,
         ],
       },
     })
       .prepend(...storeListenerMiddlewares)
-      .concat(busApi.middleware, databaseApi.middleware),
+      .concat(busApi.middleware, databaseApi.middleware, transitApi.middleware),
 })
 
 export type RootState = ReturnType<typeof store.getState>

@@ -240,11 +240,21 @@ Prefer standard Redux Toolkit patterns such as slices, typed selectors, typed di
 
 The preferred data flow is:
 
-1. Fetch raw data via RTK Query in `app/modules/apis/bus.ts`
-2. Transform raw TDX fields into app-facing shapes inside the API layer
+1. Fetch raw data via RTK Query in a source API: `app/modules/apis/bus.ts` for TDX through the proxy, or `app/modules/apis/database.ts` for the app's own API
+2. Transform raw fields into app-facing shapes inside the API layer
 3. Consume transformed models in pages and components
 
 This keeps pages focused on behavior and presentation instead of raw response cleanup.
+
+While base data is moving from TDX to the app API, some data can come from either source. For that data, `app/modules/apis/transit.ts` owns the choice:
+
+- `transitApi` endpoints decide which source to call, combine source requests when needed, and return the same app-facing model in both modes
+- pages and hooks call `transitApi` hooks and must not check `isDatabaseApiEnabled()` or call both sources themselves
+- `transitApi` calls source endpoints with `initiate(..., { subscribe: false })`, so source caches stay short-lived and are shared between transit endpoints
+- keep cached transit models locale-independent; store `LocalizedText` and pick the display string in the hook or component
+- when one source returns related data together and the other needs extra requests, express that in the model, such as nullable `routesByStationId`, rather than branching on the source in the hook
+
+Data that only exists in one source, such as realtime TDX data, can stay on that source's API until it has a second source.
 
 When the same kind of API request must be sent to multiple sibling targets, such as multiple cities in the same area, prefer `await Promise.all(...)` over sequential requests unless request ordering or rate limiting is a real requirement.
 
