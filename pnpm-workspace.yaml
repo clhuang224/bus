@@ -4,6 +4,7 @@ packages:
 overrides:
   '@prisma/config>deepmerge-ts': 8.0.0
   'prisma>mysql2': 3.24.4
+  'miniflare>undici': 7.29.1
 allowBuilds:
   '@nestjs/core': true
   '@prisma/engines': true
