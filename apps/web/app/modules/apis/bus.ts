@@ -49,7 +49,7 @@ const baseQuery = fetchBaseQuery({
 })
 
 const DEFAULT_RETENTION_SECONDS = 60 * 5
-const AREA_ROUTES_RETENTION_SECONDS = 60 * 15
+export const AREA_ROUTES_RETENTION_SECONDS = 60 * 15
 
 export const busApi = createApi({
   reducerPath: 'busApi',

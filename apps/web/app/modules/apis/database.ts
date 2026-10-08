@@ -1,8 +1,11 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import {
+  type ApiRouteSummary,
   type ApiSuccessResponse,
   type ApiStation,
   type AppLocaleType,
+  type AreaType,
+  type RoutesResponse,
   type StationsResponse,
 } from '@bus/shared'
 
@@ -35,6 +38,14 @@ export const databaseApi = createApi({
     },
   }),
   endpoints: (build) => ({
+    getRoutes: build.query<ApiRouteSummary[], AreaType>({
+      query: (area) => ({
+        url: 'routes',
+        params: { area },
+      }),
+      transformResponse: (response: ApiSuccessResponse<RoutesResponse>) =>
+        response.data.routes,
+    }),
     getNearbyStations: build.query<ApiStation[], NearbyStationsQuery>({
       query: (params) => ({
         url: 'stations',

@@ -3,6 +3,7 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
+import type { RouteSummary } from '~/modules/interfaces/RouteSummary'
 import { AppLocaleType, AreaType, CityNameType } from '@bus/shared'
 import routeSearchSlice from '~/modules/slices/routeSearchSlice'
 import { getEnumValues } from '~/modules/utils/shared/getEnumValues'
@@ -14,15 +15,15 @@ import Routes from './Routes'
 const t = i18n.getFixedT(AppLocaleType.ZH_TW)
 const routeInfoOriginLabel = `${t('components.routeInfoCard.departureLabel')}: 市政府`
 
-const { mockTrackGoogleAnalyticsEvent, mockUseGetRoutesByAreaQuery } =
+const { mockTrackGoogleAnalyticsEvent, mockUseGetRouteSummariesQuery } =
   vi.hoisted(() => ({
     mockTrackGoogleAnalyticsEvent: vi.fn(),
-    mockUseGetRoutesByAreaQuery: vi.fn(),
+    mockUseGetRouteSummariesQuery: vi.fn(),
   }))
 
-vi.mock('~/modules/apis/bus', () => ({
-  busApi: {
-    useGetRoutesByAreaQuery: mockUseGetRoutesByAreaQuery,
+vi.mock('~/modules/apis/transit', () => ({
+  transitApi: {
+    useGetRouteSummariesQuery: mockUseGetRouteSummariesQuery,
   },
 }))
 
@@ -52,126 +53,61 @@ vi.mock('~/components/AreaSelect', () => ({
   ),
 }))
 
-const routesData = [
+const routesData: RouteSummary[] = [
   {
-    RouteUID: 'route-1',
-    RouteID: '1',
-    HasSubRoutes: true,
-    Operators: [],
-    AuthorityID: '005',
-    ProviderID: 'provider-1',
-    SubRoutes: [],
-    BusRouteType: 0,
-    RouteName: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
-    DepartureStopName: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
-    DestinationStopName: {
+    routeUID: 'route-1',
+    city: CityNameType.TAIPEI,
+    name: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
+    departure: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
+    destination: {
       'zh-TW': '捷運昆陽站',
       en: 'MRT Kunyang Station',
       ja: '',
       ko: '',
     },
-    TicketPriceDescription: { 'zh-TW': '', en: '', ja: '', ko: '' },
-    FareBufferZoneDescription: { 'zh-TW': '', en: '', ja: '', ko: '' },
-    RouteMapImageUrl: '',
-    City: CityNameType.TAIPEI,
-    CityCode: 'TPE',
-    UpdateTime: '2026-03-17T10:00:00+08:00',
-    VersionID: 1,
   },
   {
-    RouteUID: 'route-1',
-    RouteID: '1-duplicate',
-    HasSubRoutes: true,
-    Operators: [],
-    AuthorityID: '005',
-    ProviderID: 'provider-1-duplicate',
-    SubRoutes: [],
-    BusRouteType: 0,
-    RouteName: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
-    DepartureStopName: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
-    DestinationStopName: {
+    routeUID: 'route-1',
+    city: CityNameType.NEW_TAIPEI,
+    name: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
+    departure: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
+    destination: {
       'zh-TW': '捷運昆陽站',
       en: 'MRT Kunyang Station',
       ja: '',
       ko: '',
     },
-    TicketPriceDescription: { 'zh-TW': '', en: '', ja: '', ko: '' },
-    FareBufferZoneDescription: { 'zh-TW': '', en: '', ja: '', ko: '' },
-    RouteMapImageUrl: '',
-    City: CityNameType.NEW_TAIPEI,
-    CityCode: 'NWT',
-    UpdateTime: '2026-03-17T10:05:00+08:00',
-    VersionID: 2,
   },
   {
-    RouteUID: 'route-2',
-    RouteID: '2',
-    HasSubRoutes: true,
-    Operators: [],
-    AuthorityID: '005',
-    ProviderID: 'provider-2',
-    SubRoutes: [],
-    BusRouteType: 0,
-    RouteName: { 'zh-TW': '紅25', en: 'Red 25', ja: '', ko: '' },
-    DepartureStopName: {
+    routeUID: 'route-2',
+    city: CityNameType.TAIPEI,
+    name: { 'zh-TW': '紅25', en: 'Red 25', ja: '', ko: '' },
+    departure: {
       'zh-TW': '台北車站',
       en: 'Taipei Main Station',
       ja: '',
       ko: '',
     },
-    DestinationStopName: { 'zh-TW': '北門', en: 'Beimen', ja: '', ko: '' },
-    TicketPriceDescription: { 'zh-TW': '', en: '', ja: '', ko: '' },
-    FareBufferZoneDescription: { 'zh-TW': '', en: '', ja: '', ko: '' },
-    RouteMapImageUrl: '',
-    City: CityNameType.TAIPEI,
-    CityCode: 'TPE',
-    UpdateTime: '2026-03-17T10:00:00+08:00',
-    VersionID: 1,
+    destination: { 'zh-TW': '北門', en: 'Beimen', ja: '', ko: '' },
   },
   {
-    RouteUID: 'route-3',
-    RouteID: '3',
-    HasSubRoutes: true,
-    Operators: [],
-    AuthorityID: '005',
-    ProviderID: 'provider-3',
-    SubRoutes: [],
-    BusRouteType: 0,
-    RouteName: {
+    routeUID: 'route-3',
+    city: CityNameType.TAIPEI,
+    name: {
       'zh-TW': '市民小巴1',
       en: 'Citizen Shuttle 1',
       ja: '',
       ko: '',
     },
-    DepartureStopName: { 'zh-TW': '圓山', en: 'Yuanshan', ja: '', ko: '' },
-    DestinationStopName: { 'zh-TW': '劍潭', en: 'Jiantan', ja: '', ko: '' },
-    TicketPriceDescription: { 'zh-TW': '', en: '', ja: '', ko: '' },
-    FareBufferZoneDescription: { 'zh-TW': '', en: '', ja: '', ko: '' },
-    RouteMapImageUrl: '',
-    City: CityNameType.TAIPEI,
-    CityCode: 'TPE',
-    UpdateTime: '2026-03-17T10:00:00+08:00',
-    VersionID: 1,
+    departure: { 'zh-TW': '圓山', en: 'Yuanshan', ja: '', ko: '' },
+    destination: { 'zh-TW': '劍潭', en: 'Jiantan', ja: '', ko: '' },
   },
   {
-    RouteUID: 'route-4',
-    RouteID: '4',
-    HasSubRoutes: true,
-    Operators: [],
-    AuthorityID: '005',
-    ProviderID: 'provider-4',
-    SubRoutes: [],
-    BusRouteType: 0,
-    RouteName: { 'zh-TW': '藍10', en: 'Blue 10', ja: '', ko: '' },
-    DepartureStopName: { 'zh-TW': '動物園', en: 'Zoo', ja: '', ko: '' },
-    DestinationStopName: { 'zh-TW': '象山', en: 'Xiangshan', ja: '', ko: '' },
-    TicketPriceDescription: { 'zh-TW': '', en: '', ja: '', ko: '' },
-    FareBufferZoneDescription: { 'zh-TW': '', en: '', ja: '', ko: '' },
-    RouteMapImageUrl: '',
-    City: CityNameType.TAIPEI,
-    CityCode: 'TPE',
-    UpdateTime: '2026-03-17T10:00:00+08:00',
-    VersionID: 1,
+    routeUID: 'route-4',
+    city: CityNameType.TAIPEI,
+    name: { 'zh-TW': '藍10', en: 'Blue 10', ja: '', ko: '' },
+    departure: { 'zh-TW': '動物園', en: 'Zoo', ja: '', ko: '' },
+    destination: { 'zh-TW': '象山', en: 'Xiangshan', ja: '', ko: '' },
   },
 ]
 
@@ -225,8 +161,8 @@ describe('Routes', () => {
     localStorage.clear()
     mockTrackGoogleAnalyticsEvent.mockReset()
     vi.mocked(HTMLElement.prototype.scrollTo).mockClear()
-    mockUseGetRoutesByAreaQuery.mockReset()
-    mockUseGetRoutesByAreaQuery.mockReturnValue({
+    mockUseGetRouteSummariesQuery.mockReset()
+    mockUseGetRouteSummariesQuery.mockReturnValue({
       data: routesData,
       isLoading: false,
       error: null,
@@ -266,7 +202,7 @@ describe('Routes', () => {
   })
 
   it('shows route skeleton cards while routes are loading', () => {
-    mockUseGetRoutesByAreaQuery.mockReturnValue({
+    mockUseGetRouteSummariesQuery.mockReturnValue({
       data: [],
       isLoading: true,
       error: null,
@@ -278,7 +214,7 @@ describe('Routes', () => {
     expect(screen.queryByText('載入中')).not.toBeInTheDocument()
   })
 
-  it('deduplicates routes that share the same RouteUID', () => {
+  it('deduplicates routes that share the same route UID', () => {
     renderRoutes({
       keyword: '藍1',
     })
@@ -287,17 +223,17 @@ describe('Routes', () => {
   })
 
   it('renders available terminal text when only one terminal value is present', () => {
-    mockUseGetRoutesByAreaQuery.mockReturnValue({
+    mockUseGetRouteSummariesQuery.mockReturnValue({
       data: [
         {
           ...routesData[0],
-          DepartureStopName: {
+          departure: {
             'zh-TW': '市政府',
             en: 'City Hall',
             ja: '',
             ko: '',
           },
-          DestinationStopName: { 'zh-TW': '', en: '', ja: '', ko: '' },
+          destination: { 'zh-TW': '', en: '', ja: '', ko: '' },
         },
       ],
       isLoading: false,
