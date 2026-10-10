@@ -5,12 +5,13 @@ import {
   type BaseQueryApi,
   type FetchBaseQueryError,
 } from '@reduxjs/toolkit/query/react'
-import type { AreaType } from '@bus/shared'
+import { ErrorCode, type AreaType, type CityNameType } from '@bus/shared'
 import { NEARBY_DISTANCE_KM } from '../consts/nearby'
 import type {
   NearbyStationRoutesMap,
   NearbyStationsResult,
 } from '../interfaces/Nearby'
+import type { RouteDetail } from '../interfaces/RouteDetail'
 import type { RouteSummary } from '../interfaces/RouteSummary'
 import type { LatLng } from '../types/CoordsType'
 import {
@@ -20,11 +21,17 @@ import {
   toNearbyStationsFromTdx,
 } from '../utils/nearby/toNearbyStations'
 import {
+  getTdxRouteStopIds,
+  toRouteDetailFromApi,
+  toRouteDetailFromTdx,
+} from '../utils/route/toRouteDetail'
+import {
   toRouteSummaryFromApi,
   toRouteSummaryFromTdx,
 } from '../utils/routes/toRouteSummary'
 import { AREA_ROUTES_RETENTION_SECONDS, busApi } from './bus'
 import { databaseApi, isDatabaseApiEnabled } from './database'
+import { isDatabaseApiError } from './errors/databaseError'
 
 export type TransitQueryError = FetchBaseQueryError | SerializedError
 
@@ -36,6 +43,11 @@ export interface NearbyStationsQuery {
 export interface NearbyStationRoutesQuery extends NearbyStationsQuery {
   /** Also load departure and destination names, which costs another request. */
   includeTerminals: boolean
+}
+
+export interface RouteDetailQuery {
+  city: CityNameType
+  routeUID: string
 }
 
 type SourceDispatch = BaseQueryApi['dispatch']
@@ -113,6 +125,88 @@ async function loadTdxNearbyStationRoutes(
   return toNearbyStationRoutesFromTdx(stopOfRoutes, routes)
 }
 
+async function loadDatabaseRouteDetail(
+  dispatch: SourceDispatch,
+  { routeUID }: RouteDetailQuery,
+) {
+  try {
+    const route = await dispatch(
+      databaseApi.endpoints.getRouteDetail.initiate(
+        routeUID,
+        SOURCE_REQUEST_OPTIONS,
+      ),
+    ).unwrap()
+
+    return toRouteDetailFromApi(route)
+  } catch (error) {
+    if (isDatabaseApiError(error, ErrorCode.ROUTE_NOT_FOUND)) return null
+
+    throw error
+  }
+}
+
+async function loadTdxRouteShapes(
+  dispatch: SourceDispatch,
+  query: RouteDetailQuery,
+) {
+  try {
+    return await dispatch(
+      busApi.endpoints.getRouteShapesByRoute.initiate(
+        query,
+        SOURCE_REQUEST_OPTIONS,
+      ),
+    ).unwrap()
+  } catch {
+    // The map falls back to connecting stop positions without a shape.
+    return []
+  }
+}
+
+async function loadTdxRouteStops(
+  dispatch: SourceDispatch,
+  query: RouteDetailQuery,
+) {
+  const stopOfRoutes = await dispatch(
+    busApi.endpoints.getStopOfRoutesByCity.initiate(
+      query,
+      SOURCE_REQUEST_OPTIONS,
+    ),
+  ).unwrap()
+  const stopIds = getTdxRouteStopIds(query.routeUID, stopOfRoutes)
+  const stops =
+    stopIds.length > 0
+      ? await dispatch(
+          busApi.endpoints.getStopsByCityAndIds.initiate(
+            { city: query.city, stopIds },
+            SOURCE_REQUEST_OPTIONS,
+          ),
+        ).unwrap()
+      : []
+
+  return { stopOfRoutes, stops }
+}
+
+async function loadTdxRouteDetail(
+  dispatch: SourceDispatch,
+  query: RouteDetailQuery,
+) {
+  const [routes, { stopOfRoutes, stops }, shapes] = await Promise.all([
+    dispatch(
+      busApi.endpoints.getRoutesByCity.initiate(
+        query.city,
+        SOURCE_REQUEST_OPTIONS,
+      ),
+    ).unwrap(),
+    loadTdxRouteStops(dispatch, query),
+    loadTdxRouteShapes(dispatch, query),
+  ])
+  const route = routes.find(({ RouteUID }) => RouteUID === query.routeUID)
+
+  if (!route) return null
+
+  return toRouteDetailFromTdx({ route, stopOfRoutes, stops, shapes })
+}
+
 /**
  * App-facing data that may come from either the app database API or TDX.
  * Pages and hooks use these endpoints and never choose the source themselves.
@@ -161,6 +255,15 @@ export const transitApi = createApi({
             routesByStationId: null,
           }
         }),
+    }),
+    /** Returns null when the route does not exist. */
+    getRouteDetail: build.query<RouteDetail | null, RouteDetailQuery>({
+      queryFn: (query, { dispatch }) =>
+        querySource(() =>
+          isDatabaseApiEnabled()
+            ? loadDatabaseRouteDetail(dispatch, query)
+            : loadTdxRouteDetail(dispatch, query),
+        ),
     }),
     getNearbyStationRoutes: build.query<
       NearbyStationRoutesMap,

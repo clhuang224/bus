@@ -52,20 +52,18 @@ export default function Route() {
     subRoute,
     routePath,
     baseStops,
-    busRoute,
+    routeDetail,
     highlightedStopId,
     isLoading,
-    isStopListLoading,
     message,
     defaultActiveTabId,
     routeMapStops,
     routeTabs,
   } = useRouteBaseData(routeBaseOptions)
   const routeRealtimeOptions =
-    city && isCityName(city) && id && busRoute && subRoute
+    city && isCityName(city) && id && subRoute
       ? {
           subRoute,
-          busRoute,
           city,
           id,
         }
@@ -115,14 +113,14 @@ export default function Route() {
       null,
     [selectedStopId, stops],
   )
-  const routeName = busRoute
-    ? getLocalizedText(busRoute.RouteName, locale)
+  const routeName = routeDetail
+    ? getLocalizedText(routeDetail.name, locale)
     : null
-  const routeDeparture = busRoute
-    ? getLocalizedText(busRoute.DepartureStopName, locale)
+  const routeDeparture = routeDetail
+    ? getLocalizedText(routeDetail.departure, locale)
     : null
-  const routeDestination = busRoute
-    ? getLocalizedText(busRoute.DestinationStopName, locale)
+  const routeDestination = routeDetail
+    ? getLocalizedText(routeDetail.destination, locale)
     : null
   const routeTerminalDisplay = getTerminalDisplay(
     routeDeparture,
@@ -214,7 +212,6 @@ export default function Route() {
                   <RouteStopList
                     highlightedStopId={highlightedStopId}
                     hasRealtimeError={hasRealtimeError}
-                    isLoading={isStopListLoading}
                     isRealtimeLoading={isRealtimeLoading}
                     isRealtimeRateLimited={isRealtimeRateLimited}
                     listScrollBehavior={listScrollBehavior}
