@@ -155,11 +155,27 @@ pnpm --filter @bus/api test:e2e:db
 - `system`：服務健康檢查
 - `routes`：由資料庫支援的路線列表和路線詳情 endpoints
 - `stations`：由資料庫支援的站位和附近站位 endpoints
-- `realtime`：適合 polling 的即時資料快照 contracts
+- `realtime`：單一路線由 TDX 取得的即時資料快照
 - `admin`：基礎資料同步入口
 
 共用 response envelope 和全域錯誤文件規則請看
 [api-error-handling.md](./api-error-handling.md)。
+
+### Realtime
+
+`GET /api/realtime/routes/:uuid` 會向 TDX 取得單一路線的到站時間、靠站資訊和
+GPS 位置，並回傳每個子路線要顯示的內容：每個站牌的到站資訊、每台車和它對應的
+到站資訊，以及狀態訊息。顯示文字由前端依回傳的狀態值決定。
+
+- 每條路線的快照會在記憶體中保留 15 秒；有任一 TDX 來源失敗時只保留 5 秒。同一
+  條路線同時有多個請求時，只會向 TDX 查詢一次。
+- Realtime 請求與 sync 共用 TDX token，但不寫入 sync 的資料庫額度紀錄。
+  `TDX_REALTIME_REQUESTS_PER_SECOND`（預設 `5`）限制每秒請求數；TDX 回應
+  `429` 後，realtime 請求會暫停 3 秒。
+- 某個來源失敗時，請求本身不會失敗，受影響的子路線會回報 `rate_limited` 或
+  `unavailable`。
+
+記憶體快取的前提是 API 只有一個常駐執行個體。
 
 ## Backlog Endpoint Groups
 

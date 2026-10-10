@@ -1,111 +1,146 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { DirectionType } from '@bus/shared'
+import {
+  RealtimeArrivalStatus,
+  RealtimeVehicleState,
+  RouteRealtimeStatus,
+  type ApiRealtimeArrival,
+  type ApiRouteRealtime,
+  type ApiRouteRealtimeNearStop,
+  type ApiRouteRealtimeStop,
+  type ApiRouteRealtimeSubRoute,
+  type ApiRouteRealtimeVehicle,
+} from '@bus/shared'
 import { LocalizedTextDto, PositionDto } from '../../dto/shared.dto.js'
 
-export class RouteRealtimeStopRefDto {
-  @ApiProperty({ description: 'Stop UUID', example: 'stop-1' })
+export class RealtimeArrivalDto implements ApiRealtimeArrival {
+  @ApiProperty({
+    description:
+      'How to present the arrival. `minutes` comes with a minute count; `in_service` is only used for vehicles without a usable estimate.',
+    enum: RealtimeArrivalStatus,
+    example: RealtimeArrivalStatus.MINUTES,
+  })
+  status!: RealtimeArrivalStatus
+
+  @ApiProperty({
+    description: 'Minutes until arrival, only when status is `minutes`',
+    nullable: true,
+    example: 4,
+  })
+  minutes!: number | null
+}
+
+export class RouteRealtimeStopDto implements ApiRouteRealtimeStop {
+  @ApiProperty({
+    description: 'Stop UUID from the route detail response',
+    example: 'TPE43100',
+  })
   uuid!: string
 
   @ApiProperty({
-    description: 'Stop sequence in the route direction',
-    example: 1,
+    description: 'Arrival for this stop, or null when no ETA covers it',
+    type: RealtimeArrivalDto,
     nullable: true,
   })
-  sequence!: number | null
+  arrival!: RealtimeArrivalDto | null
+}
+
+export class RouteRealtimeNearStopDto implements ApiRouteRealtimeNearStop {
+  @ApiProperty({
+    description: 'Stop UUID, or null when the realtime feed omits it',
+    nullable: true,
+    example: 'TPE43100',
+  })
+  uuid!: string | null
+
+  @ApiProperty({ description: 'Stop sequence in the sub-route', example: 7 })
+  sequence!: number
 
   @ApiProperty({
-    description: 'Localized stop name',
+    description: 'Localized stop name from the realtime feed',
     type: LocalizedTextDto,
-    nullable: true,
+    example: { 'zh-TW': '捷運公館站', en: 'MRT Gongguan Sta.' },
   })
-  name!: LocalizedTextDto | null
+  name!: LocalizedTextDto
 }
 
-export class RouteRealtimeArrivalDto {
-  @ApiProperty({
-    description: 'Stop receiving this ETA',
-    type: RouteRealtimeStopRefDto,
-  })
-  stop!: RouteRealtimeStopRefDto
-
-  @ApiProperty({
-    description: 'Estimated arrival time in seconds',
-    example: 300,
-    nullable: true,
-  })
-  estimate_seconds!: number | null
-
-  @ApiProperty({
-    description: 'Fallback next bus timestamp when no countdown is available',
-    example: null,
-    nullable: true,
-  })
-  next_bus_time!: string | null
-
-  @ApiProperty({
-    description: 'Stop status code normalized by the backend',
-    example: 'normal',
-  })
-  status!: string
-
-  @ApiProperty({ description: 'Realtime source update timestamp', example: '' })
-  updated_at!: string
-}
-
-export class RouteRealtimeVehicleDto {
-  @ApiProperty({ description: 'Vehicle plate number', example: 'ABC-123' })
+export class RouteRealtimeVehicleDto implements ApiRouteRealtimeVehicle {
+  @ApiProperty({ description: 'Vehicle plate number', example: 'EAL-1092' })
   plate_number!: string
 
   @ApiProperty({
-    description: 'Route direction',
-    enum: DirectionType,
+    description:
+      'Stop the vehicle is near, or null for vehicles only in the GPS feed',
+    type: RouteRealtimeNearStopDto,
     nullable: true,
   })
-  direction!: DirectionType | null
+  near_stop!: RouteRealtimeNearStopDto | null
 
   @ApiProperty({
-    description: 'Vehicle position',
+    description:
+      'Vehicle state at its nearest stop, or null for vehicles only in the GPS feed',
+    enum: RealtimeVehicleState,
+    nullable: true,
+    example: RealtimeVehicleState.DEPARTED,
+  })
+  state!: RealtimeVehicleState | null
+
+  @ApiProperty({
+    description:
+      'Arrival that describes this vehicle. A departed vehicle uses the next stop; otherwise the current stop.',
+    type: RealtimeArrivalDto,
+  })
+  arrival!: RealtimeArrivalDto
+
+  @ApiProperty({
+    description: 'GPS position, or null when unavailable',
     type: PositionDto,
     nullable: true,
   })
   position!: PositionDto | null
-
-  @ApiProperty({
-    description: 'Stop the vehicle is currently near',
-    type: RouteRealtimeStopRefDto,
-    nullable: true,
-  })
-  near_stop!: RouteRealtimeStopRefDto | null
-
-  @ApiProperty({
-    description: 'Realtime vehicle state normalized by the backend',
-    example: 'in_service',
-  })
-  state!: string
-
-  @ApiProperty({ description: 'Realtime source update timestamp', example: '' })
-  updated_at!: string
 }
 
-export class RouteRealtimeResponseDto {
-  @ApiProperty({ description: 'Route UUID', example: 'route-1' })
+export class RouteRealtimeSubRouteDto implements ApiRouteRealtimeSubRoute {
+  @ApiProperty({
+    description: 'Sub-route UUID from the route detail response',
+    example: 'TPE118110-1',
+  })
   uuid!: string
 
   @ApiProperty({
-    description: 'Stop-based ETA data for polling',
-    type: [RouteRealtimeArrivalDto],
+    description:
+      'Message to show for this sub-route, in priority order: `rate_limited`, `unavailable`, then the service state.',
+    enum: RouteRealtimeStatus,
+    example: RouteRealtimeStatus.NORMAL,
   })
-  arrivals!: RouteRealtimeArrivalDto[]
+  status!: RouteRealtimeStatus
 
   @ApiProperty({
-    description: 'Realtime vehicle snapshots for polling',
+    description: 'Every stop of the sub-route, in sequence order',
+    type: [RouteRealtimeStopDto],
+  })
+  stops!: RouteRealtimeStopDto[]
+
+  @ApiProperty({
+    description:
+      'Vehicles near a stop first, ordered by arrival; vehicles only in the GPS feed last',
     type: [RouteRealtimeVehicleDto],
   })
   vehicles!: RouteRealtimeVehicleDto[]
+}
+
+export class RouteRealtimeResponseDto implements ApiRouteRealtime {
+  @ApiProperty({ description: 'Route UUID', example: 'TPE11811' })
+  uuid!: string
 
   @ApiProperty({
-    description: 'Response generation timestamp',
-    example: '',
+    description: 'Realtime data for every sub-route of the route',
+    type: [RouteRealtimeSubRouteDto],
+  })
+  sub_routes!: RouteRealtimeSubRouteDto[]
+
+  @ApiProperty({
+    description: 'When the API fetched this snapshot from TDX',
+    example: '2026-10-11T08:30:00.000Z',
   })
   updated_at!: string
 }

@@ -155,11 +155,28 @@ Do not add database e2e tests to pre-push yet. Keep them manual until there is a
 - `system`: service health checks
 - `routes`: database-backed route list and route detail endpoints
 - `stations`: database-backed station and nearby station endpoints
-- `realtime`: polling-friendly realtime snapshot contracts
+- `realtime`: TDX-backed realtime snapshots for one route
 - `admin`: base-data sync entry points
 
 See [docs/api-error-handling.md](./docs/api-error-handling.md) for the shared
 response envelope and global error documentation rules.
+
+### Realtime
+
+`GET /api/realtime/routes/:uuid` fetches ETA, near-stop, and GPS data for one
+route from TDX and returns what each sub-route should show: an arrival per
+stop, the vehicles with their arrivals, and a status message. Clients map the
+returned status values to their own copy.
+
+- Snapshots are cached in memory per route for 15 seconds, or 5 seconds when a
+  TDX feed failed. Concurrent requests for one route share one TDX fetch.
+- Realtime requests share the TDX token with sync but not its database quota
+  log. `TDX_REALTIME_REQUESTS_PER_SECOND` (default `5`) limits them per
+  second, and a TDX `429` pauses realtime requests for 3 seconds.
+- A failed feed does not fail the request; the affected sub-routes report
+  `rate_limited` or `unavailable` instead.
+
+The in-memory cache assumes one long-running API instance.
 
 ## Backlog Endpoint Groups
 
