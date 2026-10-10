@@ -982,19 +982,17 @@ and index metadata even when there are no rows.
 - Public route and nearby station endpoints backed by the database
 - Local web API mode for the Nearby page, backed by `GET /api/stations`
 - Local web API mode for the Routes page, backed by `GET /api/routes`
+- Local web API mode for the Route page, backed by `GET /api/routes/:uuid`,
+  with TDX references for realtime matching
 
 ## Plan Order
 
-1. Connect the web Route page to the existing database-backed route detail
-   endpoint in local API mode. Keep the current TDX path available for
-   production until the API is deployed. See the Route Page Migration section
-   in `docs/plan.md` for the known gaps.
-2. Continue monitoring database size after full sync runs.
-3. Deploy the API to a long-running host, run migrations safely, configure
+1. Continue monitoring database size after full sync runs.
+2. Deploy the API to a long-running host, run migrations safely, configure
    production CORS and admin secrets, and protect admin operations.
-4. Decide where scheduled monthly sync jobs run after deployment is stable.
-5. Build the next public read endpoint, starting with stops if route pages
+3. Decide where scheduled monthly sync jobs run after deployment is stable.
+4. Build the next public read endpoint, starting with stops if route pages
    need stop-level lookup.
-6. Discuss realtime cache.
-7. Discuss auth, favorites, and settings.
-8. Add `apps/manager` for sync monitoring and controlled retry actions.
+5. Discuss realtime cache.
+6. Discuss auth, favorites, and settings.
+7. Add `apps/manager` for sync monitoring and controlled retry actions.
