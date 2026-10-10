@@ -36,6 +36,24 @@ describe('isTdxBusRoute', () => {
     expect(isTdxBusRoute(route)).toBe(true)
   })
 
+  it('accepts operators without an OperatorNo', () => {
+    expect(
+      isTdxBusRoute({
+        ...route,
+        Operators: [{ ...route.Operators[0], OperatorNo: null }],
+      }),
+    ).toBe(true)
+  })
+
+  it('rejects operators without an OperatorID', () => {
+    expect(
+      isTdxBusRoute({
+        ...route,
+        Operators: [{ ...route.Operators[0], OperatorID: '' }],
+      }),
+    ).toBe(false)
+  })
+
   it('rejects malformed nested subroutes', () => {
     expect(
       isTdxBusRoute({
