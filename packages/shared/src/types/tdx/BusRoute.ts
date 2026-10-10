@@ -12,7 +12,7 @@ export interface TdxBusOperator<L = TdxLocalizedText> {
   OperatorID: string
   OperatorName: L
   OperatorCode?: string | null
-  OperatorNo: string
+  OperatorNo?: string | null
 }
 
 export interface TdxBusSubRoute<D = string, L = TdxLocalizedText> {

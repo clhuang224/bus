@@ -155,3 +155,27 @@ sequence: 1
 
 The route stop table intentionally stores only one row per subroute sequence, so
 the duplicate TDX rows are deduplicated before writing to the database.
+
+## Route Sync Fails On Operators Without `OperatorNo`
+
+Error example:
+
+```text
+Sync <id> stopped: Invalid TDX record at index 3 for /Route/City/Taoyuan.
+```
+
+Cause:
+
+TDX can return route operators whose `OperatorNo` is `null`. In October 2026,
+88 Taoyuan routes had operators without it, including `TAO1020` (T102). The
+route validator required a non-empty `OperatorNo`, so one such record stopped
+the whole sync.
+
+Current handling:
+
+Route sync does not store `OperatorNo`, so the validator accepts a missing or
+`null` value. Operators still need an `OperatorID` and `OperatorName`.
+
+When a sync stops with `Invalid TDX record`, fetch that city's resource and
+check the record at the reported index against the validator to find the field
+that changed upstream.

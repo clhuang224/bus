@@ -2,6 +2,7 @@ model SubRoute {
   id                   String              @id @default(uuid()) @db.Uuid
   uuid                 String              @unique @db.VarChar(64)
   tdx_subroute_id      String              @db.VarChar(64)
+  tdx_subroute_uid     String              @db.VarChar(64)
   route_id             String              @db.Uuid
   route                Route               @relation(fields: [route_id], references: [id])
   direction            DirectionType

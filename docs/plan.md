@@ -110,53 +110,29 @@ The first phase should prove that the app can read core route and station data f
 - Stop sync persists station groups, stations, stops, route stops, and fallback route shapes.
 - Full stop sync has been validated across Taiwan, but database usage and storage should continue to be monitored.
 - Public route and nearby station endpoints read from the database.
-- In local API mode, the Nearby and Routes pages read from the database API;
-  default and production web builds still use the TDX proxy.
+- In local API mode, the Nearby, Routes, and Route pages read base data from
+  the database API; default and production web builds still use the TDX
+  proxy.
 - The web app chooses the data source in one place, `transitApi`, so pages and
   hooks consume the same app-facing models in either mode.
-- The Route page still reads base data from TDX, despite its database-backed
-  API endpoint being ready.
+- Realtime ETA, near-stop, and vehicle position data still come from TDX in
+  every mode. Route detail responses include TDX references (`SubRouteUID`,
+  `StopID`, and `StationID`) so the web app can match that realtime data and
+  keep saved favorite IDs stable.
 
 ## Next Steps
 
-1. Connect the Route page to `GET /api/routes/:uuid` in local API mode through
-   `transitApi`. See [Route Page Migration](#route-page-migration). Preserve
-   the current TDX-backed production behavior until the public API is
-   deployed.
-2. Prepare API deployment as its own change. Choose the long-running host and
+1. Prepare API deployment as its own change. Choose the long-running host and
    managed PostgreSQL provider, configure production CORS and secrets, apply
    committed Prisma migrations, and decide where the protected monthly sync
-   job will run. Do not combine this operational rollout with the frontend
-   route-data migration.
-
-### Route Page Migration
-
-The Route page currently combines four TDX base-data requests: the city route
-list, stop-of-route data for the route, stop positions, and route shapes.
-`GET /api/routes/:uuid` can replace all four. Realtime ETA, near-stop, and
-vehicle position requests stay on TDX until a realtime cache exists.
-
-Route UUIDs already equal TDX `RouteUID` values, so `/routes/:city/:id` URLs
-keep working. Close these gaps before switching the page:
-
-- **Favorite identity.** Saved favorites build their ID from the TDX
-  `SubRouteUID`, direction, and the stop's `StationID` (falling back to
-  `StopUID`). The API sub-route UUID is `<SubRouteUID>-<Direction>`, and route
-  stops do not expose a station ID. Either return the identifiers the
-  favorite ID needs, or migrate stored favorites, so existing favorites still
-  match and highlight.
-- **Realtime matching.** ETA and near-stop data match stops by `StopUID` with
-  `StopID` as a fallback. API stop UUIDs equal `StopUID`, so confirm that the
-  fallback is not needed before dropping `StopID`.
-- **Shapes.** The API returns a stop-position path when the precise shape is
-  missing. Check that the map handles that fallback the same way as the
-  current TDX shape parsing.
-- **Service times and locale fallback.** Compare first and last bus times and
-  English fallbacks with the current TDX-backed page.
-
-Add a `getRouteDetail` endpoint to `transitApi` that returns one app-facing
-route model from either source, then move `useRouteBaseData` onto it. Keep the
-TDX path's request staging so the shared proxy key does not regress.
+   job will run.
+2. After the public API is deployed, switch production web builds to the
+   database API and validate that route search, route detail, shapes, and
+   locale fallback match the TDX-backed experience. Watch for sub-route tab
+   order: the API orders sub-routes by direction, while TDX keeps upstream
+   order.
+3. Plan a realtime cache, so realtime requests stop sharing the TDX proxy key
+   and the TDX references in route detail can eventually be retired.
 
 ## Backlog
 

@@ -4,6 +4,8 @@ import {
   BearingType,
   CityNameType,
   DirectionType,
+  ErrorCode,
+  type ApiRouteDetail,
   type ApiRouteSummary,
   type ApiStation,
 } from '@bus/shared'
@@ -16,16 +18,26 @@ import { transitApi } from './transit'
 
 const {
   mockGetDatabaseNearbyStations,
+  mockGetDatabaseRouteDetail,
   mockGetDatabaseRoutes,
+  mockGetTdxRouteShapesByRoute,
   mockGetTdxRoutesByArea,
+  mockGetTdxRoutesByCity,
   mockGetTdxStopOfRoutesByArea,
+  mockGetTdxStopOfRoutesByCity,
+  mockGetTdxStopsByCityAndIds,
   mockGetTdxStopsByNearbyArea,
   mockIsDatabaseApiEnabled,
 } = vi.hoisted(() => ({
   mockGetDatabaseNearbyStations: vi.fn(),
+  mockGetDatabaseRouteDetail: vi.fn(),
   mockGetDatabaseRoutes: vi.fn(),
+  mockGetTdxRouteShapesByRoute: vi.fn(),
   mockGetTdxRoutesByArea: vi.fn(),
+  mockGetTdxRoutesByCity: vi.fn(),
   mockGetTdxStopOfRoutesByArea: vi.fn(),
+  mockGetTdxStopOfRoutesByCity: vi.fn(),
+  mockGetTdxStopsByCityAndIds: vi.fn(),
   mockGetTdxStopsByNearbyArea: vi.fn(),
   mockIsDatabaseApiEnabled: vi.fn(),
 }))
@@ -34,6 +46,7 @@ vi.mock('./database', () => ({
   databaseApi: {
     endpoints: {
       getNearbyStations: { initiate: mockGetDatabaseNearbyStations },
+      getRouteDetail: { initiate: mockGetDatabaseRouteDetail },
       getRoutes: { initiate: mockGetDatabaseRoutes },
     },
   },
@@ -44,8 +57,12 @@ vi.mock('./bus', () => ({
   AREA_ROUTES_RETENTION_SECONDS: 60,
   busApi: {
     endpoints: {
+      getRouteShapesByRoute: { initiate: mockGetTdxRouteShapesByRoute },
       getRoutesByArea: { initiate: mockGetTdxRoutesByArea },
+      getRoutesByCity: { initiate: mockGetTdxRoutesByCity },
       getStopOfRoutesByArea: { initiate: mockGetTdxStopOfRoutesByArea },
+      getStopOfRoutesByCity: { initiate: mockGetTdxStopOfRoutesByCity },
+      getStopsByCityAndIds: { initiate: mockGetTdxStopsByCityAndIds },
       getStopsByNearbyArea: { initiate: mockGetTdxStopsByNearbyArea },
     },
   },
@@ -302,5 +319,218 @@ describe('transitApi.getNearbyStationRoutes', () => {
         destination: { 'zh-TW': '昆陽', en: '昆陽' },
       },
     ])
+  })
+})
+
+const routeDetailQuery = { city: CityNameType.TAIPEI, routeUID: 'TPE10132' }
+
+const apiRouteDetail: ApiRouteDetail = {
+  ...apiRoute,
+  sub_routes: [
+    {
+      uuid: 'TPE101320-0',
+      name: apiRoute.name,
+      direction: DirectionType.GO,
+      departure: apiRoute.departure,
+      destination: apiRoute.destination,
+      first_bus_time: null,
+      last_bus_time: null,
+      stops: [
+        {
+          uuid: 'TPE1',
+          sequence: 1,
+          name: { 'zh-TW': '市政府', en: 'City Hall' },
+          position: { latitude: 25.033, longitude: 121.5654 },
+          tdx: { stop_id: '1', station_id: 'station-1' },
+        },
+      ],
+      shape: {
+        path: [
+          [121.5654, 25.033],
+          [121.57, 25.04],
+        ],
+        updated_at: '2026-10-01T00:00:00.000Z',
+      },
+      tdx: { sub_route_uid: 'TPE101320' },
+    },
+  ],
+}
+
+const tdxRouteWithSubRoute = {
+  ...tdxRoute,
+  SubRoutes: [
+    {
+      SubRouteUID: 'TPE101320',
+      Direction: DirectionType.GO,
+      SubRouteName: tdxRoute.RouteName,
+      DepartureStopName: tdxRoute.DepartureStopName,
+      DestinationStopName: tdxRoute.DestinationStopName,
+    } as BusSubRoute<string>,
+  ],
+} as BusRoute<string>
+
+const tdxStopOfRoute = {
+  ...stopOfRoute,
+  Stops: [
+    {
+      StopUID: 'TPE1',
+      StopID: '1',
+      StationID: 'station-1',
+      StopName: nearStop.StopName,
+      StopSequence: 1,
+    },
+  ],
+} as StopOfRoute
+
+const expectedSubRoute = {
+  id: 'TPE101320-0',
+  subRouteUID: 'TPE101320',
+  direction: DirectionType.GO,
+  stops: [
+    {
+      stopUID: 'TPE1',
+      stopID: '1',
+      stationID: 'station-1',
+      name: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
+      sequence: 1,
+      position: [121.5654, 25.033],
+    },
+  ],
+}
+
+describe('transitApi.getRouteDetail', () => {
+  describe('in local API mode', () => {
+    beforeEach(() => {
+      mockIsDatabaseApiEnabled.mockReturnValue(true)
+    })
+
+    it('reads the route detail from the database API', async () => {
+      mockGetDatabaseRouteDetail.mockImplementation(
+        sourceResult({ data: apiRouteDetail }),
+      )
+
+      const result = await createStore().dispatch(
+        transitApi.endpoints.getRouteDetail.initiate(routeDetailQuery),
+      )
+
+      expect(mockGetDatabaseRouteDetail).toHaveBeenCalledWith('TPE10132', {
+        subscribe: false,
+      })
+      expect(result.data).toMatchObject({
+        routeUID: 'TPE10132',
+        subRoutes: [
+          {
+            ...expectedSubRoute,
+            path: [
+              [121.5654, 25.033],
+              [121.57, 25.04],
+            ],
+          },
+        ],
+      })
+    })
+
+    it('returns null when the route belongs to another city', async () => {
+      mockGetDatabaseRouteDetail.mockImplementation(
+        sourceResult({ data: apiRouteDetail }),
+      )
+
+      const result = await createStore().dispatch(
+        transitApi.endpoints.getRouteDetail.initiate({
+          ...routeDetailQuery,
+          city: CityNameType.NEW_TAIPEI,
+        }),
+      )
+
+      expect(result.isSuccess).toBe(true)
+      expect(result.data).toBeNull()
+    })
+
+    it('returns null when the route does not exist', async () => {
+      mockGetDatabaseRouteDetail.mockImplementation(
+        sourceResult({
+          error: {
+            status: 404,
+            data: {
+              status: 404,
+              error: { code: ErrorCode.ROUTE_NOT_FOUND, message: 'missing' },
+            },
+          },
+        }),
+      )
+
+      const result = await createStore().dispatch(
+        transitApi.endpoints.getRouteDetail.initiate(routeDetailQuery),
+      )
+
+      expect(result.isSuccess).toBe(true)
+      expect(result.data).toBeNull()
+    })
+
+    it('passes other errors through', async () => {
+      const error = { status: 500, data: null }
+      mockGetDatabaseRouteDetail.mockImplementation(sourceResult({ error }))
+
+      const result = await createStore().dispatch(
+        transitApi.endpoints.getRouteDetail.initiate(routeDetailQuery),
+      )
+
+      expect(result.error).toEqual(error)
+    })
+  })
+
+  describe('in TDX mode', () => {
+    beforeEach(() => {
+      mockIsDatabaseApiEnabled.mockReturnValue(false)
+      mockGetTdxRoutesByCity.mockImplementation(
+        sourceResult({ data: [tdxRouteWithSubRoute] }),
+      )
+      mockGetTdxStopOfRoutesByCity.mockImplementation(
+        sourceResult({ data: [tdxStopOfRoute] }),
+      )
+      mockGetTdxStopsByCityAndIds.mockImplementation(
+        sourceResult({ data: [nearStop] }),
+      )
+      mockGetTdxRouteShapesByRoute.mockImplementation(
+        sourceResult({ data: [] }),
+      )
+    })
+
+    it('combines the TDX route, stops, positions, and shapes', async () => {
+      const result = await createStore().dispatch(
+        transitApi.endpoints.getRouteDetail.initiate(routeDetailQuery),
+      )
+
+      expect(mockGetTdxStopsByCityAndIds).toHaveBeenCalledWith(
+        { city: CityNameType.TAIPEI, stopIds: ['1', 'TPE1'] },
+        { subscribe: false },
+      )
+      expect(result.data).toMatchObject({
+        routeUID: 'TPE10132',
+        subRoutes: [{ ...expectedSubRoute, path: [] }],
+      })
+    })
+
+    it('keeps the route when the shape request fails', async () => {
+      mockGetTdxRouteShapesByRoute.mockImplementation(
+        sourceResult({ error: { status: 429, data: null } }),
+      )
+
+      const result = await createStore().dispatch(
+        transitApi.endpoints.getRouteDetail.initiate(routeDetailQuery),
+      )
+
+      expect(result.data?.subRoutes[0]?.path).toEqual([])
+    })
+
+    it('returns null when the city has no such route', async () => {
+      mockGetTdxRoutesByCity.mockImplementation(sourceResult({ data: [] }))
+
+      const result = await createStore().dispatch(
+        transitApi.endpoints.getRouteDetail.initiate(routeDetailQuery),
+      )
+
+      expect(result.data).toBeNull()
+    })
   })
 })

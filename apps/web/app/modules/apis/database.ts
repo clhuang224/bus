@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import {
+  type ApiRouteDetail,
   type ApiRouteSummary,
   type ApiSuccessResponse,
   type ApiStation,
@@ -38,6 +39,11 @@ export const databaseApi = createApi({
     },
   }),
   endpoints: (build) => ({
+    getRouteDetail: build.query<ApiRouteDetail, string>({
+      query: (uuid) => `routes/${encodeURIComponent(uuid)}`,
+      transformResponse: (response: ApiSuccessResponse<ApiRouteDetail>) =>
+        response.data,
+    }),
     getRoutes: build.query<ApiRouteSummary[], AreaType>({
       query: (area) => ({
         url: 'routes',

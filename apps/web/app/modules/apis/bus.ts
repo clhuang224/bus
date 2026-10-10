@@ -308,10 +308,6 @@ export const {
   useGetEstimatedArrivalByRouteQuery,
   useGetRealtimeByFrequencyByRouteQuery,
   useGetRealtimeNearStopsByRouteQuery,
-  useGetRouteShapesByRouteQuery,
-  useGetStopsByCityAndIdsQuery,
-  useGetRoutesByCityQuery,
-  useGetStopOfRoutesByCityQuery,
   useGetStopsByCityQuery,
   useGetStopsByAreaQuery,
 } = busApi

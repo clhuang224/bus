@@ -7,8 +7,12 @@ import { getRouteRealtimeMessages } from '~/modules/consts/routeRealtimeMessages
 import { AppLocaleType, CityNameType, DirectionType } from '@bus/shared'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
 import { VehicleStateType } from '~/modules/enums/VehicleStateType'
+import type { BusRoute } from '~/modules/interfaces/BusRoute'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
+import type { Stop } from '~/modules/interfaces/Stop'
+import type { StopOfRoute } from '~/modules/interfaces/StopOfRoute'
 import geoSlice from '~/modules/slices/geoSlice'
+import { toRouteDetailFromTdx } from '~/modules/utils/route/toRouteDetail'
 import { ROUTE_SEARCH_RECENT_STORAGE_KEY } from '~/modules/utils/routes/routeSearchRecentStorage'
 import { createTestStore } from '~/test/createTestStore'
 import { mockMatchMedia } from '~/test/mockMatchMedia'
@@ -29,20 +33,14 @@ const {
   mockUseGetEstimatedArrivalByRouteQuery,
   mockUseGetRealtimeByFrequencyByRouteQuery,
   mockUseGetRealtimeNearStopsByRouteQuery,
-  mockUseGetRouteShapesByRouteQuery,
-  mockUseGetRoutesByCityQuery,
-  mockUseGetStopOfRoutesByCityQuery,
-  mockUseGetStopsByCityAndIdsQuery,
+  mockUseGetRouteDetailQuery,
   mockRouteMap,
 } = vi.hoisted(() => ({
   mockToggleFavoriteRouteStop: vi.fn(),
   mockUseGetEstimatedArrivalByRouteQuery: vi.fn(),
   mockUseGetRealtimeByFrequencyByRouteQuery: vi.fn(),
   mockUseGetRealtimeNearStopsByRouteQuery: vi.fn(),
-  mockUseGetRouteShapesByRouteQuery: vi.fn(),
-  mockUseGetRoutesByCityQuery: vi.fn(),
-  mockUseGetStopOfRoutesByCityQuery: vi.fn(),
-  mockUseGetStopsByCityAndIdsQuery: vi.fn(),
+  mockUseGetRouteDetailQuery: vi.fn(),
   mockRouteMap: vi.fn(
     ({ extraControls }: { extraControls?: React.ReactNode }) => {
       return (
@@ -82,10 +80,12 @@ vi.mock('~/modules/apis/bus', () => ({
       mockUseGetRealtimeByFrequencyByRouteQuery,
     useGetRealtimeNearStopsByRouteQuery:
       mockUseGetRealtimeNearStopsByRouteQuery,
-    useGetRouteShapesByRouteQuery: mockUseGetRouteShapesByRouteQuery,
-    useGetRoutesByCityQuery: mockUseGetRoutesByCityQuery,
-    useGetStopOfRoutesByCityQuery: mockUseGetStopOfRoutesByCityQuery,
-    useGetStopsByCityAndIdsQuery: mockUseGetStopsByCityAndIdsQuery,
+  },
+}))
+
+vi.mock('~/modules/apis/transit', () => ({
+  transitApi: {
+    useGetRouteDetailQuery: mockUseGetRouteDetailQuery,
   },
 }))
 
@@ -106,7 +106,7 @@ vi.mock('~/modules/hooks/favorite/useFavoriteRouteStops', () => ({
   }),
 }))
 
-const routeData = [
+const routeData: BusRoute<string>[] = [
   {
     RouteUID: 'route-1',
     RouteID: 'route-1',
@@ -181,7 +181,7 @@ const routeData = [
   },
 ]
 
-const stopOfRoutesData = [
+const stopOfRoutesData: StopOfRoute[] = [
   {
     RouteUID: 'route-1',
     RouteID: 'route-1',
@@ -234,7 +234,10 @@ const stopOfRoutesData = [
   },
 ]
 
-const stopsByCityData = [
+const stopsByCityData: Pick<
+  Stop,
+  'StopUID' | 'StopID' | 'StopName' | 'position'
+>[] = [
   {
     StopUID: 'stop-a',
     StopID: 'stop-a',
@@ -364,31 +367,25 @@ function resetRouteMocks() {
   mockUseGetEstimatedArrivalByRouteQuery.mockReset()
   mockUseGetRealtimeByFrequencyByRouteQuery.mockReset()
   mockUseGetRealtimeNearStopsByRouteQuery.mockReset()
-  mockUseGetRouteShapesByRouteQuery.mockReset()
-  mockUseGetRoutesByCityQuery.mockReset()
-  mockUseGetStopOfRoutesByCityQuery.mockReset()
-  mockUseGetStopsByCityAndIdsQuery.mockReset()
+  mockUseGetRouteDetailQuery.mockReset()
   mockRouteMap.mockClear()
 }
 
+function mockRouteDetail(route: BusRoute<string>) {
+  mockUseGetRouteDetailQuery.mockReturnValue({
+    currentData: toRouteDetailFromTdx({
+      route,
+      stopOfRoutes: stopOfRoutesData,
+      stops: stopsByCityData,
+      shapes: [],
+    }),
+    isFetching: false,
+    error: undefined,
+  })
+}
+
 function mockDefaultRouteQueries() {
-  mockUseGetRoutesByCityQuery.mockReturnValue({
-    data: routeData,
-    isLoading: false,
-    error: null,
-  })
-
-  mockUseGetStopOfRoutesByCityQuery.mockReturnValue({
-    data: stopOfRoutesData,
-    isLoading: false,
-    error: null,
-  })
-
-  mockUseGetStopsByCityAndIdsQuery.mockReturnValue({
-    data: stopsByCityData,
-    isLoading: false,
-    error: null,
-  })
+  mockRouteDetail(routeData[0]!)
 
   mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
     data: estimatedArrivalsData,
@@ -407,12 +404,6 @@ function mockDefaultRouteQueries() {
   mockUseGetRealtimeByFrequencyByRouteQuery.mockReturnValue({
     data: realtimeByFrequencyData,
     isError: false,
-    isLoading: false,
-    error: null,
-  })
-
-  mockUseGetRouteShapesByRouteQuery.mockReturnValue({
-    data: [],
     isLoading: false,
     error: null,
   })
@@ -516,20 +507,10 @@ describe('Route', () => {
   })
 
   it('keeps the back button visible while base route data is loading', () => {
-    mockUseGetRoutesByCityQuery.mockReturnValue({
-      data: [],
-      isLoading: true,
-      error: null,
-    })
-    mockUseGetStopOfRoutesByCityQuery.mockReturnValue({
-      data: [],
-      isLoading: true,
-      error: null,
-    })
-    mockUseGetStopsByCityAndIdsQuery.mockReturnValue({
-      data: [],
-      isLoading: true,
-      error: null,
+    mockUseGetRouteDetailQuery.mockReturnValue({
+      currentData: undefined,
+      isFetching: true,
+      error: undefined,
     })
 
     renderRoutePage()
@@ -542,21 +523,15 @@ describe('Route', () => {
   })
 
   it('renders available terminal text when only one terminal name is present', () => {
-    mockUseGetRoutesByCityQuery.mockReturnValue({
-      data: [
-        {
-          ...routeData[0],
-          DepartureStopName: {
-            'zh-TW': '市政府',
-            en: 'City Hall',
-            ja: '',
-            ko: '',
-          },
-          DestinationStopName: { 'zh-TW': '', en: '', ja: '', ko: '' },
-        },
-      ],
-      isLoading: false,
-      error: null,
+    mockRouteDetail({
+      ...routeData[0]!,
+      DepartureStopName: {
+        'zh-TW': '市政府',
+        en: 'City Hall',
+        ja: '',
+        ko: '',
+      },
+      DestinationStopName: { 'zh-TW': '', en: '', ja: '', ko: '' },
     })
 
     renderRoutePage()

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { busApi } from '~/modules/apis/bus'
 import { isTdxRateLimitError } from '~/modules/apis/errors/busError'
-import type { BusRoute, BusSubRoute } from '~/modules/interfaces/BusRoute'
+import type { RouteDetailSubRoute } from '~/modules/interfaces/RouteDetail'
 import { CityNameType } from '@bus/shared'
 import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
 import { StopStatusType } from '~/modules/enums/StopStatusType'
@@ -30,8 +30,7 @@ type RealtimeQueryState =
   | { status: RealtimeQueryStatus.READY }
 
 interface UseRouteRealtimeDataOptions {
-  subRoute: BusSubRoute<Date | null>
-  busRoute: BusRoute<Date | null>
+  subRoute: Pick<RouteDetailSubRoute, 'subRouteUID' | 'direction'>
   city: CityNameType
   id: string
 }
@@ -42,7 +41,7 @@ export function useRouteRealtimeData(
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
   const subRoute = options?.subRoute ?? null
-  const busRoute = options?.busRoute ?? null
+  const routeUID = options?.id ?? null
 
   // Keep RTK Query args well-typed; skip prevents requests until realtime options are ready.
   const realtimeQueryArgs = options
@@ -64,13 +63,7 @@ export function useRouteRealtimeData(
       status: RealtimeQueryStatus.WAITING,
       waitMs: REALTIME_INITIAL_DELAY_MS,
     })
-  }, [
-    subRoute?.Direction,
-    subRoute?.SubRouteUID,
-    busRoute?.RouteUID,
-    options?.id,
-    options?.city,
-  ])
+  }, [subRoute?.direction, subRoute?.subRouteUID, options?.id, options?.city])
 
   useEffect(() => {
     if (realtimeQueryState.status !== RealtimeQueryStatus.WAITING) {
@@ -140,20 +133,20 @@ export function useRouteRealtimeData(
   }, [isRealtimeRateLimited])
 
   const directionMatchedEstimatedArrivals = useMemo(() => {
-    if (!subRoute || !busRoute) return []
+    if (!subRoute) return []
 
     return estimatedArrivals.filter(
-      (estimatedArrival) => estimatedArrival.Direction === subRoute.Direction,
+      (estimatedArrival) => estimatedArrival.Direction === subRoute.direction,
     )
-  }, [subRoute, busRoute, estimatedArrivals])
+  }, [subRoute, estimatedArrivals])
 
   const activeEstimatedArrivals = useMemo(() => {
-    if (!subRoute || !busRoute) return []
+    if (!subRoute || !routeUID) return []
 
     const subRouteMatchedEstimatedArrivals =
       directionMatchedEstimatedArrivals.filter(
         (estimatedArrival) =>
-          estimatedArrival.SubRouteUID === subRoute.SubRouteUID,
+          estimatedArrival.SubRouteUID === subRoute.subRouteUID,
       )
 
     if (subRouteMatchedEstimatedArrivals.length > 0) {
@@ -163,21 +156,21 @@ export function useRouteRealtimeData(
     const routeLevelEstimatedArrivals =
       directionMatchedEstimatedArrivals.filter(
         (estimatedArrival) =>
-          estimatedArrival.RouteUID === busRoute.RouteUID ||
-          estimatedArrival.SubRouteUID === busRoute.RouteUID,
+          estimatedArrival.RouteUID === routeUID ||
+          estimatedArrival.SubRouteUID === routeUID,
       )
 
     return routeLevelEstimatedArrivals.length > 0
       ? routeLevelEstimatedArrivals
       : directionMatchedEstimatedArrivals
-  }, [subRoute, busRoute, directionMatchedEstimatedArrivals])
+  }, [subRoute, routeUID, directionMatchedEstimatedArrivals])
 
   const activeRealtimeNearStops = useMemo(
     () =>
       realtimeNearStops.filter(
         (realtimeNearStop) =>
-          realtimeNearStop.SubRouteUID === subRoute?.SubRouteUID &&
-          realtimeNearStop.Direction === subRoute?.Direction,
+          realtimeNearStop.SubRouteUID === subRoute?.subRouteUID &&
+          realtimeNearStop.Direction === subRoute?.direction,
       ),
     [subRoute, realtimeNearStops],
   )
@@ -185,8 +178,8 @@ export function useRouteRealtimeData(
     () =>
       realtimeByFrequency.filter(
         (realtimeVehicle) =>
-          realtimeVehicle.SubRouteUID === subRoute?.SubRouteUID &&
-          realtimeVehicle.Direction === subRoute?.Direction &&
+          realtimeVehicle.SubRouteUID === subRoute?.subRouteUID &&
+          realtimeVehicle.Direction === subRoute?.direction &&
           realtimeVehicle.position != null,
       ) as Array<
         (typeof realtimeByFrequency)[number] & {

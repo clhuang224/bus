@@ -44,7 +44,7 @@ function isTdxBusOperator(value: unknown): value is TdxBusOperator {
     isNonEmptyString(value.OperatorID) &&
     isTdxLocalizedText(value.OperatorName) &&
     isNullableString(value.OperatorCode) &&
-    isNonEmptyString(value.OperatorNo)
+    isNullableString(value.OperatorNo)
   )
 }
 

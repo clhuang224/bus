@@ -100,6 +100,7 @@ describe('Routes API (e2e)', () => {
                 subroutes: [
                   {
                     uuid: 'TPE-subroute-1',
+                    tdx_subroute_uid: 'TPE-tdx-subroute-1',
                     direction: PrismaDirectionType.GO,
                     name_zh_tw: '307',
                     name_en: '307',
@@ -117,6 +118,8 @@ describe('Routes API (e2e)', () => {
                         sequence: 1,
                         stop: {
                           uuid: 'TPE-stop-1',
+                          tdx_stop_id: 'tdx-stop-1',
+                          station: { tdx_station_id: 'tdx-station-1' },
                           name_zh_tw: '板橋站',
                           name_en: 'Banqiao Station',
                           latitude: 25,
@@ -193,8 +196,10 @@ describe('Routes API (e2e)', () => {
                     en: 'Banqiao Station',
                   },
                   position: { latitude: 25, longitude: 121 },
+                  tdx: { stop_id: 'tdx-stop-1', station_id: 'tdx-station-1' },
                 },
               ],
+              tdx: { sub_route_uid: 'TPE-tdx-subroute-1' },
               shape: {
                 path: [
                   [121, 25],

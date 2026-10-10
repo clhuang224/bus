@@ -4,7 +4,6 @@ import { act, renderHook } from '@testing-library/react'
 import { createElement, type PropsWithChildren } from 'react'
 import { Provider } from 'react-redux'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { BusRoute, BusSubRoute } from '~/modules/interfaces/BusRoute'
 import { AppLocaleType, CityNameType, DirectionType } from '@bus/shared'
 import { createTestStore } from '~/test/createTestStore'
 import { useRouteRealtimeData } from './useRouteRealtimeData'
@@ -29,50 +28,10 @@ vi.mock('~/modules/apis/bus', () => ({
   },
 }))
 
-const busRoute: BusRoute<Date | null> = {
-  RouteUID: 'route-1',
-  RouteID: 'route-1',
-  HasSubRoutes: true,
-  Operators: [],
-  AuthorityID: '005',
-  ProviderID: 'provider-1',
-  SubRoutes: [],
-  BusRouteType: 0,
-  RouteName: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
-  DepartureStopName: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
-  DestinationStopName: {
-    'zh-TW': '捷運昆陽站',
-    en: 'MRT Kunyang Station',
-    ja: '',
-    ko: '',
-  },
-  TicketPriceDescription: { 'zh-TW': '', en: '', ja: '', ko: '' },
-  FareBufferZoneDescription: { 'zh-TW': '', en: '', ja: '', ko: '' },
-  RouteMapImageUrl: '',
-  City: CityNameType.TAIPEI,
-  CityCode: 'TPE',
-  UpdateTime: null,
-  VersionID: 0,
-}
-
 const subRoute = {
-  SubRouteUID: 'subroute-1',
-  SubRouteID: 'subroute-1',
-  OperatorIDs: [],
-  SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
-  Direction: DirectionType.RETURN,
-  FirstBusTime: null,
-  LastBusTime: null,
-  HolidayFirstBusTime: null,
-  HolidayLastBusTime: null,
-  DepartureStopName: {
-    'zh-TW': '捷運昆陽站',
-    en: 'MRT Kunyang Station',
-    ja: '',
-    ko: '',
-  },
-  DestinationStopName: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
-} satisfies BusSubRoute<Date | null>
+  subRouteUID: 'subroute-1',
+  direction: DirectionType.RETURN,
+}
 
 interface RealtimeQueryOptions {
   skip: boolean
@@ -140,7 +99,6 @@ describe('useRouteRealtimeData', () => {
       () =>
         useRouteRealtimeData({
           subRoute,
-          busRoute,
           city: CityNameType.TAIPEI,
           id: 'route-1',
         }),
