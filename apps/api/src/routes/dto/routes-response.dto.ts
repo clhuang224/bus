@@ -2,6 +2,12 @@ import { ApiProperty } from '@nestjs/swagger'
 import {
   CityNameType,
   DirectionType,
+  type ApiRouteDetail,
+  type ApiRouteShape,
+  type ApiRouteStop,
+  type ApiRouteStopTdxReference,
+  type ApiRouteSubRoute,
+  type ApiRouteSubRouteTdxReference,
   type ApiRouteSummary,
   type RoutesResponse,
 } from '@bus/shared'
@@ -67,7 +73,19 @@ export class RoutesResponseDto implements RoutesResponse {
   routes!: RouteSummaryDto[]
 }
 
-export class RouteStopDto {
+export class RouteStopTdxDto implements ApiRouteStopTdxReference {
+  @ApiProperty({ description: 'TDX StopID', example: '121560' })
+  stop_id!: string
+
+  @ApiProperty({
+    description: 'TDX StationID, or null when TDX does not assign a station',
+    nullable: true,
+    example: '1001',
+  })
+  station_id!: string | null
+}
+
+export class RouteStopDto implements ApiRouteStop {
   @ApiProperty({ description: 'Stop UUID', example: 'NWT121560' })
   uuid!: string
 
@@ -90,9 +108,16 @@ export class RouteStopDto {
     example: { latitude: 25.0018, longitude: 121.4984 },
   })
   position!: PositionDto
+
+  @ApiProperty({
+    description:
+      'TDX identifiers for matching this stop with TDX realtime data, which the API does not serve yet',
+    type: RouteStopTdxDto,
+  })
+  tdx!: RouteStopTdxDto
 }
 
-export class RouteShapeDto {
+export class RouteShapeDto implements ApiRouteShape {
   @ApiProperty({
     description:
       'Decoded route shape path as [longitude, latitude] tuples. Precise TDX shape data is preferred; if it is unavailable or invalid, the backend falls back to ordered stop positions. Routes with stops should not return an empty path.',
@@ -118,8 +143,13 @@ export class RouteShapeDto {
   updated_at!: string
 }
 
-export class RouteSubRouteDto {
-  @ApiProperty({ description: 'Sub-route UUID', example: 'NWT101160' })
+export class RouteSubRouteTdxDto implements ApiRouteSubRouteTdxReference {
+  @ApiProperty({ description: 'TDX SubRouteUID', example: 'NWT101160' })
+  sub_route_uid!: string
+}
+
+export class RouteSubRouteDto implements ApiRouteSubRoute {
+  @ApiProperty({ description: 'Sub-route UUID', example: 'NWT101160-0' })
   uuid!: string
 
   @ApiProperty({
@@ -173,16 +203,26 @@ export class RouteSubRouteDto {
     type: RouteShapeDto,
   })
   shape!: RouteShapeDto
+
+  @ApiProperty({
+    description:
+      'TDX identifiers for matching this sub-route with TDX realtime data, which the API does not serve yet',
+    type: RouteSubRouteTdxDto,
+  })
+  tdx!: RouteSubRouteTdxDto
 }
 
-export class RouteDetailResponseDto extends RouteSummaryDto {
+export class RouteDetailResponseDto
+  extends RouteSummaryDto
+  implements ApiRouteDetail
+{
   @ApiProperty({
     description:
       'Sub-routes for this route. Each sub-route contains its ordered stops and shape path. Realtime data is intentionally excluded.',
     type: [RouteSubRouteDto],
     example: [
       {
-        uuid: 'NWT101160',
+        uuid: 'NWT101160-0',
         name: { 'zh-TW': '242', en: '242' },
         direction: DirectionType.GO,
         departure: { 'zh-TW': '中和', en: 'Zhonghe' },
@@ -195,6 +235,7 @@ export class RouteDetailResponseDto extends RouteSummaryDto {
             sequence: 1,
             name: { 'zh-TW': '中和站', en: 'Zhonghe Station' },
             position: { latitude: 25.0018, longitude: 121.4984 },
+            tdx: { stop_id: '121560', station_id: '1001' },
           },
           {
             uuid: 'NWT121561',
@@ -204,6 +245,7 @@ export class RouteDetailResponseDto extends RouteSummaryDto {
               en: 'Chih-Kuang Vocational High School',
             },
             position: { latitude: 25.0042, longitude: 121.5021 },
+            tdx: { stop_id: '121561', station_id: null },
           },
         ],
         shape: {
@@ -213,6 +255,7 @@ export class RouteDetailResponseDto extends RouteSummaryDto {
           ],
           updated_at: '2026-06-03T18:25:13.000Z',
         },
+        tdx: { sub_route_uid: 'NWT101160' },
       },
     ],
   })

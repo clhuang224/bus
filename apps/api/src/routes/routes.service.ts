@@ -28,6 +28,8 @@ import type {
 
 interface StopRecord {
   uuid: string
+  tdx_stop_id: string
+  station: { tdx_station_id: string } | null
   name_zh_tw: string
   name_en: string | null
   latitude: number
@@ -50,6 +52,7 @@ interface RouteShapeRecord {
 
 interface SubRouteRecord {
   uuid: string
+  tdx_subroute_uid: string
   direction: PrismaDirectionType
   name_zh_tw: string
   name_en: string | null
@@ -116,6 +119,7 @@ export class RoutesService {
           orderBy: [{ direction: 'asc' }, { uuid: 'asc' }],
           select: {
             uuid: true,
+            tdx_subroute_uid: true,
             direction: true,
             name_zh_tw: true,
             name_en: true,
@@ -143,6 +147,8 @@ export class RoutesService {
                 stop: {
                   select: {
                     uuid: true,
+                    tdx_stop_id: true,
+                    station: { select: { tdx_station_id: true } },
                     name_zh_tw: true,
                     name_en: true,
                     latitude: true,
@@ -195,6 +201,7 @@ export class RoutesService {
       last_bus_time: subroute.last_bus_time,
       stops,
       shape: this.toRouteShape(subroute, stops),
+      tdx: { sub_route_uid: subroute.tdx_subroute_uid },
     }
   }
 
@@ -206,6 +213,10 @@ export class RoutesService {
       position: {
         latitude: routeStop.stop.latitude,
         longitude: routeStop.stop.longitude,
+      },
+      tdx: {
+        stop_id: routeStop.stop.tdx_stop_id,
+        station_id: routeStop.stop.station?.tdx_station_id ?? null,
       },
     }
   }
