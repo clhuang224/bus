@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 import { PrismaModule } from '../prisma/prisma.module.js'
+import { TdxModule } from '../tdx/tdx.module.js'
 import { RoutePersistenceService } from './route-persistence.service.js'
 import { RoutesSyncService } from './routes-sync.service.js'
 import { StopBulkWriterService } from './stop-bulk-writer.service.js'
@@ -10,7 +11,7 @@ import { SyncService } from './sync.service.js'
 import { TdxClientService } from './tdx-client.service.js'
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, TdxModule],
   providers: [
     RoutePersistenceService,
     RoutesSyncService,
