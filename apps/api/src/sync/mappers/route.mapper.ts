@@ -36,6 +36,7 @@ interface RouteRecord {
 interface SubRouteRecord {
   uuid: string
   tdx_subroute_id: string
+  tdx_subroute_uid: string
   direction: PrismaDirectionType
   name_zh_tw: string
   name_en: string | null
@@ -96,6 +97,7 @@ function mapSubRoute(
   return {
     uuid: `${subroute.SubRouteUID}-${subroute.Direction}`,
     tdx_subroute_id: subroute.SubRouteID,
+    tdx_subroute_uid: subroute.SubRouteUID,
     direction: mapDirection(subroute.Direction),
     ...mapLocalizedName(subroute.SubRouteName),
     departure_zh_tw: toRequiredText(
