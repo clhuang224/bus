@@ -115,24 +115,30 @@ The first phase should prove that the app can read core route and station data f
   proxy.
 - The web app chooses the data source in one place, `transitApi`, so pages and
   hooks consume the same app-facing models in either mode.
-- Realtime ETA, near-stop, and vehicle position data still come from TDX in
-  every mode. Route detail responses include TDX references (`SubRouteUID`,
-  `StopID`, and `StationID`) so the web app can match that realtime data and
-  keep saved favorite IDs stable.
+- The web app still reads realtime ETA, near-stop, and vehicle position data
+  from TDX in every mode. Route detail responses include TDX references
+  (`SubRouteUID`, `StopID`, and `StationID`) so the web app can match that
+  realtime data and keep saved favorite IDs stable.
+- The API serves `GET /api/realtime/routes/:uuid`. It fetches one route's
+  realtime feeds from TDX, caches them briefly in memory, and returns what each
+  sub-route should show, keyed by app UUIDs. The web app does not use it yet.
 
 ## Next Steps
 
-1. Prepare API deployment as its own change. Choose the long-running host and
+1. Switch the Route page's realtime data to `GET /api/realtime/routes/:uuid`
+   in local API mode through `transitApi`, so the page renders the API's
+   arrival and status values instead of matching TDX records itself. After
+   that, favorites are the only reason route detail still carries TDX
+   references.
+2. Prepare API deployment as its own change. Choose the long-running host and
    managed PostgreSQL provider, configure production CORS and secrets, apply
    committed Prisma migrations, and decide where the protected monthly sync
-   job will run.
-2. After the public API is deployed, switch production web builds to the
-   database API and validate that route search, route detail, shapes, and
-   locale fallback match the TDX-backed experience. Watch for sub-route tab
-   order: the API orders sub-routes by direction, while TDX keeps upstream
+   job will run. The realtime cache lives in memory, so run one API instance.
+3. After the public API is deployed, switch production web builds to the
+   database API and validate that route search, route detail, shapes, realtime,
+   and locale fallback match the TDX-backed experience. Watch for sub-route
+   tab order: the API orders sub-routes by direction, while TDX keeps upstream
    order.
-3. Plan a realtime cache, so realtime requests stop sharing the TDX proxy key
-   and the TDX references in route detail can eventually be retired.
 
 ## Backlog
 
