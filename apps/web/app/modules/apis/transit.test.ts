@@ -430,6 +430,22 @@ describe('transitApi.getRouteDetail', () => {
       })
     })
 
+    it('returns null when the route belongs to another city', async () => {
+      mockGetDatabaseRouteDetail.mockImplementation(
+        sourceResult({ data: apiRouteDetail }),
+      )
+
+      const result = await createStore().dispatch(
+        transitApi.endpoints.getRouteDetail.initiate({
+          ...routeDetailQuery,
+          city: CityNameType.NEW_TAIPEI,
+        }),
+      )
+
+      expect(result.isSuccess).toBe(true)
+      expect(result.data).toBeNull()
+    })
+
     it('returns null when the route does not exist', async () => {
       mockGetDatabaseRouteDetail.mockImplementation(
         sourceResult({

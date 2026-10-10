@@ -127,7 +127,7 @@ async function loadTdxNearbyStationRoutes(
 
 async function loadDatabaseRouteDetail(
   dispatch: SourceDispatch,
-  { routeUID }: RouteDetailQuery,
+  { city, routeUID }: RouteDetailQuery,
 ) {
   try {
     const route = await dispatch(
@@ -137,7 +137,9 @@ async function loadDatabaseRouteDetail(
       ),
     ).unwrap()
 
-    return toRouteDetailFromApi(route)
+    // Match TDX mode, which only finds a route within the requested city.
+    // Realtime requests use that city, so a mismatch would show no realtime data.
+    return route.city === city ? toRouteDetailFromApi(route) : null
   } catch (error) {
     if (isDatabaseApiError(error, ErrorCode.ROUTE_NOT_FOUND)) return null
 
