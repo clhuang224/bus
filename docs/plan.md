@@ -140,6 +140,27 @@ The first phase should prove that the app can read core route and station data f
    tab order: the API orders sub-routes by direction, while TDX keeps upstream
    order.
 
+### TDX Quota
+
+The project aims to run on the free TDX basic membership (5 requests per
+minute per key, 3 points per month: 1,500 requests or 150MB per point) and
+currently uses the bronze membership (5 requests per second, 200 points per
+month).
+
+- Base-data sync fits the free tier. One route and stop sync used about 100
+  requests and 175MB of decompressed responses in October 2026.
+- Realtime data does not fit the free tier through TDX. Each refresh needs
+  three requests (ETA, near-stop, and GPS), and TDX offers no endpoint that
+  combines them, so 5 requests per minute serves about two routes at a time
+  across all users.
+- Production web builds still call TDX for base data through the proxy, so
+  the free tier also requires the production switch to the database API.
+- City open-data feeds are the candidate path to free realtime data. Taipei
+  publishes a citywide ETA file without an API key, updated about every 20
+  seconds. Before building on such feeds, check each city's update rate,
+  identifiers, license, and access limits, and whether they report whether a
+  vehicle is arriving at or leaving a stop.
+
 ## Backlog
 
 These features should wait until the base backend/database flow is stable and the product has a clearer account/auth direction:
