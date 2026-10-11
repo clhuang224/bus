@@ -21,6 +21,21 @@ const REQUESTS_PER_SECOND_ENV = 'TDX_REALTIME_REQUESTS_PER_SECOND'
 const DEFAULT_REQUESTS_PER_SECOND = 5
 const RATE_LIMIT_COOLDOWN_MS = 3 * 1000
 const REQUEST_TIMEOUT_MS = 10 * 1000
+/**
+ * ETA responses are the largest feed and TDX also bills by volume, so only
+ * the fields the realtime calculator reads are requested.
+ */
+const ESTIMATED_ARRIVAL_FIELDS = [
+  'PlateNumb',
+  'StopUID',
+  'StopID',
+  'RouteUID',
+  'SubRouteUID',
+  'Direction',
+  'StopSequence',
+  'EstimateTime',
+  'StopStatus',
+]
 
 export enum RealtimeSourceFailure {
   RATE_LIMITED = 'rate_limited',
@@ -61,6 +76,7 @@ export class TdxRealtimeClientService {
       `/EstimatedTimeOfArrival/City/${city}`,
       routeUID,
       isTdxEstimatedArrival,
+      ESTIMATED_ARRIVAL_FIELDS,
     )
   }
 
@@ -90,9 +106,10 @@ export class TdxRealtimeClientService {
     path: string,
     routeUID: string,
     isItem: (value: unknown) => value is T,
+    fields?: string[],
   ): Promise<RealtimeSourceResult<T>> {
     try {
-      const payload = await this.fetchJson(path, routeUID)
+      const payload = await this.fetchJson(path, routeUID, fields)
 
       if (!Array.isArray(payload)) {
         throw new Error(`Expected TDX response to be an array for ${path}.`)
@@ -120,12 +137,17 @@ export class TdxRealtimeClientService {
     }
   }
 
-  private async fetchJson(path: string, routeUID: string): Promise<unknown> {
+  private async fetchJson(
+    path: string,
+    routeUID: string,
+    fields?: string[],
+  ): Promise<unknown> {
     const url = new URL(`${TDX_BUS_BASE_URL}${path}`)
     url.searchParams.set(
       '$filter',
       `RouteUID eq '${escapeODataText(routeUID)}'`,
     )
+    if (fields) url.searchParams.set('$select', fields.join(','))
     url.searchParams.set('$format', 'JSON')
 
     const accessToken = await this.tdxAuthService.getAccessToken()

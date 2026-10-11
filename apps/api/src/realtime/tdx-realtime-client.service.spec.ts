@@ -75,6 +75,25 @@ describe('TdxRealtimeClientService', () => {
     expect(requests[0].authorization).toBe('Bearer token-1')
   })
 
+  it('requests only the ETA fields the calculator reads', async () => {
+    const urls: URL[] = []
+    globalThis.fetch = (input: RequestInfo | URL) => {
+      urls.push(new URL(input instanceof Request ? input.url : input))
+      return Promise.resolve(jsonResponse([]))
+    }
+    const service = new TdxRealtimeClientService(
+      createAuthService().authService,
+    )
+
+    await service.fetchEstimatedArrivals(CityNameType.TAIPEI, 'TPE1')
+    await service.fetchNearStops(CityNameType.TAIPEI, 'TPE1')
+
+    expect(urls[0].searchParams.get('$select')).toBe(
+      'PlateNumb,StopUID,StopID,RouteUID,SubRouteUID,Direction,StopSequence,EstimateTime,StopStatus',
+    )
+    expect(urls[1].searchParams.has('$select')).toBe(false)
+  })
+
   it('refreshes the token once after a 401', async () => {
     const authorizations: (string | null)[] = []
     globalThis.fetch = (_input: RequestInfo | URL, init?: RequestInit) => {
