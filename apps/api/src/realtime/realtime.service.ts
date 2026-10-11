@@ -13,8 +13,11 @@ import {
 } from './route-realtime.calculator.js'
 import { TdxRealtimeClientService } from './tdx-realtime-client.service.js'
 
-/** Shorter than the 30-second web polling interval, so polls see new data. */
-const SNAPSHOT_TTL_MS = 15 * 1000
+/**
+ * TDX batch ETAs only change about once a minute, so a longer cache saves
+ * requests and quota at the cost of some freshness for vehicle positions.
+ */
+const SNAPSHOT_TTL_MS = 90 * 1000
 /** Retry sooner after a failed feed, without letting every poll hit TDX. */
 const FAILED_SNAPSHOT_TTL_MS = 5 * 1000
 

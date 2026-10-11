@@ -94,7 +94,7 @@ describe('RealtimeService', () => {
       service.getRouteRealtime('TPE10132'),
       service.getRouteRealtime('TPE10132'),
     ])
-    now += 14_000
+    now += 89_000
     await service.getRouteRealtime('TPE10132')
 
     expect(calls.arrivals).toHaveLength(1)

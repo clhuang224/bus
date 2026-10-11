@@ -16,7 +16,7 @@ export class RealtimeController {
   @ApiOperation({
     summary: 'Get route realtime polling snapshot',
     description:
-      'Returns what each sub-route should show: an arrival per stop, the vehicles with their arrivals, and a status message. Data comes from TDX and is cached per route for up to 15 seconds, or 5 seconds when a TDX feed failed. Feed failures are reported through each sub-route status instead of an error response.',
+      'Returns what each sub-route should show: an arrival per stop, the vehicles with their arrivals, and a status message. Data comes from TDX and is cached per route for up to 90 seconds, or 5 seconds when a TDX feed failed. Feed failures are reported through each sub-route status instead of an error response.',
   })
   @ApiSuccessResponse({ type: RouteRealtimeResponseDto })
   @ApiErrorResponse({
