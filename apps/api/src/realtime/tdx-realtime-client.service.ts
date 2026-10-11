@@ -46,6 +46,12 @@ export type RealtimeSourceResult<T> =
   | { ok: true; data: T[] }
   | { ok: false; failure: RealtimeSourceFailure }
 
+interface TdxResponse {
+  status: number
+  /** Parsed JSON for a successful response; null otherwise. */
+  payload: unknown
+}
+
 class TdxRateLimitedError extends Error {
   constructor(path: string) {
     super(`TDX rate limited realtime request: ${path}`)
@@ -61,6 +67,7 @@ class TdxRateLimitedError extends Error {
 @Injectable()
 export class TdxRealtimeClientService {
   private readonly logger = new Logger(TdxRealtimeClientService.name)
+  protected readonly requestTimeoutMs = REQUEST_TIMEOUT_MS
   private readonly requestsPerSecond = getRequestsPerSecond()
   private readonly recentRequestTimes: number[] = []
   private requestQueue: Promise<void> = Promise.resolve()
@@ -166,32 +173,44 @@ export class TdxRealtimeClientService {
       throw new TdxRateLimitedError(path)
     }
 
-    if (!response.ok) {
+    if (response.status < 200 || response.status >= 300) {
       throw new Error(`TDX request failed: ${response.status} ${path}`)
     }
 
-    return response.json()
+    return response.payload
   }
 
-  private async request(url: URL, accessToken: string): Promise<Response> {
+  /**
+   * Sends one request and reads its body under the same timeout, so a
+   * response that stalls after its headers cannot hang the snapshot.
+   */
+  private async request(url: URL, accessToken: string): Promise<TdxResponse> {
     await this.waitForRequestSlot(url.pathname)
 
-    const timeout = createRequestTimeout(REQUEST_TIMEOUT_MS)
+    const timeout = createRequestTimeout(this.requestTimeoutMs)
 
     try {
-      return await fetch(url, {
+      const response = await fetch(url, {
         signal: timeout.signal,
         headers: {
           accept: 'application/json',
           authorization: `Bearer ${accessToken}`,
         },
       })
+
+      if (!response.ok) {
+        // Release the connection; error bodies are not used.
+        await response.body?.cancel()
+        return { status: response.status, payload: null }
+      }
+
+      return { status: response.status, payload: await response.json() }
     } catch (error) {
       throw toRequestError(
         error,
         timeout,
         'TDX realtime request',
-        REQUEST_TIMEOUT_MS,
+        this.requestTimeoutMs,
       )
     } finally {
       timeout.cancel()

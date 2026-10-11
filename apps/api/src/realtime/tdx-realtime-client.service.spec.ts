@@ -26,6 +26,28 @@ function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status })
 }
 
+class ShortTimeoutClient extends TdxRealtimeClientService {
+  protected override readonly requestTimeoutMs = 50
+}
+
+/**
+ * A response whose headers arrive but whose body never finishes. Like a real
+ * fetch, aborting the request signal errors the body stream.
+ */
+function stalledResponse(signal: AbortSignal | null | undefined) {
+  return new Response(
+    new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('['))
+        signal?.addEventListener('abort', () => {
+          controller.error(new DOMException('Aborted', 'AbortError'))
+        })
+      },
+    }),
+    { status: 200 },
+  )
+}
+
 describe('TdxRealtimeClientService', () => {
   const originalFetch = globalThis.fetch
   const originalRequestsPerSecond = process.env[REQUESTS_PER_SECOND_ENV]
@@ -117,6 +139,44 @@ describe('TdxRealtimeClientService', () => {
     expect(result).toEqual({ ok: true, data: [] })
     expect(clearedTokens).toEqual(['token-1'])
     expect(authorizations).toEqual(['Bearer token-1', 'Bearer token-2'])
+  })
+
+  it('times out a response whose body stalls after the headers', async () => {
+    globalThis.fetch = (_input: RequestInfo | URL, init?: RequestInit) =>
+      Promise.resolve(stalledResponse(init?.signal))
+    const service = new ShortTimeoutClient(createAuthService().authService)
+
+    expect(
+      await service.fetchEstimatedArrivals(CityNameType.TAIPEI, 'TPE1'),
+    ).toEqual({ ok: false, failure: RealtimeSourceFailure.UNAVAILABLE })
+  })
+
+  it('releases the body of a rejected 401 response before retrying', async () => {
+    let releasedBodies = 0
+    let requestCount = 0
+    globalThis.fetch = () => {
+      requestCount += 1
+      return Promise.resolve(
+        requestCount === 1
+          ? new Response(
+              new ReadableStream({
+                cancel: () => {
+                  releasedBodies += 1
+                },
+              }),
+              { status: 401 },
+            )
+          : jsonResponse([]),
+      )
+    }
+    const service = new TdxRealtimeClientService(
+      createAuthService().authService,
+    )
+
+    await service.fetchNearStops(CityNameType.TAIPEI, 'TPE1')
+
+    expect(requestCount).toBe(2)
+    expect(releasedBodies).toBe(1)
   })
 
   it('reports a rate limit and skips TDX during the cooldown', async () => {
