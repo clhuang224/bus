@@ -1,0 +1,275 @@
+{
+  "source": "TDX PenghuCounty route PEN0758 (21), recorded 2026-10-11 and trimmed to the stops around each vehicle",
+  "route": {
+    "uuid": "PEN0758",
+    "city": "PENGHU_COUNTY",
+    "subroutes": [
+      {
+        "uuid": "PEN075801-0",
+        "tdx_subroute_uid": "PEN075801",
+        "direction": "GO",
+        "route_stops": [
+          {
+            "stop": {
+              "uuid": "PEN299468",
+              "tdx_stop_id": "299468"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "PEN299470",
+              "tdx_stop_id": "299470"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "PEN299471",
+              "tdx_stop_id": "299471"
+            }
+          }
+        ]
+      },
+      {
+        "uuid": "PEN0758I1-0",
+        "tdx_subroute_uid": "PEN0758I1",
+        "direction": "GO",
+        "route_stops": [
+          {
+            "stop": {
+              "uuid": "PEN299468",
+              "tdx_stop_id": "299468"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "PEN299470",
+              "tdx_stop_id": "299470"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "PEN299471",
+              "tdx_stop_id": "299471"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "PEN299514",
+              "tdx_stop_id": "299514"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "PEN299515",
+              "tdx_stop_id": "299515"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "PEN299516",
+              "tdx_stop_id": "299516"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "PEN299517",
+              "tdx_stop_id": "299517"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "PEN299518",
+              "tdx_stop_id": "299518"
+            }
+          }
+        ]
+      },
+      {
+        "uuid": "PEN0758N1-0",
+        "tdx_subroute_uid": "PEN0758N1",
+        "direction": "GO",
+        "route_stops": [
+          {
+            "stop": {
+              "uuid": "PEN299468",
+              "tdx_stop_id": "299468"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "PEN299470",
+              "tdx_stop_id": "299470"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "PEN299471",
+              "tdx_stop_id": "299471"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "estimatedArrivals": [
+    {
+      "PlateNumb": "-1",
+      "StopUID": "PEN299468",
+      "StopID": "299468",
+      "RouteUID": "PEN0758",
+      "SubRouteUID": "PEN075801",
+      "Direction": 0,
+      "StopSequence": 1,
+      "StopStatus": 3
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "PEN299470",
+      "StopID": "299470",
+      "RouteUID": "PEN0758",
+      "SubRouteUID": "PEN075801",
+      "Direction": 0,
+      "StopSequence": 2,
+      "StopStatus": 3
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "PEN299471",
+      "StopID": "299471",
+      "RouteUID": "PEN0758",
+      "SubRouteUID": "PEN075801",
+      "Direction": 0,
+      "StopSequence": 3,
+      "StopStatus": 3
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "PEN299468",
+      "StopID": "299468",
+      "RouteUID": "PEN0758",
+      "SubRouteUID": "PEN0758I1",
+      "Direction": 0,
+      "StopSequence": 1,
+      "StopStatus": 3
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "PEN299468",
+      "StopID": "299468",
+      "RouteUID": "PEN0758",
+      "SubRouteUID": "PEN0758N1",
+      "Direction": 0,
+      "StopSequence": 1,
+      "StopStatus": 4
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "PEN299470",
+      "StopID": "299470",
+      "RouteUID": "PEN0758",
+      "SubRouteUID": "PEN0758I1",
+      "Direction": 0,
+      "StopSequence": 2,
+      "StopStatus": 3
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "PEN299470",
+      "StopID": "299470",
+      "RouteUID": "PEN0758",
+      "SubRouteUID": "PEN0758N1",
+      "Direction": 0,
+      "StopSequence": 2,
+      "StopStatus": 4
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "PEN299471",
+      "StopID": "299471",
+      "RouteUID": "PEN0758",
+      "SubRouteUID": "PEN0758I1",
+      "Direction": 0,
+      "StopSequence": 3,
+      "StopStatus": 3
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "PEN299471",
+      "StopID": "299471",
+      "RouteUID": "PEN0758",
+      "SubRouteUID": "PEN0758N1",
+      "Direction": 0,
+      "StopSequence": 3,
+      "StopStatus": 4
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "PEN299514",
+      "StopID": "299514",
+      "RouteUID": "PEN0758",
+      "SubRouteUID": "PEN0758I1",
+      "Direction": 0,
+      "StopSequence": 47,
+      "StopStatus": 3
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "PEN299515",
+      "StopID": "299515",
+      "RouteUID": "PEN0758",
+      "SubRouteUID": "PEN0758I1",
+      "Direction": 0,
+      "StopSequence": 48,
+      "StopStatus": 3
+    },
+    {
+      "PlateNumb": "973-FQ",
+      "StopUID": "PEN299516",
+      "StopID": "299516",
+      "RouteUID": "PEN0758",
+      "SubRouteUID": "PEN0758I1",
+      "Direction": 0,
+      "StopSequence": 49,
+      "EstimateTime": 20,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "973-FQ",
+      "StopUID": "PEN299517",
+      "StopID": "299517",
+      "RouteUID": "PEN0758",
+      "SubRouteUID": "PEN0758I1",
+      "Direction": 0,
+      "StopSequence": 50,
+      "EstimateTime": 80,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "973-FQ",
+      "StopUID": "PEN299518",
+      "StopID": "299518",
+      "RouteUID": "PEN0758",
+      "SubRouteUID": "PEN0758I1",
+      "Direction": 0,
+      "StopSequence": 51,
+      "EstimateTime": 141,
+      "StopStatus": 0
+    }
+  ],
+  "nearStops": [
+    {
+      "PlateNumb": "973-FQ",
+      "SubRouteUID": "PEN0758I1",
+      "Direction": 0,
+      "StopUID": "PEN299516",
+      "StopID": "299516",
+      "StopName": {
+        "Zh_tw": "合界上站",
+        "En": "Hejie Upper stop"
+      },
+      "StopSequence": 49,
+      "A2EventType": 0
+    }
+  ],
+  "positions": []
+}

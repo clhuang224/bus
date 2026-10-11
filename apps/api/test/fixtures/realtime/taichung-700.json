@@ -1,0 +1,1161 @@
+{
+  "source": "TDX Taichung route TXG7000 (700), recorded 2026-10-11 and trimmed to the stops around each vehicle",
+  "route": {
+    "uuid": "TXG7000",
+    "city": "TAICHUNG",
+    "subroutes": [
+      {
+        "uuid": "TXG7000-0",
+        "tdx_subroute_uid": "TXG7000",
+        "direction": "GO",
+        "route_stops": [
+          {
+            "stop": {
+              "uuid": "TXG22437",
+              "tdx_stop_id": "22437"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22438",
+              "tdx_stop_id": "22438"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22439",
+              "tdx_stop_id": "22439"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22440",
+              "tdx_stop_id": "22440"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22441",
+              "tdx_stop_id": "22441"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22442",
+              "tdx_stop_id": "22442"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22443",
+              "tdx_stop_id": "22443"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22444",
+              "tdx_stop_id": "22444"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22445",
+              "tdx_stop_id": "22445"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22453",
+              "tdx_stop_id": "22453"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22454",
+              "tdx_stop_id": "22454"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22455",
+              "tdx_stop_id": "22455"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22456",
+              "tdx_stop_id": "22456"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG11314",
+              "tdx_stop_id": "11314"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22473",
+              "tdx_stop_id": "22473"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22474",
+              "tdx_stop_id": "22474"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG12460",
+              "tdx_stop_id": "12460"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22476",
+              "tdx_stop_id": "22476"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22477",
+              "tdx_stop_id": "22477"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22491",
+              "tdx_stop_id": "22491"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22492",
+              "tdx_stop_id": "22492"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG1230",
+              "tdx_stop_id": "1230"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG2249",
+              "tdx_stop_id": "2249"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG1237",
+              "tdx_stop_id": "1237"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22501",
+              "tdx_stop_id": "22501"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22502",
+              "tdx_stop_id": "22502"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22503",
+              "tdx_stop_id": "22503"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22504",
+              "tdx_stop_id": "22504"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG23633",
+              "tdx_stop_id": "23633"
+            }
+          }
+        ]
+      },
+      {
+        "uuid": "TXG7000-1",
+        "tdx_subroute_uid": "TXG7000",
+        "direction": "RETURN",
+        "route_stops": [
+          {
+            "stop": {
+              "uuid": "TXG17424",
+              "tdx_stop_id": "17424"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG23644",
+              "tdx_stop_id": "23644"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG10286",
+              "tdx_stop_id": "10286"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22514",
+              "tdx_stop_id": "22514"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22515",
+              "tdx_stop_id": "22515"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22516",
+              "tdx_stop_id": "22516"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22517",
+              "tdx_stop_id": "22517"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG19670",
+              "tdx_stop_id": "19670"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG1177",
+              "tdx_stop_id": "1177"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG1176",
+              "tdx_stop_id": "1176"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22532",
+              "tdx_stop_id": "22532"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22533",
+              "tdx_stop_id": "22533"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22534",
+              "tdx_stop_id": "22534"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22535",
+              "tdx_stop_id": "22535"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22536",
+              "tdx_stop_id": "22536"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22540",
+              "tdx_stop_id": "22540"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22541",
+              "tdx_stop_id": "22541"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG20855",
+              "tdx_stop_id": "20855"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22543",
+              "tdx_stop_id": "22543"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22544",
+              "tdx_stop_id": "22544"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22563",
+              "tdx_stop_id": "22563"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22564",
+              "tdx_stop_id": "22564"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22565",
+              "tdx_stop_id": "22565"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22566",
+              "tdx_stop_id": "22566"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG11313",
+              "tdx_stop_id": "11313"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG24812",
+              "tdx_stop_id": "24812"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22568",
+              "tdx_stop_id": "22568"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22569",
+              "tdx_stop_id": "22569"
+            }
+          },
+          {
+            "stop": {
+              "uuid": "TXG22570",
+              "tdx_stop_id": "22570"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "estimatedArrivals": [
+    {
+      "PlateNumb": "EAL-1252",
+      "StopUID": "TXG10286",
+      "StopID": "10286",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 3,
+      "EstimateTime": 180,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-822",
+      "StopUID": "TXG11313",
+      "StopID": "11313",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 60,
+      "EstimateTime": 180,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-826",
+      "StopUID": "TXG11314",
+      "StopID": "11314",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 22,
+      "EstimateTime": 120,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-852",
+      "StopUID": "TXG1176",
+      "StopID": "1176",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 10,
+      "EstimateTime": 180,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-852",
+      "StopUID": "TXG1177",
+      "StopID": "1177",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 9,
+      "EstimateTime": 120,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAL-1236",
+      "StopUID": "TXG1230",
+      "StopID": "1230",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 63,
+      "EstimateTime": 1200,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-827",
+      "StopUID": "TXG1237",
+      "StopID": "1237",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 65,
+      "EstimateTime": 120,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-826",
+      "StopUID": "TXG12460",
+      "StopID": "12460",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 45,
+      "EstimateTime": 1440,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "",
+      "StopUID": "TXG17424",
+      "StopID": "17424",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 1,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "EAL-1252",
+      "StopUID": "TXG19670",
+      "StopID": "19670",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 8,
+      "EstimateTime": 720,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-828",
+      "StopUID": "TXG20855",
+      "StopID": "20855",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 29,
+      "EstimateTime": 540,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "",
+      "StopUID": "TXG22437",
+      "StopID": "22437",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 1,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "",
+      "StopUID": "TXG22438",
+      "StopID": "22438",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 2,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "",
+      "StopUID": "TXG22439",
+      "StopID": "22439",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 3,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "",
+      "StopUID": "TXG22440",
+      "StopID": "22440",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 4,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "",
+      "StopUID": "TXG22441",
+      "StopID": "22441",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 5,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "",
+      "StopUID": "TXG22442",
+      "StopID": "22442",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 6,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "",
+      "StopUID": "TXG22443",
+      "StopID": "22443",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 7,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "EAL-0605",
+      "StopUID": "TXG22444",
+      "StopID": "22444",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 8,
+      "EstimateTime": 60,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAL-0605",
+      "StopUID": "TXG22445",
+      "StopID": "22445",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 9,
+      "EstimateTime": 120,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAL-0605",
+      "StopUID": "TXG22453",
+      "StopID": "22453",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 18,
+      "EstimateTime": 840,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAL-0605",
+      "StopUID": "TXG22454",
+      "StopID": "22454",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 19,
+      "EstimateTime": 840,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAL-0605",
+      "StopUID": "TXG22455",
+      "StopID": "22455",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 20,
+      "EstimateTime": 900,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-826",
+      "StopUID": "TXG22456",
+      "StopID": "22456",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 21,
+      "EstimateTime": 0,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-826",
+      "StopUID": "TXG22473",
+      "StopID": "22473",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 43,
+      "EstimateTime": 1260,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-826",
+      "StopUID": "TXG22474",
+      "StopID": "22474",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 44,
+      "EstimateTime": 1320,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAL-1236",
+      "StopUID": "TXG22476",
+      "StopID": "22476",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 46,
+      "EstimateTime": 60,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAL-1236",
+      "StopUID": "TXG22477",
+      "StopID": "22477",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 47,
+      "EstimateTime": 120,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-827",
+      "StopUID": "TXG2249",
+      "StopID": "2249",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 64,
+      "EstimateTime": 60,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAL-1236",
+      "StopUID": "TXG22491",
+      "StopID": "22491",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 61,
+      "EstimateTime": 960,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAL-1236",
+      "StopUID": "TXG22492",
+      "StopID": "22492",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 62,
+      "EstimateTime": 1080,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-827",
+      "StopUID": "TXG22501",
+      "StopID": "22501",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 69,
+      "EstimateTime": 420,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-827",
+      "StopUID": "TXG22502",
+      "StopID": "22502",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 70,
+      "EstimateTime": 540,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-827",
+      "StopUID": "TXG22503",
+      "StopID": "22503",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 71,
+      "EstimateTime": 600,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-855",
+      "StopUID": "TXG22504",
+      "StopID": "22504",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 72,
+      "EstimateTime": 120,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAL-1252",
+      "StopUID": "TXG22514",
+      "StopID": "22514",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 4,
+      "EstimateTime": 300,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAL-1252",
+      "StopUID": "TXG22515",
+      "StopID": "22515",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 5,
+      "EstimateTime": 360,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAL-1252",
+      "StopUID": "TXG22516",
+      "StopID": "22516",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 6,
+      "EstimateTime": 540,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAL-1252",
+      "StopUID": "TXG22517",
+      "StopID": "22517",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 7,
+      "EstimateTime": 600,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-852",
+      "StopUID": "TXG22532",
+      "StopID": "22532",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 19,
+      "EstimateTime": 900,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-852",
+      "StopUID": "TXG22533",
+      "StopID": "22533",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 20,
+      "EstimateTime": 960,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-852",
+      "StopUID": "TXG22534",
+      "StopID": "22534",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 21,
+      "EstimateTime": 1020,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-828",
+      "StopUID": "TXG22535",
+      "StopID": "22535",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 22,
+      "EstimateTime": 60,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-828",
+      "StopUID": "TXG22536",
+      "StopID": "22536",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 23,
+      "EstimateTime": 120,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-828",
+      "StopUID": "TXG22540",
+      "StopID": "22540",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 27,
+      "EstimateTime": 300,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-828",
+      "StopUID": "TXG22541",
+      "StopID": "22541",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 28,
+      "EstimateTime": 420,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAL-0606",
+      "StopUID": "TXG22543",
+      "StopID": "22543",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 30,
+      "EstimateTime": 180,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAL-0606",
+      "StopUID": "TXG22544",
+      "StopID": "22544",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 31,
+      "EstimateTime": 180,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAL-0606",
+      "StopUID": "TXG22563",
+      "StopID": "22563",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 56,
+      "EstimateTime": 1680,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAL-0606",
+      "StopUID": "TXG22564",
+      "StopID": "22564",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 57,
+      "EstimateTime": 1680,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAL-0606",
+      "StopUID": "TXG22565",
+      "StopID": "22565",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 58,
+      "EstimateTime": 1740,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-822",
+      "StopUID": "TXG22566",
+      "StopID": "22566",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 59,
+      "EstimateTime": 120,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-822",
+      "StopUID": "TXG22568",
+      "StopID": "22568",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 62,
+      "EstimateTime": 420,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-853",
+      "StopUID": "TXG22569",
+      "StopID": "22569",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 63,
+      "EstimateTime": 120,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-853",
+      "StopUID": "TXG22570",
+      "StopID": "22570",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 64,
+      "EstimateTime": 120,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "EAA-855",
+      "StopUID": "TXG23633",
+      "StopID": "23633",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopSequence": 73,
+      "EstimateTime": 300,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "",
+      "StopUID": "TXG23644",
+      "StopID": "23644",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 2,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "EAA-822",
+      "StopUID": "TXG24812",
+      "StopID": "24812",
+      "RouteUID": "TXG7000",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopSequence": 61,
+      "EstimateTime": 240,
+      "StopStatus": 0
+    }
+  ],
+  "nearStops": [
+    {
+      "PlateNumb": "EAA-822",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopUID": "TXG22565",
+      "StopID": "22565",
+      "StopName": {
+        "Zh_tw": "圓環北角潭路口",
+        "En": "Yuanhuan N.-Jiaotan Intersection"
+      },
+      "StopSequence": 58,
+      "A2EventType": 0
+    },
+    {
+      "PlateNumb": "EAA-826",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopUID": "TXG22455",
+      "StopID": "22455",
+      "StopName": {
+        "Zh_tw": "圓環北中山路口",
+        "En": "Yuanhuan N.-Zhongshan Intersection"
+      },
+      "StopSequence": 20,
+      "A2EventType": 1
+    },
+    {
+      "PlateNumb": "EAA-827",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopUID": "TXG1230",
+      "StopID": "1230",
+      "StopName": {
+        "Zh_tw": "三民錦新街口",
+        "En": "Sanmin-Jinxin Intersection"
+      },
+      "StopSequence": 63,
+      "A2EventType": 1
+    },
+    {
+      "PlateNumb": "EAA-828",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopUID": "TXG22534",
+      "StopID": "22534",
+      "StopName": {
+        "Zh_tw": "崇德五路口",
+        "En": "Chongde 5th Road"
+      },
+      "StopSequence": 21,
+      "A2EventType": 0
+    },
+    {
+      "PlateNumb": "EAA-852",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopUID": "TXG19670",
+      "StopID": "19670",
+      "StopName": {
+        "Zh_tw": "臺中公園(三民路)",
+        "En": "Taichung Park(Sanmin Road)"
+      },
+      "StopSequence": 8,
+      "A2EventType": 1
+    },
+    {
+      "PlateNumb": "EAA-853",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopUID": "TXG22568",
+      "StopID": "22568",
+      "StopName": {
+        "Zh_tw": "豐勢明興街口",
+        "En": "Fengshi-Mingxing Intersection"
+      },
+      "StopSequence": 62,
+      "A2EventType": 1
+    },
+    {
+      "PlateNumb": "EAA-855",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopUID": "TXG22503",
+      "StopID": "22503",
+      "StopName": {
+        "Zh_tw": "民權繼光街口",
+        "En": "Minquan-Jiguang Intersection"
+      },
+      "StopSequence": 71,
+      "A2EventType": 0
+    },
+    {
+      "PlateNumb": "EAL-0602",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopUID": "TXG17424",
+      "StopID": "17424",
+      "StopName": {
+        "Zh_tw": "綠空鐵道(復興東路)",
+        "En": "Greensky Railway(Fuxing E.Road)"
+      },
+      "StopSequence": 1,
+      "A2EventType": 1
+    },
+    {
+      "PlateNumb": "EAL-0605",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopUID": "TXG22443",
+      "StopID": "22443",
+      "StopName": {
+        "Zh_tw": "水源豐原大道口",
+        "En": "Shuiyuan-Fengyuan Boulevard Intersection"
+      },
+      "StopSequence": 7,
+      "A2EventType": 0
+    },
+    {
+      "PlateNumb": "EAL-0606",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopUID": "TXG20855",
+      "StopID": "20855",
+      "StopName": {
+        "Zh_tw": "臺中洲際棒球場",
+        "En": "Intercontinental Baseball Stadium"
+      },
+      "StopSequence": 29,
+      "A2EventType": 0
+    },
+    {
+      "PlateNumb": "EAL-1236",
+      "SubRouteUID": "TXG7000",
+      "Direction": 0,
+      "StopUID": "TXG12460",
+      "StopID": "12460",
+      "StopName": {
+        "Zh_tw": "崇德十八路口",
+        "En": "Chongde 18th Road"
+      },
+      "StopSequence": 45,
+      "A2EventType": 0
+    },
+    {
+      "PlateNumb": "EAL-1252",
+      "SubRouteUID": "TXG7000",
+      "Direction": 1,
+      "StopUID": "TXG23644",
+      "StopID": "23644",
+      "StopName": {
+        "Zh_tw": "臺中車站(大智北路)",
+        "En": "Taichung Station(Dazhi North Road)"
+      },
+      "StopSequence": 2,
+      "A2EventType": 1
+    }
+  ],
+  "positions": []
+}
