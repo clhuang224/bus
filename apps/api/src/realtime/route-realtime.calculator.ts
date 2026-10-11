@@ -170,8 +170,9 @@ function toArrival(arrival: TdxEstimatedArrival): Arrival {
 }
 
 /**
- * Status shared by every sub-route when a feed failed, or null when the
- * sub-route's own service state decides. Rate limits win over failures.
+ * Status shared by every sub-route when the ETA or near-stop feed failed, or
+ * null when the sub-route's own service state decides. Rate limits win over
+ * failures. GPS failures are left out: arrivals stay usable without positions.
  */
 function getRouteSourceStatus(
   sources: RealtimeSources,

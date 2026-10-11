@@ -108,7 +108,7 @@ export class RouteRealtimeSubRouteDto implements ApiRouteRealtimeSubRoute {
 
   @ApiProperty({
     description:
-      'Message to show for this sub-route, in priority order: `rate_limited`, `unavailable`, then the service state.',
+      'Message to show for this sub-route, in priority order: `rate_limited`, `unavailable`, then the service state. Only the ETA and near-stop feeds affect it; GPS failures only leave vehicle positions null.',
     enum: RouteRealtimeStatus,
     example: RouteRealtimeStatus.NORMAL,
   })
