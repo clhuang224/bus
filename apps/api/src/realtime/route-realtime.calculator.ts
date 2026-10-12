@@ -23,6 +23,8 @@ import {
 export interface RealtimeRouteStop {
   uuid: string
   tdxStopId: string
+  /** Position in the sub-route; a stop can appear more than once. */
+  sequence: number
 }
 
 export interface RealtimeRouteSubRoute {
@@ -244,8 +246,11 @@ function getServiceStatus(
 }
 
 /**
- * Picks one ETA per stop. Sooner countdowns win; ETAs without a countdown
- * follow in stop order. Stops match by StopUID first, then TDX StopID.
+ * Picks one ETA per stop. Stops match by StopUID or TDX StopID together with
+ * the stop sequence, so a stop visited twice gets each visit's own ETA. When
+ * no ETA has the same sequence, the stop falls back to any ETA for it.
+ * Among several candidates, sooner countdowns win; ETAs without a countdown
+ * follow in stop order.
  */
 function getStopArrivals(
   stops: RealtimeRouteStop[],
@@ -265,15 +270,26 @@ function getStopArrivals(
   const arrivalsByStopKey = new Map<string, Arrival>()
 
   for (const arrival of sortedArrivals) {
-    for (const key of [arrival.stopUID, arrival.stopID]) {
-      if (key && !arrivalsByStopKey.has(key))
-        arrivalsByStopKey.set(key, arrival)
+    for (const stopKey of [arrival.stopUID, arrival.stopID]) {
+      if (!stopKey) continue
+
+      for (const key of [
+        arrival.sequence == null ? null : toVisitKey(stopKey, arrival.sequence),
+        stopKey,
+      ]) {
+        if (key && !arrivalsByStopKey.has(key)) {
+          arrivalsByStopKey.set(key, arrival)
+        }
+      }
     }
   }
 
   return stops.map((stop) => {
     const arrival =
-      arrivalsByStopKey.get(stop.uuid) ?? arrivalsByStopKey.get(stop.tdxStopId)
+      arrivalsByStopKey.get(toVisitKey(stop.uuid, stop.sequence)) ??
+      arrivalsByStopKey.get(toVisitKey(stop.tdxStopId, stop.sequence)) ??
+      arrivalsByStopKey.get(stop.uuid) ??
+      arrivalsByStopKey.get(stop.tdxStopId)
 
     return {
       uuid: stop.uuid,
@@ -282,6 +298,10 @@ function getStopArrivals(
         : null,
     }
   })
+}
+
+function toVisitKey(stopKey: string, sequence: number): string {
+  return `${stopKey}#${sequence}`
 }
 
 function toApiArrival(

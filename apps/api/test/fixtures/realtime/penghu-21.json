@@ -10,18 +10,21 @@
         "direction": "GO",
         "route_stops": [
           {
+            "sequence": 1,
             "stop": {
               "uuid": "PEN299468",
               "tdx_stop_id": "299468"
             }
           },
           {
+            "sequence": 2,
             "stop": {
               "uuid": "PEN299470",
               "tdx_stop_id": "299470"
             }
           },
           {
+            "sequence": 3,
             "stop": {
               "uuid": "PEN299471",
               "tdx_stop_id": "299471"
@@ -35,48 +38,56 @@
         "direction": "GO",
         "route_stops": [
           {
+            "sequence": 1,
             "stop": {
               "uuid": "PEN299468",
               "tdx_stop_id": "299468"
             }
           },
           {
+            "sequence": 2,
             "stop": {
               "uuid": "PEN299470",
               "tdx_stop_id": "299470"
             }
           },
           {
+            "sequence": 3,
             "stop": {
               "uuid": "PEN299471",
               "tdx_stop_id": "299471"
             }
           },
           {
+            "sequence": 47,
             "stop": {
               "uuid": "PEN299514",
               "tdx_stop_id": "299514"
             }
           },
           {
+            "sequence": 48,
             "stop": {
               "uuid": "PEN299515",
               "tdx_stop_id": "299515"
             }
           },
           {
+            "sequence": 49,
             "stop": {
               "uuid": "PEN299516",
               "tdx_stop_id": "299516"
             }
           },
           {
+            "sequence": 50,
             "stop": {
               "uuid": "PEN299517",
               "tdx_stop_id": "299517"
             }
           },
           {
+            "sequence": 51,
             "stop": {
               "uuid": "PEN299518",
               "tdx_stop_id": "299518"
@@ -90,18 +101,21 @@
         "direction": "GO",
         "route_stops": [
           {
+            "sequence": 1,
             "stop": {
               "uuid": "PEN299468",
               "tdx_stop_id": "299468"
             }
           },
           {
+            "sequence": 2,
             "stop": {
               "uuid": "PEN299470",
               "tdx_stop_id": "299470"
             }
           },
           {
+            "sequence": 3,
             "stop": {
               "uuid": "PEN299471",
               "tdx_stop_id": "299471"

@@ -21,7 +21,7 @@ const route = {
       uuid: 'TPE101320-0',
       tdx_subroute_uid: 'TPE101320',
       direction: PrismaDirectionType.GO,
-      route_stops: [{ stop: { uuid: 'TPE1', tdx_stop_id: '1' } }],
+      route_stops: [{ sequence: 1, stop: { uuid: 'TPE1', tdx_stop_id: '1' } }],
     },
   ],
 }

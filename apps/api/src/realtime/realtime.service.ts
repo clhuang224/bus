@@ -114,6 +114,7 @@ export class RealtimeService {
               where: { is_active: true, stop: { is_active: true } },
               orderBy: { sequence: 'asc' },
               select: {
+                sequence: true,
                 stop: { select: { uuid: true, tdx_stop_id: true } },
               },
             },
@@ -132,9 +133,10 @@ export class RealtimeService {
         uuid: subroute.uuid,
         tdxSubRouteUid: subroute.tdx_subroute_uid,
         direction: DB_DIRECTION_BY_PRISMA[subroute.direction],
-        stops: subroute.route_stops.map(({ stop }) => ({
+        stops: subroute.route_stops.map(({ sequence, stop }) => ({
           uuid: stop.uuid,
           tdxStopId: stop.tdx_stop_id,
+          sequence,
         })),
       })),
     }

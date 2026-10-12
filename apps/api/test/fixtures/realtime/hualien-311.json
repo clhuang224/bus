@@ -10,138 +10,161 @@
         "direction": "GO",
         "route_stops": [
           {
+            "sequence": 1,
             "stop": {
               "uuid": "HUA307560",
               "tdx_stop_id": "307560"
             }
           },
           {
+            "sequence": 2,
             "stop": {
               "uuid": "HUA286979",
               "tdx_stop_id": "286979"
             }
           },
           {
+            "sequence": 3,
             "stop": {
               "uuid": "HUA182874",
               "tdx_stop_id": "182874"
             }
           },
           {
+            "sequence": 4,
             "stop": {
               "uuid": "HUA241908",
               "tdx_stop_id": "241908"
             }
           },
           {
+            "sequence": 5,
             "stop": {
               "uuid": "HUA182876",
               "tdx_stop_id": "182876"
             }
           },
           {
+            "sequence": 6,
             "stop": {
               "uuid": "HUA237391",
               "tdx_stop_id": "237391"
             }
           },
           {
+            "sequence": 7,
             "stop": {
               "uuid": "HUA182389",
               "tdx_stop_id": "182389"
             }
           },
           {
+            "sequence": 8,
             "stop": {
               "uuid": "HUA310127",
               "tdx_stop_id": "310127"
             }
           },
           {
+            "sequence": 9,
             "stop": {
               "uuid": "HUA310128",
               "tdx_stop_id": "310128"
             }
           },
           {
+            "sequence": 10,
             "stop": {
               "uuid": "HUA304778",
               "tdx_stop_id": "304778"
             }
           },
           {
+            "sequence": 11,
             "stop": {
               "uuid": "HUA304780",
               "tdx_stop_id": "304780"
             }
           },
           {
+            "sequence": 12,
             "stop": {
               "uuid": "HUA237394",
               "tdx_stop_id": "237394"
             }
           },
           {
+            "sequence": 13,
             "stop": {
               "uuid": "HUA304781",
               "tdx_stop_id": "304781"
             }
           },
           {
+            "sequence": 14,
             "stop": {
               "uuid": "HUA310129",
               "tdx_stop_id": "310129"
             }
           },
           {
+            "sequence": 15,
             "stop": {
               "uuid": "HUA310130",
               "tdx_stop_id": "310130"
             }
           },
           {
+            "sequence": 16,
             "stop": {
               "uuid": "HUA310131",
               "tdx_stop_id": "310131"
             }
           },
           {
+            "sequence": 17,
             "stop": {
               "uuid": "HUA237397",
               "tdx_stop_id": "237397"
             }
           },
           {
+            "sequence": 18,
             "stop": {
               "uuid": "HUA247675",
               "tdx_stop_id": "247675"
             }
           },
           {
+            "sequence": 19,
             "stop": {
               "uuid": "HUA182444",
               "tdx_stop_id": "182444"
             }
           },
           {
+            "sequence": 20,
             "stop": {
               "uuid": "HUA247310",
               "tdx_stop_id": "247310"
             }
           },
           {
+            "sequence": 21,
             "stop": {
               "uuid": "HUA307470",
               "tdx_stop_id": "307470"
             }
           },
           {
+            "sequence": 22,
             "stop": {
               "uuid": "HUA286975",
               "tdx_stop_id": "286975"
             }
           },
           {
+            "sequence": 23,
             "stop": {
               "uuid": "HUA307559",
               "tdx_stop_id": "307559"
@@ -155,24 +178,28 @@
         "direction": "GO",
         "route_stops": [
           {
+            "sequence": 1,
             "stop": {
               "uuid": "HUA307560",
               "tdx_stop_id": "307560"
             }
           },
           {
+            "sequence": 2,
             "stop": {
               "uuid": "HUA286977",
               "tdx_stop_id": "286977"
             }
           },
           {
+            "sequence": 3,
             "stop": {
               "uuid": "HUA286978",
               "tdx_stop_id": "286978"
             }
           },
           {
+            "sequence": 4,
             "stop": {
               "uuid": "HUA247311",
               "tdx_stop_id": "247311"
@@ -186,30 +213,35 @@
         "direction": "RETURN",
         "route_stops": [
           {
+            "sequence": 1,
             "stop": {
               "uuid": "HUA247311",
               "tdx_stop_id": "247311"
             }
           },
           {
+            "sequence": 2,
             "stop": {
               "uuid": "HUA310126",
               "tdx_stop_id": "310126"
             }
           },
           {
+            "sequence": 3,
             "stop": {
               "uuid": "HUA286982",
               "tdx_stop_id": "286982"
             }
           },
           {
+            "sequence": 4,
             "stop": {
               "uuid": "HUA286981",
               "tdx_stop_id": "286981"
             }
           },
           {
+            "sequence": 5,
             "stop": {
               "uuid": "HUA307559",
               "tdx_stop_id": "307559"

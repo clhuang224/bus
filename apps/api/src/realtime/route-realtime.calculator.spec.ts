@@ -33,6 +33,7 @@ const route: RealtimeRoute = {
       stops: [10, 11, 12].map((sequence) => ({
         uuid: `TPE${sequence}`,
         tdxStopId: `${sequence}`,
+        sequence,
       })),
     },
   ],
@@ -191,6 +192,56 @@ describe('calculateRouteRealtime', () => {
         2,
         null,
       ])
+    })
+
+    it('gives each visit of a repeated stop its own ETA', () => {
+      const loopRoute: RealtimeRoute = {
+        uuid: ROUTE_UID,
+        subRoutes: [
+          {
+            ...route.subRoutes[0],
+            stops: [
+              { uuid: 'TPE10', tdxStopId: '10', sequence: 1 },
+              { uuid: 'TPE11', tdxStopId: '11', sequence: 2 },
+              { uuid: 'TPE10', tdxStopId: '10', sequence: 3 },
+            ],
+          },
+        ],
+      }
+      const [subRoute] = calculateRouteRealtime(
+        loopRoute,
+        {
+          estimatedArrivals: ok([
+            eta(1, {
+              StopUID: 'TPE10',
+              StopStatus: TdxStopStatus.LAST_BUS_PASSED,
+            }),
+            eta(3, { StopUID: 'TPE10', EstimateTime: 600 }),
+          ]),
+          nearStops: ok([]),
+          positions: ok([]),
+        },
+        UPDATED_AT,
+      ).sub_routes
+
+      expect(subRoute.stops.map(({ arrival }) => arrival)).toEqual([
+        { status: RealtimeArrivalStatus.LAST_BUS_PASSED, minutes: null },
+        null,
+        { status: RealtimeArrivalStatus.MINUTES, minutes: 10 },
+      ])
+    })
+
+    it('matches by stop alone when the ETA sequence differs', () => {
+      const { stops } = calculate({
+        estimatedArrivals: ok([
+          eta(10, { StopSequence: 99, EstimateTime: 120 }),
+        ]),
+      })
+
+      expect(stops[0].arrival).toEqual({
+        status: RealtimeArrivalStatus.MINUTES,
+        minutes: 2,
+      })
     })
 
     it('falls back to route-level ETAs when TDX omits the sub-route', () => {

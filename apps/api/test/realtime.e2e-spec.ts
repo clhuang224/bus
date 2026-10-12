@@ -43,8 +43,14 @@ describe('Realtime API (e2e)', () => {
                             tdx_subroute_uid: 'TPE118110',
                             direction: PrismaDirectionType.RETURN,
                             route_stops: [
-                              { stop: { uuid: 'TPE7', tdx_stop_id: '7' } },
-                              { stop: { uuid: 'TPE8', tdx_stop_id: '8' } },
+                              {
+                                sequence: 7,
+                                stop: { uuid: 'TPE7', tdx_stop_id: '7' },
+                              },
+                              {
+                                sequence: 8,
+                                stop: { uuid: 'TPE8', tdx_stop_id: '8' },
+                              },
                             ],
                           },
                         ],

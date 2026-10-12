@@ -145,6 +145,28 @@ describe('Realtime API with recorded city data (e2e)', () => {
     })
   })
 
+  describe('Taoyuan route 1, which visits one stop twice', () => {
+    beforeEach(async () => {
+      app = await createFixtureApp(loadFixture('taoyuan-1'))
+    })
+
+    it('gives each visit of the repeated stop its own arrival', async () => {
+      const subRoute = (await getSubRoutes(app, 'TAO1')).get('TAO1-0')!
+      const repeatedStopArrivals = subRoute.stops
+        .filter(({ uuid }) => uuid === 'TAO190')
+        .map(({ arrival }) => arrival)
+
+      expect(repeatedStopArrivals).toEqual([
+        { status: RealtimeArrivalStatus.LAST_BUS_PASSED, minutes: null },
+        { status: RealtimeArrivalStatus.NOT_YET_DEPARTED, minutes: null },
+      ])
+      expect(arrivalOf(subRoute, 'TAO3939')).toEqual({
+        status: RealtimeArrivalStatus.MINUTES,
+        minutes: 4,
+      })
+    })
+  })
+
   describe('Hualien route 311, with lettered short-trip sub-routes', () => {
     beforeEach(async () => {
       app = await createFixtureApp(loadFixture('hualien-311'))
