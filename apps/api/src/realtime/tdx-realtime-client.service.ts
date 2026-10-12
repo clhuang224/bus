@@ -18,7 +18,12 @@ import {
 
 const TDX_BUS_BASE_URL = 'https://tdx.transportdata.tw/api/basic/v2/Bus'
 const REQUESTS_PER_SECOND_ENV = 'TDX_REALTIME_REQUESTS_PER_SECOND'
-const DEFAULT_REQUESTS_PER_SECOND = 5
+/**
+ * The TDX key allows 5 requests per second, shared with sync and the TDX
+ * proxy, which this limiter cannot see. Leave headroom for them by default;
+ * raise it once the proxy no longer uses the key.
+ */
+const DEFAULT_REQUESTS_PER_SECOND = 3
 const RATE_LIMIT_COOLDOWN_MS = 3 * 1000
 /**
  * Requests wait at most about this long for a per-second slot. Beyond that,

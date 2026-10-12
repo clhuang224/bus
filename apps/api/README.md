@@ -173,8 +173,10 @@ returned status values to their own copy.
   shorter cache would mostly spend quota on unchanged data. Concurrent
   requests for one route share one TDX fetch.
 - Realtime requests share the TDX token with sync but not its database quota
-  log. `TDX_REALTIME_REQUESTS_PER_SECOND` (default `5`) limits them per
-  second, and a TDX `429` pauses realtime requests for 3 seconds. Requests
+  log. `TDX_REALTIME_REQUESTS_PER_SECOND` (default `3`) limits them per
+  second, leaving headroom within the key's 5 requests per second for sync
+  and the TDX proxy, which share the key. A TDX `429` pauses realtime
+  requests for 3 seconds. Requests
   wait at most about 3 seconds for a slot; beyond that they are reported as
   `rate_limited` without calling TDX.
 - A failed feed does not fail the request. ETA failures make sub-routes
