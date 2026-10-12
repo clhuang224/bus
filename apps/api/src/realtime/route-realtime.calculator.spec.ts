@@ -454,6 +454,54 @@ describe('calculateRouteRealtime', () => {
     })
   })
 
+  describe('GPS positions without sub-route metadata', () => {
+    it('uses them for vehicles already near a stop, but not as GPS-only vehicles', () => {
+      const { vehicles } = calculate({
+        nearStops: ok([nearStop(10)]),
+        positions: ok([
+          gps('KKA-0151', {
+            SubRouteUID: null,
+            Direction: null,
+            BusPosition: { PositionLon: 121.2, PositionLat: 25.2 },
+          }),
+          gps('NO-METADATA', { SubRouteUID: null, Direction: null }),
+        ]),
+      })
+
+      expect(
+        vehicles.map(({ plate_number, position }) => [plate_number, position]),
+      ).toEqual([['KKA-0151', { latitude: 25.2, longitude: 121.2 }]])
+    })
+
+    it('ignores a record whose sub-route contradicts the vehicle', () => {
+      const { vehicles } = calculate({
+        nearStops: ok([nearStop(10)]),
+        positions: ok([
+          gps('KKA-0151', { SubRouteUID: 'OTHER', Direction: null }),
+        ]),
+      })
+
+      expect(vehicles[0].position).toBeNull()
+    })
+
+    it('prefers a record that matches the sub-route and direction', () => {
+      const { vehicles } = calculate({
+        nearStops: ok([nearStop(10)]),
+        positions: ok([
+          gps('KKA-0151', {
+            SubRouteUID: null,
+            BusPosition: { PositionLon: 121.9, PositionLat: 25.9 },
+          }),
+          gps('KKA-0151', {
+            BusPosition: { PositionLon: 121.1, PositionLat: 25.1 },
+          }),
+        ]),
+      })
+
+      expect(vehicles[0].position).toEqual({ latitude: 25.1, longitude: 121.1 })
+    })
+  })
+
   describe('status', () => {
     it('is normal when a vehicle is near a stop', () => {
       expect(calculate({ nearStops: ok([nearStop(10)]) }).status).toBe(

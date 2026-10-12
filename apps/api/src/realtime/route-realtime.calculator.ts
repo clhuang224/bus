@@ -475,41 +475,41 @@ function toVehicleApiArrival(arrival: Arrival | undefined): ApiRealtimeArrival {
 
 /**
  * Adds GPS positions to vehicles near a stop, then appends vehicles that only
- * appear in the GPS feed.
+ * appear in the GPS feed. A vehicle already near a stop of this sub-route can
+ * use a GPS record that omits the sub-route or direction, as long as nothing
+ * contradicts it; a GPS-only vehicle needs both to match.
  */
 function withPositions(
   nearStopVehicles: NearStopVehicle[],
   subRoute: RealtimeRouteSubRoute,
   positions: TdxRealtimeByFrequency[],
 ): ApiRouteRealtimeVehicle[] {
-  const positionsByPlate = new Map<
-    string,
-    { plateNumber: string; position: ApiPosition }
-  >()
+  const matchedPositions = new Map<string, GpsPosition>()
+  const compatiblePositions = new Map<string, GpsPosition>()
 
   for (const vehicle of positions) {
     const position = toApiPosition(vehicle)
+    if (!position) continue
+
     const plateNumber = normalizePlateNumber(vehicle.PlateNumb)
+    const gpsPosition = { plateNumber: vehicle.PlateNumb, position }
+    const isSameSubRoute = vehicle.SubRouteUID === subRoute.tdxSubRouteUid
+    const isSameDirection = vehicle.Direction === subRoute.direction
 
-    if (
-      vehicle.SubRouteUID !== subRoute.tdxSubRouteUid ||
-      vehicle.Direction !== subRoute.direction ||
-      !position ||
-      positionsByPlate.has(plateNumber)
+    if (isSameSubRoute && isSameDirection) {
+      setFirst(matchedPositions, plateNumber, gpsPosition)
+    } else if (
+      (vehicle.SubRouteUID == null || isSameSubRoute) &&
+      (vehicle.Direction == null || isSameDirection)
     ) {
-      continue
+      setFirst(compatiblePositions, plateNumber, gpsPosition)
     }
-
-    positionsByPlate.set(plateNumber, {
-      plateNumber: vehicle.PlateNumb,
-      position,
-    })
   }
 
   const nearStopPlates = new Set(
     nearStopVehicles.map(({ plateNumber }) => plateNumber),
   )
-  const gpsOnlyVehicles = [...positionsByPlate]
+  const gpsOnlyVehicles = [...matchedPositions]
     .filter(([plateNumber]) => !nearStopPlates.has(plateNumber))
     .map(([, { plateNumber, position }]) => ({
       plate_number: plateNumber,
@@ -522,10 +522,23 @@ function withPositions(
   return [
     ...nearStopVehicles.map(({ vehicle, plateNumber }) => ({
       ...vehicle,
-      position: positionsByPlate.get(plateNumber)?.position ?? null,
+      position:
+        (
+          matchedPositions.get(plateNumber) ??
+          compatiblePositions.get(plateNumber)
+        )?.position ?? null,
     })),
     ...gpsOnlyVehicles,
   ]
+}
+
+interface GpsPosition {
+  plateNumber: string
+  position: ApiPosition
+}
+
+function setFirst<K, V>(map: Map<K, V>, key: K, value: V): void {
+  if (!map.has(key)) map.set(key, value)
 }
 
 function toApiPosition(vehicle: TdxRealtimeByFrequency): ApiPosition | null {
