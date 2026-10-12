@@ -173,9 +173,10 @@ GPS 位置，並回傳每個子路線要顯示的內容：每個站牌的到站�
 - Realtime 請求與 sync 共用 TDX token，但不寫入 sync 的資料庫額度紀錄。
   `TDX_REALTIME_REQUESTS_PER_SECOND`（預設 `5`）限制每秒請求數；TDX 回應
   `429` 後，realtime 請求會暫停 3 秒。
-- 某個來源失敗時，請求本身不會失敗。到站時間或靠站資訊失敗時，子路線會回報
-  `rate_limited` 或 `unavailable`；GPS 位置失敗時，到站資訊仍可使用，只有車輛
-  位置會是 null。
+- 某個來源失敗時，請求本身不會失敗。到站時間來源失敗時，子路線會回報
+  `rate_limited` 或 `unavailable`；靠站資訊遇到 rate limit 時會回報
+  `rate_limited`，其他靠站資訊失敗只有在沒有任何到站資訊時才會回報
+  `unavailable`。GPS 位置失敗時，到站資訊仍可使用，只有車輛位置會是 null。
 
 記憶體快取的前提是 API 只有一個常駐執行個體。
 

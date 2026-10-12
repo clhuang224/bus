@@ -175,9 +175,11 @@ returned status values to their own copy.
 - Realtime requests share the TDX token with sync but not its database quota
   log. `TDX_REALTIME_REQUESTS_PER_SECOND` (default `5`) limits them per
   second, and a TDX `429` pauses realtime requests for 3 seconds.
-- A failed feed does not fail the request. ETA and near-stop failures make
-  the sub-routes report `rate_limited` or `unavailable`; a GPS failure only
-  leaves vehicle positions null, since arrivals are still usable.
+- A failed feed does not fail the request. ETA failures make sub-routes
+  report `rate_limited` or `unavailable`. Near-stop rate limits also report
+  `rate_limited`; other near-stop failures report `unavailable` only when no
+  ETA is available. A GPS failure only leaves vehicle positions null, since
+  arrivals are still usable.
 
 The in-memory cache assumes one long-running API instance.
 
