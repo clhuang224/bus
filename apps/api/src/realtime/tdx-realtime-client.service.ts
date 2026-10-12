@@ -14,6 +14,7 @@ import {
   isTdxEstimatedArrival,
   isTdxRealtimeByFrequency,
   isTdxRealtimeNearStop,
+  normalizeTdxRealtimeNearStop,
 } from './tdx-realtime.validator.js'
 
 const TDX_BUS_BASE_URL = 'https://tdx.transportdata.tw/api/basic/v2/Bus'
@@ -99,15 +100,19 @@ export class TdxRealtimeClientService {
     )
   }
 
-  fetchNearStops(
+  async fetchNearStops(
     city: CityNameType,
     routeUID: string,
   ): Promise<RealtimeSourceResult<TdxRealtimeNearStop>> {
-    return this.fetchSource(
+    const result = await this.fetchSource(
       `/RealTimeNearStop/City/${city}`,
       routeUID,
       isTdxRealtimeNearStop,
     )
+
+    return result.ok
+      ? { ok: true, data: result.data.map(normalizeTdxRealtimeNearStop) }
+      : result
   }
 
   fetchPositions(

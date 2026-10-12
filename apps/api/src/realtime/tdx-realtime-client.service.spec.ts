@@ -224,6 +224,35 @@ describe('TdxRealtimeClientService', () => {
     ])
   })
 
+  it('keeps near-stop records with an unknown A2EventType as null', async () => {
+    globalThis.fetch = () =>
+      Promise.resolve(
+        jsonResponse([
+          {
+            PlateNumb: 'KKA-0151',
+            Direction: DirectionType.GO,
+            StopSequence: 1,
+            A2EventType: 2,
+          },
+        ]),
+      )
+    const service = new TdxRealtimeClientService(
+      createAuthService().authService,
+    )
+
+    expect(await service.fetchNearStops(CityNameType.TAIPEI, 'TPE1')).toEqual({
+      ok: true,
+      data: [
+        {
+          PlateNumb: 'KKA-0151',
+          Direction: DirectionType.GO,
+          StopSequence: 1,
+          A2EventType: null,
+        },
+      ],
+    })
+  })
+
   it('reports other failures as unavailable', async () => {
     globalThis.fetch = () => Promise.resolve(new Response('', { status: 500 }))
     const service = new TdxRealtimeClientService(

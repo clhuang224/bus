@@ -29,18 +29,6 @@ function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0
 }
 
-/** TDX only defines departed (0) and arriving (1); other values are malformed. */
-function isOptionalA2EventType(
-  value: unknown,
-): value is TdxA2EventType | null | undefined {
-  return (
-    value === undefined ||
-    value === null ||
-    value === TdxA2EventType.DEPARTED ||
-    value === TdxA2EventType.ARRIVING
-  )
-}
-
 function isOptionalLocalizedText(
   value: unknown,
 ): value is TdxLocalizedText | null | undefined {
@@ -82,7 +70,7 @@ export function isTdxRealtimeNearStop(
     isOptionalString(value.StopID) &&
     isOptionalLocalizedText(value.StopName) &&
     isFiniteNumber(value.StopSequence) &&
-    isOptionalA2EventType(value.A2EventType)
+    isOptionalNumber(value.A2EventType)
   )
 }
 
@@ -100,4 +88,18 @@ export function isTdxRealtimeByFrequency(
         isOptionalNumber(value.BusPosition.PositionLon) &&
         isOptionalNumber(value.BusPosition.PositionLat)))
   )
+}
+
+/**
+ * TDX only defines departed (0) and arriving (1). Other numbers are treated
+ * as a missing A2EventType, so the vehicle is kept without an event.
+ */
+export function normalizeTdxRealtimeNearStop(
+  nearStop: TdxRealtimeNearStop,
+): TdxRealtimeNearStop {
+  const isKnownEvent =
+    nearStop.A2EventType === TdxA2EventType.DEPARTED ||
+    nearStop.A2EventType === TdxA2EventType.ARRIVING
+
+  return isKnownEvent ? nearStop : { ...nearStop, A2EventType: null }
 }
