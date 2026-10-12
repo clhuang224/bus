@@ -1,0 +1,9 @@
+/** `StopStatus` values from TDX `EstimatedTimeOfArrival`. */
+export enum TdxStopStatus {
+  NORMAL = 0,
+  NOT_YET_DEPARTED = 1,
+  NO_STOP_DUE_TO_TRAFFIC_CONTROL = 2,
+  LAST_BUS_PASSED = 3,
+  NOT_IN_SERVICE_TODAY = 4,
+  UNKNOWN = 255,
+}

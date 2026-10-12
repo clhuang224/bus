@@ -155,11 +155,37 @@ Do not add database e2e tests to pre-push yet. Keep them manual until there is a
 - `system`: service health checks
 - `routes`: database-backed route list and route detail endpoints
 - `stations`: database-backed station and nearby station endpoints
-- `realtime`: polling-friendly realtime snapshot contracts
+- `realtime`: TDX-backed realtime snapshots for one route
 - `admin`: base-data sync entry points
 
 See [docs/api-error-handling.md](./docs/api-error-handling.md) for the shared
 response envelope and global error documentation rules.
+
+### Realtime
+
+`GET /api/realtime/routes/:uuid` fetches ETA, near-stop, and GPS data for one
+route from TDX and returns what each sub-route should show: an arrival per
+stop, the vehicles with their arrivals, and a status message. Clients map the
+returned status values to their own copy.
+
+- Snapshots are cached in memory per route for 90 seconds, or 5 seconds when a
+  TDX feed failed. TDX batch ETAs only change about once a minute, so a
+  shorter cache would mostly spend quota on unchanged data. Concurrent
+  requests for one route share one TDX fetch.
+- Realtime requests share the TDX token with sync but not its database quota
+  log. `TDX_REALTIME_REQUESTS_PER_SECOND` (default `3`) limits them per
+  second, leaving headroom within the key's 5 requests per second for sync
+  and the TDX proxy, which share the key. A TDX `429` pauses realtime
+  requests for 3 seconds. Requests
+  wait at most about 3 seconds for a slot; beyond that they are reported as
+  `rate_limited` without calling TDX.
+- A failed feed does not fail the request. ETA failures make sub-routes
+  report `rate_limited` or `unavailable`. Near-stop rate limits also report
+  `rate_limited`; other near-stop failures report `unavailable` only when no
+  ETA is available. A GPS failure only leaves vehicle positions null, since
+  arrivals are still usable.
+
+The in-memory cache assumes one long-running API instance.
 
 ## Backlog Endpoint Groups
 

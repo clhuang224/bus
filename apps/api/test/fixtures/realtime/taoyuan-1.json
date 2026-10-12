@@ -1,0 +1,212 @@
+{
+  "source": "TDX Taoyuan route TAO1 (1), recorded 2026-10-12 and trimmed to stops 17-27; stop TAO190 is visited at sequences 19 and 25",
+  "route": {
+    "uuid": "TAO1",
+    "city": "TAOYUAN",
+    "subroutes": [
+      {
+        "uuid": "TAO1-0",
+        "tdx_subroute_uid": "TAO1",
+        "direction": "GO",
+        "route_stops": [
+          {
+            "sequence": 17,
+            "stop": {
+              "uuid": "TAO9988",
+              "tdx_stop_id": "9988"
+            }
+          },
+          {
+            "sequence": 18,
+            "stop": {
+              "uuid": "TAO4099",
+              "tdx_stop_id": "4099"
+            }
+          },
+          {
+            "sequence": 19,
+            "stop": {
+              "uuid": "TAO190",
+              "tdx_stop_id": "190"
+            }
+          },
+          {
+            "sequence": 20,
+            "stop": {
+              "uuid": "TAO192",
+              "tdx_stop_id": "192"
+            }
+          },
+          {
+            "sequence": 21,
+            "stop": {
+              "uuid": "TAO195",
+              "tdx_stop_id": "195"
+            }
+          },
+          {
+            "sequence": 22,
+            "stop": {
+              "uuid": "TAO196",
+              "tdx_stop_id": "196"
+            }
+          },
+          {
+            "sequence": 23,
+            "stop": {
+              "uuid": "TAO200",
+              "tdx_stop_id": "200"
+            }
+          },
+          {
+            "sequence": 24,
+            "stop": {
+              "uuid": "TAO203",
+              "tdx_stop_id": "203"
+            }
+          },
+          {
+            "sequence": 25,
+            "stop": {
+              "uuid": "TAO190",
+              "tdx_stop_id": "190"
+            }
+          },
+          {
+            "sequence": 26,
+            "stop": {
+              "uuid": "TAO3939",
+              "tdx_stop_id": "3939"
+            }
+          },
+          {
+            "sequence": 27,
+            "stop": {
+              "uuid": "TAO10031",
+              "tdx_stop_id": "10031"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "estimatedArrivals": [
+    {
+      "StopUID": "TAO10031",
+      "StopID": "10031",
+      "SubRouteUID": "TAO1",
+      "Direction": 0,
+      "EstimateTime": 300,
+      "StopSequence": 27,
+      "StopStatus": 0,
+      "NextBusTime": "2026-10-12T20:25:00+08:00",
+      "SrcUpdateTime": "2026-10-12T20:02:55+08:00",
+      "UpdateTime": "2026-10-12T20:03:12+08:00"
+    },
+    {
+      "StopUID": "TAO190",
+      "StopID": "190",
+      "SubRouteUID": "TAO1",
+      "Direction": 0,
+      "StopSequence": 19,
+      "StopStatus": 3,
+      "SrcUpdateTime": "2026-10-12T20:02:55+08:00",
+      "UpdateTime": "2026-10-12T20:03:12+08:00"
+    },
+    {
+      "StopUID": "TAO190",
+      "StopID": "190",
+      "SubRouteUID": "TAO1",
+      "Direction": 0,
+      "StopSequence": 25,
+      "StopStatus": 1,
+      "NextBusTime": "2026-10-12T20:16:00+08:00",
+      "SrcUpdateTime": "2026-10-12T20:02:55+08:00",
+      "UpdateTime": "2026-10-12T20:03:12+08:00"
+    },
+    {
+      "StopUID": "TAO192",
+      "StopID": "192",
+      "SubRouteUID": "TAO1",
+      "Direction": 0,
+      "StopSequence": 20,
+      "StopStatus": 3,
+      "SrcUpdateTime": "2026-10-12T20:02:55+08:00",
+      "UpdateTime": "2026-10-12T20:03:12+08:00"
+    },
+    {
+      "StopUID": "TAO195",
+      "StopID": "195",
+      "SubRouteUID": "TAO1",
+      "Direction": 0,
+      "StopSequence": 21,
+      "StopStatus": 3,
+      "SrcUpdateTime": "2026-10-12T20:02:55+08:00",
+      "UpdateTime": "2026-10-12T20:03:12+08:00"
+    },
+    {
+      "StopUID": "TAO196",
+      "StopID": "196",
+      "SubRouteUID": "TAO1",
+      "Direction": 0,
+      "StopSequence": 22,
+      "StopStatus": 3,
+      "SrcUpdateTime": "2026-10-12T20:02:55+08:00",
+      "UpdateTime": "2026-10-12T20:03:12+08:00"
+    },
+    {
+      "StopUID": "TAO200",
+      "StopID": "200",
+      "SubRouteUID": "TAO1",
+      "Direction": 0,
+      "StopSequence": 23,
+      "StopStatus": 3,
+      "SrcUpdateTime": "2026-10-12T20:02:55+08:00",
+      "UpdateTime": "2026-10-12T20:03:12+08:00"
+    },
+    {
+      "StopUID": "TAO203",
+      "StopID": "203",
+      "SubRouteUID": "TAO1",
+      "Direction": 0,
+      "StopSequence": 24,
+      "StopStatus": 3,
+      "SrcUpdateTime": "2026-10-12T20:02:55+08:00",
+      "UpdateTime": "2026-10-12T20:03:12+08:00"
+    },
+    {
+      "StopUID": "TAO3939",
+      "StopID": "3939",
+      "SubRouteUID": "TAO1",
+      "Direction": 0,
+      "EstimateTime": 240,
+      "StopSequence": 26,
+      "StopStatus": 0,
+      "NextBusTime": "2026-10-12T20:25:00+08:00",
+      "SrcUpdateTime": "2026-10-12T20:02:55+08:00",
+      "UpdateTime": "2026-10-12T20:03:12+08:00"
+    },
+    {
+      "StopUID": "TAO4099",
+      "StopID": "4099",
+      "SubRouteUID": "TAO1",
+      "Direction": 0,
+      "StopSequence": 18,
+      "StopStatus": 3,
+      "SrcUpdateTime": "2026-10-12T20:02:55+08:00",
+      "UpdateTime": "2026-10-12T20:03:12+08:00"
+    },
+    {
+      "StopUID": "TAO9988",
+      "StopID": "9988",
+      "SubRouteUID": "TAO1",
+      "Direction": 0,
+      "StopSequence": 17,
+      "StopStatus": 3,
+      "SrcUpdateTime": "2026-10-12T20:02:55+08:00",
+      "UpdateTime": "2026-10-12T20:03:12+08:00"
+    }
+  ],
+  "nearStops": [],
+  "positions": []
+}

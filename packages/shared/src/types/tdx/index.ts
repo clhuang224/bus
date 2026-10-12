@@ -8,3 +8,8 @@ export type { TdxStop, TdxStopPosition } from './Stop.js'
 export type { TdxStopOfRoute, TdxStopOfRouteStop } from './StopOfRoute.js'
 export type { TdxStation } from './Station.js'
 export type { TdxStationGroup } from './StationGroup.js'
+export type {
+  TdxEstimatedArrival,
+  TdxRealtimeByFrequency,
+  TdxRealtimeNearStop,
+} from './Realtime.js'

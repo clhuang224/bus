@@ -33,4 +33,15 @@ export type {
   TdxStopOfRoute,
   TdxStopOfRouteStop,
   TdxStopPosition,
+  TdxEstimatedArrival,
+  TdxRealtimeByFrequency,
+  TdxRealtimeNearStop,
 } from './tdx/index.js'
+export type {
+  ApiRealtimeArrival,
+  ApiRouteRealtime,
+  ApiRouteRealtimeNearStop,
+  ApiRouteRealtimeStop,
+  ApiRouteRealtimeSubRoute,
+  ApiRouteRealtimeVehicle,
+} from './RouteRealtime.js'

@@ -1,0 +1,689 @@
+{
+  "source": "TDX HualienCounty route HUA0117 (311), recorded 2026-10-11 and trimmed to the stops around each vehicle",
+  "route": {
+    "uuid": "HUA0117",
+    "city": "HUALIEN_COUNTY",
+    "subroutes": [
+      {
+        "uuid": "HUA011701-0",
+        "tdx_subroute_uid": "HUA011701",
+        "direction": "GO",
+        "route_stops": [
+          {
+            "sequence": 1,
+            "stop": {
+              "uuid": "HUA307560",
+              "tdx_stop_id": "307560"
+            }
+          },
+          {
+            "sequence": 2,
+            "stop": {
+              "uuid": "HUA286979",
+              "tdx_stop_id": "286979"
+            }
+          },
+          {
+            "sequence": 3,
+            "stop": {
+              "uuid": "HUA182874",
+              "tdx_stop_id": "182874"
+            }
+          },
+          {
+            "sequence": 4,
+            "stop": {
+              "uuid": "HUA241908",
+              "tdx_stop_id": "241908"
+            }
+          },
+          {
+            "sequence": 5,
+            "stop": {
+              "uuid": "HUA182876",
+              "tdx_stop_id": "182876"
+            }
+          },
+          {
+            "sequence": 6,
+            "stop": {
+              "uuid": "HUA237391",
+              "tdx_stop_id": "237391"
+            }
+          },
+          {
+            "sequence": 7,
+            "stop": {
+              "uuid": "HUA182389",
+              "tdx_stop_id": "182389"
+            }
+          },
+          {
+            "sequence": 8,
+            "stop": {
+              "uuid": "HUA310127",
+              "tdx_stop_id": "310127"
+            }
+          },
+          {
+            "sequence": 9,
+            "stop": {
+              "uuid": "HUA310128",
+              "tdx_stop_id": "310128"
+            }
+          },
+          {
+            "sequence": 10,
+            "stop": {
+              "uuid": "HUA304778",
+              "tdx_stop_id": "304778"
+            }
+          },
+          {
+            "sequence": 11,
+            "stop": {
+              "uuid": "HUA304780",
+              "tdx_stop_id": "304780"
+            }
+          },
+          {
+            "sequence": 12,
+            "stop": {
+              "uuid": "HUA237394",
+              "tdx_stop_id": "237394"
+            }
+          },
+          {
+            "sequence": 13,
+            "stop": {
+              "uuid": "HUA304781",
+              "tdx_stop_id": "304781"
+            }
+          },
+          {
+            "sequence": 14,
+            "stop": {
+              "uuid": "HUA310129",
+              "tdx_stop_id": "310129"
+            }
+          },
+          {
+            "sequence": 15,
+            "stop": {
+              "uuid": "HUA310130",
+              "tdx_stop_id": "310130"
+            }
+          },
+          {
+            "sequence": 16,
+            "stop": {
+              "uuid": "HUA310131",
+              "tdx_stop_id": "310131"
+            }
+          },
+          {
+            "sequence": 17,
+            "stop": {
+              "uuid": "HUA237397",
+              "tdx_stop_id": "237397"
+            }
+          },
+          {
+            "sequence": 18,
+            "stop": {
+              "uuid": "HUA247675",
+              "tdx_stop_id": "247675"
+            }
+          },
+          {
+            "sequence": 19,
+            "stop": {
+              "uuid": "HUA182444",
+              "tdx_stop_id": "182444"
+            }
+          },
+          {
+            "sequence": 20,
+            "stop": {
+              "uuid": "HUA247310",
+              "tdx_stop_id": "247310"
+            }
+          },
+          {
+            "sequence": 21,
+            "stop": {
+              "uuid": "HUA307470",
+              "tdx_stop_id": "307470"
+            }
+          },
+          {
+            "sequence": 22,
+            "stop": {
+              "uuid": "HUA286975",
+              "tdx_stop_id": "286975"
+            }
+          },
+          {
+            "sequence": 23,
+            "stop": {
+              "uuid": "HUA307559",
+              "tdx_stop_id": "307559"
+            }
+          }
+        ]
+      },
+      {
+        "uuid": "HUA0117A1-0",
+        "tdx_subroute_uid": "HUA0117A1",
+        "direction": "GO",
+        "route_stops": [
+          {
+            "sequence": 1,
+            "stop": {
+              "uuid": "HUA307560",
+              "tdx_stop_id": "307560"
+            }
+          },
+          {
+            "sequence": 2,
+            "stop": {
+              "uuid": "HUA286977",
+              "tdx_stop_id": "286977"
+            }
+          },
+          {
+            "sequence": 3,
+            "stop": {
+              "uuid": "HUA286978",
+              "tdx_stop_id": "286978"
+            }
+          },
+          {
+            "sequence": 4,
+            "stop": {
+              "uuid": "HUA247311",
+              "tdx_stop_id": "247311"
+            }
+          }
+        ]
+      },
+      {
+        "uuid": "HUA0117A2-1",
+        "tdx_subroute_uid": "HUA0117A2",
+        "direction": "RETURN",
+        "route_stops": [
+          {
+            "sequence": 1,
+            "stop": {
+              "uuid": "HUA247311",
+              "tdx_stop_id": "247311"
+            }
+          },
+          {
+            "sequence": 2,
+            "stop": {
+              "uuid": "HUA310126",
+              "tdx_stop_id": "310126"
+            }
+          },
+          {
+            "sequence": 3,
+            "stop": {
+              "uuid": "HUA286982",
+              "tdx_stop_id": "286982"
+            }
+          },
+          {
+            "sequence": 4,
+            "stop": {
+              "uuid": "HUA286981",
+              "tdx_stop_id": "286981"
+            }
+          },
+          {
+            "sequence": 5,
+            "stop": {
+              "uuid": "HUA307559",
+              "tdx_stop_id": "307559"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "estimatedArrivals": [
+    {
+      "PlateNumb": "KKB-2623",
+      "StopUID": "HUA182389",
+      "StopID": "182389",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 7,
+      "EstimateTime": 385,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "KKB-2623",
+      "StopUID": "HUA182444",
+      "StopID": "182444",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 19,
+      "EstimateTime": 1226,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "HUA182874",
+      "StopID": "182874",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 3,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "KKB-2623",
+      "StopUID": "HUA182876",
+      "StopID": "182876",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 5,
+      "EstimateTime": 59,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "KKB-2623",
+      "StopUID": "HUA237391",
+      "StopID": "237391",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 6,
+      "EstimateTime": 234,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "KKB-2623",
+      "StopUID": "HUA237394",
+      "StopID": "237394",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 12,
+      "EstimateTime": 759,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "KKB-2623",
+      "StopUID": "HUA237397",
+      "StopID": "237397",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 17,
+      "EstimateTime": 1097,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "HUA241908",
+      "StopID": "241908",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 4,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "KKB-2683",
+      "StopUID": "HUA247310",
+      "StopID": "247310",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 20,
+      "EstimateTime": 146,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "HUA247311",
+      "StopID": "247311",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA0117A1",
+      "Direction": 0,
+      "StopSequence": 4,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "HUA247311",
+      "StopID": "247311",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA0117A2",
+      "Direction": 1,
+      "StopSequence": 1,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "KKB-2623",
+      "StopUID": "HUA247675",
+      "StopID": "247675",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 18,
+      "EstimateTime": 1135,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "KKB-2683",
+      "StopUID": "HUA286975",
+      "StopID": "286975",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 22,
+      "EstimateTime": 455,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "HUA286977",
+      "StopID": "286977",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA0117A1",
+      "Direction": 0,
+      "StopSequence": 2,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "HUA286978",
+      "StopID": "286978",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA0117A1",
+      "Direction": 0,
+      "StopSequence": 3,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "HUA286979",
+      "StopID": "286979",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 2,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "HUA286981",
+      "StopID": "286981",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA0117A2",
+      "Direction": 1,
+      "StopSequence": 4,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "HUA286982",
+      "StopID": "286982",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA0117A2",
+      "Direction": 1,
+      "StopSequence": 3,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "KKB-2623",
+      "StopUID": "HUA304778",
+      "StopID": "304778",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 10,
+      "EstimateTime": 620,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "KKB-2623",
+      "StopUID": "HUA304780",
+      "StopID": "304780",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 11,
+      "EstimateTime": 673,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "KKB-2623",
+      "StopUID": "HUA304781",
+      "StopID": "304781",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 13,
+      "EstimateTime": 862,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "KKB-2683",
+      "StopUID": "HUA307470",
+      "StopID": "307470",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 21,
+      "EstimateTime": 261,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "KKB-2683",
+      "StopUID": "HUA307559",
+      "StopID": "307559",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 23,
+      "EstimateTime": 530,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "HUA307559",
+      "StopID": "307559",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA0117A2",
+      "Direction": 1,
+      "StopSequence": 5,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "HUA307560",
+      "StopID": "307560",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 1,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "HUA307560",
+      "StopID": "307560",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA0117A1",
+      "Direction": 0,
+      "StopSequence": 1,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "-1",
+      "StopUID": "HUA310126",
+      "StopID": "310126",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA0117A2",
+      "Direction": 1,
+      "StopSequence": 2,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "KKB-2623",
+      "StopUID": "HUA310127",
+      "StopID": "310127",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 8,
+      "EstimateTime": 509,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "KKB-2623",
+      "StopUID": "HUA310128",
+      "StopID": "310128",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 9,
+      "EstimateTime": 560,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "KKB-2623",
+      "StopUID": "HUA310129",
+      "StopID": "310129",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 14,
+      "EstimateTime": 932,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "KKB-2623",
+      "StopUID": "HUA310130",
+      "StopID": "310130",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 15,
+      "EstimateTime": 973,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "KKB-2623",
+      "StopUID": "HUA310131",
+      "StopID": "310131",
+      "RouteUID": "HUA0117",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopSequence": 16,
+      "EstimateTime": 1036,
+      "StopStatus": 0
+    }
+  ],
+  "nearStops": [
+    {
+      "PlateNumb": "KKB-2623",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopUID": "HUA182876",
+      "StopID": "182876",
+      "StopName": {
+        "Zh_tw": "大同市場",
+        "En": "Datong Market"
+      },
+      "StopSequence": 5,
+      "A2EventType": 1
+    },
+    {
+      "PlateNumb": "KKB-2369",
+      "SubRouteUID": "HUA0117A1",
+      "Direction": 0,
+      "StopUID": "HUA247311",
+      "StopID": "247311",
+      "StopName": {
+        "Zh_tw": "花蓮機場",
+        "En": "Hualien Airport"
+      },
+      "StopSequence": 4,
+      "A2EventType": 1
+    },
+    {
+      "PlateNumb": "KKB-2683",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopUID": "HUA182444",
+      "StopID": "182444",
+      "StopName": {
+        "Zh_tw": "海星中學",
+        "En": "Stella Maris Ursuline High School"
+      },
+      "StopSequence": 19,
+      "A2EventType": 0
+    },
+    {
+      "PlateNumb": "KKB-2281",
+      "SubRouteUID": "HUA0117A2",
+      "Direction": 1,
+      "StopUID": "HUA307559",
+      "StopID": "307559",
+      "StopName": {
+        "Zh_tw": "花蓮轉運站",
+        "En": "Hualien Bus Sation"
+      },
+      "StopSequence": 5,
+      "A2EventType": 1
+    },
+    {
+      "PlateNumb": "KKA-9991",
+      "SubRouteUID": "HUA0117A2",
+      "Direction": 1,
+      "StopUID": "HUA307559",
+      "StopID": "307559",
+      "StopName": {
+        "Zh_tw": "花蓮轉運站",
+        "En": "Hualien Bus Sation"
+      },
+      "StopSequence": 5,
+      "A2EventType": 1
+    },
+    {
+      "PlateNumb": "KKA-9996",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopUID": "HUA307559",
+      "StopID": "307559",
+      "StopName": {
+        "Zh_tw": "花蓮轉運站",
+        "En": "Hualien Bus Sation"
+      },
+      "StopSequence": 23,
+      "A2EventType": 1
+    },
+    {
+      "PlateNumb": "KKB-2616",
+      "SubRouteUID": "HUA011701",
+      "Direction": 0,
+      "StopUID": "HUA307559",
+      "StopID": "307559",
+      "StopName": {
+        "Zh_tw": "花蓮轉運站",
+        "En": "Hualien Bus Sation"
+      },
+      "StopSequence": 23,
+      "A2EventType": 1
+    }
+  ],
+  "positions": []
+}

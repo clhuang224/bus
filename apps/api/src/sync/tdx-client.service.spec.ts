@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing'
 import type { Prisma } from '../generated/prisma/client.js'
 import { SyncResourceType as PrismaSyncResourceType } from '../generated/prisma/enums.js'
 import { PrismaService } from '../prisma/prisma.service.js'
+import { TdxAuthService } from '../tdx/tdx-auth.service.js'
 import {
   TdxClientService,
   TdxMonthlyQuotaExceededError,
@@ -78,6 +79,7 @@ function createPrismaMock({
 async function createService(prismaService: object) {
   const module = await Test.createTestingModule({
     providers: [
+      TdxAuthService,
       TdxClientService,
       { provide: PrismaService, useValue: prismaService },
     ],
