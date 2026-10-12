@@ -1,8 +1,9 @@
-import type {
-  TdxEstimatedArrival,
-  TdxLocalizedText,
-  TdxRealtimeByFrequency,
-  TdxRealtimeNearStop,
+import {
+  TdxA2EventType,
+  type TdxEstimatedArrival,
+  type TdxLocalizedText,
+  type TdxRealtimeByFrequency,
+  type TdxRealtimeNearStop,
 } from '@bus/shared'
 
 // Realtime records are checked one by one so that a single malformed record
@@ -26,6 +27,18 @@ function isOptionalNumber(value: unknown): value is number | null | undefined {
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0
+}
+
+/** TDX only defines departed (0) and arriving (1); other values are malformed. */
+function isOptionalA2EventType(
+  value: unknown,
+): value is TdxA2EventType | null | undefined {
+  return (
+    value === undefined ||
+    value === null ||
+    value === TdxA2EventType.DEPARTED ||
+    value === TdxA2EventType.ARRIVING
+  )
 }
 
 function isOptionalLocalizedText(
@@ -69,7 +82,7 @@ export function isTdxRealtimeNearStop(
     isOptionalString(value.StopID) &&
     isOptionalLocalizedText(value.StopName) &&
     isFiniteNumber(value.StopSequence) &&
-    isOptionalNumber(value.A2EventType)
+    isOptionalA2EventType(value.A2EventType)
   )
 }
 
