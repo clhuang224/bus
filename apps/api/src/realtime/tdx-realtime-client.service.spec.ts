@@ -200,6 +200,30 @@ describe('TdxRealtimeClientService', () => {
     expect(requestCount).toBe(1)
   })
 
+  it('does not send a queued request during a cooldown that began while it waited', async () => {
+    process.env[REQUESTS_PER_SECOND_ENV] = '1'
+    let requestCount = 0
+    globalThis.fetch = async () => {
+      requestCount += 1
+      await new Promise((resolve) => setTimeout(resolve, 200))
+      return new Response('', { status: 429 })
+    }
+    const service = new TdxRealtimeClientService(
+      createAuthService().authService,
+    )
+
+    const results = await Promise.all([
+      service.fetchNearStops(CityNameType.TAIPEI, 'TPE1'),
+      service.fetchNearStops(CityNameType.TAIPEI, 'TPE2'),
+    ])
+
+    expect(requestCount).toBe(1)
+    expect(results).toEqual([
+      { ok: false, failure: RealtimeSourceFailure.RATE_LIMITED },
+      { ok: false, failure: RealtimeSourceFailure.RATE_LIMITED },
+    ])
+  })
+
   it('reports other failures as unavailable', async () => {
     globalThis.fetch = () => Promise.resolve(new Response('', { status: 500 }))
     const service = new TdxRealtimeClientService(

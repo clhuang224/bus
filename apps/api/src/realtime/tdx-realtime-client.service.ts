@@ -239,21 +239,24 @@ export class TdxRealtimeClientService {
     this.queuedRequestCount += 1
 
     const slot = this.requestQueue.then(async () => {
-      if (Date.now() < this.cooldownUntil) {
-        throw new TdxRateLimitedError(path)
-      }
+      // Another request may hit a 429 while this one waits, so the cooldown
+      // and the one-second window are checked again after every wait.
+      for (;;) {
+        if (Date.now() < this.cooldownUntil) {
+          throw new TdxRateLimitedError(path)
+        }
 
-      const now = Date.now()
-      while (
-        this.recentRequestTimes.length > 0 &&
-        now - this.recentRequestTimes[0] >= 1000
-      ) {
-        this.recentRequestTimes.shift()
-      }
+        const now = Date.now()
+        while (
+          this.recentRequestTimes.length > 0 &&
+          now - this.recentRequestTimes[0] >= 1000
+        ) {
+          this.recentRequestTimes.shift()
+        }
 
-      if (this.recentRequestTimes.length >= this.requestsPerSecond) {
+        if (this.recentRequestTimes.length < this.requestsPerSecond) break
+
         await sleep(this.recentRequestTimes[0] + 1000 - now)
-        this.recentRequestTimes.shift()
       }
 
       this.recentRequestTimes.push(Date.now())
