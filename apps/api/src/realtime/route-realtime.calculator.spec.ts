@@ -355,6 +355,25 @@ describe('calculateRouteRealtime', () => {
       expect(vehicles[0].arrival.minutes).toBe(3)
     })
 
+    it('resolves the near stop from TDX StopID when StopUID is missing', () => {
+      const { vehicles } = calculate({
+        nearStops: ok([
+          nearStop(11, { StopUID: null }),
+          nearStop(12, { PlateNumb: 'UNKNOWN', StopUID: null, StopID: 'x' }),
+        ]),
+      })
+
+      expect(
+        vehicles.map(({ plate_number, near_stop }) => [
+          plate_number,
+          near_stop?.uuid,
+        ]),
+      ).toEqual([
+        ['KKA-0151', 'TPE11'],
+        ['UNKNOWN', null],
+      ])
+    })
+
     it('treats a missing A2EventType as being at the stop', () => {
       const { vehicles } = calculate({
         nearStops: ok([nearStop(10, { A2EventType: null })]),

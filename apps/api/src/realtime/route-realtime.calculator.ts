@@ -132,7 +132,11 @@ function calculateSubRoute(
       nearStop.SubRouteUID === subRoute.tdxSubRouteUid &&
       nearStop.Direction === subRoute.direction,
   )
-  const nearStopVehicles = getNearStopVehicles(activeNearStops, activeArrivals)
+  const nearStopVehicles = getNearStopVehicles(
+    activeNearStops,
+    activeArrivals,
+    subRoute.stops,
+  )
 
   return {
     uuid: subRoute.uuid,
@@ -336,6 +340,7 @@ interface NearStopVehicle {
 function getNearStopVehicles(
   nearStops: TdxRealtimeNearStop[],
   activeArrivals: Arrival[],
+  stops: RealtimeRouteStop[],
 ): NearStopVehicle[] {
   return nearStops
     .map((nearStop) => {
@@ -357,7 +362,7 @@ function getNearStopVehicles(
         vehicle: {
           plate_number: nearStop.PlateNumb,
           near_stop: {
-            uuid: nearStop.StopUID ?? null,
+            uuid: resolveStopUuid(nearStop, stops),
             sequence: nearStop.StopSequence,
             name: {
               'zh-TW': nearStop.StopName?.Zh_tw ?? '',
@@ -380,6 +385,27 @@ function getNearStopVehicles(
       if (right.estimateMinutes == null) return -1
       return left.estimateMinutes - right.estimateMinutes
     })
+}
+
+/**
+ * App stop UUID for a near-stop record. TDX may send only StopID, so stops
+ * are matched by either identifier, preferring the visit with the same
+ * sequence. Returns null when neither identifier is known.
+ */
+function resolveStopUuid(
+  nearStop: TdxRealtimeNearStop,
+  stops: RealtimeRouteStop[],
+): string | null {
+  const candidates = stops.filter(
+    (stop) =>
+      (!!nearStop.StopUID && stop.uuid === nearStop.StopUID) ||
+      (!!nearStop.StopID && stop.tdxStopId === nearStop.StopID),
+  )
+  const stop =
+    candidates.find(({ sequence }) => sequence === nearStop.StopSequence) ??
+    candidates.at(0)
+
+  return stop?.uuid ?? (nearStop.StopUID || null)
 }
 
 function toVehicleState(
