@@ -211,6 +211,37 @@ describe('TdxRealtimeClientService', () => {
     ).toEqual({ ok: false, failure: RealtimeSourceFailure.UNAVAILABLE })
   })
 
+  it('fails fast once the queue holds the maximum wait', async () => {
+    process.env[REQUESTS_PER_SECOND_ENV] = '1'
+    let requestCount = 0
+    globalThis.fetch = () => {
+      requestCount += 1
+      return Promise.resolve(jsonResponse([]))
+    }
+    const service = new TdxRealtimeClientService(
+      createAuthService().authService,
+    )
+
+    const results = await Promise.all(
+      [1, 2, 3, 4, 5].map((index) =>
+        service.fetchPositions(CityNameType.TAIPEI, `TPE${index}`),
+      ),
+    )
+
+    expect(results.map((result) => result.ok)).toEqual([
+      true,
+      true,
+      true,
+      false,
+      false,
+    ])
+    expect(results[4]).toEqual({
+      ok: false,
+      failure: RealtimeSourceFailure.RATE_LIMITED,
+    })
+    expect(requestCount).toBe(3)
+  })
+
   it('spaces requests to the configured per-second limit', async () => {
     process.env[REQUESTS_PER_SECOND_ENV] = '2'
     const requestTimes: number[] = []

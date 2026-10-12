@@ -172,7 +172,8 @@ GPS 位置，並回傳每個子路線要顯示的內容：每個站牌的到站�
   重複取得相同資料。同一條路線同時有多個請求時，只會向 TDX 查詢一次。
 - Realtime 請求與 sync 共用 TDX token，但不寫入 sync 的資料庫額度紀錄。
   `TDX_REALTIME_REQUESTS_PER_SECOND`（預設 `5`）限制每秒請求數；TDX 回應
-  `429` 後，realtime 請求會暫停 3 秒。
+  `429` 後，realtime 請求會暫停 3 秒。請求最多排隊約 3 秒，超過時直接回報
+  `rate_limited`，不會再打 TDX。
 - 某個來源失敗時，請求本身不會失敗。到站時間來源失敗時，子路線會回報
   `rate_limited` 或 `unavailable`；靠站資訊遇到 rate limit 時會回報
   `rate_limited`，其他靠站資訊失敗只有在沒有任何到站資訊時才會回報

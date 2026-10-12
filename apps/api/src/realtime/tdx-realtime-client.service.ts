@@ -20,6 +20,12 @@ const TDX_BUS_BASE_URL = 'https://tdx.transportdata.tw/api/basic/v2/Bus'
 const REQUESTS_PER_SECOND_ENV = 'TDX_REALTIME_REQUESTS_PER_SECOND'
 const DEFAULT_REQUESTS_PER_SECOND = 5
 const RATE_LIMIT_COOLDOWN_MS = 3 * 1000
+/**
+ * Requests wait at most about this long for a per-second slot. Beyond that,
+ * new requests fail fast as rate limited instead of piling up in memory and
+ * reaching TDX after their callers have gone.
+ */
+const MAX_QUEUE_WAIT_SECONDS = 3
 const REQUEST_TIMEOUT_MS = 10 * 1000
 /**
  * ETA responses are the largest feed and TDX also bills by volume, so only
@@ -71,6 +77,7 @@ export class TdxRealtimeClientService {
   private readonly requestsPerSecond = getRequestsPerSecond()
   private readonly recentRequestTimes: number[] = []
   private requestQueue: Promise<void> = Promise.resolve()
+  private queuedRequestCount = 0
   private cooldownUntil = 0
 
   constructor(private readonly tdxAuthService: TdxAuthService) {}
@@ -217,8 +224,20 @@ export class TdxRealtimeClientService {
     }
   }
 
-  /** Waits until a request fits the per-second limit, one caller at a time. */
+  /**
+   * Waits until a request fits the per-second limit, one caller at a time.
+   * Rejects at once when the queue already holds the maximum wait.
+   */
   private waitForRequestSlot(path: string): Promise<void> {
+    if (
+      this.queuedRequestCount >=
+      this.requestsPerSecond * MAX_QUEUE_WAIT_SECONDS
+    ) {
+      return Promise.reject(new TdxRateLimitedError(path))
+    }
+
+    this.queuedRequestCount += 1
+
     const slot = this.requestQueue.then(async () => {
       if (Date.now() < this.cooldownUntil) {
         throw new TdxRateLimitedError(path)
@@ -239,11 +258,14 @@ export class TdxRealtimeClientService {
 
       this.recentRequestTimes.push(Date.now())
     })
+    const settledSlot = slot.finally(() => {
+      this.queuedRequestCount -= 1
+    })
 
     // A failed slot must not block the callers queued behind it.
-    this.requestQueue = slot.catch(() => undefined)
+    this.requestQueue = settledSlot.catch(() => undefined)
 
-    return slot
+    return settledSlot
   }
 }
 

@@ -174,7 +174,9 @@ returned status values to their own copy.
   requests for one route share one TDX fetch.
 - Realtime requests share the TDX token with sync but not its database quota
   log. `TDX_REALTIME_REQUESTS_PER_SECOND` (default `5`) limits them per
-  second, and a TDX `429` pauses realtime requests for 3 seconds.
+  second, and a TDX `429` pauses realtime requests for 3 seconds. Requests
+  wait at most about 3 seconds for a slot; beyond that they are reported as
+  `rate_limited` without calling TDX.
 - A failed feed does not fail the request. ETA failures make sub-routes
   report `rate_limited` or `unavailable`. Near-stop rate limits also report
   `rate_limited`; other near-stop failures report `unavailable` only when no
