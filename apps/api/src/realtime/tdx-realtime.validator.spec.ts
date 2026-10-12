@@ -1,5 +1,7 @@
 import { DirectionType, TdxA2EventType } from '@bus/shared'
 import {
+  isTdxEstimatedArrival,
+  isTdxRealtimeByFrequency,
   isTdxRealtimeNearStop,
   normalizeTdxRealtimeNearStop,
 } from './tdx-realtime.validator.js'
@@ -49,5 +51,34 @@ describe('normalizeTdxRealtimeNearStop', () => {
         A2EventType: 2 as TdxA2EventType,
       }),
     ).toEqual({ ...nearStop, A2EventType: null })
+  })
+})
+
+describe('Direction validation', () => {
+  it.each([
+    DirectionType.GO,
+    DirectionType.RETURN,
+    DirectionType.LOOP,
+    DirectionType.SHUTTLE,
+    DirectionType.UNKNOWN,
+  ])('accepts the defined direction %p', (direction) => {
+    expect(isTdxEstimatedArrival({ Direction: direction })).toBe(true)
+    expect(isTdxRealtimeNearStop({ ...nearStop, Direction: direction })).toBe(
+      true,
+    )
+  })
+
+  it.each([99, -1, '0'])('rejects the undefined direction %p', (direction) => {
+    expect(isTdxEstimatedArrival({ Direction: direction })).toBe(false)
+    expect(isTdxRealtimeNearStop({ ...nearStop, Direction: direction })).toBe(
+      false,
+    )
+    expect(
+      isTdxRealtimeByFrequency({ PlateNumb: 'KKA-0151', Direction: direction }),
+    ).toBe(false)
+  })
+
+  it('allows GPS records without a direction', () => {
+    expect(isTdxRealtimeByFrequency({ PlateNumb: 'KKA-0151' })).toBe(true)
   })
 })

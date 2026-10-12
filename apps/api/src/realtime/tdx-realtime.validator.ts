@@ -1,4 +1,6 @@
 import {
+  DirectionType,
+  getEnumValues,
   TdxA2EventType,
   type TdxEstimatedArrival,
   type TdxLocalizedText,
@@ -29,6 +31,19 @@ function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0
 }
 
+const DIRECTION_VALUES = new Set<unknown>(getEnumValues(DirectionType))
+
+/** Only the directions TDX defines, including 255 for unknown. */
+function isDirection(value: unknown): value is DirectionType {
+  return DIRECTION_VALUES.has(value)
+}
+
+function isOptionalDirection(
+  value: unknown,
+): value is DirectionType | null | undefined {
+  return value === undefined || value === null || isDirection(value)
+}
+
 function isOptionalLocalizedText(
   value: unknown,
 ): value is TdxLocalizedText | null | undefined {
@@ -51,7 +66,7 @@ export function isTdxEstimatedArrival(
     isOptionalString(value.StopID) &&
     isOptionalString(value.RouteUID) &&
     isOptionalString(value.SubRouteUID) &&
-    isFiniteNumber(value.Direction) &&
+    isDirection(value.Direction) &&
     isOptionalNumber(value.StopSequence) &&
     isOptionalNumber(value.EstimateTime) &&
     isOptionalNumber(value.StopStatus)
@@ -65,7 +80,7 @@ export function isTdxRealtimeNearStop(
     isRecord(value) &&
     isNonEmptyString(value.PlateNumb) &&
     isOptionalString(value.SubRouteUID) &&
-    isFiniteNumber(value.Direction) &&
+    isDirection(value.Direction) &&
     isOptionalString(value.StopUID) &&
     isOptionalString(value.StopID) &&
     isOptionalLocalizedText(value.StopName) &&
@@ -81,7 +96,7 @@ export function isTdxRealtimeByFrequency(
     isRecord(value) &&
     isNonEmptyString(value.PlateNumb) &&
     isOptionalString(value.SubRouteUID) &&
-    isOptionalNumber(value.Direction) &&
+    isOptionalDirection(value.Direction) &&
     (value.BusPosition === undefined ||
       value.BusPosition === null ||
       (isRecord(value.BusPosition) &&
