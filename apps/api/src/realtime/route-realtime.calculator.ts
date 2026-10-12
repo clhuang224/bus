@@ -435,16 +435,18 @@ function getVehicleArrival(
   const plateArrival = activeArrivals.find(
     (arrival) => arrival.plateNumber === plateNumber,
   )
-  const stopArrival = activeArrivals.find(
-    (arrival) =>
-      (nearStop.StopUID != null &&
-        nearStop.StopUID !== '' &&
-        arrival.stopUID === nearStop.StopUID) ||
-      (nearStop.StopID != null &&
-        nearStop.StopID !== '' &&
-        arrival.stopID === nearStop.StopID) ||
-      (arrival.sequence != null && arrival.sequence === nearStop.StopSequence),
-  )
+  const isSameStop = (arrival: Arrival) =>
+    (!!nearStop.StopUID && arrival.stopUID === nearStop.StopUID) ||
+    (!!nearStop.StopID && arrival.stopID === nearStop.StopID)
+  const isSameSequence = (arrival: Arrival) =>
+    arrival.sequence != null && arrival.sequence === nearStop.StopSequence
+  // A stop can be visited twice, so stop plus sequence is the surest match.
+  const stopArrival =
+    activeArrivals.find(
+      (arrival) => isSameStop(arrival) && isSameSequence(arrival),
+    ) ??
+    activeArrivals.find(isSameStop) ??
+    activeArrivals.find(isSameSequence)
   const nextArrival = activeArrivals
     .filter(
       (arrival) =>

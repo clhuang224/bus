@@ -327,6 +327,25 @@ describe('calculateRouteRealtime', () => {
       })
     })
 
+    it('matches a vehicle to the visit with its sequence at a repeated stop', () => {
+      const { vehicles } = calculate({
+        estimatedArrivals: ok([
+          eta(10, {
+            StopUID: 'TPE10',
+            StopSequence: 10,
+            StopStatus: TdxStopStatus.LAST_BUS_PASSED,
+          }),
+          eta(12, { StopUID: 'TPE10', StopSequence: 12, EstimateTime: 180 }),
+        ]),
+        nearStops: ok([nearStop(12, { StopUID: 'TPE10', StopID: null })]),
+      })
+
+      expect(vehicles[0].arrival).toEqual({
+        status: RealtimeArrivalStatus.MINUTES,
+        minutes: 3,
+      })
+    })
+
     it('matches ETAs by plate number, ignoring case and spaces', () => {
       const { vehicles } = calculate({
         estimatedArrivals: ok([
