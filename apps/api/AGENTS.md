@@ -3,9 +3,9 @@
 This workspace contains the NestJS backend API.
 
 Use this guide for changes under `apps/api`. Database-backed route and station
-endpoints, plus their sync flow, are implemented. New features may still begin
-with a contract-first stub, but do not replace existing database-backed
-behavior with placeholders.
+endpoints, their sync flow, and TDX-backed realtime snapshots are implemented.
+New features may still begin with a contract-first stub, but do not replace
+existing database-backed behavior with placeholders.
 
 ## Structure
 
@@ -13,11 +13,17 @@ Keep API features grouped by domain module:
 
 - `src/admin/`: admin-only sync endpoints such as `/api/admin/sync/routes`
 - `src/favorite/`: favorite-related endpoints
-- `src/realtime/`: polling or future realtime snapshot endpoints
+- `src/realtime/`: route realtime snapshots fetched from TDX, with their own TDX client and calculation
 - `src/routes/`: route list and route detail endpoints
 - `src/settings/`: settings-related endpoints
 - `src/stations/`: station and nearby station endpoints
+- `src/sync/`: base-data sync runs, TDX sync client, validators, mappers, and persistence
+- `src/tdx/`: TDX token handling and request timeouts shared by sync and realtime
 - `src/dto/`: DTOs shared across API modules, such as localized text and positions
+
+Supporting folders: `src/prisma/` for the Prisma service, `src/constants/` for
+enum mappings between TDX, Prisma, and API values, and `src/config/` for
+environment loading.
 
 Each feature module should usually contain:
 
@@ -197,9 +203,15 @@ pnpm --filter @bus/api test:e2e:db
 
 Only add database e2e to automated hooks or CI after a stable isolated test database exists.
 
-## TDX Sync
+## TDX Requests
 
-Design sync code for the TDX basic membership limits:
+Sync and realtime use the same TDX key, so they share one token through
+`TdxAuthService`, and the key's per-second limit is shared with the TDX proxy.
+
+### Sync
+
+The project aims to run on the free TDX membership, so design sync code for
+the basic membership limits:
 
 - 5 requests per minute per key
 - 3 virtual points per month
@@ -210,6 +222,20 @@ Design sync code for the TDX basic membership limits:
 Do not rely on exact point math inside feature sync services. Sync must be designed as a batched, resumable process instead of a large burst of upstream requests.
 
 Keep TDX request throttling inside `TdxClientService`. Feature sync services such as `RoutesSyncService` should describe what data to sync, while `TdxClientService` owns how quickly TDX may be called. Do not scatter sleep, retry, or rate-limit logic across individual sync services.
+
+### Realtime
+
+Realtime requests go through `TdxRealtimeClientService`, not the sync client.
+They are not logged to the database quota tables. Instead, the client owns an
+in-memory per-second limit (`TDX_REALTIME_REQUESTS_PER_SECOND`, default 3 to
+leave headroom for sync and the proxy), a pause after a TDX `429`, and a
+bounded wait queue. Keep pacing there rather than in the realtime service or
+calculator.
+
+`route-realtime.calculator.ts` turns TDX feeds into what each sub-route should
+show. Keep it a pure function of the route and the feed results, and add a
+recorded-city e2e fixture under `test/fixtures/realtime/` when a new upstream
+data shape needs coverage.
 
 ## Endpoint Stubs
 
