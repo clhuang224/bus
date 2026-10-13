@@ -2,13 +2,15 @@
 
 ## Overview
 
-The project currently works as a frontend-only MVP. As the app grows, direct and proxy-based TDX requests are becoming harder to scale because rate-limit pressure is increasing and the frontend is responsible for too much data composition.
+The production app is still the frontend on GitHub Pages, which calls TDX through the Cloudflare Worker proxy for both base data and realtime data. That approach is hard to scale: every visitor spends the shared TDX key's quota, and the frontend has to compose raw TDX data itself.
 
-The next direction is to introduce a backend and database layer so most user actions read from app-owned data instead of directly consuming TDX quota.
+A NestJS backend with a PostgreSQL database now runs locally. It syncs TDX base data into the database, serves route and station data from it, and serves cached TDX realtime snapshots. The web app can read from it in local API mode. The remaining work is to move realtime data in the web app onto the API, deploy the API, and switch production to it.
 
 ## Primary Goal
 
 Reduce direct TDX usage by moving common route and stop flows to app-owned data.
+
+The long-term aim is to run on the free TDX membership. See [TDX Quota](#tdx-quota) for what fits it today.
 
 The backend should not be only a proxy. The main goal is to store non-realtime base data and make the frontend depend on the app database for common route and stop flows.
 
@@ -38,11 +40,12 @@ The shared package should stay small and only contain contracts that are truly s
 
 Use NestJS for the backend API.
 
-Initial responsibilities:
+Responsibilities:
 
 - TDX authentication
 - scheduled or manual base-data sync
 - route and station API endpoints backed by the database
+- realtime snapshots fetched from TDX and cached briefly in memory
 - request shaping and response DTOs
 - TDX quota protection
 
@@ -59,7 +62,7 @@ The first database scope should focus on non-realtime base data:
 - route stops
 - sync runs
 
-Realtime data can be added later as cached snapshots after the base-data flow is stable.
+Realtime data is not stored in the database. The API fetches it from TDX per route and caches each snapshot in memory for 90 seconds.
 
 Nearby station data should be modeled around stations, not only physical stop signs.
 
@@ -85,24 +88,35 @@ managed PostgreSQL database. The current local workflow uses Prisma Postgres;
 choose and document the production database provider before deployment.
 
 Do not deploy the sync worker to a serverless platform. It resumes background
-sync runs and may run for an extended period.
+sync runs and may run for an extended period. Run a single API instance, since
+the realtime cache and rate limiter live in memory.
 
-## Phase 1 Scope
+Once the API is deployed and the web app reads all data from it, retire the
+TDX proxy. Until then, the proxy is required by production and shares the TDX
+key with the API.
 
-The first phase should prove that the app can read core route and station data from its own backend/database.
+## Current State
 
-### API Draft
+### API Endpoints
 
-| Method | Endpoint                 | Description                   |
-| ------ | ------------------------ | ----------------------------- |
-| GET    | `/api/health`            | Health check                  |
-| GET    | `/api/routes`            | List routes from the database |
-| GET    | `/api/routes/:uuid`      | Get route detail data         |
-| GET    | `/api/stations`          | Find nearby stations          |
-| POST   | `/api/admin/sync/routes` | Sync route data from TDX      |
-| POST   | `/api/admin/sync/stops`  | Sync stop data from TDX       |
+Application endpoints are prefixed with `/api`.
 
-### Current Progress
+| Method | Endpoint                     | Description                                       |
+| ------ | ---------------------------- | ------------------------------------------------- |
+| GET    | `/api/health`                | Health check                                      |
+| GET    | `/api/routes?area=...`       | Route list for one search area, from the database |
+| GET    | `/api/routes/:uuid`          | Route detail with sub-routes, stops, and shapes   |
+| GET    | `/api/stations`              | Nearby stations with their routes                 |
+| GET    | `/api/realtime/routes/:uuid` | Realtime snapshot for one route, from TDX         |
+| POST   | `/api/admin/sync/routes`     | Queue a route sync from TDX                       |
+| POST   | `/api/admin/sync/stops`      | Queue a stop sync from TDX                        |
+| GET    | `/api/admin/sync/runs`       | List recent sync runs                             |
+| GET    | `/api/admin/sync/runs/:uuid` | Get one sync run with city progress               |
+
+Favorite and settings endpoints exist only as contract placeholders; see
+[Backlog](#backlog).
+
+### Progress
 
 - The monorepo, NestJS API, Scalar documentation, Prisma schema, and initial migrations are in place.
 - Route sync runs in the background, records TDX requests, protects the basic-member quota, and resumes by city checkpoint.
@@ -140,6 +154,30 @@ The first phase should prove that the app can read core route and station data f
    tab order: the API orders sub-routes by direction, while TDX keeps upstream
    order.
 
+### Realtime Open Questions
+
+The API realtime rules are ported from the Route page and keep its behavior
+in these cases. Decide whether to change them before or after the web app
+switches to the API:
+
+- **ETAs with an unknown direction.** TDX can tag ETAs with direction `255`.
+  They match no sub-route and are ignored. On Tainan route 黃幹線, this left
+  20 of 67 stops on the full-length sub-route without the not-yet-departed
+  countdown that TDX provided. They could be used when their `SubRouteUID`
+  matches.
+- **Short-trip sub-routes without their own ETAs.** When TDX has no ETAs for
+  a sub-route, it falls back to route-level ETAs, which can show another
+  sub-route's buses. Tainan's 白河→柳營奇美醫院 short trip showed ETAs from
+  the full-length 黃幹線.
+- **Vehicles at a last-bus-passed stop.** A vehicle arriving at a stop whose
+  ETA reports the last bus has passed shows that status, as seen on Penghu
+  route 21.
+
+The API also fixes a Route page issue: a sub-route that visits the same stop
+twice shows the first visit's ETA on both rows in the web app, while the API
+matches each visit by sequence. This affects about 5% of active sub-routes
+and goes away when the web app uses the realtime API.
+
 ### TDX Quota
 
 The project aims to run on the free TDX basic membership (5 requests per
@@ -168,8 +206,7 @@ These features should wait until the base backend/database flow is stable and th
 - account/auth system
 - favorites API
 - settings API
-- realtime ETA cache
-- realtime vehicle snapshots
+- a shared realtime cache, such as Redis, if the API ever needs more than one instance
 - SSE or WebSocket delivery
 
 Favorites and settings should remain frontend-local for now. Backend-owned favorites and settings only become useful after login exists, because their main value is syncing user-specific state across devices.
