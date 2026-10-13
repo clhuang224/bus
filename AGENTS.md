@@ -8,10 +8,10 @@ This repository is a pnpm monorepo for Finding the Bus. Keep root-level document
 apps/
 ├── web/          # React Router frontend
 ├── tdx-proxy/    # Cloudflare Worker proxy for TDX authentication
-└── api/          # Planned NestJS backend
+└── api/          # NestJS backend with PostgreSQL base data and TDX realtime
 
 packages/
-└── shared/       # Planned shared API contracts and domain types
+└── shared/       # Shared API contracts, domain enums, and TDX upstream types
 ```
 
 ## Documentation Ownership
@@ -21,6 +21,9 @@ packages/
 - `docs/plan.md`: backend migration and architecture planning notes.
 - `apps/web/README.md`: frontend product features, frontend structure, open data usage, and web development details.
 - `apps/web/AGENTS.md`: frontend-specific coding, UI, data-flow, and testing conventions.
+- `apps/api/README.md`: API setup, local API mode, sync scripts, endpoint groups, and Prisma workflow.
+- `apps/api/AGENTS.md`: backend-specific structure, DTO, Prisma, and TDX request conventions.
+- `apps/api/docs/`: database plan, error handling rules, and sync troubleshooting notes.
 - `apps/tdx-proxy/README.md`: Worker proxy setup, local development, and manual deployment.
 - `packages/shared/README.md`: shared package boundaries and contract rules.
 
@@ -53,19 +56,29 @@ pnpm run dev
 
 It starts the frontend dev server and the local TDX proxy together.
 
+To develop against the local NestJS API and database, use:
+
+```bash
+pnpm run dev:api
+```
+
+It also starts the API, and the web app reads base data from it. See the
+[web local API mode](./apps/web/README.md#local-api-mode) for setup.
+
 ## Current Workspace Roles
 
 - `@bus/web` owns the user-facing SPA and current production UI.
-- `@bus/tdx-proxy` owns TDX authentication proxying. Its deployment is manual for now; do not add it to GitHub Actions deployment unless that rollout is explicitly requested.
-- `@bus/api` is a placeholder for the planned NestJS backend.
-- `@bus/shared` is a placeholder for shared API contracts and domain types.
+- `@bus/tdx-proxy` owns TDX authentication proxying for the production web app. Its deployment is manual for now; do not add it to GitHub Actions deployment unless that rollout is explicitly requested. It is planned to retire once the API is deployed and the web app no longer calls TDX directly.
+- `@bus/api` owns TDX base-data sync into PostgreSQL, database-backed route and station endpoints, and cached TDX realtime snapshots. It runs locally and is not deployed yet.
+- `@bus/shared` owns contracts shared between the web app and the API, plus the TDX upstream types both of them read.
 
 ## CI And Deployment
 
 GitHub Actions currently checks and deploys only the web workspace:
 
-- PR checks run `@bus/web` lint, typecheck, and tests.
+- PR checks run `@bus/web` lint, typecheck, and tests, plus the Playwright map test against a production build.
 - GitHub Pages deployment builds `@bus/web`.
+- API and shared checks run locally through the Husky hooks, not in CI.
 - The Cloudflare Worker proxy is deployed manually with `pnpm --filter @bus/tdx-proxy deploy`.
 
 Keep this separation unless the deployment strategy changes.

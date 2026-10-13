@@ -65,6 +65,14 @@ For mobile testing on the same local network:
 pnpm run dev:mobile
 ```
 
+To develop against the NestJS API and its PostgreSQL database, use local API mode. It also starts the API, and the web app reads route, stop, and station data from it while realtime data still comes from the TDX proxy:
+
+```bash
+pnpm run dev:api
+```
+
+Local API mode needs a configured database and synced data. See the [web local API mode](./apps/web/README.md#local-api-mode) and [API local development](./apps/api/README.md#local-development) guides.
+
 ## Checks
 
 To check the whole workspace:
@@ -93,4 +101,4 @@ The TDX proxy is still deployed manually so frontend deploys do not automaticall
 pnpm --filter @bus/tdx-proxy deploy
 ```
 
-The planned NestJS backend is not deployed yet.
+The NestJS backend is not deployed yet. Once it is deployed and the web app reads all data from it, the TDX proxy is planned to retire.

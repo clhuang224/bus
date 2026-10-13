@@ -65,6 +65,14 @@ pnpm run dev
 pnpm run dev:mobile
 ```
 
+如果要搭配 NestJS API 和 PostgreSQL 資料庫開發，可以使用 local API 模式。它會一併啟動 API，前端的路線、站牌與站位資料改由 API 提供，即時資料則仍透過 TDX proxy 取得：
+
+```bash
+pnpm run dev:api
+```
+
+local API 模式需要先設定資料庫並完成資料同步，詳見 [web local API mode](../apps/web/README.md#local-api-mode) 與 [API local development](../apps/api/README.md#local-development)。
+
 ## 檢查
 
 如果想確認整個 workspace 目前狀態，可以跑：
@@ -93,4 +101,4 @@ TDX proxy 目前仍維持手動部署，避免每次前端部署都連動 Worker
 pnpm --filter @bus/tdx-proxy deploy
 ```
 
-NestJS 後端尚未開始部署。
+NestJS 後端尚未部署。等後端部署完成、前端的資料都改由 API 提供之後，TDX proxy 預計會停用。
