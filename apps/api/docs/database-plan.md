@@ -333,8 +333,10 @@ TDX source:
 Fields:
 
 - `id`
-- `uuid`
+- `uuid`: `<SubRouteUID>-<Direction>`
 - `tdx_subroute_id`
+- `tdx_subroute_uid`: TDX `SubRouteUID`, used to match TDX realtime data and
+  saved favorites
 - `route_id`
 - `direction`
 - `name_zh_tw`
@@ -808,6 +810,25 @@ Returns:
 - ordered stops
 - stop positions
 - shape path
+- TDX references for realtime matching: each sub-route's `SubRouteUID`, and
+  each stop's `StopID` and `StationID`
+
+### `GET /api/realtime/routes/:uuid`
+
+Reads:
+
+- `route`
+- `subroute`
+- `route_stop`
+- `stop`
+
+Then fetches the route's ETA, near-stop, and GPS feeds from TDX. Realtime data
+is not stored; each route's snapshot is cached in memory for 90 seconds, or 5
+seconds after a failed feed.
+
+Returns, for each sub-route, an arrival per stop, the vehicles with their
+arrivals, and a status. Stop and sub-route UUIDs match the route detail
+response. See the API README for the caching and failure rules.
 
 ### `GET /api/stations?latitude=...&longitude=...&radius_meters=...`
 
@@ -932,33 +953,39 @@ Use Prisma Studio and application logs for local inspection until the manager pr
 
 ## Current Storage Snapshot
 
-Observed after one full route sync and one full stop sync on 2026-07-10.
+Observed on 2026-10-13, after the October route and stop syncs. Sizes are
+from `pg_size_pretty`, which uses binary units.
 
 Database size:
 
-- total database size: about 148 MB
+- total database size: about 191 MiB, up from about 148 MB on 2026-07-10
 - Prisma Free storage limit reference: 512 MiB
 
 Largest tables:
 
-| Table            | Estimated rows | Total size | Table data |  Indexes | Notes                                                               |
-| ---------------- | -------------: | ---------: | ---------: | -------: | ------------------------------------------------------------------- |
-| `route_stop`     |        233,698 |     65 MiB |     25 MiB |   41 MiB | Largest table; indexes are larger than row data.                    |
-| `stop`           |        134,869 |     46 MiB |     27 MiB |   19 MiB | Main stop sync table.                                               |
-| `station`        |         49,874 |     14 MiB |   7.71 MiB | 6.30 MiB | Station data is not available for every city.                       |
-| `route_shape`    |          6,771 |   8.05 MiB |   7.38 MiB |  624 KiB | Shared by route detail rendering and stop-position fallback shapes. |
-| `subroute`       |          6,798 |   2.70 MiB |   1.43 MiB | 1.23 MiB | Route direction and variant rows.                                   |
-| `station_group`  |          6,580 |   1.88 MiB |   1000 KiB |  888 KiB | Optional because TDX support differs by city.                       |
-| `route`          |          3,034 |   1000 KiB |    560 KiB |  400 KiB | Route list data.                                                    |
-| `route_operator` |          3,296 |    520 KiB |    200 KiB |  288 KiB | Route/operator join rows.                                           |
-| `operator`       |            153 |     96 KiB |     24 KiB |   32 KiB | Operator reference rows.                                            |
+| Table            | Estimated rows | Total size | Table data | Indexes | Notes                                                               |
+| ---------------- | -------------: | ---------: | ---------: | ------: | ------------------------------------------------------------------- |
+| `route_stop`     |        244,063 |     83 MiB |     33 MiB |  49 MiB | Largest table; indexes are larger than row data.                    |
+| `stop`           |        136,965 |     60 MiB |     34 MiB |  26 MiB | Main stop sync table.                                               |
+| `station`        |         52,163 |     18 MiB |    9.9 MiB | 8.4 MiB | Station data is not available for every city.                       |
+| `route_shape`    |          6,141 |     11 MiB |     11 MiB | 656 KiB | Shared by route detail rendering and stop-position fallback shapes. |
+| `subroute`       |          7,049 |    4.7 MiB |    2.9 MiB | 1.7 MiB | Route direction and variant rows.                                   |
+| `station_group`  |          6,684 |    2.7 MiB |    1.6 MiB | 1.1 MiB | Optional because TDX support differs by city.                       |
+| `route`          |          3,139 |    1.2 MiB |    768 KiB | 440 KiB | Route list data.                                                    |
+| `route_operator` |          3,115 |    528 KiB |    208 KiB | 288 KiB | Route/operator join rows.                                           |
 
 Approximate grouping:
 
-- route-related base tables excluding `route_shape`: about 4.3 MiB
-- stop-related base tables excluding `route_shape`: about 127 MiB
-- shared shape table: about 8.05 MiB
+- route-related base tables excluding `route_shape`: about 6.5 MiB
+- stop-related base tables excluding `route_shape`: about 164 MiB
+- shared shape table: about 11 MiB
 - sync bookkeeping tables: currently small, less than 1 MiB combined
+
+Since July, row counts grew about 4% while the database grew about 30%.
+Inactive rows are few (for example, 334 of about 244,000 route stops), so
+most of the growth is likely space left by sync rewriting rows, which
+autovacuum marks reusable but does not return. Check whether the size keeps
+growing after future syncs.
 
 Empty or mostly unused tables are expected at this stage:
 
@@ -984,6 +1011,8 @@ and index metadata even when there are no rows.
 - Local web API mode for the Routes page, backed by `GET /api/routes`
 - Local web API mode for the Route page, backed by `GET /api/routes/:uuid`,
   with TDX references for realtime matching
+- TDX-backed realtime snapshots at `GET /api/realtime/routes/:uuid`, cached in
+  memory per route
 
 ## Plan Order
 
@@ -993,6 +1022,5 @@ and index metadata even when there are no rows.
 3. Decide where scheduled monthly sync jobs run after deployment is stable.
 4. Build the next public read endpoint, starting with stops if route pages
    need stop-level lookup.
-5. Discuss realtime cache.
-6. Discuss auth, favorites, and settings.
-7. Add `apps/manager` for sync monitoring and controlled retry actions.
+5. Discuss auth, favorites, and settings.
+6. Add `apps/manager` for sync monitoring and controlled retry actions.
