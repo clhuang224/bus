@@ -4,7 +4,7 @@
 
 NestJS backend workspace for Finding the Bus.
 
-The API is moving from contract-first endpoints toward database-backed route and station data. Route and stop sync are implemented, and public route/station endpoints now read from the database.
+The API syncs TDX route and stop data into PostgreSQL, serves route and station endpoints from the database, and serves cached TDX realtime snapshots per route. It runs locally and is not deployed yet. Favorite and settings endpoints are still contract placeholders.
 
 ## Local Development
 
@@ -196,10 +196,9 @@ These groups are contract placeholders and should wait for account/auth work bef
 
 ## Planned Responsibilities
 
-- continue TDX authentication and upstream request shaping
-- continue base-data sync into PostgreSQL
-- continue route and station API endpoint coverage backed by the database
-- request pacing and TDX quota protection
-- Scalar/OpenAPI documentation
+- deploy to a long-running host with a managed PostgreSQL database
+- run the monthly base-data sync on a schedule after deployment
+- keep TDX request pacing and quota protection within the free-tier goal
+- keep the Scalar/OpenAPI documentation in step with the endpoints
 
 See [docs/plan.md](../../docs/plan.md) for the current backend migration plan.
