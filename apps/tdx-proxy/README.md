@@ -2,6 +2,10 @@
 
 This workspace contains the Cloudflare Worker used to proxy TDX API requests and keep TDX credentials out of the frontend.
 
+The production web app still depends on this proxy for base data and realtime data. The proxy is planned to retire once the NestJS API is deployed and the web app reads all data from it; see [docs/plan.md](../../docs/plan.md).
+
+The proxy uses the same TDX key as the API, so they share the key's per-second request limit. The API's realtime limiter leaves headroom for the proxy by default.
+
 ## Responsibilities
 
 - Handle TDX authentication.
