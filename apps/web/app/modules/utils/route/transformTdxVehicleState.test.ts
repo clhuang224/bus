@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { TdxA2EventType, VehicleStateType } from '../../enums/VehicleStateType'
+import { TdxA2EventType } from '@bus/shared'
+import { VehicleStateType } from '../../enums/VehicleStateType'
 import { transformTdxVehicleState } from './transformTdxVehicleState'
 
 describe('transformTdxVehicleState', () => {

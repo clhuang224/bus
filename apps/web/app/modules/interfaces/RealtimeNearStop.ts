@@ -1,7 +1,5 @@
-import type {
-  TdxA2EventType,
-  VehicleStateType,
-} from '../enums/VehicleStateType'
+import type { TdxA2EventType } from '@bus/shared'
+import type { VehicleStateType } from '../enums/VehicleStateType'
 import type { BusStatusType } from '../enums/BusStatusType'
 import type { CityNameType, DirectionType } from '@bus/shared'
 import type { DutyStatusType } from '../enums/DutyStatusType'
