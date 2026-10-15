@@ -2,22 +2,20 @@ import type { TFunction } from 'i18next'
 import type { AppLocaleType } from '@bus/shared'
 import { VehicleStateType } from '../../enums/VehicleStateType'
 import { stopStatusTranslationKeyMap } from '../../consts/stopStatus'
-import { StopStatusType } from '../../enums/StopStatusType'
+import { TdxStopStatus } from '@bus/shared'
 import type { EstimatedArrival } from '../../interfaces/EstimatedArrival'
 import type { RealtimeNearStop } from '../../interfaces/RealtimeNearStop'
 import type { RouteRealtimeBusStatus } from '../../interfaces/RouteRealtimeBusStatus'
 import { getLocalizedText } from '../i18n/getLocalizedText'
 import { normalizePlateNumb } from './normalizePlateNumb'
 
-function getStopStatusLabel(t: TFunction, stopStatus: StopStatusType) {
+function getStopStatusLabel(t: TFunction, stopStatus: TdxStopStatus) {
   return t(stopStatusTranslationKeyMap[stopStatus])
 }
 
-function getRealtimeFallbackLabel(t: TFunction, stopStatus: StopStatusType) {
+function getRealtimeFallbackLabel(t: TFunction, stopStatus: TdxStopStatus) {
   if (
-    [StopStatusType.NOT_YET_DEPARTED, StopStatusType.UNKNOWN].includes(
-      stopStatus,
-    )
+    [TdxStopStatus.NOT_YET_DEPARTED, TdxStopStatus.UNKNOWN].includes(stopStatus)
   ) {
     return t('routePage.realtime.inService')
   }
@@ -28,14 +26,14 @@ function getRealtimeFallbackLabel(t: TFunction, stopStatus: StopStatusType) {
 export function formatEstimatedArrivalLabel(
   t: TFunction,
   estimateTime: number | null,
-  stopStatus: StopStatusType,
+  stopStatus: TdxStopStatus,
 ) {
   if (estimateTime != null) {
     if (estimateTime <= 60) return t('routePage.realtime.comingSoon')
     const minutes = Math.ceil(estimateTime / 60)
     return t('routePage.realtime.minutesAway', { count: minutes })
   }
-  if (stopStatus === StopStatusType.NORMAL)
+  if (stopStatus === TdxStopStatus.NORMAL)
     return t('routePage.realtime.noEstimate')
   return getStopStatusLabel(t, stopStatus)
 }
@@ -114,11 +112,11 @@ export function getRouteRealtimeBusStatuses(
             matchedArrival.EstimateTime,
             matchedArrival.StopStatus,
           )
-        : getRealtimeFallbackLabel(t, StopStatusType.UNKNOWN)
+        : getRealtimeFallbackLabel(t, TdxStopStatus.UNKNOWN)
       const shouldUseRealtimeFallbackLabel =
         matchedArrival != null &&
         matchedArrival.EstimateTime == null &&
-        [StopStatusType.NOT_YET_DEPARTED, StopStatusType.UNKNOWN].includes(
+        [TdxStopStatus.NOT_YET_DEPARTED, TdxStopStatus.UNKNOWN].includes(
           matchedArrival.StopStatus,
         )
 

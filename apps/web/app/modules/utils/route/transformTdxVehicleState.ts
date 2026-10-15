@@ -1,4 +1,5 @@
-import { TdxA2EventType, VehicleStateType } from '../../enums/VehicleStateType'
+import { TdxA2EventType } from '@bus/shared'
+import { VehicleStateType } from '../../enums/VehicleStateType'
 
 export function transformTdxVehicleState(a2EventType?: TdxA2EventType | null) {
   switch (a2EventType) {

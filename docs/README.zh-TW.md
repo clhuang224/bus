@@ -2,7 +2,7 @@
 
 [English](../README.md) | [繁體中文](./README.zh-TW.md)
 
-這是一個查詢台灣公車路線的應用。一開始是單純的前端專案，現在正在慢慢長成前後端分工更清楚的 monorepo。
+這是一個查詢台灣公車路線的網頁應用。初期是單純的前端專案，正在走向前後端分離的 monorepo。
 
 目前正式上線的是 React Router 前端，提供路線搜尋、附近站牌、收藏、語言設定與即時公車資訊。NestJS 後端、資料庫同步，以及前後端共用的 API contract 已可在本機使用，接下來會逐步導入正式版。
 
@@ -20,14 +20,14 @@ packages/
 
 ## Workspace 文件
 
-| Workspace | 用途 | 文件 |
-| --- | --- | --- |
-| `apps/web` | 使用者介面的 React Router app | [apps/web/README.md](../apps/web/README.md) |
-| `apps/tdx-proxy` | TDX 驗證用 Cloudflare Worker proxy | [apps/tdx-proxy/README.md](../apps/tdx-proxy/README.md) |
-| `apps/api` | NestJS 後端 | [apps/api/README.md](../apps/api/README.md) |
-| `packages/shared` | 共用 API contract 與 domain types | [packages/shared/README.md](../packages/shared/README.md) |
+| Workspace         | 用途                               | 文件                                                      |
+| ----------------- | ---------------------------------- | --------------------------------------------------------- |
+| `apps/web`        | 使用者介面的 React Router app      | [apps/web/README.md](../apps/web/README.md)               |
+| `apps/tdx-proxy`  | TDX 驗證用 Cloudflare Worker proxy | [apps/tdx-proxy/README.md](../apps/tdx-proxy/README.md)   |
+| `apps/api`        | NestJS 後端                        | [apps/api/README.md](../apps/api/README.md)               |
+| `packages/shared` | 共用 API contract 與 domain types  | [packages/shared/README.md](../packages/shared/README.md) |
 
-如果想了解後端與資料庫的規劃，可以先看 [docs/plan.md](./plan.md)。
+如果想了解後端與資料庫的規劃，可以先看 [docs/plan.zh-TW.md](./plan.zh-TW.md)。
 
 ## 如何使用
 
@@ -43,7 +43,7 @@ packages/
 pnpm install
 ```
 
-設定本地 TDX proxy。這一步是為了讓本機開發時也能透過 Worker proxy 取得 TDX 資料，而不是把 TDX credentials 放進前端：
+設定本地 TDX proxy。這是為了讓本機開發時也能透過 Worker proxy 取得 TDX 資料，而不是把 TDX credentials 放進前端：
 
 ```bash
 cp apps/tdx-proxy/.dev.vars.example apps/tdx-proxy/.dev.vars
@@ -64,6 +64,14 @@ pnpm run dev
 ```bash
 pnpm run dev:mobile
 ```
+
+如果要搭配 NestJS API 和 PostgreSQL 資料庫開發，可以使用 local API 模式。這個模式會一併啟動 API，前端的路線、站牌與站位資料改由 API 提供，即時資料則仍透過 TDX proxy 取得：
+
+```bash
+pnpm run dev:api
+```
+
+local API 模式需要先設定資料庫並完成資料同步，詳見 [web local API mode](../apps/web/README.md#local-api-mode) 與 [API local development](../apps/api/README.md#local-development)。
 
 ## 檢查
 
@@ -93,4 +101,4 @@ TDX proxy 目前仍維持手動部署，避免每次前端部署都連動 Worker
 pnpm --filter @bus/tdx-proxy deploy
 ```
 
-NestJS 後端尚未開始部署。
+NestJS 後端尚未部署。等後端部署完成、前端的資料都改由 API 提供之後，TDX proxy 預計會停用。

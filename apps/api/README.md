@@ -4,7 +4,7 @@
 
 NestJS backend workspace for Finding the Bus.
 
-The API is moving from contract-first endpoints toward database-backed route and station data. Route and stop sync are implemented, and public route/station endpoints now read from the database.
+The API syncs TDX route and stop data into PostgreSQL, serves route and station endpoints from the database, and serves cached TDX realtime snapshots per route. It runs locally and is not deployed yet. Favorite and settings endpoints are still contract placeholders.
 
 ## Local Development
 
@@ -26,8 +26,8 @@ Local development scripts:
 | `pnpm --filter @bus/api start:dev:awake`        | Start the API in watch mode and prevent idle sleep on macOS.    |
 | `pnpm --filter @bus/api sync:routes:local`      | Queue a route sync through the API running on `localhost:3000`. |
 | `pnpm --filter @bus/api sync:stops:local`       | Queue a stop sync through the API running on `localhost:3000`.  |
-| `pnpm --filter @bus/api sync:routes:local-api` | Queue a route sync on `localhost:3001` for `dev:api`. |
-| `pnpm --filter @bus/api sync:stops:local-api` | Queue a stop sync on `localhost:3001` for `dev:api`. |
+| `pnpm --filter @bus/api sync:routes:local-api`  | Queue a route sync on `localhost:3001` for `dev:api`.           |
+| `pnpm --filter @bus/api sync:stops:local-api`   | Queue a stop sync on `localhost:3001` for `dev:api`.            |
 
 Use `start:dev:awake` for long local sync runs on macOS. Keep the regular `start:dev` command for cross-platform development and deployment environments.
 
@@ -196,10 +196,9 @@ These groups are contract placeholders and should wait for account/auth work bef
 
 ## Planned Responsibilities
 
-- continue TDX authentication and upstream request shaping
-- continue base-data sync into PostgreSQL
-- continue route and station API endpoint coverage backed by the database
-- request pacing and TDX quota protection
-- Scalar/OpenAPI documentation
+- deploy to a long-running host with a managed PostgreSQL database
+- run the monthly base-data sync on a schedule after deployment
+- keep TDX request pacing and quota protection within the free-tier goal
+- keep the Scalar/OpenAPI documentation in step with the endpoints
 
 See [docs/plan.md](../../docs/plan.md) for the current backend migration plan.

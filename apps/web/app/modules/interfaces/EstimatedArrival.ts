@@ -1,6 +1,6 @@
 import type { CityNameType, DirectionType } from '@bus/shared'
 import type { MessageType } from '../enums/MessageType'
-import type { StopStatusType } from '../enums/StopStatusType'
+import type { TdxStopStatus } from '@bus/shared'
 import type { LocalizedText, TdxLocalizedText } from '@bus/shared'
 
 export interface TdxEstimatedArrival<L = TdxLocalizedText> {
@@ -17,7 +17,7 @@ export interface TdxEstimatedArrival<L = TdxLocalizedText> {
   Direction: DirectionType
   StopSequence?: number | null
   EstimateTime: number | null
-  StopStatus?: StopStatusType | null
+  StopStatus?: TdxStopStatus | null
   MessageType?: MessageType | null
   NextBusTime?: string | null
   SrcUpdateTime?: string | null
@@ -36,5 +36,5 @@ export interface EstimatedArrival extends Omit<
   RouteID: string | null
   SubRouteUID: string
   SubRouteID: string | null
-  StopStatus: StopStatusType
+  StopStatus: TdxStopStatus
 }

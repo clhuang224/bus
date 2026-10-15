@@ -4,7 +4,7 @@
 
 Finding the Bus 的 NestJS 後端 workspace。
 
-API 正在從 contract-first endpoints 逐步走向由資料庫支援的路線和站位資料。Route sync 和 stop sync 已經實作，公開的 route/station endpoints 也已經開始從資料庫讀取。
+API 會把 TDX 的路線與站牌資料同步到 PostgreSQL，由資料庫提供路線與站位 endpoints，並以每條路線為單位提供有快取的 TDX 即時資料快照。目前只在本機執行，尚未部署。收藏與設定的 endpoints 仍只是 contract placeholders。
 
 ## 本地開發
 
@@ -18,16 +18,16 @@ pnpm --filter @bus/api start:dev
 
 本地開發 scripts：
 
-| Script                                          | 說明                                                 |
-| ----------------------------------------------- | ---------------------------------------------------- |
-| `pnpm --filter @bus/api generate:admin-api-key` | 產生隨機 admin API key，並寫入 `.env.local`。       |
-| `pnpm --filter @bus/api start:dev`              | 以 watch mode 啟動 API。                             |
+| Script                                          | 說明                                                      |
+| ----------------------------------------------- | --------------------------------------------------------- |
+| `pnpm --filter @bus/api generate:admin-api-key` | 產生隨機 admin API key，並寫入 `.env.local`。             |
+| `pnpm --filter @bus/api start:dev`              | 以 watch mode 啟動 API。                                  |
 | `pnpm --filter @bus/api start:dev:local-api`    | 在 port `3001` 以 local web CORS 的 watch mode 啟動 API。 |
-| `pnpm --filter @bus/api start:dev:awake`        | 以 watch mode 啟動 API，並在 macOS 防止閒置休眠。    |
-| `pnpm --filter @bus/api sync:routes:local`      | 透過執行於 `localhost:3000` 的 API 建立 route sync。 |
-| `pnpm --filter @bus/api sync:stops:local`       | 透過執行於 `localhost:3000` 的 API 建立 stop sync。  |
-| `pnpm --filter @bus/api sync:routes:local-api` | 透過 `dev:api` 的 `localhost:3001` 建立 route sync。 |
-| `pnpm --filter @bus/api sync:stops:local-api` | 透過 `dev:api` 的 `localhost:3001` 建立 stop sync。 |
+| `pnpm --filter @bus/api start:dev:awake`        | 以 watch mode 啟動 API，並在 macOS 防止閒置休眠。         |
+| `pnpm --filter @bus/api sync:routes:local`      | 透過執行於 `localhost:3000` 的 API 建立 route sync。      |
+| `pnpm --filter @bus/api sync:stops:local`       | 透過執行於 `localhost:3000` 的 API 建立 stop sync。       |
+| `pnpm --filter @bus/api sync:routes:local-api`  | 透過 `dev:api` 的 `localhost:3001` 建立 route sync。      |
+| `pnpm --filter @bus/api sync:stops:local-api`   | 透過 `dev:api` 的 `localhost:3001` 建立 stop sync。       |
 
 在 macOS 執行時間較長的本地 sync 時，可以使用 `start:dev:awake`。一般的 `start:dev` 仍保留給跨平台開發與部署環境使用。
 
@@ -191,10 +191,9 @@ GPS 位置，並回傳每個子路線要顯示的內容：每個站牌的到站�
 
 ## Planned Responsibilities
 
-- 持續完善 TDX authentication 和上游 request shaping
-- 持續完善基礎資料同步到 PostgreSQL
-- 持續補齊由資料庫支援的 route 和 station API endpoints
-- request pacing 和 TDX quota 保護
-- Scalar/OpenAPI 文件
+- 部署到常駐主機，並搭配託管的 PostgreSQL 資料庫
+- 部署後以排程執行每月的基礎資料同步
+- 在免費方案的目標內，持續控制 TDX 請求頻率與額度
+- 讓 Scalar/OpenAPI 文件跟著 endpoints 更新
 
 目前的後端遷移計劃請看 [docs/plan.md](../../../docs/plan.md)。

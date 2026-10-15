@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
 import { getRouteRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
 import { AppLocaleType, CityNameType, DirectionType } from '@bus/shared'
-import { StopStatusType } from '~/modules/enums/StopStatusType'
+import { TdxStopStatus } from '@bus/shared'
 import { VehicleStateType } from '~/modules/enums/VehicleStateType'
 import type { BusRoute } from '~/modules/interfaces/BusRoute'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
@@ -278,7 +278,7 @@ const estimatedArrivalsData = [
     Direction: DirectionType.RETURN,
     StopSequence: 2,
     EstimateTime: 181,
-    StopStatus: StopStatusType.NORMAL,
+    StopStatus: TdxStopStatus.NORMAL,
     MessageType: 0,
     UpdateTime: '2026-03-19T10:00:00+08:00',
     City: CityNameType.TAIPEI,
@@ -829,7 +829,7 @@ describe('Route', () => {
           StopSequence: 1,
           PlateNumb: undefined,
           EstimateTime: null,
-          StopStatus: StopStatusType.LAST_BUS_PASSED,
+          StopStatus: TdxStopStatus.LAST_BUS_PASSED,
         },
       ],
       isError: false,

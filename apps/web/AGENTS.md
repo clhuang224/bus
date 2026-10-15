@@ -254,7 +254,7 @@ While base data is moving from TDX to the app API, some data can come from eithe
 - keep cached transit models locale-independent; store `LocalizedText` and pick the display string in the hook or component
 - when one source returns related data together and the other needs extra requests, express that in the model, such as nullable `routesByStationId`, rather than branching on the source in the hook
 
-Data that only exists in one source, such as realtime TDX data, can stay on that source's API until it has a second source.
+Data that only exists in one source can stay on that source's API until it has a second source. Realtime data now has one: `GET /api/realtime/routes/:uuid` returns per-stop arrivals, vehicles, and status values computed by the API. Moving the Route page's realtime data into `transitApi` is the next step in `docs/plan.md`; until then, the Route page still reads realtime data from TDX through `busApi`.
 
 When the same kind of API request must be sent to multiple sibling targets, such as multiple cities in the same area, prefer `await Promise.all(...)` over sequential requests unless request ordering or rate limiting is a real requirement.
 

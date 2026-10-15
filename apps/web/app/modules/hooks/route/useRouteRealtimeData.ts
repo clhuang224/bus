@@ -6,7 +6,7 @@ import { isTdxRateLimitError } from '~/modules/apis/errors/busError'
 import type { RouteDetailSubRoute } from '~/modules/interfaces/RouteDetail'
 import { CityNameType } from '@bus/shared'
 import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
-import { StopStatusType } from '~/modules/enums/StopStatusType'
+import { TdxStopStatus } from '@bus/shared'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import {
   formatEstimatedArrivalLabel,
@@ -321,9 +321,9 @@ export function useRouteRealtimeData(
 
     const isOutOfService = activeEstimatedArrivals.every((estimatedArrival) =>
       [
-        StopStatusType.NOT_YET_DEPARTED,
-        StopStatusType.LAST_BUS_PASSED,
-        StopStatusType.NOT_IN_SERVICE_TODAY,
+        TdxStopStatus.NOT_YET_DEPARTED,
+        TdxStopStatus.LAST_BUS_PASSED,
+        TdxStopStatus.NOT_IN_SERVICE_TODAY,
       ].includes(estimatedArrival.StopStatus),
     )
 
