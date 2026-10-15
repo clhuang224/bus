@@ -27,7 +27,7 @@ packages/
 | `apps/api`        | NestJS 後端                        | [apps/api/README.md](../apps/api/README.md)               |
 | `packages/shared` | 共用 API contract 與 domain types  | [packages/shared/README.md](../packages/shared/README.md) |
 
-如果想了解後端與資料庫的規劃，可以先看 [docs/plan.md](./plan.md)。
+如果想了解後端與資料庫的規劃，可以先看 [docs/plan.zh-TW.md](./plan.zh-TW.md)。
 
 ## 如何使用
 

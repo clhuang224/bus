@@ -1,5 +1,7 @@
 # Development Plan
 
+[English](./plan.md) | [繁體中文](./plan.zh-TW.md)
+
 ## Overview
 
 The production app is still the frontend on GitHub Pages, which calls TDX through the Cloudflare Worker proxy for both base data and realtime data. That approach is hard to scale: every visitor spends the shared TDX key's quota, and the frontend has to compose raw TDX data itself.

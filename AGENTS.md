@@ -19,6 +19,7 @@ packages/
 - Root `README.md`: product-level overview, workspace map, common setup commands, and links to workspace docs.
 - `docs/README.zh-TW.md`: Traditional Chinese version of the root workspace guide.
 - `docs/plan.md`: architecture, database design decisions, current state, open questions, and next steps.
+- `docs/plan.zh-TW.md`: Traditional Chinese version of the plan. Update it in the same change whenever `docs/plan.md` changes, so the two stay in step.
 - `apps/web/README.md`: frontend product features, frontend structure, open data usage, and web development details.
 - `apps/web/AGENTS.md`: frontend-specific coding, UI, data-flow, and testing conventions.
 - `apps/api/README.md`: API setup, local API mode, sync scripts, endpoint groups, and Prisma workflow.
