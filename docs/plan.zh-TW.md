@@ -4,13 +4,13 @@
 
 ## 概況
 
-目前正式上線的還是放在 GitHub Pages 的前端，基礎資料和即時資料都是透過 Cloudflare Worker proxy 直接打 TDX。這種做法很難擴充：每個使用者都在消耗同一把 TDX key 的額度，前端也得自己組合 TDX 的原始資料。
+目前僅有前端正式部署在 GitHub Pages，基礎資料和即時資料都是透過 Cloudflare Worker proxy 直接打 TDX API。這是因應初期探索前端框架的需要。但這種做法有無可避免的缺點：每個使用者都在消耗同一把 TDX key 的額度，前端也得自己組合 TDX 的原始資料。
 
-現在已經有一個在本機跑的 NestJS 後端，搭配 PostgreSQL 資料庫。它會把 TDX 的基礎資料 sync 進資料庫，用資料庫提供路線和站位資料，也會提供有 cache 的 TDX 即時資料快照。前端在 local API 模式下可以改讀它。接下來要做的是：把前端的即時資料也改成走 API、部署 API，然後把正式環境切過去。
+現在已經有一個可以在本機執行的 NestJS 後端，搭配 PostgreSQL 資料庫。後端會把 TDX 的基礎資料 sync 進資料庫，用資料庫提供路線和站位資料，也會提供有 cache 的 TDX 即時資料快照。前端可以在本地開發時測試這個方式。接下來要做的是：把前端的即時資料也改成走 API、部署 API，然後把正式環境切過去。
 
 ## 目標
 
-- 減少直接打 TDX 的次數，把常用的路線和站牌流程改成讀自己的資料。後端不只是一層 proxy：它要存好非即時的基礎資料，讓前端在常用的路線和站牌流程上依賴它。
+- 減少直接打 TDX 的次數，把常用的路線和站牌流程改成讀自己的資料。後端不只是一層 proxy：後端要存好非即時的基礎資料，讓前端在常用的路線和站牌流程上改用這些資料。
 - 長期希望只用 TDX 的免費方案。目前哪些部分做得到，請看 [TDX 額度](#tdx-額度)。
 
 ## 架構
@@ -39,7 +39,7 @@ NestJS API 負責：
 - 整理 request 和 response DTO
 - 保護 TDX 額度
 
-API 文件用 Scalar 搭配 OpenAPI，跟著 endpoint 一起長。
+API 文件用 Scalar 搭配 OpenAPI，隨著 endpoint 一起擴充。
 
 ### 資料庫
 
@@ -73,11 +73,11 @@ erDiagram
 
 決策：
 
-- **附近站牌以站位為單位，不是以站牌為單位。** TDX 把站位群組、站位、站牌分開，所以 schema 也分成三張表。站牌是一支實體站牌，`route_stop` 指向的就是它。有些城市的站位資料不完整，所以 `station.station_group_id` 和 `stop.station_id` 可以是 null。附近站牌的 endpoint 直接回傳整理好的站位，前端不用知道是用 TDX 的哪些資料組出來的。
+- **附近站牌以站位為單位，不是以站牌為單位。** TDX 把站位群組、站位、站牌分開，所以 schema 也分成三張表。站牌指的是一支實體站牌，也是 `route_stop` 所指向的資料。有些城市的站位資料不完整，所以 `station.station_group_id` 和 `stop.station_id` 可以是 null。附近站牌的 endpoint 直接回傳整理好的站位，前端不用知道是用 TDX 的哪些資料組出來的。
 - **ID。** 對外的 `uuid` 都來自 TDX：路線是 `RouteUID`、站牌是 `StopUID`、站位是 `StationUID`，子路線則是 `<SubRouteUID>-<Direction>`，因為同一個 TDX 子路線可能有兩個方向。其他資料會用到的 TDX 原始 ID，存在 `tdx_*` 欄位，例如 `tdx_subroute_uid` 和 `tdx_stop_id`。
 - **路線站序用 `sequence` 排。** 一個子路線可能經過同一個站好幾次，所以 `route_stop` 是以「子路線 + 站序」為唯一，不是以站牌為唯一。
 - **不存 `area` 欄位。** 查詢時由 API 把搜尋區域換成對應的城市。
-- **路線形狀存成看得懂的座標。** `route_shape.path` 存 `[經度, 緯度]` 的陣列，`source` 記錄它來自 encoded polyline、geometry，還是站牌座標。TDX 沒有可用的形狀時，就用依站序排好的站牌座標組出來。
+- **路線形狀存成看得懂的座標。** `route_shape.path` 存 `[經度, 緯度]` 的陣列，`source` 記錄路徑來自 encoded polyline、geometry，還是站牌座標。TDX 沒有可用的形狀時，就用依站序排好的站牌座標組出來。
 - **暫時不用 PostGIS。** 附近站牌的搜尋用一般的經緯度欄位，先用範圍框篩選，再算精確距離。等真的需要空間查詢時再考慮 PostGIS。
 - **英文地址是翻譯來的，不是 sync 來的。** TDX 只提供中文地址。sync 時只要 `address_zh_tw` 沒變，就保留 `address_en`；中文地址變了，就清掉 `address_en`。
 - **即時資料不存進資料庫。** API 把即時資料快照 cache 在記憶體，請看 [即時資料](#即時資料)。
@@ -85,9 +85,9 @@ erDiagram
 
 ### 基礎資料 Sync
 
-- admin endpoint 建立一筆 `sync_run` 後馬上回應，實際的 sync 在背景跑，這樣 HTTP request 不用在所有城市 sync 完之前一直開著。
-- 路線和站牌的 sync 會一個城市一個城市處理，每個城市記一筆 `sync_run_city` checkpoint。重跑時會跳過已經完成的城市。sync 寫入是冪等的，所以中斷的城市可以安全地重跑。
-- sync service 只描述要抓什麼，速度和額度由 sync 用的 TDX client 管。它每打一次 TDX 就寫一筆 `tdx_request_log`，每次發出 request 前，都會根據這些紀錄檢查這分鐘和這個月的額度，並用 PostgreSQL 的 advisory lock 讓不同的 API instance 共用同一份計數。
+- admin endpoint 建立一筆 `sync_run` 後馬上回應，實際的 sync 在背景執行，這樣 HTTP request 不用在所有城市 sync 完之前一直開著。
+- 路線和站牌的 sync 會一個城市一個城市處理，每個城市記一筆 `sync_run_city` checkpoint。重新執行時會跳過已經完成的城市。sync 寫入是冪等的，所以中斷的城市可以安全地重新執行。
+- sync service 只描述要抓什麼，速度和額度由 sync 用的 TDX client 控管。這個 client 每打一次 TDX 就寫一筆 `tdx_request_log`，每次發出 request 前，都會根據這些紀錄檢查這分鐘和這個月的額度，並用 PostgreSQL 的 advisory lock 讓不同的 API instance 共用同一份計數。
 - 額度暫時用完時，sync run 會變成 `pending`，並記下可以重試的時間 `resume_after_at`。遇到預期外的錯誤就標成 `failed`。
 - mapper 依邊界分開：TDX 轉資料庫紀錄的，貼近 Prisma 欄位；資料庫紀錄轉 API response 的，貼近頁面要用的 contract。
 - `records_*` 計數以 sync 的資源為單位：路線 sync 算的是路線的資料列，不含子路線和業者的寫入。
@@ -105,17 +105,17 @@ erDiagram
 
 NestJS 後端要部署到常駐的主機，例如 Render，再搭配託管的 PostgreSQL。本機開發用的是 Prisma Postgres，正式環境的資料庫要在部署前選好，並寫進文件。
 
-sync worker 不要部署到 serverless 平台：它會接續背景的 sync run，可能跑很久。另外只能跑一個 API instance，因為即時資料的 cache 和限流都在記憶體裡。
+sync worker 不要部署到 serverless 平台：sync worker 會接續背景的 sync run，可能執行很久。另外 API 只能執行一個 instance，因為即時資料的 cache 和限流都在記憶體裡。
 
 部署前要先處理：
 
 - 確認 PostgreSQL 和主機的專案，以及 API 怎麼連到資料庫
 - 在主機上設定環境變數，`.env.example` 只放範例值
 - 決定已 commit 的 Prisma migration 要怎麼套用到正式資料庫
-- 先替 admin sync endpoint 加上保護，才能讓它改動資料
-- 決定每月的排程 sync 要在哪裡跑
+- 先替 admin sync endpoint 加上保護，才能讓這些 endpoint 改動資料
+- 決定每月的排程 sync 要在哪裡執行
 
-等 API 部署好、前端的資料都改由 API 提供之後，就停用 TDX proxy。在那之前，正式環境還是需要 proxy，而且它跟 API 共用同一把 TDX key。
+等 API 部署好、前端的資料都改由 API 提供之後，就停用 TDX proxy。在那之前，正式環境還是需要 proxy，而且 proxy 跟 API 共用同一把 TDX key。
 
 ## 目前狀態
 
@@ -138,14 +138,14 @@ sync worker 不要部署到 serverless 平台：它會接續背景的 sync run�
 補充：
 
 - 路線詳情會附上 TDX 的對應 ID（每個子路線的 `SubRouteUID`，以及每個站牌的 `StopID` 和 `StationID`），讓前端能對上 TDX 的即時資料，也讓已存的收藏 ID 維持不變。
-- 附近站牌回傳的每一筆都對應到一個站位。沒有站位的站牌目前不回傳，等產品上決定怎麼呈現再說。站位地址會把站位本身和底下站牌的地址，依語言合併。
-- local API 模式下，附近站牌頁的網址存的是站位 uuid。TDX 模式下的網址不會自動轉換。
+- 附近站牌回傳的每一筆都對應到一個站位。沒有站位的站牌目前不回傳，等決定好產品上的呈現方式再處理。站位地址會把站位本身和底下站牌的地址，依語言合併。
+- 在 local API 模式（`pnpm run dev:api`，本地開發時改用 API 的模式）下，附近站牌頁的網址存的是站位 uuid。TDX 模式下的網址不會自動轉換。
 - 收藏和設定的 endpoint 目前只是 contract placeholder，請看 [待辦](#待辦)。
 
 ### 進度
 
 - monorepo、NestJS API、Scalar 文件、Prisma schema 和 migration 都已經建好。
-- 路線和站牌的 sync 會在背景處理所有支援的城市：記錄 TDX request、保護額度、依城市 checkpoint 接續，並把上游已經沒有的資料標成停用。完整的 sync 已經在全台跑過，最近一次是 2026 年 10 月。
+- 路線和站牌的 sync 會在背景處理所有支援的城市：記錄 TDX request、保護額度、依城市 checkpoint 接續，並把上游已經沒有的資料標成停用。完整的 sync 已經在全台執行過，最近一次是 2026 年 10 月。
 - 可以透過 admin 的 sync run endpoint 查看 sync 的狀況。
 - local API 模式下，附近站牌、搜尋公車和路線頁的基礎資料都改讀資料庫 API；預設模式和正式環境還是走 TDX proxy。
 - 前端只在 `transitApi` 一個地方決定資料來源，所以兩種模式下，頁面和 hook 拿到的都是同一種前端 model。
@@ -171,7 +171,7 @@ sync worker 不要部署到 serverless 平台：它會接續背景的 sync run�
 
 站牌相關的表約 164 MiB，路線相關的表約 6.5 MiB，路線形狀約 11 MiB，sync 紀錄不到 1 MiB。之後功能要用的表目前是空的，但還是會佔一點 metadata 的空間。
 
-跟 7 月比，資料列只多了約 4%，資料庫卻大了約 30%。停用的資料列很少（例如 24 萬多筆路線站序裡只有 334 筆），所以多出來的空間比較可能是 sync 改寫資料列後留下的：autovacuum 會把這些空間標成可重用，但不會還回去。之後每次 sync 完，要再看看大小有沒有繼續長。
+跟 7 月比，資料列只多了約 4%，資料庫卻大了約 30%。停用的資料列很少（例如 24 萬多筆路線站序裡只有 334 筆），所以多出來的空間比較可能是 sync 改寫資料列後留下的：autovacuum 會把這些空間標成可重用，但不會還回去。之後每次 sync 完，要再確認大小有沒有持續增加。
 
 ## 下一步
 
@@ -193,8 +193,8 @@ API 另外修正了路線頁的一個問題：一個子路線經過同一個站�
 
 這個專案的長期目標是用 TDX 的免費方案（基礎會員：每把 key 每分鐘 5 次，每月 3 點，每點可以打 1,500 次或 150MB），目前用的是銅級會員（每秒 5 次，每月 200 點）。
 
-- 基礎資料的 sync 用免費方案就夠了。2026 年 10 月跑一次路線和站牌 sync，大約打了 100 次，解壓後的回應約 175MB。
-- 即時資料光靠 TDX 撐不住免費方案。每次更新要打 3 支（到站時間、靠站資訊、GPS 位置），TDX 也沒有一次拿到三種資料的 API，所以每分鐘 5 次，全部使用者加起來大概只撐得住同時看兩條路線。
+- 基礎資料的 sync 用免費方案就夠了。2026 年 10 月執行一次路線和站牌 sync，大約打了 100 次，解壓後的回應約 175MB。
+- 如果只靠 TDX，即時資料無法用免費方案支撐。每次更新要打 3 支（到站時間、靠站資訊、GPS 位置），TDX 也沒有一次拿到三種資料的 API，所以每分鐘 5 次，全部使用者加起來大概只能同時查看兩條路線。
 - 正式環境的前端還在透過 proxy 向 TDX 拿基礎資料，所以要用免費方案，也得先把正式環境切到資料庫 API。
 - 要讓即時資料免費，比較可行的方向是改接各縣市自己的開放資料。台北市有一份不需要 API key 的全市到站時間檔案，大約每 20 秒更新一次。要用這類資料之前，要先確認每個縣市的更新頻率、ID 怎麼對應、授權和存取限制，以及有沒有提供車輛是進站還是離站。
 
@@ -205,5 +205,5 @@ API 另外修正了路線頁的一個問題：一個子路線經過同一個站�
 - **帳號和登入。** 在有登入之前，收藏和設定都留在前端，因為後端存收藏和設定的主要好處是跨裝置同步。收藏和設定的 API 等登入做完再接著做。
 - **查詢單一站牌的 endpoint**，如果路線頁需要的話。
 - **管理後台。** 另開一個 `apps/manager` workspace 處理 sync 的操作：列出 sync run 和狀態、看各城市的 checkpoint、TDX 用量和 sync 錯誤，以及手動觸發或重試。除了明確的 sync 操作之外都維持唯讀，對外開放前每個路由都要先加上保護。在那之前，先用 Prisma Studio 和 log。
-- **共用的即時資料 cache**，例如 Redis，如果 API 之後需要跑不只一個 instance。
+- **共用的即時資料 cache**，例如 Redis，如果 API 之後需要執行多個 instance。
 - **用 SSE 或 WebSocket 推送即時資料。**

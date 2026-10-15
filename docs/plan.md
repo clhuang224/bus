@@ -4,9 +4,9 @@
 
 ## Overview
 
-The production app is still the frontend on GitHub Pages, which calls TDX through the Cloudflare Worker proxy for both base data and realtime data. That approach is hard to scale: every visitor spends the shared TDX key's quota, and the frontend has to compose raw TDX data itself.
+Only the frontend is deployed to production, on GitHub Pages, and it calls the TDX API through the Cloudflare Worker proxy for both base data and realtime data. This fit the early work, which focused on exploring the frontend framework. But the approach has unavoidable drawbacks: every visitor spends the shared TDX key's quota, and the frontend has to compose raw TDX data itself.
 
-A NestJS backend with a PostgreSQL database now runs locally. It syncs TDX base data into the database, serves route and station data from it, and serves cached TDX realtime snapshots. The web app can read from it in local API mode. The remaining work is to move realtime data in the web app onto the API, deploy the API, and switch production to it.
+A NestJS backend with a PostgreSQL database can now run locally. It syncs TDX base data into the database, serves route and station data from it, and serves cached TDX realtime snapshots. The web app can read from it in local API mode. The remaining work is to move realtime data in the web app onto the API, deploy the API, and switch production to it.
 
 ## Goals
 
