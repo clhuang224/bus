@@ -20,11 +20,11 @@ packages/
 
 ## Workspace Docs
 
-| Workspace | Purpose | Docs |
-| --- | --- | --- |
-| `apps/web` | User-facing React Router app | [apps/web/README.md](./apps/web/README.md) |
-| `apps/tdx-proxy` | Cloudflare Worker proxy for TDX auth | [apps/tdx-proxy/README.md](./apps/tdx-proxy/README.md) |
-| `apps/api` | NestJS backend | [apps/api/README.md](./apps/api/README.md) |
+| Workspace         | Purpose                               | Docs                                                     |
+| ----------------- | ------------------------------------- | -------------------------------------------------------- |
+| `apps/web`        | User-facing React Router app          | [apps/web/README.md](./apps/web/README.md)               |
+| `apps/tdx-proxy`  | Cloudflare Worker proxy for TDX auth  | [apps/tdx-proxy/README.md](./apps/tdx-proxy/README.md)   |
+| `apps/api`        | NestJS backend                        | [apps/api/README.md](./apps/api/README.md)               |
 | `packages/shared` | Shared API contracts and domain types | [packages/shared/README.md](./packages/shared/README.md) |
 
 For the backend and database direction, start with [docs/plan.md](./docs/plan.md).

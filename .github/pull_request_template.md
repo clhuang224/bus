@@ -12,7 +12,7 @@ Describe the user-facing goal or engineering purpose of this PR.
 
 ## What Changed
 
-- 
+-
 
 ## Validation
 

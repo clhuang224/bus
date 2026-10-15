@@ -56,13 +56,13 @@ The latest record in the same batch wins.
 
 Conflict keys:
 
-| Sync stage      | Conflict key               |
-| --------------- | -------------------------- |
-| station groups  | `uuid`                     |
-| stations        | `uuid`                     |
-| stops           | `uuid`                     |
-| route stops     | `subroute_id` + `sequence` |
-| route shapes    | `subroute_id`              |
+| Sync stage     | Conflict key               |
+| -------------- | -------------------------- |
+| station groups | `uuid`                     |
+| stations       | `uuid`                     |
+| stops          | `uuid`                     |
+| route stops    | `subroute_id` + `sequence` |
+| route shapes   | `subroute_id`              |
 
 Duplicate rows are dropped silently for now. If this becomes hard to debug, add
 targeted logging with small samples instead of logging every duplicate row.

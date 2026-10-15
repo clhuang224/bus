@@ -26,8 +26,8 @@ Local development scripts:
 | `pnpm --filter @bus/api start:dev:awake`        | Start the API in watch mode and prevent idle sleep on macOS.    |
 | `pnpm --filter @bus/api sync:routes:local`      | Queue a route sync through the API running on `localhost:3000`. |
 | `pnpm --filter @bus/api sync:stops:local`       | Queue a stop sync through the API running on `localhost:3000`.  |
-| `pnpm --filter @bus/api sync:routes:local-api` | Queue a route sync on `localhost:3001` for `dev:api`. |
-| `pnpm --filter @bus/api sync:stops:local-api` | Queue a stop sync on `localhost:3001` for `dev:api`. |
+| `pnpm --filter @bus/api sync:routes:local-api`  | Queue a route sync on `localhost:3001` for `dev:api`.           |
+| `pnpm --filter @bus/api sync:stops:local-api`   | Queue a stop sync on `localhost:3001` for `dev:api`.            |
 
 Use `start:dev:awake` for long local sync runs on macOS. Keep the regular `start:dev` command for cross-platform development and deployment environments.
 

@@ -18,16 +18,16 @@ pnpm --filter @bus/api start:dev
 
 本地開發 scripts：
 
-| Script                                          | 說明                                                 |
-| ----------------------------------------------- | ---------------------------------------------------- |
-| `pnpm --filter @bus/api generate:admin-api-key` | 產生隨機 admin API key，並寫入 `.env.local`。       |
-| `pnpm --filter @bus/api start:dev`              | 以 watch mode 啟動 API。                             |
+| Script                                          | 說明                                                      |
+| ----------------------------------------------- | --------------------------------------------------------- |
+| `pnpm --filter @bus/api generate:admin-api-key` | 產生隨機 admin API key，並寫入 `.env.local`。             |
+| `pnpm --filter @bus/api start:dev`              | 以 watch mode 啟動 API。                                  |
 | `pnpm --filter @bus/api start:dev:local-api`    | 在 port `3001` 以 local web CORS 的 watch mode 啟動 API。 |
-| `pnpm --filter @bus/api start:dev:awake`        | 以 watch mode 啟動 API，並在 macOS 防止閒置休眠。    |
-| `pnpm --filter @bus/api sync:routes:local`      | 透過執行於 `localhost:3000` 的 API 建立 route sync。 |
-| `pnpm --filter @bus/api sync:stops:local`       | 透過執行於 `localhost:3000` 的 API 建立 stop sync。  |
-| `pnpm --filter @bus/api sync:routes:local-api` | 透過 `dev:api` 的 `localhost:3001` 建立 route sync。 |
-| `pnpm --filter @bus/api sync:stops:local-api` | 透過 `dev:api` 的 `localhost:3001` 建立 stop sync。 |
+| `pnpm --filter @bus/api start:dev:awake`        | 以 watch mode 啟動 API，並在 macOS 防止閒置休眠。         |
+| `pnpm --filter @bus/api sync:routes:local`      | 透過執行於 `localhost:3000` 的 API 建立 route sync。      |
+| `pnpm --filter @bus/api sync:stops:local`       | 透過執行於 `localhost:3000` 的 API 建立 stop sync。       |
+| `pnpm --filter @bus/api sync:routes:local-api`  | 透過 `dev:api` 的 `localhost:3001` 建立 route sync。      |
+| `pnpm --filter @bus/api sync:stops:local-api`   | 透過 `dev:api` 的 `localhost:3001` 建立 stop sync。       |
 
 在 macOS 執行時間較長的本地 sync 時，可以使用 `start:dev:awake`。一般的 `start:dev` 仍保留給跨平台開發與部署環境使用。
 
