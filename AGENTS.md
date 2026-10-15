@@ -18,12 +18,12 @@ packages/
 
 - Root `README.md`: product-level overview, workspace map, common setup commands, and links to workspace docs.
 - `docs/README.zh-TW.md`: Traditional Chinese version of the root workspace guide.
-- `docs/plan.md`: backend migration and architecture planning notes.
+- `docs/plan.md`: architecture, database design decisions, current state, open questions, and next steps.
 - `apps/web/README.md`: frontend product features, frontend structure, open data usage, and web development details.
 - `apps/web/AGENTS.md`: frontend-specific coding, UI, data-flow, and testing conventions.
 - `apps/api/README.md`: API setup, local API mode, sync scripts, endpoint groups, and Prisma workflow.
 - `apps/api/AGENTS.md`: backend-specific structure, DTO, Prisma, and TDX request conventions.
-- `apps/api/docs/`: database plan, error handling rules, and sync troubleshooting notes.
+- `apps/api/docs/`: error handling rules and sync troubleshooting notes. Table and column definitions live in the Prisma schema, not in docs.
 - `apps/tdx-proxy/README.md`: Worker proxy setup, local development, and manual deployment.
 - `packages/shared/README.md`: shared package boundaries and contract rules.
 

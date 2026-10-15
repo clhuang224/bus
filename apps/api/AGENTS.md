@@ -170,6 +170,35 @@ Prisma schema files live under `prisma/` and may be split into `prisma/models/` 
 
 The generated Prisma Client output is `src/generated/prisma`. It is ignored by Git. Do not edit generated Prisma files by hand.
 
+The schema is the source of truth for tables and columns. The reasons behind
+the main schema decisions are recorded in `docs/plan.md`.
+
+### Schema Conventions
+
+- Use `snake_case` column names. Use `id` for internal relations and `uuid`
+  for the stable public identifier, which comes from TDX.
+- Keep raw TDX identifiers that other data refers to in `tdx_*` columns, such
+  as `tdx_stop_id`, and raw TDX codes in `tdx_*_code`.
+- Store localized text as separate columns, such as `name_zh_tw`, `name_en`,
+  `name_ja`, and `name_ko`.
+- Store coordinates as `latitude` and `longitude` (`double precision`).
+- Name timestamps `*_at` and store them in UTC. Keep the TDX update time as
+  `tdx_updated_at` and the row times as `created_at` and `updated_at`. Local
+  clock times that are not timestamps use `*_time`, such as `first_bus_time`.
+- Put the unit in duration, countdown, and distance names, such as
+  `*_seconds` and `distance_meters`, and use integers unless sub-second
+  precision is needed.
+- Name booleans `is_*`. Use `has_*` only when the row owns another resource.
+- Order rows with `sequence`; avoid `order` as a column name.
+- Use JSON only for naturally nested or external data, such as
+  `route_shape.path`.
+- Define the project's own enums with `snake_case` string values and convert
+  TDX numeric values during sync. Do not store numbers as enum values.
+- Soft-delete base data that favorites may reference with `is_active` and
+  `inactive_at`. Favorite rows can be hard deleted.
+- Use `varchar(64)` for UUIDs and TDX IDs, `varchar(100)` for names,
+  `varchar(255)` for addresses, and `text` for URLs and free-form messages.
+
 Use these scripts instead of ad hoc Prisma commands:
 
 ```sh
