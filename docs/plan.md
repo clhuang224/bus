@@ -198,6 +198,32 @@ The project aims to run on the free TDX basic membership (5 requests per minute 
 - Production web builds still call TDX for base data through the proxy, so the free tier also requires the production switch to the database API.
 - City open-data feeds are the candidate path to free realtime data. Taipei publishes a citywide ETA file without an API key, updated about every 20 seconds. Before building on such feeds, check each city's update rate, identifiers, license, and access limits, and whether they report whether a vehicle is arriving at or leaving a stop.
 
+### Product Name
+
+The working name, Finding the Bus (FTB), is a deliberate pun on Finding Nemo. The joke may not land with every user, and it does not say what the app does, so the project needs a proper name before wider release.
+
+A good name should:
+
+- say or hint that the app is about Taiwan buses: route search, arrival times, and nearby stops
+- work in both Traditional Chinese and English, since the app supports both
+- be short and easy to say, type, and search for
+- not clash with existing bus apps or services in Taiwan
+- have a usable domain or subdomain; the app currently lives at `bus.lynns.me`
+
+Where the name appears today:
+
+- user-facing: the web app title (`app.name` in both locale files), the root READMEs, and the API documentation title in `apps/api/src/main.ts`
+- docs: the opening line of `AGENTS.md`, the web and API READMEs, and the `FTB API` titles
+- code and infrastructure: the `FTBError` class in the API, and the Worker name `finding-the-bus-tdx-proxy`; renaming the Worker changes its URL, so the web build's `VITE_PROXY_API_BASE_URL` must change with it
+- names that can stay as they are: the `@bus/*` package scope and the `bus` repository
+
+Steps:
+
+1. Collect candidate names in Chinese and English.
+2. Check each against existing apps, search results, and domain availability.
+3. Decide the Chinese and English names and record them here.
+4. Rename user-facing text and docs in one change. Rename code identifiers and the Worker separately, since the Worker rename is a deployment change.
+
 ## Backlog
 
 These wait until the backend is deployed and stable:
