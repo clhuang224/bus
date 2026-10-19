@@ -1,0 +1,333 @@
+{
+  "source": "TDX Tainan route TNN1500 (黃幹線), recorded 2026-10-19 and trimmed to two direction-0 sub-routes and the stops around each vehicle",
+  "route": {
+    "uuid": "TNN1500",
+    "city": "TAINAN",
+    "subroutes": [
+      {
+        "uuid": "TNN150001-0",
+        "tdx_subroute_uid": "TNN150001",
+        "direction": "GO",
+        "route_stops": [
+          {
+            "sequence": 1,
+            "stop": {
+              "uuid": "TNN7530",
+              "tdx_stop_id": "7530"
+            }
+          },
+          {
+            "sequence": 2,
+            "stop": {
+              "uuid": "TNN7531",
+              "tdx_stop_id": "7531"
+            }
+          },
+          {
+            "sequence": 3,
+            "stop": {
+              "uuid": "TNN7532",
+              "tdx_stop_id": "7532"
+            }
+          },
+          {
+            "sequence": 33,
+            "stop": {
+              "uuid": "TNN25952",
+              "tdx_stop_id": "25952"
+            }
+          },
+          {
+            "sequence": 34,
+            "stop": {
+              "uuid": "TNN7557",
+              "tdx_stop_id": "7557"
+            }
+          },
+          {
+            "sequence": 35,
+            "stop": {
+              "uuid": "TNN7558",
+              "tdx_stop_id": "7558"
+            }
+          },
+          {
+            "sequence": 45,
+            "stop": {
+              "uuid": "TNN7566",
+              "tdx_stop_id": "7566"
+            }
+          },
+          {
+            "sequence": 46,
+            "stop": {
+              "uuid": "TNN7567",
+              "tdx_stop_id": "7567"
+            }
+          },
+          {
+            "sequence": 47,
+            "stop": {
+              "uuid": "TNN7568",
+              "tdx_stop_id": "7568"
+            }
+          },
+          {
+            "sequence": 48,
+            "stop": {
+              "uuid": "TNN7569",
+              "tdx_stop_id": "7569"
+            }
+          },
+          {
+            "sequence": 64,
+            "stop": {
+              "uuid": "TNN7579",
+              "tdx_stop_id": "7579"
+            }
+          },
+          {
+            "sequence": 65,
+            "stop": {
+              "uuid": "TNN7580",
+              "tdx_stop_id": "7580"
+            }
+          },
+          {
+            "sequence": 66,
+            "stop": {
+              "uuid": "TNN7581",
+              "tdx_stop_id": "7581"
+            }
+          },
+          {
+            "sequence": 67,
+            "stop": {
+              "uuid": "TNN7582",
+              "tdx_stop_id": "7582"
+            }
+          }
+        ]
+      },
+      {
+        "uuid": "TNN150021-0",
+        "tdx_subroute_uid": "TNN150021",
+        "direction": "GO",
+        "route_stops": [
+          {
+            "sequence": 1,
+            "stop": {
+              "uuid": "TNN7530",
+              "tdx_stop_id": "7530"
+            }
+          },
+          {
+            "sequence": 2,
+            "stop": {
+              "uuid": "TNN7531",
+              "tdx_stop_id": "7531"
+            }
+          },
+          {
+            "sequence": 3,
+            "stop": {
+              "uuid": "TNN7532",
+              "tdx_stop_id": "7532"
+            }
+          },
+          {
+            "sequence": 33,
+            "stop": {
+              "uuid": "TNN25952",
+              "tdx_stop_id": "25952"
+            }
+          },
+          {
+            "sequence": 34,
+            "stop": {
+              "uuid": "TNN7557",
+              "tdx_stop_id": "7557"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "estimatedArrivals": [
+    {
+      "StopUID": "TNN7530",
+      "StopID": "7530",
+      "RouteUID": "TNN1500",
+      "SubRouteUID": "TNN150001",
+      "Direction": 255,
+      "StopSequence": 1,
+      "EstimateTime": 1476,
+      "StopStatus": 1
+    },
+    {
+      "StopUID": "TNN7531",
+      "StopID": "7531",
+      "RouteUID": "TNN1500",
+      "SubRouteUID": "TNN150001",
+      "Direction": 255,
+      "StopSequence": 2,
+      "EstimateTime": 1568,
+      "StopStatus": 1
+    },
+    {
+      "StopUID": "TNN7532",
+      "StopID": "7532",
+      "RouteUID": "TNN1500",
+      "SubRouteUID": "TNN150001",
+      "Direction": 255,
+      "StopSequence": 3,
+      "EstimateTime": 1605,
+      "StopStatus": 1
+    },
+    {
+      "StopUID": "TNN25952",
+      "StopID": "25952",
+      "RouteUID": "TNN1500",
+      "SubRouteUID": "TNN150001",
+      "Direction": 255,
+      "StopSequence": 33,
+      "EstimateTime": 3657,
+      "StopStatus": 1
+    },
+    {
+      "StopUID": "TNN7557",
+      "StopID": "7557",
+      "RouteUID": "TNN1500",
+      "SubRouteUID": "TNN150001",
+      "Direction": 255,
+      "StopSequence": 34,
+      "EstimateTime": 3737,
+      "StopStatus": 1
+    },
+    {
+      "StopUID": "TNN7558",
+      "StopID": "7558",
+      "RouteUID": "TNN1500",
+      "SubRouteUID": "TNN150001",
+      "Direction": 255,
+      "StopSequence": 35,
+      "EstimateTime": 3923,
+      "StopStatus": 1
+    },
+    {
+      "StopUID": "TNN7566",
+      "StopID": "7566",
+      "RouteUID": "TNN1500",
+      "SubRouteUID": "TNN150001",
+      "Direction": 255,
+      "StopSequence": 45,
+      "EstimateTime": 4722,
+      "StopStatus": 1
+    },
+    {
+      "StopUID": "TNN7567",
+      "StopID": "7567",
+      "RouteUID": "TNN1500",
+      "SubRouteUID": "TNN150001",
+      "Direction": 255,
+      "StopSequence": 46,
+      "EstimateTime": 4811,
+      "StopStatus": 1
+    },
+    {
+      "PlateNumb": "061-U9",
+      "StopUID": "TNN7568",
+      "StopID": "7568",
+      "RouteUID": "TNN1500",
+      "SubRouteUID": "TNN150001",
+      "Direction": 0,
+      "StopSequence": 47,
+      "EstimateTime": 121,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "061-U9",
+      "StopUID": "TNN7569",
+      "StopID": "7569",
+      "RouteUID": "TNN1500",
+      "SubRouteUID": "TNN150001",
+      "Direction": 0,
+      "StopSequence": 48,
+      "EstimateTime": 157,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "061-U9",
+      "StopUID": "TNN7579",
+      "StopID": "7579",
+      "RouteUID": "TNN1500",
+      "SubRouteUID": "TNN150001",
+      "Direction": 0,
+      "StopSequence": 64,
+      "EstimateTime": 1515,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "061-U9",
+      "StopUID": "TNN7580",
+      "StopID": "7580",
+      "RouteUID": "TNN1500",
+      "SubRouteUID": "TNN150001",
+      "Direction": 0,
+      "StopSequence": 65,
+      "EstimateTime": 1706,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "686-U9",
+      "StopUID": "TNN7581",
+      "StopID": "7581",
+      "RouteUID": "TNN1500",
+      "SubRouteUID": "TNN150001",
+      "Direction": 0,
+      "StopSequence": 66,
+      "EstimateTime": 35,
+      "StopStatus": 0
+    },
+    {
+      "PlateNumb": "686-U9",
+      "StopUID": "TNN7582",
+      "StopID": "7582",
+      "RouteUID": "TNN1500",
+      "SubRouteUID": "TNN150001",
+      "Direction": 0,
+      "StopSequence": 67,
+      "EstimateTime": 161,
+      "StopStatus": 0
+    }
+  ],
+  "nearStops": [
+    {
+      "PlateNumb": "061-U9",
+      "SubRouteUID": "TNN150001",
+      "Direction": 0,
+      "StopUID": "TNN7567",
+      "StopID": "7567",
+      "StopName": {
+        "Zh_tw": "嘉鴻公司",
+        "En": "Jiahong Corp."
+      },
+      "StopSequence": 46,
+      "A2EventType": 0
+    },
+    {
+      "PlateNumb": "686-U9",
+      "SubRouteUID": "TNN150001",
+      "Direction": 0,
+      "StopUID": "TNN7580",
+      "StopID": "7580",
+      "StopName": {
+        "Zh_tw": "小埤頭",
+        "En": "Siaobitou"
+      },
+      "StopSequence": 65,
+      "A2EventType": 0
+    }
+  ],
+  "positions": []
+}

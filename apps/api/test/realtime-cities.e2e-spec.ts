@@ -193,6 +193,45 @@ describe('Realtime API with recorded city data (e2e)', () => {
     })
   })
 
+  describe('Tainan route 黃幹線, with unknown-direction ETAs and a short trip', () => {
+    beforeEach(async () => {
+      app = await createFixtureApp(loadFixture('tainan-1500'))
+    })
+
+    it('uses the sub-route ETAs that TDX tags with an unknown direction', async () => {
+      const fullLength = (await getSubRoutes(app, 'TNN1500')).get(
+        'TNN150001-0',
+      )!
+
+      expect(fullLength.status).toBe(RouteRealtimeStatus.NORMAL)
+      expect(fullLength.stops.every(({ arrival }) => arrival !== null)).toBe(
+        true,
+      )
+      expect(arrivalOf(fullLength, 'TNN7530')).toEqual({
+        status: RealtimeArrivalStatus.MINUTES,
+        minutes: 25,
+      })
+      expect(arrivalOf(fullLength, 'TNN7568')).toEqual({
+        status: RealtimeArrivalStatus.MINUTES,
+        minutes: 3,
+      })
+      expect(vehicleSummaries(fullLength)).toEqual([
+        ['686-U9', RealtimeVehicleState.DEPARTED, 'coming_soon', null],
+        ['061-U9', RealtimeVehicleState.DEPARTED, 'minutes', 3],
+      ])
+    })
+
+    it('leaves a short trip without its own ETAs empty', async () => {
+      const shortTrip = (await getSubRoutes(app, 'TNN1500')).get('TNN150021-0')!
+
+      expect(shortTrip.status).toBe(RouteRealtimeStatus.NO_REALTIME_DATA)
+      expect(shortTrip.stops.every(({ arrival }) => arrival === null)).toBe(
+        true,
+      )
+      expect(shortTrip.vehicles).toEqual([])
+    })
+  })
+
   describe('Penghu route 21, with running and finished sub-routes', () => {
     beforeEach(async () => {
       app = await createFixtureApp(loadFixture('penghu-21'))

@@ -263,6 +263,50 @@ describe('calculateRouteRealtime', () => {
       ])
     })
 
+    it('does not borrow ETAs tagged with another sub-route', () => {
+      const { stops } = calculate({
+        estimatedArrivals: ok([
+          eta(10, { SubRouteUID: 'TPE101321', EstimateTime: 120 }),
+        ]),
+      })
+
+      expect(stops[0].arrival).toBeNull()
+    })
+
+    it('uses sub-route ETAs with an unknown direction', () => {
+      const { stops } = calculate({
+        estimatedArrivals: ok([
+          eta(10, { EstimateTime: 120 }),
+          eta(11, { Direction: DirectionType.UNKNOWN, EstimateTime: 600 }),
+          eta(12, {
+            Direction: DirectionType.UNKNOWN,
+            SubRouteUID: 'TPE101321',
+            EstimateTime: 900,
+          }),
+        ]),
+      })
+
+      expect(stops.map(({ arrival }) => arrival?.minutes ?? null)).toEqual([
+        2,
+        10,
+        null,
+      ])
+    })
+
+    it('prefers an ETA with a known direction at the same stop', () => {
+      const { stops } = calculate({
+        estimatedArrivals: ok([
+          eta(10, { Direction: DirectionType.UNKNOWN, EstimateTime: 60 }),
+          eta(10, { EstimateTime: 300 }),
+        ]),
+      })
+
+      expect(stops[0].arrival).toEqual({
+        status: RealtimeArrivalStatus.MINUTES,
+        minutes: 5,
+      })
+    })
+
     it('ignores ETAs for the other direction', () => {
       const { stops } = calculate({
         estimatedArrivals: ok([
@@ -319,6 +363,34 @@ describe('calculateRouteRealtime', () => {
           eta(11, { EstimateTime: 80 }),
         ]),
         nearStops: ok([nearStop(10)]),
+      })
+
+      expect(vehicles[0].arrival).toEqual({
+        status: RealtimeArrivalStatus.IN_SERVICE,
+        minutes: null,
+      })
+    })
+
+    it('shows in service at a stop where the last bus has passed', () => {
+      const { vehicles } = calculate({
+        estimatedArrivals: ok([
+          eta(10, { StopStatus: TdxStopStatus.LAST_BUS_PASSED }),
+        ]),
+        nearStops: ok([nearStop(10)]),
+      })
+
+      expect(vehicles[0].arrival).toEqual({
+        status: RealtimeArrivalStatus.IN_SERVICE,
+        minutes: null,
+      })
+    })
+
+    it('ignores ETAs with an unknown direction for vehicles', () => {
+      const { vehicles } = calculate({
+        estimatedArrivals: ok([
+          eta(11, { Direction: DirectionType.UNKNOWN, EstimateTime: 600 }),
+        ]),
+        nearStops: ok([nearStop(10, { A2EventType: TdxA2EventType.DEPARTED })]),
       })
 
       expect(vehicles[0].arrival).toEqual({
