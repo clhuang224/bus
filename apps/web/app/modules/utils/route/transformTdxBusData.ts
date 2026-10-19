@@ -1,46 +1,10 @@
 import type { CityNameType } from '@bus/shared'
 import type { BusRoute, TdxBusRoute } from '../../interfaces/BusRoute'
-import type {
-  EstimatedArrival,
-  TdxEstimatedArrival,
-} from '../../interfaces/EstimatedArrival'
-import type {
-  RealtimeByFrequency,
-  TdxRealtimeByFrequency,
-} from '../../interfaces/RealtimeByFrequency'
-import type {
-  RealtimeNearStop,
-  TdxRealtimeNearStop,
-} from '../../interfaces/RealtimeNearStop'
 import type { RouteShape, TdxRouteShape } from '../../interfaces/RouteShape'
 import type { StopOfRoute, TdxStopOfRoute } from '../../interfaces/StopOfRoute'
 import type { Stop, TdxStop } from '../../interfaces/Stop'
 import { toLngLat, toLocalizedText } from './normalizeTdxFields'
 import { parseRouteShapePath } from './parseRouteShapePath'
-import { transformTdxVehicleState } from './transformTdxVehicleState'
-
-export function transformEstimatedArrival(
-  estimatedArrival: TdxEstimatedArrival,
-  city: CityNameType,
-): EstimatedArrival {
-  const routeUID = estimatedArrival.RouteUID ?? ''
-
-  return {
-    ...estimatedArrival,
-    City: city,
-    RouteUID: routeUID,
-    RouteID: estimatedArrival.RouteID ?? null,
-    RouteName: toLocalizedText(estimatedArrival.RouteName),
-    StopName: toLocalizedText(estimatedArrival.StopName),
-    StopStatus: estimatedArrival.StopStatus ?? 255,
-    SubRouteUID: estimatedArrival.SubRouteUID ?? routeUID,
-    SubRouteID: estimatedArrival.SubRouteID ?? estimatedArrival.RouteID ?? null,
-    SubRouteName: toLocalizedText(
-      estimatedArrival.SubRouteName,
-      estimatedArrival.RouteName,
-    ),
-  }
-}
 
 export function transformBusRoute(
   busRoute: TdxBusRoute<string>,
@@ -151,41 +115,6 @@ export function transformStops(stops: TdxStop[]): Stop[] {
     const transformedStop = transformStop(stop)
     return transformedStop ? [transformedStop] : []
   })
-}
-
-export function transformRealtimeNearStop(
-  realtimeNearStop: TdxRealtimeNearStop,
-  city: CityNameType,
-): RealtimeNearStop {
-  const { A2EventType, ...restRealtimeNearStop } = realtimeNearStop
-
-  return {
-    ...restRealtimeNearStop,
-    City: city,
-    RouteName: toLocalizedText(realtimeNearStop.RouteName),
-    StopName: toLocalizedText(realtimeNearStop.StopName),
-    SubRouteName: toLocalizedText(
-      realtimeNearStop.SubRouteName,
-      realtimeNearStop.RouteName,
-    ),
-    vehicleState: transformTdxVehicleState(A2EventType),
-  }
-}
-
-export function transformRealtimeByFrequency(
-  realtimeByFrequency: TdxRealtimeByFrequency,
-  city: CityNameType,
-): RealtimeByFrequency {
-  return {
-    ...realtimeByFrequency,
-    City: city,
-    RouteName: toLocalizedText(realtimeByFrequency.RouteName),
-    SubRouteName: toLocalizedText(
-      realtimeByFrequency.SubRouteName,
-      realtimeByFrequency.RouteName,
-    ),
-    position: toLngLat(realtimeByFrequency.BusPosition),
-  }
 }
 
 export function transformRouteShape(

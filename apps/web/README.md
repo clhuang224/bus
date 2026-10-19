@@ -158,8 +158,8 @@ To develop the Nearby Stops, Route Search, and Route Detail pages against the
 local NestJS API, first configure `apps/api/.env.local` with `DATABASE_URL` and
 the other API credentials, and apply the committed migrations. Also configure
 `apps/tdx-proxy/.dev.vars` using the
-[TDX proxy setup](../tdx-proxy/README.md#local-setup); realtime data still uses
-that proxy. Then run:
+[TDX proxy setup](../tdx-proxy/README.md#local-setup), since this mode also
+starts the proxy. Then run:
 
 ```bash
 pnpm run dev:api
@@ -181,6 +181,7 @@ These commands target the API on port `3001`; see the
 [API local development guide](../api/README.md#local-development) for setup.
 
 In this mode, the Nearby Stops, Route Search, and Route Detail pages read base
-data from the database-backed API, while realtime data still comes from the
-TDX proxy. The default `pnpm run dev` and production builds continue to use the
-TDX proxy for all data.
+data from the database-backed API, and the Route Detail page reads realtime data
+from the API's realtime endpoint. The default `pnpm run dev` and production
+builds continue to use the TDX proxy for all data, and compute realtime results
+with the same shared code as the API.

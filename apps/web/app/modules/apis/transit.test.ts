@@ -5,7 +5,11 @@ import {
   CityNameType,
   DirectionType,
   ErrorCode,
+  RealtimeArrivalStatus,
+  RouteRealtimeStatus,
+  TdxStopStatus,
   type ApiRouteDetail,
+  type ApiRouteRealtime,
   type ApiRouteSummary,
   type ApiStation,
 } from '@bus/shared'
@@ -19,7 +23,11 @@ import { transitApi } from './transit'
 const {
   mockGetDatabaseNearbyStations,
   mockGetDatabaseRouteDetail,
+  mockGetDatabaseRouteRealtime,
   mockGetDatabaseRoutes,
+  mockGetTdxEstimatedArrivals,
+  mockGetTdxNearStops,
+  mockGetTdxPositions,
   mockGetTdxRouteShapesByRoute,
   mockGetTdxRoutesByArea,
   mockGetTdxRoutesByCity,
@@ -31,7 +39,11 @@ const {
 } = vi.hoisted(() => ({
   mockGetDatabaseNearbyStations: vi.fn(),
   mockGetDatabaseRouteDetail: vi.fn(),
+  mockGetDatabaseRouteRealtime: vi.fn(),
   mockGetDatabaseRoutes: vi.fn(),
+  mockGetTdxEstimatedArrivals: vi.fn(),
+  mockGetTdxNearStops: vi.fn(),
+  mockGetTdxPositions: vi.fn(),
   mockGetTdxRouteShapesByRoute: vi.fn(),
   mockGetTdxRoutesByArea: vi.fn(),
   mockGetTdxRoutesByCity: vi.fn(),
@@ -47,6 +59,7 @@ vi.mock('./database', () => ({
     endpoints: {
       getNearbyStations: { initiate: mockGetDatabaseNearbyStations },
       getRouteDetail: { initiate: mockGetDatabaseRouteDetail },
+      getRouteRealtime: { initiate: mockGetDatabaseRouteRealtime },
       getRoutes: { initiate: mockGetDatabaseRoutes },
     },
   },
@@ -57,6 +70,9 @@ vi.mock('./bus', () => ({
   AREA_ROUTES_RETENTION_SECONDS: 60,
   busApi: {
     endpoints: {
+      getEstimatedArrivalByRoute: { initiate: mockGetTdxEstimatedArrivals },
+      getRealtimeByFrequencyByRoute: { initiate: mockGetTdxPositions },
+      getRealtimeNearStopsByRoute: { initiate: mockGetTdxNearStops },
       getRouteShapesByRoute: { initiate: mockGetTdxRouteShapesByRoute },
       getRoutesByArea: { initiate: mockGetTdxRoutesByArea },
       getRoutesByCity: { initiate: mockGetTdxRoutesByCity },
@@ -528,6 +544,147 @@ describe('transitApi.getRouteDetail', () => {
 
       const result = await createStore().dispatch(
         transitApi.endpoints.getRouteDetail.initiate(routeDetailQuery),
+      )
+
+      expect(result.data).toBeNull()
+    })
+  })
+})
+
+describe('transitApi.getRouteRealtime', () => {
+  const realtimeRequestOptions = { subscribe: false, forceRefetch: true }
+
+  describe('in local API mode', () => {
+    beforeEach(() => {
+      mockIsDatabaseApiEnabled.mockReturnValue(true)
+    })
+
+    it('reads realtime data from the database API on every request', async () => {
+      const routeRealtime: ApiRouteRealtime = {
+        uuid: 'TPE10132',
+        sub_routes: [],
+        updated_at: '2026-10-19T08:00:00.000Z',
+      }
+      mockGetDatabaseRouteRealtime.mockImplementation(
+        sourceResult({ data: routeRealtime }),
+      )
+
+      const result = await createStore().dispatch(
+        transitApi.endpoints.getRouteRealtime.initiate(routeDetailQuery),
+      )
+
+      expect(mockGetDatabaseRouteRealtime).toHaveBeenCalledWith(
+        'TPE10132',
+        realtimeRequestOptions,
+      )
+      expect(result.data).toEqual(routeRealtime)
+    })
+
+    it('returns null when the route does not exist', async () => {
+      mockGetDatabaseRouteRealtime.mockImplementation(
+        sourceResult({
+          error: {
+            status: 404,
+            data: {
+              status: 404,
+              error: { code: ErrorCode.ROUTE_NOT_FOUND, message: 'missing' },
+            },
+          },
+        }),
+      )
+
+      const result = await createStore().dispatch(
+        transitApi.endpoints.getRouteRealtime.initiate(routeDetailQuery),
+      )
+
+      expect(result.data).toBeNull()
+    })
+  })
+
+  describe('in TDX mode', () => {
+    beforeEach(() => {
+      mockIsDatabaseApiEnabled.mockReturnValue(false)
+      mockGetTdxRoutesByCity.mockImplementation(
+        sourceResult({ data: [tdxRouteWithSubRoute] }),
+      )
+      mockGetTdxStopOfRoutesByCity.mockImplementation(
+        sourceResult({ data: [tdxStopOfRoute] }),
+      )
+      mockGetTdxStopsByCityAndIds.mockImplementation(
+        sourceResult({ data: [nearStop] }),
+      )
+      mockGetTdxRouteShapesByRoute.mockImplementation(
+        sourceResult({ data: [] }),
+      )
+      mockGetTdxEstimatedArrivals.mockImplementation(
+        sourceResult({
+          data: [
+            {
+              RouteUID: 'TPE10132',
+              SubRouteUID: 'TPE101320',
+              Direction: DirectionType.GO,
+              StopUID: 'TPE1',
+              StopID: '1',
+              StopSequence: 1,
+              EstimateTime: 240,
+              StopStatus: TdxStopStatus.NORMAL,
+            },
+          ],
+        }),
+      )
+      mockGetTdxNearStops.mockImplementation(sourceResult({ data: [] }))
+      mockGetTdxPositions.mockImplementation(sourceResult({ data: [] }))
+    })
+
+    it('applies the shared realtime rules to fresh TDX feeds', async () => {
+      const result = await createStore().dispatch(
+        transitApi.endpoints.getRouteRealtime.initiate(routeDetailQuery),
+      )
+
+      for (const initiate of [
+        mockGetTdxEstimatedArrivals,
+        mockGetTdxNearStops,
+        mockGetTdxPositions,
+      ]) {
+        expect(initiate).toHaveBeenCalledWith(
+          routeDetailQuery,
+          realtimeRequestOptions,
+        )
+      }
+      expect(result.data?.sub_routes).toEqual([
+        {
+          uuid: 'TPE101320-0',
+          status: RouteRealtimeStatus.NO_REALTIME_DATA,
+          stops: [
+            {
+              uuid: 'TPE1',
+              arrival: { status: RealtimeArrivalStatus.MINUTES, minutes: 4 },
+            },
+          ],
+          vehicles: [],
+        },
+      ])
+    })
+
+    it('reports a rate limit from a TDX feed as the sub-route status', async () => {
+      mockGetTdxNearStops.mockImplementation(
+        sourceResult({ error: { status: 429, data: null } }),
+      )
+
+      const result = await createStore().dispatch(
+        transitApi.endpoints.getRouteRealtime.initiate(routeDetailQuery),
+      )
+
+      expect(result.data?.sub_routes[0]?.status).toBe(
+        RouteRealtimeStatus.RATE_LIMITED,
+      )
+    })
+
+    it('returns null when the city has no such route', async () => {
+      mockGetTdxRoutesByCity.mockImplementation(sourceResult({ data: [] }))
+
+      const result = await createStore().dispatch(
+        transitApi.endpoints.getRouteRealtime.initiate(routeDetailQuery),
       )
 
       expect(result.data).toBeNull()

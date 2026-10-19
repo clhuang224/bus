@@ -1,14 +1,9 @@
-import type { DirectionType } from '@bus/shared'
-import type { VehicleStateType } from '../enums/VehicleStateType'
+import type { RealtimeVehicleState } from '@bus/shared'
 
 export interface RouteRealtimeBusStatus {
-  direction: DirectionType
-  estimateLabel: string
-  estimateMinutes: number | null
+  /** Normalized plate number, shared with the map vehicle of the same bus. */
   id: string
   plateNumb: string
-  stopName: string
   stopSequence: number
-  subRouteUID: string
-  vehicleState: VehicleStateType
+  vehicleState: RealtimeVehicleState
 }

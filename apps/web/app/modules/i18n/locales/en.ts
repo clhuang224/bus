@@ -190,7 +190,6 @@ export const en = {
         minutesAway_one: 'Arriving in {{count}} min',
         minutesAway_other: 'Arriving in {{count}} mins',
         stopStatus: {
-          normal: 'Normal',
           notYetDeparted: 'Not departed yet',
           noStopDueToTrafficControl: 'Skipping stop due to traffic control',
           lastBusPassed: 'Last bus has passed',

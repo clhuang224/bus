@@ -1,18 +1,16 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { BusRoute, TdxBusRoute } from '../interfaces/BusRoute'
-import type { AreaType, CityNameType } from '@bus/shared'
-import type {
-  EstimatedArrival,
-  TdxEstimatedArrival,
-} from '../interfaces/EstimatedArrival'
-import type {
-  RealtimeByFrequency,
-  TdxRealtimeByFrequency,
-} from '../interfaces/RealtimeByFrequency'
-import type {
-  RealtimeNearStop,
-  TdxRealtimeNearStop,
-} from '../interfaces/RealtimeNearStop'
+import {
+  isTdxEstimatedArrival,
+  isTdxRealtimeByFrequency,
+  isTdxRealtimeNearStop,
+  normalizeTdxRealtimeNearStop,
+  type AreaType,
+  type CityNameType,
+  type TdxEstimatedArrival,
+  type TdxRealtimeByFrequency,
+  type TdxRealtimeNearStop,
+} from '@bus/shared'
 import type { RouteShape, TdxRouteShape } from '../interfaces/RouteShape'
 import type { StopOfRoute, TdxStopOfRoute } from '../interfaces/StopOfRoute'
 import type { Stop, TdxStop } from '../interfaces/Stop'
@@ -28,9 +26,6 @@ import {
 import { queryArrayWith414Fallback } from '../utils/api/queryWith414Fallback'
 import {
   transformBusRoute,
-  transformEstimatedArrival,
-  transformRealtimeByFrequency,
-  transformRealtimeNearStop,
   transformRouteShape,
   transformStops,
   transformStopOfRoute,
@@ -47,6 +42,19 @@ if (import.meta.env.PROD && !import.meta.env.VITE_PROXY_API_BASE_URL) {
 const baseQuery = fetchBaseQuery({
   baseUrl: busApiBaseUrl,
 })
+
+interface RouteRealtimeQuery {
+  city: CityNameType
+  routeUID: string
+}
+
+/** Keeps the realtime records that match the TDX shape and drops the rest. */
+function keepRecords<T>(
+  response: unknown,
+  isRecord: (value: unknown) => value is T,
+): T[] {
+  return Array.isArray(response) ? response.filter(isRecord) : []
+}
 
 const DEFAULT_RETENTION_SECONDS = 60 * 5
 export const AREA_ROUTES_RETENTION_SECONDS = 60 * 15
@@ -66,15 +74,13 @@ export const busApi = createApi({
   keepUnusedDataFor: DEFAULT_RETENTION_SECONDS,
   endpoints: (build) => ({
     getEstimatedArrivalByRoute: build.query<
-      EstimatedArrival[],
-      { city: CityNameType; routeUID: string }
+      TdxEstimatedArrival[],
+      RouteRealtimeQuery
     >({
       query: ({ city, routeUID }) =>
         `/EstimatedTimeOfArrival/City/${city}?%24filter=RouteUID%20eq%20'${routeUID}'&%24format=JSON`,
-      transformResponse: (res: TdxEstimatedArrival[], _meta, { city }) =>
-        res.map((estimatedArrival) =>
-          transformEstimatedArrival(estimatedArrival, city),
-        ),
+      transformResponse: (res: unknown) =>
+        keepRecords(res, isTdxEstimatedArrival),
     }),
     getRoutesByCity: build.query<BusRoute<string>[], CityNameType>({
       query: (city) => `/Route/City/${city}?%24format=JSON`,
@@ -271,26 +277,24 @@ export const busApi = createApi({
       },
     }),
     getRealtimeNearStopsByRoute: build.query<
-      RealtimeNearStop[],
-      { city: CityNameType; routeUID: string }
+      TdxRealtimeNearStop[],
+      RouteRealtimeQuery
     >({
       query: ({ city, routeUID }) =>
         `/RealTimeNearStop/City/${city}?%24filter=RouteUID%20eq%20'${routeUID}'&%24format=JSON`,
-      transformResponse: (res: TdxRealtimeNearStop[], _meta, { city }) =>
-        res.map((realtimeNearStop) =>
-          transformRealtimeNearStop(realtimeNearStop, city),
+      transformResponse: (res: unknown) =>
+        keepRecords(res, isTdxRealtimeNearStop).map(
+          normalizeTdxRealtimeNearStop,
         ),
     }),
     getRealtimeByFrequencyByRoute: build.query<
-      RealtimeByFrequency[],
-      { city: CityNameType; routeUID: string }
+      TdxRealtimeByFrequency[],
+      RouteRealtimeQuery
     >({
       query: ({ city, routeUID }) =>
         `/RealTimeByFrequency/City/${city}?%24filter=RouteUID%20eq%20'${routeUID}'&%24format=JSON`,
-      transformResponse: (res: TdxRealtimeByFrequency[], _meta, { city }) =>
-        res.map((realtimeByFrequency) =>
-          transformRealtimeByFrequency(realtimeByFrequency, city),
-        ),
+      transformResponse: (res: unknown) =>
+        keepRecords(res, isTdxRealtimeByFrequency),
     }),
     getRouteShapesByRoute: build.query<
       RouteShape[],
@@ -304,10 +308,4 @@ export const busApi = createApi({
   }),
 })
 
-export const {
-  useGetEstimatedArrivalByRouteQuery,
-  useGetRealtimeByFrequencyByRouteQuery,
-  useGetRealtimeNearStopsByRouteQuery,
-  useGetStopsByCityQuery,
-  useGetStopsByAreaQuery,
-} = busApi
+export const { useGetStopsByCityQuery, useGetStopsByAreaQuery } = busApi

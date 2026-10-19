@@ -17,7 +17,7 @@ import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
 import { useScrollSelectedItem } from '~/modules/hooks/shared/useScrollSelectedItem'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeBusStatus'
-import { VehicleStateType } from '~/modules/enums/VehicleStateType'
+import { RealtimeVehicleState } from '@bus/shared'
 import { toLatLng } from '~/modules/utils/geo/convertCoordinates'
 import { SkeletonList } from '../common/SkeletonList'
 import { RouteRealtimeBadge } from './RouteRealtimeBadge'
@@ -155,20 +155,20 @@ export const RouteStopList = ({
               const isLastStop = nextStop == null
               const stopLevelRealtimeBuses = stop.realtimeBuses.filter(
                 (bus) =>
-                  bus.vehicleState === VehicleStateType.AT_STOP ||
+                  bus.vehicleState === RealtimeVehicleState.AT_STOP ||
                   (isFirstStop &&
-                    bus.vehicleState === VehicleStateType.ARRIVING) ||
+                    bus.vehicleState === RealtimeVehicleState.ARRIVING) ||
                   (isLastStop &&
-                    bus.vehicleState === VehicleStateType.DEPARTED),
+                    bus.vehicleState === RealtimeVehicleState.DEPARTED),
               )
               const departedBuses = isLastStop
                 ? []
                 : stop.realtimeBuses.filter(
-                    (bus) => bus.vehicleState === VehicleStateType.DEPARTED,
+                    (bus) => bus.vehicleState === RealtimeVehicleState.DEPARTED,
                   )
               const arrivingBuses =
                 nextStop?.realtimeBuses.filter(
-                  (bus) => bus.vehicleState === VehicleStateType.ARRIVING,
+                  (bus) => bus.vehicleState === RealtimeVehicleState.ARRIVING,
                 ) ?? []
               const gapRealtimeBuses = [...departedBuses, ...arrivingBuses]
 

@@ -4,9 +4,17 @@ import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
 import { getRouteRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
-import { AppLocaleType, CityNameType, DirectionType } from '@bus/shared'
-import { TdxStopStatus } from '@bus/shared'
-import { VehicleStateType } from '~/modules/enums/VehicleStateType'
+import {
+  AppLocaleType,
+  CityNameType,
+  DirectionType,
+  RealtimeArrivalStatus,
+  RealtimeVehicleState,
+  RouteRealtimeStatus,
+  type ApiRouteRealtime,
+  type ApiRouteRealtimeSubRoute,
+  type ApiRouteRealtimeVehicle,
+} from '@bus/shared'
 import type { BusRoute } from '~/modules/interfaces/BusRoute'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
 import type { Stop } from '~/modules/interfaces/Stop'
@@ -25,22 +33,17 @@ const navigateToCityHallLabel = t(
   'components.routeStopList.navigateAriaLabel',
   { stopName: '市政府' },
 )
-const noEstimateLabel = t('routePage.realtime.noEstimate')
 const routeRealtimeMessages = getRouteRealtimeMessages(t)
 
 const {
   mockToggleFavoriteRouteStop,
-  mockUseGetEstimatedArrivalByRouteQuery,
-  mockUseGetRealtimeByFrequencyByRouteQuery,
-  mockUseGetRealtimeNearStopsByRouteQuery,
   mockUseGetRouteDetailQuery,
+  mockUseGetRouteRealtimeQuery,
   mockRouteMap,
 } = vi.hoisted(() => ({
   mockToggleFavoriteRouteStop: vi.fn(),
-  mockUseGetEstimatedArrivalByRouteQuery: vi.fn(),
-  mockUseGetRealtimeByFrequencyByRouteQuery: vi.fn(),
-  mockUseGetRealtimeNearStopsByRouteQuery: vi.fn(),
   mockUseGetRouteDetailQuery: vi.fn(),
+  mockUseGetRouteRealtimeQuery: vi.fn(),
   mockRouteMap: vi.fn(
     ({ extraControls }: { extraControls?: React.ReactNode }) => {
       return (
@@ -73,19 +76,10 @@ vi.mock('~/components/common/MapSidebarLayout', () => ({
   ),
 }))
 
-vi.mock('~/modules/apis/bus', () => ({
-  busApi: {
-    useGetEstimatedArrivalByRouteQuery: mockUseGetEstimatedArrivalByRouteQuery,
-    useGetRealtimeByFrequencyByRouteQuery:
-      mockUseGetRealtimeByFrequencyByRouteQuery,
-    useGetRealtimeNearStopsByRouteQuery:
-      mockUseGetRealtimeNearStopsByRouteQuery,
-  },
-}))
-
 vi.mock('~/modules/apis/transit', () => ({
   transitApi: {
     useGetRouteDetailQuery: mockUseGetRouteDetailQuery,
+    useGetRouteRealtimeQuery: mockUseGetRouteRealtimeQuery,
   },
 }))
 
@@ -263,81 +257,62 @@ const stopsByCityData: Pick<
   },
 ]
 
-const estimatedArrivalsData = [
-  {
-    PlateNumb: 'ABC-123',
-    StopUID: 'stop-c',
-    StopID: 'stop-c',
-    StopName: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
-    RouteUID: 'route-1',
-    RouteID: 'route-1',
-    RouteName: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
-    SubRouteUID: 'subroute-1',
-    SubRouteID: 'subroute-1',
-    SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
-    Direction: DirectionType.RETURN,
-    StopSequence: 2,
-    EstimateTime: 181,
-    StopStatus: TdxStopStatus.NORMAL,
-    MessageType: 0,
-    UpdateTime: '2026-03-19T10:00:00+08:00',
-    City: CityNameType.TAIPEI,
+const cityHallVehicle: ApiRouteRealtimeVehicle = {
+  plate_number: 'ABC-123',
+  near_stop: {
+    uuid: 'stop-c',
+    sequence: 2,
+    name: { 'zh-TW': '市政府', en: 'City Hall' },
   },
-]
+  state: RealtimeVehicleState.DEPARTED,
+  arrival: { status: RealtimeArrivalStatus.MINUTES, minutes: 4 },
+  position: { latitude: 25.045, longitude: 121.58 },
+}
 
-const realtimeNearStopsData = [
-  {
-    PlateNumb: 'ABC-123',
-    OperatorID: 'operator-1',
-    RouteUID: 'route-1',
-    RouteID: 'route-1',
-    RouteName: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
-    SubRouteUID: 'subroute-1',
-    SubRouteID: 'subroute-1',
-    SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
-    Direction: DirectionType.RETURN,
-    StopUID: 'stop-c',
-    StopID: 'stop-c',
-    StopName: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
-    StopSequence: 2,
-    DutyStatus: 0,
-    BusStatus: 0,
-    vehicleState: VehicleStateType.DEPARTED,
-    GPSTime: '2026-03-19T10:00:00+08:00',
-    SrcUpdateTime: '2026-03-19T10:00:00+08:00',
-    UpdateTime: '2026-03-19T10:00:00+08:00',
-    position: [121.56, 25.04] as [number, number],
-    City: CityNameType.TAIPEI,
-  },
-]
+/** Realtime for both sub-routes: only the return trip has a running bus. */
+function routeRealtimeOf({
+  go = {},
+  back = {},
+}: {
+  go?: Partial<ApiRouteRealtimeSubRoute>
+  back?: Partial<ApiRouteRealtimeSubRoute>
+} = {}): ApiRouteRealtime {
+  return {
+    uuid: 'route-1',
+    sub_routes: [
+      {
+        uuid: 'subroute-0-0',
+        status: RouteRealtimeStatus.NO_REALTIME_DATA,
+        stops: [{ uuid: 'stop-a', arrival: null }],
+        vehicles: [],
+        ...go,
+      },
+      {
+        uuid: 'subroute-1-1',
+        status: RouteRealtimeStatus.NORMAL,
+        stops: [
+          { uuid: 'stop-b', arrival: null },
+          {
+            uuid: 'stop-c',
+            arrival: { status: RealtimeArrivalStatus.MINUTES, minutes: 4 },
+          },
+        ],
+        vehicles: [cityHallVehicle],
+        ...back,
+      },
+    ],
+    updated_at: '2026-03-19T02:00:00.000Z',
+  }
+}
 
-const realtimeByFrequencyData = [
-  {
-    PlateNumb: 'ABC-123',
-    OperatorID: 'operator-1',
-    OperatorNo: null,
-    RouteUID: 'route-1',
-    RouteID: 'route-1',
-    RouteName: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
-    SubRouteUID: 'subroute-1',
-    SubRouteID: 'subroute-1',
-    SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
-    Direction: DirectionType.RETURN,
-    Speed: null,
-    Azimuth: null,
-    DutyStatus: 0,
-    BusStatus: 0,
-    MessageType: 0,
-    GPSTime: '2026-03-19T10:00:00+08:00',
-    TransTime: null,
-    SrcRecTime: null,
-    SrcTransTime: null,
-    SrcUpdateTime: '2026-03-19T10:00:00+08:00',
-    UpdateTime: '2026-03-19T10:00:00+08:00',
-    position: [121.58, 25.045] as [number, number],
-    City: CityNameType.TAIPEI,
-  },
-]
+function mockRouteRealtime(data: ApiRouteRealtime) {
+  mockUseGetRouteRealtimeQuery.mockReturnValue({
+    data,
+    isError: false,
+    isLoading: false,
+    refetch: vi.fn(),
+  })
+}
 
 const targetFavoriteRouteStop: FavoriteRouteStop = {
   favoriteId: 'route-1-subroute-1-1-station-c',
@@ -364,10 +339,8 @@ const targetFavoriteRouteStop: FavoriteRouteStop = {
 
 function resetRouteMocks() {
   mockToggleFavoriteRouteStop.mockReset()
-  mockUseGetEstimatedArrivalByRouteQuery.mockReset()
-  mockUseGetRealtimeByFrequencyByRouteQuery.mockReset()
-  mockUseGetRealtimeNearStopsByRouteQuery.mockReset()
   mockUseGetRouteDetailQuery.mockReset()
+  mockUseGetRouteRealtimeQuery.mockReset()
   mockRouteMap.mockClear()
 }
 
@@ -386,27 +359,7 @@ function mockRouteDetail(route: BusRoute<string>) {
 
 function mockDefaultRouteQueries() {
   mockRouteDetail(routeData[0]!)
-
-  mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
-    data: estimatedArrivalsData,
-    isError: false,
-    isLoading: false,
-    error: null,
-  })
-
-  mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
-    data: realtimeNearStopsData,
-    isError: false,
-    isLoading: false,
-    error: null,
-  })
-
-  mockUseGetRealtimeByFrequencyByRouteQuery.mockReturnValue({
-    data: realtimeByFrequencyData,
-    isError: false,
-    isLoading: false,
-    error: null,
-  })
+  mockRouteRealtime(routeRealtimeOf())
 }
 
 function renderRoutePage(
@@ -546,25 +499,9 @@ describe('Route', () => {
   })
 
   it('shows an inline warning when realtime queries are rate limited', async () => {
-    mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
-      data: [],
-      isError: true,
-      isLoading: false,
-      error: {
-        status: 429,
-        data: {},
-      },
-    })
-
-    mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
-      data: [],
-      isError: true,
-      isLoading: false,
-      error: {
-        status: 429,
-        data: {},
-      },
-    })
+    mockRouteRealtime(
+      routeRealtimeOf({ go: { status: RouteRealtimeStatus.RATE_LIMITED } }),
+    )
 
     renderRoutePage()
 
@@ -575,55 +512,39 @@ describe('Route', () => {
     })
   })
 
-  it('shows an ambiguous realtime notice when ETA data succeeds but realtime vehicle data is unavailable', async () => {
-    mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
-      data: estimatedArrivalsData,
-      isError: false,
-      isLoading: false,
-      error: null,
-    })
-
-    mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
-      data: [],
-      isError: true,
-      isLoading: false,
-      error: {
-        status: 500,
-        data: {},
-      },
-    })
+  it('shows an error notice when realtime feeds are unavailable', async () => {
+    mockRouteRealtime(
+      routeRealtimeOf({ go: { status: RouteRealtimeStatus.UNAVAILABLE } }),
+    )
 
     renderRoutePage()
 
     await waitFor(() => {
       expect(
-        screen.queryByText(routeRealtimeMessages.error.description),
-      ).not.toBeInTheDocument()
-      expect(
-        screen.getByText(routeRealtimeMessages.noRealtimeData.description),
+        screen.getByText(routeRealtimeMessages.error.description),
       ).toBeInTheDocument()
     })
   })
 
-  it('keeps stop ETA rendering available even when bus positions are unavailable', async () => {
-    mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
-      data: estimatedArrivalsData,
-      isError: false,
-      isLoading: false,
-      error: null,
-    })
+  it('shows a no-realtime-data notice for a sub-route without buses', async () => {
+    renderRoutePage()
 
-    mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
-      data: [
-        {
-          ...realtimeNearStopsData[0],
-          position: null,
-        },
-      ],
-      isError: false,
-      isLoading: false,
-      error: null,
+    await waitFor(() => {
+      expect(
+        screen.getByText(routeRealtimeMessages.noRealtimeData.description),
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByText(routeRealtimeMessages.error.description),
+      ).not.toBeInTheDocument()
     })
+  })
+
+  it('keeps stop ETA rendering available even when bus positions are unavailable', async () => {
+    mockRouteRealtime(
+      routeRealtimeOf({
+        back: { vehicles: [{ ...cityHallVehicle, position: null }] },
+      }),
+    )
 
     renderRoutePage()
 
@@ -635,28 +556,15 @@ describe('Route', () => {
         screen.queryByText(routeRealtimeMessages.noRealtimeData.description),
       ).not.toBeInTheDocument()
     })
+
+    const latestCall = mockRouteMap.mock.calls[
+      mockRouteMap.mock.calls.length - 1
+    ] as unknown as [{ vehicles: unknown[] }] | undefined
+
+    expect(latestCall?.[0].vehicles).toEqual([])
   })
 
-  it('uses realtime by frequency positions for route map vehicles instead of near-stop positions', async () => {
-    mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
-      data: [
-        {
-          ...realtimeNearStopsData[0],
-          position: null,
-        },
-      ],
-      isError: false,
-      isLoading: false,
-      error: null,
-    })
-
-    mockUseGetRealtimeByFrequencyByRouteQuery.mockReturnValue({
-      data: realtimeByFrequencyData,
-      isError: false,
-      isLoading: false,
-      error: null,
-    })
-
+  it('passes vehicles with a GPS position to the route map', async () => {
     renderRoutePage()
 
     fireEvent.click(screen.getByRole('tab', { name: '返程' }))
@@ -671,6 +579,7 @@ describe('Route', () => {
         expect.objectContaining({
           plateNumb: 'ABC-123',
           position: [121.58, 25.045],
+          stopName: '市政府',
         }),
       ])
     })
@@ -701,25 +610,22 @@ describe('Route', () => {
   })
 
   it('selects only the vehicle when clicking a realtime plate badge in the list', async () => {
-    mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
-      data: [
-        {
-          ...realtimeNearStopsData[0],
-          StopUID: 'stop-b',
-          StopID: 'stop-b',
-          StopName: {
-            'zh-TW': '捷運昆陽站',
-            en: 'MRT Kunyang Station',
-            ja: '',
-            ko: '',
-          },
-          StopSequence: 1,
+    mockRouteRealtime(
+      routeRealtimeOf({
+        back: {
+          vehicles: [
+            {
+              ...cityHallVehicle,
+              near_stop: {
+                uuid: 'stop-b',
+                sequence: 1,
+                name: { 'zh-TW': '捷運昆陽站', en: 'MRT Kunyang Station' },
+              },
+            },
+          ],
         },
-      ],
-      isError: false,
-      isLoading: false,
-      error: null,
-    })
+      }),
+    )
 
     renderRoutePage()
 
@@ -782,73 +688,32 @@ describe('Route', () => {
     })
   })
 
-  it('uses route-level ETA data when subroute fields are omitted by upstream', async () => {
-    mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
-      data: [
-        {
-          ...estimatedArrivalsData[0],
-          RouteUID: 'route-1',
-          SubRouteUID: 'route-1',
-          SubRouteID: 'route-1',
-          SubRouteName: { 'zh-TW': '藍1', en: 'Blue 1', ja: '', ko: '' },
-        },
-      ],
-      isError: false,
-      isLoading: false,
-      error: null,
-    })
-
-    mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
-      data: realtimeNearStopsData,
-      isError: false,
-      isLoading: false,
-      error: null,
-    })
-
-    renderRoutePage()
-
-    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
-
-    await waitFor(() => {
-      expect(screen.getByText(fourMinutesAwayLabel)).toBeInTheDocument()
-      expect(screen.queryByText(noEstimateLabel)).not.toBeInTheDocument()
-    })
-  })
-
   it('shows a non-operating notice when there are no active buses but the route is outside service hours', async () => {
-    mockUseGetEstimatedArrivalByRouteQuery.mockReturnValue({
-      data: [
-        {
-          ...estimatedArrivalsData[0],
-          SubRouteUID: 'subroute-0',
-          SubRouteID: 'subroute-0',
-          Direction: DirectionType.GO,
-          StopUID: 'stop-a',
-          StopID: 'stop-a',
-          StopName: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
-          StopSequence: 1,
-          PlateNumb: undefined,
-          EstimateTime: null,
-          StopStatus: TdxStopStatus.LAST_BUS_PASSED,
+    mockRouteRealtime(
+      routeRealtimeOf({
+        go: {
+          status: RouteRealtimeStatus.NO_SERVICE,
+          stops: [
+            {
+              uuid: 'stop-a',
+              arrival: {
+                status: RealtimeArrivalStatus.LAST_BUS_PASSED,
+                minutes: null,
+              },
+            },
+          ],
         },
-      ],
-      isError: false,
-      isLoading: false,
-      error: null,
-    })
-
-    mockUseGetRealtimeNearStopsByRouteQuery.mockReturnValue({
-      data: [],
-      isError: false,
-      isLoading: false,
-      error: null,
-    })
+      }),
+    )
 
     renderRoutePage()
 
     await waitFor(() => {
       expect(
         screen.getByText(routeRealtimeMessages.noService.description),
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText(t('routePage.realtime.stopStatus.lastBusPassed')),
       ).toBeInTheDocument()
       expect(
         screen.queryByText(routeRealtimeMessages.error.description),

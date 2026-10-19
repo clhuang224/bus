@@ -188,7 +188,6 @@ export const zhTW = {
         minutesAway_one: '{{count}} 分後到站',
         minutesAway_other: '{{count}} 分後到站',
         stopStatus: {
-          normal: '正常',
           notYetDeparted: '- 分後到站',
           noStopDueToTrafficControl: '交管不停靠',
           lastBusPassed: '末班已過',

@@ -5,7 +5,7 @@ import type { ReactElement } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { DEFAULT_APP_LOCALE } from '~/modules/consts/i18n'
 import { CityNameType, DirectionType } from '@bus/shared'
-import { VehicleStateType } from '~/modules/enums/VehicleStateType'
+import { RealtimeVehicleState } from '@bus/shared'
 import i18n from '~/modules/i18n'
 import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeBusStatus'
 import geoSlice from '~/modules/slices/geoSlice'
@@ -39,15 +39,10 @@ const favoriteRouteStop = {
 }
 
 const realtimeBus: RouteRealtimeBusStatus = {
-  direction: DirectionType.GO,
-  estimateLabel: t('routePage.realtime.minutesAway', { count: 4 }),
-  estimateMinutes: 4,
   id: 'bus-1',
   plateNumb: 'ABC-123',
-  stopName: '市政府',
   stopSequence: 1,
-  subRouteUID: 'subroute-1',
-  vehicleState: VehicleStateType.ARRIVING,
+  vehicleState: RealtimeVehicleState.ARRIVING,
 }
 
 const secondFavoriteRouteStop = {
@@ -294,7 +289,7 @@ describe('RouteStopList', () => {
                 ...realtimeBus,
                 id: 'bus-2',
                 plateNumb: 'ABC-456',
-                vehicleState: VehicleStateType.DEPARTED,
+                vehicleState: RealtimeVehicleState.DEPARTED,
               },
             ],
             sequence: 1,
@@ -444,7 +439,7 @@ describe('RouteStopList', () => {
                 ...realtimeBus,
                 id: 'bus-2',
                 plateNumb: 'ABC-456',
-                vehicleState: VehicleStateType.DEPARTED,
+                vehicleState: RealtimeVehicleState.DEPARTED,
               },
             ],
             sequence: 2,
