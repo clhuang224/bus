@@ -1,24 +1,23 @@
-import {
-  DirectionType,
-  RealtimeArrivalStatus,
-  RealtimeVehicleState,
-  RouteRealtimeStatus,
-  TdxA2EventType,
-  TdxStopStatus,
-  type ApiPosition,
-  type ApiRealtimeArrival,
-  type ApiRouteRealtime,
-  type ApiRouteRealtimeStop,
-  type ApiRouteRealtimeSubRoute,
-  type ApiRouteRealtimeVehicle,
-  type TdxEstimatedArrival,
-  type TdxRealtimeByFrequency,
-  type TdxRealtimeNearStop,
-} from '@bus/shared'
-import {
-  RealtimeSourceFailure,
-  type RealtimeSourceResult,
-} from './tdx-realtime-client.service.js'
+import { DirectionType } from '../enums/DirectionType.js'
+import { RealtimeArrivalStatus } from '../enums/RealtimeArrivalStatus.js'
+import { RealtimeSourceFailure } from '../enums/RealtimeSourceFailure.js'
+import { RealtimeVehicleState } from '../enums/RealtimeVehicleState.js'
+import { RouteRealtimeStatus } from '../enums/RouteRealtimeStatus.js'
+import { TdxA2EventType } from '../enums/TdxA2EventType.js'
+import { TdxStopStatus } from '../enums/TdxStopStatus.js'
+import type {
+  ApiRealtimeArrival,
+  ApiRouteRealtime,
+  ApiRouteRealtimeStop,
+  ApiRouteRealtimeSubRoute,
+  ApiRouteRealtimeVehicle,
+} from '../types/RouteRealtime.js'
+import type { ApiPosition } from '../types/Station.js'
+import type {
+  TdxEstimatedArrival,
+  TdxRealtimeByFrequency,
+  TdxRealtimeNearStop,
+} from '../types/tdx/index.js'
 
 export interface RealtimeRouteStop {
   uuid: string
@@ -39,6 +38,10 @@ export interface RealtimeRoute {
   uuid: string
   subRoutes: RealtimeRouteSubRoute[]
 }
+
+export type RealtimeSourceResult<T> =
+  | { ok: true; data: T[] }
+  | { ok: false; failure: RealtimeSourceFailure }
 
 export interface RealtimeSources {
   estimatedArrivals: RealtimeSourceResult<TdxEstimatedArrival>

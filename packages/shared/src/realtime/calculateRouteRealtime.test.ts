@@ -1,23 +1,22 @@
-import {
-  DirectionType,
-  RealtimeArrivalStatus,
-  RealtimeVehicleState,
-  RouteRealtimeStatus,
-  TdxA2EventType,
-  TdxStopStatus,
-  type TdxEstimatedArrival,
-  type TdxRealtimeByFrequency,
-  type TdxRealtimeNearStop,
-} from '@bus/shared'
+import { describe, expect, it } from 'vitest'
+import { DirectionType } from '../enums/DirectionType.js'
+import { RealtimeArrivalStatus } from '../enums/RealtimeArrivalStatus.js'
+import { RealtimeSourceFailure } from '../enums/RealtimeSourceFailure.js'
+import { RealtimeVehicleState } from '../enums/RealtimeVehicleState.js'
+import { RouteRealtimeStatus } from '../enums/RouteRealtimeStatus.js'
+import { TdxA2EventType } from '../enums/TdxA2EventType.js'
+import { TdxStopStatus } from '../enums/TdxStopStatus.js'
+import type {
+  TdxEstimatedArrival,
+  TdxRealtimeByFrequency,
+  TdxRealtimeNearStop,
+} from '../types/tdx/index.js'
 import {
   calculateRouteRealtime,
   type RealtimeRoute,
-  type RealtimeSources,
-} from './route-realtime.calculator.js'
-import {
-  RealtimeSourceFailure,
   type RealtimeSourceResult,
-} from './tdx-realtime-client.service.js'
+  type RealtimeSources,
+} from './calculateRouteRealtime.js'
 
 const ROUTE_UID = 'TPE10132'
 const SUB_ROUTE_UID = 'TPE101320'

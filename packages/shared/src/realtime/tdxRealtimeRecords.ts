@@ -1,12 +1,12 @@
-import {
-  DirectionType,
-  getEnumValues,
-  TdxA2EventType,
-  type TdxEstimatedArrival,
-  type TdxLocalizedText,
-  type TdxRealtimeByFrequency,
-  type TdxRealtimeNearStop,
-} from '@bus/shared'
+import { DirectionType } from '../enums/DirectionType.js'
+import { TdxA2EventType } from '../enums/TdxA2EventType.js'
+import type {
+  TdxEstimatedArrival,
+  TdxLocalizedText,
+  TdxRealtimeByFrequency,
+  TdxRealtimeNearStop,
+} from '../types/tdx/index.js'
+import { getEnumValues } from '../utils/getEnumValues.js'
 
 // Realtime records are checked one by one so that a single malformed record
 // is skipped instead of failing the whole response.

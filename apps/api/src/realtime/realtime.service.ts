@@ -1,16 +1,17 @@
 import { HttpStatus, Injectable } from '@nestjs/common'
-import { ErrorCode, type ApiRouteRealtime } from '@bus/shared'
+import {
+  calculateRouteRealtime,
+  ErrorCode,
+  type ApiRouteRealtime,
+  type RealtimeRoute,
+  type RealtimeSources,
+} from '@bus/shared'
 import {
   DB_CITY_NAME_BY_PRISMA,
   DB_DIRECTION_BY_PRISMA,
 } from '../constants/enum-mappings.js'
 import { FTBError } from '../dto/ftb-error.js'
 import { PrismaService } from '../prisma/prisma.service.js'
-import {
-  calculateRouteRealtime,
-  type RealtimeRoute,
-  type RealtimeSources,
-} from './route-realtime.calculator.js'
 import { TdxRealtimeClientService } from './tdx-realtime-client.service.js'
 
 /**
