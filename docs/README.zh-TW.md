@@ -65,7 +65,7 @@ pnpm run dev
 pnpm run dev:mobile
 ```
 
-如果要搭配 NestJS API 和 PostgreSQL 資料庫開發，可以使用 local API 模式。這個模式會一併啟動 API，前端的路線、站牌與站位資料改由 API 提供，即時資料則仍透過 TDX proxy 取得：
+如果要搭配 NestJS API 和 PostgreSQL 資料庫開發，可以使用 local API 模式。這個模式會一併啟動 API，前端的路線、站牌、站位與即時資料都改由 API 提供：
 
 ```bash
 pnpm run dev:api

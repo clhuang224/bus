@@ -179,6 +179,9 @@ GPS 位置，並回傳每個子路線要顯示的內容：每個站牌的到站�
   `rate_limited` 或 `unavailable`；靠站資訊遇到 rate limit 時會回報
   `rate_limited`，其他靠站資訊失敗只有在沒有任何到站資訊時才會回報
   `unavailable`。GPS 位置失敗時，到站資訊仍可使用，只有車輛位置會是 null。
+- 比對規則寫在 `packages/shared` 的 `calculateRouteRealtime`，前端在還直接呼叫
+  TDX 的期間也會執行同一份程式。到站資料對不上子路線時怎麼處理，請看
+  [開發計畫的即時資料一節](../../../docs/plan.zh-TW.md#即時資料)。
 
 記憶體快取的前提是 API 只有一個常駐執行個體。
 
