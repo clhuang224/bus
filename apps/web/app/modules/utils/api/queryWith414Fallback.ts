@@ -18,12 +18,19 @@ interface QueryArrayWith414FallbackOptions<
   shouldFallback?: (error: TError) => boolean
 }
 
+/**
+ * A request URL that is too long. TDX and the Worker proxy answer 414, while
+ * the Vite dev server proxy rejects long URLs earlier with 431, since Node
+ * counts the request line toward its header size limit.
+ */
 function isUriTooLongStatus(status: unknown): boolean {
-  return status === 414
+  return status === 414 || status === 431
 }
 
 function isParsingErrorWithUriTooLongStatus(error: QueryErrorLike): boolean {
-  return error.status === 'PARSING_ERROR' && error.originalStatus === 414
+  return (
+    error.status === 'PARSING_ERROR' && isUriTooLongStatus(error.originalStatus)
+  )
 }
 
 function defaultShouldFallback<TError extends QueryErrorLike>(

@@ -37,6 +37,27 @@ describe('queryArrayWith414Fallback', () => {
     expect(result).toEqual({ data: [1, 2, 3, 4] })
   })
 
+  it('splits recursively for 431 from the dev server proxy', async () => {
+    const queryBatch = vi.fn(async (batchItems: number[]) =>
+      batchItems.length > 2
+        ? {
+            error: {
+              status: 'PARSING_ERROR' as const,
+              originalStatus: 431 as const,
+            },
+          }
+        : { data: batchItems },
+    )
+
+    const result = await queryArrayWith414Fallback({
+      items: [1, 2, 3, 4],
+      queryBatch,
+    })
+
+    expect(result).toEqual({ data: [1, 2, 3, 4] })
+    expect(queryBatch).toHaveBeenCalledTimes(3)
+  })
+
   it('splits recursively when 414 is wrapped as a parsing error', async () => {
     const queryBatch = vi.fn(async (batchItems: number[]) => {
       if (batchItems.length > 2) {
