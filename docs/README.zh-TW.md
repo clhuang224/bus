@@ -15,17 +15,17 @@ apps/
 └── api/          # NestJS 後端
 
 packages/
-└── shared/       # 共用 API contract 與型別
+└── shared/       # 共用 API contract、型別與即時資料規則
 ```
 
 ## Workspace 文件
 
-| Workspace         | 用途                               | 文件                                                      |
-| ----------------- | ---------------------------------- | --------------------------------------------------------- |
-| `apps/web`        | 使用者介面的 React Router app      | [apps/web/README.md](../apps/web/README.md)               |
-| `apps/tdx-proxy`  | TDX 驗證用 Cloudflare Worker proxy | [apps/tdx-proxy/README.md](../apps/tdx-proxy/README.md)   |
-| `apps/api`        | NestJS 後端                        | [apps/api/README.md](../apps/api/README.md)               |
-| `packages/shared` | 共用 API contract 與 domain types  | [packages/shared/README.md](../packages/shared/README.md) |
+| Workspace         | 用途                                           | 文件                                                      |
+| ----------------- | ---------------------------------------------- | --------------------------------------------------------- |
+| `apps/web`        | 使用者介面的 React Router app                  | [apps/web/README.md](../apps/web/README.md)               |
+| `apps/tdx-proxy`  | TDX 驗證用 Cloudflare Worker proxy             | [apps/tdx-proxy/README.md](../apps/tdx-proxy/README.md)   |
+| `apps/api`        | NestJS 後端                                    | [apps/api/README.md](../apps/api/README.md)               |
+| `packages/shared` | 共用 API contract、domain types 與即時資料規則 | [packages/shared/README.md](../packages/shared/README.md) |
 
 如果想了解後端與資料庫的規劃，可以先看 [docs/plan.zh-TW.md](./plan.zh-TW.md)。
 
