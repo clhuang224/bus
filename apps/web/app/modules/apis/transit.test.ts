@@ -732,7 +732,7 @@ describe('transitApi.getRouteRealtime', () => {
       )
     })
 
-    it('returns null when the city has no such route', async () => {
+    it('returns null without calling realtime feeds when the city has no such route', async () => {
       mockGetTdxRoutesByCity.mockImplementation(sourceResult({ data: [] }))
 
       const result = await createStore().dispatch(
@@ -740,6 +740,9 @@ describe('transitApi.getRouteRealtime', () => {
       )
 
       expect(result.data).toBeNull()
+      expect(mockGetTdxEstimatedArrivals).not.toHaveBeenCalled()
+      expect(mockGetTdxNearStops).not.toHaveBeenCalled()
+      expect(mockGetTdxPositions).not.toHaveBeenCalled()
     })
   })
 })

@@ -224,22 +224,28 @@ async function loadTdxRouteDetail(
   return toRouteDetailFromTdx({ route, stopOfRoutes, stops, shapes })
 }
 
-async function loadDatabaseRouteRealtime(
+/**
+ * Route detail returns null for a missing route or one in another city, so
+ * no realtime request is spent on it. The Route page already has it cached,
+ * so this adds no request there.
+ */
+function loadRealtimeRouteDetail(
   dispatch: SourceDispatch,
   query: RouteDetailQuery,
-) {
-  // Route detail already returns null for a route in another city, as in
-  // TDX mode. The Route page has it cached, so this adds no request there.
-  const route = await dispatch(
+): Promise<RouteDetail | null> {
+  return dispatch(
     transitApi.endpoints.getRouteDetail.initiate(query, SOURCE_REQUEST_OPTIONS),
   ).unwrap()
+}
 
-  if (!route) return null
-
+async function loadDatabaseRouteRealtime(
+  dispatch: SourceDispatch,
+  { routeUID }: RouteDetailQuery,
+) {
   try {
     return await dispatch(
       databaseApi.endpoints.getRouteRealtime.initiate(
-        query.routeUID,
+        routeUID,
         REALTIME_REQUEST_OPTIONS,
       ),
     ).unwrap()
@@ -291,14 +297,9 @@ async function loadTdxRealtimeSource<T>(
 async function loadTdxRouteRealtime(
   dispatch: SourceDispatch,
   query: RouteDetailQuery,
-): Promise<ApiRouteRealtime | null> {
-  const [route, estimatedArrivals, nearStops, positions] = await Promise.all([
-    dispatch(
-      transitApi.endpoints.getRouteDetail.initiate(
-        query,
-        SOURCE_REQUEST_OPTIONS,
-      ),
-    ).unwrap(),
+  route: RouteDetail,
+): Promise<ApiRouteRealtime> {
+  const [estimatedArrivals, nearStops, positions] = await Promise.all([
     loadTdxRealtimeSource(() =>
       dispatch(
         busApi.endpoints.getEstimatedArrivalByRoute.initiate(
@@ -324,8 +325,6 @@ async function loadTdxRouteRealtime(
       ),
     ),
   ])
-
-  if (!route) return null
 
   return calculateRouteRealtime(
     toRealtimeRoute(route),
@@ -395,11 +394,15 @@ export const transitApi = createApi({
     /** Returns null when the route does not exist. */
     getRouteRealtime: build.query<ApiRouteRealtime | null, RouteDetailQuery>({
       queryFn: (query, { dispatch }) =>
-        querySource(() =>
-          isDatabaseApiEnabled()
+        querySource(async () => {
+          const route = await loadRealtimeRouteDetail(dispatch, query)
+
+          if (!route) return null
+
+          return isDatabaseApiEnabled()
             ? loadDatabaseRouteRealtime(dispatch, query)
-            : loadTdxRouteRealtime(dispatch, query),
-        ),
+            : loadTdxRouteRealtime(dispatch, query, route)
+        }),
     }),
     getNearbyStationRoutes: build.query<
       NearbyStationRoutesMap,
