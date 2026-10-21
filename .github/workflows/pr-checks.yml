@@ -20,6 +20,13 @@ jobs:
             command: typecheck
           - workspace: '@bus/web'
             command: test
+          # The production web app runs the shared realtime calculation.
+          - workspace: '@bus/shared'
+            command: lint
+          - workspace: '@bus/shared'
+            command: typecheck
+          - workspace: '@bus/shared'
+            command: test
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-pnpm
