@@ -23,7 +23,9 @@ import { normalizePlateNumb } from '~/modules/utils/route/normalizePlateNumb'
 
 const REALTIME_POLLING_INTERVAL = 30000
 const REALTIME_INITIAL_DELAY_MS = 1200
-const REALTIME_RATE_LIMIT_BACKOFF_MS = 3000
+// Longer than the 5 seconds the API caches a failed snapshot, so the retry
+// gets a fresh result in local API mode.
+const REALTIME_RATE_LIMIT_BACKOFF_MS = 6000
 
 type RealtimeStop = Pick<RouteDetailStop, 'stopUID' | 'sequence'>
 

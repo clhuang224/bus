@@ -124,7 +124,7 @@ describe('useRouteRealtimeData', () => {
     )
   })
 
-  it('retries once shortly after each rate limit', () => {
+  it('retries once after the API stops caching the rate-limited result', () => {
     mockQueryResult({
       data: realtimeOf({ status: RouteRealtimeStatus.RATE_LIMITED }),
     })
@@ -132,8 +132,14 @@ describe('useRouteRealtimeData', () => {
 
     expect(result.current.isRealtimeRateLimited).toBe(true)
 
+    // The API keeps a failed snapshot for 5 seconds.
     act(() => {
-      vi.advanceTimersByTime(3000)
+      vi.advanceTimersByTime(5000)
+    })
+    expect(mockRefetch).not.toHaveBeenCalled()
+
+    act(() => {
+      vi.advanceTimersByTime(1000)
     })
     expect(mockRefetch).toHaveBeenCalledTimes(1)
 
@@ -141,7 +147,7 @@ describe('useRouteRealtimeData', () => {
       rerender()
     })
     act(() => {
-      vi.advanceTimersByTime(3000)
+      vi.advanceTimersByTime(6000)
     })
     expect(mockRefetch).toHaveBeenCalledTimes(1)
 
@@ -156,7 +162,7 @@ describe('useRouteRealtimeData', () => {
       rerender()
     })
     act(() => {
-      vi.advanceTimersByTime(3000)
+      vi.advanceTimersByTime(6000)
     })
     expect(mockRefetch).toHaveBeenCalledTimes(2)
   })
