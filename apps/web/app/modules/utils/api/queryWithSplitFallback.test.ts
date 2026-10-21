@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
-import { queryArrayWith414Fallback } from './queryWith414Fallback'
+import { queryArrayWithSplitFallback } from './queryWithSplitFallback'
 
-describe('queryArrayWith414Fallback', () => {
+describe('queryArrayWithSplitFallback', () => {
   it('returns data directly when the first request succeeds', async () => {
     const queryBatch = vi.fn(async (batchItems: number[]) => ({
       data: batchItems,
     }))
 
-    const result = await queryArrayWith414Fallback({
+    const result = await queryArrayWithSplitFallback({
       items: [1, 2, 3],
       queryBatch,
     })
@@ -29,7 +29,7 @@ describe('queryArrayWith414Fallback', () => {
       return { data: batchItems }
     })
 
-    const result = await queryArrayWith414Fallback({
+    const result = await queryArrayWithSplitFallback({
       items: [1, 2, 3, 4],
       queryBatch,
     })
@@ -49,7 +49,7 @@ describe('queryArrayWith414Fallback', () => {
         : { data: batchItems },
     )
 
-    const result = await queryArrayWith414Fallback({
+    const result = await queryArrayWithSplitFallback({
       items: [1, 2, 3, 4],
       queryBatch,
     })
@@ -74,7 +74,7 @@ describe('queryArrayWith414Fallback', () => {
       return { data: batchItems }
     })
 
-    const result = await queryArrayWith414Fallback({
+    const result = await queryArrayWithSplitFallback({
       items: [1, 2, 3, 4],
       queryBatch,
     })
@@ -87,7 +87,7 @@ describe('queryArrayWith414Fallback', () => {
       error: { status: 500 as const },
     }))
 
-    const result = await queryArrayWith414Fallback({
+    const result = await queryArrayWithSplitFallback({
       items: [1, 2, 3],
       queryBatch,
     })
@@ -101,7 +101,7 @@ describe('queryArrayWith414Fallback', () => {
       error: { status: 414 as const },
     }))
 
-    const result = await queryArrayWith414Fallback({
+    const result = await queryArrayWithSplitFallback({
       items: [1],
       queryBatch,
     })

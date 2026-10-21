@@ -8,7 +8,7 @@ interface QueryResultLike<TData, TError extends QueryErrorLike> {
   error?: TError
 }
 
-interface QueryArrayWith414FallbackOptions<
+interface QueryArrayWithSplitFallbackOptions<
   TItem,
   TData,
   TError extends QueryErrorLike,
@@ -23,13 +23,16 @@ interface QueryArrayWith414FallbackOptions<
  * the Vite dev server proxy rejects long URLs earlier with 431, since Node
  * counts the request line toward its header size limit.
  */
-function isUriTooLongStatus(status: unknown): boolean {
+function isRequestTooLongStatus(status: unknown): boolean {
   return status === 414 || status === 431
 }
 
-function isParsingErrorWithUriTooLongStatus(error: QueryErrorLike): boolean {
+function isParsingErrorWithRequestTooLongStatus(
+  error: QueryErrorLike,
+): boolean {
   return (
-    error.status === 'PARSING_ERROR' && isUriTooLongStatus(error.originalStatus)
+    error.status === 'PARSING_ERROR' &&
+    isRequestTooLongStatus(error.originalStatus)
   )
 }
 
@@ -37,17 +40,21 @@ function defaultShouldFallback<TError extends QueryErrorLike>(
   error: TError,
 ): boolean {
   return (
-    isUriTooLongStatus(error.status) ||
-    isParsingErrorWithUriTooLongStatus(error)
+    isRequestTooLongStatus(error.status) ||
+    isParsingErrorWithRequestTooLongStatus(error)
   )
 }
 
-export async function queryArrayWith414Fallback<
+/**
+ * Queries all items in one request, and splits the items in half and retries
+ * while the request is rejected for being too long.
+ */
+export async function queryArrayWithSplitFallback<
   TItem,
   TData,
   TError extends QueryErrorLike,
 >(
-  options: QueryArrayWith414FallbackOptions<TItem, TData, TError>,
+  options: QueryArrayWithSplitFallbackOptions<TItem, TData, TError>,
 ): Promise<QueryResultLike<TData[], TError>> {
   const { items, queryBatch, shouldFallback = defaultShouldFallback } = options
   const result = await queryBatch(items)
@@ -66,7 +73,7 @@ export async function queryArrayWith414Fallback<
   const leftItems = items.slice(0, middle)
   const rightItems = items.slice(middle)
 
-  const leftResult = await queryArrayWith414Fallback({
+  const leftResult = await queryArrayWithSplitFallback({
     items: leftItems,
     queryBatch,
     shouldFallback,
@@ -75,7 +82,7 @@ export async function queryArrayWith414Fallback<
     return { error: leftResult.error }
   }
 
-  const rightResult = await queryArrayWith414Fallback({
+  const rightResult = await queryArrayWithSplitFallback({
     items: rightItems,
     queryBatch,
     shouldFallback,

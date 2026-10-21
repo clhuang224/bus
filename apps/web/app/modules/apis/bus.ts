@@ -23,7 +23,7 @@ import {
   buildNearbyStopQuery,
   buildStopsByCityAndIdsQuery,
 } from '../utils/api/tdxQuery'
-import { queryArrayWith414Fallback } from '../utils/api/queryWith414Fallback'
+import { queryArrayWithSplitFallback } from '../utils/api/queryWithSplitFallback'
 import { keepTdxRecords } from '../utils/api/keepTdxRecords'
 import {
   transformBusRoute,
@@ -104,7 +104,7 @@ export const busApi = createApi({
         const cityResults = await Promise.all(
           areaMapCity[area].map(async (city) => ({
             city,
-            result: await queryArrayWith414Fallback({
+            result: await queryArrayWithSplitFallback({
               items: stopUIDs,
               queryBatch: async (stopUIDBatch) => {
                 const batchResult = await baseQuery(
@@ -190,7 +190,7 @@ export const busApi = createApi({
         }
 
         const deduplicatedStopIds = Array.from(new Set(stopIds))
-        const queryResult = await queryArrayWith414Fallback({
+        const queryResult = await queryArrayWithSplitFallback({
           items: deduplicatedStopIds,
           queryBatch: async (stopIdBatch) => {
             const batchResult = await baseQuery(

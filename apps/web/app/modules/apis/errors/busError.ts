@@ -92,7 +92,7 @@ export const getBusErrorModal = (error: FetchBaseQueryError) => {
     return null
   }
 
-  // Long queries are split and retried by queryArrayWith414Fallback.
+  // Long queries are split and retried by queryArrayWithSplitFallback.
   if (
     tdxHttpStatus === TdxHttpErrorStatus.URI_TOO_LONG ||
     tdxHttpStatus === TdxHttpErrorStatus.REQUEST_HEADER_FIELDS_TOO_LARGE
