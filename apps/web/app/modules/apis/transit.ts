@@ -242,11 +242,28 @@ async function loadDatabaseRouteRealtime(
   }
 }
 
+// Matches the API's realtime request timeout.
+const TDX_REALTIME_TIMEOUT_MS = 10_000
+
+interface RealtimeSourceRequest<T> {
+  abort: () => void
+  unwrap: () => Promise<T[]>
+}
+
+/**
+ * Loads one realtime feed. A request that stalls is aborted after a timeout
+ * and reported as unavailable, so the other feeds can still be shown.
+ */
 async function loadTdxRealtimeSource<T>(
-  load: () => Promise<T[]>,
+  start: () => RealtimeSourceRequest<T>,
 ): Promise<RealtimeSourceResult<T>> {
+  const request = start()
+  const timeoutId = setTimeout(() => {
+    request.abort()
+  }, TDX_REALTIME_TIMEOUT_MS)
+
   try {
-    return { ok: true, data: await load() }
+    return { ok: true, data: await request.unwrap() }
   } catch (error) {
     return {
       ok: false,
@@ -254,6 +271,8 @@ async function loadTdxRealtimeSource<T>(
         ? RealtimeSourceFailure.RATE_LIMITED
         : RealtimeSourceFailure.UNAVAILABLE,
     }
+  } finally {
+    clearTimeout(timeoutId)
   }
 }
 
@@ -278,7 +297,7 @@ async function loadTdxRouteRealtime(
           query,
           REALTIME_REQUEST_OPTIONS,
         ),
-      ).unwrap(),
+      ),
     ),
     loadTdxRealtimeSource(() =>
       dispatch(
@@ -286,7 +305,7 @@ async function loadTdxRouteRealtime(
           query,
           REALTIME_REQUEST_OPTIONS,
         ),
-      ).unwrap(),
+      ),
     ),
     loadTdxRealtimeSource(() =>
       dispatch(
@@ -294,7 +313,7 @@ async function loadTdxRouteRealtime(
           query,
           REALTIME_REQUEST_OPTIONS,
         ),
-      ).unwrap(),
+      ),
     ),
   ])
 

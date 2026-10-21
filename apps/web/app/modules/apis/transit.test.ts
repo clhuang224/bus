@@ -87,6 +87,7 @@ vi.mock('./bus', () => ({
 /** Mimics a source endpoint's initiate() thunk and its unwrap() result. */
 function sourceResult(result: { data: unknown } | { error: unknown }) {
   return () => () => ({
+    abort: () => {},
     unwrap: () =>
       'data' in result
         ? Promise.resolve(result.data)
@@ -664,6 +665,42 @@ describe('transitApi.getRouteRealtime', () => {
           vehicles: [],
         },
       ])
+    })
+
+    it('shows arrivals when the GPS feed stalls past the timeout', async () => {
+      vi.useFakeTimers()
+      const abortGps = vi.fn()
+      mockGetTdxPositions.mockImplementation(() => () => {
+        let rejectRequest: (error: unknown) => void = () => {}
+        const response = new Promise<never>((_resolve, reject) => {
+          rejectRequest = reject
+        })
+
+        return {
+          abort: () => {
+            abortGps()
+            rejectRequest({ name: 'AbortError', message: 'Aborted' })
+          },
+          unwrap: () => response,
+        }
+      })
+
+      try {
+        const request = createStore().dispatch(
+          transitApi.endpoints.getRouteRealtime.initiate(routeDetailQuery),
+        )
+
+        await vi.advanceTimersByTimeAsync(10_000)
+        const result = await request
+
+        expect(abortGps).toHaveBeenCalledTimes(1)
+        expect(result.data?.sub_routes[0]?.stops[0]?.arrival).toEqual({
+          status: RealtimeArrivalStatus.MINUTES,
+          minutes: 4,
+        })
+      } finally {
+        vi.useRealTimers()
+      }
     })
 
     it('reports a rate limit from a TDX feed as the sub-route status', async () => {
