@@ -106,6 +106,8 @@ The rules that turn the three feeds into arrivals, vehicles, and statuses live i
 - **Vehicles at a last-bus-passed stop.** A vehicle at a stop whose ETA says the last bus has passed shows as in service, since the vehicle is clearly running.
 - **Stops visited twice.** About 5% of active sub-routes visit a stop twice. Each visit gets its own ETA, matched by stop sequence.
 
+These rules were checked against citywide TDX ETAs from all 22 supported cities on 2026-10-21. Only Tainan tags ETAs with direction `255` or has sub-routes that relied on another sub-route's ETAs. Taipei and New Taipei send ETAs without a sub-route. Every other city tags each ETA with a sub-route that exists on its route. Check again when TDX adds a city or changes how a city tags its ETAs.
+
 ### Deployment
 
 Keep the frontend on GitHub Pages.
