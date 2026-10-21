@@ -226,12 +226,20 @@ async function loadTdxRouteDetail(
 
 async function loadDatabaseRouteRealtime(
   dispatch: SourceDispatch,
-  { routeUID }: RouteDetailQuery,
+  query: RouteDetailQuery,
 ) {
+  // Route detail already returns null for a route in another city, as in
+  // TDX mode. The Route page has it cached, so this adds no request there.
+  const route = await dispatch(
+    transitApi.endpoints.getRouteDetail.initiate(query, SOURCE_REQUEST_OPTIONS),
+  ).unwrap()
+
+  if (!route) return null
+
   try {
     return await dispatch(
       databaseApi.endpoints.getRouteRealtime.initiate(
-        routeUID,
+        query.routeUID,
         REALTIME_REQUEST_OPTIONS,
       ),
     ).unwrap()

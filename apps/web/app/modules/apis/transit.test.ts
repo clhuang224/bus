@@ -558,6 +558,21 @@ describe('transitApi.getRouteRealtime', () => {
   describe('in local API mode', () => {
     beforeEach(() => {
       mockIsDatabaseApiEnabled.mockReturnValue(true)
+      mockGetDatabaseRouteDetail.mockImplementation(
+        sourceResult({ data: apiRouteDetail }),
+      )
+    })
+
+    it('returns null without loading realtime data for a route in another city', async () => {
+      const result = await createStore().dispatch(
+        transitApi.endpoints.getRouteRealtime.initiate({
+          ...routeDetailQuery,
+          city: CityNameType.NEW_TAIPEI,
+        }),
+      )
+
+      expect(result.data).toBeNull()
+      expect(mockGetDatabaseRouteRealtime).not.toHaveBeenCalled()
     })
 
     it('reads realtime data from the database API on every request', async () => {
@@ -581,7 +596,7 @@ describe('transitApi.getRouteRealtime', () => {
       expect(result.data).toEqual(routeRealtime)
     })
 
-    it('returns null when the route does not exist', async () => {
+    it('returns null when the route disappears before realtime loads', async () => {
       mockGetDatabaseRouteRealtime.mockImplementation(
         sourceResult({
           error: {
