@@ -24,6 +24,7 @@ import {
   buildStopsByCityAndIdsQuery,
 } from '../utils/api/tdxQuery'
 import { queryArrayWith414Fallback } from '../utils/api/queryWith414Fallback'
+import { keepTdxRecords } from '../utils/api/keepTdxRecords'
 import {
   transformBusRoute,
   transformRouteShape,
@@ -46,14 +47,6 @@ const baseQuery = fetchBaseQuery({
 interface RouteRealtimeQuery {
   city: CityNameType
   routeUID: string
-}
-
-/** Keeps the realtime records that match the TDX shape and drops the rest. */
-function keepRecords<T>(
-  response: unknown,
-  isRecord: (value: unknown) => value is T,
-): T[] {
-  return Array.isArray(response) ? response.filter(isRecord) : []
 }
 
 const DEFAULT_RETENTION_SECONDS = 60 * 5
@@ -80,7 +73,7 @@ export const busApi = createApi({
       query: ({ city, routeUID }) =>
         `/EstimatedTimeOfArrival/City/${city}?%24filter=RouteUID%20eq%20'${routeUID}'&%24format=JSON`,
       transformResponse: (res: unknown) =>
-        keepRecords(res, isTdxEstimatedArrival),
+        keepTdxRecords(res, isTdxEstimatedArrival),
     }),
     getRoutesByCity: build.query<BusRoute<string>[], CityNameType>({
       query: (city) => `/Route/City/${city}?%24format=JSON`,
@@ -283,7 +276,7 @@ export const busApi = createApi({
       query: ({ city, routeUID }) =>
         `/RealTimeNearStop/City/${city}?%24filter=RouteUID%20eq%20'${routeUID}'&%24format=JSON`,
       transformResponse: (res: unknown) =>
-        keepRecords(res, isTdxRealtimeNearStop).map(
+        keepTdxRecords(res, isTdxRealtimeNearStop).map(
           normalizeTdxRealtimeNearStop,
         ),
     }),
@@ -294,7 +287,7 @@ export const busApi = createApi({
       query: ({ city, routeUID }) =>
         `/RealTimeByFrequency/City/${city}?%24filter=RouteUID%20eq%20'${routeUID}'&%24format=JSON`,
       transformResponse: (res: unknown) =>
-        keepRecords(res, isTdxRealtimeByFrequency),
+        keepTdxRecords(res, isTdxRealtimeByFrequency),
     }),
     getRouteShapesByRoute: build.query<
       RouteShape[],
