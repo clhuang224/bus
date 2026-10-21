@@ -5,7 +5,15 @@ import {
   type BaseQueryApi,
   type FetchBaseQueryError,
 } from '@reduxjs/toolkit/query/react'
-import { ErrorCode, type AreaType, type CityNameType } from '@bus/shared'
+import {
+  calculateRouteRealtime,
+  ErrorCode,
+  RealtimeSourceFailure,
+  type ApiRouteRealtime,
+  type AreaType,
+  type CityNameType,
+  type RealtimeSourceResult,
+} from '@bus/shared'
 import { NEARBY_DISTANCE_KM } from '../consts/nearby'
 import type {
   NearbyStationRoutesMap,
@@ -25,12 +33,14 @@ import {
   toRouteDetailFromApi,
   toRouteDetailFromTdx,
 } from '../utils/route/toRouteDetail'
+import { toRealtimeRoute } from '../utils/route/toRealtimeRoute'
 import {
   toRouteSummaryFromApi,
   toRouteSummaryFromTdx,
 } from '../utils/routes/toRouteSummary'
 import { AREA_ROUTES_RETENTION_SECONDS, busApi } from './bus'
 import { databaseApi, isDatabaseApiEnabled } from './database'
+import { isTdxRateLimitError } from './errors/busError'
 import { isDatabaseApiError } from './errors/databaseError'
 
 export type TransitQueryError = FetchBaseQueryError | SerializedError
@@ -55,6 +65,11 @@ type SourceDispatch = BaseQueryApi['dispatch']
 // Source endpoints keep their own short-lived cache, so nested requests from
 // several transit endpoints share one upstream response.
 const SOURCE_REQUEST_OPTIONS = { subscribe: false } as const
+// Realtime polling must reach the source every time instead of its cache.
+const REALTIME_REQUEST_OPTIONS = {
+  subscribe: false,
+  forceRefetch: true,
+} as const
 
 async function querySource<T>(load: () => Promise<T>) {
   try {
@@ -210,6 +225,115 @@ async function loadTdxRouteDetail(
 }
 
 /**
+ * Route detail returns null for a missing route or one in another city, so
+ * no realtime request is spent on it. The Route page already has it cached,
+ * so this adds no request there.
+ */
+function loadRealtimeRouteDetail(
+  dispatch: SourceDispatch,
+  query: RouteDetailQuery,
+): Promise<RouteDetail | null> {
+  return dispatch(
+    transitApi.endpoints.getRouteDetail.initiate(query, SOURCE_REQUEST_OPTIONS),
+  ).unwrap()
+}
+
+async function loadDatabaseRouteRealtime(
+  dispatch: SourceDispatch,
+  { routeUID }: RouteDetailQuery,
+) {
+  try {
+    return await dispatch(
+      databaseApi.endpoints.getRouteRealtime.initiate(
+        routeUID,
+        REALTIME_REQUEST_OPTIONS,
+      ),
+    ).unwrap()
+  } catch (error) {
+    if (isDatabaseApiError(error, ErrorCode.ROUTE_NOT_FOUND)) return null
+
+    throw error
+  }
+}
+
+// Matches the API's realtime request timeout.
+const TDX_REALTIME_TIMEOUT_MS = 10_000
+
+interface RealtimeSourceRequest<T> {
+  abort: () => void
+  unwrap: () => Promise<T[]>
+}
+
+/**
+ * Loads one realtime feed. A request that stalls is aborted after a timeout
+ * and reported as unavailable, so the other feeds can still be shown.
+ */
+async function loadTdxRealtimeSource<T>(
+  start: () => RealtimeSourceRequest<T>,
+): Promise<RealtimeSourceResult<T>> {
+  const request = start()
+  const timeoutId = setTimeout(() => {
+    request.abort()
+  }, TDX_REALTIME_TIMEOUT_MS)
+
+  try {
+    return { ok: true, data: await request.unwrap() }
+  } catch (error) {
+    return {
+      ok: false,
+      failure: isTdxRateLimitError(error as TransitQueryError)
+        ? RealtimeSourceFailure.RATE_LIMITED
+        : RealtimeSourceFailure.UNAVAILABLE,
+    }
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
+
+/**
+ * Calls the three TDX realtime feeds and applies the same rules as the API,
+ * so both sources show the same results.
+ */
+async function loadTdxRouteRealtime(
+  dispatch: SourceDispatch,
+  query: RouteDetailQuery,
+  route: RouteDetail,
+): Promise<ApiRouteRealtime> {
+  const [estimatedArrivals, nearStops, positions] = await Promise.all([
+    loadTdxRealtimeSource(() =>
+      dispatch(
+        busApi.endpoints.getEstimatedArrivalByRoute.initiate(
+          query,
+          REALTIME_REQUEST_OPTIONS,
+        ),
+      ),
+    ),
+    loadTdxRealtimeSource(() =>
+      dispatch(
+        busApi.endpoints.getRealtimeNearStopsByRoute.initiate(
+          query,
+          REALTIME_REQUEST_OPTIONS,
+        ),
+      ),
+    ),
+    loadTdxRealtimeSource(() =>
+      dispatch(
+        busApi.endpoints.getRealtimeByFrequencyByRoute.initiate(
+          query,
+          REALTIME_REQUEST_OPTIONS,
+        ),
+      ),
+    ),
+  ])
+
+  return calculateRouteRealtime(
+    toRealtimeRoute(route),
+    { estimatedArrivals, nearStops, positions },
+    new Date(),
+  )
+}
+
+/**
  * App-facing data that may come from either the app database API or TDX.
  * Pages and hooks use these endpoints and never choose the source themselves.
  */
@@ -266,6 +390,19 @@ export const transitApi = createApi({
             ? loadDatabaseRouteDetail(dispatch, query)
             : loadTdxRouteDetail(dispatch, query),
         ),
+    }),
+    /** Returns null when the route does not exist. */
+    getRouteRealtime: build.query<ApiRouteRealtime | null, RouteDetailQuery>({
+      queryFn: (query, { dispatch }) =>
+        querySource(async () => {
+          const route = await loadRealtimeRouteDetail(dispatch, query)
+
+          if (!route) return null
+
+          return isDatabaseApiEnabled()
+            ? loadDatabaseRouteRealtime(dispatch, query)
+            : loadTdxRouteRealtime(dispatch, query, route)
+        }),
     }),
     getNearbyStationRoutes: build.query<
       NearbyStationRoutesMap,

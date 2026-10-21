@@ -184,6 +184,10 @@ returned status values to their own copy.
   `rate_limited`; other near-stop failures report `unavailable` only when no
   ETA is available. A GPS failure only leaves vehicle positions null, since
   arrivals are still usable.
+- The matching rules live in `calculateRouteRealtime` in `packages/shared`,
+  which the web app also runs while it calls TDX directly. See
+  [Realtime in the plan](../../docs/plan.md#realtime) for how they handle ETAs
+  that do not map cleanly to a sub-route.
 
 The in-memory cache assumes one long-running API instance.
 

@@ -1,9 +1,6 @@
-import { CityNameType, DirectionType } from '@bus/shared'
+import { CityNameType, DirectionType, RealtimeSourceFailure } from '@bus/shared'
 import type { TdxAuthService } from '../tdx/tdx-auth.service.js'
-import {
-  RealtimeSourceFailure,
-  TdxRealtimeClientService,
-} from './tdx-realtime-client.service.js'
+import { TdxRealtimeClientService } from './tdx-realtime-client.service.js'
 
 const REQUESTS_PER_SECOND_ENV = 'TDX_REALTIME_REQUESTS_PER_SECOND'
 

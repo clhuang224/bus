@@ -1,10 +1,12 @@
-import { DirectionType, TdxA2EventType } from '@bus/shared'
+import { describe, expect, it } from 'vitest'
+import { DirectionType } from '../enums/DirectionType.js'
+import { TdxA2EventType } from '../enums/TdxA2EventType.js'
 import {
   isTdxEstimatedArrival,
   isTdxRealtimeByFrequency,
   isTdxRealtimeNearStop,
   normalizeTdxRealtimeNearStop,
-} from './tdx-realtime.validator.js'
+} from './tdxRealtimeRecords.js'
 
 const nearStop = {
   PlateNumb: 'KKA-0151',

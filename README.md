@@ -15,17 +15,17 @@ apps/
 └── api/          # NestJS backend
 
 packages/
-└── shared/       # Shared API contracts and domain types
+└── shared/       # Shared API contracts, domain types, and realtime rules
 ```
 
 ## Workspace Docs
 
-| Workspace         | Purpose                               | Docs                                                     |
-| ----------------- | ------------------------------------- | -------------------------------------------------------- |
-| `apps/web`        | User-facing React Router app          | [apps/web/README.md](./apps/web/README.md)               |
-| `apps/tdx-proxy`  | Cloudflare Worker proxy for TDX auth  | [apps/tdx-proxy/README.md](./apps/tdx-proxy/README.md)   |
-| `apps/api`        | NestJS backend                        | [apps/api/README.md](./apps/api/README.md)               |
-| `packages/shared` | Shared API contracts and domain types | [packages/shared/README.md](./packages/shared/README.md) |
+| Workspace         | Purpose                                                | Docs                                                     |
+| ----------------- | ------------------------------------------------------ | -------------------------------------------------------- |
+| `apps/web`        | User-facing React Router app                           | [apps/web/README.md](./apps/web/README.md)               |
+| `apps/tdx-proxy`  | Cloudflare Worker proxy for TDX auth                   | [apps/tdx-proxy/README.md](./apps/tdx-proxy/README.md)   |
+| `apps/api`        | NestJS backend                                         | [apps/api/README.md](./apps/api/README.md)               |
+| `packages/shared` | Shared API contracts, domain types, and realtime rules | [packages/shared/README.md](./packages/shared/README.md) |
 
 For the backend and database direction, start with [docs/plan.md](./docs/plan.md).
 
@@ -65,7 +65,7 @@ For mobile testing on the same local network:
 pnpm run dev:mobile
 ```
 
-To develop against the NestJS API and its PostgreSQL database, use local API mode. It also starts the API, and the web app reads route, stop, and station data from it while realtime data still comes from the TDX proxy:
+To develop against the NestJS API and its PostgreSQL database, use local API mode. It also starts the API, and the web app reads route, stop, station, and realtime data from it:
 
 ```bash
 pnpm run dev:api

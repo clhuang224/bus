@@ -11,7 +11,7 @@ apps/
 └── api/          # NestJS backend with PostgreSQL base data and TDX realtime
 
 packages/
-└── shared/       # Shared API contracts, domain enums, and TDX upstream types
+└── shared/       # Shared API contracts, domain enums, TDX upstream types, and realtime rules
 ```
 
 ## Documentation Ownership
@@ -63,7 +63,7 @@ To develop against the local NestJS API and database, use:
 pnpm run dev:api
 ```
 
-It also starts the API, and the web app reads base data from it. See the
+It also starts the API, and the web app reads base and realtime data from it. See the
 [web local API mode](./apps/web/README.md#local-api-mode) for setup.
 
 ## Current Workspace Roles
@@ -71,15 +71,16 @@ It also starts the API, and the web app reads base data from it. See the
 - `@bus/web` owns the user-facing SPA and current production UI.
 - `@bus/tdx-proxy` owns TDX authentication proxying for the production web app. Its deployment is manual for now; do not add it to GitHub Actions deployment unless that rollout is explicitly requested. It is planned to retire once the API is deployed and the web app no longer calls TDX directly.
 - `@bus/api` owns TDX base-data sync into PostgreSQL, database-backed route and station endpoints, and cached TDX realtime snapshots. It runs locally and is not deployed yet.
-- `@bus/shared` owns contracts shared between the web app and the API, plus the TDX upstream types both of them read.
+- `@bus/shared` owns contracts shared between the web app and the API, the TDX upstream types both of them read, and the realtime calculation both of them run.
 
 ## CI And Deployment
 
-GitHub Actions currently checks and deploys only the web workspace:
+GitHub Actions currently checks the web and shared workspaces and deploys only the web workspace:
 
 - PR checks run `@bus/web` lint, typecheck, and tests, plus the Playwright map test against a production build.
+- PR checks also run `@bus/shared` lint, typecheck, and tests, since the production web app runs the shared realtime calculation.
 - GitHub Pages deployment builds `@bus/web`.
-- API and shared checks run locally through the Husky hooks, not in CI.
+- API checks run locally through the Husky hooks, not in CI.
 - The Cloudflare Worker proxy is deployed manually with `pnpm --filter @bus/tdx-proxy deploy`.
 
 Keep this separation unless the deployment strategy changes.

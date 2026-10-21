@@ -1,24 +1,23 @@
-import {
-  RealtimeArrivalStatus,
-  RealtimeVehicleState,
-  RouteRealtimeStatus,
-  TdxA2EventType,
-  TdxStopStatus,
-  type ApiPosition,
-  type ApiRealtimeArrival,
-  type ApiRouteRealtime,
-  type ApiRouteRealtimeStop,
-  type ApiRouteRealtimeSubRoute,
-  type ApiRouteRealtimeVehicle,
-  type DirectionType,
-  type TdxEstimatedArrival,
-  type TdxRealtimeByFrequency,
-  type TdxRealtimeNearStop,
-} from '@bus/shared'
-import {
-  RealtimeSourceFailure,
-  type RealtimeSourceResult,
-} from './tdx-realtime-client.service.js'
+import { DirectionType } from '../enums/DirectionType.js'
+import { RealtimeArrivalStatus } from '../enums/RealtimeArrivalStatus.js'
+import { RealtimeSourceFailure } from '../enums/RealtimeSourceFailure.js'
+import { RealtimeVehicleState } from '../enums/RealtimeVehicleState.js'
+import { RouteRealtimeStatus } from '../enums/RouteRealtimeStatus.js'
+import { TdxA2EventType } from '../enums/TdxA2EventType.js'
+import { TdxStopStatus } from '../enums/TdxStopStatus.js'
+import type {
+  ApiRealtimeArrival,
+  ApiRouteRealtime,
+  ApiRouteRealtimeStop,
+  ApiRouteRealtimeSubRoute,
+  ApiRouteRealtimeVehicle,
+} from '../types/RouteRealtime.js'
+import type { ApiPosition } from '../types/Station.js'
+import type {
+  TdxEstimatedArrival,
+  TdxRealtimeByFrequency,
+  TdxRealtimeNearStop,
+} from '../types/tdx/index.js'
 
 export interface RealtimeRouteStop {
   uuid: string
@@ -40,6 +39,10 @@ export interface RealtimeRoute {
   subRoutes: RealtimeRouteSubRoute[]
 }
 
+export type RealtimeSourceResult<T> =
+  | { ok: true; data: T[] }
+  | { ok: false; failure: RealtimeSourceFailure }
+
 export interface RealtimeSources {
   estimatedArrivals: RealtimeSourceResult<TdxEstimatedArrival>
   nearStops: RealtimeSourceResult<TdxRealtimeNearStop>
@@ -50,8 +53,8 @@ interface Arrival {
   plateNumber: string | null
   stopUID: string | null
   stopID: string | null
-  routeUID: string
-  subRouteUID: string
+  /** Null when TDX sends the ETA for the whole route. */
+  subRouteUID: string | null
   direction: DirectionType
   sequence: number | null
   estimateSeconds: number | null
@@ -78,6 +81,7 @@ const OUT_OF_SERVICE_STOP_STATUSES = [
 /** Stop statuses that say nothing useful about a vehicle already running. */
 const VEHICLE_FALLBACK_STOP_STATUSES = [
   TdxStopStatus.NOT_YET_DEPARTED,
+  TdxStopStatus.LAST_BUS_PASSED,
   TdxStopStatus.UNKNOWN,
 ]
 
@@ -105,36 +109,30 @@ export function calculateRouteRealtime(
   return {
     uuid: route.uuid,
     sub_routes: route.subRoutes.map((subRoute) =>
-      calculateSubRoute(
-        route.uuid,
-        subRoute,
-        arrivals,
-        nearStops,
-        positions,
-        routeStatus,
-      ),
+      calculateSubRoute(subRoute, arrivals, nearStops, positions, routeStatus),
     ),
     updated_at: updatedAt.toISOString(),
   }
 }
 
 function calculateSubRoute(
-  routeUID: string,
   subRoute: RealtimeRouteSubRoute,
   arrivals: Arrival[],
   nearStops: TdxRealtimeNearStop[],
   positions: TdxRealtimeByFrequency[],
   routeStatus: RouteRealtimeStatus | null,
 ): ApiRouteRealtimeSubRoute {
-  const activeArrivals = getActiveArrivals(routeUID, subRoute, arrivals)
+  const activeArrivals = getActiveArrivals(subRoute, arrivals)
   const activeNearStops = nearStops.filter(
     (nearStop) =>
       nearStop.SubRouteUID === subRoute.tdxSubRouteUid &&
       nearStop.Direction === subRoute.direction,
   )
+  // ETAs without a known direction belong to buses that have not left yet,
+  // so they never describe a vehicle on the road.
   const nearStopVehicles = getNearStopVehicles(
     activeNearStops,
-    activeArrivals,
+    activeArrivals.filter(hasKnownDirection),
     subRoute.stops,
   )
 
@@ -157,17 +155,14 @@ function getData<T>(source: RealtimeSourceResult<T>): T[] {
 }
 
 function toArrival(arrival: TdxEstimatedArrival): Arrival {
-  const routeUID = arrival.RouteUID ?? ''
-
   return {
     plateNumber: arrival.PlateNumb
       ? normalizePlateNumber(arrival.PlateNumb)
       : null,
     stopUID: arrival.StopUID ?? null,
     stopID: arrival.StopID ?? null,
-    routeUID,
     // TDX omits SubRouteUID for some routes; those ETAs apply route-wide.
-    subRouteUID: arrival.SubRouteUID ?? routeUID,
+    subRouteUID: arrival.SubRouteUID ?? null,
     direction: arrival.Direction,
     sequence: arrival.StopSequence ?? null,
     estimateSeconds: arrival.EstimateTime ?? null,
@@ -203,30 +198,33 @@ function getRouteSourceStatus(
 }
 
 /**
- * ETAs for this sub-route and direction. When TDX does not tag ETAs with the
- * sub-route, falls back to route-level ETAs, then to every ETA in the
- * direction.
+ * ETAs for this sub-route. TDX can tag a sub-route's ETAs with an unknown
+ * direction, usually for buses that have not left yet; they still belong to
+ * the sub-route. When TDX has no ETAs for the sub-route, route-level ETAs in
+ * the same direction apply, and stops pick them up by stop ID. ETAs tagged
+ * with another sub-route never apply, since a short trip would otherwise show
+ * the full route's buses.
  */
 function getActiveArrivals(
-  routeUID: string,
   subRoute: RealtimeRouteSubRoute,
   arrivals: Arrival[],
 ): Arrival[] {
-  const directionArrivals = arrivals.filter(
-    (arrival) => arrival.direction === subRoute.direction,
-  )
-  const subRouteArrivals = directionArrivals.filter(
-    (arrival) => arrival.subRouteUID === subRoute.tdxSubRouteUid,
+  const subRouteArrivals = arrivals.filter(
+    (arrival) =>
+      arrival.subRouteUID === subRoute.tdxSubRouteUid &&
+      (arrival.direction === subRoute.direction || !hasKnownDirection(arrival)),
   )
 
   if (subRouteArrivals.length > 0) return subRouteArrivals
 
-  const routeArrivals = directionArrivals.filter(
+  return arrivals.filter(
     (arrival) =>
-      arrival.routeUID === routeUID || arrival.subRouteUID === routeUID,
+      arrival.subRouteUID == null && arrival.direction === subRoute.direction,
   )
+}
 
-  return routeArrivals.length > 0 ? routeArrivals : directionArrivals
+function hasKnownDirection(arrival: Arrival): boolean {
+  return arrival.direction !== DirectionType.UNKNOWN
 }
 
 function getServiceStatus(
@@ -253,14 +251,18 @@ function getServiceStatus(
  * Picks one ETA per stop. Stops match by StopUID or TDX StopID together with
  * the stop sequence, so a stop visited twice gets each visit's own ETA. When
  * no ETA has the same sequence, the stop falls back to any ETA for it.
- * Among several candidates, sooner countdowns win; ETAs without a countdown
- * follow in stop order.
+ * Among several candidates, ETAs with a known direction win, then sooner
+ * countdowns; ETAs without a countdown follow in stop order.
  */
 function getStopArrivals(
   stops: RealtimeRouteStop[],
   activeArrivals: Arrival[],
 ): ApiRouteRealtimeStop[] {
   const sortedArrivals = [...activeArrivals].sort((left, right) => {
+    const directionOrder =
+      Number(!hasKnownDirection(left)) - Number(!hasKnownDirection(right))
+
+    if (directionOrder !== 0) return directionOrder
     if (left.estimateSeconds == null && right.estimateSeconds == null) {
       return (
         (left.sequence ?? Number.POSITIVE_INFINITY) -

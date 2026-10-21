@@ -6,7 +6,7 @@
 
 Only the frontend is deployed to production, on GitHub Pages, and it calls the TDX API through the Cloudflare Worker proxy for both base data and realtime data. This fit the early work, which focused on exploring the frontend framework. But the approach has unavoidable drawbacks: every visitor spends the shared TDX key's quota, and the frontend has to compose raw TDX data itself.
 
-A NestJS backend with a PostgreSQL database can now run locally. It syncs TDX base data into the database, serves route and station data from it, and serves cached TDX realtime snapshots. The web app can read from it in local API mode. The remaining work is to move realtime data in the web app onto the API, deploy the API, and switch production to it.
+A NestJS backend with a PostgreSQL database can now run locally. It syncs TDX base data into the database, serves route and station data from it, and serves cached TDX realtime snapshots. The web app reads both base and realtime data from it in local API mode. The remaining work is to deploy the API and switch production to it.
 
 ## Goals
 
@@ -99,6 +99,15 @@ See `apps/api/docs/sync-troubleshooting.md` for failures seen so far.
 
 `GET /api/realtime/routes/:uuid` fetches one route's ETA, near-stop, and GPS feeds from TDX when asked, and returns what each sub-route should show. Each route's snapshot is cached in memory for 90 seconds, or 5 seconds after a failed feed, and concurrent requests share one fetch. A separate realtime TDX client limits itself to 3 requests per second by default, leaving headroom on the shared key for sync and the proxy.
 
+The rules that turn the three feeds into arrivals, vehicles, and statuses live in `calculateRouteRealtime` in `packages/shared`. The web app runs the same code while it still calls TDX directly, so both sources show the same results. Some rules cover upstream data that does not map cleanly to a sub-route:
+
+- **ETAs with an unknown direction.** TDX can tag ETAs with direction `255`. They still apply to the sub-route they name. Tainan uses them for buses that have not left yet, and ignoring them left many stops without a countdown.
+- **Sub-routes without their own ETAs.** Such a sub-route only uses ETAs that TDX sends without any sub-route, as Taipei does, matched by stop. It never uses ETAs tagged with another sub-route, which made Tainan's 白河→柳營奇美醫院 short trip show buses of the full-length route.
+- **Vehicles at a last-bus-passed stop.** A vehicle at a stop whose ETA says the last bus has passed shows as in service, since the vehicle is clearly running.
+- **Stops visited twice.** About 5% of active sub-routes visit a stop twice. Each visit gets its own ETA, matched by stop sequence.
+
+These rules were checked against citywide TDX ETAs from all 22 supported cities on 2026-10-21. Only Tainan tags ETAs with direction `255` or has sub-routes that relied on another sub-route's ETAs. Taipei and New Taipei send ETAs without a sub-route. Every other city tags each ETA with a sub-route that exists on its route. Check again when TDX adds a city or changes how a city tags its ETAs.
+
 ### Deployment
 
 Keep the frontend on GitHub Pages.
@@ -137,7 +146,7 @@ Application endpoints are prefixed with `/api`.
 
 Notes:
 
-- Route detail includes TDX references (each sub-route's `SubRouteUID`, and each stop's `StopID` and `StationID`) so the web app can match TDX realtime data and keep saved favorite IDs stable.
+- Route detail includes TDX references (each sub-route's `SubRouteUID`, and each stop's `StopID` and `StationID`) so saved favorite IDs stay stable, and so the web app can match TDX realtime data while it still calls TDX directly.
 - Nearby stations always correspond to a station record. Stops without a station are left out until their product behavior is decided. Station addresses merge the station's and its stops' addresses per language.
 - In local API mode, the Nearby page stores station UUIDs in its URL. Selection URLs from TDX mode are not translated.
 - Favorite and settings endpoints exist only as contract placeholders; see [Backlog](#backlog).
@@ -147,9 +156,9 @@ Notes:
 - The monorepo, NestJS API, Scalar documentation, Prisma schema, and migrations are in place.
 - Route and stop sync run in the background across all supported cities, record TDX requests, protect the quota, resume by city checkpoint, and soft-deactivate records missing upstream. Full syncs have been validated across Taiwan, most recently in October 2026.
 - Sync runs can be inspected through the admin sync run endpoints.
-- In local API mode, the Nearby, Routes, and Route pages read base data from the database API; default and production web builds still use the TDX proxy.
+- In local API mode, the Nearby, Routes, and Route pages read base data from the database API, and the Route page reads realtime data from the realtime API; default and production web builds still use the TDX proxy.
 - The web app chooses the data source in one place, `transitApi`, so pages and hooks consume the same app-facing models in either mode.
-- The API serves realtime snapshots keyed by app UUIDs. The web app still reads realtime data from TDX in every mode.
+- Realtime results follow the same rules in both modes, since the API and the web app share the code that computes them.
 
 ### Storage
 
@@ -175,19 +184,8 @@ Since July, row counts grew about 4% while the database grew about 30%. Inactive
 
 ## Next Steps
 
-1. Switch the Route page's realtime data to `GET /api/realtime/routes/:uuid` in local API mode through `transitApi`, so the page renders the API's arrival and status values instead of matching TDX records itself. After that, favorites are the only reason route detail still carries TDX references.
-2. Deploy the API as its own change, following the checklist in [Deployment](#deployment).
-3. After the public API is deployed, switch production web builds to the database API and validate that route search, route detail, shapes, realtime, and locale fallback match the TDX-backed experience. Watch for sub-route tab order: the API orders sub-routes by direction, while TDX keeps upstream order.
-
-### Realtime Open Questions
-
-The API realtime rules are ported from the Route page and keep its behavior in these cases. Decide whether to change them before or after the web app switches to the API:
-
-- **ETAs with an unknown direction.** TDX can tag ETAs with direction `255`. They match no sub-route and are ignored. On Tainan route 黃幹線, this left 20 of 67 stops on the full-length sub-route without the not-yet-departed countdown that TDX provided. They could be used when their `SubRouteUID` matches.
-- **Short-trip sub-routes without their own ETAs.** When TDX has no ETAs for a sub-route, it falls back to route-level ETAs, which can show another sub-route's buses. Tainan's 白河→柳營奇美醫院 short trip showed ETAs from the full-length 黃幹線.
-- **Vehicles at a last-bus-passed stop.** A vehicle arriving at a stop whose ETA reports the last bus has passed shows that status, as seen on Penghu route 21.
-
-The API also fixes a Route page issue: a sub-route that visits the same stop twice shows the first visit's ETA on both rows in the web app, while the API matches each visit by sequence. This affects about 5% of active sub-routes and goes away when the web app uses the realtime API.
+1. Deploy the API as its own change, following the checklist in [Deployment](#deployment).
+2. After the public API is deployed, switch production web builds to the database API and validate that route search, route detail, shapes, realtime, and locale fallback match the TDX-backed experience. Watch for sub-route tab order: the API orders sub-routes by direction, while TDX keeps upstream order.
 
 ### TDX Quota
 
@@ -197,6 +195,32 @@ The project aims to run on the free TDX basic membership (5 requests per minute 
 - Realtime data does not fit the free tier through TDX. Each refresh needs three requests (ETA, near-stop, and GPS), and TDX offers no endpoint that combines them, so 5 requests per minute serves about two routes at a time across all users.
 - Production web builds still call TDX for base data through the proxy, so the free tier also requires the production switch to the database API.
 - City open-data feeds are the candidate path to free realtime data. Taipei publishes a citywide ETA file without an API key, updated about every 20 seconds. Before building on such feeds, check each city's update rate, identifiers, license, and access limits, and whether they report whether a vehicle is arriving at or leaving a stop.
+
+### Product Name
+
+The working name, Finding the Bus (FTB), is a deliberate pun on Finding Nemo. The joke may not land with every user, and it does not say what the app does, so the project needs a proper name before wider release.
+
+A good name should:
+
+- say or hint that the app is about Taiwan buses: route search, arrival times, and nearby stops
+- work in both Traditional Chinese and English, since the app supports both
+- be short and easy to say, type, and search for
+- not clash with existing bus apps or services in Taiwan
+- have a usable domain or subdomain; the app currently lives at `bus.lynns.me`
+
+Where the name appears today:
+
+- user-facing: the web app title (`app.name` in both locale files), the root READMEs, and the API documentation title in `apps/api/src/main.ts`
+- docs: the opening line of `AGENTS.md`, the web and API READMEs, and the `FTB API` titles
+- code and infrastructure: the `FTBError` class in the API, and the Worker name `finding-the-bus-tdx-proxy`; renaming the Worker changes its URL, so the web build's `VITE_PROXY_API_BASE_URL` must change with it
+- names that can stay as they are: the `@bus/*` package scope and the `bus` repository
+
+Steps:
+
+1. Collect candidate names in Chinese and English.
+2. Check each against existing apps, search results, and domain availability.
+3. Decide the Chinese and English names and record them here.
+4. Rename user-facing text and docs in one change. Rename code identifiers and the Worker separately, since the Worker rename is a deployment change.
 
 ## Backlog
 

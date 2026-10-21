@@ -69,7 +69,7 @@ export default function Route() {
         }
       : null
   const {
-    estimatedArrivalLabelsByStopKey,
+    estimatedArrivalLabelsByStopSequence,
     hasRealtimeError,
     isRealtimeLoading,
     isRealtimeRateLimited,
@@ -82,12 +82,14 @@ export default function Route() {
       baseStops.map((stop) => ({
         ...stop,
         estimatedArrivalLabel:
-          estimatedArrivalLabelsByStopKey.get(stop.id) ??
-          estimatedArrivalLabelsByStopKey.get(stop.stopID) ??
-          null,
+          estimatedArrivalLabelsByStopSequence.get(stop.sequence) ?? null,
         realtimeBuses: realtimeBusesByStopSequence.get(stop.sequence) ?? [],
       })),
-    [baseStops, estimatedArrivalLabelsByStopKey, realtimeBusesByStopSequence],
+    [
+      baseStops,
+      estimatedArrivalLabelsByStopSequence,
+      realtimeBusesByStopSequence,
+    ],
   )
   const {
     closeSidebar,

@@ -254,7 +254,9 @@ While base data is moving from TDX to the app API, some data can come from eithe
 - keep cached transit models locale-independent; store `LocalizedText` and pick the display string in the hook or component
 - when one source returns related data together and the other needs extra requests, express that in the model, such as nullable `routesByStationId`, rather than branching on the source in the hook
 
-Data that only exists in one source can stay on that source's API until it has a second source. Realtime data now has one: `GET /api/realtime/routes/:uuid` returns per-stop arrivals, vehicles, and status values computed by the API. Moving the Route page's realtime data into `transitApi` is the next step in `docs/plan.md`; until then, the Route page still reads realtime data from TDX through `busApi`.
+Data that only exists in one source can stay on that source's API until it has a second source.
+
+Route realtime data goes through `transitApi.getRouteRealtime`, which returns the API's `ApiRouteRealtime` model in both modes. In local API mode it reads `GET /api/realtime/routes/:uuid`. In TDX mode it calls the three TDX realtime feeds through `busApi` and runs `calculateRouteRealtime` from `@bus/shared`, the same code the API runs. Change realtime matching rules in that shared code, not in web hooks or components, so both modes stay in step. Realtime source requests use `forceRefetch: true`, since polling must reach the source each time.
 
 When the same kind of API request must be sent to multiple sibling targets, such as multiple cities in the same area, prefer `await Promise.all(...)` over sequential requests unless request ordering or rate limiting is a real requirement.
 
@@ -290,7 +292,7 @@ When handling API or query errors, prefer interpreting the error by its actual t
 
 Avoid `Boolean(error)` style checks when the UI behavior depends on the difference between those states.
 
-For route realtime vehicle ETA matching, use `RealTimeNearStop.A2EventType` as the primary signal for whether the bus is arriving at the current stop or has already departed it.
+Route realtime vehicle ETA matching lives in `calculateRouteRealtime` in `packages/shared`. It uses `RealTimeNearStop.A2EventType` as the primary signal for whether the bus is arriving at the current stop or has already departed it.
 
 - when `A2EventType` indicates arriving, prefer the current stop ETA
 - when `A2EventType` indicates departed, prefer the next downstream ETA
@@ -298,7 +300,7 @@ For route realtime vehicle ETA matching, use `RealTimeNearStop.A2EventType` as t
 
 Do not regress the route page back to showing `Not departed yet` for a vehicle that the realtime feed already places on the road, and do not let a stale current-stop ETA override the `A2EventType`-based current-vs-next-stop choice.
 
-For the `Route` page specifically, keep the stop list as a stop-based ETA view whose ETA labels come directly from `EstimatedTimeOfArrival`, matched to the stop by stable stop identifiers such as `StopUID` / `StopID` when available. If realtime vehicle information is shown in the list, limit it to location-style cues such as vehicle plate badges placed beside the stop row, and do not let those badges replace, derive, or redefine the stop's ETA text. `EstimatedTimeOfArrival` answers "when does this stop get service", `RealTimeNearStop` answers "which stop is a vehicle near right now", and `RealTimeByFrequency` answers "where is the vehicle GPS position right now", so keep those data flows separate in both code and UI.
+For the `Route` page specifically, keep the stop list as a stop-based ETA view whose ETA labels come from each stop's realtime arrival, which the shared calculation derives from `EstimatedTimeOfArrival`. If realtime vehicle information is shown in the list, limit it to location-style cues such as vehicle plate badges placed beside the stop row, and do not let those badges replace, derive, or redefine the stop's ETA text. `EstimatedTimeOfArrival` answers "when does this stop get service", `RealTimeNearStop` answers "which stop is a vehicle near right now", and `RealTimeByFrequency` answers "where is the vehicle GPS position right now", so keep those data flows separate in both code and UI.
 
 For stop-focused location UX, keep page roles distinct:
 
@@ -333,7 +335,7 @@ Because the deployed TDX proxy key is shared by all visitors, design request tim
 For route realtime specifically:
 
 - prefer delaying initial realtime requests slightly after the base route data has loaded instead of firing every route-detail request at once on first paint
-- when a realtime request receives `429`, prefer a short automatic backoff before retrying instead of immediately hammering the upstream again
+- when realtime data comes back rate limited, prefer a short automatic backoff before retrying instead of immediately hammering the upstream again
 - for `RealTimeByFrequency`, prefer keeping the request narrowed by stable route identifiers, but avoid `$select` combinations that upstream rejects with `400`; reliability is more important than aggressively trimming that response
 - use user-facing copy that clearly distinguishes "too many people are querying right now" from generic upstream outages or empty realtime data
 - reflect shared rate-limit caveats in `README.md` so deployers understand that concurrent usage can temporarily make realtime queries unavailable

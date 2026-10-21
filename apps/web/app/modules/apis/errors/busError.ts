@@ -7,6 +7,8 @@ export enum TdxHttpErrorStatus {
   UNAUTHORIZED = 401,
   URI_TOO_LONG = 414,
   RATE_LIMIT = 429,
+  /** Returned by the Vite dev server proxy for a URL that is too long. */
+  REQUEST_HEADER_FIELDS_TOO_LARGE = 431,
 }
 
 export enum BaseQueryErrorStatus {
@@ -90,7 +92,11 @@ export const getBusErrorModal = (error: FetchBaseQueryError) => {
     return null
   }
 
-  if (tdxHttpStatus === TdxHttpErrorStatus.URI_TOO_LONG) {
+  // Long queries are split and retried by queryArrayWithSplitFallback.
+  if (
+    tdxHttpStatus === TdxHttpErrorStatus.URI_TOO_LONG ||
+    tdxHttpStatus === TdxHttpErrorStatus.REQUEST_HEADER_FIELDS_TOO_LARGE
+  ) {
     return null
   }
 

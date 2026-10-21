@@ -1,4 +1,9 @@
-import { ErrorCode, RouteRealtimeStatus } from '@bus/shared'
+import {
+  ErrorCode,
+  RealtimeSourceFailure,
+  RouteRealtimeStatus,
+  type RealtimeSourceResult,
+} from '@bus/shared'
 import { HttpStatus } from '@nestjs/common'
 import { FTBError } from '../dto/ftb-error.js'
 import {
@@ -7,11 +12,7 @@ import {
 } from '../generated/prisma/enums.js'
 import type { PrismaService } from '../prisma/prisma.service.js'
 import { RealtimeService } from './realtime.service.js'
-import {
-  RealtimeSourceFailure,
-  type RealtimeSourceResult,
-  type TdxRealtimeClientService,
-} from './tdx-realtime-client.service.js'
+import type { TdxRealtimeClientService } from './tdx-realtime-client.service.js'
 
 const route = {
   uuid: 'TPE10132',

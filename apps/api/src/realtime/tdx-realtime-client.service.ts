@@ -1,21 +1,21 @@
 import { Injectable, Logger } from '@nestjs/common'
-import type {
-  CityNameType,
-  TdxEstimatedArrival,
-  TdxRealtimeByFrequency,
-  TdxRealtimeNearStop,
+import {
+  isTdxEstimatedArrival,
+  isTdxRealtimeByFrequency,
+  isTdxRealtimeNearStop,
+  normalizeTdxRealtimeNearStop,
+  RealtimeSourceFailure,
+  type CityNameType,
+  type RealtimeSourceResult,
+  type TdxEstimatedArrival,
+  type TdxRealtimeByFrequency,
+  type TdxRealtimeNearStop,
 } from '@bus/shared'
 import { TdxAuthService } from '../tdx/tdx-auth.service.js'
 import {
   createRequestTimeout,
   toRequestError,
 } from '../tdx/tdx-request-timeout.js'
-import {
-  isTdxEstimatedArrival,
-  isTdxRealtimeByFrequency,
-  isTdxRealtimeNearStop,
-  normalizeTdxRealtimeNearStop,
-} from './tdx-realtime.validator.js'
 
 const TDX_BUS_BASE_URL = 'https://tdx.transportdata.tw/api/basic/v2/Bus'
 const REQUESTS_PER_SECOND_ENV = 'TDX_REALTIME_REQUESTS_PER_SECOND'
@@ -48,15 +48,6 @@ const ESTIMATED_ARRIVAL_FIELDS = [
   'EstimateTime',
   'StopStatus',
 ]
-
-export enum RealtimeSourceFailure {
-  RATE_LIMITED = 'rate_limited',
-  UNAVAILABLE = 'unavailable',
-}
-
-export type RealtimeSourceResult<T> =
-  | { ok: true; data: T[] }
-  | { ok: false; failure: RealtimeSourceFailure }
 
 interface TdxResponse {
   status: number

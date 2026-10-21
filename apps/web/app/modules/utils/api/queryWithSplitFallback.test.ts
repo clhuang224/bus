@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
-import { queryArrayWith414Fallback } from './queryWith414Fallback'
+import { queryArrayWithSplitFallback } from './queryWithSplitFallback'
 
-describe('queryArrayWith414Fallback', () => {
+describe('queryArrayWithSplitFallback', () => {
   it('returns data directly when the first request succeeds', async () => {
     const queryBatch = vi.fn(async (batchItems: number[]) => ({
       data: batchItems,
     }))
 
-    const result = await queryArrayWith414Fallback({
+    const result = await queryArrayWithSplitFallback({
       items: [1, 2, 3],
       queryBatch,
     })
@@ -29,12 +29,33 @@ describe('queryArrayWith414Fallback', () => {
       return { data: batchItems }
     })
 
-    const result = await queryArrayWith414Fallback({
+    const result = await queryArrayWithSplitFallback({
       items: [1, 2, 3, 4],
       queryBatch,
     })
 
     expect(result).toEqual({ data: [1, 2, 3, 4] })
+  })
+
+  it('splits recursively for 431 from the dev server proxy', async () => {
+    const queryBatch = vi.fn(async (batchItems: number[]) =>
+      batchItems.length > 2
+        ? {
+            error: {
+              status: 'PARSING_ERROR' as const,
+              originalStatus: 431 as const,
+            },
+          }
+        : { data: batchItems },
+    )
+
+    const result = await queryArrayWithSplitFallback({
+      items: [1, 2, 3, 4],
+      queryBatch,
+    })
+
+    expect(result).toEqual({ data: [1, 2, 3, 4] })
+    expect(queryBatch).toHaveBeenCalledTimes(3)
   })
 
   it('splits recursively when 414 is wrapped as a parsing error', async () => {
@@ -53,7 +74,7 @@ describe('queryArrayWith414Fallback', () => {
       return { data: batchItems }
     })
 
-    const result = await queryArrayWith414Fallback({
+    const result = await queryArrayWithSplitFallback({
       items: [1, 2, 3, 4],
       queryBatch,
     })
@@ -66,7 +87,7 @@ describe('queryArrayWith414Fallback', () => {
       error: { status: 500 as const },
     }))
 
-    const result = await queryArrayWith414Fallback({
+    const result = await queryArrayWithSplitFallback({
       items: [1, 2, 3],
       queryBatch,
     })
@@ -80,7 +101,7 @@ describe('queryArrayWith414Fallback', () => {
       error: { status: 414 as const },
     }))
 
-    const result = await queryArrayWith414Fallback({
+    const result = await queryArrayWithSplitFallback({
       items: [1],
       queryBatch,
     })

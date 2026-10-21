@@ -1,38 +1,80 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
-import { busApi } from '~/modules/apis/bus'
-import { isTdxRateLimitError } from '~/modules/apis/errors/busError'
-import type { RouteDetailSubRoute } from '~/modules/interfaces/RouteDetail'
-import { CityNameType } from '@bus/shared'
-import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
-import { TdxStopStatus } from '@bus/shared'
-import { selectLocale } from '~/modules/slices/localeSlice'
 import {
-  formatEstimatedArrivalLabel,
-  getRouteRealtimeBusStatuses,
-} from '~/modules/utils/route/getRouteRealtimeBusStatuses'
+  CityNameType,
+  RouteRealtimeStatus,
+  type ApiRealtimeArrival,
+  type ApiRouteRealtimeStop,
+} from '@bus/shared'
+import { transitApi } from '~/modules/apis/transit'
+import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
+import type {
+  RouteDetailStop,
+  RouteDetailSubRoute,
+} from '~/modules/interfaces/RouteDetail'
+import type { RouteMapVehicle } from '~/components/route/RouteMap'
+import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeBusStatus'
+import { selectLocale } from '~/modules/slices/localeSlice'
+import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
+import { toLocalizedText } from '~/modules/utils/i18n/toLocalizedText'
+import { formatRealtimeArrival } from '~/modules/utils/route/formatRealtimeArrival'
 import { normalizePlateNumb } from '~/modules/utils/route/normalizePlateNumb'
 
 const REALTIME_POLLING_INTERVAL = 30000
 const REALTIME_INITIAL_DELAY_MS = 1200
-const REALTIME_RATE_LIMIT_BACKOFF_MS = 3000
+// Longer than the 5 seconds the API caches a failed snapshot, so the retry
+// gets a fresh result in local API mode.
+const REALTIME_RATE_LIMIT_BACKOFF_MS = 6000
 
-enum RealtimeQueryStatus {
-  IDLE,
-  WAITING,
-  READY,
-}
-
-type RealtimeQueryState =
-  | { status: RealtimeQueryStatus.IDLE }
-  | { status: RealtimeQueryStatus.WAITING; waitMs: number }
-  | { status: RealtimeQueryStatus.READY }
+type RealtimeStop = Pick<RouteDetailStop, 'stopUID' | 'sequence'>
 
 interface UseRouteRealtimeDataOptions {
-  subRoute: Pick<RouteDetailSubRoute, 'subRouteUID' | 'direction'>
+  subRoute: Pick<RouteDetailSubRoute, 'id'> & { stops: RealtimeStop[] }
   city: CityNameType
   id: string
+}
+
+const REALTIME_INFO_STATES: Partial<
+  Record<RouteRealtimeStatus, RouteRealtimeInfoState>
+> = {
+  [RouteRealtimeStatus.NO_REALTIME_DATA]:
+    RouteRealtimeInfoState.NO_REALTIME_DATA,
+  [RouteRealtimeStatus.NO_SERVICE]: RouteRealtimeInfoState.NO_SERVICE,
+}
+
+/**
+ * Arrivals keyed by stop sequence. Realtime stops come in the sub-route's
+ * stop order, and a stop can appear twice, so each visit is matched by its
+ * stop ID and how many times the stop appeared before it.
+ */
+function getArrivalsByStopSequence(
+  stops: RealtimeStop[],
+  realtimeStops: ApiRouteRealtimeStop[],
+): Map<number, ApiRealtimeArrival> {
+  const toVisitKeys = (stopIds: string[]) => {
+    const visitCounts = new Map<string, number>()
+
+    return stopIds.map((stopId) => {
+      const visit = visitCounts.get(stopId) ?? 0
+      visitCounts.set(stopId, visit + 1)
+      return `${stopId}#${visit}`
+    })
+  }
+  const realtimeVisitKeys = toVisitKeys(realtimeStops.map(({ uuid }) => uuid))
+  const arrivalsByVisit = new Map(
+    realtimeStops.flatMap(({ arrival }, index) =>
+      arrival ? [[realtimeVisitKeys[index], arrival] as const] : [],
+    ),
+  )
+  const stopVisitKeys = toVisitKeys(stops.map(({ stopUID }) => stopUID))
+
+  return new Map(
+    stops.flatMap(({ sequence }, index) => {
+      const arrival = arrivalsByVisit.get(stopVisitKeys[index])
+      return arrival ? [[sequence, arrival] as const] : []
+    }),
+  )
 }
 
 export function useRouteRealtimeData(
@@ -41,196 +83,110 @@ export function useRouteRealtimeData(
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
   const subRoute = options?.subRoute ?? null
-  const routeUID = options?.id ?? null
 
   // Keep RTK Query args well-typed; skip prevents requests until realtime options are ready.
   const realtimeQueryArgs = options
     ? { city: options.city, routeUID: options.id }
     : { city: CityNameType.TAIPEI, routeUID: '' }
-  const [realtimeQueryState, setRealtimeQueryState] =
-    useState<RealtimeQueryState>({
-      status: RealtimeQueryStatus.IDLE,
-    })
-  const hasAppliedRateLimitBackoff = useRef(false)
+  const [isRealtimeReady, setIsRealtimeReady] = useState(false)
+  const hasOptions = options != null
 
+  // Wait briefly after the route loads so realtime requests do not burst
+  // together with the route detail requests.
   useEffect(() => {
-    if (!options) {
-      setRealtimeQueryState({ status: RealtimeQueryStatus.IDLE })
-      return
-    }
+    setIsRealtimeReady(false)
 
-    setRealtimeQueryState({
-      status: RealtimeQueryStatus.WAITING,
-      waitMs: REALTIME_INITIAL_DELAY_MS,
-    })
-  }, [subRoute?.direction, subRoute?.subRouteUID, options?.id, options?.city])
-
-  useEffect(() => {
-    if (realtimeQueryState.status !== RealtimeQueryStatus.WAITING) {
-      return
-    }
+    if (!hasOptions) return
 
     const timeoutId = window.setTimeout(() => {
-      setRealtimeQueryState({ status: RealtimeQueryStatus.READY })
-    }, realtimeQueryState.waitMs)
+      setIsRealtimeReady(true)
+    }, REALTIME_INITIAL_DELAY_MS)
 
     return () => {
       window.clearTimeout(timeoutId)
     }
-  }, [realtimeQueryState])
-
-  const skipRealtime =
-    !options || realtimeQueryState.status !== RealtimeQueryStatus.READY
+  }, [hasOptions, options?.id, options?.city])
 
   const {
-    data: estimatedArrivals = [],
-    error: estimatedArrivalsError,
-    isError: isEstimatedArrivalsError,
-    isLoading: isEstimatedArrivalsLoading,
-  } = busApi.useGetEstimatedArrivalByRouteQuery(realtimeQueryArgs, {
-    skip: skipRealtime,
+    data: routeRealtime,
+    isError,
+    isLoading: isRealtimeLoading,
+    refetch,
+  } = transitApi.useGetRouteRealtimeQuery(realtimeQueryArgs, {
+    skip: !options || !isRealtimeReady,
     pollingInterval: REALTIME_POLLING_INTERVAL,
     skipPollingIfUnfocused: true,
     refetchOnReconnect: true,
   })
-  const { data: realtimeByFrequency = [] } =
-    busApi.useGetRealtimeByFrequencyByRouteQuery(realtimeQueryArgs, {
-      skip: skipRealtime,
-      pollingInterval: REALTIME_POLLING_INTERVAL,
-      skipPollingIfUnfocused: true,
-      refetchOnReconnect: true,
-    })
-  const {
-    data: realtimeNearStops = [],
-    error: realtimeNearStopsError,
-    isError: isRealtimeNearStopsError,
-    isLoading: isRealtimeNearStopsLoading,
-  } = busApi.useGetRealtimeNearStopsByRouteQuery(realtimeQueryArgs, {
-    skip: skipRealtime,
-    pollingInterval: REALTIME_POLLING_INTERVAL,
-    skipPollingIfUnfocused: true,
-    refetchOnReconnect: true,
-  })
+  const realtimeSubRoute = useMemo(
+    () =>
+      routeRealtime?.sub_routes.find(({ uuid }) => uuid === subRoute?.id) ??
+      null,
+    [routeRealtime, subRoute?.id],
+  )
+  const realtimeStatus = realtimeSubRoute?.status ?? null
   const isRealtimeRateLimited =
-    isTdxRateLimitError(estimatedArrivalsError) ||
-    isTdxRateLimitError(realtimeNearStopsError)
+    realtimeStatus === RouteRealtimeStatus.RATE_LIMITED
 
+  // Retry once shortly after a rate limit instead of waiting for the next
+  // poll. If the retry is limited again, regular polling takes over.
   useEffect(() => {
-    if (!isRealtimeRateLimited) {
-      hasAppliedRateLimitBackoff.current = false
-      return
+    if (!isRealtimeRateLimited) return
+
+    const timeoutId = window.setTimeout(() => {
+      void refetch()
+    }, REALTIME_RATE_LIMIT_BACKOFF_MS)
+
+    return () => {
+      window.clearTimeout(timeoutId)
     }
+  }, [isRealtimeRateLimited, refetch])
 
-    if (hasAppliedRateLimitBackoff.current) {
-      return
-    }
+  const realtimeVehicles = useMemo(
+    () => realtimeSubRoute?.vehicles ?? [],
+    [realtimeSubRoute],
+  )
 
-    hasAppliedRateLimitBackoff.current = true
-    setRealtimeQueryState({
-      status: RealtimeQueryStatus.WAITING,
-      waitMs: REALTIME_RATE_LIMIT_BACKOFF_MS,
-    })
-  }, [isRealtimeRateLimited])
-
-  const directionMatchedEstimatedArrivals = useMemo(() => {
-    if (!subRoute) return []
-
-    return estimatedArrivals.filter(
-      (estimatedArrival) => estimatedArrival.Direction === subRoute.direction,
-    )
-  }, [subRoute, estimatedArrivals])
-
-  const activeEstimatedArrivals = useMemo(() => {
-    if (!subRoute || !routeUID) return []
-
-    const subRouteMatchedEstimatedArrivals =
-      directionMatchedEstimatedArrivals.filter(
-        (estimatedArrival) =>
-          estimatedArrival.SubRouteUID === subRoute.subRouteUID,
-      )
-
-    if (subRouteMatchedEstimatedArrivals.length > 0) {
-      return subRouteMatchedEstimatedArrivals
-    }
-
-    const routeLevelEstimatedArrivals =
-      directionMatchedEstimatedArrivals.filter(
-        (estimatedArrival) =>
-          estimatedArrival.RouteUID === routeUID ||
-          estimatedArrival.SubRouteUID === routeUID,
-      )
-
-    return routeLevelEstimatedArrivals.length > 0
-      ? routeLevelEstimatedArrivals
-      : directionMatchedEstimatedArrivals
-  }, [subRoute, routeUID, directionMatchedEstimatedArrivals])
-
-  const activeRealtimeNearStops = useMemo(
+  const realtimeBusStatuses = useMemo<RouteRealtimeBusStatus[]>(
     () =>
-      realtimeNearStops.filter(
-        (realtimeNearStop) =>
-          realtimeNearStop.SubRouteUID === subRoute?.subRouteUID &&
-          realtimeNearStop.Direction === subRoute?.direction,
+      realtimeVehicles.flatMap(({ near_stop, plate_number, state }) =>
+        near_stop && state
+          ? [
+              {
+                id: normalizePlateNumb(plate_number),
+                plateNumb: plate_number,
+                stopSequence: near_stop.sequence,
+                vehicleState: state,
+              },
+            ]
+          : [],
       ),
-    [subRoute, realtimeNearStops],
-  )
-  const activeRealtimeByFrequency = useMemo(
-    () =>
-      realtimeByFrequency.filter(
-        (realtimeVehicle) =>
-          realtimeVehicle.SubRouteUID === subRoute?.subRouteUID &&
-          realtimeVehicle.Direction === subRoute?.direction &&
-          realtimeVehicle.position != null,
-      ) as Array<
-        (typeof realtimeByFrequency)[number] & {
-          position: NonNullable<
-            (typeof realtimeByFrequency)[number]['position']
-          >
-        }
-      >,
-    [subRoute, realtimeByFrequency],
+    [realtimeVehicles],
   )
 
-  const realtimeBusStatuses = useMemo(
+  const realtimeMapVehicles = useMemo<RouteMapVehicle[]>(
     () =>
-      getRouteRealtimeBusStatuses(
-        t,
-        locale,
-        activeRealtimeNearStops,
-        activeEstimatedArrivals,
+      realtimeVehicles.flatMap(
+        ({ arrival, near_stop, plate_number, position }) =>
+          position
+            ? [
+                {
+                  estimateLabel: formatRealtimeArrival(t, arrival),
+                  id: normalizePlateNumb(plate_number),
+                  plateNumb: plate_number,
+                  position: [position.longitude, position.latitude],
+                  stopName: near_stop
+                    ? getLocalizedText(toLocalizedText(near_stop.name), locale)
+                    : t('components.routeMap.vehiclePopup.recentStopUnknown'),
+                },
+              ]
+            : [],
       ),
-    [activeEstimatedArrivals, activeRealtimeNearStops, locale, t],
+    [locale, realtimeVehicles, t],
   )
-  const realtimeMapVehicles = useMemo(() => {
-    const realtimeStatusesByPlate = realtimeBusStatuses.reduce<
-      Map<string, (typeof realtimeBusStatuses)[number]>
-    >((result, realtimeBusStatus) => {
-      result.set(
-        normalizePlateNumb(realtimeBusStatus.plateNumb),
-        realtimeBusStatus,
-      )
-      return result
-    }, new Map())
-
-    return activeRealtimeByFrequency.map((realtimeVehicle) => {
-      const vehicleId = normalizePlateNumb(realtimeVehicle.PlateNumb)
-      const matchedStatus = realtimeStatusesByPlate.get(vehicleId)
-
-      return {
-        estimateLabel:
-          matchedStatus?.estimateLabel ?? t('routePage.realtime.inService'),
-        id: vehicleId,
-        plateNumb: realtimeVehicle.PlateNumb,
-        position: realtimeVehicle.position,
-        stopName:
-          matchedStatus?.stopName ??
-          t('components.routeMap.vehiclePopup.recentStopUnknown'),
-      }
-    })
-  }, [activeRealtimeByFrequency, realtimeBusStatuses, t])
 
   const realtimeBusesByStopSequence = useMemo(() => {
-    return realtimeBusStatuses.reduce<Map<number, typeof realtimeBusStatuses>>(
+    return realtimeBusStatuses.reduce<Map<number, RouteRealtimeBusStatus[]>>(
       (result, realtimeBus) => {
         const stopBuses = result.get(realtimeBus.stopSequence) ?? []
         stopBuses.push(realtimeBus)
@@ -241,108 +197,34 @@ export function useRouteRealtimeData(
     )
   }, [realtimeBusStatuses])
 
-  const estimatedArrivalLabelsByStopKey = useMemo(() => {
-    const sortedEstimatedArrivals = [...activeEstimatedArrivals].sort(
-      (left, right) => {
-        const leftStopSequence = left.StopSequence ?? Number.POSITIVE_INFINITY
-        const rightStopSequence = right.StopSequence ?? Number.POSITIVE_INFINITY
+  const estimatedArrivalLabelsByStopSequence = useMemo(() => {
+    if (!subRoute || !realtimeSubRoute) return new Map<number, string>()
 
-        if (left.EstimateTime == null && right.EstimateTime == null) {
-          return leftStopSequence - rightStopSequence
-        }
-        if (left.EstimateTime == null) return 1
-        if (right.EstimateTime == null) return -1
-        return left.EstimateTime - right.EstimateTime
-      },
+    const arrivals = getArrivalsByStopSequence(
+      subRoute.stops,
+      realtimeSubRoute.stops,
     )
 
-    return sortedEstimatedArrivals.reduce<Map<string, string>>(
-      (result, estimatedArrival) => {
-        const estimatedArrivalLabel = formatEstimatedArrivalLabel(
-          t,
-          estimatedArrival.EstimateTime,
-          estimatedArrival.StopStatus,
-        )
-
-        if (estimatedArrival.StopUID && !result.has(estimatedArrival.StopUID)) {
-          result.set(estimatedArrival.StopUID, estimatedArrivalLabel)
-        }
-
-        if (estimatedArrival.StopID && !result.has(estimatedArrival.StopID)) {
-          result.set(estimatedArrival.StopID, estimatedArrivalLabel)
-        }
-
-        return result
-      },
-      new Map(),
+    return new Map(
+      [...arrivals].map(([sequence, arrival]) => [
+        sequence,
+        formatRealtimeArrival(t, arrival),
+      ]),
     )
-  }, [activeEstimatedArrivals, t])
+  }, [realtimeSubRoute, subRoute, t])
 
-  const hasRealtimeError = useMemo(() => {
-    if (isEstimatedArrivalsError && estimatedArrivals.length === 0) {
-      return true
-    }
-
-    if (
-      isRealtimeNearStopsError &&
-      realtimeNearStops.length === 0 &&
-      estimatedArrivals.length === 0
-    ) {
-      return true
-    }
-
-    return false
-  }, [
-    estimatedArrivals.length,
-    isEstimatedArrivalsError,
-    isRealtimeNearStopsError,
-    realtimeNearStops.length,
-  ])
-
-  const realtimeInfoState = useMemo<RouteRealtimeInfoState>(() => {
-    if (
-      hasRealtimeError ||
-      isEstimatedArrivalsLoading ||
-      isRealtimeNearStopsLoading
-    ) {
-      return RouteRealtimeInfoState.NORMAL
-    }
-
-    if (realtimeBusStatuses.length > 0) {
-      return RouteRealtimeInfoState.NORMAL
-    }
-
-    if (
-      activeEstimatedArrivals.length === 0 &&
-      activeRealtimeNearStops.length === 0
-    ) {
-      return RouteRealtimeInfoState.NO_REALTIME_DATA
-    }
-
-    const isOutOfService = activeEstimatedArrivals.every((estimatedArrival) =>
-      [
-        TdxStopStatus.NOT_YET_DEPARTED,
-        TdxStopStatus.LAST_BUS_PASSED,
-        TdxStopStatus.NOT_IN_SERVICE_TODAY,
-      ].includes(estimatedArrival.StopStatus),
-    )
-
-    return isOutOfService
-      ? RouteRealtimeInfoState.NO_SERVICE
-      : RouteRealtimeInfoState.NO_REALTIME_DATA
-  }, [
-    activeEstimatedArrivals,
-    activeRealtimeNearStops.length,
-    hasRealtimeError,
-    isEstimatedArrivalsLoading,
-    isRealtimeNearStopsLoading,
-    realtimeBusStatuses.length,
-  ])
+  // A failed refresh keeps showing the last realtime data it has.
+  const hasRealtimeError =
+    (isError && !routeRealtime) ||
+    realtimeStatus === RouteRealtimeStatus.UNAVAILABLE
+  const realtimeInfoState =
+    (realtimeStatus && REALTIME_INFO_STATES[realtimeStatus]) ??
+    RouteRealtimeInfoState.NORMAL
 
   return {
-    estimatedArrivalLabelsByStopKey,
+    estimatedArrivalLabelsByStopSequence,
     hasRealtimeError,
-    isRealtimeLoading: isEstimatedArrivalsLoading || isRealtimeNearStopsLoading,
+    isRealtimeLoading,
     isRealtimeRateLimited,
     realtimeMapVehicles,
     realtimeBusesByStopSequence,

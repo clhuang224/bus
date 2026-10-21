@@ -121,6 +121,17 @@ describe('getBusErrorModal', () => {
     ).toBeNull()
   })
 
+  it('does not open a modal when a 431 is wrapped as a parsing error', () => {
+    expect(
+      getBusErrorModal({
+        status: 'PARSING_ERROR',
+        originalStatus: 431,
+        data: '',
+        error: 'SyntaxError: Unexpected end of JSON input',
+      }),
+    ).toBeNull()
+  })
+
   it('returns the system modal for 5xx errors', () => {
     expect(
       getBusErrorModal({

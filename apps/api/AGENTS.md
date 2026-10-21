@@ -261,10 +261,12 @@ leave headroom for sync and the proxy), a pause after a TDX `429`, and a
 bounded wait queue. Keep pacing there rather than in the realtime service or
 calculator.
 
-`route-realtime.calculator.ts` turns TDX feeds into what each sub-route should
-show. Keep it a pure function of the route and the feed results, and add a
-recorded-city e2e fixture under `test/fixtures/realtime/` when a new upstream
-data shape needs coverage.
+`calculateRouteRealtime` in `packages/shared/src/realtime/` turns TDX feeds
+into what each sub-route should show, together with the TDX realtime record
+checks. The web app uses the same code while it still calls TDX directly, so
+both show the same results. Keep it a pure function of the route and the feed
+results, and add a recorded-city e2e fixture under `test/fixtures/realtime/`
+when a new upstream data shape needs coverage.
 
 ## Endpoint Stubs
 
