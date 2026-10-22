@@ -161,7 +161,7 @@ const BaseMap = ({
 
   return (
     <Box pos="relative" style={{ width: '100%', height: '100%' }}>
-      <Box id={id} style={{ width: '100%', height: '100%' }} />
+      <Box id={id} style={{ width: '100%', height: '100%', font: 'inherit' }} />
       {(showUserLocation || extraControls) && (
         <Flex
           pos="absolute"
