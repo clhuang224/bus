@@ -4,8 +4,8 @@ import type { AlertMessageConfig } from '~/modules/interfaces/AlertMessageConfig
 import type { AlertType } from '~/modules/types/AlertType'
 
 const alertTypeColorMap: Record<AlertType, AlertProps['color']> = {
-  error: 'red',
-  warn: 'yellow',
+  error: 'cherry',
+  warn: 'sun',
 }
 
 interface BaseAlertProps

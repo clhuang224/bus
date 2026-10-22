@@ -21,8 +21,8 @@ export const AppBadge = ({
   }[type]
 
   const color = {
-    route: 'blue',
-    city: 'gray',
+    route: 'brand',
+    city: 'cream',
   }[type]
 
   return (

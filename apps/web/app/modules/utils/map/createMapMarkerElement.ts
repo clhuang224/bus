@@ -1,9 +1,13 @@
+import { BRAND_COLORS } from '../../consts/brandColors'
+
 type MapMarkerType = 'stop' | 'vehicle' | 'user'
 
 interface CreateMapMarkerElementOptions {
   ariaLabel?: string
   backgroundColor?: string
+  borderColor?: string
   boxShadow?: string
+  color?: string
   datasetLabel?: string
   fontSize?: string
   fontWeight?: string
@@ -18,9 +22,9 @@ const markerStyleMap: Record<MapMarkerType, Partial<CSSStyleDeclaration>> = {
     width: '28px',
     height: '28px',
     borderRadius: '50%',
-    backgroundColor: '#868e96',
-    border: '2px solid #ffffff',
-    color: '#ffffff',
+    backgroundColor: '#ffffff',
+    border: `2px solid ${BRAND_COLORS.primary}`,
+    color: BRAND_COLORS.ink,
     fontSize: '12px',
     fontWeight: '700',
   },
@@ -28,9 +32,9 @@ const markerStyleMap: Record<MapMarkerType, Partial<CSSStyleDeclaration>> = {
     width: '24px',
     height: '24px',
     borderRadius: '8px',
-    backgroundColor: '#f08c00',
+    backgroundColor: BRAND_COLORS.sun,
     border: '2px solid #ffffff',
-    color: '#ffffff',
+    color: BRAND_COLORS.ink,
     fontSize: '12px',
     fontWeight: '700',
   },
@@ -38,7 +42,7 @@ const markerStyleMap: Record<MapMarkerType, Partial<CSSStyleDeclaration>> = {
     width: '20px',
     height: '20px',
     borderRadius: '50%',
-    backgroundColor: '#4A90E2',
+    backgroundColor: BRAND_COLORS.primary,
     border: '3px solid white',
     zIndex: '1',
   },
@@ -47,7 +51,9 @@ const markerStyleMap: Record<MapMarkerType, Partial<CSSStyleDeclaration>> = {
 export const createMapMarkerElement = ({
   ariaLabel,
   backgroundColor,
+  borderColor,
   boxShadow,
+  color,
   datasetLabel,
   fontSize,
   fontWeight,
@@ -64,7 +70,9 @@ export const createMapMarkerElement = ({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: backgroundColor ?? markerStyleMap[type].backgroundColor,
+    borderColor: borderColor ?? markerStyleMap[type].borderColor,
     boxShadow,
+    color: color ?? markerStyleMap[type].color,
     cursor: interactive ? 'pointer' : 'default',
     fontSize: fontSize ?? markerStyleMap[type].fontSize,
     fontWeight: fontWeight ?? markerStyleMap[type].fontWeight,

@@ -42,22 +42,22 @@ export function getRouteRealtimeMessages(
     ),
     error: buildRouteRealtimeMessage(
       t,
-      'orange',
+      'cherry',
       'messages.routeRealtime.error',
     ),
     rateLimited: buildRouteRealtimeMessage(
       t,
-      'orange',
+      'sun',
       'messages.routeRealtime.rateLimited',
     ),
     noService: buildRouteRealtimeMessage(
       t,
-      'blue',
+      'brand',
       'messages.routeRealtime.noService',
     ),
     noRealtimeData: buildRouteRealtimeMessage(
       t,
-      'yellow',
+      'sun',
       'messages.routeRealtime.noRealtimeData',
     ),
   }

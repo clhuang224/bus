@@ -191,11 +191,12 @@ export const RouteStopList = ({
                       style={{
                         flex: '0 0 28px',
                         borderRadius: '50%',
-                        backgroundColor: 'var(--mantine-color-gray-4)',
+                        backgroundColor: 'var(--mantine-color-white)',
+                        border: '2px solid var(--mantine-color-brand-6)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        color: '#ffffff',
+                        color: 'var(--mantine-color-brand-8)',
                         fontSize: '12px',
                         fontWeight: 700,
                         lineHeight: 1,
@@ -260,7 +261,7 @@ export const RouteStopList = ({
                           </Group>
                           <ActionIcon
                             variant="light"
-                            color={stop.isFavorite ? 'pink' : 'gray'}
+                            color={stop.isFavorite ? 'cherry' : 'gray'}
                             radius="50%"
                             aria-label={
                               stop.isFavorite

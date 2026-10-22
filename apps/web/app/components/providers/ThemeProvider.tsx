@@ -1,8 +1,12 @@
 import {
+  Card,
   createTheme,
+  defaultVariantColorsResolver,
   MantineProvider,
+  parseThemeColor,
   type CSSVariablesResolver,
   type MantineColorsTuple,
+  type VariantColorsResolver,
 } from '@mantine/core'
 
 // Each palette keeps the hue of one brand color and steps through lightness.
@@ -72,6 +76,28 @@ const gray: MantineColorsTuple = [
 const FONT_FAMILY =
   "Huninn, system-ui, -apple-system, 'PingFang TC', 'Microsoft JhengHei', sans-serif"
 
+// Yellow and cream are too light for text on their own light tints, so
+// light variants of them use the darkest shade for text instead.
+const LIGHT_TEXT_COLORS = new Set(['sun', 'cream'])
+
+const variantColorResolver: VariantColorsResolver = (input) => {
+  const colors = defaultVariantColorsResolver(input)
+  const { color } = parseThemeColor({
+    color: input.color ?? input.theme.primaryColor,
+    theme: input.theme,
+  })
+
+  if (input.variant === 'light' && LIGHT_TEXT_COLORS.has(color)) {
+    return {
+      ...colors,
+      color: `var(--mantine-color-${color}-9)`,
+      hoverColor: `var(--mantine-color-${color}-9)`,
+    }
+  }
+
+  return colors
+}
+
 const theme = createTheme({
   fontFamily: FONT_FAMILY,
   // Huninn has a single weight, so headings stand out by size and color.
@@ -82,6 +108,10 @@ const theme = createTheme({
   black: gray[9],
   defaultRadius: 'md',
   autoContrast: true,
+  variantColorResolver,
+  components: {
+    Card: Card.extend({ defaultProps: { radius: 'lg' } }),
+  },
 })
 
 const cssVariablesResolver: CSSVariablesResolver = () => ({

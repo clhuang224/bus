@@ -26,14 +26,14 @@ export function RouteRealtimeBadge({
         component="button"
         type="button"
         aria-pressed={isSelected}
-        color="orange"
+        color="sun"
         variant="light"
         size="md"
         radius="sm"
         leftSection={<RiBus2Fill size="1em" />}
         style={{
           boxShadow: isSelected
-            ? '0 0 0 1px rgba(245, 124, 0, 0.25), 0 2px 6px rgba(245, 124, 0, 0.18)'
+            ? '0 0 0 1px rgba(240, 200, 8, 0.45), 0 2px 6px rgba(240, 200, 8, 0.3)'
             : undefined,
           cursor: 'pointer',
           fontWeight: isSelected ? 700 : undefined,

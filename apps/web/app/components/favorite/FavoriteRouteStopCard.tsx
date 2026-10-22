@@ -74,7 +74,7 @@ export const FavoriteRouteStopCard = ({
           </Box>
           <ActionIcon
             variant="subtle"
-            color="pink"
+            color="cherry"
             radius="50%"
             aria-label={t('components.favoriteRouteStopCard.removeAriaLabel')}
             onClick={() => onRemove(favoriteRouteStop)}

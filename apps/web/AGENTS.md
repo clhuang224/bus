@@ -410,10 +410,12 @@ When working with Mantine components, prefer Mantine props, variants, spacing, r
 
 Avoid ad hoc odd pixel values such as `11px` or `13px` unless there is a clear reason grounded in an existing design pattern or third-party constraint. Prefer consistent Mantine sizing, spacing tokens, or even-numbered pixel values when custom sizing is still needed.
 
+Use the brand palettes from `ThemeProvider` (`brand`, `sun`, `cherry`, `cream`, and the tinted `gray`) instead of Mantine's default color names. Map code that needs raw values reads them from `BRAND_COLORS` in `app/modules/consts/brandColors.ts`. Keep the color roles described in `docs/plan.md`: cool colors for route structure, `sun` for vehicles and realtime cues, and `cherry` for highlighted stops, favorites, and errors.
+
 For badge-based route UI, keep badge semantics consistent across the app:
 
-- route name plus direction: `Badge` with `color="blue"` and `variant="light"`
-- city: `Badge` with `color="gray"` and `variant="light"`
+- route name plus direction: `Badge` with `color="brand"` and `variant="light"`
+- city: `Badge` with `color="cream"` and `variant="light"`
 
 For responsive logic, prefer breakpoint-based names such as `isSm` or `isMd` over device labels such as `isMobile` or `isTablet`, and derive media queries from Mantine theme breakpoints when practical.
 
