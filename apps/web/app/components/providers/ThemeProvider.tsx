@@ -76,9 +76,9 @@ const gray: MantineColorsTuple = [
 const FONT_FAMILY =
   "Huninn, system-ui, -apple-system, 'PingFang TC', 'Microsoft JhengHei', sans-serif"
 
-// Yellow and cream are too light for text on their own light tints, so
-// light variants of them use the darkest shade for text instead.
-const LIGHT_TEXT_COLORS = new Set(['sun', 'cream'])
+// Yellow is too light for text on its own light tint, so its light
+// variant uses the darkest shade for text instead.
+const LIGHT_TEXT_COLORS = new Set(['sun'])
 
 const variantColorResolver: VariantColorsResolver = (input) => {
   const colors = defaultVariantColorsResolver(input)
@@ -86,6 +86,17 @@ const variantColorResolver: VariantColorsResolver = (input) => {
     color: input.color ?? input.theme.primaryColor,
     theme: input.theme,
   })
+
+  // A translucent cream tint looks dull, so cream badges use a solid shade.
+  if (input.variant === 'light' && color === 'cream') {
+    return {
+      ...colors,
+      background: 'var(--mantine-color-cream-3)',
+      hover: 'var(--mantine-color-cream-4)',
+      color: 'var(--mantine-color-cream-9)',
+      hoverColor: 'var(--mantine-color-cream-9)',
+    }
+  }
 
   if (input.variant === 'light' && LIGHT_TEXT_COLORS.has(color)) {
     return {
@@ -116,7 +127,8 @@ const theme = createTheme({
 
 const cssVariablesResolver: CSSVariablesResolver = () => ({
   variables: {},
-  light: { '--mantine-color-body': cream[0] },
+  // The palette's own cream, not a paler tint, which reads as off-white.
+  light: { '--mantine-color-body': cream[2] },
   dark: {},
 })
 

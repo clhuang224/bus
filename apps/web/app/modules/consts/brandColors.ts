@@ -10,7 +10,7 @@ export const BRAND_COLORS = {
   primary: '#07a0c3',
   /** Vehicles and realtime cues, with ink text. */
   sun: '#f0c808',
-  /** Page background and city badges, as tints. */
+  /** Page background; city badges use a slightly deeper shade. */
   cream: '#fff1d0',
   /** Highlighted stops, favorites, and errors. */
   cherry: '#dd1c1a',

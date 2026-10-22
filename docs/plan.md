@@ -235,7 +235,8 @@ Decisions for steps 3 to 5:
   | Stops                                            | white with a `#07a0c3` outline                      |
   | Vehicles and realtime cues                       | `#f0c808` with `#086788` text                       |
   | Highlighted stop, favorites, errors              | `#dd1c1a`                                           |
-  | Page background, city badges                     | tints of `#fff1d0`                                  |
+  | Page background                                  | `#fff1d0`                                           |
+  | City badges                                      | a solid, slightly deeper cream with brown text      |
   | Neutral gray                                     | low-saturation tints of the cool hue, not pure gray |
 
 - **Contrast.** White text works on `#086788` (6.4:1) and `#dd1c1a` (4.9:1), but on `#07a0c3` (3.1:1) only for large or bold text and icons. Text on `#f0c808` uses `#086788` or darker.
