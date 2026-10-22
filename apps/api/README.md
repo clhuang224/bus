@@ -32,7 +32,8 @@ Local development scripts:
 Use `start:dev:awake` for long local sync runs on macOS. Keep the regular `start:dev` command for cross-platform development and deployment environments.
 
 The root `pnpm run dev:api` command starts this local API mode together with
-the web app and TDX proxy. The launcher sets `BUS_LOCAL_API_MODE=1`, so after
+the web app. It does not start the TDX proxy, since the web app reads all data
+from the API in this mode. The launcher sets `BUS_LOCAL_API_MODE=1`, so after
 loading `.env` and `.env.local`, the API uses port `3001` and allows the Vite
 origins `http://localhost:5173` and `http://127.0.0.1:5173`. Normal startup
 continues to use the configured `PORT` and `CORS_ORIGINS` values.

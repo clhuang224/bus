@@ -63,7 +63,7 @@ To develop against the local NestJS API and database, use:
 pnpm run dev:api
 ```
 
-It also starts the API, and the web app reads base and realtime data from it. See the
+It starts the API instead of the TDX proxy, and the web app reads base and realtime data from it. See the
 [web local API mode](./apps/web/README.md#local-api-mode) for setup.
 
 ## Current Workspace Roles
