@@ -19,11 +19,35 @@ import type { LatLng } from '~/modules/types/CoordsType'
 import type { RootState } from '~/modules/store'
 import { toLngLat } from '~/modules/utils/geo/convertCoordinates'
 import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
-import { APP_FLOATING_ACTION_OFFSET } from '~/modules/consts/layout'
+import {
+  APP_FLOATING_ACTION_OFFSET,
+  MAP_OVERLAY_BOTTOM_INSET_VAR,
+  MAP_OVERLAY_TOP_INSET_VAR,
+} from '~/modules/consts/layout'
+import { MAP_Z_INDEX } from '~/modules/consts/mapLayers'
 
 mapLibre.setWorkerUrl(mapWorkerUrl)
 
 const FOCUS_ZOOM = 16
+
+function keepControlsClearOfOverlayBars(map: Map) {
+  const container = map.getContainer()
+
+  container
+    .querySelectorAll<HTMLElement>(
+      '.maplibregl-ctrl-top-left, .maplibregl-ctrl-top-right',
+    )
+    .forEach((corner) => {
+      corner.style.top = `var(${MAP_OVERLAY_TOP_INSET_VAR}, 0px)`
+    })
+  container
+    .querySelectorAll<HTMLElement>(
+      '.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right',
+    )
+    .forEach((corner) => {
+      corner.style.bottom = `var(${MAP_OVERLAY_BOTTOM_INSET_VAR}, 0px)`
+    })
+}
 
 interface PropType {
   center: LatLng | null
@@ -64,6 +88,7 @@ const BaseMap = ({
       attributionControl: { compact: true },
     })
     setMap(mapInstance)
+    keepControlsClearOfOverlayBars(mapInstance)
 
     const collapseAttribution = () => {
       const compactAttribution = mapInstance
@@ -139,10 +164,10 @@ const BaseMap = ({
         <Flex
           pos="absolute"
           right={APP_FLOATING_ACTION_OFFSET}
-          bottom="48px"
+          bottom={`calc(var(${MAP_OVERLAY_BOTTOM_INSET_VAR}, 0px) + 48px)`}
           direction="column"
           gap="sm"
-          style={{ zIndex: 2 }}
+          style={{ zIndex: MAP_Z_INDEX.controls }}
         >
           {extraControls}
           {showUserLocation && (

@@ -1,11 +1,20 @@
 import { Box, Drawer, Flex } from '@mantine/core'
 import type { ReactNode } from 'react'
 import {
+  APP_FOOTER_HEIGHT,
+  APP_MOBILE_HEADER_HEIGHT,
   APP_PAGE_PADDING,
   DRAWER_TOP,
   MAP_FRAME_RADIUS,
+  MAP_OVERLAY_BOTTOM_INSET_VAR,
+  MAP_OVERLAY_TOP_INSET_VAR,
   MAP_SIDEBAR_WIDTH,
 } from '~/modules/consts/layout'
+
+const fullScreenMapUnderBars = {
+  [MAP_OVERLAY_TOP_INSET_VAR]: `${APP_MOBILE_HEADER_HEIGHT}px`,
+  [MAP_OVERLAY_BOTTOM_INSET_VAR]: `${APP_FOOTER_HEIGHT}px`,
+}
 
 interface PropType {
   children: ReactNode
@@ -46,7 +55,11 @@ export const MapSidebarLayout = ({
         </Box>
       )}
 
-      <Flex pos="relative" style={{ flex: 1, minWidth: 0 }}>
+      <Flex
+        pos={isSm ? 'fixed' : 'relative'}
+        inset={isSm ? 0 : undefined}
+        style={{ flex: 1, minWidth: 0, ...(isSm && fullScreenMapUnderBars) }}
+      >
         <Drawer
           opened={isSm && isSidebarOpened}
           onClose={onCloseSidebar}

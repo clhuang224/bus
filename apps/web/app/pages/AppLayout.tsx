@@ -83,7 +83,12 @@ export default function AppLayout() {
       header={{ height: isSm ? APP_MOBILE_HEADER_HEIGHT : APP_HEADER_HEIGHT }}
       footer={{ height: isSm ? APP_FOOTER_HEIGHT : 0 }}
     >
-      <AppShell.Header withBorder={false} px={isSm ? 'sm' : 'md'} py="xs">
+      <AppShell.Header
+        withBorder={false}
+        bg={isSm ? 'transparent' : undefined}
+        px={isSm ? 'sm' : 'md'}
+        py="xs"
+      >
         {isSm ? (
           <Flex
             align="center"
