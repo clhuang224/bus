@@ -61,8 +61,23 @@ const BaseMap = ({
       style: 'https://tiles.openfreemap.org/styles/positron',
       center: mapCenter ?? [121.53969560512759, 25.059928238479156],
       zoom,
+      attributionControl: { compact: true },
     })
     setMap(mapInstance)
+
+    const collapseAttribution = () => {
+      const compactAttribution = mapInstance
+        .getContainer()
+        .querySelector('.maplibregl-ctrl-attrib.maplibregl-compact')
+
+      if (!compactAttribution) return
+
+      compactAttribution.classList.remove('maplibregl-compact-show')
+      mapInstance.off('styledata', collapseAttribution)
+      mapInstance.off('sourcedata', collapseAttribution)
+    }
+    mapInstance.on('styledata', collapseAttribution)
+    mapInstance.on('sourcedata', collapseAttribution)
 
     const handleLoad = () => {
       onLoadRef.current?.(mapInstance)
@@ -76,6 +91,8 @@ const BaseMap = ({
 
     return () => {
       mapInstance.off('load', handleLoad)
+      mapInstance.off('styledata', collapseAttribution)
+      mapInstance.off('sourcedata', collapseAttribution)
       mapInstance.remove()
     }
   }, [id])
