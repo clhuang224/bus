@@ -145,7 +145,16 @@ export default function AppLayout() {
       >
         <Outlet />
       </AppShell.Main>
-      <AppShell.Footer p="sm" hiddenFrom="sm" bg="white">
+      <AppShell.Footer
+        p="sm"
+        hiddenFrom="sm"
+        bg="white"
+        style={{
+          borderTop: 'none',
+          boxShadow: 'var(--mantine-shadow-sm)',
+          borderRadius: 'var(--mantine-radius-xl) var(--mantine-radius-xl) 0 0',
+        }}
+      >
         <Flex justify="space-around" align="center" gap="md">
           {options.map((option) => (
             <Flex

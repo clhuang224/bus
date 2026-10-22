@@ -62,6 +62,7 @@ export const MapSidebarLayout = ({
               display: 'flex',
               flexDirection: 'column',
               paddingBottom: 'env(safe-area-inset-bottom)',
+              borderRadius: `var(--mantine-radius-lg) var(--mantine-radius-lg) 0 0`,
             },
             body: {
               flex: 1,

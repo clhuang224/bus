@@ -30,7 +30,7 @@ export const FavoriteRouteStopCard = ({
   const terminalDisplay = getTerminalDisplay(departure, destination)
 
   return (
-    <Card withBorder radius="md" p="md" shadow="xs">
+    <Card radius="lg" p="md" shadow="lg">
       <Stack gap="sm">
         <Flex justify="space-between" align="flex-start" gap="sm">
           <Box
