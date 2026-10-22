@@ -6,7 +6,7 @@ Paths in this document are relative to `apps/web/`. For example, `app/pages/` me
 
 Use this as the default guide for new work. When a change touches multiple areas, prefer keeping the structure and naming consistent with the patterns described here instead of introducing a new local style.
 
-Keep `apps/web/README.md` focused on frontend product overview, setup, and usage. Small implementation conventions and team-facing coding notes should live in this file or code-local comments instead of being added to the README.
+Keep `apps/web/README.md` focused on frontend product overview, setup, and usage. Small implementation conventions and team-facing coding notes should live in this file instead of being added to the README.
 
 When updating `README.md`, prioritize:
 
