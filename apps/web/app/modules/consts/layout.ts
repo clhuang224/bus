@@ -1,5 +1,5 @@
 export const APP_HEADER_HEIGHT = 76
-export const APP_MOBILE_HEADER_HEIGHT = 56
+export const APP_MOBILE_HEADER_HEIGHT = 68
 export const APP_FOOTER_HEIGHT = 84
 export const MAP_SIDEBAR_WIDTH = 400
 export const MAP_FRAME_RADIUS = 32

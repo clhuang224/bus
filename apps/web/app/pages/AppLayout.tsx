@@ -83,14 +83,16 @@ export default function AppLayout() {
       header={{ height: isSm ? APP_MOBILE_HEADER_HEIGHT : APP_HEADER_HEIGHT }}
       footer={{ height: isSm ? APP_FOOTER_HEIGHT : 0 }}
     >
-      <AppShell.Header
-        withBorder={false}
-        bg={isSm ? 'blue.6' : undefined}
-        px="md"
-        py={isSm ? 0 : 'xs'}
-      >
+      <AppShell.Header withBorder={false} px={isSm ? 'sm' : 'md'} py="xs">
         {isSm ? (
-          <Flex align="center" h="100%">
+          <Flex
+            align="center"
+            h="100%"
+            px="md"
+            bg="blue.6"
+            bdrs="xl"
+            style={{ boxShadow: 'var(--mantine-shadow-sm)' }}
+          >
             <AppBrand inverted />
             <ActionIcon
               component={Link}
