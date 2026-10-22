@@ -1,4 +1,4 @@
-import { AppShell, Flex, useMantineTheme } from '@mantine/core'
+import { ActionIcon, AppShell, Flex, useMantineTheme } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import {
   RiHeart3Fill,
@@ -13,7 +13,7 @@ import {
 import { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
-import { Outlet } from 'react-router'
+import { Link, Outlet, useMatch } from 'react-router'
 import { AppBrand } from '~/components/AppBrand'
 import { AppNavLink } from '~/components/AppNavLink'
 import {
@@ -68,6 +68,7 @@ export default function AppLayout() {
     }),
     [t],
   )
+  const isSettingsPage = useMatch(settingNav.path) !== null
 
   useWatchGeo()
   useGoogleAnalytics()
@@ -82,27 +83,58 @@ export default function AppLayout() {
       header={{ height: isSm ? APP_MOBILE_HEADER_HEIGHT : APP_HEADER_HEIGHT }}
       footer={{ height: isSm ? APP_FOOTER_HEIGHT : 0 }}
     >
-      <AppShell.Header px="md">
-        <Flex align="center" gap="xl" h="100%">
-          <AppBrand />
-          <Flex align="center" gap="md" visibleFrom="sm">
-            {options.map((option) => (
-              <AppNavLink
-                key={option.path}
-                label={option.name}
-                to={option.path}
-              />
-            ))}
-          </Flex>
-          <Flex ml="auto">
-            <AppNavLink
-              ariaLabel={settingNav.name}
-              icon={settingNav.icon}
-              iconActive={settingNav.iconActive}
+      <AppShell.Header
+        withBorder={false}
+        bg={isSm ? 'brand.8' : undefined}
+        px="md"
+        py={isSm ? 0 : 'xs'}
+      >
+        {isSm ? (
+          <Flex align="center" h="100%">
+            <AppBrand inverted />
+            <ActionIcon
+              component={Link}
               to={settingNav.path}
-            />
+              aria-label={settingNav.name}
+              variant="subtle"
+              color="white"
+              size="lg"
+              radius="xl"
+              ml="auto"
+            >
+              {isSettingsPage ? settingNav.iconActive : settingNav.icon}
+            </ActionIcon>
           </Flex>
-        </Flex>
+        ) : (
+          <Flex
+            align="center"
+            gap="xl"
+            h="100%"
+            px="md"
+            bg="white"
+            bdrs="xl"
+            style={{ boxShadow: 'var(--mantine-shadow-sm)' }}
+          >
+            <AppBrand />
+            <Flex align="center" gap="xs">
+              {options.map((option) => (
+                <AppNavLink
+                  key={option.path}
+                  label={option.name}
+                  to={option.path}
+                />
+              ))}
+            </Flex>
+            <Flex ml="auto">
+              <AppNavLink
+                ariaLabel={settingNav.name}
+                icon={settingNav.icon}
+                iconActive={settingNav.iconActive}
+                to={settingNav.path}
+              />
+            </Flex>
+          </Flex>
+        )}
       </AppShell.Header>
       <AppShell.Main
         h={

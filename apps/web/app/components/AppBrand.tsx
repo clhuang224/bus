@@ -2,8 +2,13 @@ import { Flex, Image, Title } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
+interface PropType {
+  /** White text for the dark mobile banner. */
+  inverted?: boolean
+}
+
 /** The site heading: the product mark and name, linking to the home page. */
-export const AppBrand = () => {
+export const AppBrand = ({ inverted = false }: PropType) => {
   const { t } = useTranslation()
 
   return (
@@ -12,7 +17,8 @@ export const AppBrand = () => {
       to="/"
       align="center"
       gap="xs"
-      style={{ color: 'inherit', textDecoration: 'none' }}
+      c={inverted ? 'white' : 'brand.8'}
+      style={{ textDecoration: 'none' }}
     >
       <Image
         src={`${import.meta.env.BASE_URL}favicon.svg`}
@@ -20,7 +26,12 @@ export const AppBrand = () => {
         w={32}
         h={32}
       />
-      <Title order={1} size="h3" style={{ whiteSpace: 'nowrap' }}>
+      <Title
+        order={1}
+        size="h3"
+        c="inherit"
+        style={{ whiteSpace: 'nowrap', letterSpacing: '0.08em' }}
+      >
         {t('app.name')}
       </Title>
     </Flex>

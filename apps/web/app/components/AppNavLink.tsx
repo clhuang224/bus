@@ -36,7 +36,10 @@ export const AppNavLink = (props: AppNavLinkPropType) => {
         </Flex>
       }
       active={isActive}
-      style={{ pointerEvents: isActive ? 'none' : 'auto' }}
+      style={{
+        borderRadius: 'var(--mantine-radius-xl)',
+        pointerEvents: isActive ? 'none' : 'auto',
+      }}
       w="auto"
     />
   )
