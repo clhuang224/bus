@@ -198,29 +198,32 @@ The project aims to run on the free TDX basic membership (5 requests per minute 
 
 ### Product Name
 
-The working name, Finding the Bus (FTB), is a deliberate pun on Finding Nemo. The joke may not land with every user, and it does not say what the app does, so the project needs a proper name before wider release.
+The product is called 找找公車 in Traditional Chinese and keeps Finding the Bus in English. The English name was a pun on Finding Nemo, which not every user will catch; the Chinese name says plainly what the app is for while keeping a light tone. The domain stays `bus.lynns.me`.
 
-A good name should:
+Only the Chinese user-facing name changes: the `app.name` value in the zh-TW locale, which sets the page title and the site heading, and the title of `docs/README.zh-TW.md`. English names stay as they are, including `FTBError`, the `FTB API` titles, the Worker name, the `@bus/*` packages, and the repository.
 
-- say or hint that the app is about Taiwan buses: route search, arrival times, and nearby stops
-- work in both Traditional Chinese and English, since the app supports both
-- be short and easy to say, type, and search for
-- not clash with existing bus apps or services in Taiwan
-- have a usable domain or subdomain; the app currently lives at `bus.lynns.me`
+### Visual Identity
 
-Where the name appears today:
+The app currently has little visual identity:
 
-- user-facing: the web app title (`app.name` in both locale files), the root READMEs, and the API documentation title in `apps/api/src/main.ts`
-- docs: the opening line of `AGENTS.md`, the web and API READMEs, and the `FTB API` titles
-- code and infrastructure: the `FTBError` class in the API, and the Worker name `finding-the-bus-tdx-proxy`; renaming the Worker changes its URL, so the web build's `VITE_PROXY_API_BASE_URL` must change with it
-- names that can stay as they are: the `@bus/*` package scope and the `bus` repository
+- No part of the interface shows the product name. The desktop header holds only the navigation links and the settings button, and mobile has no header at all.
+- No page has an `h1`. Page titles such as 搜尋公車 are `h3`.
+- The theme uses Mantine's default cyan as the only brand color.
+- The theme sets Open Sans, but the page loads Inter, so neither font is actually used, and Chinese text falls back to the system font.
+- The only brand mark is the favicon: a white bus on a cyan circle.
 
-Steps:
+The work is split into steps so each one can be reviewed on its own:
 
-1. Collect candidate names in Chinese and English.
-2. Check each against existing apps, search results, and domain availability.
-3. Decide the Chinese and English names and record them here.
-4. Rename user-facing text and docs in one change. Rename code identifiers and the Worker separately, since the Worker rename is a deployment change.
+1. **Site heading.** Show the product name as the page's `h1`, with the favicon mark beside it, and lower page titles to `h2`. On desktop, the heading sits at the left of the header, before the navigation links. On mobile, a new top banner holds the heading and the settings button, which replaces the floating settings button. Layout heights that depend on the header, such as the drawer offset, must follow the new banner height.
+2. **Name.** Change the zh-TW `app.name` to 找找公車 and update the Chinese README title.
+3. **Color and type.** Choose a brand color palette for Mantine and the map, and fix the font setup so the theme and the loaded fonts agree, including a font for Chinese.
+4. **Brand mark.** Redraw the favicon as a logo that also works next to the site heading, and use it for the PNG favicon and app icons.
+5. **Surfaces.** Apply the palette to the header, the mobile banner, the bottom navigation, cards, empty states, and map markers, and check that contrast stays readable.
+
+Decisions needed before step 3:
+
+- the brand color: keep cyan as the base, or pick another color, such as one closer to Taiwan bus signage
+- the Chinese font: a web font such as Noto Sans TC, which adds download size, or the system font stack
 
 ## Backlog
 
