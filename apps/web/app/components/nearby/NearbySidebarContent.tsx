@@ -83,7 +83,12 @@ const NearbySidebarContentDetail = ({
         >
           <RiArrowLeftSLine size={18} />
         </ActionIcon>
-        <Title order={4} style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
+        <Title
+          order={2}
+          size="h4"
+          style={{ flex: 1, minWidth: 0 }}
+          lineClamp={1}
+        >
           {getLocalizedText(detailState.station!.name, locale)}
         </Title>
         {stationBearingLabel && (

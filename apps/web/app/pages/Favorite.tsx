@@ -34,7 +34,9 @@ export default function Favorite() {
   return (
     <Flex justify="center" h="100%">
       <Stack p={APP_PAGE_PADDING} w="100%" maw={720} h="100%" gap="md">
-        <Title order={3}>{t('pages.favorite.title')}</Title>
+        <Title order={2} size="h3">
+          {t('pages.favorite.title')}
+        </Title>
         {sortedFavoriteRouteStops.length === 0 ? (
           <BaseAlert {...favoriteMessages.emptyFavoriteRouteStops} />
         ) : (

@@ -60,12 +60,14 @@ export default function Settings() {
               </ActionIcon>
             )}
             <Stack gap={4}>
-              <Title order={3}>{t('pages.settings.title')}</Title>
+              <Title order={2} size="h3">
+                {t('pages.settings.title')}
+              </Title>
             </Stack>
           </Flex>
           <Card withBorder radius="md" p="md">
             <Stack gap="xs">
-              <Title order={5}>
+              <Title order={3} size="h5">
                 {t('pages.settings.languageSectionTitle')}
               </Title>
               <Radio.Group
@@ -92,7 +94,7 @@ export default function Settings() {
           </Card>
           <Card withBorder radius="md" p="md">
             <Stack gap="xs">
-              <Title order={5}>
+              <Title order={3} size="h5">
                 {t('pages.settings.analyticsSectionTitle')}
               </Title>
               <Text size="sm" c="dimmed">

@@ -46,7 +46,9 @@ export default function Routes() {
       <Card p={APP_PAGE_PADDING} w="100%" maw={720} h="100%" withBorder={false}>
         <Stack gap="md" h="100%">
           <Stack gap={4}>
-            <Title order={3}>{t('pages.routes.title')}</Title>
+            <Title order={2} size="h3">
+              {t('pages.routes.title')}
+            </Title>
           </Stack>
           <Flex gap="sm" align="stretch">
             <AreaSelect value={area} onChange={setArea} />
@@ -59,7 +61,7 @@ export default function Routes() {
           >
             <Stack gap="sm">
               {showRecentRoutesTitle && (
-                <Title order={5}>
+                <Title order={3} size="h5">
                   {t('pages.routes.recentViewedRoutesTitle')}
                 </Title>
               )}

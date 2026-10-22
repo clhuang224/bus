@@ -1,4 +1,4 @@
-import { ActionIcon, AppShell, Flex, useMantineTheme } from '@mantine/core'
+import { AppShell, Flex, useMantineTheme } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import {
   RiHeart3Fill,
@@ -13,12 +13,13 @@ import {
 import { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
-import { Outlet, useLocation, useNavigate } from 'react-router'
+import { Outlet } from 'react-router'
+import { AppBrand } from '~/components/AppBrand'
 import { AppNavLink } from '~/components/AppNavLink'
 import {
-  APP_FLOATING_ACTION_OFFSET,
   APP_FOOTER_HEIGHT,
   APP_HEADER_HEIGHT,
+  APP_MOBILE_HEADER_HEIGHT,
 } from '~/modules/consts/layout'
 import { useWatchGeo } from '~/modules/hooks/app/useWatchGeo'
 import { useGoogleAnalytics } from '~/modules/hooks/app/useGoogleAnalytics'
@@ -27,8 +28,6 @@ import type { AppDispatch, RootState } from '~/modules/store'
 
 export default function AppLayout() {
   const dispatch = useDispatch<AppDispatch>()
-  const location = useLocation()
-  const navigate = useNavigate()
   const { t } = useTranslation()
 
   const theme = useMantineTheme()
@@ -69,7 +68,6 @@ export default function AppLayout() {
     }),
     [t],
   )
-  const isSettingsPage = location.pathname === settingNav.path
 
   useWatchGeo()
   useGoogleAnalytics()
@@ -81,12 +79,13 @@ export default function AppLayout() {
 
   return (
     <AppShell
-      header={{ height: isSm ? 0 : APP_HEADER_HEIGHT }}
+      header={{ height: isSm ? APP_MOBILE_HEADER_HEIGHT : APP_HEADER_HEIGHT }}
       footer={{ height: isSm ? APP_FOOTER_HEIGHT : 0 }}
     >
-      <AppShell.Header p="md" visibleFrom="sm">
-        <Flex align="center" gap="md">
-          <Flex align="center" gap="md">
+      <AppShell.Header px="md">
+        <Flex align="center" gap="xl" h="100%">
+          <AppBrand />
+          <Flex align="center" gap="md" visibleFrom="sm">
             {options.map((option) => (
               <AppNavLink
                 key={option.path}
@@ -108,26 +107,11 @@ export default function AppLayout() {
       <AppShell.Main
         h={
           isSm
-            ? `calc(100vh - ${APP_FOOTER_HEIGHT}px)`
+            ? `calc(100vh - ${APP_MOBILE_HEADER_HEIGHT + APP_FOOTER_HEIGHT}px)`
             : `calc(100vh - ${APP_HEADER_HEIGHT}px)`
         }
       >
         <Outlet />
-        {isSm && !isSettingsPage && (
-          <ActionIcon
-            onClick={() => navigate(settingNav.path)}
-            aria-label={settingNav.name}
-            variant="white"
-            bdrs={99}
-            size="md"
-            pos="absolute"
-            top={APP_FLOATING_ACTION_OFFSET}
-            right={APP_FLOATING_ACTION_OFFSET}
-            style={{ zIndex: 'calc(var(--app-shell-header-z-index, 100) + 1)' }}
-          >
-            {settingNav.icon}
-          </ActionIcon>
-        )}
       </AppShell.Main>
       <AppShell.Footer p="sm" hiddenFrom="sm">
         <Flex justify="space-around" align="center" gap="md">
