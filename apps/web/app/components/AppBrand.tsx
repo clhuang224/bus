@@ -14,7 +14,12 @@ export const AppBrand = () => {
       gap="xs"
       style={{ color: 'inherit', textDecoration: 'none' }}
     >
-      <Image src="/favicon.svg" alt="" w={32} h={32} />
+      <Image
+        src={`${import.meta.env.BASE_URL}favicon.svg`}
+        alt=""
+        w={32}
+        h={32}
+      />
       <Title order={1} size="h3" style={{ whiteSpace: 'nowrap' }}>
         {t('app.name')}
       </Title>
