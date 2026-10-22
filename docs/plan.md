@@ -220,10 +220,25 @@ The work is split into steps so each one can be reviewed on its own:
 4. **Brand mark.** Redraw the favicon as a logo that also works next to the site heading, and use it for the PNG favicon and app icons.
 5. **Surfaces.** Apply the palette to the header, the mobile banner, the bottom navigation, cards, empty states, and map markers, and check that contrast stays readable.
 
-Decisions needed before step 3:
+Decisions for steps 3 to 5:
 
-- the brand color: keep cyan as the base, or pick another color, such as one closer to Taiwan bus signage
-- the Chinese font: a web font such as Noto Sans TC, which adds download size, or the system font stack
+- **Font.** Use jf open huninn (jf 粉圓), loaded as Huninn from Google Fonts, which splits it by character range so a page only downloads the characters it shows. It has one weight, so headings get their emphasis from size and color rather than bold.
+- **Palette.** Five colors: `#086788`, `#07a0c3`, `#f0c808`, `#fff1d0`, and `#dd1c1a`. All are highly saturated, and they fall into two groups:
+  - Cool, hue about 193°: `#086788` (lightness 28%) and `#07a0c3` (40%) share a hue and differ only in lightness, so they work as ink and primary color.
+  - Warm: `#f0c808` (hue 50°) and `#fff1d0` (42°) are a yellow and its pale tint, and `#dd1c1a` (1°) is the alert color.
+- **Color roles.** Cool colors mark the structure of a route, and warm colors mark what moves or needs attention:
+
+  | Role                                             | Color                                               |
+  | ------------------------------------------------ | --------------------------------------------------- |
+  | Text, headings, route lines, mobile banner       | `#086788`                                           |
+  | Primary actions, active navigation, route badges | `#07a0c3`                                           |
+  | Stops                                            | white with a `#07a0c3` outline                      |
+  | Vehicles and realtime cues                       | `#f0c808` with `#086788` text                       |
+  | Highlighted stop, favorites, errors              | `#dd1c1a`                                           |
+  | Page background, city badges                     | tints of `#fff1d0`                                  |
+  | Neutral gray                                     | low-saturation tints of the cool hue, not pure gray |
+
+- **Contrast.** White text works on `#086788` (6.4:1) and `#dd1c1a` (4.9:1), but on `#07a0c3` (3.1:1) only for large or bold text and icons. Text on `#f0c808` uses `#086788` or darker.
 
 ## Backlog
 
