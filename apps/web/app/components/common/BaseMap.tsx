@@ -101,7 +101,6 @@ const BaseMap = ({
 
     const el = createMapMarkerElement({
       ariaLabel: t('components.baseMap.userLocationMarkerAriaLabel'),
-      // A soft halo in the primary color around the location dot.
       boxShadow: '0 0 0 6px rgba(7, 160, 195, 0.25)',
       type: 'user',
     })

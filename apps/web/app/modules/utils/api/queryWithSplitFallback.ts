@@ -18,11 +18,6 @@ interface QueryArrayWithSplitFallbackOptions<
   shouldFallback?: (error: TError) => boolean
 }
 
-/**
- * A request URL that is too long. TDX and the Worker proxy answer 414, while
- * the Vite dev server proxy rejects long URLs earlier with 431, since Node
- * counts the request line toward its header size limit.
- */
 function isRequestTooLongStatus(status: unknown): boolean {
   return status === 414 || status === 431
 }
@@ -45,10 +40,6 @@ function defaultShouldFallback<TError extends QueryErrorLike>(
   )
 }
 
-/**
- * Queries all items in one request, and splits the items in half and retries
- * while the request is rejected for being too long.
- */
 export async function queryArrayWithSplitFallback<
   TItem,
   TData,

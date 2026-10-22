@@ -31,7 +31,6 @@ vi.mock('~/modules/apis/transit', () => ({
 
 const t = i18n.getFixedT(AppLocaleType.ZH_TW)
 
-// Stop A is visited twice, as on loop routes.
 const subRoute = {
   id: 'subroute-1-1',
   stops: [
@@ -132,7 +131,6 @@ describe('useRouteRealtimeData', () => {
 
     expect(result.current.isRealtimeRateLimited).toBe(true)
 
-    // The API keeps a failed snapshot for 5 seconds.
     act(() => {
       vi.advanceTimersByTime(5000)
     })

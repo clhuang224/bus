@@ -17,10 +17,6 @@ export class TdxClientConfigError extends Error {
   }
 }
 
-/**
- * Owns the TDX access token. Sync and realtime requests use the same TDX key,
- * so they share one token and one refresh at a time.
- */
 @Injectable()
 export class TdxAuthService {
   private accessToken: string | null = null
@@ -47,7 +43,6 @@ export class TdxAuthService {
     }
   }
 
-  /** Forgets a token that TDX rejected, unless it was already replaced. */
   clearAccessToken(rejectedToken: string): void {
     if (this.accessToken !== rejectedToken) return
 

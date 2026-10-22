@@ -3,11 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
 interface PropType {
-  /** White text for the dark mobile banner. */
   inverted?: boolean
 }
 
-/** The site heading: the product mark and name, linking to the home page. */
 export const AppBrand = ({ inverted = false }: PropType) => {
   const { t } = useTranslation()
 

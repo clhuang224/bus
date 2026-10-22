@@ -125,10 +125,6 @@ function getSubRouteKey(
   return `${subRoute.SubRouteUID}-${subRoute.Direction}`
 }
 
-/**
- * Groups route directions by the station they stop at. Terminal names come
- * from `routes`; pass null when only route names are needed.
- */
 export function toNearbyStationRoutesFromTdx(
   stopOfRoutes: StopOfRoute[],
   routes: BusRoute<string>[] | null,

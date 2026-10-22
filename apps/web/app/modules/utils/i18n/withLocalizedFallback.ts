@@ -9,10 +9,6 @@ export const EMPTY_LOCALIZED_TEXT: LocalizedText = {
   [AppLocaleType.KO]: '',
 }
 
-/**
- * Builds text that renders as `primary` in each locale, or as `fallback` when
- * `primary` has nothing to show for that locale.
- */
 export function withLocalizedFallback(
   primary: LocalizedText,
   fallback: LocalizedText,

@@ -8,9 +8,6 @@ import type {
 } from '../types/tdx/index.js'
 import { getEnumValues } from '../utils/getEnumValues.js'
 
-// Realtime records are checked one by one so that a single malformed record
-// is skipped instead of failing the whole response.
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
@@ -33,7 +30,6 @@ function isNonEmptyString(value: unknown): value is string {
 
 const DIRECTION_VALUES = new Set<unknown>(getEnumValues(DirectionType))
 
-/** Only the directions TDX defines, including 255 for unknown. */
 function isDirection(value: unknown): value is DirectionType {
   return DIRECTION_VALUES.has(value)
 }
@@ -105,10 +101,6 @@ export function isTdxRealtimeByFrequency(
   )
 }
 
-/**
- * TDX only defines departed (0) and arriving (1). Other numbers are treated
- * as a missing A2EventType, so the vehicle is kept without an event.
- */
 export function normalizeTdxRealtimeNearStop(
   nearStop: TdxRealtimeNearStop,
 ): TdxRealtimeNearStop {

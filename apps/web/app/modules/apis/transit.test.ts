@@ -84,7 +84,6 @@ vi.mock('./bus', () => ({
   },
 }))
 
-/** Mimics a source endpoint's initiate() thunk and its unwrap() result. */
 function sourceResult(result: { data: unknown } | { error: unknown }) {
   return () => () => ({
     abort: () => {},

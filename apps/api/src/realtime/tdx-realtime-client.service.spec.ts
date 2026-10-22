@@ -27,10 +27,6 @@ class ShortTimeoutClient extends TdxRealtimeClientService {
   protected override readonly requestTimeoutMs = 50
 }
 
-/**
- * A response whose headers arrive but whose body never finishes. Like a real
- * fetch, aborting the request signal errors the body stream.
- */
 function stalledResponse(signal: AbortSignal | null | undefined) {
   return new Response(
     new ReadableStream({

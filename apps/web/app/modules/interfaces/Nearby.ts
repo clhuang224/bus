@@ -29,9 +29,5 @@ export type NearbyStationRoutesMap = Record<string, NearbyStationRoute[]>
 
 export interface NearbyStationsResult {
   stations: NearbyStation[]
-  /**
-   * Routes that arrived with the stations, or null when the data source loads
-   * station routes separately through `getNearbyStationRoutes`.
-   */
   routesByStationId: NearbyStationRoutesMap | null
 }

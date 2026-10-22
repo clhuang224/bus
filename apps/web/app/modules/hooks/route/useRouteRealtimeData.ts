@@ -23,9 +23,8 @@ import { normalizePlateNumb } from '~/modules/utils/route/normalizePlateNumb'
 
 const REALTIME_POLLING_INTERVAL = 30000
 const REALTIME_INITIAL_DELAY_MS = 1200
-// Longer than the 5 seconds the API caches a failed snapshot, so the retry
-// gets a fresh result in local API mode.
-const REALTIME_RATE_LIMIT_BACKOFF_MS = 6000
+const API_FAILED_SNAPSHOT_CACHE_MS = 5000
+const REALTIME_RATE_LIMIT_BACKOFF_MS = API_FAILED_SNAPSHOT_CACHE_MS + 1000
 
 type RealtimeStop = Pick<RouteDetailStop, 'stopUID' | 'sequence'>
 
@@ -43,11 +42,6 @@ const REALTIME_INFO_STATES: Partial<
   [RouteRealtimeStatus.NO_SERVICE]: RouteRealtimeInfoState.NO_SERVICE,
 }
 
-/**
- * Arrivals keyed by stop sequence. Realtime stops come in the sub-route's
- * stop order, and a stop can appear twice, so each visit is matched by its
- * stop ID and how many times the stop appeared before it.
- */
 function getArrivalsByStopSequence(
   stops: RealtimeStop[],
   realtimeStops: ApiRouteRealtimeStop[],
@@ -91,8 +85,6 @@ export function useRouteRealtimeData(
   const [isRealtimeReady, setIsRealtimeReady] = useState(false)
   const hasOptions = options != null
 
-  // Wait briefly after the route loads so realtime requests do not burst
-  // together with the route detail requests.
   useEffect(() => {
     setIsRealtimeReady(false)
 
@@ -128,8 +120,6 @@ export function useRouteRealtimeData(
   const isRealtimeRateLimited =
     realtimeStatus === RouteRealtimeStatus.RATE_LIMITED
 
-  // Retry once shortly after a rate limit instead of waiting for the next
-  // poll. If the retry is limited again, regular polling takes over.
   useEffect(() => {
     if (!isRealtimeRateLimited) return
 
@@ -213,7 +203,6 @@ export function useRouteRealtimeData(
     )
   }, [realtimeSubRoute, subRoute, t])
 
-  // A failed refresh keeps showing the last realtime data it has.
   const hasRealtimeError =
     (isError && !routeRealtime) ||
     realtimeStatus === RouteRealtimeStatus.UNAVAILABLE

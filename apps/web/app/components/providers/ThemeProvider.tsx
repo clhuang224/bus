@@ -9,9 +9,6 @@ import {
   type VariantColorsResolver,
 } from '@mantine/core'
 
-// Each palette keeps the hue of one brand color and steps through lightness.
-// Brand: #07a0c3 (6) and #086788 (8). Sun: #f0c808 (6). Cherry: #dd1c1a (6).
-// Cream: #fff1d0 (2). Gray is a low-saturation tint of the brand hue.
 const brand: MantineColorsTuple = [
   '#ecfafe',
   '#cff3fc',
@@ -76,8 +73,6 @@ const gray: MantineColorsTuple = [
 const FONT_FAMILY =
   "Huninn, system-ui, -apple-system, 'PingFang TC', 'Microsoft JhengHei', sans-serif"
 
-// Yellow is too light for text on its own light tint, so its light
-// variant uses the darkest shade for text instead.
 const LIGHT_TEXT_COLORS = new Set(['sun'])
 
 const variantColorResolver: VariantColorsResolver = (input) => {
@@ -87,7 +82,6 @@ const variantColorResolver: VariantColorsResolver = (input) => {
     theme: input.theme,
   })
 
-  // A translucent cream tint looks dull, so cream badges use a solid shade.
   if (input.variant === 'light' && color === 'cream') {
     return {
       ...colors,
@@ -111,7 +105,6 @@ const variantColorResolver: VariantColorsResolver = (input) => {
 
 const theme = createTheme({
   fontFamily: FONT_FAMILY,
-  // Huninn has a single weight, so headings stand out by size and color.
   headings: { fontFamily: FONT_FAMILY, fontWeight: '400' },
   colors: { brand, sun, cherry, cream, gray },
   primaryColor: 'brand',
@@ -127,7 +120,6 @@ const theme = createTheme({
 
 const cssVariablesResolver: CSSVariablesResolver = () => ({
   variables: {},
-  // The palette's own cream, not a paler tint, which reads as off-white.
   light: { '--mantine-color-body': cream[2] },
   dark: {},
 })

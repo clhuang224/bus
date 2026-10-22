@@ -22,7 +22,6 @@ import type {
 export interface RealtimeRouteStop {
   uuid: string
   tdxStopId: string
-  /** Position in the sub-route; a stop can appear more than once. */
   sequence: number
 }
 
@@ -34,7 +33,6 @@ export interface RealtimeRouteSubRoute {
 }
 
 export interface RealtimeRoute {
-  /** Route UUID, which equals the TDX RouteUID. */
   uuid: string
   subRoutes: RealtimeRouteSubRoute[]
 }
@@ -53,7 +51,6 @@ interface Arrival {
   plateNumber: string | null
   stopUID: string | null
   stopID: string | null
-  /** Null when TDX sends the ETA for the whole route. */
   subRouteUID: string | null
   direction: DirectionType
   sequence: number | null
@@ -78,7 +75,6 @@ const OUT_OF_SERVICE_STOP_STATUSES = [
   TdxStopStatus.NOT_IN_SERVICE_TODAY,
 ]
 
-/** Stop statuses that say nothing useful about a vehicle already running. */
 const VEHICLE_FALLBACK_STOP_STATUSES = [
   TdxStopStatus.NOT_YET_DEPARTED,
   TdxStopStatus.LAST_BUS_PASSED,
@@ -90,10 +86,6 @@ const IN_SERVICE_ARRIVAL: ApiRealtimeArrival = {
   minutes: null,
 }
 
-/**
- * Turns one route's TDX realtime feeds into what each sub-route should show:
- * an arrival per stop, the vehicles with their arrival, and a status message.
- */
 export function calculateRouteRealtime(
   route: RealtimeRoute,
   sources: RealtimeSources,
@@ -128,8 +120,6 @@ function calculateSubRoute(
       nearStop.SubRouteUID === subRoute.tdxSubRouteUid &&
       nearStop.Direction === subRoute.direction,
   )
-  // ETAs without a known direction belong to buses that have not left yet,
-  // so they never describe a vehicle on the road.
   const nearStopVehicles = getNearStopVehicles(
     activeNearStops,
     activeArrivals.filter(hasKnownDirection),
@@ -161,7 +151,6 @@ function toArrival(arrival: TdxEstimatedArrival): Arrival {
       : null,
     stopUID: arrival.StopUID ?? null,
     stopID: arrival.StopID ?? null,
-    // TDX omits SubRouteUID for some routes; those ETAs apply route-wide.
     subRouteUID: arrival.SubRouteUID ?? null,
     direction: arrival.Direction,
     sequence: arrival.StopSequence ?? null,
@@ -170,13 +159,6 @@ function toArrival(arrival: TdxEstimatedArrival): Arrival {
   }
 }
 
-/**
- * Status shared by every sub-route when a feed failure hides realtime data, or
- * null when the sub-route's own service state decides. ETA failures and
- * near-stop rate limits always count; other near-stop failures only count when
- * no ETA is available. Rate limits win over failures. GPS failures are left
- * out: arrivals stay usable without positions.
- */
 function getRouteSourceStatus(
   sources: RealtimeSources,
   arrivalCount: number,
@@ -197,14 +179,6 @@ function getRouteSourceStatus(
     : null
 }
 
-/**
- * ETAs for this sub-route. TDX can tag a sub-route's ETAs with an unknown
- * direction, usually for buses that have not left yet; they still belong to
- * the sub-route. When TDX has no ETAs for the sub-route, route-level ETAs in
- * the same direction apply, and stops pick them up by stop ID. ETAs tagged
- * with another sub-route never apply, since a short trip would otherwise show
- * the full route's buses.
- */
 function getActiveArrivals(
   subRoute: RealtimeRouteSubRoute,
   arrivals: Arrival[],
@@ -247,13 +221,6 @@ function getServiceStatus(
     : RouteRealtimeStatus.NO_REALTIME_DATA
 }
 
-/**
- * Picks one ETA per stop. Stops match by StopUID or TDX StopID together with
- * the stop sequence, so a stop visited twice gets each visit's own ETA. When
- * no ETA has the same sequence, the stop falls back to any ETA for it.
- * Among several candidates, ETAs with a known direction win, then sooner
- * countdowns; ETAs without a countdown follow in stop order.
- */
 function getStopArrivals(
   stops: RealtimeRouteStop[],
   activeArrivals: Arrival[],
@@ -389,11 +356,6 @@ function getNearStopVehicles(
     })
 }
 
-/**
- * App stop UUID for a near-stop record. TDX may send only StopID, so stops
- * are matched by either identifier, preferring the visit with the same
- * sequence. Returns null when neither identifier is known.
- */
 function resolveStopUuid(
   nearStop: TdxRealtimeNearStop,
   stops: RealtimeRouteStop[],
@@ -423,11 +385,6 @@ function toVehicleState(
   }
 }
 
-/**
- * The ETA that describes a vehicle. A vehicle that already left its stop
- * should show the next stop's countdown; otherwise the current stop's ETA is
- * the best match, then the ETA tagged with the same plate.
- */
 function getVehicleArrival(
   nearStop: TdxRealtimeNearStop,
   plateNumber: string,
@@ -442,7 +399,6 @@ function getVehicleArrival(
     (!!nearStop.StopID && arrival.stopID === nearStop.StopID)
   const isSameSequence = (arrival: Arrival) =>
     arrival.sequence != null && arrival.sequence === nearStop.StopSequence
-  // A stop can be visited twice, so stop plus sequence is the surest match.
   const stopArrival =
     activeArrivals.find(
       (arrival) => isSameStop(arrival) && isSameSequence(arrival),
@@ -475,12 +431,6 @@ function toVehicleApiArrival(arrival: Arrival | undefined): ApiRealtimeArrival {
   return toApiArrival(arrival.estimateSeconds, arrival.stopStatus)
 }
 
-/**
- * Adds GPS positions to vehicles near a stop, then appends vehicles that only
- * appear in the GPS feed. A vehicle already near a stop of this sub-route can
- * use a GPS record that omits the sub-route or direction, as long as nothing
- * contradicts it; a GPS-only vehicle needs both to match.
- */
 function withPositions(
   nearStopVehicles: NearStopVehicle[],
   subRoute: RealtimeRouteSubRoute,
