@@ -1,4 +1,4 @@
-# Finding the Bus
+# 找找公車
 
 [English](../README.md) | [繁體中文](./README.zh-TW.md)
 
@@ -65,7 +65,7 @@ pnpm run dev
 pnpm run dev:mobile
 ```
 
-如果要搭配 NestJS API 和 PostgreSQL 資料庫開發，可以使用 local API 模式。這個模式會一併啟動 API，前端的路線、站牌、站位與即時資料都改由 API 提供：
+如果要搭配 NestJS API 和 PostgreSQL 資料庫開發，可以使用 local API 模式。這個模式會啟動 API 而不是 TDX proxy，前端的路線、站牌、站位與即時資料都改由 API 提供：
 
 ```bash
 pnpm run dev:api

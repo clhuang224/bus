@@ -1,4 +1,3 @@
-/** `StopStatus` values from TDX `EstimatedTimeOfArrival`. */
 export enum TdxStopStatus {
   NORMAL = 0,
   NOT_YET_DEPARTED = 1,

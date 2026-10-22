@@ -19,24 +19,10 @@ import {
 
 const TDX_BUS_BASE_URL = 'https://tdx.transportdata.tw/api/basic/v2/Bus'
 const REQUESTS_PER_SECOND_ENV = 'TDX_REALTIME_REQUESTS_PER_SECOND'
-/**
- * The TDX key allows 5 requests per second, shared with sync and the TDX
- * proxy, which this limiter cannot see. Leave headroom for them by default;
- * raise it once the proxy no longer uses the key.
- */
 const DEFAULT_REQUESTS_PER_SECOND = 3
 const RATE_LIMIT_COOLDOWN_MS = 3 * 1000
-/**
- * Requests wait at most about this long for a per-second slot. Beyond that,
- * new requests fail fast as rate limited instead of piling up in memory and
- * reaching TDX after their callers have gone.
- */
 const MAX_QUEUE_WAIT_SECONDS = 3
 const REQUEST_TIMEOUT_MS = 10 * 1000
-/**
- * ETA responses are the largest feed and TDX also bills by volume, so only
- * the fields the realtime calculator reads are requested.
- */
 const ESTIMATED_ARRIVAL_FIELDS = [
   'PlateNumb',
   'StopUID',
@@ -51,7 +37,6 @@ const ESTIMATED_ARRIVAL_FIELDS = [
 
 interface TdxResponse {
   status: number
-  /** Parsed JSON for a successful response; null otherwise. */
   payload: unknown
 }
 
@@ -62,11 +47,6 @@ class TdxRateLimitedError extends Error {
   }
 }
 
-/**
- * Calls TDX realtime endpoints for one route. Unlike sync requests, these are
- * not logged to the database or counted against the sync quota; an in-memory
- * per-second limit and a short cooldown after `429` keep the shared key safe.
- */
 @Injectable()
 export class TdxRealtimeClientService {
   private readonly logger = new Logger(TdxRealtimeClientService.name)
@@ -188,10 +168,6 @@ export class TdxRealtimeClientService {
     return response.payload
   }
 
-  /**
-   * Sends one request and reads its body under the same timeout, so a
-   * response that stalls after its headers cannot hang the snapshot.
-   */
   private async request(url: URL, accessToken: string): Promise<TdxResponse> {
     await this.waitForRequestSlot(url.pathname)
 
@@ -207,7 +183,6 @@ export class TdxRealtimeClientService {
       })
 
       if (!response.ok) {
-        // Release the connection; error bodies are not used.
         await response.body?.cancel()
         return { status: response.status, payload: null }
       }
@@ -225,10 +200,6 @@ export class TdxRealtimeClientService {
     }
   }
 
-  /**
-   * Waits until a request fits the per-second limit, one caller at a time.
-   * Rejects at once when the queue already holds the maximum wait.
-   */
   private waitForRequestSlot(path: string): Promise<void> {
     if (
       this.queuedRequestCount >=
@@ -240,8 +211,6 @@ export class TdxRealtimeClientService {
     this.queuedRequestCount += 1
 
     const slot = this.requestQueue.then(async () => {
-      // Another request may hit a 429 while this one waits, so the cooldown
-      // and the one-second window are checked again after every wait.
       for (;;) {
         if (Date.now() < this.cooldownUntil) {
           throw new TdxRateLimitedError(path)
@@ -266,7 +235,6 @@ export class TdxRealtimeClientService {
       this.queuedRequestCount -= 1
     })
 
-    // A failed slot must not block the callers queued behind it.
     this.requestQueue = settledSlot.catch(() => undefined)
 
     return settledSlot

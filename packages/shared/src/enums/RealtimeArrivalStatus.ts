@@ -1,16 +1,11 @@
-/** How to present an arrival estimate for a stop or a vehicle. */
 export enum RealtimeArrivalStatus {
-  /** Arrives within a minute. */
   COMING_SOON = 'coming_soon',
-  /** Arrives in `minutes` minutes. */
   MINUTES = 'minutes',
-  /** In normal service, but no countdown is available. */
   NO_ESTIMATE = 'no_estimate',
   NOT_YET_DEPARTED = 'not_yet_departed',
   NO_STOP_DUE_TO_TRAFFIC_CONTROL = 'no_stop_due_to_traffic_control',
   LAST_BUS_PASSED = 'last_bus_passed',
   NOT_IN_SERVICE_TODAY = 'not_in_service_today',
   UNKNOWN = 'unknown',
-  /** Vehicles only: the vehicle is running but has no usable estimate. */
   IN_SERVICE = 'in_service',
 }

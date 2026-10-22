@@ -6,7 +6,7 @@ Paths in this document are relative to `apps/web/`. For example, `app/pages/` me
 
 Use this as the default guide for new work. When a change touches multiple areas, prefer keeping the structure and naming consistent with the patterns described here instead of introducing a new local style.
 
-Keep `apps/web/README.md` focused on frontend product overview, setup, and usage. Small implementation conventions and team-facing coding notes should live in this file or code-local comments instead of being added to the README.
+Keep `apps/web/README.md` focused on frontend product overview, setup, and usage. Small implementation conventions and team-facing coding notes should live in this file instead of being added to the README.
 
 When updating `README.md`, prioritize:
 
@@ -409,6 +409,8 @@ When reviewing a UI block, ask:
 When working with Mantine components, prefer Mantine props, variants, spacing, radius, color, and layout primitives over custom `style` or `styles` overrides whenever the built-in API can express the same intent.
 
 Avoid ad hoc odd pixel values such as `11px` or `13px` unless there is a clear reason grounded in an existing design pattern or third-party constraint. Prefer consistent Mantine sizing, spacing tokens, or even-numbered pixel values when custom sizing is still needed.
+
+`ThemeProvider` overrides Mantine's built-in `blue`, `orange`, `teal`, `yellow`, `red`, `pink`, and `gray` with validated palettes, so use those color names in components. Map code that needs raw values reads them from `MAP_COLORS` in `app/modules/consts/mapColors.ts`. Keep the color roles described in `docs/plan.md`: blue for the route and primary actions, orange for vehicles and realtime cues, teal for the highlighted stop, and red and yellow only for status messages.
 
 For badge-based route UI, keep badge semantics consistent across the app:
 

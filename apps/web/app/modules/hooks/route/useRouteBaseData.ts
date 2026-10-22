@@ -51,8 +51,6 @@ export function useRouteBaseData(options: UseRouteBaseDataOptions | null) {
   const isFavoriteRouteStop = options?.isFavoriteRouteStop ?? (() => false)
   const locationState = options?.locationState
 
-  // currentData stays empty while another route loads, so the page never
-  // shows the previous route's stops under the new URL.
   const {
     currentData: routeDetail,
     error,

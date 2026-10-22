@@ -1,6 +1,7 @@
 import { Box, Group } from '@mantine/core'
 import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeBusStatus'
 import { RouteRealtimeBadge } from './RouteRealtimeBadge'
+import { ROUTE_STOP_BULLET_SIZE } from '~/modules/consts/layout'
 
 interface PropType {
   realtimeBuses: RouteRealtimeBusStatus[]
@@ -19,7 +20,7 @@ export function RouteRealtimeGap({
   selectedVehicleId = null,
 }: PropType) {
   return (
-    <Box mih={28} pr="sm">
+    <Box mih={ROUTE_STOP_BULLET_SIZE} pr="sm">
       <Group wrap="nowrap" justify="space-between" align="flex-start">
         <Box style={{ flex: 1, minWidth: 0 }} />
         <Group

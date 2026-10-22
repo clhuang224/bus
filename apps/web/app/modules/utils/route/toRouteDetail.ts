@@ -14,7 +14,6 @@ function getSubRouteId(subRouteUID: string, direction: DirectionType) {
   return `${subRouteUID}-${direction}`
 }
 
-/** Indexes items by sub-route ID, keeping the first item for each ID. */
 function indexBySubRouteId<
   T extends { SubRouteUID: string | null; Direction: DirectionType },
 >(items: T[]) {
@@ -30,7 +29,6 @@ function indexBySubRouteId<
   return result
 }
 
-/** Stop IDs to request positions for, in a stable order for caching. */
 export function getTdxRouteStopIds(
   routeUID: string,
   stopOfRoutes: StopOfRoute[],

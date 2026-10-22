@@ -33,7 +33,7 @@ export function RouteRealtimeBadge({
         leftSection={<RiBus2Fill size="1em" />}
         style={{
           boxShadow: isSelected
-            ? '0 0 0 1px rgba(245, 124, 0, 0.25), 0 2px 6px rgba(245, 124, 0, 0.18)'
+            ? '0 0 0 1px rgba(235, 104, 52, 0.35), 0 2px 6px rgba(235, 104, 52, 0.25)'
             : undefined,
           cursor: 'pointer',
           fontWeight: isSelected ? 700 : undefined,

@@ -31,8 +31,8 @@ pnpm --filter @bus/api start:dev
 
 在 macOS 執行時間較長的本地 sync 時，可以使用 `start:dev:awake`。一般的 `start:dev` 仍保留給跨平台開發與部署環境使用。
 
-Root 的 `pnpm run dev:api` 會同時啟動此 local API mode、web app 與 TDX
-proxy。啟動器會設定 `BUS_LOCAL_API_MODE=1`，讓 API 在讀取 `.env` 與
+Root 的 `pnpm run dev:api` 會同時啟動此 local API mode 與 web app。這個模式下
+前端所有資料都從 API 讀取，所以不會啟動 TDX proxy。啟動器會設定 `BUS_LOCAL_API_MODE=1`，讓 API 在讀取 `.env` 與
 `.env.local` 後，固定使用 port `3001`，並允許 Vite 的
 `http://localhost:5173` 與 `http://127.0.0.1:5173` origins。
 一般啟動方式仍使用設定中的 `PORT` 與 `CORS_ORIGINS`。

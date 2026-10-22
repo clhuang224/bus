@@ -269,7 +269,6 @@ const cityHallVehicle: ApiRouteRealtimeVehicle = {
   position: { latitude: 25.045, longitude: 121.58 },
 }
 
-/** Realtime for both sub-routes: only the return trip has a running bus. */
 function routeRealtimeOf({
   go = {},
   back = {},

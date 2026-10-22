@@ -40,14 +40,10 @@ export function getRouteRealtimeMessages(
       'gray',
       'messages.routeRealtime.loading',
     ),
-    error: buildRouteRealtimeMessage(
-      t,
-      'orange',
-      'messages.routeRealtime.error',
-    ),
+    error: buildRouteRealtimeMessage(t, 'red', 'messages.routeRealtime.error'),
     rateLimited: buildRouteRealtimeMessage(
       t,
-      'orange',
+      'yellow',
       'messages.routeRealtime.rateLimited',
     ),
     noService: buildRouteRealtimeMessage(

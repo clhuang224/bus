@@ -14,12 +14,7 @@ import { FTBError } from '../dto/ftb-error.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import { TdxRealtimeClientService } from './tdx-realtime-client.service.js'
 
-/**
- * TDX batch ETAs only change about once a minute, so a longer cache saves
- * requests and quota at the cost of some freshness for vehicle positions.
- */
 const SNAPSHOT_TTL_MS = 90 * 1000
-/** Retry sooner after a failed feed, without letting every poll hit TDX. */
 const FAILED_SNAPSHOT_TTL_MS = 5 * 1000
 
 interface Snapshot {
@@ -41,10 +36,6 @@ export class RealtimeService {
     private readonly tdxRealtimeClientService: TdxRealtimeClientService,
   ) {}
 
-  /**
-   * Returns a cached snapshot while it is fresh. Concurrent requests for the
-   * same route share one upstream fetch.
-   */
   async getRouteRealtime(uuid: string): Promise<ApiRouteRealtime> {
     const now = Date.now()
     const cached = this.snapshots.get(uuid)
@@ -105,7 +96,6 @@ export class RealtimeService {
         city: true,
         subroutes: {
           where: { is_active: true },
-          // Same order as the route detail endpoint.
           orderBy: [{ direction: 'asc' }, { uuid: 'asc' }],
           select: {
             uuid: true,

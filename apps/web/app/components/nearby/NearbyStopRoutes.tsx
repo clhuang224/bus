@@ -69,9 +69,6 @@ export const NearbyStopRoutes = ({
   if (isLoading) {
     return (
       <Stack gap="sm" style={{ flex: 1, minHeight: 0 }}>
-        <Text size="sm" c="dimmed">
-          {t('components.nearbyStopRoutes.title')}
-        </Text>
         <Tabs value={null}>
           <Tabs.List>
             <Tabs.Tab value="loading-go">{t('common.direction.go')}</Tabs.Tab>
@@ -95,9 +92,6 @@ export const NearbyStopRoutes = ({
   if (routeSections.length === 0) {
     return (
       <Stack gap={4}>
-        <Text size="sm" c="dimmed">
-          {t('components.nearbyStopRoutes.title')}
-        </Text>
         <Text size="sm">
           {isRateLimited
             ? t('components.nearbyStopRoutes.rateLimited')
@@ -111,9 +105,6 @@ export const NearbyStopRoutes = ({
 
   return (
     <Stack gap="sm" style={{ flex: 1, minHeight: 0 }}>
-      <Text size="sm" c="dimmed">
-        {t('components.nearbyStopRoutes.title')}
-      </Text>
       <Tabs value={selectedDirection} onChange={setSelectedDirection}>
         <Tabs.List>
           {routeSections.map((section) => (

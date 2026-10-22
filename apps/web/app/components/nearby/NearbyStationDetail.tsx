@@ -12,6 +12,7 @@ import { toLatLng } from '~/modules/utils/geo/convertCoordinates'
 import { getCityTranslationKey } from '~/modules/utils/i18n/getCityTranslationKey'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 import { getStationBearingLabel } from '~/modules/utils/nearby/getStationBearingLabel'
+import { APP_ACTION_ICON_SIZE } from '~/modules/consts/layout'
 
 interface PropType {
   station: NearbyStation
@@ -152,7 +153,7 @@ export const NearbyStationDetail = ({
           })}
           onClick={() => onViewStationRoutes(station.stationId)}
         >
-          <RiArrowRightSLine size={18} />
+          <RiArrowRightSLine size={APP_ACTION_ICON_SIZE} />
         </ActionIcon>
       </Group>
     </Stack>

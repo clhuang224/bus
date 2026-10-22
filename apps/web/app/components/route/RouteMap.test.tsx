@@ -53,6 +53,11 @@ const { mockMap, MockLngLatBounds, MockMarker, MockPopup } = vi.hoisted(() => {
 
   class MockPopup {
     private container: HTMLDivElement | null = null
+    private element = document.createElement('div')
+
+    getElement() {
+      return this.element
+    }
 
     setLngLat() {
       return this

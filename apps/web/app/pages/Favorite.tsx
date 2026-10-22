@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { BaseAlert } from '~/components/common/BaseAlert'
 import { FavoriteRouteStopCard } from '~/components/favorite/FavoriteRouteStopCard'
-import { APP_PAGE_PADDING } from '~/modules/consts/layout'
+import { APP_PAGE_MAX_WIDTH, APP_PAGE_PADDING } from '~/modules/consts/layout'
 import { getFavoriteMessages } from '~/modules/consts/pageMessages'
 import { useFavoriteRouteStops } from '~/modules/hooks/favorite/useFavoriteRouteStops'
 import { useLocalizedTextCollator } from '~/modules/hooks/shared/useLocalizedTextCollator'
@@ -33,8 +33,16 @@ export default function Favorite() {
 
   return (
     <Flex justify="center" h="100%">
-      <Stack p={APP_PAGE_PADDING} w="100%" maw={720} h="100%" gap="md">
-        <Title order={3}>{t('pages.favorite.title')}</Title>
+      <Stack
+        p={APP_PAGE_PADDING}
+        w="100%"
+        maw={APP_PAGE_MAX_WIDTH}
+        h="100%"
+        gap="md"
+      >
+        <Title order={2} size="h3">
+          {t('pages.favorite.title')}
+        </Title>
         {sortedFavoriteRouteStops.length === 0 ? (
           <BaseAlert {...favoriteMessages.emptyFavoriteRouteStops} />
         ) : (

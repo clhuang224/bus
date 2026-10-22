@@ -26,6 +26,7 @@ import { getTerminalDisplay } from '~/modules/utils/i18n/getTerminalDisplay'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 import { saveRouteSearchRecent } from '~/modules/utils/routes/routeSearchRecentStorage'
 import { isCityName } from '~/modules/utils/shared/isCityName'
+import { APP_ACTION_ICON_SIZE } from '~/modules/consts/layout'
 
 export default function Route() {
   const { t } = useTranslation()
@@ -160,7 +161,7 @@ export default function Route() {
                 aria-label={t('routePage.backToRoutes')}
                 onClick={handleBack}
               >
-                <RiArrowLeftSLine size={18} />
+                <RiArrowLeftSLine size={APP_ACTION_ICON_SIZE} />
               </ActionIcon>
               {routeName && (
                 <AppBadge type="route" size="xl">
@@ -241,7 +242,7 @@ export default function Route() {
               onClick={openSidebar}
               aria-label={t('components.mapSidebarLayout.openRouteList')}
             >
-              <RiMenuFill size={18} />
+              <RiMenuFill size={APP_ACTION_ICON_SIZE} />
             </ActionIcon>
           ) : null
         }

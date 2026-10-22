@@ -1,7 +1,3 @@
-/**
- * What a client should tell the user about a sub-route's realtime data, in
- * priority order: rate limits, then failures, then the service state.
- */
 export enum RouteRealtimeStatus {
   NORMAL = 'normal',
   RATE_LIMITED = 'rate_limited',

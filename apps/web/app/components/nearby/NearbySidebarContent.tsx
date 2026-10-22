@@ -30,6 +30,7 @@ import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 import { getStationBearingLabel } from '~/modules/utils/nearby/getStationBearingLabel'
 import { NearbyStationDetail } from './NearbyStationDetail'
 import { NearbyStopRoutes } from './NearbyStopRoutes'
+import { APP_ACTION_ICON_SIZE } from '~/modules/consts/layout'
 
 type StationItemRefs = RefObject<Map<string, HTMLDivElement | null>>
 
@@ -75,15 +76,20 @@ const NearbySidebarContentDetail = ({
   const stationBearingLabel = getStationBearingLabel(t, detailState.station!)
 
   return (
-    <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
+    <Stack gap="sm" style={{ flex: 1, minHeight: 0 }}>
       <Flex gap="xs" align="center">
         <ActionIcon
           aria-label={t('components.nearbySidebarContent.backAriaLabel')}
           onClick={detailState.onBack}
         >
-          <RiArrowLeftSLine size={18} />
+          <RiArrowLeftSLine size={APP_ACTION_ICON_SIZE} />
         </ActionIcon>
-        <Title order={4} style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
+        <Title
+          order={2}
+          size="h4"
+          style={{ flex: 1, minWidth: 0 }}
+          lineClamp={1}
+        >
           {getLocalizedText(detailState.station!.name, locale)}
         </Title>
         {stationBearingLabel && (
@@ -92,7 +98,7 @@ const NearbySidebarContentDetail = ({
           </Text>
         )}
       </Flex>
-      <Stack gap="md" style={{ flex: 1, minHeight: 0 }}>
+      <Stack gap="sm" style={{ flex: 1, minHeight: 0 }}>
         <Stack gap={2}>
           <Text size="sm" c="dimmed">
             {t('components.nearbyStopDetail.distanceLabel')}

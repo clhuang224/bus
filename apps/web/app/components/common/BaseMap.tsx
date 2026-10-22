@@ -19,11 +19,37 @@ import type { LatLng } from '~/modules/types/CoordsType'
 import type { RootState } from '~/modules/store'
 import { toLngLat } from '~/modules/utils/geo/convertCoordinates'
 import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
-import { APP_FLOATING_ACTION_OFFSET } from '~/modules/consts/layout'
+import {
+  APP_ACTION_ICON_SIZE,
+  APP_FLOATING_ACTION_OFFSET,
+  MAP_CONTROLS_BOTTOM_OFFSET,
+  MAP_OVERLAY_BOTTOM_INSET_VAR,
+  MAP_OVERLAY_TOP_INSET_VAR,
+} from '~/modules/consts/layout'
+import { MAP_Z_INDEX } from '~/modules/consts/mapLayers'
 
 mapLibre.setWorkerUrl(mapWorkerUrl)
 
 const FOCUS_ZOOM = 16
+
+function keepControlsClearOfOverlayBars(map: Map) {
+  const container = map.getContainer()
+
+  container
+    .querySelectorAll<HTMLElement>(
+      '.maplibregl-ctrl-top-left, .maplibregl-ctrl-top-right',
+    )
+    .forEach((corner) => {
+      corner.style.top = `var(${MAP_OVERLAY_TOP_INSET_VAR}, 0px)`
+    })
+  container
+    .querySelectorAll<HTMLElement>(
+      '.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right',
+    )
+    .forEach((corner) => {
+      corner.style.bottom = `var(${MAP_OVERLAY_BOTTOM_INSET_VAR}, 0px)`
+    })
+}
 
 interface PropType {
   center: LatLng | null
@@ -61,8 +87,24 @@ const BaseMap = ({
       style: 'https://tiles.openfreemap.org/styles/positron',
       center: mapCenter ?? [121.53969560512759, 25.059928238479156],
       zoom,
+      attributionControl: { compact: true },
     })
     setMap(mapInstance)
+    keepControlsClearOfOverlayBars(mapInstance)
+
+    const collapseAttribution = () => {
+      const compactAttribution = mapInstance
+        .getContainer()
+        .querySelector('.maplibregl-ctrl-attrib.maplibregl-compact')
+
+      if (!compactAttribution) return
+
+      compactAttribution.classList.remove('maplibregl-compact-show')
+      mapInstance.off('styledata', collapseAttribution)
+      mapInstance.off('sourcedata', collapseAttribution)
+    }
+    mapInstance.on('styledata', collapseAttribution)
+    mapInstance.on('sourcedata', collapseAttribution)
 
     const handleLoad = () => {
       onLoadRef.current?.(mapInstance)
@@ -76,6 +118,8 @@ const BaseMap = ({
 
     return () => {
       mapInstance.off('load', handleLoad)
+      mapInstance.off('styledata', collapseAttribution)
+      mapInstance.off('sourcedata', collapseAttribution)
       mapInstance.remove()
     }
   }, [id])
@@ -101,7 +145,7 @@ const BaseMap = ({
 
     const el = createMapMarkerElement({
       ariaLabel: t('components.baseMap.userLocationMarkerAriaLabel'),
-      boxShadow: '0 0 10px rgba(0,0,0,0.3)',
+      boxShadow: '0 0 0 6px rgba(42, 120, 214, 0.3)',
       type: 'user',
     })
 
@@ -117,15 +161,15 @@ const BaseMap = ({
 
   return (
     <Box pos="relative" style={{ width: '100%', height: '100%' }}>
-      <Box id={id} style={{ width: '100%', height: '100%' }} />
+      <Box id={id} style={{ width: '100%', height: '100%', font: 'inherit' }} />
       {(showUserLocation || extraControls) && (
         <Flex
           pos="absolute"
           right={APP_FLOATING_ACTION_OFFSET}
-          bottom="48px"
+          bottom={`calc(var(${MAP_OVERLAY_BOTTOM_INSET_VAR}, 0px) + ${MAP_CONTROLS_BOTTOM_OFFSET}px)`}
           direction="column"
           gap="sm"
-          style={{ zIndex: 2 }}
+          style={{ zIndex: MAP_Z_INDEX.controls }}
         >
           {extraControls}
           {showUserLocation && (
@@ -143,7 +187,7 @@ const BaseMap = ({
               }}
               disabled={!userLngLat || !map}
             >
-              <RiFocus3Line size={18} />
+              <RiFocus3Line size={APP_ACTION_ICON_SIZE} />
             </ActionIcon>
           )}
         </Flex>

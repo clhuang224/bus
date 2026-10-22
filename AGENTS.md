@@ -63,8 +63,16 @@ To develop against the local NestJS API and database, use:
 pnpm run dev:api
 ```
 
-It also starts the API, and the web app reads base and realtime data from it. See the
+It starts the API instead of the TDX proxy, and the web app reads base and realtime data from it. See the
 [web local API mode](./apps/web/README.md#local-api-mode) for setup.
+
+## Code Comments
+
+Prefer readable code over comments. Clear names, small functions, and named constants should explain what the code does and why a value is what it is.
+
+- Do not add comments or docblocks that restate the code or describe how it works.
+- Add a comment only when the code cannot carry the information, such as a tool directive or the reason a `@ts-expect-error` is needed.
+- Put design reasoning, data-source quirks, and rules that span files in the owning docs, such as `docs/plan.md`, instead of in code comments.
 
 ## Current Workspace Roles
 

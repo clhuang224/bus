@@ -13,12 +13,13 @@ import {
 import { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
-import { Outlet, useLocation, useNavigate } from 'react-router'
+import { Link, Outlet, useMatch } from 'react-router'
+import { AppBrand } from '~/components/AppBrand'
 import { AppNavLink } from '~/components/AppNavLink'
 import {
-  APP_FLOATING_ACTION_OFFSET,
   APP_FOOTER_HEIGHT,
   APP_HEADER_HEIGHT,
+  APP_MOBILE_HEADER_HEIGHT,
 } from '~/modules/consts/layout'
 import { useWatchGeo } from '~/modules/hooks/app/useWatchGeo'
 import { useGoogleAnalytics } from '~/modules/hooks/app/useGoogleAnalytics'
@@ -27,8 +28,6 @@ import type { AppDispatch, RootState } from '~/modules/store'
 
 export default function AppLayout() {
   const dispatch = useDispatch<AppDispatch>()
-  const location = useLocation()
-  const navigate = useNavigate()
   const { t } = useTranslation()
 
   const theme = useMantineTheme()
@@ -69,7 +68,7 @@ export default function AppLayout() {
     }),
     [t],
   )
-  const isSettingsPage = location.pathname === settingNav.path
+  const isSettingsPage = useMatch(settingNav.path) !== null
 
   useWatchGeo()
   useGoogleAnalytics()
@@ -81,55 +80,88 @@ export default function AppLayout() {
 
   return (
     <AppShell
-      header={{ height: isSm ? 0 : APP_HEADER_HEIGHT }}
+      header={{ height: isSm ? APP_MOBILE_HEADER_HEIGHT : APP_HEADER_HEIGHT }}
       footer={{ height: isSm ? APP_FOOTER_HEIGHT : 0 }}
     >
-      <AppShell.Header p="md" visibleFrom="sm">
-        <Flex align="center" gap="md">
-          <Flex align="center" gap="md">
-            {options.map((option) => (
-              <AppNavLink
-                key={option.path}
-                label={option.name}
-                to={option.path}
-              />
-            ))}
-          </Flex>
-          <Flex ml="auto">
-            <AppNavLink
-              ariaLabel={settingNav.name}
-              icon={settingNav.icon}
-              iconActive={settingNav.iconActive}
+      <AppShell.Header
+        withBorder={false}
+        bg={isSm ? 'transparent' : undefined}
+        px={isSm ? 'sm' : 'md'}
+        py="xs"
+      >
+        {isSm ? (
+          <Flex
+            align="center"
+            h="100%"
+            px="md"
+            bg="blue.6"
+            bdrs="xl"
+            style={{ boxShadow: 'var(--mantine-shadow-sm)' }}
+          >
+            <AppBrand inverted />
+            <ActionIcon
+              component={Link}
               to={settingNav.path}
-            />
+              aria-label={settingNav.name}
+              variant="subtle"
+              color="white"
+              size="lg"
+              radius="xl"
+              ml="auto"
+            >
+              {isSettingsPage ? settingNav.iconActive : settingNav.icon}
+            </ActionIcon>
           </Flex>
-        </Flex>
+        ) : (
+          <Flex
+            align="center"
+            gap="xl"
+            h="100%"
+            px="md"
+            bg="white"
+            bdrs="xl"
+            style={{ boxShadow: 'var(--mantine-shadow-sm)' }}
+          >
+            <AppBrand />
+            <Flex align="center" gap="xs">
+              {options.map((option) => (
+                <AppNavLink
+                  key={option.path}
+                  label={option.name}
+                  to={option.path}
+                />
+              ))}
+            </Flex>
+            <Flex ml="auto">
+              <AppNavLink
+                ariaLabel={settingNav.name}
+                icon={settingNav.icon}
+                iconActive={settingNav.iconActive}
+                to={settingNav.path}
+              />
+            </Flex>
+          </Flex>
+        )}
       </AppShell.Header>
       <AppShell.Main
         h={
           isSm
-            ? `calc(100vh - ${APP_FOOTER_HEIGHT}px)`
+            ? `calc(100vh - ${APP_MOBILE_HEADER_HEIGHT + APP_FOOTER_HEIGHT}px)`
             : `calc(100vh - ${APP_HEADER_HEIGHT}px)`
         }
       >
         <Outlet />
-        {isSm && !isSettingsPage && (
-          <ActionIcon
-            onClick={() => navigate(settingNav.path)}
-            aria-label={settingNav.name}
-            variant="white"
-            bdrs={99}
-            size="md"
-            pos="absolute"
-            top={APP_FLOATING_ACTION_OFFSET}
-            right={APP_FLOATING_ACTION_OFFSET}
-            style={{ zIndex: 'calc(var(--app-shell-header-z-index, 100) + 1)' }}
-          >
-            {settingNav.icon}
-          </ActionIcon>
-        )}
       </AppShell.Main>
-      <AppShell.Footer p="sm" hiddenFrom="sm">
+      <AppShell.Footer
+        p="sm"
+        hiddenFrom="sm"
+        bg="white"
+        style={{
+          borderTop: 'none',
+          boxShadow: 'var(--mantine-shadow-sm)',
+          borderRadius: 'var(--mantine-radius-xl) var(--mantine-radius-xl) 0 0',
+        }}
+      >
         <Flex justify="space-around" align="center" gap="md">
           {options.map((option) => (
             <Flex

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { fireEvent, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
 import { renderRoute } from '~/test/render'
@@ -12,7 +12,6 @@ const {
   mockFetchCityGeoJSON,
   mockUseGoogleAnalytics,
   mockUseWatchGeo,
-  mockNavigate,
   mockUseMediaQuery,
 } = vi.hoisted(() => ({
   mockDispatch: vi.fn(),
@@ -20,7 +19,6 @@ const {
   mockFetchCityGeoJSON: vi.fn(),
   mockUseGoogleAnalytics: vi.fn(),
   mockUseWatchGeo: vi.fn(),
-  mockNavigate: vi.fn(),
   mockUseMediaQuery: vi.fn(),
 }))
 
@@ -40,7 +38,6 @@ vi.mock('react-router', async () => {
   return {
     ...actual,
     Outlet: () => <div>outlet</div>,
-    useNavigate: () => mockNavigate,
   }
 })
 
@@ -89,7 +86,6 @@ describe('AppLayout', () => {
     mockFetchCityGeoJSON.mockReset()
     mockUseGoogleAnalytics.mockReset()
     mockUseWatchGeo.mockReset()
-    mockNavigate.mockReset()
     mockUseMediaQuery.mockReset()
     mockFetchCityGeoJSON.mockReturnValue({ type: 'cityGeo/fetchCityGeoJSON' })
     mockUseMediaQuery.mockReturnValue(false)
@@ -162,47 +158,37 @@ describe('AppLayout', () => {
     ).toBeInTheDocument()
   })
 
-  it('uses the settings action icon outside the settings page on mobile', () => {
-    mockUseSelector.mockImplementation(
-      (selector: (state: unknown) => unknown) =>
-        selector({
-          geolocation: {
-            coords: null,
-          },
-          cityGeo: {
-            geojson: null,
-          },
-        }),
-    )
-    mockUseMediaQuery.mockReturnValue(true)
+  it.each([
+    ['desktop', false],
+    ['mobile', true],
+  ])(
+    'shows the site heading and settings entry in the %s header',
+    (_viewport, isSm) => {
+      mockUseSelector.mockImplementation(
+        (selector: (state: unknown) => unknown) =>
+          selector({
+            geolocation: {
+              coords: null,
+            },
+            cityGeo: {
+              geojson: null,
+            },
+          }),
+      )
+      mockUseMediaQuery.mockReturnValue(isSm)
 
-    renderAppLayout(['/routes'])
+      renderAppLayout(['/routes'])
 
-    fireEvent.click(
-      screen.getByRole('button', { name: i18n.t('layout.nav.settings') }),
-    )
-
-    expect(mockNavigate).toHaveBeenCalledWith('/settings')
-  })
-
-  it('does not render the settings action icon on mobile when already on the settings page', () => {
-    mockUseSelector.mockImplementation(
-      (selector: (state: unknown) => unknown) =>
-        selector({
-          geolocation: {
-            coords: null,
-          },
-          cityGeo: {
-            geojson: null,
-          },
-        }),
-    )
-    mockUseMediaQuery.mockReturnValue(true)
-
-    renderAppLayout(['/settings'])
-
-    expect(
-      screen.queryByRole('button', { name: i18n.t('layout.nav.settings') }),
-    ).not.toBeInTheDocument()
-  })
+      expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
+      expect(
+        screen.getByRole('heading', { level: 1, name: i18n.t('app.name') }),
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole('link', { name: i18n.t('app.name') }),
+      ).toHaveAttribute('href', '/')
+      expect(
+        screen.getByLabelText(i18n.t('layout.nav.settings')),
+      ).toBeInTheDocument()
+    },
+  )
 })

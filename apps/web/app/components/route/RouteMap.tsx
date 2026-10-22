@@ -7,9 +7,15 @@ import { useTranslation } from 'react-i18next'
 import type { LngLat } from '~/modules/types/CoordsType'
 import { toLatLng } from '~/modules/utils/geo/convertCoordinates'
 import { addMapMarkerActivationListeners } from '~/modules/utils/map/addMapMarkerActivationListeners'
+import { MAP_COLORS } from '~/modules/consts/mapColors'
 import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
+import { showMapPopup } from '~/modules/utils/map/showMapPopup'
 import BaseMap from '../common/BaseMap'
 import { RoutePopupContent } from './RoutePopupContent'
+import {
+  MAP_STOP_POPUP_OFFSET,
+  MAP_VEHICLE_POPUP_OFFSET,
+} from '~/modules/consts/layout'
 
 export interface RouteMapStop {
   id: string
@@ -42,8 +48,6 @@ interface PropType {
 
 const ROUTE_LINE_SOURCE_ID = 'route-line-source'
 const ROUTE_LINE_LAYER_ID = 'route-line-layer'
-const ROUTE_COLOR = '#868e96'
-const HIGHLIGHTED_STOP_COLOR = '#1c7ed6'
 
 function removeRouteLine(map: MapLibreMap) {
   if (map.getLayer(ROUTE_LINE_LAYER_ID)) {
@@ -182,7 +186,7 @@ export const RouteMap = ({
           'line-join': 'round',
         },
         paint: {
-          'line-color': ROUTE_COLOR,
+          'line-color': MAP_COLORS.route,
           'line-width': 4,
           'line-opacity': 0.85,
         },
@@ -196,7 +200,11 @@ export const RouteMap = ({
           stopName: stop.name,
           sequence: stop.sequence,
         }),
-        backgroundColor: isHighlighted ? HIGHLIGHTED_STOP_COLOR : ROUTE_COLOR,
+        ...(isHighlighted && {
+          backgroundColor: MAP_COLORS.highlightedStop,
+          borderColor: '#ffffff',
+          color: MAP_COLORS.markerInk,
+        }),
         datasetLabel: stop.name,
         interactive: true,
         textContent: String(stop.sequence),
@@ -311,14 +319,16 @@ export const RouteMap = ({
 
       const container = document.createElement('div')
 
-      const popup = new mapLibre.Popup({
-        closeButton: false,
-        offset: 20,
-        closeOnClick: false,
-      })
-        .setLngLat(selectedVehicle.position)
-        .setDOMContent(container)
-        .addTo(map)
+      const popup = showMapPopup(
+        new mapLibre.Popup({
+          closeButton: false,
+          offset: MAP_VEHICLE_POPUP_OFFSET,
+          closeOnClick: false,
+        })
+          .setLngLat(selectedVehicle.position)
+          .setDOMContent(container),
+        map,
+      )
 
       popupRef.current = popup
       setPopupContainer(container)
@@ -337,14 +347,16 @@ export const RouteMap = ({
 
     const container = document.createElement('div')
 
-    const popup = new mapLibre.Popup({
-      closeButton: false,
-      offset: 25,
-      closeOnClick: false,
-    })
-      .setLngLat(marker.getLngLat())
-      .setDOMContent(container)
-      .addTo(map)
+    const popup = showMapPopup(
+      new mapLibre.Popup({
+        closeButton: false,
+        offset: MAP_STOP_POPUP_OFFSET,
+        closeOnClick: false,
+      })
+        .setLngLat(marker.getLngLat())
+        .setDOMContent(container),
+      map,
+    )
 
     popupRef.current = popup
     setPopupContainer(container)

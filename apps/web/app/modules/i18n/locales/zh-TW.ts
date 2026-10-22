@@ -1,7 +1,7 @@
 export const zhTW = {
   translation: {
     app: {
-      name: 'Finding the Bus',
+      name: '找找公車',
       description: '一起找公車。',
     },
     common: {

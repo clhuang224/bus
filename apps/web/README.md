@@ -156,20 +156,17 @@ PR checks run this test and save a report, screenshot, and trace on failure.
 
 To develop the Nearby Stops, Route Search, and Route Detail pages against the
 local NestJS API, first configure `apps/api/.env.local` with `DATABASE_URL` and
-the other API credentials, and apply the committed migrations. Also configure
-`apps/tdx-proxy/.dev.vars` using the
-[TDX proxy setup](../tdx-proxy/README.md#local-setup), since this mode also
-starts the proxy. Then run:
+the other API credentials, and apply the committed migrations. This mode does
+not use the TDX proxy, so `apps/tdx-proxy/.dev.vars` is not needed. Then run:
 
 ```bash
 pnpm run dev:api
 ```
 
-This starts the TDX proxy on port `3000`, the API on port `3001`, and the web
-app on port `5173` in Vite's `local-api` mode. That mode loads the committed
-`.env.local-api`, which sets `VITE_API_BASE_URL=http://127.0.0.1:3001/api`
-for database-backed requests and retains `/api/tdx` for pages that still use
-the local TDX proxy.
+This starts the API on port `3001` and the web app on port `5173` in Vite's
+`local-api` mode. That mode loads the committed `.env.local-api`, which sets
+`VITE_API_BASE_URL=http://127.0.0.1:3001/api`, so every page reads its data,
+including realtime data, from the API.
 
 Port `5173` must be available. Local API mode exits if it is occupied, keeping
 the web origin aligned with the API's CORS configuration.

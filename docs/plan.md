@@ -198,29 +198,61 @@ The project aims to run on the free TDX basic membership (5 requests per minute 
 
 ### Product Name
 
-The working name, Finding the Bus (FTB), is a deliberate pun on Finding Nemo. The joke may not land with every user, and it does not say what the app does, so the project needs a proper name before wider release.
+The product is called 找找公車 in Traditional Chinese and keeps Finding the Bus in English. The English name was a pun on Finding Nemo, which not every user will catch; the Chinese name says plainly what the app is for while keeping a light tone. The domain stays `bus.lynns.me`.
 
-A good name should:
+Only the Chinese user-facing name changes: the `app.name` value in the zh-TW locale, which sets the page title and the site heading, and the title of `docs/README.zh-TW.md`. English names stay as they are, including `FTBError`, the `FTB API` titles, the Worker name, the `@bus/*` packages, and the repository.
 
-- say or hint that the app is about Taiwan buses: route search, arrival times, and nearby stops
-- work in both Traditional Chinese and English, since the app supports both
-- be short and easy to say, type, and search for
-- not clash with existing bus apps or services in Taiwan
-- have a usable domain or subdomain; the app currently lives at `bus.lynns.me`
+### Visual Identity
 
-Where the name appears today:
+Before this work, the app had little visual identity. A first pass of all five steps below is done; later changes refine it:
 
-- user-facing: the web app title (`app.name` in both locale files), the root READMEs, and the API documentation title in `apps/api/src/main.ts`
-- docs: the opening line of `AGENTS.md`, the web and API READMEs, and the `FTB API` titles
-- code and infrastructure: the `FTBError` class in the API, and the Worker name `finding-the-bus-tdx-proxy`; renaming the Worker changes its URL, so the web build's `VITE_PROXY_API_BASE_URL` must change with it
-- names that can stay as they are: the `@bus/*` package scope and the `bus` repository
+- No part of the interface showed the product name. The desktop header held only the navigation links and the settings button, and mobile had no header at all.
+- No page had an `h1`. Page titles such as 搜尋公車 were `h3`.
+- The theme used Mantine's default cyan as the only brand color.
+- The theme set Open Sans, but the page loaded Inter, so neither font was used, and Chinese text fell back to the system font.
+- The only brand mark was the favicon: a white bus on a cyan circle.
 
-Steps:
+The work is split into steps so each one can be reviewed on its own:
 
-1. Collect candidate names in Chinese and English.
-2. Check each against existing apps, search results, and domain availability.
-3. Decide the Chinese and English names and record them here.
-4. Rename user-facing text and docs in one change. Rename code identifiers and the Worker separately, since the Worker rename is a deployment change.
+1. **Site heading.** Show the product name as the page's `h1`, with the favicon mark beside it, and lower page titles to `h2`. On desktop, the heading sits at the left of the header, before the navigation links. On mobile, a new top banner holds the heading and the settings button, which replaces the floating settings button. Layout heights that depend on the header, such as the drawer offset, must follow the new banner height.
+2. **Name.** Change the zh-TW `app.name` to 找找公車 and update the Chinese README title.
+3. **Color and type.** Choose a brand color palette for Mantine and the map, and fix the font setup so the theme and the loaded fonts agree, including a font for Chinese.
+4. **Brand mark.** Redraw the favicon as a logo that also works next to the site heading, and use it for the PNG favicon and app icons.
+5. **Surfaces.** Apply the palette to the header, the mobile banner, the bottom navigation, cards, empty states, and map markers, and check that contrast stays readable.
+
+Decisions for steps 3 to 5:
+
+- **Font.** Use Chiron GoRound TC, a rounded Traditional Chinese font from Google Fonts with regular and bold weights. Google Fonts splits it by character range, so a page only downloads the characters it shows. jf open huninn was tried first, but it has a single weight and headings need a real bold.
+- **How colors are chosen.** Colors are assigned by the job they do, and every color that must be told apart is checked with a palette validator for lightness, chroma, separation under color blindness, normal-vision separation, and contrast:
+  - Map identities, which can sit next to each other anywhere on the map, are limited to three hues that pass the all-pairs check: blue `#2a78d6` for the route and its stops, orange `#eb6834` for vehicles, and green `#1baf7a` for the highlighted stop. Each marker also has a white ring and a number or icon, so color is never the only cue.
+  - Status colors are reserved for messages: red `#d03b3b` for errors and yellow `#fab219` for warnings, always with a title and text.
+  - Each color is a Mantine palette of ten steps built in OKLCH around the chosen value, overriding Mantine's built-in color of the same name, so component code keeps using `blue`, `orange`, `teal`, `red`, `yellow`, `pink`, and `gray`. Step 6, used for text in light variants, keeps at least 4.5:1 contrast on white.
+
+  | Role                                 | Color                                      |
+  | ------------------------------------ | ------------------------------------------ |
+  | Site heading, primary actions, route | blue                                       |
+  | Mobile banner                        | blue, with white text                      |
+  | Vehicles and realtime cues           | orange                                     |
+  | Highlighted stop                     | green (`teal`)                             |
+  | Favorites                            | pink                                       |
+  | Errors and warnings                  | red and yellow                             |
+  | Page background, city badges         | light cool gray, with white cards and bars |
+
+### UI and UX Follow-ups
+
+A design review of the visual refresh, at desktop (1440px) and mobile (375px) widths, found these issues. They are left for a later pass so the refresh itself stays reviewable. In order of priority:
+
+1. **Nearby stops without location.** When location access is denied, mobile shows only a blank map. The error message sits inside the closed drawer, so nothing tells the user why. Open the drawer, or show the error over the map, in this state.
+2. **Touch targets and link names.** The favorite heart button is 28×28 and the settings button is 34×34, below the 44×44 target size. The favorite card link and the site heading link have no accessible name.
+3. **Page frames and cards.** Favorites puts cards straight on the gray page, while search and settings put a full-height white column behind bordered white cards, so those pages are framed twice. Cards also differ: favorite cards use a shadow and no border, while recent routes and settings cards use a border and no shadow. Pick one page frame and one card style.
+4. **Blue text on light blue.** Blue step 6 keeps 4.5:1 on white, but on the 10% blue fill of the active navigation item and the service status title it drops to about 4.2:1. Use a darker step on tinted fills.
+5. **Map loading.** On desktop the map area stays blank for several seconds before tiles appear, with no loading cue.
+6. **Mobile route map.** With the drawer closed, the route number shows nowhere on screen, and stop markers overlap at the initial zoom. Show a small route label on the map, and consider fewer markers at low zoom.
+7. **Smaller details.**
+   - The button that opens the drawer uses a hamburger icon, which reads as a main menu. Use a list icon or a text label.
+   - The mobile bottom navigation puts the label above the icon, the reverse of the common pattern.
+   - The logo circle in the mobile banner is blue on the blue banner, so its outline barely shows.
+   - The service status card takes a lot of space when it only says there is no service. A one-line notice is enough.
 
 ## Backlog
 

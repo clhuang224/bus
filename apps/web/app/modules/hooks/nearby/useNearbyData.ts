@@ -108,8 +108,6 @@ export function useNearbyData({
     isSuccess: isStationsSuccess,
   } = transitApi.useGetNearbyStationsQuery(nearbyQuery ?? skipToken)
   const nearbyStations = stationsResult?.stations ?? EMPTY_STATIONS
-  // Some sources return station routes with the stations; others need a
-  // separate request, which waits until the user selects a station.
   const shouldLoadStationRoutes =
     stationsResult?.routesByStationId === null && nearbyStations.length > 0
 

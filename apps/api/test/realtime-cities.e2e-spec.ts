@@ -16,8 +16,6 @@ import type { RouteRealtimeResponseDto } from '../src/realtime/dto/route-realtim
 import { TdxRealtimeClientService } from '../src/realtime/tdx-realtime-client.service.js'
 import { createE2eApp } from './create-e2e-app.js'
 
-// Fixtures are real TDX responses recorded per city and trimmed to the stops
-// around each vehicle. They cover upstream shapes that differ from Taipei.
 interface RealtimeFixture {
   route: { uuid: string }
   estimatedArrivals: TdxEstimatedArrival[]

@@ -10,6 +10,7 @@ import { useNearbySearchParams } from '~/modules/hooks/nearby/useNearbySearchPar
 import { NearbyStationDetail } from '~/components/nearby/NearbyStationDetail'
 import { NearbyStationMap } from '~/components/nearby/NearbyStationMap'
 import { RiMenuFill } from '@remixicon/react'
+import { APP_ACTION_ICON_SIZE } from '~/modules/consts/layout'
 
 const Nearby = () => {
   const { t } = useTranslation()
@@ -131,7 +132,7 @@ const Nearby = () => {
               onClick={openSidebar}
               aria-label={t('components.mapSidebarLayout.openNearbyStops')}
             >
-              <RiMenuFill size={18} />
+              <RiMenuFill size={APP_ACTION_ICON_SIZE} />
             </ActionIcon>
           ) : null
         }

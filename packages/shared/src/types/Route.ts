@@ -14,7 +14,6 @@ export interface RoutesResponse {
   routes: ApiRouteSummary[]
 }
 
-/** TDX identifiers for matching a route stop with TDX realtime data. */
 export interface ApiRouteStopTdxReference {
   stop_id: string
   station_id: string | null
@@ -29,12 +28,10 @@ export interface ApiRouteStop {
 }
 
 export interface ApiRouteShape {
-  /** Ordered `[longitude, latitude]` points. */
   path: [longitude: number, latitude: number][]
   updated_at: string
 }
 
-/** TDX identifiers for matching a sub-route with TDX realtime data. */
 export interface ApiRouteSubRouteTdxReference {
   sub_route_uid: string
 }

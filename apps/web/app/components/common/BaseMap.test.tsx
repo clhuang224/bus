@@ -10,6 +10,8 @@ import BaseMap from './BaseMap'
 const { mockMap, MockMap, MockMarker, MockLngLat } = vi.hoisted(() => {
   const mockMap = {
     isStyleLoaded: () => true,
+    getContainer: () => document.createElement('div'),
+    on: vi.fn(),
     once: vi.fn(),
     off: vi.fn(),
     remove: vi.fn(),

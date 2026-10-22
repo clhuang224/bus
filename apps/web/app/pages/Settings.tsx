@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router'
 import { isSupportedAppLocale } from '~/modules/consts/i18n'
-import { APP_PAGE_PADDING } from '~/modules/consts/layout'
+import { APP_PAGE_MAX_WIDTH, APP_PAGE_PADDING } from '~/modules/consts/layout'
 import { AppLocaleType } from '@bus/shared'
 import {
   selectAnalyticsEnabled,
@@ -46,7 +46,13 @@ export default function Settings() {
 
   return (
     <Flex justify="center" h="100%">
-      <Card p={APP_PAGE_PADDING} w="100%" maw={720} h="100%" withBorder={false}>
+      <Card
+        p={APP_PAGE_PADDING}
+        w="100%"
+        maw={APP_PAGE_MAX_WIDTH}
+        h="100%"
+        withBorder={false}
+      >
         <Stack gap="md">
           <Flex align="flex-start" gap="sm">
             {isSm && (
@@ -60,12 +66,14 @@ export default function Settings() {
               </ActionIcon>
             )}
             <Stack gap={4}>
-              <Title order={3}>{t('pages.settings.title')}</Title>
+              <Title order={2} size="h3">
+                {t('pages.settings.title')}
+              </Title>
             </Stack>
           </Flex>
           <Card withBorder radius="md" p="md">
             <Stack gap="xs">
-              <Title order={5}>
+              <Title order={3} size="h5">
                 {t('pages.settings.languageSectionTitle')}
               </Title>
               <Radio.Group
@@ -92,7 +100,7 @@ export default function Settings() {
           </Card>
           <Card withBorder radius="md" p="md">
             <Stack gap="xs">
-              <Title order={5}>
+              <Title order={3} size="h5">
                 {t('pages.settings.analyticsSectionTitle')}
               </Title>
               <Text size="sm" c="dimmed">

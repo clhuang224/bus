@@ -65,7 +65,7 @@ For mobile testing on the same local network:
 pnpm run dev:mobile
 ```
 
-To develop against the NestJS API and its PostgreSQL database, use local API mode. It also starts the API, and the web app reads route, stop, station, and realtime data from it:
+To develop against the NestJS API and its PostgreSQL database, use local API mode. It starts the API instead of the TDX proxy, and the web app reads route, stop, station, and realtime data from it:
 
 ```bash
 pnpm run dev:api
