@@ -1,4 +1,5 @@
 import { MAP_COLORS } from '../../consts/mapColors'
+import { MAP_Z_INDEX } from '../../consts/mapLayers'
 
 type MapMarkerType = 'stop' | 'vehicle' | 'user'
 
@@ -44,7 +45,7 @@ const markerStyleMap: Record<MapMarkerType, Partial<CSSStyleDeclaration>> = {
     borderRadius: '50%',
     backgroundColor: MAP_COLORS.userLocation,
     border: '3px solid white',
-    zIndex: '1',
+    zIndex: String(MAP_Z_INDEX.userMarker),
   },
 }
 

@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import type { LngLat, LatLng } from '~/modules/types/CoordsType'
 import { addMapMarkerActivationListeners } from '~/modules/utils/map/addMapMarkerActivationListeners'
 import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
+import { showMapPopup } from '~/modules/utils/map/showMapPopup'
 import BaseMap from '../common/BaseMap'
 
 interface PropType {
@@ -115,7 +116,7 @@ export const NearbyStationMap = ({
       popup.setText(marker.getElement().dataset.label || '')
     }
 
-    popup.addTo(map)
+    showMapPopup(popup, map)
 
     popupRef.current = popup
 

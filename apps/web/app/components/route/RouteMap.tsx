@@ -9,6 +9,7 @@ import { toLatLng } from '~/modules/utils/geo/convertCoordinates'
 import { addMapMarkerActivationListeners } from '~/modules/utils/map/addMapMarkerActivationListeners'
 import { MAP_COLORS } from '~/modules/consts/mapColors'
 import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
+import { showMapPopup } from '~/modules/utils/map/showMapPopup'
 import BaseMap from '../common/BaseMap'
 import { RoutePopupContent } from './RoutePopupContent'
 
@@ -314,14 +315,16 @@ export const RouteMap = ({
 
       const container = document.createElement('div')
 
-      const popup = new mapLibre.Popup({
-        closeButton: false,
-        offset: 20,
-        closeOnClick: false,
-      })
-        .setLngLat(selectedVehicle.position)
-        .setDOMContent(container)
-        .addTo(map)
+      const popup = showMapPopup(
+        new mapLibre.Popup({
+          closeButton: false,
+          offset: 20,
+          closeOnClick: false,
+        })
+          .setLngLat(selectedVehicle.position)
+          .setDOMContent(container),
+        map,
+      )
 
       popupRef.current = popup
       setPopupContainer(container)
@@ -340,14 +343,16 @@ export const RouteMap = ({
 
     const container = document.createElement('div')
 
-    const popup = new mapLibre.Popup({
-      closeButton: false,
-      offset: 25,
-      closeOnClick: false,
-    })
-      .setLngLat(marker.getLngLat())
-      .setDOMContent(container)
-      .addTo(map)
+    const popup = showMapPopup(
+      new mapLibre.Popup({
+        closeButton: false,
+        offset: 25,
+        closeOnClick: false,
+      })
+        .setLngLat(marker.getLngLat())
+        .setDOMContent(container),
+      map,
+    )
 
     popupRef.current = popup
     setPopupContainer(container)
