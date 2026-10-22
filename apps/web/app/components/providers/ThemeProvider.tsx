@@ -110,7 +110,10 @@ const theme = createTheme({
 
 const cssVariablesResolver: CSSVariablesResolver = () => ({
   variables: {},
-  light: { '--mantine-color-body': gray[1] },
+  light: {
+    '--mantine-color-body': gray[1],
+    '--mantine-color-blue-light-color': blue[8],
+  },
   dark: {},
 })
 
