@@ -204,13 +204,13 @@ Only the Chinese user-facing name changes: the `app.name` value in the zh-TW loc
 
 ### Visual Identity
 
-The app currently has little visual identity:
+Before this work, the app had little visual identity. A first pass of all five steps below is done; later changes refine it:
 
-- No part of the interface shows the product name. The desktop header holds only the navigation links and the settings button, and mobile has no header at all.
-- No page has an `h1`. Page titles such as 搜尋公車 are `h3`.
-- The theme uses Mantine's default cyan as the only brand color.
-- The theme sets Open Sans, but the page loads Inter, so neither font is actually used, and Chinese text falls back to the system font.
-- The only brand mark is the favicon: a white bus on a cyan circle.
+- No part of the interface showed the product name. The desktop header held only the navigation links and the settings button, and mobile had no header at all.
+- No page had an `h1`. Page titles such as 搜尋公車 were `h3`.
+- The theme used Mantine's default cyan as the only brand color.
+- The theme set Open Sans, but the page loaded Inter, so neither font was used, and Chinese text fell back to the system font.
+- The only brand mark was the favicon: a white bus on a cyan circle.
 
 The work is split into steps so each one can be reviewed on its own:
 
