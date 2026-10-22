@@ -101,7 +101,7 @@ const BaseMap = ({
 
     const el = createMapMarkerElement({
       ariaLabel: t('components.baseMap.userLocationMarkerAriaLabel'),
-      boxShadow: '0 0 0 6px rgba(7, 160, 195, 0.25)',
+      boxShadow: '0 0 0 6px rgba(42, 120, 214, 0.3)',
       type: 'user',
     })
 

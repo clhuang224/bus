@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next'
 import type { LngLat } from '~/modules/types/CoordsType'
 import { toLatLng } from '~/modules/utils/geo/convertCoordinates'
 import { addMapMarkerActivationListeners } from '~/modules/utils/map/addMapMarkerActivationListeners'
-import { BRAND_COLORS } from '~/modules/consts/brandColors'
+import { MAP_COLORS } from '~/modules/consts/mapColors'
 import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
 import BaseMap from '../common/BaseMap'
 import { RoutePopupContent } from './RoutePopupContent'
@@ -43,7 +43,6 @@ interface PropType {
 
 const ROUTE_LINE_SOURCE_ID = 'route-line-source'
 const ROUTE_LINE_LAYER_ID = 'route-line-layer'
-const ROUTE_COLOR = BRAND_COLORS.ink
 
 function removeRouteLine(map: MapLibreMap) {
   if (map.getLayer(ROUTE_LINE_LAYER_ID)) {
@@ -182,7 +181,7 @@ export const RouteMap = ({
           'line-join': 'round',
         },
         paint: {
-          'line-color': ROUTE_COLOR,
+          'line-color': MAP_COLORS.route,
           'line-width': 4,
           'line-opacity': 0.85,
         },
@@ -197,9 +196,9 @@ export const RouteMap = ({
           sequence: stop.sequence,
         }),
         ...(isHighlighted && {
-          backgroundColor: BRAND_COLORS.cherry,
+          backgroundColor: MAP_COLORS.highlightedStop,
           borderColor: '#ffffff',
-          color: '#ffffff',
+          color: MAP_COLORS.markerInk,
         }),
         datasetLabel: stop.name,
         interactive: true,

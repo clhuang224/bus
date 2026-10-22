@@ -1,118 +1,108 @@
 import {
   Card,
   createTheme,
-  defaultVariantColorsResolver,
   MantineProvider,
-  parseThemeColor,
   type CSSVariablesResolver,
   type MantineColorsTuple,
-  type VariantColorsResolver,
 } from '@mantine/core'
 
-const brand: MantineColorsTuple = [
-  '#ecfafe',
-  '#cff3fc',
-  '#9ee6fa',
-  '#64d7f7',
-  '#2ac8f4',
-  '#0cb5e4',
-  '#07a0c3',
-  '#0983a5',
-  '#086788',
-  '#055166',
+const blue: MantineColorsTuple = [
+  '#eff6ff',
+  '#d9e9ff',
+  '#b3d4ff',
+  '#89bafc',
+  '#58a0fc',
+  '#2a78d6',
+  '#2372cf',
+  '#035eb9',
+  '#024b96',
+  '#033974',
 ]
-const sun: MantineColorsTuple = [
-  '#fefbec',
-  '#fcf5cf',
-  '#fcec9c',
-  '#fae26b',
-  '#f9db43',
-  '#f8d420',
-  '#f0c808',
-  '#d0ae06',
-  '#a88d05',
-  '#816c04',
+const orange: MantineColorsTuple = [
+  '#fff2ee',
+  '#ffe0d6',
+  '#ffc0aa',
+  '#fd9a76',
+  '#f5713e',
+  '#eb6834',
+  '#bf460d',
+  '#a33903',
+  '#842c02',
+  '#652103',
 ]
-const cherry: MantineColorsTuple = [
-  '#fdeded',
-  '#fad7d6',
-  '#f5aead',
-  '#f0817f',
-  '#eb5956',
-  '#e73532',
-  '#dd1c1a',
-  '#bb1916',
-  '#9b1412',
-  '#7b100e',
+const teal: MantineColorsTuple = [
+  '#e1fdee',
+  '#c3f6db',
+  '#8ee7bc',
+  '#50d39c',
+  '#2db983',
+  '#1baf7a',
+  '#03885d',
+  '#0d724e',
+  '#085c3e',
+  '#01462e',
 ]
-const cream: MantineColorsTuple = [
-  '#fefcf5',
-  '#fef7e7',
-  '#fff1d0',
-  '#fbe7b6',
-  '#ffda85',
-  '#ffcb52',
-  '#ffbc1f',
-  '#e6a100',
-  '#b27d00',
-  '#805900',
+const yellow: MantineColorsTuple = [
+  '#fff4e2',
+  '#fee4bb',
+  '#fdc76e',
+  '#fab219',
+  '#cd9216',
+  '#af7b08',
+  '#976902',
+  '#7e580a',
+  '#664606',
+  '#4f3501',
+]
+const red: MantineColorsTuple = [
+  '#fff2f0',
+  '#ffe0dc',
+  '#ffbeb8',
+  '#fd978f',
+  '#fd6660',
+  '#e04b48',
+  '#d03b3b',
+  '#b21722',
+  '#930415',
+  '#71060f',
+]
+const pink: MantineColorsTuple = [
+  '#fff1f4',
+  '#ffdee6',
+  '#ffbbce',
+  '#fc92b2',
+  '#f06a98',
+  '#d55181',
+  '#bd3b6d',
+  '#a7245b',
+  '#8c0b48',
+  '#6e0236',
 ]
 const gray: MantineColorsTuple = [
-  '#f9fafb',
-  '#f3f6f7',
-  '#e5eaeb',
-  '#d4dbdd',
-  '#b3bec1',
-  '#8b989c',
-  '#65767b',
-  '#4b5d63',
-  '#324348',
-  '#1e2a2f',
+  '#f7faff',
+  '#f0f4f9',
+  '#e3e6ec',
+  '#d1d4d9',
+  '#b4b8bc',
+  '#8d939a',
+  '#6d7279',
+  '#4e5359',
+  '#31363c',
+  '#171b20',
 ]
 
 const FONT_FAMILY =
-  "Huninn, system-ui, -apple-system, 'PingFang TC', 'Microsoft JhengHei', sans-serif"
-
-const LIGHT_TEXT_COLORS = new Set(['sun'])
-
-const variantColorResolver: VariantColorsResolver = (input) => {
-  const colors = defaultVariantColorsResolver(input)
-  const { color } = parseThemeColor({
-    color: input.color ?? input.theme.primaryColor,
-    theme: input.theme,
-  })
-
-  if (input.variant === 'light' && color === 'cream') {
-    return {
-      ...colors,
-      background: 'var(--mantine-color-cream-3)',
-      hover: 'var(--mantine-color-cream-4)',
-      color: 'var(--mantine-color-cream-9)',
-      hoverColor: 'var(--mantine-color-cream-9)',
-    }
-  }
-
-  if (input.variant === 'light' && LIGHT_TEXT_COLORS.has(color)) {
-    return {
-      ...colors,
-      color: `var(--mantine-color-${color}-9)`,
-      hoverColor: `var(--mantine-color-${color}-9)`,
-    }
-  }
-
-  return colors
-}
+  "'Chiron GoRound TC', system-ui, -apple-system, 'PingFang TC', 'Microsoft JhengHei', sans-serif"
 
 const theme = createTheme({
   fontFamily: FONT_FAMILY,
-  headings: { fontFamily: FONT_FAMILY, fontWeight: '400' },
-  colors: { brand, sun, cherry, cream, gray },
-  primaryColor: 'brand',
+  headings: { fontFamily: FONT_FAMILY, fontWeight: '700' },
+  colors: { blue, orange, teal, yellow, red, pink, gray },
+  primaryColor: 'blue',
   primaryShade: 6,
   black: gray[9],
   defaultRadius: 'md',
   autoContrast: true,
-  variantColorResolver,
   components: {
     Card: Card.extend({ defaultProps: { radius: 'lg' } }),
   },
@@ -120,7 +110,7 @@ const theme = createTheme({
 
 const cssVariablesResolver: CSSVariablesResolver = () => ({
   variables: {},
-  light: { '--mantine-color-body': cream[2] },
+  light: { '--mantine-color-body': gray[1] },
   dark: {},
 })
 

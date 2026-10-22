@@ -1,4 +1,4 @@
-import { BRAND_COLORS } from '../../consts/brandColors'
+import { MAP_COLORS } from '../../consts/mapColors'
 
 type MapMarkerType = 'stop' | 'vehicle' | 'user'
 
@@ -23,8 +23,8 @@ const markerStyleMap: Record<MapMarkerType, Partial<CSSStyleDeclaration>> = {
     height: '28px',
     borderRadius: '50%',
     backgroundColor: '#ffffff',
-    border: `2px solid ${BRAND_COLORS.primary}`,
-    color: BRAND_COLORS.ink,
+    border: `2px solid ${MAP_COLORS.route}`,
+    color: MAP_COLORS.markerInk,
     fontSize: '12px',
     fontWeight: '700',
   },
@@ -32,9 +32,9 @@ const markerStyleMap: Record<MapMarkerType, Partial<CSSStyleDeclaration>> = {
     width: '24px',
     height: '24px',
     borderRadius: '8px',
-    backgroundColor: BRAND_COLORS.sun,
+    backgroundColor: MAP_COLORS.vehicle,
     border: '2px solid #ffffff',
-    color: BRAND_COLORS.ink,
+    color: '#ffffff',
     fontSize: '12px',
     fontWeight: '700',
   },
@@ -42,7 +42,7 @@ const markerStyleMap: Record<MapMarkerType, Partial<CSSStyleDeclaration>> = {
     width: '20px',
     height: '20px',
     borderRadius: '50%',
-    backgroundColor: BRAND_COLORS.primary,
+    backgroundColor: MAP_COLORS.userLocation,
     border: '3px solid white',
     zIndex: '1',
   },

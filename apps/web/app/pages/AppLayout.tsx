@@ -85,7 +85,7 @@ export default function AppLayout() {
     >
       <AppShell.Header
         withBorder={false}
-        bg={isSm ? 'brand.8' : undefined}
+        bg={isSm ? 'blue.6' : undefined}
         px="md"
         py={isSm ? 0 : 'xs'}
       >
@@ -145,7 +145,7 @@ export default function AppLayout() {
       >
         <Outlet />
       </AppShell.Main>
-      <AppShell.Footer p="sm" hiddenFrom="sm">
+      <AppShell.Footer p="sm" hiddenFrom="sm" bg="white">
         <Flex justify="space-around" align="center" gap="md">
           {options.map((option) => (
             <Flex

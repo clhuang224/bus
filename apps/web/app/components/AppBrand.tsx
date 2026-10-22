@@ -15,7 +15,7 @@ export const AppBrand = ({ inverted = false }: PropType) => {
       to="/"
       align="center"
       gap="xs"
-      c={inverted ? 'white' : 'brand.8'}
+      c={inverted ? 'white' : 'blue.7'}
       style={{ textDecoration: 'none' }}
     >
       <Image
