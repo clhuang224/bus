@@ -12,6 +12,10 @@ import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerEleme
 import { showMapPopup } from '~/modules/utils/map/showMapPopup'
 import BaseMap from '../common/BaseMap'
 import { RoutePopupContent } from './RoutePopupContent'
+import {
+  MAP_STOP_POPUP_OFFSET,
+  MAP_VEHICLE_POPUP_OFFSET,
+} from '~/modules/consts/layout'
 
 export interface RouteMapStop {
   id: string
@@ -318,7 +322,7 @@ export const RouteMap = ({
       const popup = showMapPopup(
         new mapLibre.Popup({
           closeButton: false,
-          offset: 20,
+          offset: MAP_VEHICLE_POPUP_OFFSET,
           closeOnClick: false,
         })
           .setLngLat(selectedVehicle.position)
@@ -346,7 +350,7 @@ export const RouteMap = ({
     const popup = showMapPopup(
       new mapLibre.Popup({
         closeButton: false,
-        offset: 25,
+        offset: MAP_STOP_POPUP_OFFSET,
         closeOnClick: false,
       })
         .setLngLat(marker.getLngLat())

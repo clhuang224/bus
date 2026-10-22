@@ -9,6 +9,7 @@ import { addMapMarkerActivationListeners } from '~/modules/utils/map/addMapMarke
 import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
 import { showMapPopup } from '~/modules/utils/map/showMapPopup'
 import BaseMap from '../common/BaseMap'
+import { MAP_STOP_POPUP_OFFSET } from '~/modules/consts/layout'
 
 interface PropType {
   center: LatLng | null
@@ -104,7 +105,7 @@ export const NearbyStationMap = ({
 
     const popup = new Popup({
       closeButton: false,
-      offset: 25,
+      offset: MAP_STOP_POPUP_OFFSET,
       closeOnClick: false,
     }).setLngLat(marker.getLngLat())
 

@@ -1,3 +1,4 @@
+import { MAP_MARKER_SIZE } from '../../consts/layout'
 import { MAP_COLORS } from '../../consts/mapColors'
 import { MAP_Z_INDEX } from '../../consts/mapLayers'
 
@@ -20,8 +21,8 @@ interface CreateMapMarkerElementOptions {
 
 const markerStyleMap: Record<MapMarkerType, Partial<CSSStyleDeclaration>> = {
   stop: {
-    width: '28px',
-    height: '28px',
+    width: `${MAP_MARKER_SIZE.stop}px`,
+    height: `${MAP_MARKER_SIZE.stop}px`,
     borderRadius: '50%',
     backgroundColor: '#ffffff',
     border: `2px solid ${MAP_COLORS.route}`,
@@ -30,8 +31,8 @@ const markerStyleMap: Record<MapMarkerType, Partial<CSSStyleDeclaration>> = {
     fontWeight: '700',
   },
   vehicle: {
-    width: '24px',
-    height: '24px',
+    width: `${MAP_MARKER_SIZE.vehicle}px`,
+    height: `${MAP_MARKER_SIZE.vehicle}px`,
     borderRadius: '8px',
     backgroundColor: MAP_COLORS.vehicle,
     border: '2px solid #ffffff',
@@ -40,8 +41,8 @@ const markerStyleMap: Record<MapMarkerType, Partial<CSSStyleDeclaration>> = {
     fontWeight: '700',
   },
   user: {
-    width: '20px',
-    height: '20px',
+    width: `${MAP_MARKER_SIZE.user}px`,
+    height: `${MAP_MARKER_SIZE.user}px`,
     borderRadius: '50%',
     backgroundColor: MAP_COLORS.userLocation,
     border: '3px solid white',

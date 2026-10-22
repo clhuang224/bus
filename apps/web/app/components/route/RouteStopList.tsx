@@ -24,6 +24,7 @@ import { RouteRealtimeBadge } from './RouteRealtimeBadge'
 import { RouteRealtimeGap } from './RouteRealtimeGap'
 import { NavigationButton } from '../common/NavigationButton'
 import type { LngLat } from '~/modules/types/CoordsType'
+import { ROUTE_STOP_BULLET_SIZE } from '~/modules/consts/layout'
 
 export interface RouteStopListItem {
   estimatedArrivalLabel: string | null
@@ -146,7 +147,11 @@ export const RouteStopList = ({
             <Skeleton h={52} radius="md" />
           </SkeletonList>
         ) : (
-          <Timeline active={-1} bulletSize={28} lineWidth={2}>
+          <Timeline
+            active={-1}
+            bulletSize={ROUTE_STOP_BULLET_SIZE}
+            lineWidth={2}
+          >
             {stops.map((stop, stopIndex) => {
               const isHighlighted = stop.id === highlightedStopId
               const isSelected = stop.id === selectedStopId
@@ -186,10 +191,10 @@ export const RouteStopList = ({
                   }}
                   bullet={
                     <Box
-                      w={28}
-                      h={28}
+                      w={ROUTE_STOP_BULLET_SIZE}
+                      h={ROUTE_STOP_BULLET_SIZE}
                       style={{
-                        flex: '0 0 28px',
+                        flex: `0 0 ${ROUTE_STOP_BULLET_SIZE}px`,
                         borderRadius: '50%',
                         backgroundColor: 'var(--mantine-color-white)',
                         border: '2px solid var(--mantine-color-blue-5)',

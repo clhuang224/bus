@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router'
 import { isSupportedAppLocale } from '~/modules/consts/i18n'
-import { APP_PAGE_PADDING } from '~/modules/consts/layout'
+import { APP_PAGE_MAX_WIDTH, APP_PAGE_PADDING } from '~/modules/consts/layout'
 import { AppLocaleType } from '@bus/shared'
 import {
   selectAnalyticsEnabled,
@@ -46,7 +46,13 @@ export default function Settings() {
 
   return (
     <Flex justify="center" h="100%">
-      <Card p={APP_PAGE_PADDING} w="100%" maw={720} h="100%" withBorder={false}>
+      <Card
+        p={APP_PAGE_PADDING}
+        w="100%"
+        maw={APP_PAGE_MAX_WIDTH}
+        h="100%"
+        withBorder={false}
+      >
         <Stack gap="md">
           <Flex align="flex-start" gap="sm">
             {isSm && (

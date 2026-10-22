@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { AreaType } from '@bus/shared'
 import { getAreaTranslationKey } from '~/modules/utils/i18n/getAreaTranslationKey'
 import { getEnumValues } from '~/modules/utils/shared/getEnumValues'
+import { AREA_SELECT_WIDTH } from '~/modules/consts/layout'
 
 export interface AreaSelectPropType {
   value: AreaType
@@ -27,7 +28,7 @@ export const AreaSelect = (props: AreaSelectPropType): ReactElement => {
   return (
     <Select
       aria-label={t('components.areaSelect.ariaLabel')}
-      flex="0 0 124px"
+      flex={`0 0 ${AREA_SELECT_WIDTH}px`}
       value={value}
       data={options}
       onChange={(value) => {

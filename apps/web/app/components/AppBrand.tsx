@@ -1,6 +1,7 @@
 import { Flex, Image, Title } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
+import { APP_BRAND_MARK_SIZE } from '~/modules/consts/layout'
 
 interface PropType {
   inverted?: boolean
@@ -21,8 +22,8 @@ export const AppBrand = ({ inverted = false }: PropType) => {
       <Image
         src={`${import.meta.env.BASE_URL}favicon.svg`}
         alt=""
-        w={32}
-        h={32}
+        w={APP_BRAND_MARK_SIZE}
+        h={APP_BRAND_MARK_SIZE}
       />
       <Title
         order={1}

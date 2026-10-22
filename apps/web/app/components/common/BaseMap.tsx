@@ -20,7 +20,9 @@ import type { RootState } from '~/modules/store'
 import { toLngLat } from '~/modules/utils/geo/convertCoordinates'
 import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
 import {
+  APP_ACTION_ICON_SIZE,
   APP_FLOATING_ACTION_OFFSET,
+  MAP_CONTROLS_BOTTOM_OFFSET,
   MAP_OVERLAY_BOTTOM_INSET_VAR,
   MAP_OVERLAY_TOP_INSET_VAR,
 } from '~/modules/consts/layout'
@@ -164,7 +166,7 @@ const BaseMap = ({
         <Flex
           pos="absolute"
           right={APP_FLOATING_ACTION_OFFSET}
-          bottom={`calc(var(${MAP_OVERLAY_BOTTOM_INSET_VAR}, 0px) + 48px)`}
+          bottom={`calc(var(${MAP_OVERLAY_BOTTOM_INSET_VAR}, 0px) + ${MAP_CONTROLS_BOTTOM_OFFSET}px)`}
           direction="column"
           gap="sm"
           style={{ zIndex: MAP_Z_INDEX.controls }}
@@ -185,7 +187,7 @@ const BaseMap = ({
               }}
               disabled={!userLngLat || !map}
             >
-              <RiFocus3Line size={18} />
+              <RiFocus3Line size={APP_ACTION_ICON_SIZE} />
             </ActionIcon>
           )}
         </Flex>
