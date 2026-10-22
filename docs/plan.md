@@ -222,24 +222,21 @@ The work is split into steps so each one can be reviewed on its own:
 
 Decisions for steps 3 to 5:
 
-- **Font.** Use jf open huninn (jf 粉圓), loaded as Huninn from Google Fonts, which splits it by character range so a page only downloads the characters it shows. It has one weight, so headings get their emphasis from size and color rather than bold.
-- **Palette.** Five colors: `#086788`, `#07a0c3`, `#f0c808`, `#fff1d0`, and `#dd1c1a`. All are highly saturated, and they fall into two groups:
-  - Cool, hue about 193°: `#086788` (lightness 28%) and `#07a0c3` (40%) share a hue and differ only in lightness, so they work as ink and primary color.
-  - Warm: `#f0c808` (hue 50°) and `#fff1d0` (42°) are a yellow and its pale tint, and `#dd1c1a` (1°) is the alert color.
-- **Color roles.** Cool colors mark the structure of a route, and warm colors mark what moves or needs attention:
+- **Font.** Use Chiron GoRound TC, a rounded Traditional Chinese font from Google Fonts with regular and bold weights. Google Fonts splits it by character range, so a page only downloads the characters it shows. jf open huninn was tried first, but it has a single weight and headings need a real bold.
+- **How colors are chosen.** Colors are assigned by the job they do, and every color that must be told apart is checked with a palette validator for lightness, chroma, separation under color blindness, normal-vision separation, and contrast:
+  - Map identities, which can sit next to each other anywhere on the map, are limited to three hues that pass the all-pairs check: blue `#2a78d6` for the route and its stops, orange `#eb6834` for vehicles, and green `#1baf7a` for the highlighted stop. Each marker also has a white ring and a number or icon, so color is never the only cue.
+  - Status colors are reserved for messages: red `#d03b3b` for errors and yellow `#fab219` for warnings, always with a title and text.
+  - Each color is a Mantine palette of ten steps built in OKLCH around the chosen value, overriding Mantine's built-in color of the same name, so component code keeps using `blue`, `orange`, `teal`, `red`, `yellow`, `pink`, and `gray`. Step 6, used for text in light variants, keeps at least 4.5:1 contrast on white.
 
-  | Role                                             | Color                                               |
-  | ------------------------------------------------ | --------------------------------------------------- |
-  | Text, headings, route lines, mobile banner       | `#086788`                                           |
-  | Primary actions, active navigation, route badges | `#07a0c3`                                           |
-  | Stops                                            | white with a `#07a0c3` outline                      |
-  | Vehicles and realtime cues                       | `#f0c808` with `#086788` text                       |
-  | Highlighted stop, favorites, errors              | `#dd1c1a`                                           |
-  | Page background                                  | `#fff1d0`                                           |
-  | City badges                                      | a solid, slightly deeper cream with brown text      |
-  | Neutral gray                                     | low-saturation tints of the cool hue, not pure gray |
-
-- **Contrast.** White text works on `#086788` (6.4:1) and `#dd1c1a` (4.9:1), but on `#07a0c3` (3.1:1) only for large or bold text and icons. Text on `#f0c808` uses `#086788` or darker.
+  | Role                                 | Color                                      |
+  | ------------------------------------ | ------------------------------------------ |
+  | Site heading, primary actions, route | blue                                       |
+  | Mobile banner                        | blue, with white text                      |
+  | Vehicles and realtime cues           | orange                                     |
+  | Highlighted stop                     | green (`teal`)                             |
+  | Favorites                            | pink                                       |
+  | Errors and warnings                  | red and yellow                             |
+  | Page background, city badges         | light cool gray, with white cards and bars |
 
 ## Backlog
 
