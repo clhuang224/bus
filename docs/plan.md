@@ -238,6 +238,22 @@ Decisions for steps 3 to 5:
   | Errors and warnings                  | red and yellow                             |
   | Page background, city badges         | light cool gray, with white cards and bars |
 
+### UI and UX Follow-ups
+
+A design review of the visual refresh, at desktop (1440px) and mobile (375px) widths, found these issues. They are left for a later pass so the refresh itself stays reviewable. In order of priority:
+
+1. **Nearby stops without location.** When location access is denied, mobile shows only a blank map. The error message sits inside the closed drawer, so nothing tells the user why. Open the drawer, or show the error over the map, in this state.
+2. **Touch targets and link names.** The favorite heart button is 28×28 and the settings button is 34×34, below the 44×44 target size. The favorite card link and the site heading link have no accessible name.
+3. **Page frames and cards.** Favorites puts cards straight on the gray page, while search and settings put a full-height white column behind bordered white cards, so those pages are framed twice. Cards also differ: favorite cards use a shadow and no border, while recent routes and settings cards use a border and no shadow. Pick one page frame and one card style.
+4. **Blue text on light blue.** Blue step 6 keeps 4.5:1 on white, but on the 10% blue fill of the active navigation item and the service status title it drops to about 4.2:1. Use a darker step on tinted fills.
+5. **Map loading.** On desktop the map area stays blank for several seconds before tiles appear, with no loading cue.
+6. **Mobile route map.** With the drawer closed, the route number shows nowhere on screen, and stop markers overlap at the initial zoom. Show a small route label on the map, and consider fewer markers at low zoom.
+7. **Smaller details.**
+   - The button that opens the drawer uses a hamburger icon, which reads as a main menu. Use a list icon or a text label.
+   - The mobile bottom navigation puts the label above the icon, the reverse of the common pattern.
+   - The logo circle in the mobile banner is blue on the blue banner, so its outline barely shows.
+   - The service status card takes a lot of space when it only says there is no service. A one-line notice is enough.
+
 ## Backlog
 
 These wait until the backend is deployed and stable:
