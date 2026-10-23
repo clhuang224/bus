@@ -41,6 +41,11 @@ export const NearbyStationMap = ({
   )
   const markerMap = useRef<Map<string, Marker>>(new Map<string, Marker>())
   const popupRef = useRef<Popup | null>(null)
+  const selectedStationRef = useRef(selectedStation)
+
+  useEffect(() => {
+    selectedStationRef.current = selectedStation
+  }, [selectedStation])
 
   useEffect(() => {
     if (!map) return
@@ -66,7 +71,7 @@ export const NearbyStationMap = ({
       const handleSelectStation = (event: MouseEvent | KeyboardEvent) => {
         event.preventDefault()
         event.stopPropagation()
-        onSelectStation(data.id)
+        onSelectStation(data.id === selectedStationRef.current ? null : data.id)
       }
 
       markerCleanupFns.push(

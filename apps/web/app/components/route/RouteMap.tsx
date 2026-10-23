@@ -37,7 +37,7 @@ interface PropType {
   highlightedStopId?: string | null
   isSm?: boolean
   onSelectStop: (stopId: string | null) => void
-  onSelectVehicle: (vehicleId: string) => void
+  onSelectVehicle: (vehicleId: string | null) => void
   routePath?: LngLat[]
   selectedStop: string | null
   selectedStopEstimatedArrivalLabel?: string | null
@@ -215,7 +215,7 @@ export const RouteMap = ({
       const handleSelectStop = (event: MouseEvent | KeyboardEvent) => {
         event.preventDefault()
         event.stopPropagation()
-        onSelectStop(stop.id)
+        onSelectStop(stop.id === selectedStop ? null : stop.id)
       }
 
       markerCleanupFns.push(
@@ -245,8 +245,13 @@ export const RouteMap = ({
       const handleOpenVehiclePopup = (event: MouseEvent | KeyboardEvent) => {
         event.preventDefault()
         event.stopPropagation()
-        onSelectVehicle(vehicle.id)
 
+        if (vehicle.id === selectedVehicleId) {
+          onSelectVehicle(null)
+          return
+        }
+
+        onSelectVehicle(vehicle.id)
         map.flyTo({
           center: vehicle.position,
           zoom: 16,

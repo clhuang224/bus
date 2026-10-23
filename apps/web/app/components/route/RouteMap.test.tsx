@@ -8,90 +8,94 @@ import { createTestStore } from '~/test/createTestStore'
 import { renderWithStore } from '~/test/render'
 import { RouteMap } from './RouteMap'
 
-const { mockMap, MockLngLatBounds, MockMarker, MockPopup } = vi.hoisted(() => {
-  const mockMap = {
-    isStyleLoaded: () => true,
-    once: vi.fn(),
-    off: vi.fn(),
-    addSource: vi.fn(),
-    addLayer: vi.fn(),
-    getLayer: vi.fn(() => null),
-    getSource: vi.fn(() => null),
-    removeLayer: vi.fn(),
-    removeSource: vi.fn(),
-    fitBounds: vi.fn(),
-    flyTo: vi.fn(),
-  }
-
-  class MockMarker {
-    private lngLat: [number, number] = [0, 0]
-    private element: HTMLElement
-
-    constructor({ element }: { element: HTMLElement }) {
-      this.element = element
+const { markerElements, mockMap, MockLngLatBounds, MockMarker, MockPopup } =
+  vi.hoisted(() => {
+    const markerElements: HTMLElement[] = []
+    const mockMap = {
+      isStyleLoaded: () => true,
+      once: vi.fn(),
+      off: vi.fn(),
+      addSource: vi.fn(),
+      addLayer: vi.fn(),
+      getLayer: vi.fn(() => null),
+      getSource: vi.fn(() => null),
+      removeLayer: vi.fn(),
+      removeSource: vi.fn(),
+      fitBounds: vi.fn(),
+      flyTo: vi.fn(),
     }
 
-    setLngLat(lngLat: [number, number]) {
-      this.lngLat = lngLat
-      return this
+    class MockMarker {
+      private lngLat: [number, number] = [0, 0]
+      private element: HTMLElement
+
+      constructor({ element }: { element: HTMLElement }) {
+        this.element = element
+        markerElements.push(element)
+      }
+
+      setLngLat(lngLat: [number, number]) {
+        this.lngLat = lngLat
+        return this
+      }
+
+      addTo() {
+        return this
+      }
+
+      remove() {}
+
+      getLngLat() {
+        return this.lngLat
+      }
+
+      getElement() {
+        return this.element
+      }
     }
 
-    addTo() {
-      return this
+    class MockPopup {
+      private container: HTMLDivElement | null = null
+      private element = document.createElement('div')
+
+      getElement() {
+        return this.element
+      }
+
+      setLngLat() {
+        return this
+      }
+
+      setDOMContent(container: HTMLDivElement) {
+        this.container = container
+        document.body.appendChild(container)
+        return this
+      }
+
+      addTo() {
+        return this
+      }
+
+      remove() {
+        this.container?.remove()
+        this.container = null
+      }
     }
 
-    remove() {}
-
-    getLngLat() {
-      return this.lngLat
+    class MockLngLatBounds {
+      extend() {
+        return this
+      }
     }
 
-    getElement() {
-      return this.element
+    return {
+      markerElements,
+      mockMap,
+      MockMarker,
+      MockPopup,
+      MockLngLatBounds,
     }
-  }
-
-  class MockPopup {
-    private container: HTMLDivElement | null = null
-    private element = document.createElement('div')
-
-    getElement() {
-      return this.element
-    }
-
-    setLngLat() {
-      return this
-    }
-
-    setDOMContent(container: HTMLDivElement) {
-      this.container = container
-      document.body.appendChild(container)
-      return this
-    }
-
-    addTo() {
-      return this
-    }
-
-    remove() {
-      this.container?.remove()
-      this.container = null
-    }
-  }
-
-  class MockLngLatBounds {
-    extend() {
-      return this
-    }
-  }
-
-  return {
-    mockMap,
-    MockMarker,
-    MockPopup,
-    MockLngLatBounds,
-  }
-})
+  })
 
 vi.mock('maplibre-gl', () => ({
   Marker: MockMarker,
@@ -114,9 +118,114 @@ vi.mock('../common/BaseMap', () => ({
   },
 }))
 
+const createGeolocationStore = () =>
+  createTestStore({
+    reducer: {
+      geolocation: geoSlice.reducer,
+    },
+    preloadedState: {
+      geolocation: {
+        ...geoSlice.getInitialState(),
+        coords: [25.033, 121.5654],
+        error: null,
+      },
+    },
+  })
+
+const findMarkerElement = (labelText: string) =>
+  [...markerElements]
+    .reverse()
+    .find((element) => element.getAttribute('aria-label')?.includes(labelText))
+
+const stop = {
+  id: 'stop-1',
+  name: '市政府',
+  position: [121.55, 25.03] as [number, number],
+  sequence: 1,
+}
+
+const vehicle = {
+  id: 'vehicle-1',
+  estimateLabel: '3 分',
+  plateNumb: 'EAL-2082',
+  position: [121.551, 25.031] as [number, number],
+  stopName: '市政府',
+}
+
 describe('RouteMap', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
+    markerElements.length = 0
+  })
+
+  it('clears the selected stop when its marker is clicked again', async () => {
+    const onSelectStop = vi.fn()
+
+    renderWithStore(
+      <RouteMap
+        onSelectStop={onSelectStop}
+        onSelectVehicle={vi.fn()}
+        selectedStop="stop-1"
+        stops={[stop]}
+        vehicles={[]}
+      />,
+      { store: createGeolocationStore() },
+    )
+
+    await waitFor(() => {
+      expect(findMarkerElement(stop.name)).toBeDefined()
+    })
+    findMarkerElement(stop.name)?.click()
+
+    expect(onSelectStop).toHaveBeenCalledWith(null)
+  })
+
+  it('selects a stop when an unselected stop marker is clicked', async () => {
+    const onSelectStop = vi.fn()
+
+    renderWithStore(
+      <RouteMap
+        onSelectStop={onSelectStop}
+        onSelectVehicle={vi.fn()}
+        selectedStop={null}
+        stops={[stop]}
+        vehicles={[]}
+      />,
+      { store: createGeolocationStore() },
+    )
+
+    await waitFor(() => {
+      expect(findMarkerElement(stop.name)).toBeDefined()
+    })
+    findMarkerElement(stop.name)?.click()
+
+    expect(onSelectStop).toHaveBeenCalledWith(stop.id)
+  })
+
+  it('clears the selected vehicle when its marker is clicked again', async () => {
+    const onSelectVehicle = vi.fn()
+
+    renderWithStore(
+      <RouteMap
+        onSelectStop={vi.fn()}
+        onSelectVehicle={onSelectVehicle}
+        selectedStop={null}
+        selectedVehicleId={vehicle.id}
+        stops={[stop]}
+        vehicles={[vehicle]}
+      />,
+      { store: createGeolocationStore() },
+    )
+
+    await waitFor(() => {
+      expect(findMarkerElement(vehicle.plateNumb)).toBeDefined()
+    })
+    findMarkerElement(vehicle.plateNumb)?.click()
+
+    expect(onSelectVehicle).toHaveBeenCalledWith(null)
+    expect(mockMap.flyTo).not.toHaveBeenCalledWith(
+      expect.objectContaining({ center: vehicle.position }),
+    )
   })
 
   it('renders only the stop name in the selected stop popup', async () => {
