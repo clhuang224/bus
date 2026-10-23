@@ -104,7 +104,7 @@ const theme = createTheme({
   defaultRadius: 'md',
   autoContrast: true,
   components: {
-    Card: Card.extend({ defaultProps: { radius: 'lg' } }),
+    Card: Card.extend({ defaultProps: { radius: 'lg', shadow: 'sm' } }),
   },
 })
 
