@@ -2,12 +2,14 @@ import {
   ActionIcon,
   Alert,
   Box,
+  Center,
   Group,
   ScrollArea,
   Skeleton,
   Stack,
   Text,
   Timeline,
+  UnstyledButton,
 } from '@mantine/core'
 import { RiHeart2Fill, RiHeart2Line } from '@remixicon/react'
 import { useMemo, useRef } from 'react'
@@ -131,9 +133,9 @@ export const RouteStopList = ({
   }
 
   return (
-    <Stack h="100%" gap="xs" style={{ minHeight: 0 }}>
+    <Stack h="100%" gap="xs" mih={0}>
       {realtimeMessage === routeRealtimeMessages.noService ? (
-        <Text size="sm" c="dimmed" style={{ flex: '0 0 auto' }}>
+        <Text size="sm" c="dimmed" flex="0 0 auto">
           {realtimeMessage.description}
         </Text>
       ) : (
@@ -141,13 +143,13 @@ export const RouteStopList = ({
           <Alert
             color={realtimeMessage.color}
             title={realtimeMessage.title}
-            style={{ flex: '0 0 auto' }}
+            flex="0 0 auto"
           >
             {realtimeMessage.description}
           </Alert>
         )
       )}
-      <ScrollArea style={{ flex: 1, minHeight: 0 }}>
+      <ScrollArea flex={1} mih={0}>
         {isLoading ? (
           <SkeletonList count={6} gap="sm" testId="route-stop-list-skeleton">
             <Skeleton h={52} radius="md" />
@@ -196,25 +198,20 @@ export const RouteStopList = ({
                     },
                   }}
                   bullet={
-                    <Box
+                    <Center
                       w={ROUTE_STOP_BULLET_SIZE}
                       h={ROUTE_STOP_BULLET_SIZE}
-                      style={{
-                        flex: `0 0 ${ROUTE_STOP_BULLET_SIZE}px`,
-                        borderRadius: '50%',
-                        backgroundColor: 'var(--mantine-color-white)',
-                        border: '2px solid var(--mantine-color-blue-5)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'var(--mantine-color-gray-9)',
-                        fontSize: '12px',
-                        fontWeight: 700,
-                        lineHeight: 1,
-                      }}
+                      flex={`0 0 ${ROUTE_STOP_BULLET_SIZE}px`}
+                      bdrs="50%"
+                      bg="white"
+                      bd="2px solid blue.5"
+                      c="gray.9"
+                      fz="xs"
+                      fw={700}
+                      lh={1}
                     >
                       {stop.sequence}
-                    </Box>
+                    </Center>
                   }
                   title={
                     <Box
@@ -232,7 +229,7 @@ export const RouteStopList = ({
                       pt={4}
                       pb="xs"
                       bg={isHighlighted ? 'blue.0' : undefined}
-                      style={{ borderRadius: 'var(--mantine-radius-sm)' }}
+                      bdrs="sm"
                     >
                       <Stack gap={4} pr="sm">
                         <Group
@@ -241,25 +238,21 @@ export const RouteStopList = ({
                           wrap="nowrap"
                         >
                           <Group align="center" gap="xs">
-                            <Text
-                              component="button"
-                              type="button"
-                              lineClamp={1}
-                              fw={isHighlighted || isSelected ? 700 : undefined}
-                              c={isHighlighted ? 'blue.8' : undefined}
-                              style={{
-                                flex: 1,
-                                minWidth: 0,
-                                cursor: 'pointer',
-                                background: 'none',
-                                border: 0,
-                                padding: 0,
-                                textAlign: 'left',
-                              }}
+                            <UnstyledButton
+                              flex={1}
+                              miw={0}
                               onClick={() => onSelectStop(stop.id)}
                             >
-                              {stop.name}
-                            </Text>
+                              <Text
+                                lineClamp={1}
+                                fw={
+                                  isHighlighted || isSelected ? 700 : undefined
+                                }
+                                c={isHighlighted ? 'blue.8' : undefined}
+                              >
+                                {stop.name}
+                              </Text>
+                            </UnstyledButton>
                             <NavigationButton
                               ariaLabel={t(
                                 'components.routeStopList.navigateAriaLabel',
@@ -303,7 +296,7 @@ export const RouteStopList = ({
                             align="center"
                             wrap="nowrap"
                           >
-                            <Box style={{ flex: 1, minWidth: 0 }}>
+                            <Box flex={1} miw={0}>
                               {stop.estimatedArrivalLabel && (
                                 <Text size="xs" c="dimmed">
                                   {stop.estimatedArrivalLabel}
@@ -315,7 +308,8 @@ export const RouteStopList = ({
                               wrap="wrap"
                               justify="flex-end"
                               pr="xl"
-                              style={{ minWidth: 0, maxWidth: '100%' }}
+                              miw={0}
+                              maw="100%"
                             >
                               {stopLevelRealtimeBuses.map((bus) => (
                                 <RouteRealtimeBadge

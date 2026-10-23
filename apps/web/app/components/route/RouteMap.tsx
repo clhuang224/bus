@@ -200,7 +200,7 @@ export const RouteMap = ({
         }),
         ...(isHighlighted && {
           backgroundColor: MAP_COLORS.highlightedStop,
-          borderColor: '#ffffff',
+          borderColor: MAP_COLORS.markerOutline,
           color: MAP_COLORS.markerInk,
         }),
         datasetLabel: stop.name,

@@ -76,7 +76,7 @@ const NearbySidebarContentDetail = ({
   const stationBearingLabel = getStationBearingLabel(t, detailState.station!)
 
   return (
-    <Stack gap="sm" style={{ flex: 1, minHeight: 0 }}>
+    <Stack gap="sm" flex={1} mih={0}>
       <Flex gap="xs" align="center">
         <ActionIcon
           aria-label={t('components.nearbySidebarContent.backAriaLabel')}
@@ -84,12 +84,7 @@ const NearbySidebarContentDetail = ({
         >
           <RiArrowLeftSLine size={APP_ACTION_ICON_SIZE} />
         </ActionIcon>
-        <Title
-          order={2}
-          size="h4"
-          style={{ flex: 1, minWidth: 0 }}
-          lineClamp={1}
-        >
+        <Title order={2} size="h4" flex={1} miw={0} lineClamp={1}>
           {getLocalizedText(detailState.station!.name, locale)}
         </Title>
         {stationBearingLabel && (
@@ -98,7 +93,7 @@ const NearbySidebarContentDetail = ({
           </Text>
         )}
       </Flex>
-      <Stack gap="sm" style={{ flex: 1, minHeight: 0 }}>
+      <Stack gap="sm" flex={1} mih={0}>
         <Stack gap={2}>
           <Text size="sm" c="dimmed">
             {t('components.nearbyStopDetail.distanceLabel')}
@@ -156,10 +151,7 @@ const NearbySidebarContentList = ({
   const locale = useSelector(selectLocale)
 
   return (
-    <ScrollArea
-      viewportRef={listState.scrollViewportRef}
-      style={{ flex: 1, minHeight: 0 }}
-    >
+    <ScrollArea viewportRef={listState.scrollViewportRef} flex={1} mih={0}>
       {listState.isStationsLoading && (
         <SkeletonList count={5} gap="sm" testId="nearby-stops-skeleton">
           <Skeleton h={56} radius="md" />
@@ -196,10 +188,7 @@ const NearbySidebarContentList = ({
                     gap="xs"
                     w="100%"
                   >
-                    <Text
-                      style={{ flex: '1 1 auto', minWidth: 0 }}
-                      lineClamp={1}
-                    >
+                    <Text flex="1 1 auto" miw={0} lineClamp={1}>
                       {getLocalizedText(station.name, locale)}
                     </Text>
                     {stationBearingLabel && (

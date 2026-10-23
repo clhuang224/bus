@@ -53,10 +53,7 @@ export default function Routes() {
           <SearchInput value={keyword} onChange={setKeyword} />
         </Flex>
         {message && <BaseAlert {...message} />}
-        <ScrollArea
-          viewportRef={scrollViewportRef}
-          style={{ flex: 1, minHeight: 0 }}
-        >
+        <ScrollArea viewportRef={scrollViewportRef} flex={1} mih={0}>
           <Stack gap="sm">
             {showRecentRoutesTitle && (
               <Title order={3} size="h5">

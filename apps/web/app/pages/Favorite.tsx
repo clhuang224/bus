@@ -46,7 +46,7 @@ export default function Favorite() {
         {sortedFavoriteRouteStops.length === 0 ? (
           <BaseAlert {...favoriteMessages.emptyFavoriteRouteStops} />
         ) : (
-          <ScrollArea style={{ flex: 1, minHeight: 0 }}>
+          <ScrollArea flex={1} mih={0}>
             <Stack gap="sm">
               {sortedFavoriteRouteStops.map((favoriteRouteStop) => (
                 <FavoriteRouteStopCard

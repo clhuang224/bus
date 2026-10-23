@@ -121,7 +121,7 @@ const Nearby = () => {
     >
       {isNearbyDisabled && (
         <Overlay
-          color="#fff"
+          color="var(--mantine-color-white)"
           backgroundOpacity={0.55}
           zIndex={1}
           style={{ cursor: 'not-allowed' }}

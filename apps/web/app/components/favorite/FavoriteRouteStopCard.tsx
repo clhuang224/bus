@@ -37,12 +37,10 @@ export const FavoriteRouteStopCard = ({
             component={Link}
             to={`/routes/${favoriteRouteStop.city}/${favoriteRouteStop.routeUID}`}
             state={{ favoriteRouteStop }}
-            style={{
-              color: 'inherit',
-              flex: 1,
-              minWidth: 0,
-              textDecoration: 'none',
-            }}
+            c="inherit"
+            flex={1}
+            miw={0}
+            td="none"
           >
             <Stack gap="xs">
               <Group gap="xs" wrap="wrap">

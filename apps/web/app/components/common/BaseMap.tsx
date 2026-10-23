@@ -1,4 +1,4 @@
-import { ActionIcon, Box } from '@mantine/core'
+import { ActionIcon, alpha, Box } from '@mantine/core'
 import { useId } from '@mantine/hooks'
 import * as mapLibre from 'maplibre-gl'
 import { type Map, Marker, LngLat as MapLngLat } from 'maplibre-gl'
@@ -26,6 +26,7 @@ import {
   MAP_OVERLAY_BOTTOM_INSET_VAR,
   MAP_OVERLAY_TOP_INSET_VAR,
 } from '~/modules/consts/layout'
+import { MAP_COLORS } from '~/modules/consts/mapColors'
 import { MAP_Z_INDEX } from '~/modules/consts/mapLayers'
 import { MapOverlayInsetsContext } from './mapOverlayInsetsContext'
 
@@ -164,7 +165,7 @@ const BaseMap = ({
 
     const el = createMapMarkerElement({
       ariaLabel: t('components.baseMap.userLocationMarkerAriaLabel'),
-      boxShadow: '0 0 0 6px rgba(42, 120, 214, 0.3)',
+      boxShadow: `0 0 0 6px ${alpha(MAP_COLORS.route, 0.3)}`,
       type: 'user',
     })
 
@@ -179,8 +180,8 @@ const BaseMap = ({
   }, [map, showUserLocation, t, userLngLat])
 
   return (
-    <Box pos="relative" style={{ width: '100%', height: '100%' }}>
-      <Box id={id} style={{ width: '100%', height: '100%', font: 'inherit' }} />
+    <Box pos="relative" w="100%" h="100%">
+      <Box id={id} w="100%" h="100%" style={{ font: 'inherit' }} />
       {showUserLocation && (
         <ActionIcon
           aria-label={t('components.baseMap.focusUserLocationAriaLabel')}

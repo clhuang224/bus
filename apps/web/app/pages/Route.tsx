@@ -182,12 +182,10 @@ export default function Route() {
               value={activeTab}
               onChange={setActiveTab}
               keepMounted={false}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                flex: 1,
-                minHeight: 0,
-              }}
+              display="flex"
+              flex={1}
+              mih={0}
+              style={{ flexDirection: 'column' }}
             >
               <Tabs.List
                 style={{
@@ -197,11 +195,7 @@ export default function Route() {
                 }}
               >
                 {routeTabs.map((tab) => (
-                  <Tabs.Tab
-                    key={tab.id}
-                    value={tab.id}
-                    style={{ flex: '0 0 auto' }}
-                  >
+                  <Tabs.Tab key={tab.id} value={tab.id} flex="0 0 auto">
                     {tab.label}
                   </Tabs.Tab>
                 ))}
@@ -212,7 +206,8 @@ export default function Route() {
                   key={tab.id}
                   value={tab.id}
                   pt="md"
-                  style={{ flex: 1, minHeight: 0 }}
+                  flex={1}
+                  mih={0}
                 >
                   <RouteStopList
                     highlightedStopId={highlightedStopId}

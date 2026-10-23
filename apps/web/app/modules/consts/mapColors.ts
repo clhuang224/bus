@@ -4,4 +4,5 @@ export const MAP_COLORS = {
   highlightedStop: '#1baf7a',
   userLocation: '#2372cf',
   markerInk: '#171b20',
+  markerOutline: '#ffffff',
 } as const

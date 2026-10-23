@@ -42,7 +42,7 @@ export const NearbyStationDetail = ({
   if (displayMode === 'title') {
     return (
       <Flex gap="xs" align="center" wrap="nowrap">
-        <Text style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
+        <Text flex={1} miw={0} lineClamp={1}>
           {stopName}
         </Text>
         {Boolean(bearingLabel) && (

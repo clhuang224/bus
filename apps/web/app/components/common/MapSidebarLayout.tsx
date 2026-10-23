@@ -1,4 +1,4 @@
-import { Box, Flex } from '@mantine/core'
+import { Box, Flex, Paper } from '@mantine/core'
 import { useMemo, useState, type ReactNode } from 'react'
 import {
   APP_MOBILE_HEADER_HEIGHT,
@@ -53,26 +53,25 @@ export const MapSidebarLayout = ({
     >
       <Flex h="100%" pos="relative">
         {!isSm && (
-          <Box
+          <Paper
             w={MAP_SIDEBAR_WIDTH}
             h="100%"
             p={APP_PAGE_PADDING}
+            flex={`0 0 ${MAP_SIDEBAR_WIDTH}px`}
             bg="white"
-            style={{
-              flex: `0 0 ${MAP_SIDEBAR_WIDTH}px`,
-              boxShadow: 'var(--mantine-shadow-sm)',
-            }}
+            radius={0}
+            shadow="sm"
           >
             {panel}
-          </Box>
+          </Paper>
         )}
 
         <Flex
           pos={isSm ? 'fixed' : 'relative'}
           inset={isSm ? 0 : undefined}
+          flex={1}
+          miw={0}
           style={{
-            flex: 1,
-            minWidth: 0,
             ...(isSm && {
               [MAP_OVERLAY_TOP_INSET_VAR]: `${mapOverlayInsets.top}px`,
               [MAP_OVERLAY_BOTTOM_INSET_VAR]: `${mapOverlayInsets.bottom}px`,

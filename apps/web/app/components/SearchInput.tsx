@@ -26,7 +26,7 @@ export const SearchInput = (props: SearchInputPropType): ReactElement => {
           />
         )
       }
-      style={{ '--input-right-section-pointer-events': 'auto' }}
+      rightSectionPointerEvents="auto"
       value={props.value}
       onChange={(e) => {
         props.onChange(e.currentTarget.value)
