@@ -31,8 +31,8 @@ export const AppNavLink = (props: AppNavLinkPropType) => {
       aria-label={props.ariaLabel ?? props.label}
       label={
         <Flex align="center" justify="center" direction="column">
-          {props.label}
           {isActive ? (props.iconActive ?? props.icon) : props.icon}
+          {props.label}
         </Flex>
       }
       active={isActive}
