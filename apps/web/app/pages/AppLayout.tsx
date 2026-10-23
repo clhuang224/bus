@@ -158,7 +158,8 @@ export default function AppLayout() {
         bg="white"
         style={{
           borderTop: 'none',
-          boxShadow: 'var(--mantine-shadow-sm)',
+          boxShadow:
+            '0 -1px 2px rgba(0, 0, 0, 0.04), 0 -4px 12px rgba(0, 0, 0, 0.06)',
           borderRadius: 'var(--mantine-radius-xl) var(--mantine-radius-xl) 0 0',
         }}
       >
