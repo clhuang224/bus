@@ -14,6 +14,7 @@ import { BaseAlert } from '~/components/common/BaseAlert'
 import { MapSidebarLayout } from '~/components/common/MapSidebarLayout'
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { RouteMap } from '~/components/route/RouteMap'
+import { RouteMapLabel } from '~/components/route/RouteMapLabel'
 import { RouteStopList } from '~/components/route/RouteStopList'
 import { useFavoriteRouteStops } from '~/modules/hooks/favorite/useFavoriteRouteStops'
 import { useRouteBaseData } from '~/modules/hooks/route/useRouteBaseData'
@@ -235,6 +236,15 @@ export default function Route() {
         </Stack>
       }
     >
+      {isSm && routeName && (
+        <RouteMapLabel
+          routeName={routeName}
+          directionLabel={
+            routeTabs.find((tab) => tab.id === activeTab)?.label ?? null
+          }
+          onClick={openSidebar}
+        />
+      )}
       <RouteMap
         extraControls={
           isSm ? (
