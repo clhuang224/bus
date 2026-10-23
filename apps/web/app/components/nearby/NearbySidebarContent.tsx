@@ -29,6 +29,7 @@ import { getCityTranslationKey } from '~/modules/utils/i18n/getCityTranslationKe
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 import { getStationBearingLabel } from '~/modules/utils/nearby/getStationBearingLabel'
 import { NearbyStationDetail } from './NearbyStationDetail'
+import { NearbyStationTitle } from './NearbyStationTitle'
 import { NearbyStopRoutes } from './NearbyStopRoutes'
 import { APP_ACTION_ICON_SIZE } from '~/modules/consts/layout'
 
@@ -147,9 +148,6 @@ const NearbySidebarContentList = ({
 }: {
   listState: NearbySidebarListState
 }) => {
-  const { t } = useTranslation()
-  const locale = useSelector(selectLocale)
-
   return (
     <ScrollArea viewportRef={listState.scrollViewportRef} flex={1} mih={0}>
       {listState.isStationsLoading && (
@@ -163,62 +161,40 @@ const NearbySidebarContentList = ({
           value={listState.selectedStationId}
           onChange={listState.onSelectStation}
         >
-          {listState.nearbyStations.map((station) => {
-            const stationBearingLabel = getStationBearingLabel(t, station)
-
-            return (
-              <AccordionItem
-                value={station.stationId}
-                key={station.stationId}
-                ref={(node) => {
-                  if (node) {
-                    listState.stationItemRefs.current.set(
-                      station.stationId,
-                      node,
-                    )
-                  } else {
-                    listState.stationItemRefs.current.delete(station.stationId)
+          {listState.nearbyStations.map((station) => (
+            <AccordionItem
+              value={station.stationId}
+              key={station.stationId}
+              ref={(node) => {
+                if (node) {
+                  listState.stationItemRefs.current.set(station.stationId, node)
+                } else {
+                  listState.stationItemRefs.current.delete(station.stationId)
+                }
+              }}
+            >
+              <AccordionControl>
+                <NearbyStationTitle station={station} />
+              </AccordionControl>
+              <AccordionPanel>
+                <NearbyStationDetail
+                  station={station}
+                  hasRoutesError={listState.hasStationRouteBadgesError}
+                  routes={
+                    listState.stationRouteBadgesMap.get(station.stationId) ?? []
                   }
-                }}
-              >
-                <AccordionControl>
-                  <Flex
-                    justify="space-between"
-                    align="center"
-                    gap="xs"
-                    w="100%"
-                  >
-                    <Text flex="1 1 auto" miw={0} lineClamp={1}>
-                      {getLocalizedText(station.name, locale)}
-                    </Text>
-                    {stationBearingLabel && (
-                      <Text size="sm" c="dimmed" mr="xs">
-                        {stationBearingLabel}
-                      </Text>
-                    )}
-                  </Flex>
-                </AccordionControl>
-                <AccordionPanel>
-                  <NearbyStationDetail
-                    station={station}
-                    hasRoutesError={listState.hasStationRouteBadgesError}
-                    routes={
-                      listState.stationRouteBadgesMap.get(station.stationId) ??
-                      []
-                    }
-                    isRoutesLoading={
-                      listState.isStationRoutesLoading &&
-                      listState.selectedStationId === station.stationId
-                    }
-                    isRoutesRateLimited={
-                      listState.isStationRouteBadgesRateLimited
-                    }
-                    onViewStationRoutes={listState.onViewStationRoutes}
-                  />
-                </AccordionPanel>
-              </AccordionItem>
-            )
-          })}
+                  isRoutesLoading={
+                    listState.isStationRoutesLoading &&
+                    listState.selectedStationId === station.stationId
+                  }
+                  isRoutesRateLimited={
+                    listState.isStationRouteBadgesRateLimited
+                  }
+                  onViewStationRoutes={listState.onViewStationRoutes}
+                />
+              </AccordionPanel>
+            </AccordionItem>
+          ))}
         </Accordion>
       )}
     </ScrollArea>

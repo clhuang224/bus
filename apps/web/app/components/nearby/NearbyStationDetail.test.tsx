@@ -3,7 +3,7 @@
 import { fireEvent, screen, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
-import { AppLocaleType, BearingType, CityNameType } from '@bus/shared'
+import { AppLocaleType, CityNameType } from '@bus/shared'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
 import type { NearbyStation } from '~/modules/interfaces/Nearby'
 import geoSlice from '~/modules/slices/geoSlice'
@@ -26,16 +26,7 @@ const navigateToStopLabel = t('components.routeStopList.navigateAriaLabel', {
   stopName: stopNameZhTW,
 })
 
-function renderNearbyStationDetail(
-  displayMode: 'content' | 'title' = 'content',
-) {
-  return renderNearbyStationDetailWithStation(station, displayMode)
-}
-
-function renderNearbyStationDetailWithStation(
-  targetStation: NearbyStation,
-  displayMode: 'content' | 'title' = 'content',
-) {
+function renderNearbyStationDetail() {
   const store = createTestStore({
     reducer: {
       geolocation: geoSlice.reducer,
@@ -52,10 +43,9 @@ function renderNearbyStationDetailWithStation(
 
   return renderWithStore(
     <NearbyStationDetail
-      station={targetStation}
+      station={station}
       routes={[]}
       onViewStationRoutes={vi.fn()}
-      displayMode={displayMode}
     />,
     { store },
   )
@@ -67,37 +57,8 @@ describe('NearbyStationDetail', () => {
     vi.spyOn(window, 'open').mockImplementation(() => null)
   })
 
-  it('renders only the stop name in title mode', () => {
-    renderNearbyStationDetail('title')
-
-    expect(screen.getByText(stopNameZhTW)).toBeInTheDocument()
-    expect(
-      screen.queryByRole('button', { name: navigateToStopLabel }),
-    ).not.toBeInTheDocument()
-  })
-
-  it('renders stop name with bearing label in title mode when bearing is available', () => {
-    renderNearbyStationDetailWithStation(
-      {
-        ...station,
-        bearings: [BearingType.NORTH, BearingType.SOUTH],
-      },
-      'title',
-    )
-
-    expect(screen.getByText(stopNameZhTW)).toBeInTheDocument()
-    const northBearingLabel = t('common.bearing.north')
-    const southBearingLabel = t('common.bearing.south')
-    const bearingText = screen.getByText(
-      (content) =>
-        content === `${southBearingLabel} / ${northBearingLabel}` ||
-        content === `${northBearingLabel} / ${southBearingLabel}`,
-    )
-    expect(bearingText).toBeInTheDocument()
-  })
-
   it('renders stop distance when user coordinates are available', () => {
-    renderNearbyStationDetail('content')
+    renderNearbyStationDetail()
 
     const distanceSection = screen.getByText('距離').closest('div')
 
@@ -106,7 +67,7 @@ describe('NearbyStationDetail', () => {
   })
 
   it('opens Google Maps directions from the navigation button', () => {
-    renderNearbyStationDetail('content')
+    renderNearbyStationDetail()
 
     fireEvent.click(screen.getByRole('button', { name: navigateToStopLabel }))
 

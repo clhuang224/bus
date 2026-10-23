@@ -7,7 +7,7 @@ import { NearbySidebarContent } from '~/components/nearby/NearbySidebarContent'
 import { useNearbyData } from '~/modules/hooks/nearby/useNearbyData'
 import { useScrollSelectedItem } from '~/modules/hooks/shared/useScrollSelectedItem'
 import { useNearbySearchParams } from '~/modules/hooks/nearby/useNearbySearchParams'
-import { NearbyStationDetail } from '~/components/nearby/NearbyStationDetail'
+import { NearbyStationTitle } from '~/components/nearby/NearbyStationTitle'
 import { NearbyStationMap } from '~/components/nearby/NearbyStationMap'
 
 const Nearby = () => {
@@ -66,15 +66,7 @@ const Nearby = () => {
   }, [isSm, selectedStationRoutesId, openSidebar])
 
   const selectedStationPopupContent = selectedMapStation ? (
-    <NearbyStationDetail
-      station={selectedMapStation}
-      hasRoutesError={hasStationRouteBadgesError}
-      routes={stationRouteBadgesMap.get(selectedMapStation.stationId) ?? []}
-      isRoutesLoading={isStationRouteBadgesLoading}
-      isRoutesRateLimited={isStationRouteBadgesRateLimited}
-      displayMode="title"
-      onViewStationRoutes={viewStationRoutes}
-    />
+    <NearbyStationTitle station={selectedMapStation} />
   ) : null
 
   const selectStationFromMap = (stationId: string | null) => {

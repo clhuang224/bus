@@ -11,7 +11,6 @@ import { selectLocale } from '~/modules/slices/localeSlice'
 import { toLatLng } from '~/modules/utils/geo/convertCoordinates'
 import { getCityTranslationKey } from '~/modules/utils/i18n/getCityTranslationKey'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
-import { getStationBearingLabel } from '~/modules/utils/nearby/getStationBearingLabel'
 import { APP_ACTION_ICON_SIZE } from '~/modules/consts/layout'
 
 interface PropType {
@@ -21,7 +20,6 @@ interface PropType {
   isRoutesLoading?: boolean
   isRoutesRateLimited?: boolean
   onViewStationRoutes: (stationId: string) => void
-  displayMode?: 'content' | 'title'
 }
 
 export const NearbyStationDetail = ({
@@ -31,28 +29,11 @@ export const NearbyStationDetail = ({
   isRoutesLoading = false,
   isRoutesRateLimited = false,
   onViewStationRoutes,
-  displayMode = 'content',
 }: PropType) => {
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
   const stopName = getLocalizedText(station.name, locale)
   const destination = toLatLng(station.position)!
-  const bearingLabel = getStationBearingLabel(t, station)
-
-  if (displayMode === 'title') {
-    return (
-      <Flex gap="xs" align="center" wrap="nowrap">
-        <Text flex={1} miw={0} lineClamp={1}>
-          {stopName}
-        </Text>
-        {Boolean(bearingLabel) && (
-          <Text size="sm" c="dimmed" mr="xs">
-            {bearingLabel}
-          </Text>
-        )}
-      </Flex>
-    )
-  }
 
   const detailSections = [
     {
