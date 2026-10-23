@@ -21,7 +21,6 @@ interface PropType {
   extraControls?: ReactNode
   selectedStation: string | null
   selectedStationPopupContent?: ReactNode
-  isSm?: boolean
   onSelectStation: (id: string | null) => void
 }
 
@@ -31,7 +30,6 @@ export const NearbyStationMap = ({
   extraControls,
   selectedStation,
   selectedStationPopupContent,
-  isSm = false,
   onSelectStation,
 }: PropType) => {
   const { t } = useTranslation()
@@ -157,17 +155,7 @@ export const NearbyStationMap = ({
         onLoad={setMap}
       />
       {popupContainer && selectedStationPopupContent
-        ? createPortal(
-            <div
-              style={{
-                maxHeight: isSm ? '50dvh' : '40dvh',
-                overflowY: 'auto',
-              }}
-            >
-              {selectedStationPopupContent}
-            </div>,
-            popupContainer,
-          )
+        ? createPortal(selectedStationPopupContent, popupContainer)
         : null}
     </>
   )

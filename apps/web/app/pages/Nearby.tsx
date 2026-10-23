@@ -72,15 +72,18 @@ const Nearby = () => {
       routes={stationRouteBadgesMap.get(selectedMapStation.stationId) ?? []}
       isRoutesLoading={isStationRouteBadgesLoading}
       isRoutesRateLimited={isStationRouteBadgesRateLimited}
-      displayMode={isSm ? 'full' : 'title'}
-      onViewStationRoutes={(stationId) => {
-        viewStationRoutes(stationId)
-        if (isSm) {
-          openSidebar()
-        }
-      }}
+      displayMode="title"
+      onViewStationRoutes={viewStationRoutes}
     />
   ) : null
+
+  const selectStationFromMap = (stationId: string | null) => {
+    selectStation(stationId)
+
+    if (isSm && stationId) {
+      openSidebar()
+    }
+  }
 
   return (
     <MapSidebarLayout
@@ -129,8 +132,7 @@ const Nearby = () => {
         markers={markers}
         selectedStation={selectedStationId}
         selectedStationPopupContent={selectedStationPopupContent}
-        isSm={isSm}
-        onSelectStation={selectStation}
+        onSelectStation={selectStationFromMap}
       />
     </MapSidebarLayout>
   )

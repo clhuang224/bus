@@ -21,7 +21,7 @@ interface PropType {
   isRoutesLoading?: boolean
   isRoutesRateLimited?: boolean
   onViewStationRoutes: (stationId: string) => void
-  displayMode?: 'content' | 'full' | 'title'
+  displayMode?: 'content' | 'title'
 }
 
 export const NearbyStationDetail = ({
@@ -115,29 +115,6 @@ export const NearbyStationDetail = ({
 
   return (
     <Stack gap="xs">
-      {displayMode === 'full' && (
-        <Stack
-          gap={4}
-          pb="xs"
-          style={{
-            position: 'sticky',
-            top: 0,
-            zIndex: 1,
-            backgroundColor: 'var(--mantine-color-body)',
-          }}
-        >
-          <Flex gap="xs" align="center" wrap="nowrap">
-            <Text style={{ flex: 1, minWidth: 0 }} lineClamp={1}>
-              {stopName}
-            </Text>
-            {Boolean(bearingLabel) && (
-              <Text size="sm" c="dimmed" mr="xs">
-                {bearingLabel}
-              </Text>
-            )}
-          </Flex>
-        </Stack>
-      )}
       {detailSections.map((section) => (
         <Stack key={section.label} gap={4}>
           <Text size="sm" c="dimmed">

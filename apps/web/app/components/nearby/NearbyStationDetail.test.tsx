@@ -27,14 +27,14 @@ const navigateToStopLabel = t('components.routeStopList.navigateAriaLabel', {
 })
 
 function renderNearbyStationDetail(
-  displayMode: 'content' | 'full' | 'title' = 'content',
+  displayMode: 'content' | 'title' = 'content',
 ) {
   return renderNearbyStationDetailWithStation(station, displayMode)
 }
 
 function renderNearbyStationDetailWithStation(
   targetStation: NearbyStation,
-  displayMode: 'content' | 'full' | 'title' = 'content',
+  displayMode: 'content' | 'title' = 'content',
 ) {
   const store = createTestStore({
     reducer: {
@@ -106,7 +106,7 @@ describe('NearbyStationDetail', () => {
   })
 
   it('opens Google Maps directions from the navigation button', () => {
-    renderNearbyStationDetail('full')
+    renderNearbyStationDetail('content')
 
     fireEvent.click(screen.getByRole('button', { name: navigateToStopLabel }))
 
