@@ -154,10 +154,6 @@ export const zhTW = {
         userLocationMarkerAriaLabel: '目前位置',
         focusUserLocationAriaLabel: '我的位置',
       },
-      mapSidebarLayout: {
-        openNearbyStops: '開啟附近站牌列表',
-        openRouteList: '開啟路線列表',
-      },
       nearbyStopDetail: {
         cityLabel: '縣市',
         distanceLabel: '距離',

@@ -16,6 +16,10 @@ const { mockMap, MockMap, MockMarker, MockLngLat } = vi.hoisted(() => {
     off: vi.fn(),
     remove: vi.fn(),
     flyTo: vi.fn(),
+    easeTo: vi.fn(),
+    setPadding: vi.fn(),
+    loaded: () => false,
+    isMoving: () => false,
   }
 
   class MockMap {

@@ -6,6 +6,7 @@ import mapWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { RiFocus3Line } from '@remixicon/react'
 import {
+  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -27,10 +28,12 @@ import {
   MAP_OVERLAY_TOP_INSET_VAR,
 } from '~/modules/consts/layout'
 import { MAP_Z_INDEX } from '~/modules/consts/mapLayers'
+import { MapOverlayInsetsContext } from './mapOverlayInsetsContext'
 
 mapLibre.setWorkerUrl(mapWorkerUrl)
 
 const FOCUS_ZOOM = 16
+const PADDING_TRANSITION_DURATION = 300
 
 function keepControlsClearOfOverlayBars(map: Map) {
   const container = map.getContainer()
@@ -72,6 +75,7 @@ const BaseMap = ({
   const userMarkerRef = useRef<Marker | null>(null)
   const initialCenterRef = useRef(Boolean(center))
   const onLoadRef = useRef(onLoad)
+  const overlayInsets = useContext(MapOverlayInsetsContext)
 
   const { coords } = useSelector((state: RootState) => state.geolocation)
   const mapCenter = useMemo(() => (center ? toLngLat(center) : null), [center])
@@ -123,6 +127,24 @@ const BaseMap = ({
       mapInstance.remove()
     }
   }, [id])
+
+  useEffect(() => {
+    if (!map) return
+
+    const padding = {
+      top: overlayInsets.top,
+      right: 0,
+      bottom: overlayInsets.bottom,
+      left: 0,
+    }
+
+    if (!map.loaded() || map.isMoving()) {
+      map.setPadding(padding)
+      return
+    }
+
+    map.easeTo({ padding, duration: PADDING_TRANSITION_DURATION })
+  }, [map, overlayInsets])
 
   useEffect(() => {
     if (!map || !center || initialCenterRef.current) return

@@ -154,10 +154,6 @@ export const en = {
         userLocationMarkerAriaLabel: 'Current location',
         focusUserLocationAriaLabel: 'My location',
       },
-      mapSidebarLayout: {
-        openNearbyStops: 'Open nearby stops list',
-        openRouteList: 'Open route list',
-      },
       nearbyStopDetail: {
         cityLabel: 'City',
         distanceLabel: 'Distance',

@@ -14,13 +14,12 @@ import { BaseAlert } from '~/components/common/BaseAlert'
 import { MapSidebarLayout } from '~/components/common/MapSidebarLayout'
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { RouteMap } from '~/components/route/RouteMap'
-import { RouteMapLabel } from '~/components/route/RouteMapLabel'
 import { RouteStopList } from '~/components/route/RouteStopList'
 import { useFavoriteRouteStops } from '~/modules/hooks/favorite/useFavoriteRouteStops'
 import { useRouteBaseData } from '~/modules/hooks/route/useRouteBaseData'
 import { useRouteRealtimeData } from '~/modules/hooks/route/useRouteRealtimeData'
 import { useRouteSelectionState } from '~/modules/hooks/route/useRouteSelectionState'
-import { RiArrowLeftSLine, RiListUnordered } from '@remixicon/react'
+import { RiArrowLeftSLine } from '@remixicon/react'
 import { AppBadge } from '~/components/common/AppBadge'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { getTerminalDisplay } from '~/modules/utils/i18n/getTerminalDisplay'
@@ -154,6 +153,8 @@ export default function Route() {
       isSm={isSm}
       isSidebarOpened={isSidebarOpened}
       onCloseSidebar={closeSidebar}
+      onOpenSidebar={openSidebar}
+      panelTitle={routeName ?? t('layout.nav.routes')}
       panel={
         <Stack h="100%" gap="md">
           <Stack gap={4}>
@@ -236,26 +237,7 @@ export default function Route() {
         </Stack>
       }
     >
-      {isSm && routeName && (
-        <RouteMapLabel
-          routeName={routeName}
-          directionLabel={
-            routeTabs.find((tab) => tab.id === activeTab)?.label ?? null
-          }
-          onClick={openSidebar}
-        />
-      )}
       <RouteMap
-        extraControls={
-          isSm ? (
-            <ActionIcon
-              onClick={openSidebar}
-              aria-label={t('components.mapSidebarLayout.openRouteList')}
-            >
-              <RiListUnordered size={APP_ACTION_ICON_SIZE} />
-            </ActionIcon>
-          ) : null
-        }
         highlightedStopId={highlightedStopId}
         isSm={isSm}
         selectedStop={selectedStopId}
