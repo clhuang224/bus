@@ -9,7 +9,7 @@ import { useScrollSelectedItem } from '~/modules/hooks/shared/useScrollSelectedI
 import { useNearbySearchParams } from '~/modules/hooks/nearby/useNearbySearchParams'
 import { NearbyStationDetail } from '~/components/nearby/NearbyStationDetail'
 import { NearbyStationMap } from '~/components/nearby/NearbyStationMap'
-import { RiMenuFill } from '@remixicon/react'
+import { RiListUnordered } from '@remixicon/react'
 import { APP_ACTION_ICON_SIZE } from '~/modules/consts/layout'
 
 const Nearby = () => {
@@ -132,7 +132,7 @@ const Nearby = () => {
               onClick={openSidebar}
               aria-label={t('components.mapSidebarLayout.openNearbyStops')}
             >
-              <RiMenuFill size={APP_ACTION_ICON_SIZE} />
+              <RiListUnordered size={APP_ACTION_ICON_SIZE} />
             </ActionIcon>
           ) : null
         }

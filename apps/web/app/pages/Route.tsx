@@ -20,7 +20,7 @@ import { useFavoriteRouteStops } from '~/modules/hooks/favorite/useFavoriteRoute
 import { useRouteBaseData } from '~/modules/hooks/route/useRouteBaseData'
 import { useRouteRealtimeData } from '~/modules/hooks/route/useRouteRealtimeData'
 import { useRouteSelectionState } from '~/modules/hooks/route/useRouteSelectionState'
-import { RiArrowLeftSLine, RiMenuFill } from '@remixicon/react'
+import { RiArrowLeftSLine, RiListUnordered } from '@remixicon/react'
 import { AppBadge } from '~/components/common/AppBadge'
 import { selectLocale } from '~/modules/slices/localeSlice'
 import { getTerminalDisplay } from '~/modules/utils/i18n/getTerminalDisplay'
@@ -252,7 +252,7 @@ export default function Route() {
               onClick={openSidebar}
               aria-label={t('components.mapSidebarLayout.openRouteList')}
             >
-              <RiMenuFill size={APP_ACTION_ICON_SIZE} />
+              <RiListUnordered size={APP_ACTION_ICON_SIZE} />
             </ActionIcon>
           ) : null
         }
