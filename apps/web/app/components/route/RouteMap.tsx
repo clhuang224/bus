@@ -1,7 +1,7 @@
 import { Stack, Text } from '@mantine/core'
 import * as mapLibre from 'maplibre-gl'
 import type { Map as MapLibreMap, Marker, Popup } from 'maplibre-gl'
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import type { LngLat } from '~/modules/types/CoordsType'
@@ -33,7 +33,6 @@ export interface RouteMapVehicle {
 }
 
 interface PropType {
-  extraControls?: ReactNode
   highlightedStopId?: string | null
   isSm?: boolean
   onSelectStop: (stopId: string | null) => void
@@ -60,7 +59,6 @@ function removeRouteLine(map: MapLibreMap) {
 }
 
 export const RouteMap = ({
-  extraControls,
   highlightedStopId = null,
   isSm = false,
   onSelectStop,
@@ -404,13 +402,7 @@ export const RouteMap = ({
 
   return (
     <>
-      <BaseMap
-        center={center}
-        zoom={13}
-        showUserLocation
-        extraControls={extraControls}
-        onLoad={setMap}
-      />
+      <BaseMap center={center} zoom={13} showUserLocation onLoad={setMap} />
       {popupContainer && selectedVehicle
         ? createPortal(
             <Stack gap="xs">

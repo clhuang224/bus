@@ -1,4 +1,4 @@
-import { ActionIcon, Box, Flex } from '@mantine/core'
+import { ActionIcon, Box } from '@mantine/core'
 import { useId } from '@mantine/hooks'
 import * as mapLibre from 'maplibre-gl'
 import { type Map, Marker, LngLat as MapLngLat } from 'maplibre-gl'
@@ -12,7 +12,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type ReactNode,
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
@@ -58,7 +57,6 @@ interface PropType {
   center: LatLng | null
   zoom?: number
   showUserLocation?: boolean
-  extraControls?: ReactNode
   onLoad?: (map: Map) => void
 }
 
@@ -66,7 +64,6 @@ const BaseMap = ({
   center,
   zoom = 16,
   showUserLocation = false,
-  extraControls,
   onLoad,
 }: PropType) => {
   const { t } = useTranslation()
@@ -184,35 +181,27 @@ const BaseMap = ({
   return (
     <Box pos="relative" style={{ width: '100%', height: '100%' }}>
       <Box id={id} style={{ width: '100%', height: '100%', font: 'inherit' }} />
-      {(showUserLocation || extraControls) && (
-        <Flex
+      {showUserLocation && (
+        <ActionIcon
+          aria-label={t('components.baseMap.focusUserLocationAriaLabel')}
           pos="absolute"
           right={APP_FLOATING_ACTION_OFFSET}
           bottom={`calc(var(${MAP_OVERLAY_BOTTOM_INSET_VAR}, 0px) + ${MAP_CONTROLS_BOTTOM_OFFSET}px)`}
-          direction="column"
-          gap="sm"
+          size="md"
           style={{ zIndex: MAP_Z_INDEX.controls }}
-        >
-          {extraControls}
-          {showUserLocation && (
-            <ActionIcon
-              aria-label={t('components.baseMap.focusUserLocationAriaLabel')}
-              size="md"
-              onClick={() => {
-                if (!map || !userLngLat) return
+          onClick={() => {
+            if (!map || !userLngLat) return
 
-                map.flyTo({
-                  center: userLngLat,
-                  zoom: FOCUS_ZOOM,
-                  duration: 800,
-                })
-              }}
-              disabled={!userLngLat || !map}
-            >
-              <RiFocus3Line size={APP_ACTION_ICON_SIZE} />
-            </ActionIcon>
-          )}
-        </Flex>
+            map.flyTo({
+              center: userLngLat,
+              zoom: FOCUS_ZOOM,
+              duration: 800,
+            })
+          }}
+          disabled={!userLngLat || !map}
+        >
+          <RiFocus3Line size={APP_ACTION_ICON_SIZE} />
+        </ActionIcon>
       )}
     </Box>
   )

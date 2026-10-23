@@ -18,7 +18,6 @@ interface PropType {
     position: LngLat
     label: string
   }>
-  extraControls?: ReactNode
   selectedStation: string | null
   selectedStationPopupContent?: ReactNode
   onSelectStation: (id: string | null) => void
@@ -27,7 +26,6 @@ interface PropType {
 export const NearbyStationMap = ({
   center,
   markers = [],
-  extraControls,
   selectedStation,
   selectedStationPopupContent,
   onSelectStation,
@@ -147,13 +145,7 @@ export const NearbyStationMap = ({
 
   return (
     <>
-      <BaseMap
-        center={center}
-        zoom={16}
-        showUserLocation
-        extraControls={extraControls}
-        onLoad={setMap}
-      />
+      <BaseMap center={center} zoom={16} showUserLocation onLoad={setMap} />
       {popupContainer && selectedStationPopupContent
         ? createPortal(selectedStationPopupContent, popupContainer)
         : null}

@@ -317,7 +317,7 @@ For shared map behavior, keep `BaseMap` responsible for common map-level concern
 
 - rendering the user-location marker
 - showing the built-in focus-my-location control when `showUserLocation` is enabled
-- hosting additional shared map overlay controls via `extraControls`
+- padding the map by the overlay insets from `MapOverlayInsetsContext`, so the mobile header and bottom sheet never cover centered or fitted content
 
 Do not re-implement those common controls separately in page components when the behavior belongs to the base map layer.
 
