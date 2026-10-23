@@ -78,7 +78,6 @@ export function useRouteRealtimeData(
   const locale = useSelector(selectLocale)
   const subRoute = options?.subRoute ?? null
 
-  // Keep RTK Query args well-typed; skip prevents requests until realtime options are ready.
   const realtimeQueryArgs = options
     ? { city: options.city, routeUID: options.id }
     : { city: CityNameType.TAIPEI, routeUID: '' }
