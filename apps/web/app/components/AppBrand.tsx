@@ -24,6 +24,8 @@ export const AppBrand = ({ inverted = false }: PropType) => {
         alt=""
         w={APP_BRAND_MARK_SIZE}
         h={APP_BRAND_MARK_SIZE}
+        bd={inverted ? '2px solid white' : undefined}
+        bdrs="50%"
       />
       <Title
         order={1}
