@@ -132,14 +132,20 @@ export const RouteStopList = ({
 
   return (
     <Stack h="100%" gap="xs" style={{ minHeight: 0 }}>
-      {realtimeMessage && (
-        <Alert
-          color={realtimeMessage.color}
-          title={realtimeMessage.title}
-          style={{ flex: '0 0 auto' }}
-        >
+      {realtimeMessage === routeRealtimeMessages.noService ? (
+        <Text size="sm" c="dimmed" style={{ flex: '0 0 auto' }}>
           {realtimeMessage.description}
-        </Alert>
+        </Text>
+      ) : (
+        realtimeMessage && (
+          <Alert
+            color={realtimeMessage.color}
+            title={realtimeMessage.title}
+            style={{ flex: '0 0 auto' }}
+          >
+            {realtimeMessage.description}
+          </Alert>
+        )
       )}
       <ScrollArea style={{ flex: 1, minHeight: 0 }}>
         {isLoading ? (

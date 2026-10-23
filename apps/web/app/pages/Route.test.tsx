@@ -712,6 +712,9 @@ describe('Route', () => {
         screen.getByText(routeRealtimeMessages.noService.description),
       ).toBeInTheDocument()
       expect(
+        screen.queryByText(routeRealtimeMessages.noService.title),
+      ).not.toBeInTheDocument()
+      expect(
         screen.getByText(t('routePage.realtime.stopStatus.lastBusPassed')),
       ).toBeInTheDocument()
       expect(
