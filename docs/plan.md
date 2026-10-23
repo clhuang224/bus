@@ -245,8 +245,8 @@ A design review of the visual refresh, at desktop (1440px) and mobile (375px) wi
 - Favorite and settings buttons use 44px touch targets.
 - Every page puts white cards with a small shadow straight on the gray page, with no extra white column or card borders.
 - The mobile bottom navigation shows each icon above its label, and the brand mark has a white ring on the blue mobile banner.
-- The mobile route map shows a label with the route name and direction, which opens the stop list.
-- The map drawer buttons use a list icon, and the no-service status is one line of text instead of an alert.
+- The no-service status is one line of text instead of an alert.
+- On mobile, the route and nearby pages show their list in a bottom sheet instead of a drawer that covered the map. The sheet works like the one in Google Maps: it snaps to a peek bar, half height, and full height, and cannot be dismissed, so the route or list is always one drag away. Both pages open at half height so the map and the list show together, and the map is padded by the visible sheet height so centered stops stay in view. The sheet uses the vaul library, which handles snap points, drag momentum, and the hand-off between dragging the sheet and scrolling the list.
 
 One issue is still open: on the mobile route map, stop markers overlap at the initial zoom. A fix could show only the route line and its terminal stops until the user zooms in, which needs changes to the map layers.
 
