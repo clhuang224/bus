@@ -105,7 +105,7 @@ export default function AppLayout() {
               aria-label={settingNav.name}
               variant="subtle"
               color="white"
-              size="lg"
+              size="xl"
               radius="xl"
               ml="auto"
             >

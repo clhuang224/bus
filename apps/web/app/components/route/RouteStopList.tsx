@@ -265,9 +265,10 @@ export const RouteStopList = ({
                             />
                           </Group>
                           <ActionIcon
-                            variant="light"
+                            variant={stop.isFavorite ? 'light' : 'subtle'}
                             color={stop.isFavorite ? 'pink' : 'gray'}
                             radius="50%"
+                            size="xl"
                             aria-label={
                               stop.isFavorite
                                 ? t(
