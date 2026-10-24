@@ -12,6 +12,7 @@ import {
 } from '~/modules/consts/geoMessages'
 import { getNearbyMessages } from '~/modules/consts/pageMessages'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
+import { useNearbySearchCoords } from '~/modules/hooks/nearby/useNearbySearchCoords'
 import { useLocalizedTextCollator } from '~/modules/hooks/shared/useLocalizedTextCollator'
 import type {
   NearbyStation,
@@ -92,14 +93,20 @@ export function useNearbyData({
     permission,
   } = useSelector((state: RootState) => state.geolocation)
   const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
-  const currentCity = getCityByCoords(coords, geojson)
+  const searchCoords = useNearbySearchCoords(coords)
+  const currentCity = getCityByCoords(searchCoords, geojson)
   const currentArea = currentCity ? cityMapArea[currentCity] : null
   const isNearbyDisabled =
     disabledNearbyPermissions.includes(permission) || geolocationError !== null
   const isAwaitingUsableLocation = !coords && !isNearbyDisabled
   const routeNameCollator = useLocalizedTextCollator()
-  const nearbyQuery =
-    coords && currentArea ? { area: currentArea, coords } : null
+  const nearbyQuery = useMemo(
+    () =>
+      searchCoords && currentArea
+        ? { area: currentArea, coords: searchCoords }
+        : null,
+    [currentArea, searchCoords],
+  )
 
   const {
     data: stationsResult,
