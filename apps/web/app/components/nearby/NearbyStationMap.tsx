@@ -18,20 +18,16 @@ interface PropType {
     position: LngLat
     label: string
   }>
-  extraControls?: ReactNode
   selectedStation: string | null
   selectedStationPopupContent?: ReactNode
-  isSm?: boolean
   onSelectStation: (id: string | null) => void
 }
 
 export const NearbyStationMap = ({
   center,
   markers = [],
-  extraControls,
   selectedStation,
   selectedStationPopupContent,
-  isSm = false,
   onSelectStation,
 }: PropType) => {
   const { t } = useTranslation()
@@ -41,6 +37,11 @@ export const NearbyStationMap = ({
   )
   const markerMap = useRef<Map<string, Marker>>(new Map<string, Marker>())
   const popupRef = useRef<Popup | null>(null)
+  const selectedStationRef = useRef(selectedStation)
+
+  useEffect(() => {
+    selectedStationRef.current = selectedStation
+  }, [selectedStation])
 
   useEffect(() => {
     if (!map) return
@@ -66,7 +67,7 @@ export const NearbyStationMap = ({
       const handleSelectStation = (event: MouseEvent | KeyboardEvent) => {
         event.preventDefault()
         event.stopPropagation()
-        onSelectStation(data.id)
+        onSelectStation(data.id === selectedStationRef.current ? null : data.id)
       }
 
       markerCleanupFns.push(
@@ -144,25 +145,9 @@ export const NearbyStationMap = ({
 
   return (
     <>
-      <BaseMap
-        center={center}
-        zoom={16}
-        showUserLocation
-        extraControls={extraControls}
-        onLoad={setMap}
-      />
+      <BaseMap center={center} zoom={16} showUserLocation onLoad={setMap} />
       {popupContainer && selectedStationPopupContent
-        ? createPortal(
-            <div
-              style={{
-                maxHeight: isSm ? '50dvh' : '40dvh',
-                overflowY: 'auto',
-              }}
-            >
-              {selectedStationPopupContent}
-            </div>,
-            popupContainer,
-          )
+        ? createPortal(selectedStationPopupContent, popupContainer)
         : null}
     </>
   )

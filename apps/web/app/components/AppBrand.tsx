@@ -17,20 +17,17 @@ export const AppBrand = ({ inverted = false }: PropType) => {
       align="center"
       gap="xs"
       c={inverted ? 'white' : 'blue.7'}
-      style={{ textDecoration: 'none' }}
+      td="none"
     >
       <Image
         src={`${import.meta.env.BASE_URL}favicon.svg`}
         alt=""
         w={APP_BRAND_MARK_SIZE}
         h={APP_BRAND_MARK_SIZE}
+        bd={inverted ? '2px solid white' : undefined}
+        bdrs="50%"
       />
-      <Title
-        order={1}
-        size="h3"
-        c="inherit"
-        style={{ whiteSpace: 'nowrap', letterSpacing: '0.08em' }}
-      >
+      <Title order={1} size="h3" c="inherit" textWrap="nowrap" lts="0.08em">
         {t('app.name')}
       </Title>
     </Flex>

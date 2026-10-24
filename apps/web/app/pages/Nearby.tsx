@@ -1,4 +1,4 @@
-import { ActionIcon, Overlay, useMantineTheme } from '@mantine/core'
+import { Overlay, useMantineTheme } from '@mantine/core'
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -7,10 +7,8 @@ import { NearbySidebarContent } from '~/components/nearby/NearbySidebarContent'
 import { useNearbyData } from '~/modules/hooks/nearby/useNearbyData'
 import { useScrollSelectedItem } from '~/modules/hooks/shared/useScrollSelectedItem'
 import { useNearbySearchParams } from '~/modules/hooks/nearby/useNearbySearchParams'
-import { NearbyStationDetail } from '~/components/nearby/NearbyStationDetail'
+import { NearbyStationTitle } from '~/components/nearby/NearbyStationTitle'
 import { NearbyStationMap } from '~/components/nearby/NearbyStationMap'
-import { RiMenuFill } from '@remixicon/react'
-import { APP_ACTION_ICON_SIZE } from '~/modules/consts/layout'
 
 const Nearby = () => {
   const { t } = useTranslation()
@@ -68,27 +66,24 @@ const Nearby = () => {
   }, [isSm, selectedStationRoutesId, openSidebar])
 
   const selectedStationPopupContent = selectedMapStation ? (
-    <NearbyStationDetail
-      station={selectedMapStation}
-      hasRoutesError={hasStationRouteBadgesError}
-      routes={stationRouteBadgesMap.get(selectedMapStation.stationId) ?? []}
-      isRoutesLoading={isStationRouteBadgesLoading}
-      isRoutesRateLimited={isStationRouteBadgesRateLimited}
-      displayMode={isSm ? 'full' : 'title'}
-      onViewStationRoutes={(stationId) => {
-        viewStationRoutes(stationId)
-        if (isSm) {
-          openSidebar()
-        }
-      }}
-    />
+    <NearbyStationTitle station={selectedMapStation} />
   ) : null
+
+  const selectStationFromMap = (stationId: string | null) => {
+    selectStation(stationId)
+
+    if (isSm && stationId) {
+      openSidebar()
+    }
+  }
 
   return (
     <MapSidebarLayout
       isSm={isSm}
       isSidebarOpened={isSidebarOpened}
       onCloseSidebar={closeSidebar}
+      onOpenSidebar={openSidebar}
+      panelTitle={t('layout.nav.nearby')}
       panel={
         <NearbySidebarContent
           detailState={{
@@ -118,7 +113,7 @@ const Nearby = () => {
     >
       {isNearbyDisabled && (
         <Overlay
-          color="#fff"
+          color="var(--mantine-color-white)"
           backgroundOpacity={0.55}
           zIndex={1}
           style={{ cursor: 'not-allowed' }}
@@ -126,21 +121,10 @@ const Nearby = () => {
       )}
       <NearbyStationMap
         center={coords}
-        extraControls={
-          isSm ? (
-            <ActionIcon
-              onClick={openSidebar}
-              aria-label={t('components.mapSidebarLayout.openNearbyStops')}
-            >
-              <RiMenuFill size={APP_ACTION_ICON_SIZE} />
-            </ActionIcon>
-          ) : null
-        }
         markers={markers}
         selectedStation={selectedStationId}
         selectedStationPopupContent={selectedStationPopupContent}
-        isSm={isSm}
-        onSelectStation={selectStation}
+        onSelectStation={selectStationFromMap}
       />
     </MapSidebarLayout>
   )

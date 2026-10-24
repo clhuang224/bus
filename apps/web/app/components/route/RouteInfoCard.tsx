@@ -27,7 +27,7 @@ export const RouteInfoCard = ({
   const terminalDisplay = getTerminalDisplay(departure, destination)
 
   return (
-    <Card withBorder radius="md" p="xs" shadow="xs">
+    <Card p="xs">
       <NavLink
         component={Link}
         to={to}

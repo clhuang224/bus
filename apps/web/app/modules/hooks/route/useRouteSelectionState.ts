@@ -92,7 +92,7 @@ export function useRouteSelectionState(options: UseRouteSelectionStateOptions) {
     [closeSidebar, isSm],
   )
 
-  const handleSelectVehicleFromMap = useCallback((vehicleId: string) => {
+  const handleSelectVehicleFromMap = useCallback((vehicleId: string | null) => {
     setListScrollBehavior('start')
     setSelectedVehicleId(vehicleId)
     setSelectedStopId(null)

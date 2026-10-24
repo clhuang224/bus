@@ -68,7 +68,7 @@ export const NearbyStopRoutes = ({
 
   if (isLoading) {
     return (
-      <Stack gap="sm" style={{ flex: 1, minHeight: 0 }}>
+      <Stack gap="sm" flex={1} mih={0}>
         <Tabs value={null}>
           <Tabs.List>
             <Tabs.Tab value="loading-go">{t('common.direction.go')}</Tabs.Tab>
@@ -77,10 +77,7 @@ export const NearbyStopRoutes = ({
             </Tabs.Tab>
           </Tabs.List>
         </Tabs>
-        <ScrollArea
-          style={{ flex: 1, minHeight: 0 }}
-          data-testid="nearby-stop-routes-skeleton"
-        >
+        <ScrollArea flex={1} mih={0} data-testid="nearby-stop-routes-skeleton">
           <SkeletonList count={3} gap="xs" pt="sm">
             <Skeleton h={84} radius="md" />
           </SkeletonList>
@@ -104,7 +101,7 @@ export const NearbyStopRoutes = ({
   }
 
   return (
-    <Stack gap="sm" style={{ flex: 1, minHeight: 0 }}>
+    <Stack gap="sm" flex={1} mih={0}>
       <Tabs value={selectedDirection} onChange={setSelectedDirection}>
         <Tabs.List>
           {routeSections.map((section) => (
@@ -115,7 +112,7 @@ export const NearbyStopRoutes = ({
         </Tabs.List>
       </Tabs>
 
-      <ScrollArea style={{ flex: 1, minHeight: 0 }}>
+      <ScrollArea flex={1} mih={0}>
         <Stack gap="xs" pt="sm">
           {routeSections
             .find((section) => String(section.direction) === selectedDirection)

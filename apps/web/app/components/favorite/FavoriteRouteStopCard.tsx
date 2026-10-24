@@ -30,19 +30,17 @@ export const FavoriteRouteStopCard = ({
   const terminalDisplay = getTerminalDisplay(departure, destination)
 
   return (
-    <Card radius="lg" p="md" shadow="lg">
+    <Card p="md">
       <Stack gap="sm">
         <Flex justify="space-between" align="flex-start" gap="sm">
           <Box
             component={Link}
             to={`/routes/${favoriteRouteStop.city}/${favoriteRouteStop.routeUID}`}
             state={{ favoriteRouteStop }}
-            style={{
-              color: 'inherit',
-              flex: 1,
-              minWidth: 0,
-              textDecoration: 'none',
-            }}
+            c="inherit"
+            flex={1}
+            miw={0}
+            td="none"
           >
             <Stack gap="xs">
               <Group gap="xs" wrap="wrap">
@@ -76,6 +74,7 @@ export const FavoriteRouteStopCard = ({
             variant="subtle"
             color="pink"
             radius="50%"
+            size="xl"
             aria-label={t('components.favoriteRouteStopCard.removeAriaLabel')}
             onClick={() => onRemove(favoriteRouteStop)}
           >

@@ -18,7 +18,8 @@ Search bus routes by service area and keyword.
 The Route page combines stop lists, map interaction, and real-time transit data.
 
 - Official route shape data is used for more accurate route lines on the map when available.
-- The stop list and map stay in sync: selecting a stop in one view updates the other.
+- The stop list and map stay in sync: selecting a stop in one view updates the other. Tapping the selected stop or vehicle marker again closes its popup.
+- On small screens, the stop list sits in a bottom sheet that can be dragged between a peek bar, half height, and full height, so the route and the map stay visible together.
 - Stops can open Google Maps navigation from the stop list, and the route map includes a control to focus back on the user's current location.
 - Each stop shows stop-level ETA based directly on `EstimatedTimeOfArrival` when upstream ETA data is available.
 - Real-time vehicle plates are shown as separate location cues in the stop list and do not define the stop ETA.
@@ -31,7 +32,8 @@ The Nearby Stops page uses the user's current GPS location.
 
 - If location permission is granted, the app resolves the current city and service area automatically.
 - Stops within **0.5 kilometers** are shown as both a list and map markers.
-- Selecting a stop reveals stop details, including its distance, city, address, and serving route badges.
+- Selecting a stop reveals stop details, including its distance, city, address, and serving route badges. The map popup shows only the stop name and bearing.
+- On small screens, the stop list sits in the same bottom sheet as the Route page, and tapping a stop on the map raises the sheet to show its details.
 - Stop details can open Google Maps navigation directly.
 - Opening a stop's route detail view shows the full route list grouped by direction.
 

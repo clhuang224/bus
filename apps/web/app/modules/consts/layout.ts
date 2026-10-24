@@ -10,6 +10,8 @@ export const AREA_SELECT_WIDTH = 124
 export const MAP_SIDEBAR_WIDTH = 400
 export const MAP_FRAME_RADIUS = 32
 export const APP_ACTION_ICON_SIZE = 18
+export const TOP_CORNERS_RADIUS_XL =
+  'var(--mantine-radius-xl) var(--mantine-radius-xl) 0 0'
 export const MAP_CONTROLS_BOTTOM_OFFSET = 48
 export const MAP_POPUP_RADIUS = 16
 export const MAP_STOP_POPUP_OFFSET = 25
@@ -24,11 +26,7 @@ export const ROUTE_STOP_BULLET_SIZE = MAP_MARKER_SIZE.stop
 
 export const MAP_OVERLAY_TOP_INSET_VAR = '--map-overlay-top-inset'
 export const MAP_OVERLAY_BOTTOM_INSET_VAR = '--map-overlay-bottom-inset'
-export const MOBILE_MAP_OVERLAY_INSETS = {
-  [MAP_OVERLAY_TOP_INSET_VAR]: `${APP_MOBILE_HEADER_HEIGHT}px`,
-  [MAP_OVERLAY_BOTTOM_INSET_VAR]: `${APP_FOOTER_HEIGHT}px`,
-}
 
-const MOBILE_DRAWER_MAP_PEEK_HEIGHT = 64
-export const DRAWER_TOP =
-  APP_MOBILE_HEADER_HEIGHT + MOBILE_DRAWER_MAP_PEEK_HEIGHT
+export const MAP_SHEET_TOP = APP_MOBILE_HEADER_HEIGHT + 8
+export const MAP_SHEET_PEEK_HEIGHT = APP_FOOTER_HEIGHT + 104
+export const MAP_SHEET_HALF_RATIO = 0.5

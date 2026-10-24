@@ -22,13 +22,15 @@ export function RouteRealtimeGap({
   return (
     <Box mih={ROUTE_STOP_BULLET_SIZE} pr="sm">
       <Group wrap="nowrap" justify="space-between" align="flex-start">
-        <Box style={{ flex: 1, minWidth: 0 }} />
+        <Box flex={1} miw={0} />
         <Group
           gap="xs"
           wrap="wrap"
           justify="flex-start"
           pr="xl"
-          style={{ flex: '0 1 auto', minHeight: 28, minWidth: 0 }}
+          flex="0 1 auto"
+          mih={28}
+          miw={0}
         >
           {realtimeBuses.map((bus) => (
             <RouteRealtimeBadge

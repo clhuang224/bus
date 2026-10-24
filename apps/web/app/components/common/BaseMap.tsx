@@ -1,4 +1,4 @@
-import { ActionIcon, Box, Flex } from '@mantine/core'
+import { ActionIcon, alpha, Box } from '@mantine/core'
 import { useId } from '@mantine/hooks'
 import * as mapLibre from 'maplibre-gl'
 import { type Map, Marker, LngLat as MapLngLat } from 'maplibre-gl'
@@ -6,12 +6,12 @@ import mapWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { RiFocus3Line } from '@remixicon/react'
 import {
+  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  type ReactNode,
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
@@ -26,11 +26,14 @@ import {
   MAP_OVERLAY_BOTTOM_INSET_VAR,
   MAP_OVERLAY_TOP_INSET_VAR,
 } from '~/modules/consts/layout'
+import { MAP_COLORS } from '~/modules/consts/mapColors'
 import { MAP_Z_INDEX } from '~/modules/consts/mapLayers'
+import { MapOverlayInsetsContext } from './mapOverlayInsetsContext'
 
 mapLibre.setWorkerUrl(mapWorkerUrl)
 
 const FOCUS_ZOOM = 16
+const PADDING_TRANSITION_DURATION = 300
 
 function keepControlsClearOfOverlayBars(map: Map) {
   const container = map.getContainer()
@@ -55,7 +58,6 @@ interface PropType {
   center: LatLng | null
   zoom?: number
   showUserLocation?: boolean
-  extraControls?: ReactNode
   onLoad?: (map: Map) => void
 }
 
@@ -63,7 +65,6 @@ const BaseMap = ({
   center,
   zoom = 16,
   showUserLocation = false,
-  extraControls,
   onLoad,
 }: PropType) => {
   const { t } = useTranslation()
@@ -72,6 +73,7 @@ const BaseMap = ({
   const userMarkerRef = useRef<Marker | null>(null)
   const initialCenterRef = useRef(Boolean(center))
   const onLoadRef = useRef(onLoad)
+  const overlayInsets = useContext(MapOverlayInsetsContext)
 
   const { coords } = useSelector((state: RootState) => state.geolocation)
   const mapCenter = useMemo(() => (center ? toLngLat(center) : null), [center])
@@ -125,6 +127,37 @@ const BaseMap = ({
   }, [id])
 
   useEffect(() => {
+    if (!map) return
+
+    const padding = {
+      top: overlayInsets.top,
+      right: 0,
+      bottom: overlayInsets.bottom,
+      left: 0,
+    }
+
+    const applyPadding = () => {
+      if (!map.loaded()) {
+        map.setPadding(padding)
+        return
+      }
+
+      map.easeTo({ padding, duration: PADDING_TRANSITION_DURATION })
+    }
+
+    if (!map.isMoving()) {
+      applyPadding()
+      return
+    }
+
+    map.once('moveend', applyPadding)
+
+    return () => {
+      map.off('moveend', applyPadding)
+    }
+  }, [map, overlayInsets])
+
+  useEffect(() => {
     if (!map || !center || initialCenterRef.current) return
 
     map.flyTo({
@@ -145,7 +178,7 @@ const BaseMap = ({
 
     const el = createMapMarkerElement({
       ariaLabel: t('components.baseMap.userLocationMarkerAriaLabel'),
-      boxShadow: '0 0 0 6px rgba(42, 120, 214, 0.3)',
+      boxShadow: `0 0 0 6px ${alpha(MAP_COLORS.route, 0.3)}`,
       type: 'user',
     })
 
@@ -160,37 +193,29 @@ const BaseMap = ({
   }, [map, showUserLocation, t, userLngLat])
 
   return (
-    <Box pos="relative" style={{ width: '100%', height: '100%' }}>
-      <Box id={id} style={{ width: '100%', height: '100%', font: 'inherit' }} />
-      {(showUserLocation || extraControls) && (
-        <Flex
+    <Box pos="relative" w="100%" h="100%">
+      <Box id={id} w="100%" h="100%" style={{ font: 'inherit' }} />
+      {showUserLocation && (
+        <ActionIcon
+          aria-label={t('components.baseMap.focusUserLocationAriaLabel')}
           pos="absolute"
           right={APP_FLOATING_ACTION_OFFSET}
           bottom={`calc(var(${MAP_OVERLAY_BOTTOM_INSET_VAR}, 0px) + ${MAP_CONTROLS_BOTTOM_OFFSET}px)`}
-          direction="column"
-          gap="sm"
+          size="md"
           style={{ zIndex: MAP_Z_INDEX.controls }}
-        >
-          {extraControls}
-          {showUserLocation && (
-            <ActionIcon
-              aria-label={t('components.baseMap.focusUserLocationAriaLabel')}
-              size="md"
-              onClick={() => {
-                if (!map || !userLngLat) return
+          onClick={() => {
+            if (!map || !userLngLat) return
 
-                map.flyTo({
-                  center: userLngLat,
-                  zoom: FOCUS_ZOOM,
-                  duration: 800,
-                })
-              }}
-              disabled={!userLngLat || !map}
-            >
-              <RiFocus3Line size={APP_ACTION_ICON_SIZE} />
-            </ActionIcon>
-          )}
-        </Flex>
+            map.flyTo({
+              center: userLngLat,
+              zoom: FOCUS_ZOOM,
+              duration: 800,
+            })
+          }}
+          disabled={!userLngLat || !map}
+        >
+          <RiFocus3Line size={APP_ACTION_ICON_SIZE} />
+        </ActionIcon>
       )}
     </Box>
   )

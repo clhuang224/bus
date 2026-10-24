@@ -1,7 +1,7 @@
 import { Stack, Text } from '@mantine/core'
 import * as mapLibre from 'maplibre-gl'
 import type { Map as MapLibreMap, Marker, Popup } from 'maplibre-gl'
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import type { LngLat } from '~/modules/types/CoordsType'
@@ -33,11 +33,10 @@ export interface RouteMapVehicle {
 }
 
 interface PropType {
-  extraControls?: ReactNode
   highlightedStopId?: string | null
   isSm?: boolean
   onSelectStop: (stopId: string | null) => void
-  onSelectVehicle: (vehicleId: string) => void
+  onSelectVehicle: (vehicleId: string | null) => void
   routePath?: LngLat[]
   selectedStop: string | null
   selectedStopEstimatedArrivalLabel?: string | null
@@ -60,7 +59,6 @@ function removeRouteLine(map: MapLibreMap) {
 }
 
 export const RouteMap = ({
-  extraControls,
   highlightedStopId = null,
   isSm = false,
   onSelectStop,
@@ -202,7 +200,7 @@ export const RouteMap = ({
         }),
         ...(isHighlighted && {
           backgroundColor: MAP_COLORS.highlightedStop,
-          borderColor: '#ffffff',
+          borderColor: MAP_COLORS.markerOutline,
           color: MAP_COLORS.markerInk,
         }),
         datasetLabel: stop.name,
@@ -215,7 +213,7 @@ export const RouteMap = ({
       const handleSelectStop = (event: MouseEvent | KeyboardEvent) => {
         event.preventDefault()
         event.stopPropagation()
-        onSelectStop(stop.id)
+        onSelectStop(stop.id === selectedStop ? null : stop.id)
       }
 
       markerCleanupFns.push(
@@ -245,8 +243,13 @@ export const RouteMap = ({
       const handleOpenVehiclePopup = (event: MouseEvent | KeyboardEvent) => {
         event.preventDefault()
         event.stopPropagation()
-        onSelectVehicle(vehicle.id)
 
+        if (vehicle.id === selectedVehicleId) {
+          onSelectVehicle(null)
+          return
+        }
+
+        onSelectVehicle(vehicle.id)
         map.flyTo({
           center: vehicle.position,
           zoom: 16,
@@ -399,13 +402,7 @@ export const RouteMap = ({
 
   return (
     <>
-      <BaseMap
-        center={center}
-        zoom={13}
-        showUserLocation
-        extraControls={extraControls}
-        onLoad={setMap}
-      />
+      <BaseMap center={center} zoom={13} showUserLocation onLoad={setMap} />
       {popupContainer && selectedVehicle
         ? createPortal(
             <Stack gap="xs">

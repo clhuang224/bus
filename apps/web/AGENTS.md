@@ -308,16 +308,20 @@ For stop-focused location UX, keep page roles distinct:
 - on the `Route` page, do not add distance-from-user to the stop list by default; keep that page focused on route structure, ETA, realtime vehicle cues, and stop actions
 - external stop navigation should open Google Maps with the stop as the destination; do not rely on browser geolocation as an explicit origin in the outbound URL unless the product direction changes again
 
-For desktop map popups on both `Route` and `Nearby`, keep stop popups lightweight:
+For map popups on both `Route` and `Nearby`, keep stop popups lightweight:
 
-- default desktop stop popups should only identify the selected stop, typically by showing the stop name on a single line
-- richer detail such as distance, address, route badges, or navigation actions should live in the surrounding sidebar / detail panel unless there is a strong product reason to duplicate them in the popup
+- stop popups should only identify the selected stop: the stop name on a single line, plus the bearing label on `Nearby`
+- on small screens, the `Route` stop popup may add the navigation button and the stop's ETA, so a collapsed bottom sheet does not hide them
+- richer detail such as distance, address, route badges, or navigation actions should live in the sidebar on desktop or the bottom sheet on small screens unless there is a strong product reason to duplicate them in the popup
+- tapping the selected stop or vehicle marker again clears the selection and closes its popup
+
+For map page layout, `MapSidebarLayout` shows the page panel in a sidebar on desktop and in `MapBottomSheet` on small screens. The sheet snaps to a peek bar, half height, and full height and cannot be dismissed. Pages open it at half height, collapse it to the peek bar after a list selection that should show the map, and raise it when a map selection needs the list. Do not add separate map buttons for opening the list.
 
 For shared map behavior, keep `BaseMap` responsible for common map-level concerns such as:
 
 - rendering the user-location marker
 - showing the built-in focus-my-location control when `showUserLocation` is enabled
-- hosting additional shared map overlay controls via `extraControls`
+- padding the map by the overlay insets from `MapOverlayInsetsContext`, so the mobile header and bottom sheet never cover centered or fitted content
 
 Do not re-implement those common controls separately in page components when the behavior belongs to the base map layer.
 
@@ -406,11 +410,18 @@ When reviewing a UI block, ask:
 - Is this a screen-level concern that belongs in the page?
 - Or is this already a named piece of the feature that deserves its own component?
 
-When working with Mantine components, prefer Mantine props, variants, spacing, radius, color, and layout primitives over custom `style` or `styles` overrides whenever the built-in API can express the same intent.
+When working with Mantine components, prefer Mantine props, variants, spacing, radius, color, and layout primitives over custom `style` or `styles` overrides whenever the built-in API can express the same intent. In practice:
+
+- use style props such as `flex`, `miw`, `mih`, `w`, `h`, `bg`, `c`, `fw`, `fz`, `lh`, `lts`, `td`, `bd`, `bdrs`, and `display` instead of the matching CSS properties
+- use `Paper` with `shadow` for surfaces that need a shadow, and components such as `Center` and `UnstyledButton` instead of hand-written flex centering or button resets
+- use Mantine CSS variables, such as `var(--mantine-color-white)` or `var(--mantine-radius-xl)`, or `alpha()` with a theme color, when a value has to go through `style`
+- keep `style` only for what props cannot express, such as `z-index`, `overflow`, `cursor`, `pointer-events`, custom CSS variables, or per-corner radii
+
+Cards take their look from the `Card` defaults in `ThemeProvider`: the large radius, a light gray fill that matches the nearby stop list items, an extra-small shadow, and no border. Do not override these per card.
 
 Avoid ad hoc odd pixel values such as `11px` or `13px` unless there is a clear reason grounded in an existing design pattern or third-party constraint. Prefer consistent Mantine sizing, spacing tokens, or even-numbered pixel values when custom sizing is still needed.
 
-`ThemeProvider` overrides Mantine's built-in `blue`, `orange`, `teal`, `yellow`, `red`, `pink`, and `gray` with validated palettes, so use those color names in components. Map code that needs raw values reads them from `MAP_COLORS` in `app/modules/consts/mapColors.ts`. Keep the color roles described in `docs/plan.md`: blue for the route and primary actions, orange for vehicles and realtime cues, teal for the highlighted stop, and red and yellow only for status messages.
+`ThemeProvider` overrides Mantine's built-in `blue`, `orange`, `teal`, `yellow`, `red`, `pink`, and `gray` with validated palettes, so use those color names in components. Map code that needs raw values, such as route line paint and the DOM map markers, reads them from `MAP_COLORS` in `app/modules/consts/mapColors.ts`, including the white marker outline. Keep the color roles described in `docs/plan.md`: blue for the route and primary actions, orange for vehicles and realtime cues, teal for the highlighted stop, and red and yellow only for status messages.
 
 For badge-based route UI, keep badge semantics consistent across the app:
 

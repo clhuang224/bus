@@ -15,16 +15,21 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, Outlet, useMatch } from 'react-router'
 import { AppBrand } from '~/components/AppBrand'
+import { AppHeaderBar } from '~/components/AppHeaderBar'
 import { AppNavLink } from '~/components/AppNavLink'
 import {
   APP_FOOTER_HEIGHT,
   APP_HEADER_HEIGHT,
   APP_MOBILE_HEADER_HEIGHT,
+  TOP_CORNERS_RADIUS_XL,
 } from '~/modules/consts/layout'
 import { useWatchGeo } from '~/modules/hooks/app/useWatchGeo'
 import { useGoogleAnalytics } from '~/modules/hooks/app/useGoogleAnalytics'
 import { fetchCityGeoJSON } from '~/modules/slices/cityGeoSlice'
 import type { AppDispatch, RootState } from '~/modules/store'
+
+const FOOTER_SHADOW =
+  '0 -1px 2px rgba(0, 0, 0, 0.04), 0 -4px 12px rgba(0, 0, 0, 0.06)'
 
 export default function AppLayout() {
   const dispatch = useDispatch<AppDispatch>()
@@ -90,14 +95,7 @@ export default function AppLayout() {
         py="xs"
       >
         {isSm ? (
-          <Flex
-            align="center"
-            h="100%"
-            px="md"
-            bg="blue.6"
-            bdrs="xl"
-            style={{ boxShadow: 'var(--mantine-shadow-sm)' }}
-          >
+          <AppHeaderBar bg="blue.6">
             <AppBrand inverted />
             <ActionIcon
               component={Link}
@@ -105,23 +103,15 @@ export default function AppLayout() {
               aria-label={settingNav.name}
               variant="subtle"
               color="white"
-              size="lg"
+              size="xl"
               radius="xl"
               ml="auto"
             >
               {isSettingsPage ? settingNav.iconActive : settingNav.icon}
             </ActionIcon>
-          </Flex>
+          </AppHeaderBar>
         ) : (
-          <Flex
-            align="center"
-            gap="xl"
-            h="100%"
-            px="md"
-            bg="white"
-            bdrs="xl"
-            style={{ boxShadow: 'var(--mantine-shadow-sm)' }}
-          >
+          <AppHeaderBar bg="white" gap="xl">
             <AppBrand />
             <Flex align="center" gap="xs">
               {options.map((option) => (
@@ -140,7 +130,7 @@ export default function AppLayout() {
                 to={settingNav.path}
               />
             </Flex>
-          </Flex>
+          </AppHeaderBar>
         )}
       </AppShell.Header>
       <AppShell.Main
@@ -156,10 +146,10 @@ export default function AppLayout() {
         p="sm"
         hiddenFrom="sm"
         bg="white"
+        withBorder={false}
         style={{
-          borderTop: 'none',
-          boxShadow: 'var(--mantine-shadow-sm)',
-          borderRadius: 'var(--mantine-radius-xl) var(--mantine-radius-xl) 0 0',
+          boxShadow: FOOTER_SHADOW,
+          borderRadius: TOP_CORNERS_RADIUS_XL,
         }}
       >
         <Flex justify="space-around" align="center" gap="md">

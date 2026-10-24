@@ -23,14 +23,7 @@ export default function Routes() {
   } = useRoutesData()
 
   const routeCardSkeletons = Array.from({ length: 6 }, (_, index) => (
-    <Card
-      key={index}
-      withBorder
-      radius="md"
-      p="xs"
-      shadow="xs"
-      data-testid="routes-skeleton-card"
-    >
+    <Card key={index} p="xs" data-testid="routes-skeleton-card">
       <Stack gap={8}>
         <Flex justify="space-between" align="center">
           <Skeleton h={26} w={64} radius="xl" />
@@ -43,51 +36,46 @@ export default function Routes() {
 
   return (
     <Flex justify="center" h="100%">
-      <Card
+      <Stack
         p={APP_PAGE_PADDING}
         w="100%"
         maw={APP_PAGE_MAX_WIDTH}
         h="100%"
-        withBorder={false}
+        gap="md"
       >
-        <Stack gap="md" h="100%">
-          <Stack gap={4}>
-            <Title order={2} size="h3">
-              {t('pages.routes.title')}
-            </Title>
-          </Stack>
-          <Flex gap="sm" align="stretch">
-            <AreaSelect value={area} onChange={setArea} />
-            <SearchInput value={keyword} onChange={setKeyword} />
-          </Flex>
-          {message && <BaseAlert {...message} />}
-          <ScrollArea
-            viewportRef={scrollViewportRef}
-            style={{ flex: 1, minHeight: 0 }}
-          >
-            <Stack gap="sm">
-              {showRecentRoutesTitle && (
-                <Title order={3} size="h5">
-                  {t('pages.routes.recentViewedRoutesTitle')}
-                </Title>
-              )}
-              {isLoading
-                ? routeCardSkeletons
-                : displayedRoutes.map((route) => (
-                    <RouteInfoCard
-                      key={route.routeUID}
-                      to={route.to}
-                      name={route.name}
-                      city={route.city}
-                      departure={route.departure}
-                      destination={route.destination}
-                      onClick={() => trackRouteSelected(route)}
-                    />
-                  ))}
-            </Stack>
-          </ScrollArea>
+        <Stack gap={4}>
+          <Title order={2} size="h3">
+            {t('pages.routes.title')}
+          </Title>
         </Stack>
-      </Card>
+        <Flex gap="sm" align="stretch">
+          <AreaSelect value={area} onChange={setArea} />
+          <SearchInput value={keyword} onChange={setKeyword} />
+        </Flex>
+        {message && <BaseAlert {...message} />}
+        <ScrollArea viewportRef={scrollViewportRef} flex={1} mih={0}>
+          <Stack gap="sm">
+            {showRecentRoutesTitle && (
+              <Title order={3} size="h5">
+                {t('pages.routes.recentViewedRoutesTitle')}
+              </Title>
+            )}
+            {isLoading
+              ? routeCardSkeletons
+              : displayedRoutes.map((route) => (
+                  <RouteInfoCard
+                    key={route.routeUID}
+                    to={route.to}
+                    name={route.name}
+                    city={route.city}
+                    departure={route.departure}
+                    destination={route.destination}
+                    onClick={() => trackRouteSelected(route)}
+                  />
+                ))}
+          </Stack>
+        </ScrollArea>
+      </Stack>
     </Flex>
   )
 }

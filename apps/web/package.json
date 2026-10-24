@@ -15,6 +15,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@bus/shared": "workspace:*",
     "@mantine/core": "^8.2.1",
     "@mantine/hooks": "^8.2.1",
     "@react-router/node": "7.18.2",
@@ -34,7 +35,7 @@
     "react-redux": "^9.2.0",
     "react-router": "7.18.2",
     "topojson-client": "^3.1.0",
-    "@bus/shared": "workspace:*"
+    "vaul": "^1.1.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",

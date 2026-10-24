@@ -29,6 +29,7 @@ import { getCityTranslationKey } from '~/modules/utils/i18n/getCityTranslationKe
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 import { getStationBearingLabel } from '~/modules/utils/nearby/getStationBearingLabel'
 import { NearbyStationDetail } from './NearbyStationDetail'
+import { NearbyStationTitle } from './NearbyStationTitle'
 import { NearbyStopRoutes } from './NearbyStopRoutes'
 import { APP_ACTION_ICON_SIZE } from '~/modules/consts/layout'
 
@@ -76,7 +77,7 @@ const NearbySidebarContentDetail = ({
   const stationBearingLabel = getStationBearingLabel(t, detailState.station!)
 
   return (
-    <Stack gap="sm" style={{ flex: 1, minHeight: 0 }}>
+    <Stack gap="sm" flex={1} mih={0}>
       <Flex gap="xs" align="center">
         <ActionIcon
           aria-label={t('components.nearbySidebarContent.backAriaLabel')}
@@ -84,12 +85,7 @@ const NearbySidebarContentDetail = ({
         >
           <RiArrowLeftSLine size={APP_ACTION_ICON_SIZE} />
         </ActionIcon>
-        <Title
-          order={2}
-          size="h4"
-          style={{ flex: 1, minWidth: 0 }}
-          lineClamp={1}
-        >
+        <Title order={2} size="h4" flex={1} miw={0} lineClamp={1}>
           {getLocalizedText(detailState.station!.name, locale)}
         </Title>
         {stationBearingLabel && (
@@ -98,7 +94,7 @@ const NearbySidebarContentDetail = ({
           </Text>
         )}
       </Flex>
-      <Stack gap="sm" style={{ flex: 1, minHeight: 0 }}>
+      <Stack gap="sm" flex={1} mih={0}>
         <Stack gap={2}>
           <Text size="sm" c="dimmed">
             {t('components.nearbyStopDetail.distanceLabel')}
@@ -152,14 +148,8 @@ const NearbySidebarContentList = ({
 }: {
   listState: NearbySidebarListState
 }) => {
-  const { t } = useTranslation()
-  const locale = useSelector(selectLocale)
-
   return (
-    <ScrollArea
-      viewportRef={listState.scrollViewportRef}
-      style={{ flex: 1, minHeight: 0 }}
-    >
+    <ScrollArea viewportRef={listState.scrollViewportRef} flex={1} mih={0}>
       {listState.isStationsLoading && (
         <SkeletonList count={5} gap="sm" testId="nearby-stops-skeleton">
           <Skeleton h={56} radius="md" />
@@ -171,65 +161,40 @@ const NearbySidebarContentList = ({
           value={listState.selectedStationId}
           onChange={listState.onSelectStation}
         >
-          {listState.nearbyStations.map((station) => {
-            const stationBearingLabel = getStationBearingLabel(t, station)
-
-            return (
-              <AccordionItem
-                value={station.stationId}
-                key={station.stationId}
-                ref={(node) => {
-                  if (node) {
-                    listState.stationItemRefs.current.set(
-                      station.stationId,
-                      node,
-                    )
-                  } else {
-                    listState.stationItemRefs.current.delete(station.stationId)
+          {listState.nearbyStations.map((station) => (
+            <AccordionItem
+              value={station.stationId}
+              key={station.stationId}
+              ref={(node) => {
+                if (node) {
+                  listState.stationItemRefs.current.set(station.stationId, node)
+                } else {
+                  listState.stationItemRefs.current.delete(station.stationId)
+                }
+              }}
+            >
+              <AccordionControl>
+                <NearbyStationTitle station={station} />
+              </AccordionControl>
+              <AccordionPanel>
+                <NearbyStationDetail
+                  station={station}
+                  hasRoutesError={listState.hasStationRouteBadgesError}
+                  routes={
+                    listState.stationRouteBadgesMap.get(station.stationId) ?? []
                   }
-                }}
-              >
-                <AccordionControl>
-                  <Flex
-                    justify="space-between"
-                    align="center"
-                    gap="xs"
-                    w="100%"
-                  >
-                    <Text
-                      style={{ flex: '1 1 auto', minWidth: 0 }}
-                      lineClamp={1}
-                    >
-                      {getLocalizedText(station.name, locale)}
-                    </Text>
-                    {stationBearingLabel && (
-                      <Text size="sm" c="dimmed" mr="xs">
-                        {stationBearingLabel}
-                      </Text>
-                    )}
-                  </Flex>
-                </AccordionControl>
-                <AccordionPanel>
-                  <NearbyStationDetail
-                    station={station}
-                    hasRoutesError={listState.hasStationRouteBadgesError}
-                    routes={
-                      listState.stationRouteBadgesMap.get(station.stationId) ??
-                      []
-                    }
-                    isRoutesLoading={
-                      listState.isStationRoutesLoading &&
-                      listState.selectedStationId === station.stationId
-                    }
-                    isRoutesRateLimited={
-                      listState.isStationRouteBadgesRateLimited
-                    }
-                    onViewStationRoutes={listState.onViewStationRoutes}
-                  />
-                </AccordionPanel>
-              </AccordionItem>
-            )
-          })}
+                  isRoutesLoading={
+                    listState.isStationRoutesLoading &&
+                    listState.selectedStationId === station.stationId
+                  }
+                  isRoutesRateLimited={
+                    listState.isStationRouteBadgesRateLimited
+                  }
+                  onViewStationRoutes={listState.onViewStationRoutes}
+                />
+              </AccordionPanel>
+            </AccordionItem>
+          ))}
         </Accordion>
       )}
     </ScrollArea>

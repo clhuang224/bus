@@ -31,15 +31,13 @@ export const AppNavLink = (props: AppNavLinkPropType) => {
       aria-label={props.ariaLabel ?? props.label}
       label={
         <Flex align="center" justify="center" direction="column">
-          {props.label}
           {isActive ? (props.iconActive ?? props.icon) : props.icon}
+          {props.label}
         </Flex>
       }
       active={isActive}
-      style={{
-        borderRadius: 'var(--mantine-radius-xl)',
-        pointerEvents: isActive ? 'none' : 'auto',
-      }}
+      bdrs="xl"
+      style={{ pointerEvents: isActive ? 'none' : 'auto' }}
       w="auto"
     />
   )
