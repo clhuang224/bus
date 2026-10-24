@@ -1,4 +1,5 @@
 import { Box, Paper, Stack, VisuallyHidden } from '@mantine/core'
+import { useViewportSize } from '@mantine/hooks'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Drawer } from 'vaul'
 import {
@@ -17,12 +18,13 @@ const FULL_SNAP_POINT = 1
 const SNAP_POINTS = [PEEK_SNAP_POINT, HALF_SNAP_POINT, FULL_SNAP_POINT]
 const SHEET_Z_INDEX = 99
 
-function getVisibleHeight(snapPoint: SnapPoint | null) {
-  if (snapPoint === PEEK_SNAP_POINT || snapPoint === null) {
-    return MAP_SHEET_PEEK_HEIGHT
-  }
+function getVisibleHeight(snapPoint: SnapPoint | null, viewportHeight: number) {
+  if (typeof snapPoint !== 'number') return MAP_SHEET_PEEK_HEIGHT
 
-  return window.innerHeight * HALF_SNAP_POINT - MAP_SHEET_TOP
+  return Math.max(
+    MAP_SHEET_PEEK_HEIGHT,
+    viewportHeight * snapPoint - MAP_SHEET_TOP,
+  )
 }
 
 interface PropType {
@@ -55,9 +57,11 @@ export const MapBottomSheet = ({
     })
   }, [isExpanded])
 
+  const { height: viewportHeight } = useViewportSize()
+
   useEffect(() => {
-    onVisibleHeightChange(getVisibleHeight(snapPoint))
-  }, [onVisibleHeightChange, snapPoint])
+    onVisibleHeightChange(getVisibleHeight(snapPoint, viewportHeight))
+  }, [onVisibleHeightChange, snapPoint, viewportHeight])
 
   const handleSnapPointChange = (nextSnapPoint: SnapPoint | null) => {
     setSnapPoint(nextSnapPoint)
