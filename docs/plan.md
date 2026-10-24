@@ -23,10 +23,10 @@ apps/
   tdx-proxy/  Cloudflare Worker proxy for TDX authentication
   api/        NestJS backend
 packages/
-  shared/     shared API contracts, enums, and TDX upstream types
+  shared/     shared API contracts, enums, TDX upstream types, and realtime rules
 ```
 
-The shared package stays small and only contains contracts that are truly shared between frontend and backend. Nest-specific DTO classes stay in the API workspace.
+The shared package stays small and only contains code that is truly shared between frontend and backend: contracts, TDX upstream types, and the realtime calculation. Nest-specific DTO classes stay in the API workspace.
 
 ### Backend
 
@@ -214,7 +214,7 @@ Before this work, the app had little visual identity. A first pass of all five s
 
 The work is split into steps so each one can be reviewed on its own:
 
-1. **Site heading.** Show the product name as the page's `h1`, with the favicon mark beside it, and lower page titles to `h2`. On desktop, the heading sits at the left of the header, before the navigation links. On mobile, a new top banner holds the heading and the settings button, which replaces the floating settings button. Layout heights that depend on the header, such as the drawer offset, must follow the new banner height.
+1. **Site heading.** Show the product name as the page's `h1`, with the favicon mark beside it, and lower page titles to `h2`. On desktop, the heading sits at the left of the header, before the navigation links. On mobile, a new top banner holds the heading and the settings button, which replaces the floating settings button. Layout heights that depend on the header, such as the map overlay offsets, must follow the new banner height.
 2. **Name.** Change the zh-TW `app.name` to 找找公車 and update the Chinese README title.
 3. **Color and type.** Choose a brand color palette for Mantine and the map, and fix the font setup so the theme and the loaded fonts agree, including a font for Chinese.
 4. **Brand mark.** Redraw the favicon as a logo that also works next to the site heading, and use it for the PNG favicon and app icons.
@@ -226,25 +226,26 @@ Decisions for steps 3 to 5:
 - **How colors are chosen.** Colors are assigned by the job they do, and every color that must be told apart is checked with a palette validator for lightness, chroma, separation under color blindness, normal-vision separation, and contrast:
   - Map identities, which can sit next to each other anywhere on the map, are limited to three hues that pass the all-pairs check: blue `#2a78d6` for the route and its stops, orange `#eb6834` for vehicles, and green `#1baf7a` for the highlighted stop. Each marker also has a white ring and a number or icon, so color is never the only cue.
   - Status colors are reserved for messages: red `#d03b3b` for errors and yellow `#fab219` for warnings, always with a title and text.
-  - Each color is a Mantine palette of ten steps built in OKLCH around the chosen value, overriding Mantine's built-in color of the same name, so component code keeps using `blue`, `orange`, `teal`, `red`, `yellow`, `pink`, and `gray`. Step 6, used for text in light variants, keeps at least 4.5:1 contrast on white.
+  - Each color is a Mantine palette of ten steps built in OKLCH around the chosen value, overriding Mantine's built-in color of the same name, so component code keeps using `blue`, `orange`, `teal`, `red`, `yellow`, `pink`, and `gray`. Step 6 keeps at least 4.5:1 contrast on white. Blue light variants use step 8 for their text, because step 6 drops to about 4.2:1 on the light blue fill.
 
-  | Role                                 | Color                                      |
-  | ------------------------------------ | ------------------------------------------ |
-  | Site heading, primary actions, route | blue                                       |
-  | Mobile banner                        | blue, with white text                      |
-  | Vehicles and realtime cues           | orange                                     |
-  | Highlighted stop                     | green (`teal`)                             |
-  | Favorites                            | pink                                       |
-  | Errors and warnings                  | red and yellow                             |
-  | Page background, city badges         | light cool gray, with white cards and bars |
+  | Role                                 | Color                                                   |
+  | ------------------------------------ | ------------------------------------------------------- |
+  | Site heading, primary actions, route | blue                                                    |
+  | Mobile banner                        | blue, with white text                                   |
+  | Vehicles and realtime cues           | orange                                                  |
+  | Highlighted stop                     | green (`teal`)                                          |
+  | Favorites                            | pink                                                    |
+  | Errors and warnings                  | red and yellow                                          |
+  | Page background, city badges         | light cool gray, with lighter gray cards and white bars |
 
 ### UI and UX Follow-ups
 
 A design review of the visual refresh, at desktop (1440px) and mobile (375px) widths, led to a follow-up pass:
 
 - Favorite and settings buttons use 44px touch targets.
-- Every page puts its cards straight on the gray page, with no extra white column. Cards match the nearby stop list items: a lighter gray fill, with no shadow or border.
-- The mobile bottom navigation shows each icon above its label, and the brand mark has a white ring on the blue mobile banner.
+- Every page puts its cards straight on the gray page, with no extra white column. Cards match the nearby stop list items: a lighter gray fill and an extra-small shadow, with no border.
+- The mobile bottom navigation shows each icon above its label and casts a soft upward shadow, and the brand mark has a white ring on the blue mobile banner.
+- Tapping the selected stop or vehicle marker again closes its popup. On mobile, nearby stop popups show only the stop name and bearing, as on desktop, and tapping a stop marker raises the bottom sheet to show its details.
 - The no-service status is one line of text instead of an alert.
 - On mobile, the route and nearby pages show their list in a bottom sheet instead of a drawer that covered the map. The sheet works like the one in Google Maps: it snaps to a peek bar, half height, and full height, and cannot be dismissed, so the route or list is always one drag away. Both pages open at half height so the map and the list show together, and the map is padded by the visible sheet height so centered stops stay in view. The sheet uses the vaul library, which handles snap points, drag momentum, and the hand-off between dragging the sheet and scrolling the list.
 
