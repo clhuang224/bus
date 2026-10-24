@@ -136,12 +136,25 @@ const BaseMap = ({
       left: 0,
     }
 
-    if (!map.loaded() || map.isMoving()) {
-      map.setPadding(padding)
+    const applyPadding = () => {
+      if (!map.loaded()) {
+        map.setPadding(padding)
+        return
+      }
+
+      map.easeTo({ padding, duration: PADDING_TRANSITION_DURATION })
+    }
+
+    if (!map.isMoving()) {
+      applyPadding()
       return
     }
 
-    map.easeTo({ padding, duration: PADDING_TRANSITION_DURATION })
+    map.once('moveend', applyPadding)
+
+    return () => {
+      map.off('moveend', applyPadding)
+    }
   }, [map, overlayInsets])
 
   useEffect(() => {
