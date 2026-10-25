@@ -97,25 +97,28 @@ const stationMarkers = [
   },
 ]
 
-const renderNearbyStationMap = () => {
+const renderNearbyStationMap = (onSelectStation = vi.fn()) => {
   const store = createTestStore()
   const view = renderWithStore(
     <NearbyStationMap
       center={[25.033, 121.5654]}
       markers={stationMarkers}
       selectedStation="station-1"
-      onSelectStation={vi.fn()}
+      onSelectStation={onSelectStation}
     />,
     { store },
   )
 
-  const rerender = (markers = stationMarkers) =>
+  const rerender = ({
+    markers = stationMarkers,
+    onSelectStation: nextOnSelectStation = vi.fn(),
+  } = {}) =>
     view.rerender(
       <NearbyStationMap
         center={[25.033, 121.5654]}
         markers={markers}
         selectedStation="station-1"
-        onSelectStation={vi.fn()}
+        onSelectStation={nextOnSelectStation}
       />,
     )
 
@@ -141,8 +144,20 @@ describe('NearbyStationMap', () => {
   it('flies to the selected stop once, even when the markers refresh', () => {
     const { rerender } = renderNearbyStationMap()
 
-    rerender([...stationMarkers])
+    rerender({ markers: [...stationMarkers] })
 
     expect(mockMap.flyTo).toHaveBeenCalledTimes(1)
+  })
+
+  it('calls the latest select handler from a kept marker', () => {
+    const firstOnSelectStation = vi.fn()
+    const latestOnSelectStation = vi.fn()
+    const { rerender } = renderNearbyStationMap(firstOnSelectStation)
+
+    rerender({ onSelectStation: latestOnSelectStation })
+    createdMarkers[0]?.click()
+
+    expect(firstOnSelectStation).not.toHaveBeenCalled()
+    expect(latestOnSelectStation).toHaveBeenCalledWith(null)
   })
 })
