@@ -65,7 +65,7 @@ For mobile testing on the same local network:
 pnpm run dev:mobile
 ```
 
-The web app is served over HTTPS with a self-signed certificate, because browsers only allow location access on secure origins. Open the `https://` network address printed by Vite on the phone, and accept the certificate warning the first time.
+The web app is served over HTTPS with a self-signed certificate, because browsers only allow location access on secure origins. Open the `https://` network address printed by Vite on the phone, and accept the certificate warning the first time. The local TDX proxy allows the computer's current LAN addresses for that session, so `.dev.vars` does not need to list them.
 
 To develop against the NestJS API and its PostgreSQL database, use local API mode. It starts the API instead of the TDX proxy, and the web app reads route, stop, station, and realtime data from it:
 

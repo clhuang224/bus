@@ -65,7 +65,7 @@ pnpm run dev
 pnpm run dev:mobile
 ```
 
-瀏覽器只允許安全來源取得位置，所以這個模式會用自簽憑證以 HTTPS 提供網頁。在手機上開啟 Vite 印出的 `https://` 區網網址，第一次連線時接受憑證警告就好。
+瀏覽器只允許安全來源取得位置，所以這個模式會用自簽憑證以 HTTPS 提供網頁。在手機上開啟 Vite 印出的 `https://` 區網網址，第一次連線時接受憑證警告就好。本機的 TDX proxy 會在這次啟動時自動允許電腦目前的區網位址，所以不用把它們寫進 `.dev.vars`。
 
 如果要搭配 NestJS API 和 PostgreSQL 資料庫開發，可以使用 local API 模式。這個模式會啟動 API 而不是 TDX proxy，前端的路線、站牌、站位與即時資料都改由 API 提供：
 
