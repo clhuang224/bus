@@ -4,3 +4,5 @@ build/
 coverage/
 .react-router/
 .pnpm-store/
+pnpm-lock.yaml
+apps/web/app/modules/assets/taiwan-counties-10t.json
