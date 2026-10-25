@@ -38,10 +38,14 @@ export const NearbyStationMap = ({
   const markerMap = useRef<Map<string, Marker>>(new Map<string, Marker>())
   const popupRef = useRef<Popup | null>(null)
   const selectedStationRef = useRef(selectedStation)
+  const onSelectStationRef = useRef(onSelectStation)
+  const focusedStationRef = useRef<string | null>(null)
+  const hasPopupContent = Boolean(selectedStationPopupContent)
 
   useEffect(() => {
     selectedStationRef.current = selectedStation
-  }, [selectedStation])
+    onSelectStationRef.current = onSelectStation
+  }, [onSelectStation, selectedStation])
 
   useEffect(() => {
     if (!map) return
@@ -67,7 +71,9 @@ export const NearbyStationMap = ({
       const handleSelectStation = (event: MouseEvent | KeyboardEvent) => {
         event.preventDefault()
         event.stopPropagation()
-        onSelectStation(data.id === selectedStationRef.current ? null : data.id)
+        onSelectStationRef.current(
+          data.id === selectedStationRef.current ? null : data.id,
+        )
       }
 
       markerCleanupFns.push(
@@ -88,7 +94,7 @@ export const NearbyStationMap = ({
       })
       markerMap.current.clear()
     }
-  }, [map, markers, onSelectStation, t])
+  }, [map, markers, t])
 
   useEffect(() => {
     if (!map || !markerMap.current.size) return
@@ -110,7 +116,7 @@ export const NearbyStationMap = ({
       closeOnClick: false,
     }).setLngLat(marker.getLngLat())
 
-    if (selectedStationPopupContent) {
+    if (hasPopupContent) {
       const container = document.createElement('div')
       popup.setDOMContent(container)
       setPopupContainer(container)
@@ -127,11 +133,15 @@ export const NearbyStationMap = ({
       popupRef.current.remove()
       popupRef.current = null
     }
-  }, [map, markers, selectedStation, selectedStationPopupContent])
+  }, [hasPopupContent, map, markers, selectedStation])
 
   useEffect(() => {
-    if (!map) return
-    if (!selectedStation) return
+    if (!selectedStation) {
+      focusedStationRef.current = null
+      return
+    }
+
+    if (!map || focusedStationRef.current === selectedStation) return
 
     const marker = markerMap.current.get(selectedStation)
     if (!marker) return
@@ -141,6 +151,7 @@ export const NearbyStationMap = ({
       zoom: 16,
       duration: 800,
     })
+    focusedStationRef.current = selectedStation
   }, [map, markers, selectedStation])
 
   return (

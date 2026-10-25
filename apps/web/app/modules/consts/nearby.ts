@@ -1,1 +1,2 @@
 export const NEARBY_DISTANCE_KM = 0.5
+export const NEARBY_SEARCH_MOVE_THRESHOLD_KM = 0.1

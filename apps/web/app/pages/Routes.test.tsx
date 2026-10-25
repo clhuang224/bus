@@ -5,7 +5,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
 import type { RouteSummary } from '~/modules/interfaces/RouteSummary'
 import { AppLocaleType, AreaType, CityNameType } from '@bus/shared'
+import { GeoErrorType } from '~/modules/enums/geo/GeoErrorType'
+import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
 import routeSearchSlice from '~/modules/slices/routeSearchSlice'
+import { getAreaByCoords } from '~/modules/utils/geo/getAreaByCoords'
+import { getAreaTranslationKey } from '~/modules/utils/i18n/getAreaTranslationKey'
 import { getEnumValues } from '~/modules/utils/shared/getEnumValues'
 import { ROUTE_SEARCH_RECENT_STORAGE_KEY } from '~/modules/utils/routes/routeSearchRecentStorage'
 import { createTestStore } from '~/test/createTestStore'
@@ -13,6 +17,9 @@ import { renderWithProvidersAndRouter } from '~/test/render'
 import Routes from './Routes'
 
 const t = i18n.getFixedT(AppLocaleType.ZH_TW)
+const taipeiFallbackNotice = t('pages.routes.locationFallbackNotice', {
+  area: t(getAreaTranslationKey(AreaType.TAIPEI)),
+})
 const routeInfoOriginLabel = `${t('components.routeInfoCard.departureLabel')}: 市政府`
 
 const { mockTrackGoogleAnalyticsEvent, mockUseGetRouteSummariesQuery } =
@@ -20,6 +27,13 @@ const { mockTrackGoogleAnalyticsEvent, mockUseGetRouteSummariesQuery } =
     mockTrackGoogleAnalyticsEvent: vi.fn(),
     mockUseGetRouteSummariesQuery: vi.fn(),
   }))
+
+vi.mock('~/modules/utils/geo/getAreaByCoords', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('~/modules/utils/geo/getAreaByCoords')>()
+
+  return { getAreaByCoords: vi.fn(actual.getAreaByCoords) }
+})
 
 vi.mock('~/modules/apis/transit', () => ({
   transitApi: {
@@ -111,16 +125,33 @@ const routesData: RouteSummary[] = [
   },
 ]
 
-function createStore(preloadedRouteSearchState?: {
+interface RoutesTestState {
   keyword?: string
   selectedArea?: AreaType | null
-}) {
+  geolocation?: {
+    coords: [number, number] | null
+    error: GeoErrorType | null
+    permission: GeoPermissionType
+  }
+}
+
+const grantedGeolocation = {
+  coords: [25.033, 121.5654] as [number, number],
+  error: null,
+  permission: GeoPermissionType.GRANTED,
+}
+
+const deniedGeolocation = {
+  coords: null,
+  error: GeoErrorType.PERMISSION_DENIED,
+  permission: GeoPermissionType.DENIED,
+}
+
+function createStore(preloadedRouteSearchState?: RoutesTestState) {
   return createTestStore({
     reducer: {
       geolocation: (
-        state = {
-          coords: [25.033, 121.5654] as [number, number],
-        },
+        state = preloadedRouteSearchState?.geolocation ?? grantedGeolocation,
       ) => state,
       cityGeo: (
         state = {
@@ -141,10 +172,7 @@ function createStore(preloadedRouteSearchState?: {
   })
 }
 
-const renderRoutes = (preloadedRouteSearchState?: {
-  keyword?: string
-  selectedArea?: AreaType | null
-}) => {
+const renderRoutes = (preloadedRouteSearchState?: RoutesTestState) => {
   const store = createStore(preloadedRouteSearchState)
 
   return {
@@ -157,7 +185,14 @@ const renderRoutes = (preloadedRouteSearchState?: {
 }
 
 describe('Routes', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    const actualAreaByCoords = await vi.importActual<
+      typeof import('~/modules/utils/geo/getAreaByCoords')
+    >('~/modules/utils/geo/getAreaByCoords')
+    vi.mocked(getAreaByCoords).mockReset()
+    vi.mocked(getAreaByCoords).mockImplementation(
+      actualAreaByCoords.getAreaByCoords,
+    )
     localStorage.clear()
     mockTrackGoogleAnalyticsEvent.mockReset()
     vi.mocked(HTMLElement.prototype.scrollTo).mockClear()
@@ -182,6 +217,42 @@ describe('Routes', () => {
     renderRoutes()
 
     expect(screen.getByLabelText('area-select')).toHaveValue(AreaType.TAIPEI)
+  })
+
+  it('explains the default area when the location is unavailable', () => {
+    renderRoutes({ geolocation: deniedGeolocation })
+
+    expect(screen.getByText(taipeiFallbackNotice)).toBeInTheDocument()
+  })
+
+  it('falls back to the default area when permission is revoked after a fix', () => {
+    vi.mocked(getAreaByCoords).mockReturnValue(AreaType.TAICHUNG)
+
+    renderRoutes({
+      geolocation: {
+        coords: [24.1477, 120.6736],
+        error: null,
+        permission: GeoPermissionType.DENIED,
+      },
+    })
+
+    expect(screen.getByLabelText('area-select')).toHaveValue(AreaType.TAIPEI)
+    expect(screen.getByText(taipeiFallbackNotice)).toBeInTheDocument()
+  })
+
+  it('hides the default area notice once the user picks an area', () => {
+    renderRoutes({
+      geolocation: deniedGeolocation,
+      selectedArea: AreaType.TAICHUNG,
+    })
+
+    expect(screen.queryByText(taipeiFallbackNotice)).not.toBeInTheDocument()
+  })
+
+  it('hides the default area notice while the location is available', () => {
+    renderRoutes()
+
+    expect(screen.queryByText(taipeiFallbackNotice)).not.toBeInTheDocument()
   })
 
   it('updates the selected area from the picker', async () => {

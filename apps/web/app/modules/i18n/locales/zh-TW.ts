@@ -88,6 +88,8 @@ export const zhTW = {
       routes: {
         title: '搜尋公車',
         recentViewedRoutesTitle: '最近查看路線',
+        locationFallbackNotice:
+          '無法取得目前位置，先顯示{{area}}的路線，可以從區域選單切換。',
       },
       settings: {
         title: '設定',

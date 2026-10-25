@@ -24,6 +24,7 @@ import type { RouteSummary } from '../interfaces/RouteSummary'
 import type { LatLng } from '../types/CoordsType'
 import {
   filterTdxStopsWithinDistance,
+  sortNearbyStationsByDistance,
   toNearbyStationRoutesFromTdx,
   toNearbyStationsFromApi,
   toNearbyStationsFromTdx,
@@ -350,7 +351,10 @@ export const transitApi = createApi({
           const stops = await loadTdxNearbyStops(dispatch, query)
 
           return {
-            stations: toNearbyStationsFromTdx(stops),
+            stations: sortNearbyStationsByDistance(
+              toNearbyStationsFromTdx(stops),
+              query.coords,
+            ),
             routesByStationId: null,
           }
         }),

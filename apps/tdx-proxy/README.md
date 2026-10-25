@@ -33,6 +33,8 @@ The root development command starts both the web app and this proxy:
 pnpm run dev
 ```
 
+`pnpm run dev:mobile` starts the proxy through `scripts/start-dev-mobile.mjs`, which listens on all network interfaces and adds `https://<LAN IP>:5173` for each of the computer's current LAN addresses to `ALLOWED_ORIGINS` for that session only. It keeps the origins from `.dev.vars`, leaves `*` as it is, and does not change `.dev.vars` or the deployed Worker, so a new LAN address after switching networks only needs a restart.
+
 ## Deployment
 
 The Worker is deployed manually for now:

@@ -88,6 +88,8 @@ export const en = {
       routes: {
         title: 'Routes',
         recentViewedRoutesTitle: 'Recently viewed routes',
+        locationFallbackNotice:
+          'Your location is unavailable, so routes in {{area}} are shown. You can switch areas from the area menu.',
       },
       settings: {
         title: 'Settings',

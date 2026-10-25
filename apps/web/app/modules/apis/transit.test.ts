@@ -280,6 +280,28 @@ describe('transitApi.getNearbyStations', () => {
     expect(mockGetTdxStopOfRoutesByArea).not.toHaveBeenCalled()
     expect(mockGetTdxRoutesByArea).not.toHaveBeenCalled()
   })
+
+  it('orders TDX stations from nearest to farthest', async () => {
+    const middleStop = {
+      ...nearStop,
+      StopUID: 'TPE3',
+      StationID: 'station-3',
+      position: [121.568, 25.035],
+    } as Stop
+    mockIsDatabaseApiEnabled.mockReturnValue(false)
+    mockGetTdxStopsByNearbyArea.mockImplementation(
+      sourceResult({ data: [middleStop, nearStop] }),
+    )
+
+    const result = await createStore().dispatch(
+      transitApi.endpoints.getNearbyStations.initiate(nearbyQuery),
+    )
+
+    expect(result.data?.stations.map(({ stationId }) => stationId)).toEqual([
+      'station-1',
+      'station-3',
+    ])
+  })
 })
 
 describe('transitApi.getNearbyStationRoutes', () => {
