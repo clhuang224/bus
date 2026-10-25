@@ -3,7 +3,11 @@ import { describe, expect, it } from 'vitest'
 import type { BusRoute, BusSubRoute } from '../../interfaces/BusRoute'
 import type { StopOfRoute } from '../../interfaces/StopOfRoute'
 import { EMPTY_LOCALIZED_TEXT } from '../i18n/withLocalizedFallback'
-import { toNearbyStationRoutesFromTdx } from './toNearbyStations'
+import type { NearbyStation } from '../../interfaces/Nearby'
+import {
+  sortNearbyStationsByDistance,
+  toNearbyStationRoutesFromTdx,
+} from './toNearbyStations'
 
 function text(zhTW: string, en = '') {
   return { ...EMPTY_LOCALIZED_TEXT, 'zh-TW': zhTW, en }
@@ -121,5 +125,46 @@ describe('toNearbyStationRoutesFromTdx', () => {
     )
 
     expect(routes['station-1']).toHaveLength(1)
+  })
+})
+
+describe('sortNearbyStationsByDistance', () => {
+  const createStation = (
+    stationId: string,
+    position: [number, number],
+  ): NearbyStation => ({
+    stationId,
+    name: EMPTY_LOCALIZED_TEXT,
+    city: CityNameType.TAIPEI,
+    address: null,
+    bearings: [],
+    position,
+  })
+
+  it('orders stations from nearest to farthest', () => {
+    const stations = [
+      createStation('far', [121.57, 25.04]),
+      createStation('near', [121.5655, 25.0331]),
+      createStation('middle', [121.567, 25.034]),
+    ]
+
+    expect(
+      sortNearbyStationsByDistance(stations, [25.033, 121.5654]).map(
+        ({ stationId }) => stationId,
+      ),
+    ).toEqual(['near', 'middle', 'far'])
+  })
+
+  it('breaks distance ties by station ID', () => {
+    const stations = [
+      createStation('station-b', [121.5655, 25.033]),
+      createStation('station-a', [121.5655, 25.033]),
+    ]
+
+    expect(
+      sortNearbyStationsByDistance(stations, [25.033, 121.5654]).map(
+        ({ stationId }) => stationId,
+      ),
+    ).toEqual(['station-a', 'station-b'])
   })
 })

@@ -67,6 +67,29 @@ export function filterTdxStopsWithinDistance(
   })
 }
 
+export function sortNearbyStationsByDistance(
+  stations: NearbyStation[],
+  coords: LatLng,
+): NearbyStation[] {
+  const currentPoint = point(toLngLat(coords)!)
+
+  return stations
+    .map((station) => ({
+      station,
+      distanceKm: distance(currentPoint, point(station.position), {
+        units: 'kilometers',
+      }),
+    }))
+    .sort((left, right) => {
+      if (left.distanceKm !== right.distanceKm) {
+        return left.distanceKm - right.distanceKm
+      }
+
+      return left.station.stationId.localeCompare(right.station.stationId)
+    })
+    .map(({ station }) => station)
+}
+
 function getTdxStationId(stop: { StationID?: string | null; StopUID: string }) {
   return stop.StationID ?? stop.StopUID
 }
