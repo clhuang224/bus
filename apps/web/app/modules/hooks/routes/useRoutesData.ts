@@ -35,6 +35,8 @@ type DisplayRoute = {
 
 const EMPTY_ROUTES: RouteSummary[] = []
 
+const FALLBACK_AREA = AreaType.TAIPEI
+
 const unavailableLocationPermissions = [
   GeoPermissionType.DENIED,
   GeoPermissionType.UNSUPPORTED,
@@ -265,11 +267,13 @@ export function useRoutesData() {
   const { keyword, selectedArea } = useSelector(
     (state: RootState) => state.routeSearch,
   )
-  const currentArea = getAreaByCoords(coords, geojson)
-  const area = selectedArea ?? currentArea ?? AreaType.TAIPEI
   const isLocationUnavailable =
     unavailableLocationPermissions.includes(permission) ||
     geolocationError !== null
+  const currentArea = isLocationUnavailable
+    ? FALLBACK_AREA
+    : getAreaByCoords(coords, geojson)
+  const area = selectedArea ?? currentArea
   const locationFallbackNotice =
     !selectedArea && isLocationUnavailable
       ? t('pages.routes.locationFallbackNotice', {
