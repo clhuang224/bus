@@ -1,0 +1,100 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: zh-TW
+tone_instructions: >-
+  Write each comment in Traditional Chinese, then repeat it in English below.
+  Judge changes against the whole repository, its AGENTS.md guides, and
+  docs/plan.md, not only the diff.
+reviews:
+  profile: assertive
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: true
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    - '!pnpm-lock.yaml'
+    - '!**/generated/**'
+    - '!apps/web/app/modules/assets/taiwan-counties-10t.json'
+    - '!docs/assets/**'
+  path_instructions:
+    - path: '**/*'
+      instructions: |
+        Review each change in the context of the whole monorepo, not only the
+        changed lines. Look for callers, shared contracts, tests, and docs
+        that the change affects but does not update, and for code the change
+        leaves unused.
+        - Follow the root AGENTS.md and the AGENTS.md of the owning
+          workspace.
+        - Code should explain itself through names and small functions.
+          Flag comments that restate the code; keep only tool directives and
+          reasons the code cannot carry.
+        - Commits follow Conventional Commits with a body.
+    - path: 'apps/web/**'
+      instructions: |
+        Follow apps/web/AGENTS.md.
+        - Prefer Mantine props, style props, Paper shadows, and Mantine CSS
+          variables over inline style; keep style only for what props cannot
+          express.
+        - Use the theme colors named in ThemeProvider and MAP_COLORS for map
+          code; keep the color roles in docs/plan.md.
+        - User-facing copy goes through react-i18next keys in both zh-TW and
+          en locales; no hard-coded UI strings.
+        - Pages and hooks get data through transitApi and must not branch on
+          the data source.
+        - Keep RTK Query cache data serializable, and keep realtime matching
+          rules in packages/shared.
+        - Watch effects for unstable dependencies that rebuild map markers,
+          refetch data, or re-run camera moves on every render.
+    - path: 'apps/web/**/*.test.{ts,tsx}'
+      instructions: |
+        Tests use Vitest and Testing Library. Prefer role, label, and text
+        queries over positional or generated selectors, reuse exported copy
+        and constants, and check that new behavior is covered.
+    - path: 'apps/api/**'
+      instructions: |
+        Follow apps/api/AGENTS.md: feature modules with controller, service,
+        and DTO files, the shared response envelope, uuid and latitude and
+        longitude naming, Prisma schema conventions, and TDX request pacing
+        and quota protection. Admin endpoints must stay protected.
+    - path: 'apps/api/prisma/**'
+      instructions: |
+        Check schema and migration changes against the Prisma conventions in
+        apps/api/AGENTS.md, and flag destructive or non-reversible migrations.
+    - path: 'packages/shared/**'
+      instructions: |
+        Follow packages/shared/README.md. Keep the package a small contract
+        layer shared by the web app and the API, with no React, Redux, NestJS,
+        or Prisma code. Realtime rule changes must keep both sources in step.
+    - path: 'apps/tdx-proxy/**'
+      instructions: |
+        Follow apps/tdx-proxy/README.md. TDX credentials and bearer tokens
+        must never reach the client, origin checks must stay strict outside
+        local development, and deployment stays manual.
+    - path: '**/*.md'
+      instructions: |
+        Docs are in English, except files that target Chinese readers such as
+        *.zh-TW.md. docs/plan.md and docs/plan.zh-TW.md, and README.md and
+        docs/README.zh-TW.md, must change together. Chinese text follows the
+        Chinese Copywriting Guidelines, with spaces between Chinese and
+        English or numbers. Flag statements that no longer match the code.
+  tools:
+    biome:
+      enabled: false
+    oxc:
+      enabled: false
+    languagetool:
+      enabled: false
+chat:
+  auto_reply: true
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - AGENTS.md
+      - apps/*/AGENTS.md
+      - packages/*/README.md
+  learnings:
+    scope: auto
