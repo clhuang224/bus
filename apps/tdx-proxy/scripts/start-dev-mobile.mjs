@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { networkInterfaces } from 'node:os'
+import { parseEnv } from 'node:util'
 
 const DEV_VARS_PATH = new URL('../.dev.vars', import.meta.url)
 const WEB_MOBILE_ORIGIN_PORT = 5173
@@ -9,11 +10,11 @@ const ALLOW_ALL_ORIGINS = '*'
 function readConfiguredAllowedOrigins() {
   if (!existsSync(DEV_VARS_PATH)) return []
 
-  const allowedOriginsLine = readFileSync(DEV_VARS_PATH, 'utf8')
-    .split(/\r?\n/)
-    .find((line) => line.trim().startsWith('ALLOWED_ORIGINS='))
+  const { ALLOWED_ORIGINS: allowedOrigins = '' } = parseEnv(
+    readFileSync(DEV_VARS_PATH, 'utf8'),
+  )
 
-  return (allowedOriginsLine?.split('=').slice(1).join('=') ?? '')
+  return allowedOrigins
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean)
