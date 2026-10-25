@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { transitApi } from '~/modules/apis/transit'
 import { getSearchMessages } from '~/modules/consts/pageMessages'
+import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
 import { AreaType, type AppLocaleType } from '@bus/shared'
 import type { RouteSummary } from '~/modules/interfaces/RouteSummary'
 import { useLocalizedTextCollator } from '~/modules/hooks/shared/useLocalizedTextCollator'
@@ -15,6 +16,7 @@ import { selectLocale } from '~/modules/slices/localeSlice'
 import { setKeyword, setSelectedArea } from '~/modules/slices/routeSearchSlice'
 import type { AppDispatch, RootState } from '~/modules/store'
 import { getAreaByCoords } from '~/modules/utils/geo/getAreaByCoords'
+import { getAreaTranslationKey } from '~/modules/utils/i18n/getAreaTranslationKey'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 import { normalizeRouteSearchText } from '~/modules/utils/routes/normalizeRouteSearchText'
 import { loadRouteSearchRecentFromStorage } from '~/modules/utils/routes/routeSearchRecentStorage'
@@ -32,6 +34,11 @@ type DisplayRoute = {
 } & RouteSearchAnalyticsRoute
 
 const EMPTY_ROUTES: RouteSummary[] = []
+
+const unavailableLocationPermissions = [
+  GeoPermissionType.DENIED,
+  GeoPermissionType.UNSUPPORTED,
+]
 
 type RoutesMessage = ReturnType<typeof getSearchMessages>['emptyRoutes'] | null
 
@@ -249,13 +256,26 @@ export function useRoutesData() {
   const dispatch = useDispatch<AppDispatch>()
   const { t } = useTranslation()
   const locale = useSelector(selectLocale)
-  const { coords } = useSelector((state: RootState) => state.geolocation)
+  const {
+    coords,
+    error: geolocationError,
+    permission,
+  } = useSelector((state: RootState) => state.geolocation)
   const geojson = useSelector((state: RootState) => state.cityGeo.geojson)
   const { keyword, selectedArea } = useSelector(
     (state: RootState) => state.routeSearch,
   )
   const currentArea = getAreaByCoords(coords, geojson)
   const area = selectedArea ?? currentArea ?? AreaType.TAIPEI
+  const isLocationUnavailable =
+    unavailableLocationPermissions.includes(permission) ||
+    geolocationError !== null
+  const locationFallbackNotice =
+    !selectedArea && isLocationUnavailable
+      ? t('pages.routes.locationFallbackNotice', {
+          area: t(getAreaTranslationKey(area)),
+        })
+      : null
   const {
     data: routes = EMPTY_ROUTES,
     isLoading,
@@ -355,6 +375,7 @@ export function useRoutesData() {
     displayedRoutes,
     isLoading,
     keyword,
+    locationFallbackNotice,
     message,
     scrollViewportRef,
     showRecentRoutesTitle:

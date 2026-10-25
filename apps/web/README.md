@@ -8,7 +8,7 @@ This workspace contains the React Router frontend for Finding the Bus.
 
 Search bus routes by service area and keyword.
 
-- The Routes page defaults to the area resolved from the user's current location.
+- The Routes page defaults to the area resolved from the user's current location. When the location is unavailable, it shows the Taipei area and says so until the user picks an area.
 - If the user manually changes the area, that selection is preserved across revisits.
 - When the search box is empty, the page shows recently viewed routes when available for quick access.
 - Matching routes open a route detail page with subroute tabs, stop lists, and a synchronized map.

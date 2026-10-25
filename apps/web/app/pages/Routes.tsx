@@ -1,4 +1,12 @@
-import { Card, Flex, ScrollArea, Skeleton, Stack, Title } from '@mantine/core'
+import {
+  Card,
+  Flex,
+  ScrollArea,
+  Skeleton,
+  Stack,
+  Text,
+  Title,
+} from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { AreaSelect } from '~/components/AreaSelect'
 import { SearchInput } from '~/components/SearchInput'
@@ -14,6 +22,7 @@ export default function Routes() {
     displayedRoutes,
     isLoading,
     keyword,
+    locationFallbackNotice,
     message,
     scrollViewportRef,
     setArea,
@@ -52,6 +61,11 @@ export default function Routes() {
           <AreaSelect value={area} onChange={setArea} />
           <SearchInput value={keyword} onChange={setKeyword} />
         </Flex>
+        {locationFallbackNotice && (
+          <Text size="sm" c="dimmed">
+            {locationFallbackNotice}
+          </Text>
+        )}
         {message && <BaseAlert {...message} />}
         <ScrollArea viewportRef={scrollViewportRef} flex={1} mih={0}>
           <Stack gap="sm">
