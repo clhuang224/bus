@@ -249,7 +249,7 @@ A design review of the visual refresh, at desktop (1440px) and mobile (375px) wi
 - The no-service status is one line of text instead of an alert.
 - On mobile, the route and nearby pages show their list in a bottom sheet instead of a drawer that covered the map. The sheet works like the one in Google Maps: it snaps to a peek bar, half height, and full height, and cannot be dismissed, so the route or list is always one drag away. Both pages open at half height so the map and the list show together, and the map is padded by the visible sheet height so centered stops stay in view. The sheet uses the vaul library, which handles snap points, drag momentum, and the hand-off between dragging the sheet and scrolling the list.
 
-One issue is still open: on the mobile route map, stop markers overlap at the initial zoom. A fix could show only the route line and its terminal stops until the user zooms in, which needs changes to the map layers.
+Stop markers on the route map no longer pile up when zoomed out. After each zoom, a stop marker that would overlap one already shown is hidden, walking the route in order; the terminals, the selected stop, and the highlighted stop always stay visible. Hiding by overlap, rather than below a fixed zoom level, adapts to routes whose stops are spaced very differently, and the stop list still lists every stop.
 
 ## Backlog
 

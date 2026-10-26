@@ -9,10 +9,12 @@ import { toLatLng } from '~/modules/utils/geo/convertCoordinates'
 import { addMapMarkerActivationListeners } from '~/modules/utils/map/addMapMarkerActivationListeners'
 import { MAP_COLORS } from '~/modules/consts/mapColors'
 import { createMapMarkerElement } from '~/modules/utils/map/createMapMarkerElement'
+import { pickSpacedStopIds } from '~/modules/utils/map/pickSpacedStopIds'
 import { showMapPopup } from '~/modules/utils/map/showMapPopup'
 import BaseMap from '../common/BaseMap'
 import { RoutePopupContent } from './RoutePopupContent'
 import {
+  MAP_MARKER_SIZE,
   MAP_STOP_POPUP_OFFSET,
   MAP_VEHICLE_POPUP_OFFSET,
 } from '~/modules/consts/layout'
@@ -266,6 +268,37 @@ export const RouteMap = ({
         .addTo(map)
 
       vehicleMarkerMap.current.set(vehicle.id, marker)
+    })
+
+    const pinnedStopIds = new Set(
+      [
+        positionedStops[0]?.id,
+        positionedStops.at(-1)?.id,
+        selectedStop,
+        highlightedStopId,
+      ].filter((stopId): stopId is string => Boolean(stopId)),
+    )
+    const showSpacedStopMarkers = () => {
+      const visibleStopIds = pickSpacedStopIds(
+        positionedStops.map((stop) => {
+          const { x, y } = map.project(stop.position)
+          return { id: stop.id, x, y }
+        }),
+        pinnedStopIds,
+        MAP_MARKER_SIZE.stop,
+      )
+
+      markerMap.current.forEach((marker, stopId) => {
+        marker.getElement().style.display = visibleStopIds.has(stopId)
+          ? ''
+          : 'none'
+      })
+    }
+
+    showSpacedStopMarkers()
+    map.on('zoomend', showSpacedStopMarkers)
+    markerCleanupFns.push(() => {
+      map.off('zoomend', showSpacedStopMarkers)
     })
 
     if (
