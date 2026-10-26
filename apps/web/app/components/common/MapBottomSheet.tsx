@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Drawer } from 'vaul'
 import {
   APP_FOOTER_HEIGHT,
+  MAP_PANEL_BACKGROUND_VAR,
   MAP_SHEET_HALF_RATIO,
   MAP_SHEET_PEEK_HEIGHT,
   MAP_SHEET_TOP,
@@ -58,10 +59,15 @@ export const MapBottomSheet = ({
   }, [isExpanded])
 
   const { height: viewportHeight } = useViewportSize()
+  const visibleHeight = getVisibleHeight(snapPoint, viewportHeight)
+  const offscreenHeight = Math.max(
+    0,
+    viewportHeight - MAP_SHEET_TOP - visibleHeight,
+  )
 
   useEffect(() => {
-    onVisibleHeightChange(getVisibleHeight(snapPoint, viewportHeight))
-  }, [onVisibleHeightChange, snapPoint, viewportHeight])
+    onVisibleHeightChange(visibleHeight)
+  }, [onVisibleHeightChange, visibleHeight])
 
   const handleSnapPointChange = (nextSnapPoint: SnapPoint | null) => {
     setSnapPoint(nextSnapPoint)
@@ -93,10 +99,11 @@ export const MapBottomSheet = ({
             bottom={0}
             left={0}
             display="flex"
-            pb={`calc(${APP_FOOTER_HEIGHT}px + env(safe-area-inset-bottom))`}
+            pb={`calc(${APP_FOOTER_HEIGHT + offscreenHeight}px + env(safe-area-inset-bottom))`}
             bg="var(--mantine-color-body)"
             shadow="md"
             style={{
+              [MAP_PANEL_BACKGROUND_VAR]: 'var(--mantine-color-body)',
               zIndex: SHEET_Z_INDEX,
               flexDirection: 'column',
               borderRadius: TOP_CORNERS_RADIUS_XL,
