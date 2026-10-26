@@ -315,7 +315,7 @@ For map popups on both `Route` and `Nearby`, keep stop popups lightweight:
 - richer detail such as distance, address, route badges, or navigation actions should live in the sidebar on desktop or the bottom sheet on small screens unless there is a strong product reason to duplicate them in the popup
 - tapping the selected stop or vehicle marker again clears the selection and closes its popup
 
-For map page layout, `MapSidebarLayout` shows the page panel in a sidebar on desktop and in `MapBottomSheet` on small screens. The sheet snaps to a peek bar, half height, and full height and cannot be dismissed. Pages open it at half height, collapse it to the peek bar after a list selection that should show the map, and raise it when a map selection needs the list. Do not add separate map buttons for opening the list.
+For map page layout, `MapSidebarLayout` shows the page panel in a sidebar on desktop and in `MapBottomSheet` on small screens. The sheet snaps to a peek bar, half height, and full height and cannot be dismissed. Pages open it at half height, collapse it to the peek bar after a list selection that should show the map, and raise it when a map selection needs the list. Do not add separate map buttons for opening the list. The sheet's content always ends at its visible bottom edge, so a list scrolls only within what is on screen and scrolling a selected item into view works at every height. Keep page headers inside the panel's scroll area, with tabs sticky at the top, so the list keeps room at half height.
 
 For shared map behavior, keep `BaseMap` responsible for common map-level concerns such as:
 

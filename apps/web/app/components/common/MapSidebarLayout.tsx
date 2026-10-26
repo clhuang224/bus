@@ -4,6 +4,7 @@ import {
   APP_MOBILE_HEADER_HEIGHT,
   APP_PAGE_PADDING,
   MAP_FRAME_RADIUS,
+  MAP_PANEL_BACKGROUND_VAR,
   MAP_OVERLAY_BOTTOM_INSET_VAR,
   MAP_OVERLAY_TOP_INSET_VAR,
   MAP_SHEET_PEEK_HEIGHT,
@@ -61,6 +62,7 @@ export const MapSidebarLayout = ({
             bg="white"
             radius={0}
             shadow="sm"
+            style={{ [MAP_PANEL_BACKGROUND_VAR]: 'var(--mantine-color-white)' }}
           >
             {panel}
           </Paper>

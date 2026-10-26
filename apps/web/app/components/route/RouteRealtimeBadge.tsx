@@ -1,6 +1,7 @@
 import { alpha, Badge, Box } from '@mantine/core'
 import { RiBus2Fill } from '@remixicon/react'
 import type { MouseEvent } from 'react'
+import { ROUTE_STICKY_TABS_SCROLL_MARGIN } from '~/modules/consts/layout'
 
 interface PropType {
   isSelected: boolean
@@ -36,6 +37,7 @@ export function RouteRealtimeBadge({
         style={{
           boxShadow: isSelected ? SELECTED_BADGE_SHADOW : undefined,
           cursor: 'pointer',
+          scrollMarginTop: ROUTE_STICKY_TABS_SCROLL_MARGIN,
         }}
         onClick={onClick}
       >
