@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '~/modules/i18n'
 import type { RouteSummary } from '~/modules/interfaces/RouteSummary'
 import { AppLocaleType, AreaType, CityNameType } from '@bus/shared'
+import { getSearchMessages } from '~/modules/consts/pageMessages'
 import { GeoErrorType } from '~/modules/enums/geo/GeoErrorType'
 import { GeoPermissionType } from '~/modules/enums/geo/GeoPermissionType'
 import routeSearchSlice from '~/modules/slices/routeSearchSlice'
@@ -412,7 +413,9 @@ describe('Routes', () => {
   it('shows the search prompt message when the keyword is empty and there is no recent-route history', () => {
     renderRoutes()
 
-    expect(screen.getByText('開始搜尋公車')).toBeInTheDocument()
+    expect(
+      screen.getByText(getSearchMessages(t).emptyRouteSearch.title),
+    ).toBeInTheDocument()
     expect(screen.queryByRole('link')).not.toBeInTheDocument()
   })
 

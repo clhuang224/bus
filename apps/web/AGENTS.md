@@ -520,8 +520,6 @@ Current shared testing mechanisms:
 
 Current testing cleanup backlog:
 
-- replace remaining hard-coded shared UI copy in tests with imports from existing message constants where practical
-- reduce positional DOM selectors in tests, especially indexed textbox queries, in favor of labels, roles, or clearer helpers
 - continue consolidating obviously repeated provider boilerplate or mock reset code when the helper remains small, honest, and easy to inspect
 
 ## 7. Commit Rules

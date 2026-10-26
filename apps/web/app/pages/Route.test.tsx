@@ -547,7 +547,9 @@ describe('Route', () => {
 
     renderRoutePage()
 
-    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
+    fireEvent.click(
+      screen.getByRole('tab', { name: t('common.direction.return') }),
+    )
 
     await waitFor(() => {
       expect(screen.getByText(fourMinutesAwayLabel)).toBeInTheDocument()
@@ -566,7 +568,9 @@ describe('Route', () => {
   it('passes vehicles with a GPS position to the route map', async () => {
     renderRoutePage()
 
-    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
+    fireEvent.click(
+      screen.getByRole('tab', { name: t('common.direction.return') }),
+    )
 
     await waitFor(() => {
       const latestCall = mockRouteMap.mock.calls[
@@ -587,7 +591,9 @@ describe('Route', () => {
   it('selects only the stop when choosing a stop title from the list', async () => {
     renderRoutePage()
 
-    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
+    fireEvent.click(
+      screen.getByRole('tab', { name: t('common.direction.return') }),
+    )
 
     await waitFor(() => {
       expect(screen.getByText(fourMinutesAwayLabel)).toBeInTheDocument()
@@ -628,7 +634,9 @@ describe('Route', () => {
 
     renderRoutePage()
 
-    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
+    fireEvent.click(
+      screen.getByRole('tab', { name: t('common.direction.return') }),
+    )
 
     await waitFor(() => {
       expect(
@@ -654,7 +662,9 @@ describe('Route', () => {
   it('selects only the vehicle in the list when clicking a vehicle marker on the map', async () => {
     renderRoutePage()
 
-    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
+    fireEvent.click(
+      screen.getByRole('tab', { name: t('common.direction.return') }),
+    )
 
     await waitFor(() => {
       expect(mockRouteMap).toHaveBeenCalled()
