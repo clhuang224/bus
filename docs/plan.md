@@ -194,7 +194,29 @@ The project aims to run on the free TDX basic membership (5 requests per minute 
 - Base-data sync fits the free tier. One route and stop sync used about 100 requests and 175MB of decompressed responses in October 2026.
 - Realtime data does not fit the free tier through TDX. Each refresh needs three requests (ETA, near-stop, and GPS), and TDX offers no endpoint that combines them, so 5 requests per minute serves about two routes at a time across all users.
 - Production web builds still call TDX for base data through the proxy, so the free tier also requires the production switch to the database API.
-- City open-data feeds are the candidate path to free realtime data. Taipei publishes a citywide ETA file without an API key, updated about every 20 seconds. Before building on such feeds, check each city's update rate, identifiers, license, and access limits, and whether they report whether a vehicle is arriving at or leaving a stop.
+- City open-data feeds are the candidate path to free realtime data. Taipei has been checked; see [Taipei Realtime Open Data](#taipei-realtime-open-data). Before building on another city's feed, check its update rate, identifiers, license, and access limits, and whether it reports whether a vehicle is arriving at or leaving a stop.
+
+### Taipei Realtime Open Data
+
+The Taipei City Public Transportation Office publishes citywide bus files on Azure Blob Storage under `https://tcgbusfs.blob.core.windows.net/blobbus/`, described in its Data.Taipei API document, version 6.3 (September 2025). The files were checked on 2026-10-26. They cover the same three kinds of realtime data that the shared calculation reads from TDX:
+
+| Taipei file          | Content                                                       | TDX counterpart          |
+| -------------------- | ------------------------------------------------------------- | ------------------------ |
+| `GetEstimateTime.gz` | Seconds until arrival per route, stop, and direction          | `EstimatedTimeOfArrival` |
+| `GetBusEvent.gz`     | Each bus's current stop, plate, and arriving or leaving state | `RealTimeNearStop`       |
+| `GetBusData.gz`      | Each bus's GPS position, speed, and heading                   | `RealTimeByFrequency`    |
+
+Findings:
+
+- **No key, cheap to poll.** The files need no API key, send `Access-Control-Allow-Origin: *` and an `ETag`, and each one covers the whole city, so one fetch serves every Taipei route no matter how many people are looking. On a weekday evening, the three files were about 147 KB, 14 KB, and 25 KB gzipped; daytime sizes still need measuring.
+- **Updated about every 10 seconds.** Polling the three files for three minutes showed a new upload about every 10 seconds, faster than the 20 seconds assumed earlier. The static files, such as stops and routes, were uploaded once that evening.
+- **Identifiers map directly to TDX.** A route's TDX `RouteUID` is `TPE` plus its Taipei route ID, a sub-route's `SubRouteUID` is `TPE` plus its Taipei path attribute ID, and a stop's `StopUID` is `TPE` plus its Taipei stop ID. TDX's `StationID` equals Taipei's stop location ID. All 416 TDX Taipei routes, all 722 of their sub-routes, and all 28,814 TDX Taipei stops matched. `GetEstimateTime` names the main route, while `GetBusEvent` and `GetBusData` name the sub-route.
+- **Arriving or leaving is reported.** `GetBusEvent` marks each bus as arriving at (`CarOnStop` 1) or leaving (`CarOnStop` 0) its current stop, which can stand in for TDX's `A2EventType`.
+- **Arrival status codes.** `EstimateTime` is in seconds, or a negative code: -1 not departed yet, -2 not stopping because of traffic control, -3 last bus passed, and -4 not running today. `GoBack` adds 2 for not departed yet and 3 for the last bus gone. ETAs carry no plate and no sub-route, which matches how TDX already delivers Taipei ETAs, so the existing rule for sub-routes without their own ETAs applies.
+- **Taipei routes only.** The files cover the routes TDX lists under Taipei. New Taipei routes (`NWT`) are not included and would need New Taipei's own feed.
+- **License still to confirm.** Data.Taipei datasets generally use the Open Government Data License, version 1, which requires attribution, but the ETA dataset page only lists the data as open. Confirm the license and add the attribution before shipping.
+
+A Taipei source would fit behind the API: an adapter in `packages/shared` would turn the three files into the TDX record types that `calculateRouteRealtime` already reads, and the API would poll the citywide files on a short interval for `TPE` routes instead of calling TDX per route. Fetching the files directly from the browser is possible because of CORS, but every visitor would download the whole city every few seconds, and the files are gzip bodies that the page would have to decompress itself.
 
 ### Product Name
 
