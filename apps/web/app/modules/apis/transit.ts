@@ -43,7 +43,7 @@ import { databaseApi, isDatabaseApiEnabled } from './database'
 import { isTdxRateLimitError } from './errors/busError'
 import { isDatabaseApiError } from './errors/databaseError'
 
-export type TransitQueryError = FetchBaseQueryError | SerializedError
+type TransitQueryError = FetchBaseQueryError | SerializedError
 
 export interface NearbyStationsQuery {
   area: AreaType
@@ -54,7 +54,7 @@ export interface NearbyStationRoutesQuery extends NearbyStationsQuery {
   includeTerminals: boolean
 }
 
-export interface RouteDetailQuery {
+interface RouteDetailQuery {
   city: CityNameType
   routeUID: string
 }

@@ -1,4 +1,4 @@
-export interface ScreenStop {
+interface ScreenStop {
   id: string
   x: number
   y: number

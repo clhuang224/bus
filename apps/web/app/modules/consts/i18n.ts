@@ -7,7 +7,7 @@ export const SUPPORTED_APP_LOCALES = [
   AppLocaleType.EN,
 ] as const
 
-export type SupportedAppLocale = (typeof SUPPORTED_APP_LOCALES)[number]
+type SupportedAppLocale = (typeof SUPPORTED_APP_LOCALES)[number]
 
 export function isSupportedAppLocale(
   value: string,

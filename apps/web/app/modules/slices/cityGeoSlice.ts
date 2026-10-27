@@ -9,7 +9,7 @@ import {
 } from '../utils/geo/cityBoundaryIndexedDB'
 import cityBoundaryAssetUrl from '../assets/taiwan-counties-10t.json?url'
 
-export interface CityGeoState {
+interface CityGeoState {
   geojson: FeatureCollection | null
   loading: boolean
   error: string | null

@@ -30,7 +30,7 @@ import {
   ROUTE_STOP_BULLET_SIZE,
 } from '~/modules/consts/layout'
 
-export interface RouteStopListItem {
+interface RouteStopListItem {
   estimatedArrivalLabel: string | null
   favoriteRouteStop: FavoriteRouteStop
   id: string

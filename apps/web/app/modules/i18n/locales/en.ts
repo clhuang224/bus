@@ -165,7 +165,6 @@ export const en = {
         viewRoutesAriaLabel: 'View routes for {{stopName}}',
       },
       nearbyStopRoutes: {
-        title: 'Routes at this stop',
         empty: 'No route information is currently available for this stop',
         error:
           'Unable to load route information right now. Please try again later.',
@@ -282,11 +281,6 @@ export const en = {
           title: 'Bus data service authentication failed',
           description:
             'The app could not authenticate with the bus data service right now. Please try again later.',
-        },
-        rateLimited: {
-          title: 'Too many queries right now',
-          description:
-            'The system cannot fetch bus data at the moment. Please wait a bit and try again.',
         },
         systemError: {
           title: 'The system is temporarily unavailable',

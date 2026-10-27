@@ -3,7 +3,7 @@ import { RiSearchLine } from '@remixicon/react'
 import type { ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
 
-export interface SearchInputPropType {
+interface SearchInputPropType {
   value: string
   onChange: (value: string) => void
 }

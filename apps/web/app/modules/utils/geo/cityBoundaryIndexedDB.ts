@@ -5,7 +5,7 @@ const CITY_BOUNDARY_DB_VERSION = 1
 const CITY_BOUNDARY_STORE_NAME = 'city-boundary-cache'
 const CITY_BOUNDARY_CACHE_KEY = 'city-boundaries'
 
-export interface CityBoundaryCacheRecord {
+interface CityBoundaryCacheRecord {
   topojson: Topology
   assetUrl?: string
   updatedAt: string

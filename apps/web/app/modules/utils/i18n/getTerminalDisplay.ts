@@ -1,4 +1,4 @@
-export type TerminalDisplay =
+type TerminalDisplay =
   | {
       labelKey: 'terminalLabel'
       text: string

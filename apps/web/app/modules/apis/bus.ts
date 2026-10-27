@@ -175,33 +175,6 @@ export const busApi = createApi({
         }
       },
     }),
-    getStopsByCity: build.query<Stop[], CityNameType>({
-      query: (cityName) => `/Stop/City/${cityName}?%24format=JSON`,
-      transformResponse: (res: TdxStop[]) => transformStops(res),
-    }),
-    getStopsByArea: build.query<Stop[], AreaType>({
-      queryFn: async (area, _api, _extraOptions, baseQuery) => {
-        const cityResults = await Promise.all(
-          areaMapCity[area].map(async (city) => ({
-            city,
-            result: await baseQuery(`/Stop/City/${city}?%24format=JSON`),
-          })),
-        )
-
-        const errorResult = cityResults.find(
-          ({ result }) => result.error != null,
-        )
-        if (errorResult?.result.error != null) {
-          return { error: errorResult.result.error }
-        }
-
-        return {
-          data: cityResults.flatMap(({ result }) =>
-            transformStops(result.data as TdxStop[]),
-          ),
-        }
-      },
-    }),
     getStopsByNearbyArea: build.query<
       Stop[],
       { area: AreaType; coords: LatLng }
@@ -258,5 +231,3 @@ export const busApi = createApi({
     }),
   }),
 })
-
-export const { useGetStopsByCityQuery, useGetStopsByAreaQuery } = busApi

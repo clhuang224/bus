@@ -35,7 +35,7 @@ export function getRouteSearchRecentFromStorage(
   }
 }
 
-export function setRouteSearchRecentInStorage(
+function setRouteSearchRecentInStorage(
   storage: Pick<Storage, 'setItem'>,
   recentRouteUIDs: string[],
 ) {

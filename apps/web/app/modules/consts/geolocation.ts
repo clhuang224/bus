@@ -1,7 +1,0 @@
-import { CityNameType } from '@bus/shared'
-import { getEnumValues } from '../utils/shared/getEnumValues'
-
-export const defaultCoords = null
-export const defaultZoom = 12
-export const defaultCityName = 'NantouCounty'
-export const allCityNames = getEnumValues(CityNameType)

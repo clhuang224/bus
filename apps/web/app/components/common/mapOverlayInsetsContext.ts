@@ -1,6 +1,6 @@
 import { createContext } from 'react'
 
-export interface MapOverlayInsets {
+interface MapOverlayInsets {
   top: number
   bottom: number
 }

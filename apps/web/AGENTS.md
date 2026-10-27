@@ -512,7 +512,7 @@ When updating or adding tests in this repository, prefer these conventions:
 Current shared testing mechanisms:
 
 - use `app/test/setup.ts` for shared jsdom test setup such as `jest-dom`, automatic `cleanup()`, and browser API shims required by Mantine or scroll-sync behavior
-- use `app/test/render.tsx` for shared provider wrappers such as `renderWithMantine`, `renderWithStore`, `renderWithProvidersAndRouter`, and `renderRoute`
+- use `app/test/render.tsx` for shared provider wrappers such as `renderWithStore`, `renderWithProvidersAndRouter`, and `renderRoute`
 - prefer these shared render helpers when the test is only repeating provider boilerplate; do not recreate the same Mantine, Redux, or router wrapper inline across multiple test files
 - keep shared render helpers infrastructure-focused; they should provide providers and route context, not hide scenario-specific state, mock data, or user actions
 - local test-file helpers are encouraged when they are thin and repetitive, such as a small route-page render helper or grouped mock reset/default-return setup

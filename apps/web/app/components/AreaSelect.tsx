@@ -6,7 +6,7 @@ import { getAreaTranslationKey } from '~/modules/utils/i18n/getAreaTranslationKe
 import { getEnumValues } from '~/modules/utils/shared/getEnumValues'
 import { AREA_SELECT_WIDTH } from '~/modules/consts/layout'
 
-export interface AreaSelectPropType {
+interface AreaSelectPropType {
   value: AreaType
   onChange: (value: AreaType) => void
   readOnly?: boolean

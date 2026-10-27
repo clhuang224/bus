@@ -33,7 +33,7 @@ export function getFavoriteRouteStopsFromStorage(
   })
 }
 
-export function setFavoriteRouteStopsInStorage(
+function setFavoriteRouteStopsInStorage(
   storage: Pick<Storage, 'setItem'>,
   routeStops: FavoriteRouteStop[],
 ) {

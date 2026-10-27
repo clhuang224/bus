@@ -1,6 +1,6 @@
 import { getLocalStorage } from '../shared/getLocalStorage'
 
-export const ANALYTICS_ENABLED_STORAGE_KEY = 'bus-preferences-analytics-enabled'
+const ANALYTICS_ENABLED_STORAGE_KEY = 'bus-preferences-analytics-enabled'
 
 export function loadAnalyticsEnabledFromStorage() {
   const storedValue = getLocalStorage().getItem(ANALYTICS_ENABLED_STORAGE_KEY)
