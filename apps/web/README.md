@@ -93,15 +93,15 @@ TDX, short for Transport Data eXchange, provides the route, stop, realtime, and 
 
 Current endpoint usage:
 
-| Endpoint                             | Used For                                        |
-| ------------------------------------ | ----------------------------------------------- |
-| `/Route/City/:city`                  | route search and route detail                   |
-| `/StopOfRoute/City/:city`            | route stop lists and nearby route relationships |
-| `/Stop/City/:city`                   | nearby stop discovery and map stop positions    |
-| `/EstimatedTimeOfArrival/City/:city` | stop-level ETA                                  |
-| `/RealTimeNearStop/City/:city`       | stop-list vehicle cues and near-stop status     |
-| `/RealTimeByFrequency/City/:city`    | route map vehicle GPS positions                 |
-| `/Shape/City/:city`                  | route map path rendering                        |
+| Endpoint                             | Used For                                                         |
+| ------------------------------------ | ---------------------------------------------------------------- |
+| `/Route/City/:city`                  | route search and route detail                                    |
+| `/StopOfRoute/City/:city`            | route stop lists, stop positions, and nearby route relationships |
+| `/Stop/City/:city`                   | nearby stop discovery                                            |
+| `/EstimatedTimeOfArrival/City/:city` | stop-level ETA                                                   |
+| `/RealTimeNearStop/City/:city`       | stop-list vehicle cues and near-stop status                      |
+| `/RealTimeByFrequency/City/:city`    | route map vehicle GPS positions                                  |
+| `/Shape/City/:city`                  | route map path rendering                                         |
 
 Realtime data is best-effort and may be temporarily unavailable when the shared proxy-backed key hits upstream rate limits.
 

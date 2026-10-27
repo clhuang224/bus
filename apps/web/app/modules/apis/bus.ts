@@ -21,7 +21,6 @@ import type { LatLng } from '../types/CoordsType'
 import {
   buildNearbyStopOfRouteQuery,
   buildNearbyStopQuery,
-  buildStopsByCityAndIdsQuery,
 } from '../utils/api/tdxQuery'
 import { queryArrayWithSplitFallback } from '../utils/api/queryWithSplitFallback'
 import { keepTdxRecords } from '../utils/api/keepTdxRecords'
@@ -179,47 +178,6 @@ export const busApi = createApi({
     getStopsByCity: build.query<Stop[], CityNameType>({
       query: (cityName) => `/Stop/City/${cityName}?%24format=JSON`,
       transformResponse: (res: TdxStop[]) => transformStops(res),
-    }),
-    getStopsByCityAndIds: build.query<
-      Stop[],
-      { city: CityNameType; stopIds: string[] }
-    >({
-      queryFn: async ({ city, stopIds }, _api, _extraOptions, baseQuery) => {
-        if (stopIds.length === 0) {
-          return { data: [] }
-        }
-
-        const deduplicatedStopIds = Array.from(new Set(stopIds))
-        const queryResult = await queryArrayWithSplitFallback({
-          items: deduplicatedStopIds,
-          queryBatch: async (stopIdBatch) => {
-            const batchResult = await baseQuery(
-              buildStopsByCityAndIdsQuery(city, stopIdBatch),
-            )
-
-            return {
-              data: (batchResult.data as TdxStop[]) ?? [],
-              error: batchResult.error,
-            }
-          },
-        })
-
-        if (queryResult.error) {
-          return { error: queryResult.error }
-        }
-
-        const transformedStops = transformStops(queryResult.data ?? [])
-
-        const dedupedStopsById = transformedStops.reduce<Map<string, Stop>>(
-          (result, stop) => {
-            result.set(stop.StopUID, stop)
-            return result
-          },
-          new Map(),
-        )
-
-        return { data: Array.from(dedupedStopsById.values()) }
-      },
     }),
     getStopsByArea: build.query<Stop[], AreaType>({
       queryFn: async (area, _api, _extraOptions, baseQuery) => {

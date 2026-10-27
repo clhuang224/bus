@@ -2,6 +2,12 @@ import type { BearingType, CityNameType } from '@bus/shared'
 import type { LngLat } from '../types/CoordsType'
 import type { LocalizedText, TdxLocalizedText } from '@bus/shared'
 
+export interface TdxStopPosition {
+  PositionLon: number
+  PositionLat: number
+  GeoHash: string | null
+}
+
 export interface TdxStop {
   StopUID: string
   StopID: string
@@ -9,11 +15,7 @@ export interface TdxStop {
   StationID: string | null
   StationGroupID: string
   StopName: TdxLocalizedText
-  StopPosition: {
-    PositionLon: number
-    PositionLat: number
-    GeoHash: string | null
-  }
+  StopPosition: TdxStopPosition
   StopAddress: string | null
   Bearing: BearingType | null
   StopDescription: string | null

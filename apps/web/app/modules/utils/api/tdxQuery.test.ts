@@ -3,7 +3,6 @@ import { CityNameType } from '@bus/shared'
 import {
   buildNearbyStopOfRouteQuery,
   buildNearbyStopQuery,
-  buildStopsByCityAndIdsQuery,
   getNearbyStopBounds,
 } from './tdxQuery'
 
@@ -40,20 +39,6 @@ describe('tdxQuery', () => {
     expect(query).toContain('Stops%2Fany')
     expect(query).toContain('d%2FStopUID+eq+%27stop-1%27')
     expect(query).toContain('d%2FStopUID+eq+%27stop-2%27')
-    expect(query).toContain('%24format=JSON')
-  })
-
-  it('builds a stop query that filters by stop uid or stop id', () => {
-    const query = buildStopsByCityAndIdsQuery(CityNameType.TAIPEI, [
-      'stop-1',
-      "stop'2",
-    ])
-
-    expect(query).toContain('/Stop/City/Taipei?')
-    expect(query).toContain('%24filter=')
-    expect(query).toContain("StopUID%20eq%20'stop-1'")
-    expect(query).toContain("StopID%20eq%20'stop-1'")
-    expect(query).toContain("stop''2")
     expect(query).toContain('%24format=JSON')
   })
 })

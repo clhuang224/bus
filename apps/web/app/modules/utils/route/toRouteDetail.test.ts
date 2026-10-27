@@ -2,9 +2,9 @@ import { CityNameType, DirectionType } from '@bus/shared'
 import { describe, expect, it } from 'vitest'
 import type { BusRoute, BusSubRoute } from '../../interfaces/BusRoute'
 import type { RouteShape } from '../../interfaces/RouteShape'
-import type { StopOfRoute } from '../../interfaces/StopOfRoute'
+import type { StopOfRoute, StopOfRouteStop } from '../../interfaces/StopOfRoute'
 import { EMPTY_LOCALIZED_TEXT } from '../i18n/withLocalizedFallback'
-import { getTdxRouteStopIds, toRouteDetailFromTdx } from './toRouteDetail'
+import { toRouteDetailFromTdx } from './toRouteDetail'
 
 const text = { ...EMPTY_LOCALIZED_TEXT, 'zh-TW': '藍1' }
 
@@ -43,27 +43,20 @@ function stopOfRoute(
   }
 }
 
-function stop(stopUID: string, stopID: string) {
+function stop(
+  stopUID: string,
+  stopID: string,
+  stopPosition: StopOfRouteStop['StopPosition'] = null,
+): StopOfRouteStop {
   return {
     StopUID: stopUID,
     StopID: stopID,
     StopName: text,
     StopSequence: 1,
     StationID: null,
+    StopPosition: stopPosition,
   }
 }
-
-describe('getTdxRouteStopIds', () => {
-  it('returns unique, sorted stop UIDs and IDs for the route only', () => {
-    expect(
-      getTdxRouteStopIds('TPE10132', [
-        stopOfRoute({ Stops: [stop('TPE2', '2'), stop('TPE1', '1')] }),
-        stopOfRoute({ Stops: [stop('TPE1', '1')] }),
-        stopOfRoute({ RouteUID: 'OTHER', Stops: [stop('TPE9', '9')] }),
-      ]),
-    ).toEqual(['1', '2', 'TPE1', 'TPE2'])
-  })
-})
 
 describe('toRouteDetailFromTdx', () => {
   it('keeps the first stop list and shape for each sub-route direction', () => {
@@ -73,7 +66,6 @@ describe('toRouteDetailFromTdx', () => {
         stopOfRoute({ Stops: [stop('TPE1', '1')] }),
         stopOfRoute({ Stops: [stop('TPE2', '2')] }),
       ],
-      stops: [],
       shapes: [
         {
           SubRouteUID: 'TPE101320',
@@ -98,7 +90,6 @@ describe('toRouteDetailFromTdx', () => {
     const detail = toRouteDetailFromTdx({
       route,
       stopOfRoutes: [stopOfRoute({ Stops: [stop('TPE1', '1')] })],
-      stops: [],
       shapes: [],
     })
 
@@ -109,22 +100,27 @@ describe('toRouteDetailFromTdx', () => {
     expect(detail.subRoutes[1]!.stops).toEqual([])
   })
 
-  it('finds stop positions by StopUID, then StopID', () => {
+  it('reads stop positions from the stop of route data', () => {
     const detail = toRouteDetailFromTdx({
       route,
       stopOfRoutes: [
-        stopOfRoute({ Stops: [stop('TPE1', '1'), stop('TPE2', '2')] }),
-      ],
-      stops: [
-        { StopUID: 'TPE1', StopID: 'x', position: [121, 25] },
-        { StopUID: 'y', StopID: '2', position: [122, 26] },
+        stopOfRoute({
+          Stops: [
+            stop('TPE1', '1', {
+              PositionLon: 121,
+              PositionLat: 25,
+              GeoHash: null,
+            }),
+            stop('TPE2', '2'),
+          ],
+        }),
       ],
       shapes: [],
     })
 
     expect(detail.subRoutes[0]!.stops.map(({ position }) => position)).toEqual([
       [121, 25],
-      [122, 26],
+      null,
     ])
   })
 })

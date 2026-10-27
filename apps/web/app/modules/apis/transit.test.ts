@@ -33,7 +33,6 @@ const {
   mockGetTdxRoutesByCity,
   mockGetTdxStopOfRoutesByArea,
   mockGetTdxStopOfRoutesByCity,
-  mockGetTdxStopsByCityAndIds,
   mockGetTdxStopsByNearbyArea,
   mockIsDatabaseApiEnabled,
 } = vi.hoisted(() => ({
@@ -49,7 +48,6 @@ const {
   mockGetTdxRoutesByCity: vi.fn(),
   mockGetTdxStopOfRoutesByArea: vi.fn(),
   mockGetTdxStopOfRoutesByCity: vi.fn(),
-  mockGetTdxStopsByCityAndIds: vi.fn(),
   mockGetTdxStopsByNearbyArea: vi.fn(),
   mockIsDatabaseApiEnabled: vi.fn(),
 }))
@@ -78,7 +76,6 @@ vi.mock('./bus', () => ({
       getRoutesByCity: { initiate: mockGetTdxRoutesByCity },
       getStopOfRoutesByArea: { initiate: mockGetTdxStopOfRoutesByArea },
       getStopOfRoutesByCity: { initiate: mockGetTdxStopOfRoutesByCity },
-      getStopsByCityAndIds: { initiate: mockGetTdxStopsByCityAndIds },
       getStopsByNearbyArea: { initiate: mockGetTdxStopsByNearbyArea },
     },
   },
@@ -416,6 +413,11 @@ const tdxStopOfRoute = {
       StationID: 'station-1',
       StopName: nearStop.StopName,
       StopSequence: 1,
+      StopPosition: {
+        PositionLon: 121.5654,
+        PositionLat: 25.033,
+        GeoHash: null,
+      },
     },
   ],
 } as StopOfRoute
@@ -526,23 +528,16 @@ describe('transitApi.getRouteDetail', () => {
       mockGetTdxStopOfRoutesByCity.mockImplementation(
         sourceResult({ data: [tdxStopOfRoute] }),
       )
-      mockGetTdxStopsByCityAndIds.mockImplementation(
-        sourceResult({ data: [nearStop] }),
-      )
       mockGetTdxRouteShapesByRoute.mockImplementation(
         sourceResult({ data: [] }),
       )
     })
 
-    it('combines the TDX route, stops, positions, and shapes', async () => {
+    it('combines the TDX route, stop of route positions, and shapes', async () => {
       const result = await createStore().dispatch(
         transitApi.endpoints.getRouteDetail.initiate(routeDetailQuery),
       )
 
-      expect(mockGetTdxStopsByCityAndIds).toHaveBeenCalledWith(
-        { city: CityNameType.TAIPEI, stopIds: ['1', 'TPE1'] },
-        { subscribe: false },
-      )
       expect(result.data).toMatchObject({
         routeUID: 'TPE10132',
         subRoutes: [{ ...expectedSubRoute, path: [] }],
@@ -646,9 +641,6 @@ describe('transitApi.getRouteRealtime', () => {
       )
       mockGetTdxStopOfRoutesByCity.mockImplementation(
         sourceResult({ data: [tdxStopOfRoute] }),
-      )
-      mockGetTdxStopsByCityAndIds.mockImplementation(
-        sourceResult({ data: [nearStop] }),
       )
       mockGetTdxRouteShapesByRoute.mockImplementation(
         sourceResult({ data: [] }),
