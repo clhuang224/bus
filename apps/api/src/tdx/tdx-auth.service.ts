@@ -10,7 +10,7 @@ interface TdxTokenResponse {
   expires_in: number
 }
 
-export class TdxClientConfigError extends Error {
+class TdxClientConfigError extends Error {
   constructor(message: string) {
     super(message)
     this.name = 'TdxClientConfigError'
