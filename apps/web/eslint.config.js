@@ -27,6 +27,7 @@ export default defineConfig([
         ...globals.node,
       },
       parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
         ecmaVersion: 'latest',
         sourceType: 'module',
         ecmaFeatures: {
