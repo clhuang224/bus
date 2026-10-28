@@ -11,6 +11,7 @@ import type { RouteRealtimeBusStatus } from '~/modules/interfaces/RouteRealtimeB
 import geoSlice from '~/modules/slices/geoSlice'
 import { createTestStore } from '~/test/createTestStore'
 import { renderWithStore } from '~/test/render'
+import { MapOverlayInsetsContext } from '../common/mapOverlayInsetsContext'
 import { RouteStopList } from './RouteStopList'
 
 const t = i18n.getFixedT(DEFAULT_APP_LOCALE)
@@ -102,6 +103,48 @@ describe('RouteStopList', () => {
     expect(handleSelectStop).toHaveBeenCalledWith('stop-1')
     expect(handleSelectVehicle).not.toHaveBeenCalled()
     expect(handleToggleFavorite).not.toHaveBeenCalled()
+  })
+
+  it('realigns the selected stop when the sheet height changes', () => {
+    const scrollIntoView = vi.mocked(HTMLElement.prototype.scrollIntoView)
+    const renderWithSheetHeight = (sheetVisibleHeight: number) => (
+      <MapOverlayInsetsContext.Provider
+        value={{ top: 0, bottom: sheetVisibleHeight }}
+      >
+        <RouteStopList
+          stops={[
+            {
+              estimatedArrivalLabel: null,
+              id: 'stop-1',
+              favoriteRouteStop,
+              name: '市政府',
+              realtimeBuses: [],
+              sequence: 1,
+              isFavorite: false,
+            },
+          ]}
+          onSelectStop={vi.fn()}
+          onSelectVehicle={vi.fn()}
+          onToggleFavorite={vi.fn()}
+          selectedStopId="stop-1"
+        />
+      </MapOverlayInsetsContext.Provider>
+    )
+
+    const { rerender } = renderRouteStopList(renderWithSheetHeight(400))
+    scrollIntoView.mockClear()
+
+    rerender(renderWithSheetHeight(188))
+
+    expect(scrollIntoView).toHaveBeenCalledTimes(1)
+    expect(scrollIntoView.mock.contexts[0]).toHaveAttribute(
+      'data-selected',
+      'true',
+    )
+    expect(scrollIntoView).toHaveBeenCalledWith({
+      behavior: 'smooth',
+      block: 'nearest',
+    })
   })
 
   it('does not select the stop when toggling favorite', () => {

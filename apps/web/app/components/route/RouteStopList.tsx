@@ -11,7 +11,7 @@ import {
   UnstyledButton,
 } from '@mantine/core'
 import { RiHeart2Fill, RiHeart2Line } from '@remixicon/react'
-import { useMemo, useRef } from 'react'
+import { useContext, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getRouteRealtimeMessages } from '~/modules/consts/routeRealtimeMessages'
 import { RouteRealtimeInfoState } from '~/modules/enums/RouteRealtimeInfoState'
@@ -24,6 +24,7 @@ import { SkeletonList } from '../common/SkeletonList'
 import { RouteRealtimeBadge } from './RouteRealtimeBadge'
 import { RouteRealtimeGap } from './RouteRealtimeGap'
 import { NavigationButton } from '../common/NavigationButton'
+import { MapOverlayInsetsContext } from '../common/mapOverlayInsetsContext'
 import type { LngLat } from '~/modules/types/CoordsType'
 import {
   ROUTE_STICKY_TABS_SCROLL_MARGIN,
@@ -77,6 +78,7 @@ export const RouteStopList = ({
   const vehicleBadgeRefs = useRef<Map<string, HTMLButtonElement | null>>(
     new Map(),
   )
+  const { bottom: sheetVisibleHeight } = useContext(MapOverlayInsetsContext)
   const routeRealtimeMessages = getRouteRealtimeMessages(t)
   const stopIdsKey = useMemo(
     () => stops.map((stop) => stop.id).join('|'),
@@ -95,6 +97,7 @@ export const RouteStopList = ({
     listItems: stopIdsKey,
     selectedItemId: highlightedStopId,
     verticalAlignment: 'center',
+    viewportHeight: sheetVisibleHeight,
   })
 
   useScrollSelectedItem({
@@ -102,6 +105,7 @@ export const RouteStopList = ({
     listItems: stopIdsKey,
     selectedItemId: selectedStopId,
     verticalAlignment: listScrollBehavior,
+    viewportHeight: sheetVisibleHeight,
   })
 
   useScrollSelectedItem({
@@ -109,6 +113,7 @@ export const RouteStopList = ({
     listItems: vehicleIdsKey,
     selectedItemId: selectedVehicleId,
     verticalAlignment: listScrollBehavior,
+    viewportHeight: sheetVisibleHeight,
   })
 
   const realtimeMessage = (() => {

@@ -6,6 +6,7 @@ interface UseScrollSelectedItemOptions<T extends HTMLElement> {
   itemElementRefs: RefObject<Map<string, T | null>>
   listItems: unknown
   selectedItemId?: string | null
+  viewportHeight?: number
 }
 
 export function useScrollSelectedItem<T extends HTMLElement>({
@@ -14,6 +15,7 @@ export function useScrollSelectedItem<T extends HTMLElement>({
   itemElementRefs,
   listItems,
   selectedItemId = null,
+  viewportHeight,
 }: UseScrollSelectedItemOptions<T>) {
   useEffect(() => {
     if (!selectedItemId) return
@@ -25,5 +27,12 @@ export function useScrollSelectedItem<T extends HTMLElement>({
       behavior,
       block: verticalAlignment,
     })
-  }, [behavior, itemElementRefs, listItems, selectedItemId, verticalAlignment])
+  }, [
+    behavior,
+    itemElementRefs,
+    listItems,
+    selectedItemId,
+    verticalAlignment,
+    viewportHeight,
+  ])
 }
