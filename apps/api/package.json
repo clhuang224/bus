@@ -32,7 +32,7 @@
     "test:unit": "pnpm run prisma:generate && NODE_OPTIONS=--experimental-vm-modules jest",
     "test:e2e": "pnpm run prisma:generate && NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-e2e.json",
     "test:e2e:db": "pnpm run prisma:generate && NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-db-e2e.json",
-    "typecheck": "pnpm run prisma:generate && tsc -p tsconfig.json --noEmit"
+    "typecheck": "pnpm run prisma:generate && tsc -p tsconfig.json --noEmit && tsc -p test/tsconfig.json --noEmit"
   },
   "dependencies": {
     "@bus/shared": "workspace:*",
