@@ -290,7 +290,7 @@ export const RouteMap = ({
 
       markerMap.current.forEach((marker, stopId) => {
         marker.getElement().style.display = visibleStopIds.has(stopId)
-          ? ''
+          ? 'flex'
           : 'none'
       })
     }

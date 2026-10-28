@@ -161,6 +161,11 @@ describe('RouteMap', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
     markerElements.length = 0
+    mockMap.on.mockClear()
+    mockMap.project.mockImplementation(([longitude, latitude]) => ({
+      x: longitude * 10_000,
+      y: latitude * 10_000,
+    }))
   })
 
   it('hides stop markers that would overlap, keeping both terminals', async () => {
@@ -190,10 +195,20 @@ describe('RouteMap', () => {
       expect(findMarkerElement('終站')).toBeDefined()
     })
 
-    expect(findMarkerElement('起站')?.style.display).toBe('')
+    expect(findMarkerElement('起站')?.style.display).toBe('flex')
     expect(findMarkerElement('擠在一起')?.style.display).toBe('none')
-    expect(findMarkerElement('終站')?.style.display).toBe('')
-    expect(mockMap.on).toHaveBeenCalledWith('zoomend', expect.any(Function))
+    expect(findMarkerElement('終站')?.style.display).toBe('flex')
+
+    const showSpacedStopMarkers = [...mockMap.on.mock.calls]
+      .reverse()
+      .find(([eventName]) => eventName === 'zoomend')?.[1] as () => void
+    mockMap.project.mockImplementation(([longitude, latitude]) => ({
+      x: longitude * 1_000_000,
+      y: latitude * 1_000_000,
+    }))
+    showSpacedStopMarkers()
+
+    expect(findMarkerElement('擠在一起')?.style.display).toBe('flex')
   })
 
   it('clears the selected stop when its marker is clicked again', async () => {
