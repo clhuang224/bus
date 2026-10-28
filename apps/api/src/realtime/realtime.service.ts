@@ -14,8 +14,8 @@ import { FTBError } from '../dto/ftb-error.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import { TdxRealtimeClientService } from './tdx-realtime-client.service.js'
 
-const SNAPSHOT_TTL_MS = 90 * 1000
-const FAILED_SNAPSHOT_TTL_MS = 5 * 1000
+const SNAPSHOT_TTL_MS = 90_000
+const FAILED_SNAPSHOT_TTL_MS = 5_000
 
 interface Snapshot {
   realtime: ApiRouteRealtime

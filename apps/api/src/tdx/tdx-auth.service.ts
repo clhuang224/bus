@@ -3,7 +3,7 @@ import { createRequestTimeout, toRequestError } from './tdx-request-timeout.js'
 
 const TDX_TOKEN_ENDPOINT =
   'https://tdx.transportdata.tw/auth/realms/TDXConnect/protocol/openid-connect/token'
-const TOKEN_REFRESH_BUFFER_MS = 60 * 1000
+const TOKEN_REFRESH_BUFFER_MS = 60_000
 
 interface TdxTokenResponse {
   access_token: string

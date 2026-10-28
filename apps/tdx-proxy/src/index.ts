@@ -1,7 +1,7 @@
 const TDX_BUS_BASE_URL = 'https://tdx.transportdata.tw/api/basic/v2/Bus'
 const TDX_TOKEN_ENDPOINT =
   'https://tdx.transportdata.tw/auth/realms/TDXConnect/protocol/openid-connect/token'
-const TOKEN_REFRESH_BUFFER_MS = 60 * 1000
+const TOKEN_REFRESH_BUFFER_MS = 60_000
 
 interface Env {
   TDX_CLIENT_ID?: string
