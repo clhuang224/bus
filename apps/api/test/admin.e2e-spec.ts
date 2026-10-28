@@ -31,7 +31,7 @@ function createMockSyncRun(resource: PrismaSyncResourceType) {
   return {
     id: syncRunUuid,
     resource,
-    status: PrismaSyncStatusType.QUEUED,
+    status: PrismaSyncStatusType.QUEUED as PrismaSyncStatusType,
     started_at: null,
     finished_at: null,
     resume_after_at: null,

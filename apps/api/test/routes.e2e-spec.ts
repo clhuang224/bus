@@ -69,14 +69,18 @@ describe('Routes API (e2e)', () => {
             },
             findFirst: (args: RouteFindFirstArgs) => {
               routeFindFirstArgs.push(args)
+              const routeUuid =
+                typeof args.where?.uuid === 'string'
+                  ? args.where.uuid
+                  : undefined
 
-              if (args.where?.uuid === 'missing-route') {
+              if (routeUuid === 'missing-route') {
                 return Promise.resolve(null)
               }
 
-              const routeShapePath = routeShapePathFor(args.where?.uuid)
+              const routeShapePath = routeShapePathFor(routeUuid)
               const routeShape =
-                args.where?.uuid === 'route-without-shape'
+                routeUuid === 'route-without-shape'
                   ? null
                   : {
                       path: routeShapePath,
@@ -86,10 +90,7 @@ describe('Routes API (e2e)', () => {
                     }
 
               return Promise.resolve({
-                uuid:
-                  typeof args.where?.uuid === 'string'
-                    ? args.where.uuid
-                    : 'TPE-route-1',
+                uuid: routeUuid ?? 'TPE-route-1',
                 city: PrismaCityNameType.TAIPEI,
                 name_zh_tw: '307',
                 name_en: '307',
