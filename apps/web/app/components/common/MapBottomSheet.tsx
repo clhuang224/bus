@@ -19,13 +19,13 @@ const FULL_SNAP_POINT = 1
 const SNAP_POINTS = [PEEK_SNAP_POINT, HALF_SNAP_POINT, FULL_SNAP_POINT]
 const SHEET_Z_INDEX = 99
 
-function getVisibleHeight(snapPoint: SnapPoint | null, viewportHeight: number) {
+function getSnapPointHeight(
+  snapPoint: SnapPoint | null,
+  viewportHeight: number,
+) {
   if (typeof snapPoint !== 'number') return MAP_SHEET_PEEK_HEIGHT
 
-  return Math.max(
-    MAP_SHEET_PEEK_HEIGHT,
-    viewportHeight * snapPoint - MAP_SHEET_TOP,
-  )
+  return viewportHeight * snapPoint - MAP_SHEET_TOP
 }
 
 interface PropType {
@@ -59,10 +59,11 @@ export const MapBottomSheet = ({
   }, [isExpanded])
 
   const { height: viewportHeight } = useViewportSize()
-  const visibleHeight = getVisibleHeight(snapPoint, viewportHeight)
+  const snapPointHeight = getSnapPointHeight(snapPoint, viewportHeight)
+  const visibleHeight = Math.max(MAP_SHEET_PEEK_HEIGHT, snapPointHeight)
   const offscreenHeight = Math.max(
     0,
-    viewportHeight - MAP_SHEET_TOP - visibleHeight,
+    viewportHeight - MAP_SHEET_TOP - snapPointHeight,
   )
 
   useEffect(() => {
