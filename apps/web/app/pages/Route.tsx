@@ -160,7 +160,11 @@ export default function Route() {
       onOpenSidebar={openSidebar}
       panelTitle={routeName ?? t('layout.nav.routes')}
       panel={
-        <ScrollArea h="100%">
+        <ScrollArea
+          h="100%"
+          scrollbars="y"
+          styles={{ content: { display: 'block' } }}
+        >
           <Stack gap="md">
             <Stack gap={4}>
               <Flex gap="xs" align="center">
