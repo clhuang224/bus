@@ -85,7 +85,7 @@ Prefer readable code over comments. Clear names, small functions, and named cons
 
 GitHub Actions currently checks the web and shared workspaces and deploys only the web workspace:
 
-- PR checks run `@bus/web` lint, typecheck, and tests, plus the Playwright map test against a production build.
+- PR checks run `@bus/web` lint, typecheck, and tests, plus the Playwright browser tests against a production build.
 - PR checks also run `@bus/shared` lint, typecheck, and tests, since the production web app runs the shared realtime calculation.
 - GitHub Pages deployment builds `@bus/web`.
 - API checks run locally through the Husky hooks, not in CI.

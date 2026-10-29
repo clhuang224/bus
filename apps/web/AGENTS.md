@@ -518,6 +518,8 @@ Current shared testing mechanisms:
 - local test-file helpers are encouraged when they are thin and repetitive, such as a small route-page render helper or grouped mock reset/default-return setup
 - do not introduce large scenario helpers that hide the important test preconditions; mock state and branch-specific query responses should remain visible in the test file
 
+Layout behavior that jsdom cannot measure, such as the mobile bottom sheet height, list scroll sync, and horizontal overflow, belongs in the Playwright tests under `e2e/`. Run them against the synthetic TDX data in `e2e/fixtures/transit.ts` through `mockNetwork`, and wait for the route realtime message before measuring the list, since it shifts the content when it appears.
+
 Current testing cleanup backlog:
 
 - continue consolidating obviously repeated provider boilerplate or mock reset code when the helper remains small, honest, and easy to inspect
