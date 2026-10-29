@@ -273,6 +273,11 @@ A design review of the visual refresh, at desktop (1440px) and mobile (375px) wi
 
 Stop markers on the route map no longer pile up when zoomed out. After each zoom, a stop marker that would overlap one already shown is hidden, walking the route in order; the terminals, the selected stop, and the highlighted stop always stay visible. Hiding by overlap, rather than below a fixed zoom level, adapts to routes whose stops are spaced very differently, and the stop list still lists every stop.
 
+Two known issues on the mobile map pages are still open:
+
+- **The map is hidden from assistive technology.** While the bottom sheet is open, vaul marks everything outside it with `aria-hidden`, including the header, the map, and every stop marker. Screen reader users cannot reach the markers, even though they are focusable buttons. The sheet is non-modal, so the rest of the page should stay exposed.
+- **The route list shifts when realtime status arrives.** Route realtime requests start a little after the base data loads, to spread out TDX requests. When the realtime status message then appears above the stop list, it pushes the list down, so a stop selected before that moment, such as the last stop scrolled into view, can end up just below the visible area. Reserving room for the message, or aligning the selected stop again when the list content above it changes, would keep it in place.
+
 ## Backlog
 
 These wait until the backend is deployed and stable:
