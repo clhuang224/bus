@@ -5,6 +5,7 @@ import {
   MANY_TABS_ROUTE_UID,
   NEARBY_STATION_COUNT,
   getNearbyStationName,
+  getRouteStopName,
   ROUTE_GO_STOP_UID_PREFIX,
   ROUTE_STOP_COUNT,
   ROUTE_UID,
@@ -17,6 +18,27 @@ const MAP_RENDER_TIMEOUT = { timeout: 15_000 }
 const MIDDLE_NEARBY_STATION_ORDER = 8
 const NO_REALTIME_MESSAGE =
   zhTW.translation.messages.routeRealtime.noRealtimeData.description
+const ROUTE_STOP_MARKER_LABEL =
+  zhTW.translation.components.routeMap.stopMarkerAriaLabel
+const NEARBY_STOP_MARKER_LABEL =
+  zhTW.translation.components.nearbyStopMap.stopMarkerAriaLabel
+
+function fillCopy(template: string, values: Record<string, string | number>) {
+  return template.replace(/\{\{(\w+)\}\}/g, (_, key: string) =>
+    String(values[key]),
+  )
+}
+
+function getRouteStopMarkerLabel(sequence: number) {
+  return fillCopy(ROUTE_STOP_MARKER_LABEL, {
+    stopName: getRouteStopName(sequence),
+    sequence,
+  })
+}
+
+function getNearbyStationMarkerLabel(stationName: string) {
+  return fillCopy(NEARBY_STOP_MARKER_LABEL, { stopName: stationName })
+}
 
 interface ListGeometry {
   viewportTop: number
@@ -120,20 +142,19 @@ async function expandSheet(page: Page) {
   await waitForSheetToSettle(page)
 }
 
-async function readTappableMarkerLabel(
+async function readLastTappableMarkerLabel(
   page: Page,
-  labelPattern: string,
-  pick: 'first' | 'last',
+  candidateLabels: string[],
 ) {
-  return page.evaluate(
-    ({ labelPattern, pick }) => {
-      const sheetTop = document
-        .querySelector('[data-vaul-drawer]')!
-        .getBoundingClientRect().top
-      const headerBottom = document
-        .querySelector('header')!
-        .getBoundingClientRect().bottom
-      const labels = [
+  return page.evaluate((candidateLabels) => {
+    const sheetTop = document
+      .querySelector('[data-vaul-drawer]')!
+      .getBoundingClientRect().top
+    const headerBottom = document
+      .querySelector('header')!
+      .getBoundingClientRect().bottom
+    const tappableLabels = new Set(
+      [
         ...document.querySelectorAll<HTMLElement>(
           '.maplibregl-marker[role="button"]',
         ),
@@ -141,7 +162,6 @@ async function readTappableMarkerLabel(
         .filter((marker) => {
           const rect = marker.getBoundingClientRect()
           return (
-            new RegExp(labelPattern).test(marker.ariaLabel ?? '') &&
             marker.style.display !== 'none' &&
             rect.top > headerBottom &&
             rect.bottom < sheetTop &&
@@ -149,24 +169,24 @@ async function readTappableMarkerLabel(
             rect.right <= window.innerWidth
           )
         })
-        .map((marker) => marker.ariaLabel!)
+        .map((marker) => marker.ariaLabel),
+    )
 
-      return pick === 'first' ? labels[0] : labels.at(-1)
-    },
-    { labelPattern, pick },
-  )
+    return [...candidateLabels]
+      .reverse()
+      .find((label) => tappableLabels.has(label))
+  }, candidateLabels)
 }
 
-async function findTappableMarkerLabel(
+async function findLastTappableMarkerLabel(
   page: Page,
-  labelPattern: string,
-  pick: 'first' | 'last',
+  candidateLabels: string[],
 ) {
   let label: string | undefined
 
   await expect
     .poll(async () => {
-      label = await readTappableMarkerLabel(page, labelPattern, pick)
+      label = await readLastTappableMarkerLabel(page, candidateLabels)
       return label
     }, MAP_RENDER_TIMEOUT)
     .toBeDefined()
@@ -205,7 +225,9 @@ test.describe('route page bottom sheet', () => {
       STOP_TEST_ID_PREFIX,
     )
 
-    await page.getByText(`E2E 站 ${targetSequence}`, { exact: true }).click()
+    await page
+      .getByText(getRouteStopName(targetSequence), { exact: true })
+      .click()
     await waitForSheetToSettle(page)
 
     await expect
@@ -237,12 +259,15 @@ test.describe('route page bottom sheet', () => {
   }) => {
     await openRoutePage(page)
 
-    const markerLabel = await findTappableMarkerLabel(
-      page,
-      '^E2E 站 \\d+，',
-      'last',
+    const stopMarkerLabels = Array.from(
+      { length: ROUTE_STOP_COUNT },
+      (_, index) => getRouteStopMarkerLabel(index + 1),
     )
-    const targetSequence = Number(markerLabel.match(/第 (\d+) 站/)![1])
+    const markerLabel = await findLastTappableMarkerLabel(
+      page,
+      stopMarkerLabels,
+    )
+    const targetSequence = stopMarkerLabels.indexOf(markerLabel) + 1
     expect(targetSequence).toBeGreaterThan(5)
 
     await mapMarker(page, markerLabel).click()
@@ -319,6 +344,10 @@ test.describe('route page bottom sheet', () => {
 test.describe('nearby page bottom sheet', () => {
   test('scrolls the list to a station tapped on the map', async ({ page }) => {
     const stationName = getNearbyStationName(MIDDLE_NEARBY_STATION_ORDER)
+    const stationMarker = mapMarker(
+      page,
+      getNearbyStationMarkerLabel(stationName),
+    )
     const expandedStation = sheetListViewport(page).locator(
       '[data-accordion-control][aria-expanded="true"]',
     )
@@ -330,10 +359,8 @@ test.describe('nearby page bottom sheet', () => {
       page.getByRole('button', { name: stationName }),
     ).not.toBeInViewport()
 
-    await expect(mapMarker(page, `附近站牌 ${stationName}`)).toBeInViewport(
-      MAP_RENDER_TIMEOUT,
-    )
-    await mapMarker(page, `附近站牌 ${stationName}`).click()
+    await expect(stationMarker).toBeInViewport(MAP_RENDER_TIMEOUT)
+    await stationMarker.click()
 
     await expect(expandedStation).toContainText(stationName)
     await expect

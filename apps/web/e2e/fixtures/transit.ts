@@ -11,6 +11,10 @@ export const ROUTE_GO_STOP_UID_PREFIX = `${ROUTE_UID}-0-${DirectionType.GO}-`
 export const ROUTE_STOP_COUNT = 30
 export const NEARBY_STATION_COUNT = 12
 
+export function getRouteStopName(sequence: number) {
+  return `E2E 站 ${sequence}`
+}
+
 export function getNearbyStationName(order: number) {
   return `E2E 附近站 ${order}`
 }
@@ -55,7 +59,7 @@ function createRouteStops(routeUID: string, direction: DirectionType) {
     return {
       StopUID: id,
       StopID: id,
-      StopName: localizedName(`E2E 站 ${sequence}`),
+      StopName: localizedName(getRouteStopName(sequence)),
       StopSequence: sequence,
       StationID: id,
       StopPosition: {
