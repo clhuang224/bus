@@ -17,7 +17,6 @@ import {
 } from '@bus/shared'
 import type { BusRoute } from '~/modules/interfaces/BusRoute'
 import type { FavoriteRouteStop } from '~/modules/interfaces/FavoriteRouteStop'
-import type { Stop } from '~/modules/interfaces/Stop'
 import type { StopOfRoute } from '~/modules/interfaces/StopOfRoute'
 import geoSlice from '~/modules/slices/geoSlice'
 import { toRouteDetailFromTdx } from '~/modules/utils/route/toRouteDetail'
@@ -192,6 +191,11 @@ const stopOfRoutesData: StopOfRoute[] = [
         StopName: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
         StopSequence: 1,
         StationID: 'station-a',
+        StopPosition: {
+          PositionLon: 121.55,
+          PositionLat: 25.03,
+          GeoHash: null,
+        },
       },
     ],
   },
@@ -216,6 +220,7 @@ const stopOfRoutesData: StopOfRoute[] = [
         },
         StopSequence: 1,
         StationID: 'station-b',
+        StopPosition: { PositionLon: 121.6, PositionLat: 25.05, GeoHash: null },
       },
       {
         StopUID: 'stop-c',
@@ -223,37 +228,13 @@ const stopOfRoutesData: StopOfRoute[] = [
         StopName: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
         StopSequence: 2,
         StationID: 'station-c',
+        StopPosition: {
+          PositionLon: 121.56,
+          PositionLat: 25.04,
+          GeoHash: null,
+        },
       },
     ],
-  },
-]
-
-const stopsByCityData: Pick<
-  Stop,
-  'StopUID' | 'StopID' | 'StopName' | 'position'
->[] = [
-  {
-    StopUID: 'stop-a',
-    StopID: 'stop-a',
-    StopName: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
-    position: [121.55, 25.03] as [number, number],
-  },
-  {
-    StopUID: 'stop-b',
-    StopID: 'stop-b',
-    StopName: {
-      'zh-TW': '捷運昆陽站',
-      en: 'MRT Kunyang Station',
-      ja: '',
-      ko: '',
-    },
-    position: [121.6, 25.05] as [number, number],
-  },
-  {
-    StopUID: 'stop-c',
-    StopID: 'stop-c',
-    StopName: { 'zh-TW': '市政府', en: 'City Hall', ja: '', ko: '' },
-    position: [121.56, 25.04] as [number, number],
   },
 ]
 
@@ -348,7 +329,6 @@ function mockRouteDetail(route: BusRoute<string>) {
     currentData: toRouteDetailFromTdx({
       route,
       stopOfRoutes: stopOfRoutesData,
-      stops: stopsByCityData,
       shapes: [],
     }),
     isFetching: false,
@@ -547,7 +527,9 @@ describe('Route', () => {
 
     renderRoutePage()
 
-    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
+    fireEvent.click(
+      screen.getByRole('tab', { name: t('common.direction.return') }),
+    )
 
     await waitFor(() => {
       expect(screen.getByText(fourMinutesAwayLabel)).toBeInTheDocument()
@@ -566,7 +548,9 @@ describe('Route', () => {
   it('passes vehicles with a GPS position to the route map', async () => {
     renderRoutePage()
 
-    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
+    fireEvent.click(
+      screen.getByRole('tab', { name: t('common.direction.return') }),
+    )
 
     await waitFor(() => {
       const latestCall = mockRouteMap.mock.calls[
@@ -587,7 +571,9 @@ describe('Route', () => {
   it('selects only the stop when choosing a stop title from the list', async () => {
     renderRoutePage()
 
-    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
+    fireEvent.click(
+      screen.getByRole('tab', { name: t('common.direction.return') }),
+    )
 
     await waitFor(() => {
       expect(screen.getByText(fourMinutesAwayLabel)).toBeInTheDocument()
@@ -628,7 +614,9 @@ describe('Route', () => {
 
     renderRoutePage()
 
-    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
+    fireEvent.click(
+      screen.getByRole('tab', { name: t('common.direction.return') }),
+    )
 
     await waitFor(() => {
       expect(
@@ -654,7 +642,9 @@ describe('Route', () => {
   it('selects only the vehicle in the list when clicking a vehicle marker on the map', async () => {
     renderRoutePage()
 
-    fireEvent.click(screen.getByRole('tab', { name: '返程' }))
+    fireEvent.click(
+      screen.getByRole('tab', { name: t('common.direction.return') }),
+    )
 
     await waitFor(() => {
       expect(mockRouteMap).toHaveBeenCalled()

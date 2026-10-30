@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import geoSlice from '~/modules/slices/geoSlice'
 import { createTestStore } from '~/test/createTestStore'
 import { renderWithStore } from '~/test/render'
-import { RouteMap } from './RouteMap'
+import { RouteMap, type RouteMapStop } from './RouteMap'
 
 const { markerElements, mockMap, MockLngLatBounds, MockMarker, MockPopup } =
   vi.hoisted(() => {
@@ -23,6 +23,11 @@ const { markerElements, mockMap, MockLngLatBounds, MockMarker, MockPopup } =
       removeSource: vi.fn(),
       fitBounds: vi.fn(),
       flyTo: vi.fn(),
+      on: vi.fn(),
+      project: vi.fn(([longitude, latitude]: [number, number]) => ({
+        x: longitude * 10_000,
+        y: latitude * 10_000,
+      })),
     }
 
     class MockMarker {
@@ -156,6 +161,54 @@ describe('RouteMap', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
     markerElements.length = 0
+    mockMap.on.mockClear()
+    mockMap.project.mockImplementation(([longitude, latitude]) => ({
+      x: longitude * 10_000,
+      y: latitude * 10_000,
+    }))
+  })
+
+  it('hides stop markers that would overlap, keeping both terminals', async () => {
+    const crowdedStops = [
+      { id: 'first', name: '起站', position: [121.55, 25.03], sequence: 1 },
+      {
+        id: 'crowded',
+        name: '擠在一起',
+        position: [121.5501, 25.03],
+        sequence: 2,
+      },
+      { id: 'last', name: '終站', position: [121.56, 25.03], sequence: 3 },
+    ] satisfies RouteMapStop[]
+
+    renderWithStore(
+      <RouteMap
+        onSelectStop={vi.fn()}
+        onSelectVehicle={vi.fn()}
+        selectedStop={null}
+        stops={crowdedStops}
+        vehicles={[]}
+      />,
+      { store: createGeolocationStore() },
+    )
+
+    await waitFor(() => {
+      expect(findMarkerElement('終站')).toBeDefined()
+    })
+
+    expect(findMarkerElement('起站')?.style.display).toBe('flex')
+    expect(findMarkerElement('擠在一起')?.style.display).toBe('none')
+    expect(findMarkerElement('終站')?.style.display).toBe('flex')
+
+    const showSpacedStopMarkers = [...mockMap.on.mock.calls]
+      .reverse()
+      .find(([eventName]) => eventName === 'zoomend')?.[1] as () => void
+    mockMap.project.mockImplementation(([longitude, latitude]) => ({
+      x: longitude * 1_000_000,
+      y: latitude * 1_000_000,
+    }))
+    showSpacedStopMarkers()
+
+    expect(findMarkerElement('擠在一起')?.style.display).toBe('flex')
   })
 
   it('clears the selected stop when its marker is clicked again', async () => {

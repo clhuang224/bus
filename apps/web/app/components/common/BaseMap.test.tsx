@@ -2,11 +2,17 @@
 
 import { fireEvent, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { AppLocaleType } from '@bus/shared'
+import i18n from '~/modules/i18n'
 import geoSlice from '~/modules/slices/geoSlice'
 import { createTestStore } from '~/test/createTestStore'
 import { renderWithStore } from '~/test/render'
 import BaseMap from './BaseMap'
 import { MapOverlayInsetsContext } from './mapOverlayInsetsContext'
+
+const focusUserLocationLabel = i18n.getFixedT(AppLocaleType.ZH_TW)(
+  'components.baseMap.focusUserLocationAriaLabel',
+)
 
 const { mockMap, MockMap, MockMarker, MockLngLat } = vi.hoisted(() => {
   const mockMap = {
@@ -89,7 +95,9 @@ describe('BaseMap', () => {
       store,
     })
 
-    expect(screen.getByRole('button', { name: '我的位置' })).toBeDisabled()
+    expect(
+      screen.getByRole('button', { name: focusUserLocationLabel }),
+    ).toBeDisabled()
   })
 
   it('focuses the map on the user location when the control is clicked', () => {
@@ -109,7 +117,9 @@ describe('BaseMap', () => {
       store,
     })
 
-    fireEvent.click(screen.getByRole('button', { name: '我的位置' }))
+    fireEvent.click(
+      screen.getByRole('button', { name: focusUserLocationLabel }),
+    )
 
     expect(mockMap.flyTo).toHaveBeenCalledWith({
       center: [121.5654, 25.033],

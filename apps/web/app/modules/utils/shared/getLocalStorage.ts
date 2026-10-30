@@ -2,7 +2,7 @@ const WINDOW_UNAVAILABLE_ERROR = 'window is unavailable in this environment.'
 const LOCAL_STORAGE_UNAVAILABLE_ERROR =
   'Failed to access localStorage in this environment.'
 
-export class WindowUnavailableError extends Error {
+class WindowUnavailableError extends Error {
   constructor() {
     super(WINDOW_UNAVAILABLE_ERROR)
     this.name = 'WindowUnavailableError'

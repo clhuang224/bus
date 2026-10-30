@@ -1,4 +1,4 @@
-export const TDX_REQUEST_TIMEOUT_MS = 30 * 1000
+const TDX_REQUEST_TIMEOUT_MS = 30_000
 
 export interface RequestTimeout {
   signal: AbortSignal

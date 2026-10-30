@@ -165,7 +165,6 @@ export const zhTW = {
         viewRoutesAriaLabel: '查看 {{stopName}} 路線',
       },
       nearbyStopRoutes: {
-        title: '此站路線',
         empty: '目前沒有可顯示的路線資訊',
         error: '目前無法載入路線資訊，請稍後再試',
         rateLimited: '目前查詢路線的人太多，請稍後再試',
@@ -272,10 +271,6 @@ export const zhTW = {
         unauthorized: {
           title: '公車資料服務驗證失敗',
           description: '目前無法驗證公車資料服務，請稍後再試。',
-        },
-        rateLimited: {
-          title: '目前查詢人數較多',
-          description: '系統暫時無法取得公車資料，請稍候一段時間再試。',
         },
         systemError: {
           title: '系統暫時無法使用',

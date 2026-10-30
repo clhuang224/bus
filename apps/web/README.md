@@ -93,15 +93,15 @@ TDX, short for Transport Data eXchange, provides the route, stop, realtime, and 
 
 Current endpoint usage:
 
-| Endpoint                             | Used For                                        |
-| ------------------------------------ | ----------------------------------------------- |
-| `/Route/City/:city`                  | route search and route detail                   |
-| `/StopOfRoute/City/:city`            | route stop lists and nearby route relationships |
-| `/Stop/City/:city`                   | nearby stop discovery and map stop positions    |
-| `/EstimatedTimeOfArrival/City/:city` | stop-level ETA                                  |
-| `/RealTimeNearStop/City/:city`       | stop-list vehicle cues and near-stop status     |
-| `/RealTimeByFrequency/City/:city`    | route map vehicle GPS positions                 |
-| `/Shape/City/:city`                  | route map path rendering                        |
+| Endpoint                             | Used For                                                         |
+| ------------------------------------ | ---------------------------------------------------------------- |
+| `/Route/City/:city`                  | route search and route detail                                    |
+| `/StopOfRoute/City/:city`            | route stop lists, stop positions, and nearby route relationships |
+| `/Stop/City/:city`                   | nearby stop discovery                                            |
+| `/EstimatedTimeOfArrival/City/:city` | stop-level ETA                                                   |
+| `/RealTimeNearStop/City/:city`       | stop-list vehicle cues and near-stop status                      |
+| `/RealTimeByFrequency/City/:city`    | route map vehicle GPS positions                                  |
+| `/Shape/City/:city`                  | route map path rendering                                         |
 
 Realtime data is best-effort and may be temporarily unavailable when the shared proxy-backed key hits upstream rate limits.
 
@@ -135,9 +135,9 @@ For full local development with the proxy, use the root command:
 pnpm run dev
 ```
 
-### Map Browser Test
+### Browser Tests
 
-Install the test browser once, then run the production-build map check:
+Install the test browser once, then run the production-build browser tests:
 
 ```bash
 pnpm --filter @bus/web exec playwright install chromium
@@ -145,14 +145,22 @@ pnpm --filter @bus/web test:e2e
 ```
 
 Playwright builds the app and serves it on port `4173`, which must be free.
-The test opens Nearby with a fixed location and verifies that real MapLibre
-workers render vector tiles. External map and transit requests use fixtures,
-so no TDX credentials or live tile service are required.
+External map and transit requests use fixtures, so no TDX credentials or live
+tile service are required.
+
+- `e2e/map.test.ts` opens Nearby with a fixed location and verifies that real
+  MapLibre workers render vector tiles.
+- `e2e/mobile-sheet.test.ts` checks the mobile bottom sheet on the Route and
+  Nearby pages: list and map selections stay in view as the sheet changes
+  height, the last stop stays reachable above the footer, and a route with
+  many tabs does not widen the panel.
 
 `e2e/fixtures/land.pbf` is a synthetic MVT v2 tile with extent `4096` and one
-polygon covering the tile in the `land` layer. The test checks its rendered
+polygon covering the tile in the `land` layer. The map test checks its rendered
 fill color against `map-style.ts`, rather than accepting an empty canvas.
-PR checks run this test and save a report, screenshot, and trace on failure.
+`e2e/fixtures/transit.ts` holds synthetic TDX routes and stops for the bottom
+sheet tests. PR checks run these tests and save a report, screenshot, and trace
+on failure.
 
 ### Local API Mode
 

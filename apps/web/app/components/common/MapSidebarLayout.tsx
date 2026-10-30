@@ -4,6 +4,7 @@ import {
   APP_MOBILE_HEADER_HEIGHT,
   APP_PAGE_PADDING,
   MAP_FRAME_RADIUS,
+  MAP_PANEL_BACKGROUND_VAR,
   MAP_OVERLAY_BOTTOM_INSET_VAR,
   MAP_OVERLAY_TOP_INSET_VAR,
   MAP_SHEET_PEEK_HEIGHT,
@@ -51,50 +52,53 @@ export const MapSidebarLayout = ({
       bdrs={{ base: 0, sm: MAP_FRAME_RADIUS }}
       style={{ overflow: 'hidden' }}
     >
-      <Flex h="100%" pos="relative">
-        {!isSm && (
-          <Paper
-            w={MAP_SIDEBAR_WIDTH}
-            h="100%"
-            p={APP_PAGE_PADDING}
-            flex={`0 0 ${MAP_SIDEBAR_WIDTH}px`}
-            bg="white"
-            radius={0}
-            shadow="sm"
-          >
-            {panel}
-          </Paper>
-        )}
+      <MapOverlayInsetsContext.Provider value={mapOverlayInsets}>
+        <Flex h="100%" pos="relative">
+          {!isSm && (
+            <Paper
+              w={MAP_SIDEBAR_WIDTH}
+              h="100%"
+              p={APP_PAGE_PADDING}
+              flex={`0 0 ${MAP_SIDEBAR_WIDTH}px`}
+              bg="white"
+              radius={0}
+              shadow="sm"
+              style={{
+                [MAP_PANEL_BACKGROUND_VAR]: 'var(--mantine-color-white)',
+              }}
+            >
+              {panel}
+            </Paper>
+          )}
 
-        <Flex
-          pos={isSm ? 'fixed' : 'relative'}
-          inset={isSm ? 0 : undefined}
-          flex={1}
-          miw={0}
-          style={{
-            ...(isSm && {
-              [MAP_OVERLAY_TOP_INSET_VAR]: `${mapOverlayInsets.top}px`,
-              [MAP_OVERLAY_BOTTOM_INSET_VAR]: `${mapOverlayInsets.bottom}px`,
-            }),
-          }}
-        >
-          <MapOverlayInsetsContext.Provider value={mapOverlayInsets}>
+          <Flex
+            pos={isSm ? 'fixed' : 'relative'}
+            inset={isSm ? 0 : undefined}
+            flex={1}
+            miw={0}
+            style={{
+              ...(isSm && {
+                [MAP_OVERLAY_TOP_INSET_VAR]: `${mapOverlayInsets.top}px`,
+                [MAP_OVERLAY_BOTTOM_INSET_VAR]: `${mapOverlayInsets.bottom}px`,
+              }),
+            }}
+          >
             {children}
-          </MapOverlayInsetsContext.Provider>
-        </Flex>
+          </Flex>
 
-        {isSm && (
-          <MapBottomSheet
-            isExpanded={isSidebarOpened}
-            onCollapse={onCloseSidebar}
-            onExpand={onOpenSidebar}
-            onVisibleHeightChange={setSheetVisibleHeight}
-            title={panelTitle}
-          >
-            {panel}
-          </MapBottomSheet>
-        )}
-      </Flex>
+          {isSm && (
+            <MapBottomSheet
+              isExpanded={isSidebarOpened}
+              onCollapse={onCloseSidebar}
+              onExpand={onOpenSidebar}
+              onVisibleHeightChange={setSheetVisibleHeight}
+              title={panelTitle}
+            >
+              {panel}
+            </MapBottomSheet>
+          )}
+        </Flex>
+      </MapOverlayInsetsContext.Provider>
     </Box>
   )
 }

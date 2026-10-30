@@ -19,7 +19,7 @@ export interface RouteTab {
   direction: DirectionType
 }
 
-export interface RouteBaseStop {
+interface RouteBaseStop {
   favoriteRouteStop: FavoriteRouteStop
   id: string
   isFavorite: boolean

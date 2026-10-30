@@ -23,20 +23,6 @@ interface RenderRouteOptions extends Omit<RenderOptions, 'wrapper'> {
   store?: EnhancedStore
 }
 
-function MantineWrapper({ children }: PropsWithChildren) {
-  return <MantineProvider>{children}</MantineProvider>
-}
-
-export function renderWithMantine(
-  ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>,
-) {
-  return render(ui, {
-    wrapper: MantineWrapper,
-    ...options,
-  })
-}
-
 export function renderWithStore(
   ui: ReactElement,
   { store, ...options }: RenderWithStoreOptions,

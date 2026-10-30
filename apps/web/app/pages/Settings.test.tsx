@@ -81,7 +81,13 @@ describe('Settings', () => {
   it('shows the currently selected locale', () => {
     renderSettingsPage()
 
-    expect(screen.getByRole('radio', { name: '繁體中文' })).toBeChecked()
+    expect(
+      screen.getByRole('radio', {
+        name: getSettingsT(AppLocaleType.ZH_TW)(
+          'pages.settings.localeOptions.zhTW.label',
+        ),
+      }),
+    ).toBeChecked()
   })
 
   it('explains analytics data collection', () => {

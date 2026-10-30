@@ -31,7 +31,9 @@ describe('Stations API (e2e)', () => {
     return stationFindManyArgs[0]
   }
 
-  const isNumberRange = (value: unknown) =>
+  const isNumberRange = (
+    value: unknown,
+  ): value is { gte: number; lte: number } =>
     typeof value === 'object' &&
     value !== null &&
     'gte' in value &&
@@ -207,18 +209,15 @@ describe('Stations API (e2e)', () => {
         })
         expect(orderBy).toBeUndefined()
         expect(where?.is_active).toBe(true)
-        expect(isNumberRange(where?.latitude)).toBe(true)
+        const latitude = where?.latitude
+        expect(isNumberRange(latitude)).toBe(true)
         expect(isNumberRange(where?.longitude)).toBe(true)
 
-        if (isNumberRange(where?.latitude)) {
+        if (isNumberRange(latitude)) {
           const latitudeDelta = (500 / EARTH_RADIUS_METERS) * DEGREES_PER_RADIAN
 
-          expect(where.latitude.gte).toBeLessThanOrEqual(
-            24.9939 - latitudeDelta,
-          )
-          expect(where.latitude.lte).toBeGreaterThanOrEqual(
-            24.9939 + latitudeDelta,
-          )
+          expect(latitude.gte).toBeLessThanOrEqual(24.9939 - latitudeDelta)
+          expect(latitude.lte).toBeGreaterThanOrEqual(24.9939 + latitudeDelta)
         }
       })
   })

@@ -14,7 +14,7 @@ type AppNavLinkAccessibleName = RequireAtLeastOne<{
   ariaLabel: string
 }>
 
-export type AppNavLinkPropType = AppNavLinkBaseProps & AppNavLinkAccessibleName
+type AppNavLinkPropType = AppNavLinkBaseProps & AppNavLinkAccessibleName
 
 export const AppNavLink = (props: AppNavLinkPropType) => {
   const resolvedPath = useResolvedPath(props.to)

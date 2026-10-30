@@ -60,7 +60,9 @@ describe('NearbyStationDetail', () => {
   it('renders stop distance when user coordinates are available', () => {
     renderNearbyStationDetail()
 
-    const distanceSection = screen.getByText('距離').closest('div')
+    const distanceSection = screen
+      .getByText(t('components.nearbyStopDetail.distanceLabel'))
+      .closest('div')
 
     expect(distanceSection).not.toBeNull()
     expect(within(distanceSection!).getByText('3.8 公里')).toBeInTheDocument()

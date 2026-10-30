@@ -30,7 +30,6 @@ import {
   toNearbyStationsFromTdx,
 } from '../utils/nearby/toNearbyStations'
 import {
-  getTdxRouteStopIds,
   toRouteDetailFromApi,
   toRouteDetailFromTdx,
 } from '../utils/route/toRouteDetail'
@@ -44,7 +43,7 @@ import { databaseApi, isDatabaseApiEnabled } from './database'
 import { isTdxRateLimitError } from './errors/busError'
 import { isDatabaseApiError } from './errors/databaseError'
 
-export type TransitQueryError = FetchBaseQueryError | SerializedError
+type TransitQueryError = FetchBaseQueryError | SerializedError
 
 export interface NearbyStationsQuery {
   area: AreaType
@@ -55,7 +54,7 @@ export interface NearbyStationRoutesQuery extends NearbyStationsQuery {
   includeTerminals: boolean
 }
 
-export interface RouteDetailQuery {
+interface RouteDetailQuery {
   city: CityNameType
   routeUID: string
 }
@@ -172,49 +171,37 @@ async function loadTdxRouteShapes(
   }
 }
 
-async function loadTdxRouteStops(
+function loadTdxStopOfRoutes(
   dispatch: SourceDispatch,
   query: RouteDetailQuery,
 ) {
-  const stopOfRoutes = await dispatch(
+  return dispatch(
     busApi.endpoints.getStopOfRoutesByCity.initiate(
       query,
       SOURCE_REQUEST_OPTIONS,
     ),
   ).unwrap()
-  const stopIds = getTdxRouteStopIds(query.routeUID, stopOfRoutes)
-  const stops =
-    stopIds.length > 0
-      ? await dispatch(
-          busApi.endpoints.getStopsByCityAndIds.initiate(
-            { city: query.city, stopIds },
-            SOURCE_REQUEST_OPTIONS,
-          ),
-        ).unwrap()
-      : []
-
-  return { stopOfRoutes, stops }
 }
 
 async function loadTdxRouteDetail(
   dispatch: SourceDispatch,
   query: RouteDetailQuery,
 ) {
-  const [routes, { stopOfRoutes, stops }, shapes] = await Promise.all([
+  const [routes, stopOfRoutes, shapes] = await Promise.all([
     dispatch(
       busApi.endpoints.getRoutesByCity.initiate(
         query.city,
         SOURCE_REQUEST_OPTIONS,
       ),
     ).unwrap(),
-    loadTdxRouteStops(dispatch, query),
+    loadTdxStopOfRoutes(dispatch, query),
     loadTdxRouteShapes(dispatch, query),
   ])
   const route = routes.find(({ RouteUID }) => RouteUID === query.routeUID)
 
   if (!route) return null
 
-  return toRouteDetailFromTdx({ route, stopOfRoutes, stops, shapes })
+  return toRouteDetailFromTdx({ route, stopOfRoutes, shapes })
 }
 
 function loadRealtimeRouteDetail(

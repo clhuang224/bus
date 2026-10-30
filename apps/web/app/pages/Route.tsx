@@ -1,6 +1,7 @@
 import {
   ActionIcon,
   Flex,
+  ScrollArea,
   Stack,
   Tabs,
   Text,
@@ -26,7 +27,10 @@ import { getTerminalDisplay } from '~/modules/utils/i18n/getTerminalDisplay'
 import { getLocalizedText } from '~/modules/utils/i18n/getLocalizedText'
 import { saveRouteSearchRecent } from '~/modules/utils/routes/routeSearchRecentStorage'
 import { isCityName } from '~/modules/utils/shared/isCityName'
-import { APP_ACTION_ICON_SIZE } from '~/modules/consts/layout'
+import {
+  APP_ACTION_ICON_SIZE,
+  MAP_PANEL_BACKGROUND_VAR,
+} from '~/modules/consts/layout'
 
 export default function Route() {
   const { t } = useTranslation()
@@ -156,80 +160,80 @@ export default function Route() {
       onOpenSidebar={openSidebar}
       panelTitle={routeName ?? t('layout.nav.routes')}
       panel={
-        <Stack h="100%" gap="md">
-          <Stack gap={4}>
-            <Flex gap="xs" align="center">
-              <ActionIcon
-                aria-label={t('routePage.backToRoutes')}
-                onClick={handleBack}
-              >
-                <RiArrowLeftSLine size={APP_ACTION_ICON_SIZE} />
-              </ActionIcon>
-              {routeName && (
-                <AppBadge type="route" size="xl">
-                  {routeName}
-                </AppBadge>
-              )}
-            </Flex>
-            {routeTerminalDisplay && (
-              <Text size="sm" c="dimmed" mt="sm">
-                {routeTerminalDisplay.text}
-              </Text>
-            )}
-          </Stack>
-          {routeTabs.length > 0 ? (
-            <Tabs
-              value={activeTab}
-              onChange={setActiveTab}
-              keepMounted={false}
-              display="flex"
-              flex={1}
-              mih={0}
-              style={{ flexDirection: 'column' }}
-            >
-              <Tabs.List
-                style={{
-                  flexWrap: 'nowrap',
-                  overflowX: 'auto',
-                  overflowY: 'hidden',
-                }}
-              >
-                {routeTabs.map((tab) => (
-                  <Tabs.Tab key={tab.id} value={tab.id} flex="0 0 auto">
-                    {tab.label}
-                  </Tabs.Tab>
-                ))}
-              </Tabs.List>
-              {!isLoading && message && <BaseAlert {...message} mt="sm" />}
-              {routeTabs.map((tab) => (
-                <Tabs.Panel
-                  key={tab.id}
-                  value={tab.id}
-                  pt="md"
-                  flex={1}
-                  mih={0}
+        <ScrollArea
+          h="100%"
+          scrollbars="y"
+          styles={{ content: { display: 'block' } }}
+        >
+          <Stack gap="md">
+            <Stack gap={4}>
+              <Flex gap="xs" align="center">
+                <ActionIcon
+                  aria-label={t('routePage.backToRoutes')}
+                  onClick={handleBack}
                 >
-                  <RouteStopList
-                    highlightedStopId={highlightedStopId}
-                    hasRealtimeError={hasRealtimeError}
-                    isRealtimeLoading={isRealtimeLoading}
-                    isRealtimeRateLimited={isRealtimeRateLimited}
-                    listScrollBehavior={listScrollBehavior}
-                    onSelectStop={handleSelectStopFromList}
-                    onSelectVehicle={handleSelectVehicleFromList}
-                    realtimeInfoState={realtimeInfoState}
-                    stops={stops}
-                    onToggleFavorite={toggleFavoriteRouteStop}
-                    selectedStopId={selectedStopId}
-                    selectedVehicleId={selectedVehicleId}
-                  />
-                </Tabs.Panel>
-              ))}
-            </Tabs>
-          ) : !isLoading && message ? (
-            <BaseAlert {...message} />
-          ) : null}
-        </Stack>
+                  <RiArrowLeftSLine size={APP_ACTION_ICON_SIZE} />
+                </ActionIcon>
+                {routeName && (
+                  <AppBadge type="route" size="xl">
+                    {routeName}
+                  </AppBadge>
+                )}
+              </Flex>
+              {routeTerminalDisplay && (
+                <Text size="sm" c="dimmed" mt="sm">
+                  {routeTerminalDisplay.text}
+                </Text>
+              )}
+            </Stack>
+            {routeTabs.length > 0 ? (
+              <Tabs
+                value={activeTab}
+                onChange={setActiveTab}
+                keepMounted={false}
+              >
+                <Tabs.List
+                  pos="sticky"
+                  top={0}
+                  style={{
+                    zIndex: 1,
+                    background: `var(${MAP_PANEL_BACKGROUND_VAR})`,
+                    flexWrap: 'nowrap',
+                    overflowX: 'auto',
+                    overflowY: 'hidden',
+                  }}
+                >
+                  {routeTabs.map((tab) => (
+                    <Tabs.Tab key={tab.id} value={tab.id} flex="0 0 auto">
+                      {tab.label}
+                    </Tabs.Tab>
+                  ))}
+                </Tabs.List>
+                {!isLoading && message && <BaseAlert {...message} mt="sm" />}
+                {routeTabs.map((tab) => (
+                  <Tabs.Panel key={tab.id} value={tab.id} pt="md">
+                    <RouteStopList
+                      highlightedStopId={highlightedStopId}
+                      hasRealtimeError={hasRealtimeError}
+                      isRealtimeLoading={isRealtimeLoading}
+                      isRealtimeRateLimited={isRealtimeRateLimited}
+                      listScrollBehavior={listScrollBehavior}
+                      onSelectStop={handleSelectStopFromList}
+                      onSelectVehicle={handleSelectVehicleFromList}
+                      realtimeInfoState={realtimeInfoState}
+                      stops={stops}
+                      onToggleFavorite={toggleFavoriteRouteStop}
+                      selectedStopId={selectedStopId}
+                      selectedVehicleId={selectedVehicleId}
+                    />
+                  </Tabs.Panel>
+                ))}
+              </Tabs>
+            ) : !isLoading && message ? (
+              <BaseAlert {...message} />
+            ) : null}
+          </Stack>
+        </ScrollArea>
       }
     >
       <RouteMap

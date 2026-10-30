@@ -23,6 +23,8 @@ export const MAP_MARKER_SIZE = {
 } as const
 
 export const ROUTE_STOP_BULLET_SIZE = MAP_MARKER_SIZE.stop
+export const ROUTE_STICKY_TABS_SCROLL_MARGIN = 48
+export const MAP_PANEL_BACKGROUND_VAR = '--map-panel-background'
 
 export const MAP_OVERLAY_TOP_INSET_VAR = '--map-overlay-top-inset'
 export const MAP_OVERLAY_BOTTOM_INSET_VAR = '--map-overlay-bottom-inset'

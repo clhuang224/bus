@@ -86,17 +86,3 @@ export function buildNearbyStopOfRouteQuery(
 
   return `/StopOfRoute/City/${city}?${searchParams.toString()}`
 }
-
-export function buildStopsByCityAndIdsQuery(
-  city: CityNameType,
-  stopIds: string[],
-): string {
-  const filter = stopIds
-    .map((stopId) => {
-      const quotedStopId = quoteODataString(stopId)
-      return `(StopUID eq '${quotedStopId}' or StopID eq '${quotedStopId}')`
-    })
-    .join(' or ')
-
-  return `/Stop/City/${city}?%24filter=${encodeURIComponent(filter)}&%24format=JSON`
-}

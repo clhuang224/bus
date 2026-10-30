@@ -1,14 +1,16 @@
 import {
   type ArgumentsHost,
+  type ContextType,
   HttpStatus,
   HttpException,
   Logger,
-  type HttpArgumentsHost,
 } from '@nestjs/common'
 import { ErrorCode, type ApiErrorResponse } from '@bus/shared'
 import { ApiExceptionFilter } from './api-exception.filter.js'
 import { DEFAULT_API_ERROR_MESSAGE_BY_CODE } from './api-response.messages.js'
 import { FTBError } from './ftb-error.js'
+
+type HttpArgumentsHost = ReturnType<ArgumentsHost['switchToHttp']>
 
 interface MockResponse {
   statusCalls: number[]
@@ -61,7 +63,7 @@ function createHost(
   }
 
   const host: ArgumentsHost = {
-    getArgs: <T extends unknown[] = unknown[]>(): T => [] as T,
+    getArgs: <T extends unknown[] = unknown[]>(): T => [] as unknown[] as T,
     getArgByIndex: <T = unknown>(): T => undefined as T,
     switchToRpc: () => {
       throw new Error('RPC host is not used in this test.')
@@ -70,7 +72,7 @@ function createHost(
     switchToWs: () => {
       throw new Error('WS host is not used in this test.')
     },
-    getType: () => 'http',
+    getType: <TContext extends string = ContextType>() => 'http' as TContext,
   }
 
   return host

@@ -47,7 +47,7 @@ export function getRouteSearchFromStorage(
   }
 }
 
-export function setRouteSearchInStorage(
+function setRouteSearchInStorage(
   storage: Pick<Storage, 'setItem'>,
   routeSearch: RouteSearchState,
 ) {

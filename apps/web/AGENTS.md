@@ -315,7 +315,7 @@ For map popups on both `Route` and `Nearby`, keep stop popups lightweight:
 - richer detail such as distance, address, route badges, or navigation actions should live in the sidebar on desktop or the bottom sheet on small screens unless there is a strong product reason to duplicate them in the popup
 - tapping the selected stop or vehicle marker again clears the selection and closes its popup
 
-For map page layout, `MapSidebarLayout` shows the page panel in a sidebar on desktop and in `MapBottomSheet` on small screens. The sheet snaps to a peek bar, half height, and full height and cannot be dismissed. Pages open it at half height, collapse it to the peek bar after a list selection that should show the map, and raise it when a map selection needs the list. Do not add separate map buttons for opening the list.
+For map page layout, `MapSidebarLayout` shows the page panel in a sidebar on desktop and in `MapBottomSheet` on small screens. The sheet snaps to a peek bar, half height, and full height and cannot be dismissed. Pages open it at half height, collapse it to the peek bar after a list selection that should show the map, and raise it when a map selection needs the list. Do not add separate map buttons for opening the list. The sheet's content always ends at its visible bottom edge, so a list scrolls only within what is on screen and scrolling a selected item into view works at every height. Keep page headers inside the panel's scroll area, with tabs sticky at the top, so the list keeps room at half height.
 
 For shared map behavior, keep `BaseMap` responsible for common map-level concerns such as:
 
@@ -512,16 +512,16 @@ When updating or adding tests in this repository, prefer these conventions:
 Current shared testing mechanisms:
 
 - use `app/test/setup.ts` for shared jsdom test setup such as `jest-dom`, automatic `cleanup()`, and browser API shims required by Mantine or scroll-sync behavior
-- use `app/test/render.tsx` for shared provider wrappers such as `renderWithMantine`, `renderWithStore`, `renderWithProvidersAndRouter`, and `renderRoute`
+- use `app/test/render.tsx` for shared provider wrappers such as `renderWithStore`, `renderWithProvidersAndRouter`, and `renderRoute`
 - prefer these shared render helpers when the test is only repeating provider boilerplate; do not recreate the same Mantine, Redux, or router wrapper inline across multiple test files
 - keep shared render helpers infrastructure-focused; they should provide providers and route context, not hide scenario-specific state, mock data, or user actions
 - local test-file helpers are encouraged when they are thin and repetitive, such as a small route-page render helper or grouped mock reset/default-return setup
 - do not introduce large scenario helpers that hide the important test preconditions; mock state and branch-specific query responses should remain visible in the test file
 
+Layout behavior that jsdom cannot measure, such as the mobile bottom sheet height, list scroll sync, and horizontal overflow, belongs in the Playwright tests under `e2e/`. Run them against the synthetic TDX data in `e2e/fixtures/transit.ts` through `mockNetwork`, and wait for the route realtime message before measuring the list, since it shifts the content when it appears.
+
 Current testing cleanup backlog:
 
-- replace remaining hard-coded shared UI copy in tests with imports from existing message constants where practical
-- reduce positional DOM selectors in tests, especially indexed textbox queries, in favor of labels, roles, or clearer helpers
 - continue consolidating obviously repeated provider boilerplate or mock reset code when the helper remains small, honest, and easy to inspect
 
 ## 7. Commit Rules

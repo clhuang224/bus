@@ -1,5 +1,6 @@
 import type { CityNameType, DirectionType } from '@bus/shared'
 import type { LocalizedText, TdxLocalizedText } from '@bus/shared'
+import type { TdxStopPosition } from './Stop'
 
 export interface TdxStopOfRouteStop<L = TdxLocalizedText> {
   StopUID: string
@@ -7,6 +8,7 @@ export interface TdxStopOfRouteStop<L = TdxLocalizedText> {
   StopName: L
   StopSequence: number
   StationID?: string | null
+  StopPosition?: TdxStopPosition | null
 }
 
 export interface TdxStopOfRoute<

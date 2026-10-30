@@ -5,10 +5,9 @@ import type {
   RouteDetailSubRoute,
 } from '../../interfaces/RouteDetail'
 import type { RouteShape } from '../../interfaces/RouteShape'
-import type { Stop } from '../../interfaces/Stop'
 import type { StopOfRoute } from '../../interfaces/StopOfRoute'
-import type { LngLat } from '../../types/CoordsType'
 import { toLocalizedText } from '../i18n/toLocalizedText'
+import { toLngLat } from './normalizeTdxFields'
 
 function getSubRouteId(subRouteUID: string, direction: DirectionType) {
   return `${subRouteUID}-${direction}`
@@ -29,28 +28,13 @@ function indexBySubRouteId<
   return result
 }
 
-export function getTdxRouteStopIds(
-  routeUID: string,
-  stopOfRoutes: StopOfRoute[],
-): string[] {
-  const stopIds = stopOfRoutes
-    .filter((stopOfRoute) => stopOfRoute.RouteUID === routeUID)
-    .flatMap((stopOfRoute) =>
-      stopOfRoute.Stops.flatMap((stop) => [stop.StopUID, stop.StopID]),
-    )
-
-  return Array.from(new Set(stopIds)).sort()
-}
-
 export function toRouteDetailFromTdx({
   route,
   stopOfRoutes,
-  stops,
   shapes,
 }: {
   route: BusRoute<string>
   stopOfRoutes: StopOfRoute[]
-  stops: Pick<Stop, 'StopUID' | 'StopID' | 'position'>[]
   shapes: RouteShape[]
 }): RouteDetail {
   const stopOfRoutesById = indexBySubRouteId(
@@ -59,14 +43,6 @@ export function toRouteDetailFromTdx({
     ),
   )
   const shapesById = indexBySubRouteId(shapes)
-  const positionsByStopId = new Map<string, LngLat>()
-
-  for (const stop of stops) {
-    if (!stop.position) continue
-
-    positionsByStopId.set(stop.StopUID, stop.position)
-    positionsByStopId.set(stop.StopID, stop.position)
-  }
 
   return {
     routeUID: route.RouteUID,
@@ -90,10 +66,7 @@ export function toRouteDetailFromTdx({
           stationID: stop.StationID ?? null,
           name: stop.StopName,
           sequence: stop.StopSequence,
-          position:
-            positionsByStopId.get(stop.StopUID) ??
-            positionsByStopId.get(stop.StopID) ??
-            null,
+          position: toLngLat(stop.StopPosition),
         })),
         path: shapesById.get(id)?.path ?? [],
       }

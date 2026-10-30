@@ -38,6 +38,8 @@ import { createTestStore } from '~/test/createTestStore'
 import { mockMatchMedia } from '~/test/mockMatchMedia'
 import { renderWithProvidersAndRouter } from '~/test/render'
 
+const t = i18n.getFixedT(AppLocaleType.ZH_TW)
+
 const {
   mockUseGetNearbyStationsQuery,
   mockUseGetNearbyStationRoutesQuery,
@@ -867,10 +869,10 @@ describe('Nearby', () => {
     })
 
     expect(
-      screen.getByText('目前查詢路線的人太多，請稍後再試'),
+      screen.getByText(t('components.nearbyStopRoutes.rateLimited')),
     ).toBeInTheDocument()
     expect(
-      screen.queryByText('目前沒有可顯示的路線資訊'),
+      screen.queryByText(t('components.nearbyStopRoutes.empty')),
     ).not.toBeInTheDocument()
   })
 
@@ -885,14 +887,12 @@ describe('Nearby', () => {
       },
     })
 
-    expect(screen.getByRole('tab', { name: '去程' })).toHaveAttribute(
-      'aria-selected',
-      'true',
-    )
-    expect(screen.getByRole('tab', { name: '返程' })).toHaveAttribute(
-      'aria-selected',
-      'false',
-    )
+    expect(
+      screen.getByRole('tab', { name: t('common.direction.go') }),
+    ).toHaveAttribute('aria-selected', 'true')
+    expect(
+      screen.getByRole('tab', { name: t('common.direction.return') }),
+    ).toHaveAttribute('aria-selected', 'false')
   })
 
   it('renders a navigation button in the selected nearby stop route detail and opens Google Maps directions', () => {

@@ -51,6 +51,7 @@ const Nearby = () => {
     itemElementRefs: stationItemRefs,
     listItems: nearbyStations,
     selectedItemId: selectedStationId,
+    verticalAlignment: 'start',
   })
 
   useEffect(() => {

@@ -5,7 +5,7 @@ type ZhTWLocale = typeof import('../i18n/locales/zh-TW').zhTW
 type CityTranslationKey =
   `common.city.${keyof ZhTWLocale['translation']['common']['city']}`
 
-export const cityMapName: Record<CityNameType, string> = {
+const cityMapName: Record<CityNameType, string> = {
   [CityNameType.TAIPEI]: '台北市',
   [CityNameType.NEW_TAIPEI]: '新北市',
   [CityNameType.TAOYUAN]: '桃園市',

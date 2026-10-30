@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Drawer } from 'vaul'
 import {
   APP_FOOTER_HEIGHT,
+  MAP_PANEL_BACKGROUND_VAR,
   MAP_SHEET_HALF_RATIO,
   MAP_SHEET_PEEK_HEIGHT,
   MAP_SHEET_TOP,
@@ -18,13 +19,13 @@ const FULL_SNAP_POINT = 1
 const SNAP_POINTS = [PEEK_SNAP_POINT, HALF_SNAP_POINT, FULL_SNAP_POINT]
 const SHEET_Z_INDEX = 99
 
-function getVisibleHeight(snapPoint: SnapPoint | null, viewportHeight: number) {
+function getSnapPointHeight(
+  snapPoint: SnapPoint | null,
+  viewportHeight: number,
+) {
   if (typeof snapPoint !== 'number') return MAP_SHEET_PEEK_HEIGHT
 
-  return Math.max(
-    MAP_SHEET_PEEK_HEIGHT,
-    viewportHeight * snapPoint - MAP_SHEET_TOP,
-  )
+  return viewportHeight * snapPoint - MAP_SHEET_TOP
 }
 
 interface PropType {
@@ -58,10 +59,16 @@ export const MapBottomSheet = ({
   }, [isExpanded])
 
   const { height: viewportHeight } = useViewportSize()
+  const snapPointHeight = getSnapPointHeight(snapPoint, viewportHeight)
+  const visibleHeight = Math.max(MAP_SHEET_PEEK_HEIGHT, snapPointHeight)
+  const offscreenHeight = Math.max(
+    0,
+    viewportHeight - MAP_SHEET_TOP - snapPointHeight,
+  )
 
   useEffect(() => {
-    onVisibleHeightChange(getVisibleHeight(snapPoint, viewportHeight))
-  }, [onVisibleHeightChange, snapPoint, viewportHeight])
+    onVisibleHeightChange(visibleHeight)
+  }, [onVisibleHeightChange, visibleHeight])
 
   const handleSnapPointChange = (nextSnapPoint: SnapPoint | null) => {
     setSnapPoint(nextSnapPoint)
@@ -93,10 +100,11 @@ export const MapBottomSheet = ({
             bottom={0}
             left={0}
             display="flex"
-            pb={`calc(${APP_FOOTER_HEIGHT}px + env(safe-area-inset-bottom))`}
+            pb={`calc(${APP_FOOTER_HEIGHT + offscreenHeight}px + env(safe-area-inset-bottom))`}
             bg="var(--mantine-color-body)"
             shadow="md"
             style={{
+              [MAP_PANEL_BACKGROUND_VAR]: 'var(--mantine-color-body)',
               zIndex: SHEET_Z_INDEX,
               flexDirection: 'column',
               borderRadius: TOP_CORNERS_RADIUS_XL,

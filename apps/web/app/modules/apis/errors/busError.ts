@@ -3,14 +3,14 @@ import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import i18n from '../../i18n'
 import type { OpenGlobalModalPayload } from '../../slices/globalModalSlice'
 
-export enum TdxHttpErrorStatus {
+enum TdxHttpErrorStatus {
   UNAUTHORIZED = 401,
   URI_TOO_LONG = 414,
   RATE_LIMIT = 429,
   REQUEST_HEADER_FIELDS_TOO_LARGE = 431,
 }
 
-export enum BaseQueryErrorStatus {
+enum BaseQueryErrorStatus {
   FETCH_ERROR = 'FETCH_ERROR',
   PARSING_ERROR = 'PARSING_ERROR',
   TIMEOUT_ERROR = 'TIMEOUT_ERROR',
@@ -29,10 +29,6 @@ function buildBusErrorModal(key: string): OpenGlobalModalPayload {
 
 export function getTdxUnauthorizedModal(): OpenGlobalModalPayload {
   return buildBusErrorModal('messages.busService.unauthorized')
-}
-
-export function getTdxRateLimitModal(): OpenGlobalModalPayload {
-  return buildBusErrorModal('messages.busService.rateLimited')
 }
 
 export function getTdxSystemErrorModal(): OpenGlobalModalPayload {

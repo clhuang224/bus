@@ -1,8 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import {
-  getTdxRateLimitModal,
-  getTdxSystemErrorModal,
-} from '../apis/errors/busError'
+import { getTdxSystemErrorModal } from '../apis/errors/busError'
 import i18n from '../i18n'
 import globalModalSlice, {
   closeGlobalModal,
@@ -16,15 +13,15 @@ describe('globalModalSlice', () => {
   })
 
   it('stores modal content and confirm behavior when opened', () => {
-    const tdxRateLimitModal = getTdxRateLimitModal()
+    const tdxSystemErrorModal = getTdxSystemErrorModal()
     const state = globalModalSlice.reducer(
       undefined,
-      openGlobalModal(tdxRateLimitModal),
+      openGlobalModal(tdxSystemErrorModal),
     )
 
     expect(state).toMatchObject({
       opened: true,
-      ...tdxRateLimitModal,
+      ...tdxSystemErrorModal,
       cancelText: null,
       confirmAction: 'refresh',
     })

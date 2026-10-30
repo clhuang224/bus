@@ -4,7 +4,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import { fireEvent, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { busApi } from '~/modules/apis/bus'
-import { getTdxRateLimitModal } from '~/modules/apis/errors/busError'
+import { getTdxSystemErrorModal } from '~/modules/apis/errors/busError'
 import globalModalSlice, {
   closeGlobalModal,
   openGlobalModal,
@@ -27,16 +27,16 @@ describe('GlobalModal', () => {
   it('resets bus api state when confirmAction is refresh', () => {
     const store = createTestStore()
     const dispatchSpy = vi.spyOn(store, 'dispatch')
-    const tdxRateLimitModal = getTdxRateLimitModal()
+    const tdxSystemErrorModal = getTdxSystemErrorModal()
 
-    store.dispatch(openGlobalModal(tdxRateLimitModal))
+    store.dispatch(openGlobalModal(tdxSystemErrorModal))
 
     renderWithStore(<GlobalModal />, { store })
 
-    expect(screen.getByText(tdxRateLimitModal.title)).toBeInTheDocument()
+    expect(screen.getByText(tdxSystemErrorModal.title)).toBeInTheDocument()
 
     fireEvent.click(
-      screen.getByRole('button', { name: tdxRateLimitModal.confirmText! }),
+      screen.getByRole('button', { name: tdxSystemErrorModal.confirmText! }),
     )
 
     expect(dispatchSpy).toHaveBeenCalledWith(
