@@ -28,7 +28,7 @@ jobs:
           - workspace: '@bus/shared'
             command: test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-pnpm
       - run: pnpm --filter "${{ matrix.workspace }}" run ${{ matrix.command }}
 
@@ -37,11 +37,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-pnpm
       - run: pnpm --filter @bus/web exec playwright install --with-deps chromium
       - run: pnpm --filter @bus/web test:e2e
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: map-browser-test-results

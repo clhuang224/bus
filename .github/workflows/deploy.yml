@@ -19,7 +19,7 @@ jobs:
       matrix:
         command: [lint, typecheck, test]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-pnpm
       - run: pnpm --filter @bus/web run ${{ matrix.command }}
 
@@ -33,12 +33,12 @@ jobs:
       VITE_PROXY_API_BASE_URL: ${{ vars.VITE_PROXY_API_BASE_URL }}
       VITE_GA_ID: ${{ vars.VITE_GA_ID }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-pnpm
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
       - run: pnpm --filter @bus/web build
       - run: cp apps/web/build/client/index.html apps/web/build/client/404.html
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: apps/web/build/client
 
@@ -52,4 +52,4 @@ jobs:
     environment:
       name: github-pages
     steps:
-      - uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v5
