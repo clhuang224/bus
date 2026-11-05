@@ -12,11 +12,7 @@ import type { SyncResult } from './sync-result.js'
 const DEACTIVATE_UUID_BATCH_SIZE = 500
 
 export type StopSyncStage =
-  | 'station_groups'
-  | 'stations'
-  | 'stops'
-  | 'route_stops'
-  | 'route_shapes'
+  'station_groups' | 'stations' | 'stops' | 'route_stops' | 'route_shapes'
 
 interface PersistStopsOptions {
   city: CityNameType

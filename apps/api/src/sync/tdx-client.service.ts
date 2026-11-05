@@ -362,12 +362,10 @@ export class TdxClientService {
     } catch (error) {
       const requestError = toRequestError(error, timeout, 'TDX request')
 
-      if (
-        !(
-          requestError instanceof Error &&
-          requestError.message.startsWith('TDX request failed:')
-        )
-      ) {
+      if (!(
+        requestError instanceof Error &&
+        requestError.message.startsWith('TDX request failed:')
+      )) {
         await this.finishRequestLog(reservation, {
           statusCode: response.status,
           errorMessage: this.getErrorMessage(requestError),
