@@ -43,7 +43,7 @@
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
     "@scalar/nestjs-api-reference": "^1.2.34",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.9",
     "pg": "^8.23.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
