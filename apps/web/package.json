@@ -26,7 +26,7 @@
     "@turf/distance": "^7.4.0",
     "@turf/helpers": "^7.4.0",
     "@types/topojson-client": "^3.1.5",
-    "i18next": "^25.10.2",
+    "i18next": "^26.3.4",
     "isbot": "^5.2.2",
     "maplibre-gl": "^6.16.0",
     "react": "^19.3.1",
